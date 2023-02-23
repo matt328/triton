@@ -1,0 +1,6 @@
+bin
+build
+vcpkg_installed
+x64
+*.user
+.vs
