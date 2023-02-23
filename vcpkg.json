@@ -1,0 +1,9 @@
+{
+	"name": "triton",
+	"version-string": "0.1.0",
+	"dependencies": [
+		"glslang",
+		"volk",
+		"spdlog"
+	]
+}
