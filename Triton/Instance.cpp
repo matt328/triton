@@ -10,7 +10,13 @@ Instance::Instance(const bool validationEnabled)
     : validationEnabled(validationEnabled) {
    context = std::make_unique<vk::raii::Context>();
 
-   // Create Instance
+   createInstance();
+}
+
+Instance::~Instance() {
+}
+
+void Instance::createInstance() {
    // Log available extensions
    const auto instanceExtensions = context->enumerateInstanceExtensionProperties();
    std::string logString = "Available Instance Extensions\n";
@@ -43,7 +49,7 @@ Instance::Instance(const bool validationEnabled)
       desiredDeviceExtensions.push_back("VK_KHR_portability_subset");
    }
 
-   auto debugCreateInfo = createDebugUtilsMessengerCreateInfoExt();
+   const auto debugCreateInfo = createDebugUtilsMessengerCreateInfoExt();
 
    if (validationEnabled) {
       instanceCreateInfo.enabledLayerCount =
@@ -53,9 +59,6 @@ Instance::Instance(const bool validationEnabled)
    }
 
    instance = std::make_unique<vk::raii::Instance>(*context, instanceCreateInfo);
-}
-
-Instance::~Instance() {
 }
 
 bool Instance::checkValidationLayerSupport() const {
@@ -112,4 +115,12 @@ vk::DebugUtilsMessengerCreateInfoEXT Instance::createDebugUtilsMessengerCreateIn
                       vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation |
                       vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance,
        .pfnUserCallback = debugCallbackFn};
+}
+
+VkBool32 Instance::debugCallbackFn(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+                                   VkDebugUtilsMessageTypeFlagsEXT messageType,
+                                   const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+                                   void* pUserData) {
+   LOG_ERROR("Validation Layer: {}", pCallbackData->pMessage);
+   return VK_FALSE;
 }
