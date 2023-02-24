@@ -24,7 +24,16 @@
     <ClInclude Include="Shaders.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="log.h">
+    <ClInclude Include="Log.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Instance.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderDevice.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -38,7 +47,13 @@
     <ClCompile Include="Shaders.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="log.cpp">
+    <ClCompile Include="Log.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Instance.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderDevice.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -11,11 +11,12 @@
 // add headers that you want to pre-compile here
 #include "framework.h"
 
+#include <GLFW/glfw3.h>
 #include <format>
 #include <memory>
 #include <string_view>
 #include <vector>
-#include <GLFW/glfw3.h>
+#define VK_NO_PROTOTYPES
 #include <vulkan/vulkan_raii.hpp>
 
 #endif // PCH_H

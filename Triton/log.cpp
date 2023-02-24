@@ -1,6 +1,6 @@
 #include "pch.h"
 
-#include "log.h"
+#include "Log.h"
 #include <spdlog/sinks/dist_sink.h>
 #ifdef WIN32
 #include <spdlog/sinks/msvc_sink.h>
