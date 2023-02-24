@@ -14,9 +14,17 @@ class Instance {
    std::unique_ptr<vk::DebugUtilsMessengerEXT> messenger;
    std::unique_ptr<vk::DebugReportCallbackEXT> reportCallback;
 
+   void createInstance();
+
    bool checkValidationLayerSupport() const;
 
    std::pair<std::vector<const char*>, bool> getRequiredExtensions() const;
 
-   vk::DebugUtilsMessengerCreateInfoEXT createDebugUtilsMessengerCreateInfoExt();
+   static vk::DebugUtilsMessengerCreateInfoEXT createDebugUtilsMessengerCreateInfoExt();
+
+   VKAPI_ATTR static VkBool32 VKAPI_CALL
+   debugCallbackFn(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+                   VkDebugUtilsMessageTypeFlagsEXT messageType,
+                   const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+                   void* pUserData);
 };
