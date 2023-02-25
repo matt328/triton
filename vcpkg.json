@@ -3,8 +3,8 @@
 	"version-string": "0.1.0",
 	"dependencies": [
 		"glslang",
-		"volk",
 		"spdlog",
-		"glfw3"
+		"glfw3",
+		"vulkan-memory-allocator-hpp"
 	]
 }

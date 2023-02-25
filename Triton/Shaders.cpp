@@ -1,5 +1,3 @@
-#include "pch.h"
-
 #include "Shaders.h"
 #include "glslang/Public/ShaderLang.h"
 
@@ -66,7 +64,7 @@ std::string ShaderModule::readShaderFile(const std::string_view filename) {
    return code;
 }
 
-void ShaderModule::compileShader(glslang_stage_t stage, const char* shaderSource) {
+void ShaderModule::compileShader(const glslang_stage_t stage, const char* shaderSource) {
    const auto resources = initResources();
    const auto input = glslang_input_t{
        .language = GLSLANG_SOURCE_GLSL,
