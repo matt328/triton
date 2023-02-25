@@ -1,19 +1,40 @@
-#include "pch.h"
-
 #include "Instance.h"
-
 #include "Log.h"
 
-const std::vector<const char*> DESIRED_VALIDATION_LAYERS = {"VK_LAYER_KHRONOS_validation"};
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
 
-Instance::Instance(const bool validationEnabled)
-    : validationEnabled(validationEnabled) {
+const std::vector DESIRED_VALIDATION_LAYERS = {"VK_LAYER_KHRONOS_validation"};
+
+Instance::Instance(const bool validationEnabled,
+                   const uint32_t initialHeight,
+                   const uint32_t initialWidth)
+    : validationEnabled(validationEnabled)
+    , height(initialHeight)
+    , width(initialWidth) {
    context = std::make_unique<vk::raii::Context>();
+
+   glfwInit();
+   glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+   glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+
+   window = std::make_unique<GLFWwindow*>(glfwCreateWindow(1366, 768, "Vulkan", nullptr, nullptr));
+   glfwSetWindowUserPointer(*window, this);
+   glfwSetFramebufferSizeCallback(*window, framebufferResizeCallback);
 
    createInstance();
 }
 
 Instance::~Instance() {
+}
+
+std::vector<vk::raii::PhysicalDevice> Instance::enumeratePhysicalDevices() const {
+   return instance->enumeratePhysicalDevices();
+}
+
+void Instance::resizeWindow(const uint32_t newHeight, const uint32_t newWidth) {
+   height = newHeight;
+   width = newWidth;
 }
 
 void Instance::createInstance() {
@@ -23,7 +44,7 @@ void Instance::createInstance() {
    for (const auto& [extensionName, specVersion] : instanceExtensions) {
       logString.append(fmt::format("   {}: v{}\n", extensionName, specVersion));
    }
-   LOG_LDEBUG("{}", logString);
+   Log::core->debug("{}", logString);
 
    if (validationEnabled && !checkValidationLayerSupport()) {
       throw std::runtime_error("Validation layers requested but not available");
@@ -49,7 +70,13 @@ void Instance::createInstance() {
       desiredDeviceExtensions.push_back("VK_KHR_portability_subset");
    }
 
-   const auto debugCreateInfo = createDebugUtilsMessengerCreateInfoExt();
+   const auto debugCreateInfo = vk::DebugUtilsMessengerCreateInfoEXT{
+       .messageSeverity = vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
+                          vk::DebugUtilsMessageSeverityFlagBitsEXT::eError,
+       .messageType = vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral |
+                      vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation |
+                      vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance,
+       .pfnUserCallback = debugCallbackFn};
 
    if (validationEnabled) {
       instanceCreateInfo.enabledLayerCount =
@@ -59,6 +86,24 @@ void Instance::createInstance() {
    }
 
    instance = std::make_unique<vk::raii::Instance>(*context, instanceCreateInfo);
+
+   const vk::DebugReportCallbackCreateInfoEXT ci = {
+       .pNext = nullptr,
+       .flags = vk::DebugReportFlagBitsEXT::eWarning |
+                vk::DebugReportFlagBitsEXT::ePerformanceWarning |
+                vk::DebugReportFlagBitsEXT::eError | vk::DebugReportFlagBitsEXT::eDebug,
+       .pfnCallback = &vulkanDebugReportCallback,
+       .pUserData = nullptr};
+
+   debugCallback = std::make_unique<vk::raii::DebugUtilsMessengerEXT>(
+       instance->createDebugUtilsMessengerEXT(debugCreateInfo));
+
+   reportCallback = std::make_unique<vk::raii::DebugReportCallbackEXT>(
+       instance->createDebugReportCallbackEXT(ci));
+
+   VkSurfaceKHR tempSurface;
+   glfwCreateWindowSurface(*(*instance), *window, nullptr, &tempSurface);
+   surface = std::make_unique<vk::raii::SurfaceKHR>(*instance, tempSurface);
 }
 
 bool Instance::checkValidationLayerSupport() const {
@@ -86,6 +131,7 @@ std::pair<std::vector<const char*>, bool> Instance::getRequiredExtensions() cons
 
    if (validationEnabled) {
       extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+      extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
    }
 
    const auto exts = context->enumerateInstanceExtensionProperties();
@@ -104,23 +150,37 @@ std::pair<std::vector<const char*>, bool> Instance::getRequiredExtensions() cons
       extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
    }
 
+   for (const auto& ext : extensions) {
+      Log::core->debug("Extension: {}", ext);
+   }
+
    return std::make_pair(extensions, portabilityPresent);
 }
 
-vk::DebugUtilsMessengerCreateInfoEXT Instance::createDebugUtilsMessengerCreateInfoExt() {
-   return vk::DebugUtilsMessengerCreateInfoEXT{
-       .messageSeverity = vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
-                          vk::DebugUtilsMessageSeverityFlagBitsEXT::eError,
-       .messageType = vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral |
-                      vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation |
-                      vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance,
-       .pfnUserCallback = debugCallbackFn};
+void Instance::framebufferResizeCallback(GLFWwindow* window, const int width, const int height) {
+   const auto instance = static_cast<Instance*>(glfwGetWindowUserPointer(window));
+   instance->resizeWindow(height, width);
 }
 
 VkBool32 Instance::debugCallbackFn(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
                                    VkDebugUtilsMessageTypeFlagsEXT messageType,
                                    const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
                                    void* pUserData) {
-   LOG_ERROR("Validation Layer: {}", pCallbackData->pMessage);
+   Log::core->debug("Validation Layer: {}", pCallbackData->pMessage);
+   return VK_FALSE;
+}
+
+VkBool32 Instance::vulkanDebugReportCallback(VkDebugReportFlagsEXT flags,
+                                             VkDebugReportObjectTypeEXT objectType,
+                                             uint64_t object,
+                                             size_t location,
+                                             int32_t messageCode,
+                                             const char* pLayerPrefix,
+                                             const char* pMessage,
+                                             void* userData) {
+   if (!strcmp(pLayerPrefix, "Loader Message")) {
+      return VK_FALSE;
+   }
+   Log::core->debug("Debug Callback ({}): {}", pLayerPrefix, pMessage);
    return VK_FALSE;
 }
