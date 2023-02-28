@@ -28,6 +28,10 @@ jobs:
         vcpkgJsonGlob: './vcpkg.json'
         runVcpkgInstall: true
     
+    - name: List $RUNNER_WORKSPACE before build
+      run: find $RUNNER_WORKSPACE
+      shell: bash
+    
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v1.1
     
