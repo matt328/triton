@@ -27,7 +27,10 @@ jobs:
       with:
         vcpkgJsonGlob: './vcpkg.json'
         runVcpkgInstall: true
-    
+
+    - name: Run vcpkg integrate install
+      run: vcpkg integrate install
+
     - name: List $RUNNER_WORKSPACE before build
       run: find $RUNNER_WORKSPACE
       shell: bash
