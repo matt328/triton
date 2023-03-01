@@ -55,6 +55,7 @@ class RenderDevice {
    void createLogicalDevice(const std::unique_ptr<Instance>& instance);
    void createSwapchain(const std::unique_ptr<Instance>& instance);
    void createSwapchainImageViews();
+   void createCommandPools(const std::unique_ptr<Instance>& instance);
 
    // Utils
    template <typename T>
@@ -98,10 +99,11 @@ class RenderDevice {
       std::optional<uint32_t> graphicsFamily;
       std::optional<uint32_t> presentFamily;
       std::optional<uint32_t> transferFamily;
+      std::optional<uint32_t> computeFamily;
 
       bool isComplete() const {
          return graphicsFamily.has_value() && presentFamily.has_value() &&
-                transferFamily.has_value();
+                transferFamily.has_value() && computeFamily.has_value();
       }
    };
 
