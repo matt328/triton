@@ -1,6 +1,8 @@
 #pragma once
 #include "Instance.h"
 
+#include <optional>
+
 namespace vma {
    class Allocator;
 }
