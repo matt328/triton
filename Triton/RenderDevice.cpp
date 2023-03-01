@@ -11,6 +11,7 @@ RenderDevice::RenderDevice(const std::unique_ptr<Instance>& instance) {
    createSwapchain(instance);
    createSwapchainImageViews();
    createAllocator(instance);
+   createCommandPools(instance);
 }
 
 RenderDevice::~RenderDevice() {
@@ -55,7 +56,7 @@ void RenderDevice::createAllocator(const std::unique_ptr<Instance>& instance) {
 }
 
 void RenderDevice::createLogicalDevice(const std::unique_ptr<Instance>& instance) {
-   auto [graphicsFamily, presentFamily, transferFamily] =
+   auto [graphicsFamily, presentFamily, transferFamily, computeFamily] =
        findQueueFamilies(*physicalDevice, instance->getSurface());
 
    std::vector<vk::DeviceQueueCreateInfo> queueCreateInfos;
@@ -130,7 +131,7 @@ void RenderDevice::createSwapchain(const std::unique_ptr<Instance>& instance) {
                                          .clipped = VK_TRUE,
                                          .oldSwapchain = VK_NULL_HANDLE};
 
-   const auto [graphicsFamily, presentFamily, transferFamily] =
+   const auto [graphicsFamily, presentFamily, transferFamily, computeFamily] =
        findQueueFamilies(*physicalDevice, surface);
    const uint32_t queueFamilyIndices[] = {graphicsFamily.value(), presentFamily.value()};
 
@@ -175,6 +176,27 @@ void RenderDevice::createSwapchainImageViews() {
       swapchainImageViews.emplace_back(*device, createInfo);
    }
    Log::core->info("Created {} swapchain image views", swapchainImageViews.size());
+}
+
+void RenderDevice::createCommandPools(const std::unique_ptr<Instance>& instance) {
+   const auto [graphicsFamily, presentFamily, transferFamily, computeFamily] =
+       findQueueFamilies(*physicalDevice, instance->getSurface());
+   auto commandPoolCreateInfo =
+       vk::CommandPoolCreateInfo{.flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
+                                 .queueFamilyIndex = graphicsFamily.value()};
+
+   commandPool =
+       std::make_unique<vk::raii::CommandPool>(device->createCommandPool(commandPoolCreateInfo));
+   setObjectName(
+       *(*commandPool), device, (*commandPool).debugReportObjectType, "Graphics Command Pool");
+
+   commandPoolCreateInfo.queueFamilyIndex = computeFamily.value();
+   computeCommandPool =
+       std::make_unique<vk::raii::CommandPool>(device->createCommandPool(commandPoolCreateInfo));
+   setObjectName(*(*computeCommandPool),
+                 device,
+                 (*computeCommandPool).debugReportObjectType,
+                 "Compute Command Pool");
 }
 
 vk::PresentModeKHR RenderDevice::chooseSwapPresentMode(
@@ -258,6 +280,11 @@ RenderDevice::QueueFamilyIndices RenderDevice::findQueueFamilies(
 
       if (queueFamily.queueFlags & vk::QueueFlagBits::eTransfer) {
          queueFamilyIndices.transferFamily = i;
+      }
+
+      if ((queueFamily.queueFlags & vk::QueueFlagBits::eCompute) &&
+          !(queueFamily.queueFlags & vk::QueueFlagBits::eGraphics)) {
+         queueFamilyIndices.computeFamily = i;
       }
 
       if (queueFamilyIndices.isComplete()) {
