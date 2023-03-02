@@ -3,6 +3,8 @@
 
 #include <optional>
 
+class ImmediateContext;
+
 namespace vma {
    class Allocator;
 }
@@ -20,8 +22,12 @@ class RenderDevice {
    uint32_t framebufferHeight = 0;
 
    std::unique_ptr<vk::raii::Device> device;
+
    std::unique_ptr<vk::raii::Queue> graphicsQueue;
    std::unique_ptr<vk::raii::Queue> presentQueue;
+   std::shared_ptr<vk::raii::Queue> transferQueue;
+   std::unique_ptr<vk::raii::Queue> computeQueue;
+
    std::unique_ptr<vk::raii::PhysicalDevice> physicalDevice;
 
    std::unique_ptr<vk::raii::SwapchainKHR> swapchain;
@@ -36,16 +42,14 @@ class RenderDevice {
    std::unique_ptr<vk::raii::CommandPool> commandPool;
    std::vector<std::unique_ptr<vk::raii::CommandBuffer>> commandBuffers;
 
-   bool useCompute = false;
-
-   uint32_t computeFamily = 0;
-   std::unique_ptr<vk::raii::Queue> computeQueue;
-
-   std::vector<uint32_t> deviceQueueIndices;
-   std::vector<std::unique_ptr<vk::raii::Queue>> deviceQueues;
+   std::unique_ptr<vk::raii::Fence> uploadFence = nullptr;
+   std::unique_ptr<vk::raii::CommandPool> uploadCommandPool = nullptr;
+   std::unique_ptr<vk::raii::CommandBuffer> uploadCommandBuffer = nullptr;
 
    std::unique_ptr<vk::raii::CommandBuffer> computeCommandBuffer;
    std::unique_ptr<vk::raii::CommandPool> computeCommandPool;
+
+   std::unique_ptr<ImmediateContext> transferImmediateContext;
 
    std::unique_ptr<vma::Allocator> allocator;
 

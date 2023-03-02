@@ -1,7 +1,9 @@
 #include "RenderDevice.h"
-#include "Log.h"
-#include "vulkan-memory-allocator-hpp/vk_mem_alloc.hpp"
 
+#include "ImmediateContext.h"
+#include "Log.h"
+
+#include "vulkan-memory-allocator-hpp/vk_mem_alloc.hpp"
 #include <GLFW/glfw3.h>
 #include <set>
 
@@ -102,6 +104,16 @@ void RenderDevice::createLogicalDevice(const std::unique_ptr<Instance>& instance
    setObjectName(
        *(*presentQueue), device, (*(*presentQueue)).debugReportObjectType, "Present Queue");
    Log::core->info("Created Present Queue");
+
+   transferQueue = std::make_shared<vk::raii::Queue>(device->getQueue(transferFamily.value(), 0));
+   setObjectName(
+       *(*transferQueue), device, (*(*transferQueue)).debugReportObjectType, "Transfer Queue");
+   Log::core->info("Created Transfer Queue");
+
+   computeQueue = std::make_unique<vk::raii::Queue>(device->getQueue(computeFamily.value(), 0));
+   setObjectName(
+       *(*computeQueue), device, (*(*computeQueue)).debugReportObjectType, "Compute Queue");
+   Log::core->info("Created Compute Queue");
 }
 
 void RenderDevice::createSwapchain(const std::unique_ptr<Instance>& instance) {
@@ -197,6 +209,9 @@ void RenderDevice::createCommandPools(const std::unique_ptr<Instance>& instance)
                  device,
                  (*computeCommandPool).debugReportObjectType,
                  "Compute Command Pool");
+
+   transferImmediateContext =
+       std::make_unique<ImmediateContext>(device, transferQueue, transferFamily.value());
 }
 
 vk::PresentModeKHR RenderDevice::chooseSwapPresentMode(
@@ -225,11 +240,9 @@ vk::Extent2D RenderDevice::chooseSwapExtent(const vk::SurfaceCapabilitiesKHR& ca
    if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
       return capabilities.currentExtent;
    } else {
-      int width, height;
-      const auto& window = instance->getWindow();
-      glfwGetFramebufferSize(*window, &width, &height);
+      const auto& [width, height] = instance->getWindowSize();
 
-      vk::Extent2D actualExtent = {static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
+      vk::Extent2D actualExtent = {width, height};
 
       actualExtent.width = std::clamp(
           actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
