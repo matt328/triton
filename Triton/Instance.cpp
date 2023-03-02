@@ -1,12 +1,12 @@
 #include "Instance.h"
 #include "Log.h"
 
-#define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
 const std::vector DESIRED_VALIDATION_LAYERS = {"VK_LAYER_KHRONOS_validation"};
 
-Instance::Instance(const bool validationEnabled,
+Instance::Instance(const std::unique_ptr<GLFWwindow*>& window,
+                   const bool validationEnabled,
                    const uint32_t initialHeight,
                    const uint32_t initialWidth)
     : validationEnabled(validationEnabled)
@@ -14,30 +14,6 @@ Instance::Instance(const bool validationEnabled,
     , width(initialWidth) {
    context = std::make_unique<vk::raii::Context>();
 
-   glfwInit();
-   glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-   glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-
-   window = std::make_unique<GLFWwindow*>(glfwCreateWindow(1366, 768, "Vulkan", nullptr, nullptr));
-   glfwSetWindowUserPointer(*window, this);
-   glfwSetFramebufferSizeCallback(*window, framebufferResizeCallback);
-
-   createInstance();
-}
-
-Instance::~Instance() {
-}
-
-std::vector<vk::raii::PhysicalDevice> Instance::enumeratePhysicalDevices() const {
-   return instance->enumeratePhysicalDevices();
-}
-
-void Instance::resizeWindow(const uint32_t newHeight, const uint32_t newWidth) {
-   height = newHeight;
-   width = newWidth;
-}
-
-void Instance::createInstance() {
    // Log available extensions
    const auto instanceExtensions = context->enumerateInstanceExtensionProperties();
    std::string logString = "Available Instance Extensions\n";
@@ -106,6 +82,21 @@ void Instance::createInstance() {
    surface = std::make_unique<vk::raii::SurfaceKHR>(*instance, tempSurface);
 }
 
+Instance::~Instance() {
+}
+
+std::vector<vk::raii::PhysicalDevice> Instance::enumeratePhysicalDevices() const {
+   return instance->enumeratePhysicalDevices();
+}
+
+void Instance::resizeWindow(const uint32_t newHeight, const uint32_t newWidth) {
+   height = newHeight;
+   width = newWidth;
+}
+
+void Instance::createInstance() {
+}
+
 bool Instance::checkValidationLayerSupport() const {
    const auto availableLayers = context->enumerateInstanceLayerProperties();
    for (const auto layerName : DESIRED_VALIDATION_LAYERS) {
@@ -155,11 +146,6 @@ std::pair<std::vector<const char*>, bool> Instance::getRequiredExtensions() cons
    }
 
    return std::make_pair(extensions, portabilityPresent);
-}
-
-void Instance::framebufferResizeCallback(GLFWwindow* window, const int width, const int height) {
-   const auto instance = static_cast<Instance*>(glfwGetWindowUserPointer(window));
-   instance->resizeWindow(height, width);
 }
 
 VkBool32 Instance::debugCallbackFn(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,

@@ -151,17 +151,21 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Application.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Instance.h" />
     <ClInclude Include="Log.h" />
     <ClInclude Include="RenderDevice.h" />
+    <ClInclude Include="ImmediateContext.h" />
     <ClInclude Include="Utils.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Application.cpp" />
     <ClCompile Include="Instance.cpp" />
     <ClCompile Include="Log.cpp" />
     <ClCompile Include="RenderDevice.cpp" />
     <ClCompile Include="Shaders.cpp" />
+    <ClCompile Include="ImmediateContext.cpp" />
     <ClCompile Include="vma.cpp" />
     <ClInclude Include="Shaders.h" />
   </ItemGroup>
