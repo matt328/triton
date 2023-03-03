@@ -7,7 +7,7 @@
 #include <GLFW/glfw3.h>
 #include <set>
 
-RenderDevice::RenderDevice(const std::unique_ptr<Instance>& instance) {
+RenderDevice::RenderDevice(const Instance& instance) {
    createPhysicalDevice(instance);
    createLogicalDevice(instance);
    createSwapchain(instance);
@@ -19,8 +19,8 @@ RenderDevice::RenderDevice(const std::unique_ptr<Instance>& instance) {
 RenderDevice::~RenderDevice() {
 }
 
-void RenderDevice::createPhysicalDevice(const std::unique_ptr<Instance>& instance) {
-   const auto physicalDevices = instance->enumeratePhysicalDevices();
+void RenderDevice::createPhysicalDevice(const Instance& instance) {
+   const auto physicalDevices = instance.enumeratePhysicalDevices();
 
    if (physicalDevices.empty()) {
       throw std::runtime_error("Failed to find any GPUs with Vulkan Support");
@@ -40,26 +40,26 @@ void RenderDevice::createPhysicalDevice(const std::unique_ptr<Instance>& instanc
    Log::core->debug("Using physical device: {}", physicalDevice->getProperties().deviceName);
 }
 
-void RenderDevice::createAllocator(const std::unique_ptr<Instance>& instance) {
+void RenderDevice::createAllocator(const Instance& instance) {
    const auto getInstanceProcAddrfn = reinterpret_cast<PFN_vkGetInstanceProcAddr>(
-       instance->getVkInstance()->getProcAddr("vkGetInstanceProcAddr"));
+       instance.getVkInstance()->getProcAddr("vkGetInstanceProcAddr"));
    const auto getDeviceProcAddrfn = reinterpret_cast<PFN_vkGetDeviceProcAddr>(
-       instance->getVkInstance()->getProcAddr("vkGetDeviceProcAddr"));
+       instance.getVkInstance()->getProcAddr("vkGetDeviceProcAddr"));
 
    const auto fns = vma::VulkanFunctions{.vkGetInstanceProcAddr = getInstanceProcAddrfn,
                                          .vkGetDeviceProcAddr = getDeviceProcAddrfn};
 
-   const auto aci = vma::AllocatorCreateInfo{.physicalDevice = (*(*physicalDevice)),
-                                             .device = *(*device),
+   const auto aci = vma::AllocatorCreateInfo{.physicalDevice = **physicalDevice,
+                                             .device = **device,
                                              .pVulkanFunctions = &fns,
-                                             .instance = *(*instance->getVkInstance())};
+                                             .instance = **instance.getVkInstance()};
 
    allocator = std::make_unique<vma::Allocator>(vma::createAllocator(aci));
 }
 
-void RenderDevice::createLogicalDevice(const std::unique_ptr<Instance>& instance) {
+void RenderDevice::createLogicalDevice(const Instance& instance) {
    auto [graphicsFamily, presentFamily, transferFamily, computeFamily] =
-       findQueueFamilies(*physicalDevice, instance->getSurface());
+       findQueueFamilies(*physicalDevice, instance.getSurface());
 
    std::vector<vk::DeviceQueueCreateInfo> queueCreateInfos;
    std::set uniqueQueueFamilies = {graphicsFamily.value(), presentFamily.value()};
@@ -74,7 +74,7 @@ void RenderDevice::createLogicalDevice(const std::unique_ptr<Instance>& instance
 
    vk::PhysicalDeviceFeatures deviceFeatures{.samplerAnisotropy = VK_TRUE};
 
-   auto desiredDeviceExtensions = instance->getDesiredDeviceExtensions();
+   auto desiredDeviceExtensions = instance.getDesiredDeviceExtensions();
    desiredDeviceExtensions.push_back(VK_EXT_DEBUG_MARKER_EXTENSION_NAME);
 
    vk::DeviceCreateInfo createInfo{
@@ -85,8 +85,8 @@ void RenderDevice::createLogicalDevice(const std::unique_ptr<Instance>& instance
        .ppEnabledExtensionNames = desiredDeviceExtensions.data(),
        .pEnabledFeatures = &deviceFeatures};
 
-   const auto validationLayers = instance->getDesiredValidationLayers();
-   if (instance->isValidationEnabled()) {
+   const auto validationLayers = instance.getDesiredValidationLayers();
+   if (instance.isValidationEnabled()) {
       createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
       createInfo.ppEnabledLayerNames = validationLayers.data();
    }
@@ -96,28 +96,30 @@ void RenderDevice::createLogicalDevice(const std::unique_ptr<Instance>& instance
    Log::core->info("Created Logical Device");
 
    graphicsQueue = std::make_unique<vk::raii::Queue>(device->getQueue(graphicsFamily.value(), 0));
-   setObjectName(
-       *(*graphicsQueue), device, (*(*graphicsQueue)).debugReportObjectType, "Graphics Queue");
+   setObjectName(**graphicsQueue,
+                 *device.get(),
+                 (**graphicsQueue).debugReportObjectType,
+                 "Graphics Queue");
    Log::core->info("Created Graphics Queue");
 
    presentQueue = std::make_unique<vk::raii::Queue>(device->getQueue(presentFamily.value(), 0));
    setObjectName(
-       *(*presentQueue), device, (*(*presentQueue)).debugReportObjectType, "Present Queue");
+       **presentQueue, *device.get(), (**presentQueue).debugReportObjectType, "Present Queue");
    Log::core->info("Created Present Queue");
 
    transferQueue = std::make_shared<vk::raii::Queue>(device->getQueue(transferFamily.value(), 0));
    setObjectName(
-       *(*transferQueue), device, (*(*transferQueue)).debugReportObjectType, "Transfer Queue");
+       **transferQueue, *device.get(), (**transferQueue).debugReportObjectType, "Transfer Queue");
    Log::core->info("Created Transfer Queue");
 
    computeQueue = std::make_unique<vk::raii::Queue>(device->getQueue(computeFamily.value(), 0));
    setObjectName(
-       *(*computeQueue), device, (*(*computeQueue)).debugReportObjectType, "Compute Queue");
+       **computeQueue, *device.get(), (**computeQueue).debugReportObjectType, "Compute Queue");
    Log::core->info("Created Compute Queue");
 }
 
-void RenderDevice::createSwapchain(const std::unique_ptr<Instance>& instance) {
-   const auto& surface = instance->getSurface();
+void RenderDevice::createSwapchain(const Instance& instance) {
+   const auto& surface = instance.getSurface();
    auto [capabilities, formats, presentModes] = querySwapchainSupport(*physicalDevice, surface);
 
    const auto surfaceFormat = chooseSwapSurfaceFormat(formats);
@@ -130,7 +132,7 @@ void RenderDevice::createSwapchain(const std::unique_ptr<Instance>& instance) {
       imageCount = capabilities.maxImageCount;
    }
 
-   vk::SwapchainCreateInfoKHR createInfo{.surface = *(*surface),
+   vk::SwapchainCreateInfoKHR createInfo{.surface = **surface,
                                          .minImageCount = imageCount,
                                          .imageFormat = surfaceFormat.format,
                                          .imageColorSpace = surfaceFormat.colorSpace,
@@ -190,9 +192,9 @@ void RenderDevice::createSwapchainImageViews() {
    Log::core->info("Created {} swapchain image views", swapchainImageViews.size());
 }
 
-void RenderDevice::createCommandPools(const std::unique_ptr<Instance>& instance) {
+void RenderDevice::createCommandPools(const Instance& instance) {
    const auto [graphicsFamily, presentFamily, transferFamily, computeFamily] =
-       findQueueFamilies(*physicalDevice, instance->getSurface());
+       findQueueFamilies(*physicalDevice, instance.getSurface());
    auto commandPoolCreateInfo =
        vk::CommandPoolCreateInfo{.flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
                                  .queueFamilyIndex = graphicsFamily.value()};
@@ -200,18 +202,18 @@ void RenderDevice::createCommandPools(const std::unique_ptr<Instance>& instance)
    commandPool =
        std::make_unique<vk::raii::CommandPool>(device->createCommandPool(commandPoolCreateInfo));
    setObjectName(
-       *(*commandPool), device, (*commandPool).debugReportObjectType, "Graphics Command Pool");
+       **commandPool, *device.get(), (*commandPool).debugReportObjectType, "Graphics Command Pool");
 
    commandPoolCreateInfo.queueFamilyIndex = computeFamily.value();
    computeCommandPool =
        std::make_unique<vk::raii::CommandPool>(device->createCommandPool(commandPoolCreateInfo));
-   setObjectName(*(*computeCommandPool),
-                 device,
+   setObjectName(**computeCommandPool,
+                 *device.get(),
                  (*computeCommandPool).debugReportObjectType,
                  "Compute Command Pool");
 
    transferImmediateContext =
-       std::make_unique<ImmediateContext>(device, transferQueue, transferFamily.value());
+       std::make_unique<ImmediateContext>(*device.get(), *transferQueue, transferFamily.value());
 }
 
 vk::PresentModeKHR RenderDevice::chooseSwapPresentMode(
@@ -236,11 +238,11 @@ vk::SurfaceFormatKHR RenderDevice::chooseSwapSurfaceFormat(
 }
 
 vk::Extent2D RenderDevice::chooseSwapExtent(const vk::SurfaceCapabilitiesKHR& capabilities,
-                                            const std::unique_ptr<Instance>& instance) const {
+                                            const Instance& instance) const {
    if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
       return capabilities.currentExtent;
    } else {
-      const auto& [width, height] = instance->getWindowSize();
+      const auto& [width, height] = instance.getWindowSize();
 
       vk::Extent2D actualExtent = {width, height};
 
@@ -255,17 +257,17 @@ vk::Extent2D RenderDevice::chooseSwapExtent(const vk::SurfaceCapabilitiesKHR& ca
 }
 
 bool RenderDevice::isDeviceSuitable(const vk::raii::PhysicalDevice& possibleDevice,
-                                    const std::unique_ptr<Instance>& instance) {
+                                    const Instance& instance) {
    const QueueFamilyIndices queueFamilyIndices =
-       findQueueFamilies(possibleDevice, instance->getSurface());
+       findQueueFamilies(possibleDevice, instance.getSurface());
 
    const bool extensionsSupported =
-       checkDeviceExtensionSupport(possibleDevice, instance->getDesiredDeviceExtensions());
+       checkDeviceExtensionSupport(possibleDevice, instance.getDesiredDeviceExtensions());
 
    bool swapchainAdequate = false;
    if (extensionsSupported) {
       auto [capabilities, formats, presentModes] =
-          querySwapchainSupport(possibleDevice, instance->getSurface());
+          querySwapchainSupport(possibleDevice, instance.getSurface());
       swapchainAdequate = !formats.empty() && !presentModes.empty();
    }
 
@@ -287,7 +289,7 @@ RenderDevice::QueueFamilyIndices RenderDevice::findQueueFamilies(
          queueFamilyIndices.graphicsFamily = i;
       }
 
-      if (possibleDevice.getSurfaceSupportKHR(i, *(*surface))) {
+      if (possibleDevice.getSurfaceSupportKHR(i, **surface)) {
          queueFamilyIndices.presentFamily = i;
       }
 
@@ -331,8 +333,8 @@ RenderDevice::SwapchainSupportDetails RenderDevice::querySwapchainSupport(
     const vk::raii::PhysicalDevice& possibleDevice,
     const std::unique_ptr<vk::raii::SurfaceKHR>& surface) {
    SwapchainSupportDetails details;
-   details.capabilities = possibleDevice.getSurfaceCapabilitiesKHR(*(*surface));
-   details.formats = possibleDevice.getSurfaceFormatsKHR(*(*surface));
-   details.presentModes = possibleDevice.getSurfacePresentModesKHR(*(*surface));
+   details.capabilities = possibleDevice.getSurfaceCapabilitiesKHR(**surface);
+   details.formats = possibleDevice.getSurfaceFormatsKHR(**surface);
+   details.presentModes = possibleDevice.getSurfacePresentModesKHR(**surface);
    return details;
 }

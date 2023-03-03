@@ -22,16 +22,16 @@ class ImmediateContext {
     * queue \param device const ref to the Device's unique_ptr. \param newQueue shared_ptr of the
     * queue to use. \param queueFamily family index matching the aforementioned queue.
     */
-   ImmediateContext(const std::unique_ptr<vk::raii::Device>& device,
-                    const std::shared_ptr<vk::raii::Queue> newQueue,
-                    const uint32_t queueFamily);
+   ImmediateContext(const vk::raii::Device& device,
+                    const vk::raii::Queue& newQueue,
+                    uint32_t queueFamily);
    ~ImmediateContext() = default;
 
    void submit(std::function<void(vk::raii::CommandBuffer& cmd)>&& fn,
-               const std::unique_ptr<vk::raii::Device>& device) const;
+               const vk::raii::Device& device) const;
 
  private:
-   std::shared_ptr<vk::raii::Queue> queue = nullptr;
+   const vk::raii::Queue& queue;
    std::unique_ptr<vk::raii::Fence> fence = nullptr;
    std::unique_ptr<vk::raii::CommandPool> commandPool = nullptr;
    std::unique_ptr<vk::raii::CommandBuffer> commandBuffer = nullptr;
