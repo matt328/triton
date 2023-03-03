@@ -9,10 +9,15 @@ namespace vma {
    class Allocator;
 }
 
+class Game;
+
 class RenderDevice {
  public:
    explicit RenderDevice(const Instance& instance);
    ~RenderDevice();
+
+   void render(const Game& game) {
+   }
 
  private:
    struct QueueFamilyIndices;
