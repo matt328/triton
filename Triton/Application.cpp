@@ -1,4 +1,5 @@
 #include "Application.h"
+#include "Game.h"
 #include "Instance.h"
 #include "RenderDevice.h"
 
@@ -16,6 +17,8 @@ Application::Application() {
    glfwSetFramebufferSizeCallback(window.get(), framebufferResizeCallback);
 
    renderDevice = std::make_unique<RenderDevice>(*instance.get());
+
+   game = std::make_unique<Game>();
 }
 
 Application::~Application() {
@@ -24,7 +27,35 @@ Application::~Application() {
 
 void Application::run() const {
    glfwSetKeyCallback(window.get(), keyCallback);
+
+   double t = 0.f;
+
+   double currentTime = glfwGetTime();
+   double accumulator = 0.f;
+
    while (!glfwWindowShouldClose(window.get())) {
+      constexpr double dt = 0.01f;
+      const double newTime = glfwGetTime();
+      double frameTime = newTime - currentTime;
+      if (frameTime > 0.25f) {
+         frameTime = 0.25f;
+      }
+      currentTime = newTime;
+
+      accumulator += frameTime;
+
+      while (accumulator >= dt) {
+         game->update(t, dt);
+         t += dt;
+         accumulator -= dt;
+      }
+
+      const double alpha = accumulator / dt;
+
+      game->blendState(alpha);
+
+      renderDevice->render(*game);
+
       glfwPollEvents();
    }
 }

@@ -6,6 +6,7 @@
 
 class RenderDevice;
 class Instance;
+class Game;
 
 struct DestroyGlfwWindow {
    void operator()(GLFWwindow* ptr) const {
@@ -24,6 +25,9 @@ class Application {
    std::unique_ptr<GLFWwindow, DestroyGlfwWindow> window = nullptr;
    std::unique_ptr<Instance> instance;
    std::unique_ptr<RenderDevice> renderDevice;
+   std::unique_ptr<Game> game;
+
+   inline static constexpr double FRAME_TIME = 1.f / 60.f;
 
    void keyCallbackInt(int key, int scancode, int action, int mods) const;
 
