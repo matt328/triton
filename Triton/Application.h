@@ -1,10 +1,17 @@
 #pragma once
 
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
 #include <memory>
 
-struct GLFWwindow;
 class RenderDevice;
 class Instance;
+
+struct DestroyGlfwWindow {
+   void operator()(GLFWwindow* ptr) const {
+      glfwDestroyWindow(ptr);
+   }
+};
 
 class Application {
  public:
@@ -14,7 +21,7 @@ class Application {
    void run() const;
 
  protected:
-   std::unique_ptr<GLFWwindow*> window;
+   std::unique_ptr<GLFWwindow, DestroyGlfwWindow> window = nullptr;
    std::unique_ptr<Instance> instance;
    std::unique_ptr<RenderDevice> renderDevice;
 

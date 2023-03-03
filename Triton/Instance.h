@@ -9,7 +9,7 @@ struct GLFWwindow;
 
 class Instance {
  public:
-   explicit Instance(const std::unique_ptr<GLFWwindow*>& window,
+   explicit Instance(GLFWwindow* window,
                      bool validationEnabled = false,
                      uint32_t initialHeight = 1366,
                      uint32_t initialWidth = 768);
@@ -56,8 +56,6 @@ class Instance {
    std::unique_ptr<vk::raii::SurfaceKHR> surface;
    std::unique_ptr<vk::raii::DebugUtilsMessengerEXT> debugCallback;
    std::unique_ptr<vk::raii::DebugReportCallbackEXT> reportCallback;
-
-   void createInstance();
 
    bool checkValidationLayerSupport() const;
 
