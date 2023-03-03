@@ -153,6 +153,7 @@
   <ItemGroup>
     <ClInclude Include="Application.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="Game.h" />
     <ClInclude Include="Instance.h" />
     <ClInclude Include="Log.h" />
     <ClInclude Include="RenderDevice.h" />
@@ -161,6 +162,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
+    <ClCompile Include="Game.cpp" />
     <ClCompile Include="Instance.cpp" />
     <ClCompile Include="Log.cpp" />
     <ClCompile Include="RenderDevice.cpp" />
