@@ -1,3 +1,5 @@
+![Build](https://github.com/matt328/triton/actions/workflows/main.yml/badge.svg)
+
 # Triton
 
 Triton is the latest of a 3D game framework that I have been writing off and on with various different technologies
