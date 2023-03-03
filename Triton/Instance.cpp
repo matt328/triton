@@ -5,7 +5,7 @@
 
 const std::vector DESIRED_VALIDATION_LAYERS = {"VK_LAYER_KHRONOS_validation"};
 
-Instance::Instance(const std::unique_ptr<GLFWwindow*>& window,
+Instance::Instance(GLFWwindow* window,
                    const bool validationEnabled,
                    const uint32_t initialHeight,
                    const uint32_t initialWidth)
@@ -78,7 +78,7 @@ Instance::Instance(const std::unique_ptr<GLFWwindow*>& window,
        instance->createDebugReportCallbackEXT(ci));
 
    VkSurfaceKHR tempSurface;
-   glfwCreateWindowSurface(*(*instance), *window, nullptr, &tempSurface);
+   glfwCreateWindowSurface(**instance, window, nullptr, &tempSurface);
    surface = std::make_unique<vk::raii::SurfaceKHR>(*instance, tempSurface);
 }
 
@@ -92,9 +92,6 @@ std::vector<vk::raii::PhysicalDevice> Instance::enumeratePhysicalDevices() const
 void Instance::resizeWindow(const uint32_t newHeight, const uint32_t newWidth) {
    height = newHeight;
    width = newWidth;
-}
-
-void Instance::createInstance() {
 }
 
 bool Instance::checkValidationLayerSupport() const {

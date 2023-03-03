@@ -11,7 +11,7 @@ namespace vma {
 
 class RenderDevice {
  public:
-   explicit RenderDevice(const std::unique_ptr<Instance>& instance);
+   explicit RenderDevice(const Instance& instance);
    ~RenderDevice();
 
  private:
@@ -54,17 +54,17 @@ class RenderDevice {
    std::unique_ptr<vma::Allocator> allocator;
 
    // Helpers
-   void createPhysicalDevice(const std::unique_ptr<Instance>& instance);
-   void createAllocator(const std::unique_ptr<Instance>& instance);
-   void createLogicalDevice(const std::unique_ptr<Instance>& instance);
-   void createSwapchain(const std::unique_ptr<Instance>& instance);
+   void createPhysicalDevice(const Instance& instance);
+   void createAllocator(const Instance& instance);
+   void createLogicalDevice(const Instance& instance);
+   void createSwapchain(const Instance& instance);
    void createSwapchainImageViews();
-   void createCommandPools(const std::unique_ptr<Instance>& instance);
+   void createCommandPools(const Instance& instance);
 
    // Utils
    template <typename T>
    static void setObjectName(T const& handle,
-                             const std::unique_ptr<vk::raii::Device>& device,
+                             const vk::raii::Device& device,
                              const vk::DebugReportObjectTypeEXT objectType,
                              const std::string_view name) {
 
@@ -72,7 +72,7 @@ class RenderDevice {
 
       const auto debugNameInfo = vk::DebugMarkerObjectNameInfoEXT{
           .objectType = objectType, .object = debugHandle, .pObjectName = name.data()};
-      device->debugMarkerSetObjectNameEXT(debugNameInfo);
+      device.debugMarkerSetObjectNameEXT(debugNameInfo);
    }
 
    static vk::PresentModeKHR chooseSwapPresentMode(
@@ -82,10 +82,10 @@ class RenderDevice {
        const std::vector<vk::SurfaceFormatKHR>& availableFormats);
 
    vk::Extent2D chooseSwapExtent(const vk::SurfaceCapabilitiesKHR& capabilities,
-                                 const std::unique_ptr<Instance>& instance) const;
+                                 const Instance& instance) const;
 
    static bool isDeviceSuitable(const vk::raii::PhysicalDevice& possibleDevice,
-                                const std::unique_ptr<Instance>& instance);
+                                const Instance& instance);
 
    static QueueFamilyIndices findQueueFamilies(
        const vk::raii::PhysicalDevice& possibleDevice,
