@@ -1,13 +1,20 @@
 #pragma once
 #include "Instance.h"
+#include "Log.h"
+
+#include <vulkan-memory-allocator-hpp/vk_mem_alloc.hpp>
 
 #include <optional>
 
-class ImmediateContext;
-
 namespace vma {
-   class Allocator;
+   namespace raii {
+      class AllocatedBuffer;
+      class Allocator;
+   }
 }
+
+class ImmediateContext;
+struct FrameData;
 
 class Game;
 
@@ -56,11 +63,11 @@ class RenderDevice {
 
    std::unique_ptr<ImmediateContext> transferImmediateContext;
 
-   std::unique_ptr<vma::Allocator> allocator;
+   std::unique_ptr<vma::raii::Allocator> raiillocator;
+   std::unique_ptr<vma::raii::AllocatedBuffer> testBuffer;
 
    // Helpers
    void createPhysicalDevice(const Instance& instance);
-   void createAllocator(const Instance& instance);
    void createLogicalDevice(const Instance& instance);
    void createSwapchain(const Instance& instance);
    void createSwapchainImageViews();
@@ -97,7 +104,7 @@ class RenderDevice {
        const std::unique_ptr<vk::raii::SurfaceKHR>& surface);
 
    static bool checkDeviceExtensionSupport(const vk::raii::PhysicalDevice& possibleDevice,
-                                           const std::vector<const char*> desiredDeviceExtensions);
+                                           std::vector<const char*> desiredDeviceExtensions);
 
    static SwapchainSupportDetails querySwapchainSupport(
        const vk::raii::PhysicalDevice& possibleDevice,

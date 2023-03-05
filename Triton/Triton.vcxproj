@@ -152,13 +152,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
+    <ClInclude Include="FrameData.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="Instance.h" />
     <ClInclude Include="Log.h" />
     <ClInclude Include="RenderDevice.h" />
     <ClInclude Include="ImmediateContext.h" />
-    <ClInclude Include="Utils.h" />
+    <ClInclude Include="vma_raii.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
@@ -169,6 +170,7 @@
     <ClCompile Include="Shaders.cpp" />
     <ClCompile Include="ImmediateContext.cpp" />
     <ClCompile Include="vma.cpp" />
+    <ClCompile Include="vma_raii.cpp" />
     <ClInclude Include="Shaders.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

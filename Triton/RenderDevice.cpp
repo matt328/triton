@@ -1,9 +1,10 @@
 #include "RenderDevice.h"
 
+#include "vma_raii.h"
+
 #include "ImmediateContext.h"
 #include "Log.h"
 
-#include "vulkan-memory-allocator-hpp/vk_mem_alloc.hpp"
 #include <GLFW/glfw3.h>
 #include <set>
 
@@ -12,8 +13,21 @@ RenderDevice::RenderDevice(const Instance& instance) {
    createLogicalDevice(instance);
    createSwapchain(instance);
    createSwapchainImageViews();
-   createAllocator(instance);
    createCommandPools(instance);
+
+   const auto allocatorCreateInfo =
+       vma::AllocatorCreateInfo{.physicalDevice = **physicalDevice,
+                                .device = **device,
+                                .instance = **instance.getVkInstance()};
+
+   raiillocator = std::make_unique<vma::raii::Allocator>(allocatorCreateInfo);
+
+   constexpr auto bufferCreateInfo =
+       vk::BufferCreateInfo{.size = 1024, .usage = vk::BufferUsageFlagBits::eVertexBuffer};
+   constexpr auto allocationCreateInfo =
+       vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eAuto};
+
+   testBuffer = raiillocator->createBuffer(&bufferCreateInfo, &allocationCreateInfo, "test buffer");
 }
 
 RenderDevice::~RenderDevice() {
@@ -38,23 +52,6 @@ void RenderDevice::createPhysicalDevice(const Instance& instance) {
    }
 
    Log::core->debug("Using physical device: {}", physicalDevice->getProperties().deviceName);
-}
-
-void RenderDevice::createAllocator(const Instance& instance) {
-   const auto getInstanceProcAddrfn = reinterpret_cast<PFN_vkGetInstanceProcAddr>(
-       instance.getVkInstance()->getProcAddr("vkGetInstanceProcAddr"));
-   const auto getDeviceProcAddrfn = reinterpret_cast<PFN_vkGetDeviceProcAddr>(
-       instance.getVkInstance()->getProcAddr("vkGetDeviceProcAddr"));
-
-   const auto fns = vma::VulkanFunctions{.vkGetInstanceProcAddr = getInstanceProcAddrfn,
-                                         .vkGetDeviceProcAddr = getDeviceProcAddrfn};
-
-   const auto aci = vma::AllocatorCreateInfo{.physicalDevice = **physicalDevice,
-                                             .device = **device,
-                                             .pVulkanFunctions = &fns,
-                                             .instance = **instance.getVkInstance()};
-
-   allocator = std::make_unique<vma::Allocator>(vma::createAllocator(aci));
 }
 
 void RenderDevice::createLogicalDevice(const Instance& instance) {
@@ -96,10 +93,8 @@ void RenderDevice::createLogicalDevice(const Instance& instance) {
    Log::core->info("Created Logical Device");
 
    graphicsQueue = std::make_unique<vk::raii::Queue>(device->getQueue(graphicsFamily.value(), 0));
-   setObjectName(**graphicsQueue,
-                 *device.get(),
-                 (**graphicsQueue).debugReportObjectType,
-                 "Graphics Queue");
+   setObjectName(
+       **graphicsQueue, *device.get(), (**graphicsQueue).debugReportObjectType, "Graphics Queue");
    Log::core->info("Created Graphics Queue");
 
    presentQueue = std::make_unique<vk::raii::Queue>(device->getQueue(presentFamily.value(), 0));
