@@ -1,11 +1,11 @@
 #pragma once
 
 class Game {
-public:
+ public:
    Game() = default;
-  ~Game() = default;
+   ~Game() = default;
 
-   void update(float t, float dt);
-  void blendState(double alpha);
+   void update(double t, float dt);
+   void blendState(double alpha);
 
 };
