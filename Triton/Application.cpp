@@ -28,7 +28,7 @@ Application::~Application() {
 void Application::run() const {
    glfwSetKeyCallback(window.get(), keyCallback);
 
-   double t = 0.f;
+   double t = 0.0;
 
    double currentTime = glfwGetTime();
    double accumulator = 0.f;

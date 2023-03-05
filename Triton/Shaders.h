@@ -14,7 +14,7 @@ class ShaderModule {
     * \param filename Absolute path to the shader file
     */
    explicit ShaderModule(const std::shared_ptr<vk::raii::Device>& device,
-                         const std::string_view filename);
+                         std::string_view filename);
 
  private:
    std::vector<unsigned int> spirv;
@@ -22,7 +22,7 @@ class ShaderModule {
 
    void compileShaderFile(std::string_view filename);
 
-   std::string readShaderFile(const std::string_view filename);
+   std::string readShaderFile(std::string_view filename);
 
    void compileShader(glslang_stage_t stage, const char* shaderSource);
 
