@@ -13,10 +13,21 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Resource Files\shaders">
+      <UniqueIdentifier>{3b69604a-e275-4b81-bedf-54130dc96417}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Driver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="resources\shaders\shader.frag">
+      <Filter>Resource Files\shaders</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="resources\shaders\shader.vert">
+      <Filter>Resource Files\shaders</Filter>
+    </CopyFileToFolders>
   </ItemGroup>
 </Project>
