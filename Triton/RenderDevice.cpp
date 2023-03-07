@@ -1,5 +1,6 @@
 #include "RenderDevice.h"
 
+#include "DefaultPipeline.h"
 #include "vma_raii.h"
 
 #include "ImmediateContext.h"
@@ -28,6 +29,8 @@ RenderDevice::RenderDevice(const Instance& instance) {
        vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eAuto};
 
    testBuffer = raiillocator->createBuffer(&bufferCreateInfo, &allocationCreateInfo, "test buffer");
+
+   auto pipeline = std::make_unique<DefaultPipeline>();
 }
 
 RenderDevice::~RenderDevice() {

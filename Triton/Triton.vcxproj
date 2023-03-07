@@ -152,6 +152,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
+    <ClInclude Include="AbstractPipeline.h" />
+    <ClInclude Include="DefaultPipeline.h" />
     <ClInclude Include="FrameData.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Game.h" />
@@ -159,19 +161,23 @@
     <ClInclude Include="Log.h" />
     <ClInclude Include="RenderDevice.h" />
     <ClInclude Include="ImmediateContext.h" />
+    <ClInclude Include="PositionColorTexture.h" />
+    <ClInclude Include="SpirvHelper.h" />
+    <ClInclude Include="Utils.h" />
     <ClInclude Include="vma_raii.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
+    <ClCompile Include="AbstractPipeline.cpp" />
+    <ClCompile Include="DefaultPipeline.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Instance.cpp" />
     <ClCompile Include="Log.cpp" />
     <ClCompile Include="RenderDevice.cpp" />
-    <ClCompile Include="Shaders.cpp" />
     <ClCompile Include="ImmediateContext.cpp" />
+    <ClCompile Include="SpirvHelper.cpp" />
     <ClCompile Include="vma.cpp" />
     <ClCompile Include="vma_raii.cpp" />
-    <ClInclude Include="Shaders.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
