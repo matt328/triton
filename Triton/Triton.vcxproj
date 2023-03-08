@@ -161,7 +161,7 @@
     <ClInclude Include="Log.h" />
     <ClInclude Include="RenderDevice.h" />
     <ClInclude Include="ImmediateContext.h" />
-    <ClInclude Include="PositionColorTexture.h" />
+    <ClInclude Include="VertexFormats.h" />
     <ClInclude Include="SpirvHelper.h" />
     <ClInclude Include="Utils.h" />
     <ClInclude Include="vma_raii.h" />

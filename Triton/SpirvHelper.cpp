@@ -10,7 +10,7 @@ SpirvHelper::~SpirvHelper() {
    glslang::FinalizeProcess();
 }
 
-std::vector<uint8_t> SpirvHelper::compileShader(const vk::ShaderStageFlagBits shaderType,
+std::vector<uint32_t> SpirvHelper::compileShader(const vk::ShaderStageFlagBits shaderType,
                                                 const char* shaderCode) const {
    const EShLanguage stage = findLanguage(shaderType);
 
@@ -36,10 +36,10 @@ std::vector<uint8_t> SpirvHelper::compileShader(const vk::ShaderStageFlagBits sh
           "Shader Compile Fail: {}, {}", shader.getInfoLog(), shader.getInfoDebugLog()));
    }
 
-   std::vector<unsigned> spirv{};
+   std::vector<uint32_t> spirv{};
    glslang::GlslangToSpv(*program.getIntermediate(stage), spirv);
 
-   return std::vector<uint8_t>(spirv.begin(), spirv.end());
+   return spirv;
 }
 
 TBuiltInResource SpirvHelper::initResources() {

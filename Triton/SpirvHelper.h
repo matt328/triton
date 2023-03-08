@@ -8,8 +8,8 @@ class SpirvHelper {
    SpirvHelper();
    ~SpirvHelper();
 
-   std::vector<uint8_t> compileShader(vk::ShaderStageFlagBits shaderType,
-                                      const char* shaderCode) const;
+   std::vector<uint32_t> compileShader(vk::ShaderStageFlagBits shaderType,
+                                       const char* shaderCode) const;
 
  private:
    static TBuiltInResource initResources();
