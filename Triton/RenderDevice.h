@@ -73,7 +73,14 @@ class RenderDevice {
    void createSwapchainImageViews();
    void createCommandPools(const Instance& instance);
 
+   vk::raii::RenderPass defaultRenderPass() const;
+   vk::Format findDepthFormat() const;
+   vk::Format findSupportedFormat(const std::vector<vk::Format>& candidates,
+                                  vk::ImageTiling tiling,
+                                  vk::FormatFeatureFlags features) const;
+
    // Utils
+
    template <typename T>
    static void setObjectName(T const& handle,
                              const vk::raii::Device& device,

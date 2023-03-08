@@ -42,7 +42,7 @@
     <ClInclude Include="vma_raii.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PositionColorTexture.h">
+    <ClInclude Include="VertexFormats.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AbstractPipeline.h">
