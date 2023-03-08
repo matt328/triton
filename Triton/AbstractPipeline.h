@@ -17,14 +17,7 @@ class AbstractPipeline {
 
    std::string readShaderFile(const std::string_view& filename) const;
 
-   const std::unique_ptr<vk::raii::Pipeline> pipeline;
-
-   const std::array<vk::DynamicState, 2> dynamicStates = {vk::DynamicState::eViewport,
-                                                          vk::DynamicState::eScissor};
-
-   const vk::PipelineDynamicStateCreateInfo dynamicState{
-       .dynamicStateCount = static_cast<uint32_t>(dynamicStates.size()),
-       .pDynamicStates = dynamicStates.data()};
+   std::unique_ptr<vk::raii::Pipeline> pipeline;
 
    const vk::PipelineInputAssemblyStateCreateInfo inputAssembly{
        .topology = vk::PrimitiveTopology::eTriangleList, .primitiveRestartEnable = VK_FALSE};

@@ -30,7 +30,12 @@ RenderDevice::RenderDevice(const Instance& instance) {
 
    testBuffer = raiillocator->createBuffer(&bufferCreateInfo, &allocationCreateInfo, "test buffer");
 
-   auto pipeline = std::make_unique<DefaultPipeline>();
+   const auto renderPass = std::make_unique<vk::raii::RenderPass>(defaultRenderPass());
+
+   const auto dsl = std::make_unique<vk::raii::DescriptorSetLayout>(
+       DefaultPipeline::createDescriptorSetLayout(*device));
+
+   auto pipeline = std::make_unique<DefaultPipeline>(*device, *renderPass, *dsl, swapchainExtent);
 }
 
 RenderDevice::~RenderDevice() {
@@ -92,6 +97,9 @@ void RenderDevice::createLogicalDevice(const Instance& instance) {
    }
 
    device = std::make_unique<vk::raii::Device>(physicalDevice->createDevice(createInfo, nullptr));
+
+   setObjectName(
+       **device, *device.get(), vk::raii::Device::debugReportObjectType, "Primary Device");
 
    Log::core->info("Created Logical Device");
 
@@ -212,6 +220,86 @@ void RenderDevice::createCommandPools(const Instance& instance) {
 
    transferImmediateContext =
        std::make_unique<ImmediateContext>(*device.get(), *transferQueue, transferFamily.value());
+}
+
+vk::raii::RenderPass RenderDevice::defaultRenderPass() const {
+   const vk::AttachmentDescription colorAttachment{.format = swapchainImageFormat,
+                                                   .samples = vk::SampleCountFlagBits::e1,
+                                                   .loadOp = vk::AttachmentLoadOp::eClear,
+                                                   .storeOp = vk::AttachmentStoreOp::eStore,
+                                                   .stencilLoadOp = vk::AttachmentLoadOp::eDontCare,
+                                                   .stencilStoreOp =
+                                                       vk::AttachmentStoreOp::eDontCare,
+                                                   .initialLayout = vk::ImageLayout::eUndefined,
+                                                   .finalLayout = vk::ImageLayout::ePresentSrcKHR};
+
+   constexpr auto colorAttachmentRef =
+       vk::AttachmentReference{.attachment = 0, // index into the color attachments array
+                               .layout = vk::ImageLayout::eColorAttachmentOptimal};
+
+   const auto depthAttachment =
+       vk::AttachmentDescription{.format = findDepthFormat(),
+                                 .samples = vk::SampleCountFlagBits::e1,
+                                 .loadOp = vk::AttachmentLoadOp::eClear,
+                                 .storeOp = vk::AttachmentStoreOp::eDontCare,
+                                 .stencilLoadOp = vk::AttachmentLoadOp::eDontCare,
+                                 .stencilStoreOp = vk::AttachmentStoreOp::eDontCare,
+                                 .initialLayout = vk::ImageLayout::eUndefined,
+                                 .finalLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal};
+
+   constexpr auto depthAttachmentRef = vk::AttachmentReference{
+       .attachment = 1, .layout = vk::ImageLayout::eDepthStencilAttachmentOptimal};
+
+   const auto attachments = std::array{colorAttachment, depthAttachment};
+
+   constexpr auto subpass =
+       vk::SubpassDescription{.pipelineBindPoint = vk::PipelineBindPoint::eGraphics,
+                              .colorAttachmentCount = 1,
+                              .pColorAttachments = &colorAttachmentRef,
+                              .pDepthStencilAttachment = &depthAttachmentRef};
+
+   const auto dependency =
+       vk::SubpassDependency{.srcSubpass = VK_SUBPASS_EXTERNAL,
+                             .dstSubpass = 0,
+                             .srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput |
+                                             vk::PipelineStageFlagBits::eEarlyFragmentTests,
+                             .dstStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput |
+                                             vk::PipelineStageFlagBits::eEarlyFragmentTests,
+                             .srcAccessMask = vk::AccessFlagBits::eNone,
+                             .dstAccessMask = vk::AccessFlagBits::eColorAttachmentWrite |
+                                              vk::AccessFlagBits::eDepthStencilAttachmentWrite};
+
+   const auto renderPassCreateInfo =
+       vk::RenderPassCreateInfo{.attachmentCount = static_cast<uint32_t>(attachments.size()),
+                                .pAttachments = attachments.data(),
+                                .subpassCount = 1,
+                                .pSubpasses = &subpass,
+                                .dependencyCount = 1,
+                                .pDependencies = &dependency};
+
+   return device->createRenderPass(renderPassCreateInfo);
+}
+
+vk::Format RenderDevice::findDepthFormat() const {
+   return findSupportedFormat(
+       {vk::Format::eD32Sfloat, vk::Format::eD32SfloatS8Uint, vk::Format::eD24UnormS8Uint},
+       vk::ImageTiling::eOptimal,
+       vk::FormatFeatureFlagBits::eDepthStencilAttachment);
+}
+
+vk::Format RenderDevice::findSupportedFormat(const std::vector<vk::Format>& candidates,
+                                             const vk::ImageTiling tiling,
+                                             const vk::FormatFeatureFlags features) const {
+   for (const auto format : candidates) {
+      auto props = physicalDevice->getFormatProperties(format);
+      if (tiling == vk::ImageTiling::eLinear &&
+              (props.linearTilingFeatures & features) == features ||
+          tiling == vk::ImageTiling::eOptimal &&
+              (props.optimalTilingFeatures & features) == features) {
+         return format;
+      }
+   }
+   throw std::runtime_error("Failed to find supported format");
 }
 
 vk::PresentModeKHR RenderDevice::chooseSwapPresentMode(
