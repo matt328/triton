@@ -23,6 +23,12 @@ namespace vma {
             allocator.destroyBuffer(buffer, allocation);
          }
 
+         void updateBufferValue(void* data, const size_t dataSize) const {
+            const auto src = allocator.mapMemory(allocation);
+            memcpy(src, &data, dataSize);
+            allocator.unmapMemory(allocation);
+         }
+
          const vk::Buffer& getBuffer() const {
             return buffer;
          }
@@ -46,6 +52,9 @@ namespace vma {
              const vk::BufferCreateInfo* bci,
              const vma::AllocationCreateInfo* aci,
              const std::string_view& name = "unnamed buffer") const;
+
+         void* mapMemory(const AllocatedBuffer& allocatedBuffer) const;
+         void unmapMemory(const AllocatedBuffer& allocatedBuffer) const;
 
        private:
          vma::Allocator allocator;

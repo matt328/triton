@@ -159,6 +159,7 @@
     <ClInclude Include="Game.h" />
     <ClInclude Include="Instance.h" />
     <ClInclude Include="Log.h" />
+    <ClInclude Include="ObjectMatrices.h" />
     <ClInclude Include="RenderDevice.h" />
     <ClInclude Include="ImmediateContext.h" />
     <ClInclude Include="VertexFormats.h" />
@@ -170,6 +171,7 @@
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="AbstractPipeline.cpp" />
     <ClCompile Include="DefaultPipeline.cpp" />
+    <ClCompile Include="FrameData.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Instance.cpp" />
     <ClCompile Include="Log.cpp" />
