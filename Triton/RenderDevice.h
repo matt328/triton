@@ -1,10 +1,9 @@
 #pragma once
+#include <optional>
+
+#include "FrameData.h"
 #include "Instance.h"
 #include "Log.h"
-
-#include <vulkan-memory-allocator-hpp/vk_mem_alloc.hpp>
-
-#include <optional>
 
 namespace vma {
    namespace raii {
@@ -14,7 +13,6 @@ namespace vma {
 }
 
 class ImmediateContext;
-struct FrameData;
 
 class Game;
 
@@ -30,6 +28,7 @@ class RenderDevice {
    struct QueueFamilyIndices;
    struct SwapchainSupportDetails;
 
+   static constexpr uint32_t FRAMES_IN_FLIGHT = 3;
    uint32_t framebufferWidth = 0;
    uint32_t framebufferHeight = 0;
 
@@ -43,8 +42,6 @@ class RenderDevice {
    std::unique_ptr<vk::raii::PhysicalDevice> physicalDevice;
 
    std::unique_ptr<vk::raii::SwapchainKHR> swapchain;
-   std::unique_ptr<vk::raii::Semaphore> semaphore;
-   std::unique_ptr<vk::raii::Semaphore> renderSemaphore;
 
    std::vector<vk::Image> swapchainImages;
    std::vector<vk::raii::ImageView> swapchainImageViews;
@@ -52,7 +49,6 @@ class RenderDevice {
    vk::Extent2D swapchainExtent;
 
    std::unique_ptr<vk::raii::CommandPool> commandPool;
-   std::vector<std::unique_ptr<vk::raii::CommandBuffer>> commandBuffers;
 
    std::unique_ptr<vk::raii::Fence> uploadFence = nullptr;
    std::unique_ptr<vk::raii::CommandPool> uploadCommandPool = nullptr;
@@ -64,6 +60,9 @@ class RenderDevice {
    std::unique_ptr<ImmediateContext> transferImmediateContext;
 
    std::unique_ptr<vma::raii::Allocator> raiillocator;
+
+   std::vector<std::unique_ptr<FrameData>> frameData;
+
    std::unique_ptr<vma::raii::AllocatedBuffer> testBuffer;
 
    // Helpers
@@ -72,6 +71,8 @@ class RenderDevice {
    void createSwapchain(const Instance& instance);
    void createSwapchainImageViews();
    void createCommandPools(const Instance& instance);
+
+   void createPerFrameData();
 
    vk::raii::RenderPass defaultRenderPass() const;
    vk::Format findDepthFormat() const;
@@ -134,24 +135,5 @@ class RenderDevice {
       vk::SurfaceCapabilitiesKHR capabilities;
       std::vector<vk::SurfaceFormatKHR> formats;
       std::vector<vk::PresentModeKHR> presentModes;
-   };
-
-   struct FrameData {
-      std::unique_ptr<vk::raii::CommandBuffer> commandBuffer = nullptr;
-      std::unique_ptr<vk::raii::Semaphore> imageAvailableSemaphore = nullptr;
-      std::unique_ptr<vk::raii::Semaphore> renderFinishedSemaphore = nullptr;
-      std::unique_ptr<vk::raii::Fence> inFlightFence = nullptr;
-
-      /*std::unique_ptr<AllocatedBuffer> uniformBuffer = nullptr;*/
-      void* uniformBufferData;
-
-      std::unique_ptr<vk::raii::DescriptorSetLayout> descriptorSetLayout;
-      std::unique_ptr<vk::raii::DescriptorSet> descriptorSet;
-
-      void cleanup() {
-         // uniformBuffer.reset();
-         descriptorSetLayout.reset();
-         // descriptorSet.reset();
-      }
    };
 };

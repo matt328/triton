@@ -56,27 +56,6 @@ DefaultPipeline::DefaultPipeline(const vk::raii::Device& device,
        .vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size()),
        .pVertexAttributeDescriptions = attributeDescriptions.data()};
 
-   // TODO This is setup for creating Descriptor Set Layouts, does it belong here?
-   auto matricesBinding = vk::DescriptorSetLayoutBinding{
-       .binding = 0,
-       .descriptorType = vk::DescriptorType::eUniformBuffer,
-       .descriptorCount = 1,
-       .stageFlags = vk::ShaderStageFlagBits::eVertex,
-   };
-
-   auto textureSamplerBinding =
-       vk::DescriptorSetLayoutBinding{.binding = 1,
-                                      .descriptorType = vk::DescriptorType::eCombinedImageSampler,
-                                      .descriptorCount = 1,
-                                      .stageFlags = vk::ShaderStageFlagBits::eFragment};
-
-   auto allBindings = std::array{matricesBinding, textureSamplerBinding};
-
-   auto descriptorSetLayoutCreateInfo = vk::DescriptorSetLayoutCreateInfo{
-       .bindingCount = static_cast<uint32_t>(allBindings.size()), .pBindings = allBindings.data()};
-
-   // TODO The pipeline will need to take in a reference to the DescriptorSetLayout in order to
-   // create the pipeline layout
    vk::PipelineLayoutCreateInfo pipelineLayoutInfo{
        .setLayoutCount = 1, .pSetLayouts = &(*descriptorSetLayout)}; // This is awkward
 
@@ -120,20 +99,21 @@ DefaultPipeline::~DefaultPipeline() {
 
 vk::raii::DescriptorSetLayout DefaultPipeline::createDescriptorSetLayout(
     const vk::raii::Device& device) {
-   constexpr auto uboBinding = vk::DescriptorSetLayoutBinding{
+   constexpr auto objectMatricesBinding = vk::DescriptorSetLayoutBinding{
        .binding = 0,
        .descriptorType = vk::DescriptorType::eUniformBuffer,
        .descriptorCount = 1,
        .stageFlags = vk::ShaderStageFlagBits::eVertex,
    };
 
-   constexpr auto samplerBinding =
+   constexpr auto textureSamplerBinding =
        vk::DescriptorSetLayoutBinding{.binding = 1,
                                       .descriptorType = vk::DescriptorType::eCombinedImageSampler,
                                       .descriptorCount = 1,
                                       .stageFlags = vk::ShaderStageFlagBits::eFragment};
 
-   const auto bindings = std::array<vk::DescriptorSetLayoutBinding, 2>{uboBinding, samplerBinding};
+   const auto bindings =
+       std::array<vk::DescriptorSetLayoutBinding, 2>{objectMatricesBinding, textureSamplerBinding};
 
    const auto descriptorSetLayoutCreateInfo = vk::DescriptorSetLayoutCreateInfo{
        .bindingCount = static_cast<uint32_t>(bindings.size()), .pBindings = bindings.data()};
