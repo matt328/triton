@@ -5,6 +5,7 @@
 
 #include "ImmediateContext.h"
 #include "Log.h"
+#include "ObjectMatrices.h"
 
 #include <GLFW/glfw3.h>
 #include <set>
@@ -22,6 +23,8 @@ RenderDevice::RenderDevice(const Instance& instance) {
                                 .instance = **instance.getVkInstance()};
 
    raiillocator = std::make_unique<vma::raii::Allocator>(allocatorCreateInfo);
+
+   createPerFrameData();
 
    constexpr auto bufferCreateInfo =
        vk::BufferCreateInfo{.size = 1024, .usage = vk::BufferUsageFlagBits::eVertexBuffer};
@@ -220,6 +223,19 @@ void RenderDevice::createCommandPools(const Instance& instance) {
 
    transferImmediateContext =
        std::make_unique<ImmediateContext>(*device.get(), *transferQueue, transferFamily.value());
+}
+
+void RenderDevice::createPerFrameData() {
+   for (uint32_t i = 0; i < FRAMES_IN_FLIGHT; i++) {
+      frameData.push_back(std::make_unique<FrameData>(*device, *commandPool, *raiillocator));
+      i++;
+   }
+
+   auto objectMatrices =
+       ObjectMatrices{.model = glm::mat4(), .view = glm::mat4(), .proj = glm::mat4()};
+
+   frameData[0]->getObjectMatricesBuffer().updateBufferValue(&objectMatrices,
+                                                             sizeof(ObjectMatrices));
 }
 
 vk::raii::RenderPass RenderDevice::defaultRenderPass() const {

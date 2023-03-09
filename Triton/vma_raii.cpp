@@ -2,6 +2,7 @@
 
 namespace vma {
    namespace raii {
+
       Allocator::Allocator(const vma::AllocatorCreateInfo& createInfo) {
          allocator = vma::createAllocator(createInfo);
       }
@@ -22,6 +23,14 @@ namespace vma {
              std::make_unique<AllocatedBuffer>(allocator, std::move(buffer), std::move(allocation));
 
          return ptr;
+      }
+
+      void* Allocator::mapMemory(const AllocatedBuffer& allocatedBuffer) const {
+         return allocator.mapMemory(allocatedBuffer.getAllocation());
+      }
+
+      void Allocator::unmapMemory(const AllocatedBuffer& allocatedBuffer) const {
+         return allocator.unmapMemory(allocatedBuffer.getAllocation());
       }
    }
 }
