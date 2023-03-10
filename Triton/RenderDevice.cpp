@@ -16,7 +16,7 @@ RenderDevice::RenderDevice(const Instance& instance) {
    createSwapchain(instance);
    createSwapchainImageViews();
    createCommandPools(instance);
-
+   createDescriptorPool();
    const auto allocatorCreateInfo =
        vma::AllocatorCreateInfo{.physicalDevice = **physicalDevice,
                                 .device = **device,
@@ -225,9 +225,27 @@ void RenderDevice::createCommandPools(const Instance& instance) {
        std::make_unique<ImmediateContext>(*device.get(), *transferQueue, transferFamily.value());
 }
 
+void RenderDevice::createDescriptorPool() {
+   const auto poolSize =
+       std::array{vk::DescriptorPoolSize{.type = vk::DescriptorType::eUniformBuffer,
+                                         .descriptorCount = FRAMES_IN_FLIGHT * 10},
+                  vk::DescriptorPoolSize{.type = vk::DescriptorType::eCombinedImageSampler,
+                                         .descriptorCount = FRAMES_IN_FLIGHT * 10}};
+
+   const vk::DescriptorPoolCreateInfo poolInfo{
+       .flags = vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet,
+       .maxSets = FRAMES_IN_FLIGHT * 2,
+       .poolSizeCount = 2,
+       .pPoolSizes = poolSize.data()};
+
+   descriptorPool =
+       std::make_unique<vk::raii::DescriptorPool>(device->createDescriptorPool(poolInfo, nullptr));
+}
+
 void RenderDevice::createPerFrameData() {
    for (uint32_t i = 0; i < FRAMES_IN_FLIGHT; i++) {
-      frameData.push_back(std::make_unique<FrameData>(*device, *commandPool, *raiillocator));
+      frameData.push_back(
+          std::make_unique<FrameData>(*device, *commandPool, *raiillocator, *descriptorPool));
       i++;
    }
 
