@@ -6,7 +6,9 @@
 
 FrameData::FrameData(const vk::raii::Device& device,
                      const vk::raii::CommandPool& commandPool,
-                     const vma::raii::Allocator& raiillocator) {
+                     const vma::raii::Allocator& raiillocator,
+                     const vk::raii::DescriptorPool& descriptorPool) {
+
    const auto allocInfo = vk::CommandBufferAllocateInfo{.commandPool = *commandPool,
                                                         .level = vk::CommandBufferLevel::ePrimary,
                                                         .commandBufferCount = 1};
@@ -29,6 +31,23 @@ FrameData::FrameData(const vk::raii::Device& device,
 
    objectMatricesBuffer = raiillocator.createBuffer(
        &bufferCreateInfo, &allocationCreateInfo, std::format("Object Matrices Buffer"));
+
+   const auto descriptorSetAllocateInfo =
+       vk::DescriptorSetAllocateInfo{.descriptorPool = *descriptorPool,
+                                     .descriptorSetCount = 1,
+                                     .pSetLayouts = &(**descriptorSetLayout)};
+
+   descriptorSet = std::make_unique<vk::raii::DescriptorSet>(
+       std::move(device.allocateDescriptorSets(descriptorSetAllocateInfo).front()));
+
+   const auto objectMatricesBufferInfo = vk::DescriptorBufferInfo{
+       .buffer = objectMatricesBuffer->getBuffer(), .offset = 0, .range = sizeof(ObjectMatrices)};
+
+   //const auto textureImageInfo = vk::DescriptorImageInfo{
+   //    .sampler = *textureSampler,
+   //    .imageView = *(*textureImageView),
+   //    .imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal,
+   //};
 }
 
 FrameData::~FrameData() {

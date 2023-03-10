@@ -4,6 +4,7 @@
 
 namespace vk {
    namespace raii {
+      class DescriptorPool;
       class Device;
       class CommandPool;
       class DescriptorSet;
@@ -18,7 +19,8 @@ class FrameData {
  public:
    FrameData(const vk::raii::Device& device,
              const vk::raii::CommandPool& commandPool,
-             const vma::raii::Allocator& raiillocator);
+             const vma::raii::Allocator& raiillocator,
+             const vk::raii::DescriptorPool& descriptorPool);
    ~FrameData();
 
    const vk::raii::CommandBuffer& getCommandBuffer() const {

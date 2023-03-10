@@ -52,10 +52,13 @@ class RenderDevice {
 
    std::unique_ptr<vk::raii::Fence> uploadFence = nullptr;
    std::unique_ptr<vk::raii::CommandPool> uploadCommandPool = nullptr;
-   std::unique_ptr<vk::raii::CommandBuffer> uploadCommandBuffer = nullptr;
 
+   std::unique_ptr<vk::raii::CommandBuffer> uploadCommandBuffer = nullptr;
    std::unique_ptr<vk::raii::CommandBuffer> computeCommandBuffer;
+
    std::unique_ptr<vk::raii::CommandPool> computeCommandPool;
+
+   std::unique_ptr<vk::raii::DescriptorPool> descriptorPool;
 
    std::unique_ptr<ImmediateContext> transferImmediateContext;
 
@@ -71,6 +74,7 @@ class RenderDevice {
    void createSwapchain(const Instance& instance);
    void createSwapchainImageViews();
    void createCommandPools(const Instance& instance);
+   void createDescriptorPool();
 
    void createPerFrameData();
 
