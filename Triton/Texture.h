@@ -12,7 +12,7 @@ class Texture final {
                     const ImmediateContext& graphicsContext,
                     const ImmediateContext& transferContext);
    ~Texture();
-
+   const vk::DescriptorImageInfo& getDescriptorImageInfo() const;
  protected:
    std::unique_ptr<vma::raii::AllocatedImage> image;
    std::unique_ptr<vk::raii::ImageView> view;

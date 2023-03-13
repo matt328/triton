@@ -21,6 +21,7 @@ class Game;
 
 class RenderDevice {
  public:
+   void createAllocator(const Instance& instance);
    explicit RenderDevice(const Instance& instance);
    ~RenderDevice();
 
@@ -84,24 +85,13 @@ class RenderDevice {
    void createCommandPools(const Instance& instance);
    void createDescriptorPool();
 
-   void createPerFrameData();
+   void createPerFrameData(const vk::raii::DescriptorSetLayout& descriptorSetLayout);
 
    vk::raii::RenderPass defaultRenderPass() const;
    vk::Format findDepthFormat() const;
    vk::Format findSupportedFormat(const std::vector<vk::Format>& candidates,
                                   vk::ImageTiling tiling,
                                   vk::FormatFeatureFlags features) const;
-
-   void transitionImageLayout(const vk::Image& image,
-                              vk::ImageLayout oldLayout,
-                              vk::ImageLayout newLayout,
-                              vk::ImageSubresourceRange subresourceRange) const;
-
-   void copyBufferToImage(const vk::Buffer& buffer,
-                          const vk::Image& image,
-                          vk::ImageLayout imageLayout,
-                          const std::vector<vk::BufferImageCopy>& regions) const;
-
    // Utils
 
    template <typename T>

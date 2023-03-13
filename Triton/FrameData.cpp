@@ -1,7 +1,5 @@
 #include "FrameData.h"
 
-#include "DefaultPipeline.h"
-
 #include <vulkan/vulkan_raii.hpp>
 
 #include "ObjectMatrices.h"
@@ -9,7 +7,9 @@
 FrameData::FrameData(const vk::raii::Device& device,
                      const vk::raii::CommandPool& commandPool,
                      const vma::raii::Allocator& raiillocator,
-                     const vk::raii::DescriptorPool& descriptorPool) {
+                     const vk::raii::DescriptorPool& descriptorPool,
+                     const vk::raii::DescriptorSetLayout& descriptorSetLayout,
+                     const vk::DescriptorImageInfo textureImageInfo) {
 
    const auto allocInfo = vk::CommandBufferAllocateInfo{.commandPool = *commandPool,
                                                         .level = vk::CommandBufferLevel::ePrimary,
@@ -34,13 +34,10 @@ FrameData::FrameData(const vk::raii::Device& device,
    objectMatricesBuffer = raiillocator.createBuffer(
        &bufferCreateInfo, &allocationCreateInfo, std::format("Object Matrices Buffer"));
 
-   this->descriptorSetLayout = std::make_unique<vk::raii::DescriptorSetLayout>(
-       DefaultPipeline::createDescriptorSetLayout(device));
-
    const auto descriptorSetAllocateInfo =
        vk::DescriptorSetAllocateInfo{.descriptorPool = *descriptorPool,
                                      .descriptorSetCount = 1,
-                                     .pSetLayouts = &(**descriptorSetLayout)};
+                                     .pSetLayouts = &(*descriptorSetLayout)};
 
    descriptorSet = std::make_unique<vk::raii::DescriptorSet>(
        std::move(device.allocateDescriptorSets(descriptorSetAllocateInfo).front()));
@@ -48,11 +45,27 @@ FrameData::FrameData(const vk::raii::Device& device,
    const auto objectMatricesBufferInfo = vk::DescriptorBufferInfo{
        .buffer = objectMatricesBuffer->getBuffer(), .offset = 0, .range = sizeof(ObjectMatrices)};
 
-   // const auto textureImageInfo = vk::DescriptorImageInfo{
-   //     .sampler = *textureSampler,
-   //     .imageView = *(*textureImageView),
-   //     .imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal,
-   // };
+   const auto objectMatricesDescriptorWrite = vk::WriteDescriptorSet{
+       .dstSet = **descriptorSet,
+       .dstBinding = 0,
+       .dstArrayElement = 0,
+       .descriptorCount = 1,
+       .descriptorType = vk::DescriptorType::eUniformBuffer,
+       .pBufferInfo = &objectMatricesBufferInfo,
+   };
+
+   const auto textureDescriptorWrite = vk::WriteDescriptorSet{
+       .dstSet = **descriptorSet,
+       .dstBinding = 1,
+       .dstArrayElement = 0,
+       .descriptorCount = 1,
+       .descriptorType = vk::DescriptorType::eCombinedImageSampler,
+       .pImageInfo = &textureImageInfo,
+   };
+
+   const auto writes = std::array{objectMatricesDescriptorWrite, textureDescriptorWrite};
+
+   device.updateDescriptorSets(writes, nullptr);
 }
 
 FrameData::~FrameData() {
