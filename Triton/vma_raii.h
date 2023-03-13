@@ -7,6 +7,34 @@
 namespace vma {
    namespace raii {
 
+      class AllocatedImage {
+       public:
+         AllocatedImage(const vma::Allocator& newAllocator,
+                        const vk::Image newImage,
+                        const vma::Allocation newAllocation)
+             : image(newImage)
+             , allocation(newAllocation)
+             , allocator(newAllocator) {
+         }
+
+         ~AllocatedImage() {
+            allocator.destroyImage(image, allocation);
+         }
+
+         const vk::Image& getImage() const {
+            return image;
+         }
+
+         const vma::Allocation& getAllocation() const {
+            return allocation;
+         }
+
+       private:
+         vk::Image image;
+         vma::Allocation allocation;
+         vma::Allocator allocator;
+      };
+
       class AllocatedBuffer {
        public:
          AllocatedBuffer(const vma::Allocator& newAllocator,
@@ -53,8 +81,16 @@ namespace vma {
              const vma::AllocationCreateInfo* aci,
              const std::string_view& name = "unnamed buffer") const;
 
+         std::unique_ptr<AllocatedImage> createImage(
+             const vk::ImageCreateInfo& imageCreateInfo,
+             const vma::AllocationCreateInfo& allocationCreateInfo,
+             const std::string_view& newName = "unnamed image") const;
+
          void* mapMemory(const AllocatedBuffer& allocatedBuffer) const;
          void unmapMemory(const AllocatedBuffer& allocatedBuffer) const;
+
+         void* mapMemory(const AllocatedImage& allocatedImage) const;
+         void unmapMemory(const AllocatedImage& allocatedImage) const;
 
        private:
          vma::Allocator allocator;

@@ -25,12 +25,32 @@ namespace vma {
          return ptr;
       }
 
+      std::unique_ptr<AllocatedImage> Allocator::createImage(
+          const vk::ImageCreateInfo& imageCreateInfo,
+          const vma::AllocationCreateInfo& allocationCreateInfo,
+          const std::string_view& newName) const {
+
+         auto [image, allocation] = allocator.createImage(imageCreateInfo, allocationCreateInfo);
+         allocator.setAllocationName(allocation, newName.data());
+
+         return std::make_unique<AllocatedImage>(
+             allocator, std::move(image), std::move(allocation));
+      }
+
       void* Allocator::mapMemory(const AllocatedBuffer& allocatedBuffer) const {
          return allocator.mapMemory(allocatedBuffer.getAllocation());
       }
 
       void Allocator::unmapMemory(const AllocatedBuffer& allocatedBuffer) const {
          return allocator.unmapMemory(allocatedBuffer.getAllocation());
+      }
+
+      void* Allocator::mapMemory(const AllocatedImage& allocatedImage) const {
+         return allocator.mapMemory(allocatedImage.getAllocation());
+      }
+
+      void Allocator::unmapMemory(const AllocatedImage& allocatedImage) const {
+         allocator.unmapMemory(allocatedImage.getAllocation());
       }
    }
 }

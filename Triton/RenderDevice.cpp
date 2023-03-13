@@ -6,6 +6,9 @@
 #include "ImmediateContext.h"
 #include "Log.h"
 #include "ObjectMatrices.h"
+#include "Texture.h"
+#include "TextureFactory.h"
+#include "Utils.h"
 
 #include <GLFW/glfw3.h>
 #include <set>
@@ -24,6 +27,9 @@ RenderDevice::RenderDevice(const Instance& instance) {
 
    raiillocator = std::make_unique<vma::raii::Allocator>(allocatorCreateInfo);
 
+   const auto dsl = std::make_unique<vk::raii::DescriptorSetLayout>(
+       DefaultPipeline::createDescriptorSetLayout(*device));
+
    createPerFrameData();
 
    constexpr auto bufferCreateInfo =
@@ -35,10 +41,14 @@ RenderDevice::RenderDevice(const Instance& instance) {
 
    const auto renderPass = std::make_unique<vk::raii::RenderPass>(defaultRenderPass());
 
-   const auto dsl = std::make_unique<vk::raii::DescriptorSetLayout>(
-       DefaultPipeline::createDescriptorSetLayout(*device));
-
    auto pipeline = std::make_unique<DefaultPipeline>(*device, *renderPass, *dsl, swapchainExtent);
+
+   textureFactory = std::make_unique<TextureFactory>(
+       *raiillocator, *device, *graphicsImmediateContext, *transferImmediateContext);
+
+   const auto textureFilename = Paths::TEXTURES / "viking_room_2.ktx";
+
+   textures["texture1"] = textureFactory->createTexture2D(textureFilename.string());
 }
 
 RenderDevice::~RenderDevice() {
@@ -223,6 +233,9 @@ void RenderDevice::createCommandPools(const Instance& instance) {
 
    transferImmediateContext =
        std::make_unique<ImmediateContext>(*device.get(), *transferQueue, transferFamily.value());
+
+   graphicsImmediateContext =
+       std::make_unique<ImmediateContext>(*device.get(), *graphicsQueue, graphicsFamily.value());
 }
 
 void RenderDevice::createDescriptorPool() {
