@@ -11,6 +11,7 @@
 #include "Utils.h"
 
 #include <GLFW/glfw3.h>
+#include <ranges>
 #include <set>
 
 RenderDevice::RenderDevice(const Instance& instance) {
@@ -20,28 +21,10 @@ RenderDevice::RenderDevice(const Instance& instance) {
    createSwapchainImageViews();
    createCommandPools(instance);
    createDescriptorPool();
-   const auto allocatorCreateInfo =
-       vma::AllocatorCreateInfo{.physicalDevice = **physicalDevice,
-                                .device = **device,
-                                .instance = **instance.getVkInstance()};
-
-   raiillocator = std::make_unique<vma::raii::Allocator>(allocatorCreateInfo);
-
-   const auto dsl = std::make_unique<vk::raii::DescriptorSetLayout>(
-       DefaultPipeline::createDescriptorSetLayout(*device));
-
-   createPerFrameData();
-
-   constexpr auto bufferCreateInfo =
-       vk::BufferCreateInfo{.size = 1024, .usage = vk::BufferUsageFlagBits::eVertexBuffer};
-   constexpr auto allocationCreateInfo =
-       vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eAuto};
-
-   testBuffer = raiillocator->createBuffer(&bufferCreateInfo, &allocationCreateInfo, "test buffer");
+   createAllocator(instance);
 
    const auto renderPass = std::make_unique<vk::raii::RenderPass>(defaultRenderPass());
-
-   auto pipeline = std::make_unique<DefaultPipeline>(*device, *renderPass, *dsl, swapchainExtent);
+   const auto pipeline = std::make_unique<DefaultPipeline>(*device, *renderPass, swapchainExtent);
 
    textureFactory = std::make_unique<TextureFactory>(
        *raiillocator, *device, *graphicsImmediateContext, *transferImmediateContext);
@@ -49,6 +32,8 @@ RenderDevice::RenderDevice(const Instance& instance) {
    const auto textureFilename = Paths::TEXTURES / "viking_room_2.ktx";
 
    textures["texture1"] = textureFactory->createTexture2D(textureFilename.string());
+
+   createPerFrameData(pipeline->getDescriptorSetLayout());
 }
 
 RenderDevice::~RenderDevice() {
@@ -255,11 +240,20 @@ void RenderDevice::createDescriptorPool() {
        std::make_unique<vk::raii::DescriptorPool>(device->createDescriptorPool(poolInfo, nullptr));
 }
 
-void RenderDevice::createPerFrameData() {
-   for (uint32_t i = 0; i < FRAMES_IN_FLIGHT; i++) {
-      frameData.push_back(
-          std::make_unique<FrameData>(*device, *commandPool, *raiillocator, *descriptorPool));
-      i++;
+void RenderDevice::createAllocator(const Instance& instance) {
+   const auto allocatorCreateInfo =
+       vma::AllocatorCreateInfo{.physicalDevice = **physicalDevice,
+                                .device = **device,
+                                .instance = **instance.getVkInstance()};
+
+   raiillocator = std::make_unique<vma::raii::Allocator>(allocatorCreateInfo);
+}
+
+void RenderDevice::createPerFrameData(const vk::raii::DescriptorSetLayout& descriptorSetLayout) {
+   for (int _ : std::ranges::iota_view{1, 3}) { // l33t!
+      const auto textureInfo = textures["texture1"]->getDescriptorImageInfo();
+      frameData.push_back(std::make_unique<FrameData>(
+          *device, *commandPool, *raiillocator, *descriptorPool, descriptorSetLayout, textureInfo));
    }
 
    auto objectMatrices =

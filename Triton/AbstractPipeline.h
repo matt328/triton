@@ -12,12 +12,18 @@ class AbstractPipeline {
       return *pipeline;
    };
 
+   const vk::raii::DescriptorSetLayout& getDescriptorSetLayout() const {
+      return *descriptorSetLayout;
+   };
+
  protected:
    AbstractPipeline() = default;
 
    std::string readShaderFile(const std::string_view& filename) const;
 
    std::unique_ptr<vk::raii::Pipeline> pipeline;
+
+   std::unique_ptr<vk::raii::DescriptorSetLayout> descriptorSetLayout;
 
    const vk::PipelineInputAssemblyStateCreateInfo inputAssembly{
        .topology = vk::PrimitiveTopology::eTriangleList, .primitiveRestartEnable = VK_FALSE};

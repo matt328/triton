@@ -20,7 +20,9 @@ class FrameData {
    FrameData(const vk::raii::Device& device,
              const vk::raii::CommandPool& commandPool,
              const vma::raii::Allocator& raiillocator,
-             const vk::raii::DescriptorPool& descriptorPool);
+             const vk::raii::DescriptorPool& descriptorPool,
+             const vk::raii::DescriptorSetLayout& descriptorSetLayout,
+             const vk::DescriptorImageInfo textureImageInfo);
    ~FrameData();
 
    const vk::raii::CommandBuffer& getCommandBuffer() const {

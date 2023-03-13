@@ -164,11 +164,19 @@ Texture::~Texture() {
    Log::core->debug("Destroying Texture");
 }
 
+const vk::DescriptorImageInfo& Texture::getDescriptorImageInfo() const {
+   return vk::DescriptorImageInfo{
+       .sampler = **sampler,
+       .imageView = **view,
+       .imageLayout = imageLayout,
+   };
+}
+
 void Texture::transitionImageLayout(const ImmediateContext& context,
                                     const vk::Image& image,
-                                    vk::ImageLayout oldLayout,
-                                    vk::ImageLayout newLayout,
-                                    vk::ImageSubresourceRange subresourceRange) {
+                                    const vk::ImageLayout oldLayout,
+                                    const vk::ImageLayout newLayout,
+                                    const vk::ImageSubresourceRange subresourceRange) {
    const auto transitionImageLayoutFn = [&](const vk::raii::CommandBuffer& cmd) {
       vk::ImageMemoryBarrier barrier{
           .srcAccessMask = vk::AccessFlagBits::eNone,
@@ -210,7 +218,7 @@ void Texture::transitionImageLayout(const ImmediateContext& context,
 void Texture::copyBufferToImage(const ImmediateContext& context,
                                 const vk::Buffer& buffer,
                                 const vk::Image& image,
-                                vk::ImageLayout imageLayout,
+                                const vk::ImageLayout imageLayout,
                                 const std::vector<vk::BufferImageCopy>& regions) {
 
    const auto copyBufferToImageFn = [&](const vk::raii::CommandBuffer& cmd) {
