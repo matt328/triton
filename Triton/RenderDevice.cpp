@@ -251,9 +251,13 @@ void RenderDevice::createAllocator(const Instance& instance) {
 
 void RenderDevice::createPerFrameData(const vk::raii::DescriptorSetLayout& descriptorSetLayout) {
    for (int _ : std::ranges::iota_view{1, 3}) { // l33t!
-      const auto textureInfo = textures["texture1"]->getDescriptorImageInfo();
-      frameData.push_back(std::make_unique<FrameData>(
-          *device, *commandPool, *raiillocator, *descriptorPool, descriptorSetLayout, textureInfo));
+      frameData.push_back(
+          std::make_unique<FrameData>(*device,
+                                      *commandPool,
+                                      *raiillocator,
+                                      *descriptorPool,
+                                      descriptorSetLayout,
+                                      textures["texture1"]->getDescriptorImageInfo()));
    }
 
    auto objectMatrices =

@@ -164,7 +164,7 @@ Texture::~Texture() {
    Log::core->debug("Destroying Texture");
 }
 
-const vk::DescriptorImageInfo& Texture::getDescriptorImageInfo() const {
+vk::DescriptorImageInfo Texture::getDescriptorImageInfo() const {
    return vk::DescriptorImageInfo{
        .sampler = **sampler,
        .imageView = **view,
