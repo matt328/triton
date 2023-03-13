@@ -7,7 +7,6 @@
 
 DefaultPipeline::DefaultPipeline(const vk::raii::Device& device,
                                  const vk::raii::RenderPass& renderPass,
-                                 const vk::raii::DescriptorSetLayout& descriptorSetLayout,
                                  const vk::Extent2D& swapchainExtent) {
    // Configure Shader Modules
    auto helper = std::make_unique<SpirvHelper>();
@@ -46,6 +45,9 @@ DefaultPipeline::DefaultPipeline(const vk::raii::Device& device,
 
    auto shaderStages = std::array{vertexShaderStageInfo, fragmentShaderStageInfo};
 
+   descriptorSetLayout =
+       std::make_unique<vk::raii::DescriptorSetLayout>(createDescriptorSetLayout(device));
+
    // Configure Vertex Attributes
    auto bindingDescription = VertexFormats::PositionColorTexture::bindingDescription();
    auto attributeDescriptions = VertexFormats::PositionColorTexture::attributeDescriptions();
@@ -57,7 +59,8 @@ DefaultPipeline::DefaultPipeline(const vk::raii::Device& device,
        .pVertexAttributeDescriptions = attributeDescriptions.data()};
 
    vk::PipelineLayoutCreateInfo pipelineLayoutInfo{
-       .setLayoutCount = 1, .pSetLayouts = &(*descriptorSetLayout)}; // This is awkward
+       .setLayoutCount = 1,
+       .pSetLayouts = &(**descriptorSetLayout)}; // This is (now even more) awkward
 
    auto pipelineLayout =
        std::make_unique<vk::raii::PipelineLayout>(device.createPipelineLayout(pipelineLayoutInfo));
