@@ -5,6 +5,9 @@
 #include "Instance.h"
 #include "Log.h"
 
+class TextureFactory;
+class Texture;
+
 namespace vma {
    namespace raii {
       class AllocatedBuffer;
@@ -61,12 +64,17 @@ class RenderDevice {
    std::unique_ptr<vk::raii::DescriptorPool> descriptorPool;
 
    std::unique_ptr<ImmediateContext> transferImmediateContext;
+   std::unique_ptr<ImmediateContext> graphicsImmediateContext;
 
    std::unique_ptr<vma::raii::Allocator> raiillocator;
 
    std::vector<std::unique_ptr<FrameData>> frameData;
 
    std::unique_ptr<vma::raii::AllocatedBuffer> testBuffer;
+
+   std::unique_ptr<TextureFactory> textureFactory;
+
+   std::unordered_map<std::string, std::unique_ptr<Texture>> textures;
 
    // Helpers
    void createPhysicalDevice(const Instance& instance);
@@ -83,6 +91,16 @@ class RenderDevice {
    vk::Format findSupportedFormat(const std::vector<vk::Format>& candidates,
                                   vk::ImageTiling tiling,
                                   vk::FormatFeatureFlags features) const;
+
+   void transitionImageLayout(const vk::Image& image,
+                              vk::ImageLayout oldLayout,
+                              vk::ImageLayout newLayout,
+                              vk::ImageSubresourceRange subresourceRange) const;
+
+   void copyBufferToImage(const vk::Buffer& buffer,
+                          const vk::Image& image,
+                          vk::ImageLayout imageLayout,
+                          const std::vector<vk::BufferImageCopy>& regions) const;
 
    // Utils
 

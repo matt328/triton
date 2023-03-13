@@ -1,5 +1,7 @@
 #include "FrameData.h"
 
+#include "DefaultPipeline.h"
+
 #include <vulkan/vulkan_raii.hpp>
 
 #include "ObjectMatrices.h"
@@ -32,6 +34,9 @@ FrameData::FrameData(const vk::raii::Device& device,
    objectMatricesBuffer = raiillocator.createBuffer(
        &bufferCreateInfo, &allocationCreateInfo, std::format("Object Matrices Buffer"));
 
+   this->descriptorSetLayout = std::make_unique<vk::raii::DescriptorSetLayout>(
+       DefaultPipeline::createDescriptorSetLayout(device));
+
    const auto descriptorSetAllocateInfo =
        vk::DescriptorSetAllocateInfo{.descriptorPool = *descriptorPool,
                                      .descriptorSetCount = 1,
@@ -43,11 +48,11 @@ FrameData::FrameData(const vk::raii::Device& device,
    const auto objectMatricesBufferInfo = vk::DescriptorBufferInfo{
        .buffer = objectMatricesBuffer->getBuffer(), .offset = 0, .range = sizeof(ObjectMatrices)};
 
-   //const auto textureImageInfo = vk::DescriptorImageInfo{
-   //    .sampler = *textureSampler,
-   //    .imageView = *(*textureImageView),
-   //    .imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal,
-   //};
+   // const auto textureImageInfo = vk::DescriptorImageInfo{
+   //     .sampler = *textureSampler,
+   //     .imageView = *(*textureImageView),
+   //     .imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal,
+   // };
 }
 
 FrameData::~FrameData() {
