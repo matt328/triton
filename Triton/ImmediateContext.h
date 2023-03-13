@@ -27,10 +27,10 @@ class ImmediateContext {
                     uint32_t queueFamily);
    ~ImmediateContext() = default;
 
-   void submit(std::function<void(vk::raii::CommandBuffer& cmd)>&& fn,
-               const vk::raii::Device& device) const;
+   void submit(std::function<void(vk::raii::CommandBuffer& cmd)>&& fn) const;
 
  private:
+   const vk::raii::Device& device;
    const vk::raii::Queue& queue;
    std::unique_ptr<vk::raii::Fence> fence = nullptr;
    std::unique_ptr<vk::raii::CommandPool> commandPool = nullptr;

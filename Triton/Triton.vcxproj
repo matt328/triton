@@ -163,6 +163,7 @@
     <ClInclude Include="RenderDevice.h" />
     <ClInclude Include="ImmediateContext.h" />
     <ClInclude Include="Texture.h" />
+    <ClInclude Include="TextureFactory.h" />
     <ClInclude Include="VertexFormats.h" />
     <ClInclude Include="SpirvHelper.h" />
     <ClInclude Include="Utils.h" />
@@ -180,6 +181,8 @@
     <ClCompile Include="ImmediateContext.cpp" />
     <ClCompile Include="SpirvHelper.cpp" />
     <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="TextureFactory.cpp" />
+    <ClCompile Include="Utils.cpp" />
     <ClCompile Include="vma.cpp" />
     <ClCompile Include="vma_raii.cpp" />
   </ItemGroup>

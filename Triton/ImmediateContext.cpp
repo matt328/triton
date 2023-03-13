@@ -8,7 +8,8 @@
 ImmediateContext::ImmediateContext(const vk::raii::Device& device,
                                    const vk::raii::Queue& newQueue,
                                    const uint32_t queueFamily)
-    : queue(newQueue) {
+    : device(device)
+    , queue(newQueue) {
    // Create Command Pool
    const vk::CommandPoolCreateInfo transferCommandPoolCreateInfo{.queueFamilyIndex = queueFamily};
 
@@ -28,8 +29,7 @@ ImmediateContext::ImmediateContext(const vk::raii::Device& device,
    fence = std::make_unique<vk::raii::Fence>(device.createFence(vk::FenceCreateInfo{}));
 }
 
-void ImmediateContext::submit(std::function<void(vk::raii::CommandBuffer& cmd)>&& fn,
-                              const vk::raii::Device& device) const {
+void ImmediateContext::submit(std::function<void(vk::raii::CommandBuffer& cmd)>&& fn) const {
    constexpr vk::CommandBufferBeginInfo cmdBeginInfo{
        .flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit};
 
