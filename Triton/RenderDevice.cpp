@@ -23,8 +23,8 @@ RenderDevice::RenderDevice(const Instance& instance) {
    createDescriptorPool();
    createAllocator(instance);
 
-   const auto renderPass = std::make_unique<vk::raii::RenderPass>(defaultRenderPass());
-   const auto pipeline = std::make_unique<DefaultPipeline>(*device, *renderPass, swapchainExtent);
+   renderPass = std::make_unique<vk::raii::RenderPass>(defaultRenderPass());
+   pipeline = std::make_unique<DefaultPipeline>(*device, *renderPass, swapchainExtent);
 
    textureFactory = std::make_unique<TextureFactory>(
        *raiillocator, *device, *graphicsImmediateContext, *transferImmediateContext);
@@ -34,9 +34,16 @@ RenderDevice::RenderDevice(const Instance& instance) {
    textures["texture1"] = textureFactory->createTexture2D(textureFilename.string());
 
    createPerFrameData(pipeline->getDescriptorSetLayout());
+
+   createDepthResources();
+   createFramebuffers();
 }
 
 RenderDevice::~RenderDevice() {
+}
+
+void RenderDevice::waitIdle() const {
+   device->waitIdle();
 }
 
 void RenderDevice::createPhysicalDevice(const Instance& instance) {
@@ -250,7 +257,7 @@ void RenderDevice::createAllocator(const Instance& instance) {
 }
 
 void RenderDevice::createPerFrameData(const vk::raii::DescriptorSetLayout& descriptorSetLayout) {
-   for (int _ : std::ranges::iota_view{1, 3}) { // l33t!
+   for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++) {
       frameData.push_back(
           std::make_unique<FrameData>(*device,
                                       *commandPool,
@@ -265,6 +272,60 @@ void RenderDevice::createPerFrameData(const vk::raii::DescriptorSetLayout& descr
 
    frameData[0]->getObjectMatricesBuffer().updateBufferValue(&objectMatrices,
                                                              sizeof(ObjectMatrices));
+}
+
+void RenderDevice::createDepthResources() {
+   const auto depthFormat = findDepthFormat();
+
+   const auto imageCreateInfo =
+       vk::ImageCreateInfo{.imageType = vk::ImageType::e2D,
+                           .format = depthFormat,
+                           .extent = vk::Extent3D{.width = swapchainExtent.width,
+                                                  .height = swapchainExtent.height,
+                                                  .depth = 1},
+                           .mipLevels = 1,
+                           .arrayLayers = 1,
+                           .samples = vk::SampleCountFlagBits::e1,
+                           .tiling = vk::ImageTiling::eOptimal,
+                           .usage = vk::ImageUsageFlagBits::eDepthStencilAttachment,
+                           .sharingMode = vk::SharingMode::eExclusive,
+                           .initialLayout = vk::ImageLayout::eUndefined};
+
+   constexpr auto allocationCreateInfo =
+       vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eGpuOnly};
+
+   depthImage = raiillocator->createImage(imageCreateInfo, allocationCreateInfo);
+
+   constexpr auto range = vk::ImageSubresourceRange{.aspectMask = vk::ImageAspectFlagBits::eDepth,
+                                                    .baseMipLevel = 0,
+                                                    .levelCount = 1,
+                                                    .baseArrayLayer = 0,
+                                                    .layerCount = 1};
+
+   const auto viewInfo = vk::ImageViewCreateInfo{.image = depthImage->getImage(),
+                                                 .viewType = vk::ImageViewType::e2D,
+                                                 .format = depthFormat,
+                                                 .subresourceRange = range};
+   depthImageView = std::make_unique<vk::raii::ImageView>(device->createImageView(viewInfo));
+}
+
+void RenderDevice::createFramebuffers() {
+   swapchainFramebuffers.reserve(swapchainImageViews.size());
+   std::array<vk::ImageView, 2> attachments;
+
+   for (const auto& imageView : swapchainImageViews) {
+      attachments[0] = *imageView;
+      attachments[1] = **depthImageView;
+
+      const auto framebufferCreateInfo =
+          vk::FramebufferCreateInfo{.renderPass = **renderPass,
+                                    .attachmentCount = static_cast<uint32_t>(attachments.size()),
+                                    .pAttachments = attachments.data(),
+                                    .width = swapchainExtent.width,
+                                    .height = swapchainExtent.height,
+                                    .layers = 1};
+      swapchainFramebuffers.emplace_back(device->createFramebuffer(framebufferCreateInfo));
+   }
 }
 
 vk::raii::RenderPass RenderDevice::defaultRenderPass() const {
@@ -345,6 +406,100 @@ vk::Format RenderDevice::findSupportedFormat(const std::vector<vk::Format>& cand
       }
    }
    throw std::runtime_error("Failed to find supported format");
+}
+
+void RenderDevice::recreateSwapchain() {
+}
+
+void RenderDevice::drawFrame() {
+   const auto& currentFrameData = frameData[currentFrame];
+   const auto res =
+       device->waitForFences(*currentFrameData->getInFlightFence(), VK_TRUE, UINT64_MAX);
+
+   const auto [result, imageIndex] = swapchain->acquireNextImage(
+       UINT64_MAX, *currentFrameData->getImageAvailableSemaphore(), nullptr);
+
+   if (result == vk::Result::eErrorOutOfDateKHR) {
+      recreateSwapchain();
+      return;
+   }
+   if (result != vk::Result::eSuccess && result != vk::Result::eSuboptimalKHR) {
+      throw std::runtime_error("Failed to acquire swapchain image");
+   }
+
+   device->resetFences(*currentFrameData->getInFlightFence());
+
+   currentFrameData->getCommandBuffer().reset();
+
+   recordCommandBuffer(currentFrameData->getCommandBuffer(), imageIndex);
+
+   constexpr vk::PipelineStageFlags waitStages[] = {
+       vk::PipelineStageFlagBits::eColorAttachmentOutput};
+
+   const vk::Semaphore signalSemaphores[] = {*currentFrameData->getRenderFinishedSemaphore()};
+
+   // updateUniformBuffer(currentFrame);
+
+   const auto submitInfo =
+       vk::SubmitInfo{.waitSemaphoreCount = 1,
+                      .pWaitSemaphores = &*currentFrameData->getImageAvailableSemaphore(),
+                      .pWaitDstStageMask = waitStages,
+                      .commandBufferCount = 1,
+                      .pCommandBuffers = &*currentFrameData->getCommandBuffer(),
+                      .signalSemaphoreCount = 1,
+                      .pSignalSemaphores = signalSemaphores};
+
+   graphicsQueue->submit(submitInfo, *currentFrameData->getInFlightFence());
+
+   const auto presentInfo = vk::PresentInfoKHR{.waitSemaphoreCount = 1,
+                                               .pWaitSemaphores = signalSemaphores,
+                                               .swapchainCount = 1,
+                                               .pSwapchains = &(*(*swapchain)),
+                                               .pImageIndices = &imageIndex};
+
+   if (const auto pResult = graphicsQueue->presentKHR(presentInfo);
+       pResult == vk::Result::eErrorOutOfDateKHR || pResult == vk::Result::eSuboptimalKHR ||
+       framebufferResized) {
+      framebufferResized = false;
+      recreateSwapchain();
+   } else if (result != vk::Result::eSuccess) {
+      throw std::runtime_error("Failed to present swapchain image");
+   }
+
+   currentFrame = (currentFrame + 1) % FRAMES_IN_FLIGHT;
+}
+
+void RenderDevice::recordCommandBuffer(const vk::raii::CommandBuffer& cmd, unsigned imageIndex) {
+   std::array<vk::ClearValue, 2> clearValues;
+   std::array<float, 4> clearColor = {0.39f, 0.58f, 0.93f, 1.f};
+   clearValues[0].color = vk::ClearColorValue(clearColor);
+   clearValues[1].depthStencil = vk::ClearDepthStencilValue(1.0f, 0);
+
+   constexpr auto beginInfo = vk::CommandBufferBeginInfo{};
+   cmd.begin(beginInfo);
+
+   const auto renderArea = vk::Rect2D{.offset = {0, 0}, .extent = swapchainExtent};
+
+   const auto renderPassInfo =
+       vk::RenderPassBeginInfo{.renderPass = *(*renderPass),
+                               .framebuffer = *swapchainFramebuffers[imageIndex],
+                               .renderArea = renderArea,
+                               .clearValueCount = static_cast<uint32_t>(clearValues.size()),
+                               .pClearValues = clearValues.data()};
+
+   cmd.beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
+   cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, *pipeline->getPipeline());
+
+   // cmd.bindVertexBuffers(0, *vertexBuffer->buffer, {0});
+   // cmd.bindIndexBuffer(*indexBuffer->buffer, 0, vk::IndexType::eUint32);
+   // cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
+   //                        *pipeline->getPipelineLayout(),
+   //                         0,
+   //                         *frameData[currentFrame]->getDescriptorSet(),
+   //                         nullptr);
+   // cmd.drawIndexed(static_cast<uint32_t>(this->model.indices.size()), 1, 0, 0, 0);
+   cmd.endRenderPass();
+   cmd.end();
 }
 
 vk::PresentModeKHR RenderDevice::chooseSwapPresentMode(
