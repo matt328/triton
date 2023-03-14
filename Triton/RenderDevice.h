@@ -5,6 +5,7 @@
 #include "Instance.h"
 #include "Log.h"
 
+class AbstractPipeline;
 class TextureFactory;
 class Texture;
 
@@ -26,13 +27,17 @@ class RenderDevice {
    ~RenderDevice();
 
    void render(const Game& game) {
+      drawFrame();
    }
+
+   void waitIdle() const;
 
  private:
    struct QueueFamilyIndices;
    struct SwapchainSupportDetails;
 
    static constexpr uint32_t FRAMES_IN_FLIGHT = 3;
+
    uint32_t framebufferWidth = 0;
    uint32_t framebufferHeight = 0;
 
@@ -67,7 +72,14 @@ class RenderDevice {
    std::unique_ptr<ImmediateContext> transferImmediateContext;
    std::unique_ptr<ImmediateContext> graphicsImmediateContext;
 
+   std::unique_ptr<vk::raii::RenderPass> renderPass;
+   std::unique_ptr<AbstractPipeline> pipeline;
+
    std::unique_ptr<vma::raii::Allocator> raiillocator;
+
+   std::unique_ptr<vma::raii::AllocatedImage> depthImage;
+   std::unique_ptr<vk::raii::ImageView> depthImageView;
+   std::vector<vk::raii::Framebuffer> swapchainFramebuffers;
 
    std::vector<std::unique_ptr<FrameData>> frameData;
 
@@ -76,6 +88,9 @@ class RenderDevice {
    std::unique_ptr<TextureFactory> textureFactory;
 
    std::unordered_map<std::string, std::unique_ptr<Texture>> textures;
+
+   uint32_t currentFrame = 0;
+   bool framebufferResized = false;
 
    // Helpers
    void createPhysicalDevice(const Instance& instance);
@@ -87,11 +102,21 @@ class RenderDevice {
 
    void createPerFrameData(const vk::raii::DescriptorSetLayout& descriptorSetLayout);
 
+   void createDepthResources();
+   void createFramebuffers();
+
    vk::raii::RenderPass defaultRenderPass() const;
    vk::Format findDepthFormat() const;
    vk::Format findSupportedFormat(const std::vector<vk::Format>& candidates,
                                   vk::ImageTiling tiling,
                                   vk::FormatFeatureFlags features) const;
+
+   void recreateSwapchain();
+
+   void drawFrame();
+
+   void recordCommandBuffer(const vk::raii::CommandBuffer& cmd, unsigned imageIndex);
+
    // Utils
 
    template <typename T>
