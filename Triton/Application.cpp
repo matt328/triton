@@ -58,6 +58,7 @@ void Application::run() const {
 
       glfwPollEvents();
    }
+   renderDevice->waitIdle();
 }
 
 void Application::keyCallbackInt(const int key, int scancode, const int action, int mods) const {
