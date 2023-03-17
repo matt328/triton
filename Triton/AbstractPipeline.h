@@ -1,5 +1,4 @@
 #pragma once
-#include <glslang/Include/glslang_c_interface.h>
 #include <memory>
 #include <vulkan/vulkan_raii.hpp>
 

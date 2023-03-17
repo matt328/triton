@@ -97,9 +97,6 @@ DefaultPipeline::DefaultPipeline(const vk::raii::Device& device,
        device.createGraphicsPipeline(VK_NULL_HANDLE, pipelineCreateInfo));
 }
 
-DefaultPipeline::~DefaultPipeline() {
-}
-
 vk::raii::DescriptorSetLayout DefaultPipeline::createDescriptorSetLayout(
     const vk::raii::Device& device) {
    constexpr auto objectMatricesBinding = vk::DescriptorSetLayoutBinding{

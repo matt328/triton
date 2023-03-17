@@ -162,6 +162,7 @@
     <ClInclude Include="ObjectMatrices.h" />
     <ClInclude Include="RenderDevice.h" />
     <ClInclude Include="ImmediateContext.h" />
+    <ClInclude Include="RendererBase.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="TextureFactory.h" />
     <ClInclude Include="VertexFormats.h" />
@@ -179,6 +180,7 @@
     <ClCompile Include="Log.cpp" />
     <ClCompile Include="RenderDevice.cpp" />
     <ClCompile Include="ImmediateContext.cpp" />
+    <ClCompile Include="RendererBase.cpp" />
     <ClCompile Include="SpirvHelper.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="TextureFactory.cpp" />

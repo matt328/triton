@@ -6,7 +6,7 @@ class DefaultPipeline final : public AbstractPipeline {
    explicit DefaultPipeline(const vk::raii::Device& device,
                             const vk::raii::RenderPass& renderPass,
                             const vk::Extent2D& swapchainExtent);
-   ~DefaultPipeline() override;
+   ~DefaultPipeline() override = default;
 
  private:
    static vk::raii::DescriptorSetLayout createDescriptorSetLayout(const vk::raii::Device& device);
