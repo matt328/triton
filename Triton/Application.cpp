@@ -54,7 +54,7 @@ void Application::run() const {
 
       game->blendState(alpha);
 
-      renderDevice->render(*game);
+      //renderDevice->render(game->getRenderData());
 
       glfwPollEvents();
    }
