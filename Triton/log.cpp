@@ -10,17 +10,17 @@ std::shared_ptr<spdlog::logger> Log::core;
 std::shared_ptr<spdlog::logger> Log::game;
 
 void Log::init() {
-   auto distSink = std::make_shared<spdlog::sinks::dist_sink_mt>();
-   const auto stdoutColorSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-   const auto vsOutputSink = std::make_shared<spdlog::sinks::msvc_sink_mt>();
-   distSink->add_sink(vsOutputSink);
+  auto distSink = std::make_shared<spdlog::sinks::dist_sink_mt>();
+  const auto stdoutColorSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+  const auto vsOutputSink = std::make_shared<spdlog::sinks::msvc_sink_mt>();
+  distSink->add_sink(vsOutputSink);
 
-   distSink->add_sink(stdoutColorSink);
-   distSink->set_pattern(LOG_PATTERN);
+  distSink->add_sink(stdoutColorSink);
+  distSink->set_pattern(LOG_PATTERN);
 
-   core = std::make_shared<spdlog::logger>("game", distSink);
-   core->set_level(spdlog::level::debug);
+  core = std::make_shared<spdlog::logger>("triton", distSink);
+  core->set_level(spdlog::level::debug);
 
-   game = std::make_shared<spdlog::logger>("triton", distSink);
-   game->set_level(spdlog::level::debug);
+  game = std::make_shared<spdlog::logger>("game", distSink);
+  game->set_level(spdlog::level::debug);
 }
