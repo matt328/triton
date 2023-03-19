@@ -2,11 +2,11 @@
 #include "Log.h"
 
 int main() {
-   Log::init();
+  Log::init();
 
-   const auto app = Application{};
+  const auto app = Application{};
 
-   app.run();
+  app.run();
 
-   Log::game->info("hello {}", "world");
+  Log::game->info("hello {}", "world");
 }
