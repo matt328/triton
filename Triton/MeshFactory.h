@@ -1,6 +1,6 @@
 #pragma once
 
-class Mesh;
+struct Mesh;
 
 class MeshFactory {
  public:
