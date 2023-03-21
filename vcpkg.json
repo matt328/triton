@@ -6,7 +6,9 @@
 		"glfw3",
 		"glm",
 		"glslang",
+		"nlohmann-json",
 		"spdlog",
+		"tinygltf",
 		"vulkan-memory-allocator-hpp"
 	]
 }

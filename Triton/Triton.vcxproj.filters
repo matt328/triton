@@ -13,6 +13,9 @@
     <Filter Include="Core\Renderers">
       <UniqueIdentifier>{8f225ee3-c0c4-4173-8b56-0edc324a29aa}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Core\Models">
+      <UniqueIdentifier>{304c3d90-a587-4cae-8e0b-899e7e2412bf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AbstractPipeline.h">
@@ -75,6 +78,18 @@
     <ClInclude Include="RenderData.h">
       <Filter>Application</Filter>
     </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>Core\Models</Filter>
+    </ClInclude>
+    <ClInclude Include="Vertex.h">
+      <Filter>Core\Models</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelData.h">
+      <Filter>Core\Models</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshFactory.h">
+      <Filter>Core\Models</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AbstractPipeline.cpp">
@@ -127,6 +142,12 @@
     </ClCompile>
     <ClCompile Include="Clear.cpp">
       <Filter>Core\Renderers</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>Core\Models</Filter>
+    </ClCompile>
+    <ClCompile Include="Vertex.cpp">
+      <Filter>Core\Models</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

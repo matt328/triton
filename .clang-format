@@ -1,7 +1,16 @@
----
-BasedOnStyle: Google
-AlignAfterOpenBracket: AlwaysBreak
+BasedOnStyle: Microsoft
+PointerAlignment: Left
+Standard: c++11
+AlwaysBreakTemplateDeclarations: Yes
+NamespaceIndentation: All
+ForEachMacros: [ TEST_CLASS, TEST_METHOD ]
+IndentWidth: 3
+IndentCaseLabels: true
 BinPackArguments: false
 BinPackParameters: false
+BreakConstructorInitializers: BeforeComma
+BreakBeforeBraces: Attach
+AllowShortBlocksOnASingleLine: Always
+ExperimentalAutoDetectBinPacking: false
 ColumnLimit: 100
-Standard: c++20
+FixNamespaceComments: false

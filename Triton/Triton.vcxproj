@@ -160,6 +160,9 @@
     <ClInclude Include="Game.h" />
     <ClInclude Include="Instance.h" />
     <ClInclude Include="Log.h" />
+    <ClInclude Include="MeshFactory.h" />
+    <ClInclude Include="Model.h" />
+    <ClInclude Include="ModelData.h" />
     <ClInclude Include="ObjectMatrices.h" />
     <ClInclude Include="RenderData.h" />
     <ClInclude Include="RenderDevice.h" />
@@ -167,6 +170,7 @@
     <ClInclude Include="RendererBase.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="TextureFactory.h" />
+    <ClInclude Include="Vertex.h" />
     <ClInclude Include="VertexFormats.h" />
     <ClInclude Include="SpirvHelper.h" />
     <ClInclude Include="Utils.h" />
@@ -179,6 +183,7 @@
     <ClCompile Include="DefaultPipeline.cpp" />
     <ClCompile Include="FrameData.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="Model.cpp" />
     <ClCompile Include="Instance.cpp" />
     <ClCompile Include="Log.cpp" />
     <ClCompile Include="RenderDevice.cpp" />
@@ -188,6 +193,7 @@
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="TextureFactory.cpp" />
     <ClCompile Include="Utils.cpp" />
+    <ClCompile Include="Vertex.cpp" />
     <ClCompile Include="vma.cpp" />
     <ClCompile Include="vma_raii.cpp" />
   </ItemGroup>

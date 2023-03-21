@@ -16,3 +16,11 @@ std::unique_ptr<Texture> TextureFactory::createTexture2D(const std::string_view&
    return std::make_unique<Texture>(
        filename, raiillocator, device, graphicsContext, transferContext);
 }
+
+std::unique_ptr<Texture> TextureFactory::createTexture2DFromBuffer(void* buffer,
+                                                                   vk::DeviceSize bufferSize,
+                                                                   vk::Format format,
+                                                                   uint32_t texWidth,
+                                                                   uint32_t texHeight) {
+   return nullptr;
+}
