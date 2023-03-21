@@ -2,7 +2,7 @@
 
 #include <glm/gtx/string_cast.hpp>
 
-#include "GltfModel.h"
+#include "Model.h"
 #include "Log.h"
 #include "Utils.h"
 
@@ -17,7 +17,7 @@ Game::Game() {
 
   const auto filename = (Paths::MODELS / "viking_room.glb").string();
 
-  const auto model = std::make_unique<GltfModel>(filename);
+  const auto model = std::make_unique<Models::Model>(filename);
 }
 
 void Game::update(double t, const float dt) const {
