@@ -76,15 +76,24 @@ namespace vma {
          explicit Allocator(const vma::AllocatorCreateInfo& createInfo);
          ~Allocator();
 
-         std::unique_ptr<AllocatedBuffer> createBuffer(
+         std::unique_ptr<AllocatedBuffer>&& createBuffer(
              const vk::BufferCreateInfo* bci,
              const vma::AllocationCreateInfo* aci,
              const std::string_view& name = "unnamed buffer") const;
 
-         std::unique_ptr<AllocatedImage> createImage(
+         std::unique_ptr<AllocatedBuffer>&& createStagingBuffer(
+             size_t size, const std::string_view& name = "unnamed buffer") const;
+
+         std::unique_ptr<AllocatedBuffer>&& createGpuVertexBuffer(
+             size_t size, const std::string_view& name = "unnamed buffer") const;
+
+         std::unique_ptr<AllocatedImage>&& createImage(
              const vk::ImageCreateInfo& imageCreateInfo,
              const vma::AllocationCreateInfo& allocationCreateInfo,
              const std::string_view& newName = "unnamed image") const;
+
+         std::unique_ptr<AllocatedBuffer>&& createGpuIndexBuffer(
+             size_t size, const std::string_view& name) const;
 
          void* mapMemory(const AllocatedBuffer& allocatedBuffer) const;
          void unmapMemory(const AllocatedBuffer& allocatedBuffer) const;

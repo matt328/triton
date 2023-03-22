@@ -78,16 +78,13 @@
     <ClInclude Include="RenderData.h">
       <Filter>Application</Filter>
     </ClInclude>
-    <ClInclude Include="Model.h">
-      <Filter>Core\Models</Filter>
-    </ClInclude>
     <ClInclude Include="Vertex.h">
       <Filter>Core\Models</Filter>
     </ClInclude>
-    <ClInclude Include="ModelData.h">
+    <ClInclude Include="MeshFactory.h">
       <Filter>Core\Models</Filter>
     </ClInclude>
-    <ClInclude Include="MeshFactory.h">
+    <ClInclude Include="Mesh.h">
       <Filter>Core\Models</Filter>
     </ClInclude>
   </ItemGroup>
@@ -143,10 +140,10 @@
     <ClCompile Include="Clear.cpp">
       <Filter>Core\Renderers</Filter>
     </ClCompile>
-    <ClCompile Include="Model.cpp">
+    <ClCompile Include="Vertex.cpp">
       <Filter>Core\Models</Filter>
     </ClCompile>
-    <ClCompile Include="Vertex.cpp">
+    <ClCompile Include="MeshFactory.cpp">
       <Filter>Core\Models</Filter>
     </ClCompile>
   </ItemGroup>
