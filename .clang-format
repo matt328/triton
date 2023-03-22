@@ -8,7 +8,8 @@ IndentWidth: 3
 IndentCaseLabels: true
 BinPackArguments: false
 BinPackParameters: false
-BreakConstructorInitializers: BeforeComma
+BreakConstructorInitializers: AfterColon
+PackConstructorInitializers: BinPack
 BreakBeforeBraces: Attach
 AllowShortBlocksOnASingleLine: Always
 ExperimentalAutoDetectBinPacking: false
