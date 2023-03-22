@@ -160,9 +160,8 @@
     <ClInclude Include="Game.h" />
     <ClInclude Include="Instance.h" />
     <ClInclude Include="Log.h" />
+    <ClInclude Include="Mesh.h" />
     <ClInclude Include="MeshFactory.h" />
-    <ClInclude Include="Model.h" />
-    <ClInclude Include="ModelData.h" />
     <ClInclude Include="ObjectMatrices.h" />
     <ClInclude Include="RenderData.h" />
     <ClInclude Include="RenderDevice.h" />
@@ -183,7 +182,7 @@
     <ClCompile Include="DefaultPipeline.cpp" />
     <ClCompile Include="FrameData.cpp" />
     <ClCompile Include="Game.cpp" />
-    <ClCompile Include="Model.cpp" />
+    <ClCompile Include="MeshFactory.cpp" />
     <ClCompile Include="Instance.cpp" />
     <ClCompile Include="Log.cpp" />
     <ClCompile Include="RenderDevice.cpp" />
