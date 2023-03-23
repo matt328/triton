@@ -1,11 +1,9 @@
+#include "pch.hpp"
+
 #include "Texture.h"
 
 #include "Log.h"
 #include "Utils.h"
-
-#include <ktx.h>
-#include <ktxvulkan.h>
-#include <vulkan/vk_enum_string_helper.h>
 
 Texture::Texture(const std::string_view& filename,
                  const vma::raii::Allocator& raiillocator,

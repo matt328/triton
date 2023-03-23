@@ -1,6 +1,6 @@
-#include "AbstractPipeline.h"
-#include <fstream>
+#include "pch.hpp"
 
+#include "AbstractPipeline.h"
 #include "Utils.h"
 
 std::string AbstractPipeline::readShaderFile(const std::string_view& filename) const {

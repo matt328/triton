@@ -1,7 +1,7 @@
+#include "pch.hpp"
+
 #include "Instance.h"
 #include "Log.h"
-
-#include <GLFW/glfw3.h>
 
 const std::vector DESIRED_VALIDATION_LAYERS = {"VK_LAYER_KHRONOS_validation"};
 

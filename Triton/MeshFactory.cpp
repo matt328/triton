@@ -1,7 +1,6 @@
-#include "MeshFactory.h"
+#include "pch.hpp"
 
-#include <glm/gtc/type_ptr.hpp>
-#include <tiny_gltf.h>
+#include "MeshFactory.h"
 
 MeshFactory::MeshFactory(const vma::raii::Allocator& allocator,
                          const ImmediateContext& transferContext) :
@@ -9,7 +8,7 @@ MeshFactory::MeshFactory(const vma::raii::Allocator& allocator,
     transferContext(transferContext) {
 }
 
-std::unique_ptr<Mesh<Models::Vertex, uint32_t>>&& MeshFactory::loadMeshFromGltf(
+std::unique_ptr<Mesh<Models::Vertex, uint32_t>> MeshFactory::loadMeshFromGltf(
     const std::string_view& filename) const {
    tinygltf::Model model;
 
@@ -110,8 +109,8 @@ std::unique_ptr<Mesh<Models::Vertex, uint32_t>>&& MeshFactory::loadMeshFromGltf(
          }
       }
 
-      return std::move(std::make_unique<Mesh<Models::Vertex, uint32_t>>(
-          allocator, vertexBuffer, indexBuffer, transferContext));
+      return std::make_unique<Mesh<Models::Vertex, uint32_t>>(
+          allocator, vertexBuffer, indexBuffer, transferContext);
    }
    throw std::runtime_error(std::format("Error loading model {}", filename));
 }

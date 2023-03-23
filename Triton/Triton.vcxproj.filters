@@ -87,6 +87,7 @@
     <ClInclude Include="Mesh.h">
       <Filter>Core\Models</Filter>
     </ClInclude>
+    <ClInclude Include="pch.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AbstractPipeline.cpp">
@@ -119,9 +120,6 @@
     <ClCompile Include="vma_raii.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="vma.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
     <ClCompile Include="Application.cpp">
       <Filter>Application</Filter>
     </ClCompile>
@@ -146,5 +144,6 @@
     <ClCompile Include="MeshFactory.cpp">
       <Filter>Core\Models</Filter>
     </ClCompile>
+    <ClCompile Include="pch.cxx" />
   </ItemGroup>
 </Project>

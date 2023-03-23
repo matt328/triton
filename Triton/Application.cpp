@@ -1,3 +1,5 @@
+#include "pch.hpp"
+
 #include "Application.h"
 #include "Game.h"
 #include "Instance.h"
@@ -54,7 +56,7 @@ void Application::run() const {
 
       game->blendState(alpha);
 
-      //renderDevice->render(game->getRenderData());
+      // renderDevice->render(game->getRenderData());
 
       glfwPollEvents();
    }
