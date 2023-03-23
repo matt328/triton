@@ -79,8 +79,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions);VULKAN_HPP_NO_STRUCT_CONSTRUCTORS;VK_USE_PLATFORM_WIN32_KHR;NOMINMAX;VMA_STATIC_VULKAN_FUNCTIONS=1;VMA_DYNAMIC_VULKAN_FUNCTIONS=0;_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING;GLM_ENABLE_EXPERIMENTAL</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.hpp</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(SolutionDir)Vendor\ktx\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
@@ -98,8 +98,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions);VULKAN_HPP_NO_STRUCT_CONSTRUCTORS;VK_USE_PLATFORM_WIN32_KHR;NOMINMAX;VMA_STATIC_VULKAN_FUNCTIONS=1;VMA_DYNAMIC_VULKAN_FUNCTIONS=0;_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING;GLM_ENABLE_EXPERIMENTAL</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.hpp</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(SolutionDir)Vendor\ktx\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
@@ -117,8 +117,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions);VULKAN_HPP_NO_STRUCT_CONSTRUCTORS;VK_USE_PLATFORM_WIN32_KHR;NOMINMAX;_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING;GLM_ENABLE_EXPERIMENTAL</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.hpp</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(SolutionDir)Vendor\ktx\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <EnableModules>false</EnableModules>
@@ -137,8 +137,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions);VULKAN_HPP_NO_STRUCT_CONSTRUCTORS;VK_USE_PLATFORM_WIN32_KHR;NOMINMAX;VMA_STATIC_VULKAN_FUNCTIONS=1;VMA_DYNAMIC_VULKAN_FUNCTIONS=0;_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING;GLM_ENABLE_EXPERIMENTAL</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.hpp</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(SolutionDir)Vendor\ktx\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
@@ -163,6 +163,7 @@
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="MeshFactory.h" />
     <ClInclude Include="ObjectMatrices.h" />
+    <ClInclude Include="pch.hpp" />
     <ClInclude Include="RenderData.h" />
     <ClInclude Include="RenderDevice.h" />
     <ClInclude Include="ImmediateContext.h" />
@@ -185,6 +186,12 @@
     <ClCompile Include="MeshFactory.cpp" />
     <ClCompile Include="Instance.cpp" />
     <ClCompile Include="Log.cpp" />
+    <ClCompile Include="pch.cxx">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="RenderDevice.cpp" />
     <ClCompile Include="ImmediateContext.cpp" />
     <ClCompile Include="RendererBase.cpp" />
@@ -193,7 +200,6 @@
     <ClCompile Include="TextureFactory.cpp" />
     <ClCompile Include="Utils.cpp" />
     <ClCompile Include="Vertex.cpp" />
-    <ClCompile Include="vma.cpp" />
     <ClCompile Include="vma_raii.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

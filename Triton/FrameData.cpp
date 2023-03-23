@@ -1,7 +1,6 @@
+#include "pch.hpp"
+
 #include "FrameData.h"
-
-#include <vulkan/vulkan_raii.hpp>
-
 #include "ObjectMatrices.h"
 
 FrameData::FrameData(const vk::raii::Device& device,

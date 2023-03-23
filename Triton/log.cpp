@@ -1,8 +1,6 @@
-#include "Log.h"
+#include "pch.hpp"
 
-#include <spdlog/sinks/dist_sink.h>
-#include <spdlog/sinks/msvc_sink.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
+#include "Log.h"
 
 const std::string LOG_PATTERN = "%^%I:%M:%S | %-5l | %-6n | %v%$";
 

@@ -1,9 +1,7 @@
-#pragma once
+#include "pch.hpp"
 
 #include "ImmediateContext.h"
 #include "Log.h"
-
-#include <vulkan/vulkan_raii.hpp>
 
 ImmediateContext::ImmediateContext(const vk::raii::Device& device,
                                    const vk::raii::Queue& newQueue,

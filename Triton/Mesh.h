@@ -17,15 +17,15 @@ class Mesh {
 
          const auto stagingBuffer = allocator.createStagingBuffer(size, "Mesh Vertex Staging");
 
-         void* data = allocator.mapMemory(stagingBuffer);
+         void* data = allocator.mapMemory(*stagingBuffer);
          memcpy(data, vertexData.data(), static_cast<size_t>(size));
-         allocator.unmapMemory(stagingBuffer);
+         allocator.unmapMemory(*stagingBuffer);
 
          vertexBuffer = allocator.createGpuVertexBuffer(size, "GPU Vertex");
 
          transferContext.submit([&](vk::raii::CommandBuffer& cmd) {
             const auto copy = vk::BufferCopy{.srcOffset = 0, .dstOffset = 0, .size = size};
-            cmd.copyBuffer(*stagingBuffer->getBuffer(), *vertexBuffer->getBuffer(), copy);
+            cmd.copyBuffer(stagingBuffer->getBuffer(), vertexBuffer->getBuffer(), copy);
          });
       }
 
@@ -39,9 +39,9 @@ class Mesh {
 
          indexBuffer = allocator.createGpuIndexBuffer(size, "GPU Index");
 
-         transferContext.submit([&](vk::raii::CommandBuffer& cmd) {
+         transferContext.submit([&](const vk::raii::CommandBuffer& cmd) {
             const auto copy = vk::BufferCopy{.srcOffset = 0, .dstOffset = 0, .size = size};
-            cmd.copyBuffer(*stagingBuffer->getBuffer(), *indexBuffer->getBuffer(), copy);
+            cmd.copyBuffer(stagingBuffer->getBuffer(), indexBuffer->getBuffer(), copy);
          });
       }
    };

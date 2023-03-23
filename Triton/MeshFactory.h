@@ -13,7 +13,7 @@ class MeshFactory {
    MeshFactory(const vma::raii::Allocator& allocator, const ImmediateContext& transferContext);
    ~MeshFactory() = default;
 
-   std::unique_ptr<Mesh<Models::Vertex, uint32_t>>&& loadMeshFromGltf(
+   std::unique_ptr<Mesh<Models::Vertex, uint32_t>> loadMeshFromGltf(
        const std::string_view& filename) const;
 
  private:
