@@ -18,130 +18,130 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AbstractPipeline.h">
+    <ClInclude Include="AbstractPipeline.hpp">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="DefaultPipeline.h">
+    <ClInclude Include="DefaultPipeline.hpp">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="FrameData.h">
+    <ClInclude Include="FrameData.hpp">
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="framework.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="ImmediateContext.h">
+    <ClInclude Include="ImmediateContext.hpp">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="Instance.h">
+    <ClInclude Include="Instance.hpp">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="ObjectMatrices.h">
+    <ClInclude Include="ObjectMatrices.hpp">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="RenderDevice.h">
+    <ClInclude Include="RenderDevice.hpp">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="SpirvHelper.h">
+    <ClInclude Include="SpirvHelper.hpp">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="Texture.h">
+    <ClInclude Include="Texture.hpp">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="TextureFactory.h">
+    <ClInclude Include="TextureFactory.hpp">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="VertexFormats.h">
+    <ClInclude Include="VertexFormats.hpp">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="vma_raii.h">
+    <ClInclude Include="vma_raii.hpp">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="Application.h">
+    <ClInclude Include="Application.hpp">
       <Filter>Application</Filter>
     </ClInclude>
-    <ClInclude Include="Game.h">
+    <ClInclude Include="Game.hpp">
       <Filter>Application</Filter>
     </ClInclude>
-    <ClInclude Include="Log.h">
+    <ClInclude Include="Log.hpp">
       <Filter>Utilities</Filter>
     </ClInclude>
-    <ClInclude Include="Utils.h">
+    <ClInclude Include="Utils.hpp">
       <Filter>Utilities</Filter>
     </ClInclude>
-    <ClInclude Include="RendererBase.h">
+    <ClInclude Include="RendererBase.hpp">
       <Filter>Core\Renderers</Filter>
     </ClInclude>
-    <ClInclude Include="Clear.h">
+    <ClInclude Include="Clear.hpp">
       <Filter>Core\Renderers</Filter>
     </ClInclude>
-    <ClInclude Include="RenderData.h">
+    <ClInclude Include="RenderData.hpp">
       <Filter>Application</Filter>
     </ClInclude>
-    <ClInclude Include="Vertex.h">
+    <ClInclude Include="Vertex.hpp">
       <Filter>Core\Models</Filter>
     </ClInclude>
-    <ClInclude Include="MeshFactory.h">
+    <ClInclude Include="MeshFactory.hpp">
       <Filter>Core\Models</Filter>
     </ClInclude>
-    <ClInclude Include="Mesh.h">
+    <ClInclude Include="Mesh.hpp">
       <Filter>Core\Models</Filter>
     </ClInclude>
     <ClInclude Include="pch.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AbstractPipeline.cpp">
+    <ClCompile Include="AbstractPipeline.cxx">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="DefaultPipeline.cpp">
+    <ClCompile Include="DefaultPipeline.cxx">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="FrameData.cpp">
+    <ClCompile Include="FrameData.cxx">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="ImmediateContext.cpp">
+    <ClCompile Include="ImmediateContext.cxx">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="Instance.cpp">
+    <ClCompile Include="Instance.cxx">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="RenderDevice.cpp">
+    <ClCompile Include="RenderDevice.cxx">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="SpirvHelper.cpp">
+    <ClCompile Include="SpirvHelper.cxx">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="Texture.cpp">
+    <ClCompile Include="Texture.cxx">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="TextureFactory.cpp">
+    <ClCompile Include="TextureFactory.cxx">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="vma_raii.cpp">
+    <ClCompile Include="vma_raii.cxx">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="Application.cpp">
+    <ClCompile Include="Application.cxx">
       <Filter>Application</Filter>
     </ClCompile>
-    <ClCompile Include="Game.cpp">
+    <ClCompile Include="Game.cxx">
       <Filter>Application</Filter>
     </ClCompile>
-    <ClCompile Include="Utils.cpp">
+    <ClCompile Include="Utils.cxx">
       <Filter>Utilities</Filter>
     </ClCompile>
-    <ClCompile Include="Log.cpp">
+    <ClCompile Include="Log.cxx">
       <Filter>Utilities</Filter>
     </ClCompile>
-    <ClCompile Include="RendererBase.cpp">
+    <ClCompile Include="RendererBase.cxx">
       <Filter>Core\Renderers</Filter>
     </ClCompile>
-    <ClCompile Include="Clear.cpp">
+    <ClCompile Include="Clear.cxx">
       <Filter>Core\Renderers</Filter>
     </ClCompile>
-    <ClCompile Include="Vertex.cpp">
+    <ClCompile Include="Vertex.cxx">
       <Filter>Core\Models</Filter>
     </ClCompile>
-    <ClCompile Include="MeshFactory.cpp">
+    <ClCompile Include="MeshFactory.cxx">
       <Filter>Core\Models</Filter>
     </ClCompile>
     <ClCompile Include="pch.cxx" />

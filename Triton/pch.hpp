@@ -1,6 +1,12 @@
+#pragma once
+
 #include <fstream>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/string_cast.hpp>
+
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
+#include <glslang/SPIRV/GlslangToSpv.h>
 
 #include <memory>
 #include <ranges>
