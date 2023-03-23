@@ -151,56 +151,56 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Application.h" />
-    <ClInclude Include="AbstractPipeline.h" />
-    <ClInclude Include="Clear.h" />
-    <ClInclude Include="DefaultPipeline.h" />
-    <ClInclude Include="FrameData.h" />
+    <ClInclude Include="Application.hpp" />
+    <ClInclude Include="AbstractPipeline.hpp" />
+    <ClInclude Include="Clear.hpp" />
+    <ClInclude Include="DefaultPipeline.hpp" />
+    <ClInclude Include="FrameData.hpp" />
     <ClInclude Include="framework.h" />
-    <ClInclude Include="Game.h" />
-    <ClInclude Include="Instance.h" />
-    <ClInclude Include="Log.h" />
-    <ClInclude Include="Mesh.h" />
-    <ClInclude Include="MeshFactory.h" />
-    <ClInclude Include="ObjectMatrices.h" />
+    <ClInclude Include="Game.hpp" />
+    <ClInclude Include="Instance.hpp" />
+    <ClInclude Include="Log.hpp" />
+    <ClInclude Include="Mesh.hpp" />
+    <ClInclude Include="MeshFactory.hpp" />
+    <ClInclude Include="ObjectMatrices.hpp" />
     <ClInclude Include="pch.hpp" />
-    <ClInclude Include="RenderData.h" />
-    <ClInclude Include="RenderDevice.h" />
-    <ClInclude Include="ImmediateContext.h" />
-    <ClInclude Include="RendererBase.h" />
-    <ClInclude Include="Texture.h" />
-    <ClInclude Include="TextureFactory.h" />
-    <ClInclude Include="Vertex.h" />
-    <ClInclude Include="VertexFormats.h" />
-    <ClInclude Include="SpirvHelper.h" />
-    <ClInclude Include="Utils.h" />
-    <ClInclude Include="vma_raii.h" />
+    <ClInclude Include="RenderData.hpp" />
+    <ClInclude Include="RenderDevice.hpp" />
+    <ClInclude Include="ImmediateContext.hpp" />
+    <ClInclude Include="RendererBase.hpp" />
+    <ClInclude Include="Texture.hpp" />
+    <ClInclude Include="TextureFactory.hpp" />
+    <ClInclude Include="Vertex.hpp" />
+    <ClInclude Include="VertexFormats.hpp" />
+    <ClInclude Include="SpirvHelper.hpp" />
+    <ClInclude Include="Utils.hpp" />
+    <ClInclude Include="vma_raii.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Application.cpp" />
-    <ClCompile Include="AbstractPipeline.cpp" />
-    <ClCompile Include="Clear.cpp" />
-    <ClCompile Include="DefaultPipeline.cpp" />
-    <ClCompile Include="FrameData.cpp" />
-    <ClCompile Include="Game.cpp" />
-    <ClCompile Include="MeshFactory.cpp" />
-    <ClCompile Include="Instance.cpp" />
-    <ClCompile Include="Log.cpp" />
+    <ClCompile Include="Application.cxx" />
+    <ClCompile Include="AbstractPipeline.cxx" />
+    <ClCompile Include="Clear.cxx" />
+    <ClCompile Include="DefaultPipeline.cxx" />
+    <ClCompile Include="FrameData.cxx" />
+    <ClCompile Include="Game.cxx" />
+    <ClCompile Include="MeshFactory.cxx" />
+    <ClCompile Include="Instance.cxx" />
+    <ClCompile Include="Log.cxx" />
     <ClCompile Include="pch.cxx">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="RenderDevice.cpp" />
-    <ClCompile Include="ImmediateContext.cpp" />
-    <ClCompile Include="RendererBase.cpp" />
-    <ClCompile Include="SpirvHelper.cpp" />
-    <ClCompile Include="Texture.cpp" />
-    <ClCompile Include="TextureFactory.cpp" />
-    <ClCompile Include="Utils.cpp" />
-    <ClCompile Include="Vertex.cpp" />
-    <ClCompile Include="vma_raii.cpp" />
+    <ClCompile Include="RenderDevice.cxx" />
+    <ClCompile Include="ImmediateContext.cxx" />
+    <ClCompile Include="RendererBase.cxx" />
+    <ClCompile Include="SpirvHelper.cxx" />
+    <ClCompile Include="Texture.cxx" />
+    <ClCompile Include="TextureFactory.cxx" />
+    <ClCompile Include="Utils.cxx" />
+    <ClCompile Include="Vertex.cxx" />
+    <ClCompile Include="vma_raii.cxx" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
