@@ -1,5 +1,10 @@
-#include "Application.h"
-#include "Log.h"
+#include <memory>
+
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
+
+#include "Application.hpp"
+#include "Log.hpp"
 // This all needs to be here since I don't understand all the preprocessor black magic happening in
 // this library
 #define TINYGLTF_IMPLEMENTATION
