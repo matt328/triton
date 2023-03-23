@@ -1,3 +1,5 @@
+#include "pch.hpp"
+
 #include "Utils.h"
 
 ktxResult Textures::loadKtxFile(const std::string_view& filename, ktxTexture** target) {

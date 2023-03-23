@@ -1,3 +1,5 @@
+#include "pch.hpp"
+
 #include "DefaultPipeline.h"
 
 #include "Log.h"

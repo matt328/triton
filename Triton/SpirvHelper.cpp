@@ -1,3 +1,5 @@
+#include "pch.hpp"
+
 #include "SpirvHelper.h"
 
 #include "Log.h"

@@ -1,3 +1,5 @@
+#include "pch.hpp"
+
 #include "Vertex.h"
 
 namespace Models {

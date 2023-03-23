@@ -1,3 +1,5 @@
+#include "pch.hpp"
+
 #include "RendererBase.h"
 
 RendererBase::RendererBase(const RendererBaseCreateInfo& createInfo)
