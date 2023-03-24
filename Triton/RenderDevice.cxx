@@ -29,6 +29,8 @@ RenderDevice::RenderDevice(const Instance& instance) {
    textureFactory = std::make_unique<TextureFactory>(
        *raiillocator, *device, *graphicsImmediateContext, *transferImmediateContext);
 
+   meshFactory = std::make_unique<MeshFactory>(*raiillocator, *transferImmediateContext);
+
    const auto textureFilename = Paths::TEXTURES / "viking_room_2.ktx";
 
    textures["texture1"] = textureFactory->createTexture2D(textureFilename.string());
@@ -53,6 +55,15 @@ RenderDevice::~RenderDevice() {
 
 void RenderDevice::waitIdle() const {
    device->waitIdle();
+}
+
+std::string RenderDevice::createMesh(const std::string_view& filename) {
+   meshes[filename.data()] = meshFactory->loadMeshFromGltf(filename.data());
+   return filename.data();
+}
+
+void RenderDevice::enqueue(const Renderable& renderable) const {
+   frameData[currentFrame]->renderables.push_back(renderable.getMeshId());
 }
 
 void RenderDevice::createPhysicalDevice(const Instance& instance) {
@@ -500,14 +511,21 @@ void RenderDevice::recordCommandBuffer(const vk::raii::CommandBuffer& cmd,
    cmd.beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
    cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, *pipeline->getPipeline());
 
-   // cmd.bindVertexBuffers(0, *vertexBuffer->buffer, {0});
-   // cmd.bindIndexBuffer(*indexBuffer->buffer, 0, vk::IndexType::eUint32);
-   // cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
-   //                        *pipeline->getPipelineLayout(),
-   //                         0,
-   //                         *frameData[currentFrame]->getDescriptorSet(),
-   //                         nullptr);
-   // cmd.drawIndexed(static_cast<uint32_t>(this->model.indices.size()), 1, 0, 0, 0);
+   for (const auto meshId : frameData[currentFrame]->renderables) {
+      Log::core->debug("Rendering Mesh: {}", meshId);
+      if (auto it = meshes.find(meshId); it != meshes.end()) {
+         auto& mesh = it->second;
+         cmd.bindVertexBuffers(0, mesh->getVertexBuffer().getBuffer(), {0});
+         cmd.bindIndexBuffer(mesh->getIndexBuffer().getBuffer(), 0, vk::IndexType::eUint32);
+         cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
+                                *pipeline->getPipelineLayout(),
+                                0,
+                                *frameData[currentFrame]->getDescriptorSet(),
+                                nullptr);
+         cmd.drawIndexed(mesh->getIndicesCount(), 1, 0, 0, 0);
+      }
+   }
+
    cmd.endRenderPass();
    cmd.end();
 }
