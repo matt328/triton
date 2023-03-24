@@ -52,6 +52,8 @@ class FrameData {
       return *descriptorSet;
    };
 
+   std::vector<std::string> renderables;
+
  private:
    std::unique_ptr<vk::raii::CommandBuffer> commandBuffer = nullptr;
    std::unique_ptr<vk::raii::Semaphore> imageAvailableSemaphore = nullptr;

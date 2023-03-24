@@ -3,6 +3,7 @@
 #include <fstream>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/string_cast.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -27,3 +28,5 @@
 
 #include <ktx.h>
 #include <ktxvulkan.h>
+
+#include <entt/entt.hpp>

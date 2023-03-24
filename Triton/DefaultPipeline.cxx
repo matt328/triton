@@ -5,7 +5,7 @@
 #include "Log.hpp"
 #include "SpirvHelper.hpp"
 #include "Utils.hpp"
-#include "VertexFormats.hpp"
+#include "Vertex.hpp"
 
 DefaultPipeline::DefaultPipeline(const vk::raii::Device& device,
                                  const vk::raii::RenderPass& renderPass,
@@ -51,8 +51,12 @@ DefaultPipeline::DefaultPipeline(const vk::raii::Device& device,
        std::make_unique<vk::raii::DescriptorSetLayout>(createDescriptorSetLayout(device));
 
    // Configure Vertex Attributes
-   auto bindingDescription = VertexFormats::PositionColorTexture::bindingDescription();
-   auto attributeDescriptions = VertexFormats::PositionColorTexture::attributeDescriptions();
+   auto bindingDescription = Models::Vertex::inputBindingDescription(0);
+   auto attributeDescriptions =
+       Models::Vertex::inputAttributeDescriptions(0,
+                                                  {Models::VertexComponent::Position,
+                                                   Models::VertexComponent::Color,
+                                                   Models::VertexComponent::UV});
 
    vk::PipelineVertexInputStateCreateInfo vertexInputInfo{
        .vertexBindingDescriptionCount = 1,
@@ -64,7 +68,7 @@ DefaultPipeline::DefaultPipeline(const vk::raii::Device& device,
        .setLayoutCount = 1,
        .pSetLayouts = &(**descriptorSetLayout)}; // This is (now even more) awkward
 
-   auto pipelineLayout =
+   pipelineLayout =
        std::make_unique<vk::raii::PipelineLayout>(device.createPipelineLayout(pipelineLayoutInfo));
 
    const auto viewport = vk::Viewport{.x = 0.f,
@@ -97,6 +101,9 @@ DefaultPipeline::DefaultPipeline(const vk::raii::Device& device,
    // Finally this is that it's all about
    pipeline = std::make_unique<vk::raii::Pipeline>(
        device.createGraphicsPipeline(VK_NULL_HANDLE, pipelineCreateInfo));
+}
+
+DefaultPipeline::~DefaultPipeline() {
 }
 
 vk::raii::DescriptorSetLayout DefaultPipeline::createDescriptorSetLayout(
