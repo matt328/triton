@@ -1,54 +1,164 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    <Filter Include="Utilities">
+      <UniqueIdentifier>{c9245952-ca3a-40c8-8428-3ce9c68fe70d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    <Filter Include="Core">
+      <UniqueIdentifier>{d1816b83-2848-4ba0-8117-4632dd1f02e8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    <Filter Include="Core\Renderers">
+      <UniqueIdentifier>{8f225ee3-c0c4-4173-8b56-0edc324a29aa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\Models">
+      <UniqueIdentifier>{304c3d90-a587-4cae-8e0b-899e7e2412bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game">
+      <UniqueIdentifier>{6d21bba3-7f76-4783-82cd-4e0bbf0a1f89}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\ECS">
+      <UniqueIdentifier>{556acd7f-b84f-4908-acd4-328ec30d5037}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AbstractPipeline.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="DefaultPipeline.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="FrameData.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
     <ClInclude Include="framework.h">
-      <Filter>Header Files</Filter>
+      <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="Shaders.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="ImmediateContext.hpp">
+      <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="Log.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Instance.hpp">
+      <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="Utils.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="ObjectMatrices.hpp">
+      <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="Instance.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="RenderDevice.hpp">
+      <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="RenderDevice.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="SpirvHelper.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureFactory.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="VertexFormats.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="vma_raii.hpp">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Application.hpp">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Game.hpp">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Log.hpp">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils.hpp">
+      <Filter>Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="RendererBase.hpp">
+      <Filter>Core\Renderers</Filter>
+    </ClInclude>
+    <ClInclude Include="Clear.hpp">
+      <Filter>Core\Renderers</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderData.hpp">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Vertex.hpp">
+      <Filter>Core\Models</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshFactory.hpp">
+      <Filter>Core\Models</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.hpp">
+      <Filter>Core\Models</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.hpp" />
+    <ClInclude Include="RenderSystem.hpp">
+      <Filter>Game\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="Transform.hpp">
+      <Filter>Game\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderable.hpp">
+      <Filter>Game\ECS</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Shaders.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="AbstractPipeline.cxx">
+      <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="Log.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="DefaultPipeline.cxx">
+      <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="Instance.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="FrameData.cxx">
+      <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="RenderDevice.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="ImmediateContext.cxx">
+      <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="vma.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Instance.cxx">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderDevice.cxx">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="SpirvHelper.cxx">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cxx">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureFactory.cxx">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="vma_raii.cxx">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Application.cxx">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Game.cxx">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils.cxx">
+      <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="Log.cxx">
+      <Filter>Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="RendererBase.cxx">
+      <Filter>Core\Renderers</Filter>
+    </ClCompile>
+    <ClCompile Include="Clear.cxx">
+      <Filter>Core\Renderers</Filter>
+    </ClCompile>
+    <ClCompile Include="Vertex.cxx">
+      <Filter>Core\Models</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshFactory.cxx">
+      <Filter>Core\Models</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cxx" />
+    <ClCompile Include="RenderSystem.cxx">
+      <Filter>Game\ECS</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
