@@ -25,9 +25,6 @@ Texture::Texture(const std::string_view& filename,
    const auto ktxTextureSize = ktxTexture_GetDataSize(ktxTexture);
    const vk::Format format{ktxTexture_GetVkFormat(ktxTexture)};
 
-   Log::core->debug(
-       "Texture {} format is {}", filename, string_VkFormat(ktxTexture_GetVkFormat(ktxTexture)));
-
    // Create a Staging Buffer
    const auto bufferCreateInfo =
        vk::BufferCreateInfo{.size = ktxTextureSize,
