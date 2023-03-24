@@ -2,9 +2,13 @@
 	"name": "triton",
 	"version-string": "0.1.0",
 	"dependencies": [
-		"glslang",
-		"spdlog",
+		"entt",
 		"glfw3",
+		"glm",
+		"glslang",
+		"nlohmann-json",
+		"spdlog",
+		"tinygltf",
 		"vulkan-memory-allocator-hpp"
 	]
 }

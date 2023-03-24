@@ -77,11 +77,11 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions);VULKAN_HPP_NO_STRUCT_CONSTRUCTORS;VK_USE_PLATFORM_WIN32_KHR;NOMINMAX;VMA_STATIC_VULKAN_FUNCTIONS=1;VMA_DYNAMIC_VULKAN_FUNCTIONS=0</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions);VULKAN_HPP_NO_STRUCT_CONSTRUCTORS;VK_USE_PLATFORM_WIN32_KHR;NOMINMAX;VMA_STATIC_VULKAN_FUNCTIONS=1;VMA_DYNAMIC_VULKAN_FUNCTIONS=0;_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING;GLM_ENABLE_EXPERIMENTAL;TINYGLTF_NO_STB_IMAGE_WRITE</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.hpp</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(SolutionDir)Vendor\ktx\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -96,11 +96,11 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions);VULKAN_HPP_NO_STRUCT_CONSTRUCTORS;VK_USE_PLATFORM_WIN32_KHR;NOMINMAX;VMA_STATIC_VULKAN_FUNCTIONS=1;VMA_DYNAMIC_VULKAN_FUNCTIONS=0</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions);VULKAN_HPP_NO_STRUCT_CONSTRUCTORS;VK_USE_PLATFORM_WIN32_KHR;NOMINMAX;VMA_STATIC_VULKAN_FUNCTIONS=1;VMA_DYNAMIC_VULKAN_FUNCTIONS=0;_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING;GLM_ENABLE_EXPERIMENTAL;TINYGLTF_NO_STB_IMAGE_WRITE</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.hpp</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(SolutionDir)Vendor\ktx\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -115,11 +115,11 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions);VULKAN_HPP_NO_STRUCT_CONSTRUCTORS;VK_USE_PLATFORM_WIN32_KHR;NOMINMAX</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions);VULKAN_HPP_NO_STRUCT_CONSTRUCTORS;VK_USE_PLATFORM_WIN32_KHR;NOMINMAX;_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING;GLM_ENABLE_EXPERIMENTAL;TINYGLTF_NO_STB_IMAGE_WRITE</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.hpp</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(SolutionDir)Vendor\ktx\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <EnableModules>false</EnableModules>
     </ClCompile>
@@ -135,11 +135,11 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions);VULKAN_HPP_NO_STRUCT_CONSTRUCTORS;VK_USE_PLATFORM_WIN32_KHR;NOMINMAX;VMA_STATIC_VULKAN_FUNCTIONS=1;VMA_DYNAMIC_VULKAN_FUNCTIONS=0</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions);VULKAN_HPP_NO_STRUCT_CONSTRUCTORS;VK_USE_PLATFORM_WIN32_KHR;NOMINMAX;VMA_STATIC_VULKAN_FUNCTIONS=1;VMA_DYNAMIC_VULKAN_FUNCTIONS=0;_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING;GLM_ENABLE_EXPERIMENTAL;TINYGLTF_NO_STB_IMAGE_WRITE</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.hpp</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;$(SolutionDir)Vendor\ktx\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -151,19 +151,60 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Application.hpp" />
+    <ClInclude Include="AbstractPipeline.hpp" />
+    <ClInclude Include="Clear.hpp" />
+    <ClInclude Include="DefaultPipeline.hpp" />
+    <ClInclude Include="FrameData.hpp" />
     <ClInclude Include="framework.h" />
-    <ClInclude Include="Instance.h" />
-    <ClInclude Include="Log.h" />
-    <ClInclude Include="RenderDevice.h" />
-    <ClInclude Include="Utils.h" />
+    <ClInclude Include="Game.hpp" />
+    <ClInclude Include="Instance.hpp" />
+    <ClInclude Include="Log.hpp" />
+    <ClInclude Include="Mesh.hpp" />
+    <ClInclude Include="MeshFactory.hpp" />
+    <ClInclude Include="ObjectMatrices.hpp" />
+    <ClInclude Include="pch.hpp" />
+    <ClInclude Include="Renderable.hpp" />
+    <ClInclude Include="RenderData.hpp" />
+    <ClInclude Include="RenderDevice.hpp" />
+    <ClInclude Include="ImmediateContext.hpp" />
+    <ClInclude Include="RendererBase.hpp" />
+    <ClInclude Include="RenderSystem.hpp" />
+    <ClInclude Include="Texture.hpp" />
+    <ClInclude Include="TextureFactory.hpp" />
+    <ClInclude Include="Transform.hpp" />
+    <ClInclude Include="Vertex.hpp" />
+    <ClInclude Include="VertexFormats.hpp" />
+    <ClInclude Include="SpirvHelper.hpp" />
+    <ClInclude Include="Utils.hpp" />
+    <ClInclude Include="vma_raii.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Instance.cpp" />
-    <ClCompile Include="Log.cpp" />
-    <ClCompile Include="RenderDevice.cpp" />
-    <ClCompile Include="Shaders.cpp" />
-    <ClCompile Include="vma.cpp" />
-    <ClInclude Include="Shaders.h" />
+    <ClCompile Include="Application.cxx" />
+    <ClCompile Include="AbstractPipeline.cxx" />
+    <ClCompile Include="Clear.cxx" />
+    <ClCompile Include="DefaultPipeline.cxx" />
+    <ClCompile Include="FrameData.cxx" />
+    <ClCompile Include="Game.cxx" />
+    <ClCompile Include="MeshFactory.cxx" />
+    <ClCompile Include="Instance.cxx" />
+    <ClCompile Include="Log.cxx" />
+    <ClCompile Include="pch.cxx">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="RenderDevice.cxx" />
+    <ClCompile Include="ImmediateContext.cxx" />
+    <ClCompile Include="RendererBase.cxx" />
+    <ClCompile Include="RenderSystem.cxx" />
+    <ClCompile Include="SpirvHelper.cxx" />
+    <ClCompile Include="Texture.cxx" />
+    <ClCompile Include="TextureFactory.cxx" />
+    <ClCompile Include="Utils.cxx" />
+    <ClCompile Include="Vertex.cxx" />
+    <ClCompile Include="vma_raii.cxx" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
