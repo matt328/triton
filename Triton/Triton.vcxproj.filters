@@ -1,9 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Application">
-      <UniqueIdentifier>{6d21bba3-7f76-4783-82cd-4e0bbf0a1f89}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Utilities">
       <UniqueIdentifier>{c9245952-ca3a-40c8-8428-3ce9c68fe70d}</UniqueIdentifier>
     </Filter>
@@ -15,6 +12,12 @@
     </Filter>
     <Filter Include="Core\Models">
       <UniqueIdentifier>{304c3d90-a587-4cae-8e0b-899e7e2412bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game">
+      <UniqueIdentifier>{6d21bba3-7f76-4783-82cd-4e0bbf0a1f89}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\ECS">
+      <UniqueIdentifier>{556acd7f-b84f-4908-acd4-328ec30d5037}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -58,10 +61,10 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Application.hpp">
-      <Filter>Application</Filter>
+      <Filter>Game</Filter>
     </ClInclude>
     <ClInclude Include="Game.hpp">
-      <Filter>Application</Filter>
+      <Filter>Game</Filter>
     </ClInclude>
     <ClInclude Include="Log.hpp">
       <Filter>Utilities</Filter>
@@ -76,7 +79,7 @@
       <Filter>Core\Renderers</Filter>
     </ClInclude>
     <ClInclude Include="RenderData.hpp">
-      <Filter>Application</Filter>
+      <Filter>Game</Filter>
     </ClInclude>
     <ClInclude Include="Vertex.hpp">
       <Filter>Core\Models</Filter>
@@ -88,6 +91,15 @@
       <Filter>Core\Models</Filter>
     </ClInclude>
     <ClInclude Include="pch.hpp" />
+    <ClInclude Include="RenderSystem.hpp">
+      <Filter>Game\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="Transform.hpp">
+      <Filter>Game\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderable.hpp">
+      <Filter>Game\ECS</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AbstractPipeline.cxx">
@@ -121,10 +133,10 @@
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="Application.cxx">
-      <Filter>Application</Filter>
+      <Filter>Game</Filter>
     </ClCompile>
     <ClCompile Include="Game.cxx">
-      <Filter>Application</Filter>
+      <Filter>Game</Filter>
     </ClCompile>
     <ClCompile Include="Utils.cxx">
       <Filter>Utilities</Filter>
@@ -145,5 +157,8 @@
       <Filter>Core\Models</Filter>
     </ClCompile>
     <ClCompile Include="pch.cxx" />
+    <ClCompile Include="RenderSystem.cxx">
+      <Filter>Game\ECS</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

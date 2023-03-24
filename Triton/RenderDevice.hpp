@@ -3,6 +3,7 @@
 #include "FrameData.hpp"
 #include "Log.hpp"
 #include "MeshFactory.hpp"
+#include "Renderable.hpp"
 #include "RenderData.hpp"
 
 class Instance;
@@ -24,6 +25,7 @@ class Game;
 class RenderDevice {
  public:
    void createAllocator(const Instance& instance);
+
    explicit RenderDevice(const Instance& instance);
    ~RenderDevice();
 
@@ -32,6 +34,9 @@ class RenderDevice {
    }
 
    void waitIdle() const;
+
+   std::string createMesh(const std::string_view& filename);
+   void enqueue(const Renderable& renderable) const;
 
  private:
    struct QueueFamilyIndices;
@@ -90,6 +95,7 @@ class RenderDevice {
    std::unique_ptr<MeshFactory> meshFactory;
 
    std::unordered_map<std::string, std::unique_ptr<Texture>> textures;
+   std::unordered_map<std::string, std::unique_ptr<Mesh<Models::Vertex, uint32_t>>> meshes;
 
    uint32_t currentFrame = 0;
    bool framebufferResized = false;

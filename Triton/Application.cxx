@@ -20,7 +20,7 @@ Application::Application() {
 
    renderDevice = std::make_unique<RenderDevice>(*instance.get());
 
-   game = std::make_unique<Game>();
+   game = std::make_unique<Game>(*renderDevice);
 }
 
 Application::~Application() {
@@ -56,7 +56,7 @@ void Application::run() const {
 
       game->blendState(alpha);
 
-      // renderDevice->render(game->getRenderData());
+      renderDevice->render({.mvp = glm::mat4(1)});
 
       glfwPollEvents();
    }

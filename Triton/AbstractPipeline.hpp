@@ -15,6 +15,8 @@ class AbstractPipeline {
       return *descriptorSetLayout;
    };
 
+   virtual const vk::raii::PipelineLayout& getPipelineLayout() const = 0;
+
  protected:
    AbstractPipeline() = default;
 
