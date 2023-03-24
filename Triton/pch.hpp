@@ -19,7 +19,6 @@
 
 #include <tiny_gltf.h>
 
-#include <vulkan/vk_enum_string_helper.h>
 #include <vulkan/vulkan_raii.hpp>
 
 #include <vulkan-memory-allocator-hpp/vk_mem_alloc.hpp>
