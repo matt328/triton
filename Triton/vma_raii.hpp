@@ -39,17 +39,15 @@ namespace vma {
                          const vma::Allocation newAllocation) :
              buffer(newBuffer),
              allocation(newAllocation), allocator(newAllocator) {
-            Log::core->debug("Created Allocated Buffer");
          }
 
          ~AllocatedBuffer() {
-            Log::core->debug("Destroyed buffer and allocation");
             allocator.destroyBuffer(buffer, allocation);
          }
 
          void updateBufferValue(void* data, const size_t dataSize) const {
-            const auto src = allocator.mapMemory(allocation);
-            memcpy(src, &data, dataSize);
+            const auto dst = allocator.mapMemory(allocation);
+            memcpy(dst, &data, dataSize);
             allocator.unmapMemory(allocation);
          }
 

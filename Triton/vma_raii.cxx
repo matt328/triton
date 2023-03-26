@@ -21,10 +21,7 @@ namespace vma {
          auto [buffer, allocation] = allocator.createBuffer(*bci, *aci);
          allocator.setAllocationName(allocation, name.data());
 
-         auto ptr =
-             std::make_unique<AllocatedBuffer>(allocator, std::move(buffer), std::move(allocation));
-
-         return ptr;
+         return std::make_unique<AllocatedBuffer>(allocator, buffer, allocation);
       }
 
       std::unique_ptr<AllocatedBuffer> Allocator::createStagingBuffer(
@@ -79,7 +76,8 @@ namespace vma {
       }
 
       void* Allocator::mapMemory(const AllocatedBuffer& allocatedBuffer) const {
-         return allocator.mapMemory(allocatedBuffer.getAllocation());
+         const auto a = allocator.mapMemory(allocatedBuffer.getAllocation());
+         return a;
       }
 
       void Allocator::unmapMemory(const AllocatedBuffer& allocatedBuffer) const {
