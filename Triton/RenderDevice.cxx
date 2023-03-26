@@ -33,7 +33,7 @@ RenderDevice::RenderDevice(const Instance& instance) {
 
    const auto textureFilename = Paths::TEXTURES / "viking_room_2.ktx";
 
-   textures["texture1"] = textureFactory->createTexture2D(textureFilename.string());
+   tempTextureId = createTexture(textureFilename.string());
 
    createPerFrameData(pipeline->getDescriptorSetLayout());
 
@@ -59,6 +59,14 @@ void RenderDevice::waitIdle() const {
 
 std::string RenderDevice::createMesh(const std::string_view& filename) {
    meshes[filename.data()] = meshFactory->loadMeshFromGltf(filename.data());
+   return filename.data();
+}
+
+std::string RenderDevice::createTexture(const std::string_view& filename) {
+   if (const auto it = textures.find(filename.data()); it != textures.end()) {
+      return filename.data();
+   }
+   textures[filename.data()] = textureFactory->createTexture2D(filename);
    return filename.data();
 }
 
@@ -265,6 +273,19 @@ void RenderDevice::createDescriptorPool() {
 
    descriptorPool =
        std::make_unique<vk::raii::DescriptorPool>(device->createDescriptorPool(poolInfo, nullptr));
+
+   const auto poolSizesBindless = std::array{
+       vk::DescriptorPoolSize{.type = vk::DescriptorType::eCombinedImageSampler,
+                              .descriptorCount = 1024},
+       vk::DescriptorPoolSize{.type = vk::DescriptorType::eStorageImage, .descriptorCount = 1024}};
+
+   const auto bindlessPoolInfo =
+       vk::DescriptorPoolCreateInfo{.flags = vk::DescriptorPoolCreateFlagBits::eUpdateAfterBind,
+                                    .maxSets = 1024,
+                                    .pPoolSizes = poolSizesBindless.data()};
+
+   const auto bindlessDescriptorPool = std::make_unique<vk::raii::DescriptorPool>(
+       device->createDescriptorPool(bindlessPoolInfo, nullptr));
 }
 
 void RenderDevice::createAllocator(const Instance& instance) {
@@ -284,14 +305,27 @@ void RenderDevice::createPerFrameData(const vk::raii::DescriptorSetLayout& descr
                                       *raiillocator,
                                       *descriptorPool,
                                       descriptorSetLayout,
-                                      textures["texture1"]->getDescriptorImageInfo()));
+                                      textures[tempTextureId]->getDescriptorImageInfo()));
    }
 
-   auto objectMatrices =
-       ObjectMatrices{.model = glm::mat4(), .view = glm::mat4(), .proj = glm::mat4()};
+   const auto cameraPosition = glm::vec3{0.f, 0.f, 7.f};
+   const auto cameraTarget = glm::vec3{0.f, 0.f, 0.f};
+   const auto cameraUp = glm::vec3{0.f, 1.f, 0.f};
+   const auto view = glm::lookAt(cameraPosition, cameraTarget, cameraUp);
 
-   frameData[0]->getObjectMatricesBuffer().updateBufferValue(&objectMatrices,
-                                                             sizeof(ObjectMatrices));
+   constexpr float fov = glm::radians(60.f);
+   const float aspectRatio = swapchainExtent.width / swapchainExtent.height;
+   constexpr float nearPlane = 0.1f;
+   constexpr float farPlane = 1000.f;
+
+   const auto projection = glm::perspective(fov, aspectRatio, nearPlane, farPlane);
+
+   auto objectMatrices = ObjectMatrices{.model = glm::mat4{1.f}, .view = view, .proj = projection};
+
+   // Log::core->debug("Calling updateBufferValue()");
+   // for (const auto& fd : frameData) {
+   //    fd->getObjectMatricesBuffer().updateBufferValue(&objectMatrices, sizeof(ObjectMatrices));
+   // }
 }
 
 void RenderDevice::createDepthResources() {
@@ -433,8 +467,12 @@ void RenderDevice::recreateSwapchain() {
 
 void RenderDevice::drawFrame(const RenderData& renderData) {
    const auto& currentFrameData = frameData[currentFrame];
-   const auto res =
-       device->waitForFences(*currentFrameData->getInFlightFence(), VK_TRUE, UINT64_MAX);
+
+   if (const auto res =
+           device->waitForFences(*currentFrameData->getInFlightFence(), VK_TRUE, UINT64_MAX);
+       res != vk::Result::eSuccess) {
+      throw std::runtime_error("Error waiting for fences");
+   }
 
    const auto [result, imageIndex] = swapchain->acquireNextImage(
        UINT64_MAX, *currentFrameData->getImageAvailableSemaphore(), nullptr);
@@ -451,6 +489,23 @@ void RenderDevice::drawFrame(const RenderData& renderData) {
 
    currentFrameData->getCommandBuffer().reset();
 
+   const auto cameraPosition = glm::vec3{0.f, 0.f, 5.f};
+   const auto cameraTarget = glm::vec3{0.f, 0.f, 0.f};
+   const auto cameraUp = glm::vec3{0.f, 1.f, 0.f};
+   const auto view = glm::lookAt(cameraPosition, cameraTarget, cameraUp);
+
+   constexpr float fov = glm::radians(60.f);
+   const float aspectRatio = swapchainExtent.width / swapchainExtent.height;
+   constexpr float nearPlane = 0.1f;
+   constexpr float farPlane = 1000.f;
+
+   const auto projection = glm::perspective(fov, aspectRatio, nearPlane, farPlane);
+
+   auto objectMatrices = ObjectMatrices{.model = glm::mat4{1.f}, .view = view, .proj = projection};
+
+   currentFrameData->getObjectMatricesBuffer().updateBufferValue(&objectMatrices,
+                                                                 sizeof(ObjectMatrices));
+
    recordCommandBuffer(currentFrameData->getCommandBuffer(), imageIndex);
 
    constexpr vk::PipelineStageFlags waitStages[] = {
@@ -458,7 +513,7 @@ void RenderDevice::drawFrame(const RenderData& renderData) {
 
    const vk::Semaphore signalSemaphores[] = {*currentFrameData->getRenderFinishedSemaphore()};
 
-   // updateUniformBuffer(currentFrame);
+   updateUniformBuffer(currentFrame);
 
    const auto submitInfo =
        vk::SubmitInfo{.waitSemaphoreCount = 1,
@@ -510,24 +565,49 @@ void RenderDevice::recordCommandBuffer(const vk::raii::CommandBuffer& cmd,
 
    cmd.beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
    cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, *pipeline->getPipeline());
-
-   for (const auto meshId : frameData[currentFrame]->renderables) {
-      Log::core->debug("Rendering Mesh: {}", meshId);
-      if (auto it = meshes.find(meshId); it != meshes.end()) {
-         auto& mesh = it->second;
-         cmd.bindVertexBuffers(0, mesh->getVertexBuffer().getBuffer(), {0});
-         cmd.bindIndexBuffer(mesh->getIndexBuffer().getBuffer(), 0, vk::IndexType::eUint32);
-         cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
-                                *pipeline->getPipelineLayout(),
-                                0,
-                                *frameData[currentFrame]->getDescriptorSet(),
-                                nullptr);
-         cmd.drawIndexed(mesh->getIndicesCount(), 1, 0, 0, 0);
-      }
+   Log::core->debug("currentFrame: {}, renderables size: {}",
+                    currentFrame,
+                    frameData[currentFrame]->renderables.size());
+   for (const auto& mesh : meshes | std::views::values) {
+      cmd.bindVertexBuffers(0, mesh->getVertexBuffer().getBuffer(), {0});
+      cmd.bindIndexBuffer(mesh->getIndexBuffer().getBuffer(), 0, vk::IndexType::eUint32);
+      cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
+                             *pipeline->getPipelineLayout(),
+                             0,
+                             *frameData[currentFrame]->getDescriptorSet(),
+                             nullptr);
+      cmd.drawIndexed(mesh->getIndicesCount(), 1, 0, 0, 0);
    }
+
+   frameData[currentFrame]->renderables.clear();
 
    cmd.endRenderPass();
    cmd.end();
+}
+
+void RenderDevice::updateUniformBuffer(const uint32_t currentFrame) const {
+   static auto startTime = std::chrono::high_resolution_clock::now();
+   const auto currentTime = std::chrono::high_resolution_clock::now();
+   const float time =
+       std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+
+   //      time = 0; // stop rotation
+
+   ObjectMatrices ubo{
+       .model =
+           glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f)),
+       .view = glm::lookAt(
+           glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)),
+       .proj = glm::perspective(glm::radians(45.0f),
+                                static_cast<float>(swapchainExtent.width) /
+                                    static_cast<float>(swapchainExtent.height),
+                                0.1f,
+                                10.0f)};
+   ubo.proj[1][1] *= -1;
+
+   const auto dest = raiillocator->mapMemory(frameData[currentFrame]->getObjectMatricesBuffer());
+   memcpy(dest, &ubo, sizeof(ubo));
+   raiillocator->unmapMemory(frameData[currentFrame]->getObjectMatricesBuffer());
 }
 
 vk::PresentModeKHR RenderDevice::chooseSwapPresentMode(

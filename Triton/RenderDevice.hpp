@@ -36,9 +36,12 @@ class RenderDevice {
    void waitIdle() const;
 
    std::string createMesh(const std::string_view& filename);
+   std::string createTexture(const std::string_view& filename);
+
    void enqueue(const Renderable& renderable) const;
 
  private:
+   std::string tempTextureId;
    struct QueueFamilyIndices;
    struct SwapchainSupportDetails;
 
@@ -124,6 +127,8 @@ class RenderDevice {
    void drawFrame(const RenderData& renderData);
 
    void recordCommandBuffer(const vk::raii::CommandBuffer& cmd, unsigned imageIndex) const;
+
+   void updateUniformBuffer(uint32_t currentFrame) const;
 
    // Utils
 
