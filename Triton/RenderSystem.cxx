@@ -7,9 +7,8 @@
 RenderSystem::RenderSystem(const RenderDevice& renderDevice) : renderDevice(renderDevice) {
 }
 
-void RenderSystem::update(entt::registry& registry, float dt) {
-   auto view = registry.view<Renderable>();
-   for (const auto entity : view) {
+void RenderSystem::update(entt::registry& registry, float dt) const {
+   for (const auto view = registry.view<Renderable>(); const auto entity : view) {
       auto& renderable = view.get<Renderable>(entity);
       renderDevice.enqueue(renderable);
    }

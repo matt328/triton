@@ -21,7 +21,7 @@ class FrameData {
              const vma::raii::Allocator& raiillocator,
              const vk::raii::DescriptorPool& descriptorPool,
              const vk::raii::DescriptorSetLayout& descriptorSetLayout,
-             const vk::DescriptorImageInfo textureImageInfo);
+             vk::DescriptorImageInfo textureImageInfo);
    ~FrameData();
 
    const vk::raii::CommandBuffer& getCommandBuffer() const {

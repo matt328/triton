@@ -126,6 +126,6 @@ vk::raii::DescriptorSetLayout DefaultPipeline::createDescriptorSetLayout(
 
    const auto descriptorSetLayoutCreateInfo = vk::DescriptorSetLayoutCreateInfo{
        .bindingCount = static_cast<uint32_t>(bindings.size()), .pBindings = bindings.data()};
-
+   Log::core->debug("Creating Descriptor Set Layout");
    return device.createDescriptorSetLayout(descriptorSetLayoutCreateInfo);
 }
