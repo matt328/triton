@@ -1,4 +1,4 @@
-name: MSBuild
+name: Build
 
 on: [push]
 
@@ -28,16 +28,16 @@ jobs:
         vcpkgJsonGlob: './vcpkg.json'
         runVcpkgInstall: true
 
-    - name: Run vcpkg integrate install
-      run: vcpkg integrate install
+    - name: CMake Generate
+      run: cmake -B build -S . -G "MinGW Makefiles"
+      env:
+        CC: 'C:\Program Files\LLVM\bin\clang.exe'
+        CXX: 'C:\Program FIles\LLVM\bin\clang++.exe'
 
     - name: List $RUNNER_WORKSPACE before build
       run: find $RUNNER_WORKSPACE
       shell: bash
-    
-    - name: Add msbuild to PATH
-      uses: microsoft/setup-msbuild@v1.1
-    
+  
     - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}}
+      run: cmake --build build --target=driver -j 18
