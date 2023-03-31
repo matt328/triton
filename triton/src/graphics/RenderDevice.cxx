@@ -23,13 +23,18 @@ RenderDevice::RenderDevice(const Instance& instance) {
    createDescriptorPool();
    createAllocator(instance);
 
+   {
+      const auto a = 5;
+      const auto c = a + 3;
+   }
+
    renderPass = std::make_unique<vk::raii::RenderPass>(defaultRenderPass());
    pipeline = std::make_unique<DefaultPipeline>(*device, *renderPass, swapchainExtent);
 
    textureFactory = std::make_unique<TextureFactory>(
        *raiillocator, *device, *graphicsImmediateContext, *transferImmediateContext);
 
-   meshFactory = std::make_unique<MeshFactory>(*raiillocator, *transferImmediateContext);
+   meshFactory = std::make_unique<MeshFactory>(raiillocator.get(), transferImmediateContext.get());
 
    const auto textureFilename = Core::Paths::TEXTURES / "viking_room.png";
 

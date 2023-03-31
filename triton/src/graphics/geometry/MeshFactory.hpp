@@ -7,7 +7,7 @@
 
 class MeshFactory {
  public:
-   MeshFactory(const vma::raii::Allocator& allocator, const ImmediateContext& transferContext);
+   MeshFactory(vma::raii::Allocator* allocator, ImmediateContext* transferContext);
    ~MeshFactory() = default;
    MeshFactory(const MeshFactory&) = default;
    MeshFactory(MeshFactory&&) = delete;
@@ -18,6 +18,6 @@ class MeshFactory {
        const std::string_view& filename) const;
 
  private:
-   const vma::raii::Allocator& allocator;
-   const ImmediateContext& transferContext;
+   vma::raii::Allocator* allocator;
+   ImmediateContext* transferContext;
 };

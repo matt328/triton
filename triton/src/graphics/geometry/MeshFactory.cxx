@@ -2,10 +2,8 @@
 
 using Core::Log;
 
-MeshFactory::MeshFactory(const vma::raii::Allocator& allocator,
-                         const ImmediateContext& transferContext) :
-    allocator(allocator),
-    transferContext(transferContext) {
+MeshFactory::MeshFactory(vma::raii::Allocator* allocator, ImmediateContext* transferContext) :
+    allocator(allocator), transferContext(transferContext) {
 }
 
 std::unique_ptr<Mesh<Models::Vertex, uint32_t>> MeshFactory::loadMeshFromGltf(
