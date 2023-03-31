@@ -112,7 +112,8 @@
   "conventionalCommits.scopes": [
     "renderer",
     "textures",
-    "everything"
-],
+    "everything",
+    "geometry"
+  ],
   "git.ignoreLimitWarning": true
 }
