@@ -1,10 +1,10 @@
 #pragma once
 
-#include "RendererBase.hpp"
+#include "graphics/renderer/RendererBase.hpp"
 
-class Clear final : public RendererBase {
+class Finish : public RendererBase {
  public:
-   explicit Clear(const RendererBaseCreateInfo& createInfo);
+   explicit Finish(const RendererBaseCreateInfo& createInfo);
 
    void fillCommandBuffer(const vk::raii::CommandBuffer& cmd, size_t currentImage) override;
 
