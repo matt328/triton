@@ -7,6 +7,10 @@
     "glfw3",
     "glm",
     "glslang",
+    {
+      "name": "imgui",
+      "features": ["vulkan-binding", "glfw-binding"]
+    },
     "nlohmann-json",
     "spdlog",
     "stb",

@@ -115,5 +115,9 @@
     "everything",
     "geometry"
   ],
-  "git.ignoreLimitWarning": true
+  "git.ignoreLimitWarning": true,
+  "workbench.colorCustomizations": {
+    "editor.wordHighlightBackground": "#228ca7a8",
+    "editor.wordHighlightStrongBackground": "#a72222a8"
+  }
 }

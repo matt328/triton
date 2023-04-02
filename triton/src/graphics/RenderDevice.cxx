@@ -9,8 +9,12 @@
 #include "graphics/pipeline/DefaultPipeline.hpp"
 #include "graphics/pipeline/ObjectMatrices.hpp"
 #include "graphics/renderer/RendererBase.hpp"
+#include "graphics/renderer/Finish.hpp"
 #include "graphics/texture/Texture.hpp"
 #include "graphics/texture/TextureFactory.hpp"
+#include "graphics/VulkanFactory.hpp"
+#include <vulkan/vulkan_core.h>
+#include <vulkan/vulkan_enums.hpp>
 
 using Core::Log;
 
@@ -23,12 +27,16 @@ RenderDevice::RenderDevice(const Instance& instance) {
    createDescriptorPool();
    createAllocator(instance);
 
-   {
-      const auto a = 5;
-      const auto c = a + 3;
-   }
+   const auto renderPassCreateInfo =
+       Graphics::Utils::RenderPassCreateInfo{.device = *device,
+                                             .physicalDevice = *physicalDevice,
+                                             .swapchainFormat = swapchainImageFormat,
+                                             .clearColor = false,
+                                             .clearDepth = false};
 
-   renderPass = std::make_unique<vk::raii::RenderPass>(defaultRenderPass());
+   renderPass = std::make_unique<vk::raii::RenderPass>(
+       Graphics::Utils::colorAndDepthRenderPass(renderPassCreateInfo));
+
    pipeline = std::make_unique<DefaultPipeline>(*device, *renderPass, swapchainExtent);
 
    textureFactory = std::make_unique<TextureFactory>(
@@ -47,12 +55,17 @@ RenderDevice::RenderDevice(const Instance& instance) {
 
    const auto rendererCreateInfo =
        RendererBaseCreateInfo{.device = *device,
+                              .physicalDevice = *physicalDevice,
                               .allocator = *raiillocator,
                               .depthTexture = this->depthImage->getImage(),
                               .swapchainExtent = swapchainExtent,
-                              .swapchainImages = swapchainImages};
+                              .swapchainImages = swapchainImages,
+                              .swapchainImageViews = swapchainImageViews,
+                              .depthImageView = *depthImageView,
+                              .swapchainFormat = swapchainImageFormat};
 
-   const auto renderer = std::make_unique<Clear>(rendererCreateInfo);
+   renderers.emplace_back(std::make_unique<Clear>(rendererCreateInfo));
+   finishRenderer = std::make_unique<Finish>(rendererCreateInfo);
 }
 
 RenderDevice::~RenderDevice() = default;
@@ -316,7 +329,7 @@ void RenderDevice::createPerFrameData(const vk::raii::DescriptorSetLayout& descr
 }
 
 void RenderDevice::createDepthResources() {
-   const auto depthFormat = findDepthFormat();
+   const auto depthFormat = Graphics::Utils::findDepthFormat(*physicalDevice);
 
    const auto imageCreateInfo =
        vk::ImageCreateInfo{.imageType = vk::ImageType::e2D,
@@ -367,86 +380,6 @@ void RenderDevice::createFramebuffers() {
                                     .layers = 1};
       swapchainFramebuffers.emplace_back(device->createFramebuffer(framebufferCreateInfo));
    }
-}
-
-vk::raii::RenderPass RenderDevice::defaultRenderPass() const {
-   const vk::AttachmentDescription colorAttachment{.format = swapchainImageFormat,
-                                                   .samples = vk::SampleCountFlagBits::e1,
-                                                   .loadOp = vk::AttachmentLoadOp::eClear,
-                                                   .storeOp = vk::AttachmentStoreOp::eStore,
-                                                   .stencilLoadOp = vk::AttachmentLoadOp::eDontCare,
-                                                   .stencilStoreOp =
-                                                       vk::AttachmentStoreOp::eDontCare,
-                                                   .initialLayout = vk::ImageLayout::eUndefined,
-                                                   .finalLayout = vk::ImageLayout::ePresentSrcKHR};
-
-   constexpr auto colorAttachmentRef =
-       vk::AttachmentReference{.attachment = 0, // index into the color attachments array
-                               .layout = vk::ImageLayout::eColorAttachmentOptimal};
-
-   const auto depthAttachment =
-       vk::AttachmentDescription{.format = findDepthFormat(),
-                                 .samples = vk::SampleCountFlagBits::e1,
-                                 .loadOp = vk::AttachmentLoadOp::eClear,
-                                 .storeOp = vk::AttachmentStoreOp::eDontCare,
-                                 .stencilLoadOp = vk::AttachmentLoadOp::eDontCare,
-                                 .stencilStoreOp = vk::AttachmentStoreOp::eDontCare,
-                                 .initialLayout = vk::ImageLayout::eUndefined,
-                                 .finalLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal};
-
-   constexpr auto depthAttachmentRef = vk::AttachmentReference{
-       .attachment = 1, .layout = vk::ImageLayout::eDepthStencilAttachmentOptimal};
-
-   const auto attachments = std::array{colorAttachment, depthAttachment};
-
-   const auto subpass =
-       vk::SubpassDescription{.pipelineBindPoint = vk::PipelineBindPoint::eGraphics,
-                              .colorAttachmentCount = 1,
-                              .pColorAttachments = &colorAttachmentRef,
-                              .pDepthStencilAttachment = &depthAttachmentRef};
-
-   const auto dependency =
-       vk::SubpassDependency{.srcSubpass = VK_SUBPASS_EXTERNAL,
-                             .dstSubpass = 0,
-                             .srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput |
-                                             vk::PipelineStageFlagBits::eEarlyFragmentTests,
-                             .dstStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput |
-                                             vk::PipelineStageFlagBits::eEarlyFragmentTests,
-                             .srcAccessMask = vk::AccessFlagBits::eNone,
-                             .dstAccessMask = vk::AccessFlagBits::eColorAttachmentWrite |
-                                              vk::AccessFlagBits::eDepthStencilAttachmentWrite};
-
-   const auto renderPassCreateInfo =
-       vk::RenderPassCreateInfo{.attachmentCount = static_cast<uint32_t>(attachments.size()),
-                                .pAttachments = attachments.data(),
-                                .subpassCount = 1,
-                                .pSubpasses = &subpass,
-                                .dependencyCount = 1,
-                                .pDependencies = &dependency};
-
-   return device->createRenderPass(renderPassCreateInfo);
-}
-
-vk::Format RenderDevice::findDepthFormat() const {
-   return findSupportedFormat(
-       {vk::Format::eD32Sfloat, vk::Format::eD32SfloatS8Uint, vk::Format::eD24UnormS8Uint},
-       vk::ImageTiling::eOptimal,
-       vk::FormatFeatureFlagBits::eDepthStencilAttachment);
-}
-
-vk::Format RenderDevice::findSupportedFormat(const std::vector<vk::Format>& candidates,
-                                             const vk::ImageTiling tiling,
-                                             const vk::FormatFeatureFlags features) const {
-   for (const auto format : candidates) {
-      auto props = physicalDevice->getFormatProperties(format);
-      if (tiling == vk::ImageTiling::eLinear &&
-              (props.linearTilingFeatures & features) == features ||
-          tiling == vk::ImageTiling::eOptimal &&
-              (props.optimalTilingFeatures & features) == features) {
-         return format;
-      }
-   }
-   throw std::runtime_error("Failed to find supported format");
 }
 
 void RenderDevice::recreateSwapchain() {
@@ -535,22 +468,22 @@ void RenderDevice::drawFrame() {
 
 void RenderDevice::recordCommandBuffer(const vk::raii::CommandBuffer& cmd,
                                        const unsigned imageIndex) const {
-   const std::array<vk::ClearValue, 2> clearValues{
-       vk::ClearValue{.color =
-                          vk::ClearColorValue{std::array<float, 4>({{0.39f, 0.58f, 0.93f, 1.f}})}},
-       vk::ClearValue{.depthStencil = vk::ClearDepthStencilValue{.depth = 1.f, .stencil = 0}}};
 
-   constexpr auto beginInfo = vk::CommandBufferBeginInfo{};
+   constexpr auto beginInfo =
+       vk::CommandBufferBeginInfo{.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse};
    cmd.begin(beginInfo);
+
+   for (const auto& renderer : renderers) {
+      renderer->update();
+      renderer->fillCommandBuffer(cmd, imageIndex);
+   }
 
    const auto renderArea = vk::Rect2D{.offset = {0, 0}, .extent = swapchainExtent};
 
    const auto renderPassInfo =
        vk::RenderPassBeginInfo{.renderPass = *(*renderPass),
                                .framebuffer = *swapchainFramebuffers[imageIndex],
-                               .renderArea = renderArea,
-                               .clearValueCount = static_cast<uint32_t>(clearValues.size()),
-                               .pClearValues = clearValues.data()};
+                               .renderArea = renderArea};
 
    cmd.beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
    cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, *pipeline->getPipeline());
@@ -569,6 +502,10 @@ void RenderDevice::recordCommandBuffer(const vk::raii::CommandBuffer& cmd,
    frameData[currentFrame]->renderables.clear();
 
    cmd.endRenderPass();
+
+   finishRenderer->update();
+   finishRenderer->fillCommandBuffer(cmd, imageIndex);
+
    cmd.end();
 }
 

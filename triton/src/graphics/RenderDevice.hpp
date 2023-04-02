@@ -4,6 +4,7 @@
 #include "Log.hpp"
 #include "geometry/MeshFactory.hpp"
 #include "game/Renderable.hpp"
+#include "graphics/renderer/RendererBase.hpp"
 
 class Instance;
 class AbstractPipeline;
@@ -101,6 +102,9 @@ class RenderDevice {
    std::unordered_map<std::string, std::unique_ptr<Texture>> textures;
    std::unordered_map<std::string, std::unique_ptr<Mesh<Models::Vertex, uint32_t>>> meshes;
 
+   std::vector<std::unique_ptr<RendererBase>> renderers;
+   std::unique_ptr<RendererBase> finishRenderer;
+
    uint32_t currentFrame = 0;
    bool framebufferResized = false;
 
@@ -116,12 +120,6 @@ class RenderDevice {
 
    void createDepthResources();
    void createFramebuffers();
-
-   [[nodiscard]] vk::raii::RenderPass defaultRenderPass() const;
-   [[nodiscard]] vk::Format findDepthFormat() const;
-   [[nodiscard]] vk::Format findSupportedFormat(const std::vector<vk::Format>& candidates,
-                                                vk::ImageTiling tiling,
-                                                vk::FormatFeatureFlags features) const;
 
    void recreateSwapchain();
 
