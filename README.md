@@ -25,7 +25,7 @@ I have been taking some time to refactor this brute force prototype code into a 
 
 ## Building/Running
 
-This has recently been migrated to using CMake, and I use vscode primarily for development.  So far everything works well on Windows as well as OS X.  The only generators I've worked with and can verify are working are 'MinGW Makefiles` on Windows and `Unix Makefiles` on OS X.  I also use clang >= 15.  I *think* msvc will compile this, but I honestly doubt gcc will.
+This has recently been migrated to using CMake, and I use vscode primarily for development.  So far everything works well on Windows as well as OS X.  The only generators I've worked with and can verify are working are `MinGW Makefiles` on Windows and `Unix Makefiles` on OS X.  I also use clang >= 15.  I *think* msvc will compile this, but I honestly doubt gcc will.
 While my goal has been to leverage vcpkg and not have to struggle with dependencies, I'm still just installing the Vulkan SDK and setting the VULKAN_SDK env var and relying on CMake's `find_package()` to do the thing.
 
 1. Clone the repo
