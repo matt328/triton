@@ -15,11 +15,11 @@ Instance::Instance(GLFWwindow* window,
 
    // Log available extensions
    const auto instanceExtensions = context->enumerateInstanceExtensionProperties();
-   std::string logString = "Available Instance Extensions\n";
-   for (const auto& [extensionName, specVersion] : instanceExtensions) {
-      logString.append(fmt::format("   {}: v{}\n", extensionName, specVersion));
-   }
-   Log::core->debug("{}", logString);
+   // std::string logString = "Available Instance Extensions\n";
+   // for (const auto& [extensionName, specVersion] : instanceExtensions) {
+   //    logString.append(fmt::format("   {}: v{}\n", extensionName, specVersion));
+   // }
+   // Log::core->debug("{}", logString);
 
    if (validationEnabled && !checkValidationLayerSupport()) {
       throw std::runtime_error("Validation layers requested but not available");
@@ -132,10 +132,6 @@ std::pair<std::vector<const char*>, bool> Instance::getRequiredExtensions() cons
 
    if (portabilityPresent) {
       extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
-   }
-
-   for (const auto& ext : extensions) {
-      Log::core->debug("Extension: {}", ext);
    }
 
    return std::make_pair(extensions, portabilityPresent);
