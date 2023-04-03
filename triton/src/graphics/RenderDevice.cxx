@@ -13,8 +13,10 @@
 #include "graphics/texture/Texture.hpp"
 #include "graphics/texture/TextureFactory.hpp"
 #include "graphics/VulkanFactory.hpp"
+#include <stdexcept>
 #include <vulkan/vulkan_core.h>
 #include <vulkan/vulkan_enums.hpp>
+#include <vulkan/vulkan_structs.hpp>
 
 using Core::Log;
 
@@ -127,18 +129,33 @@ void RenderDevice::createLogicalDevice(const Instance& instance) {
       queueCreateInfos.push_back(queueCreateInfo);
    }
 
-   vk::PhysicalDeviceFeatures deviceFeatures{.samplerAnisotropy = VK_TRUE};
-
    auto desiredDeviceExtensions = instance.getDesiredDeviceExtensions();
    desiredDeviceExtensions.push_back(VK_EXT_DEBUG_MARKER_EXTENSION_NAME);
 
+   auto features2 = physicalDevice->getFeatures2<vk::PhysicalDeviceFeatures2,
+                                                 vk::PhysicalDevice16BitStorageFeatures,
+                                                 vk::PhysicalDeviceDescriptorIndexingFeaturesEXT>();
+
+   auto indexingFeatures = features2.get<vk::PhysicalDeviceDescriptorIndexingFeatures>();
+
+   const auto bindlessTexturesSupported =
+       indexingFeatures.descriptorBindingPartiallyBound && indexingFeatures.runtimeDescriptorArray;
+
+   if (!bindlessTexturesSupported) {
+      throw std::runtime_error("GPU does not support bindless textures :(");
+   }
+
+   auto physicalFeatures2 = physicalDevice->getFeatures2();
+   physicalFeatures2.features.samplerAnisotropy = VK_TRUE;
+   physicalFeatures2.pNext = &indexingFeatures;
+
    vk::DeviceCreateInfo createInfo{
+       .pNext = &physicalFeatures2,
        .queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size()),
        .pQueueCreateInfos = queueCreateInfos.data(),
        .enabledLayerCount = 0,
        .enabledExtensionCount = static_cast<uint32_t>(desiredDeviceExtensions.size()),
-       .ppEnabledExtensionNames = desiredDeviceExtensions.data(),
-       .pEnabledFeatures = &deviceFeatures};
+       .ppEnabledExtensionNames = desiredDeviceExtensions.data()};
 
    const auto validationLayers = instance.getDesiredValidationLayers();
    if (instance.isValidationEnabled()) {
@@ -282,12 +299,15 @@ void RenderDevice::createDescriptorPool() {
        std::array{vk::DescriptorPoolSize{.type = vk::DescriptorType::eUniformBuffer,
                                          .descriptorCount = FRAMES_IN_FLIGHT * 10},
                   vk::DescriptorPoolSize{.type = vk::DescriptorType::eCombinedImageSampler,
+                                         .descriptorCount = FRAMES_IN_FLIGHT * 10},
+                  vk::DescriptorPoolSize{.type = vk::DescriptorType::eStorageImage,
                                          .descriptorCount = FRAMES_IN_FLIGHT * 10}};
 
    const vk::DescriptorPoolCreateInfo poolInfo{
-       .flags = vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet,
+       .flags = vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet |
+                vk::DescriptorPoolCreateFlagBits::eUpdateAfterBindEXT,
        .maxSets = FRAMES_IN_FLIGHT * 2,
-       .poolSizeCount = 2,
+       .poolSizeCount = 3,
        .pPoolSizes = poolSize.data()};
 
    descriptorPool =
@@ -631,10 +651,6 @@ bool RenderDevice::checkDeviceExtensionSupport(
     const vk::raii::PhysicalDevice& possibleDevice,
     const std::vector<const char*> desiredDeviceExtensions) {
    const auto availableExtensions = possibleDevice.enumerateDeviceExtensionProperties();
-
-   for (const auto& ext : availableExtensions) {
-      Log::core->debug("Physical Device Extension: {}", ext.extensionName);
-   }
 
    std::set<std::string> requiredExtensions(desiredDeviceExtensions.begin(),
                                             desiredDeviceExtensions.end());
