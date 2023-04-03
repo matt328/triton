@@ -312,19 +312,6 @@ void RenderDevice::createDescriptorPool() {
 
    descriptorPool =
        std::make_unique<vk::raii::DescriptorPool>(device->createDescriptorPool(poolInfo, nullptr));
-
-   const auto poolSizesBindless = std::array{
-       vk::DescriptorPoolSize{.type = vk::DescriptorType::eCombinedImageSampler,
-                              .descriptorCount = 1024},
-       vk::DescriptorPoolSize{.type = vk::DescriptorType::eStorageImage, .descriptorCount = 1024}};
-
-   const auto bindlessPoolInfo =
-       vk::DescriptorPoolCreateInfo{.flags = vk::DescriptorPoolCreateFlagBits::eUpdateAfterBind,
-                                    .maxSets = 1024,
-                                    .pPoolSizes = poolSizesBindless.data()};
-
-   const auto bindlessDescriptorPool = std::make_unique<vk::raii::DescriptorPool>(
-       device->createDescriptorPool(bindlessPoolInfo, nullptr));
 }
 
 void RenderDevice::createAllocator(const Instance& instance) {
