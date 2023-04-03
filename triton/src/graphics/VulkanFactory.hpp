@@ -9,12 +9,17 @@ namespace Graphics::Utils {
    };
 
    struct RenderPassCreateInfo {
-      const vk::raii::Device& device;
-      const vk::raii::PhysicalDevice& physicalDevice;
-      const vk::Format& swapchainFormat;
+      const vk::raii::Device* device = nullptr;
+      const vk::raii::PhysicalDevice* physicalDevice = nullptr;
+      vk::Format swapchainFormat = vk::Format::eR8G8B8A8Srgb;
       bool clearColor = false;
       bool clearDepth = false;
       uint8_t flags = 0;
+   };
+
+   struct ShaderStage {
+      const vk::raii::ShaderModule* shaderModule;
+      vk::ShaderStageFlags stages = vk::ShaderStageFlagBits::eAll;
    };
 
    vk::Format findSupportedFormat(const vk::raii::PhysicalDevice& physicalDevice,
@@ -32,4 +37,7 @@ namespace Graphics::Utils {
        const vk::ImageView& depthImageView,
        const vk::Extent2D swapchainExtent,
        const vk::raii::RenderPass& renderPass);
+
+   std::unique_ptr<vk::raii::PipelineLayout> createPipelineLayout(
+       const std::vector<ShaderStage>& stages);
 }

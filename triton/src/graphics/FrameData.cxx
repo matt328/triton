@@ -37,14 +37,11 @@ FrameData::FrameData(const vk::raii::Device& device,
    auto objectMatrices =
        ObjectMatrices{.model = glm::mat4{1.f}, .view = glm::mat4{1.f}, .proj = glm::mat4{1.f}};
 
-   Log::core->debug("UpdateBufferValue");
-
    const auto descriptorSetAllocateInfo =
        vk::DescriptorSetAllocateInfo{.descriptorPool = *descriptorPool,
                                      .descriptorSetCount = 1,
                                      .pSetLayouts = &(*descriptorSetLayout)};
 
-   Log::core->debug("Allocating DescriptorSet");
    descriptorSet = std::make_unique<vk::raii::DescriptorSet>(
        std::move(device.allocateDescriptorSets(descriptorSetAllocateInfo).front()));
 
@@ -71,7 +68,6 @@ FrameData::FrameData(const vk::raii::Device& device,
 
    const auto writes = std::array{objectMatricesDescriptorWrite, textureDescriptorWrite};
 
-   Log::core->debug("Updating DescriptorSets");
    device.updateDescriptorSets(writes, nullptr);
 
    const auto dest = raiillocator.mapMemory(*objectMatricesBuffer);

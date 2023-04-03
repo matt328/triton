@@ -30,8 +30,8 @@ RenderDevice::RenderDevice(const Instance& instance) {
    createAllocator(instance);
 
    const auto renderPassCreateInfo =
-       Graphics::Utils::RenderPassCreateInfo{.device = *device,
-                                             .physicalDevice = *physicalDevice,
+       Graphics::Utils::RenderPassCreateInfo{.device = device.get(),
+                                             .physicalDevice = physicalDevice.get(),
                                              .swapchainFormat = swapchainImageFormat,
                                              .clearColor = false,
                                              .clearDepth = false};

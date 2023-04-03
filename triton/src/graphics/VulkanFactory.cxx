@@ -56,6 +56,12 @@ namespace Graphics::Utils {
       return swapchainFramebuffers;
    }
 
+   std::unique_ptr<vk::raii::PipelineLayout> createPipelineLayout(
+       const std::vector<ShaderStage>& stages) {
+
+      for (const auto& stage : stages) {}
+   }
+
    vk::raii::RenderPass colorAndDepthRenderPass(const RenderPassCreateInfo& createInfo) {
       const bool first = createInfo.flags & eRenderPassBit_First;
       const bool last = createInfo.flags & eRenderPassBit_Last;
@@ -78,7 +84,7 @@ namespace Graphics::Utils {
                                   .layout = vk::ImageLayout::eColorAttachmentOptimal};
 
       const auto depthAttachment = vk::AttachmentDescription{
-          .format = findDepthFormat(createInfo.physicalDevice),
+          .format = findDepthFormat(*createInfo.physicalDevice),
           .samples = vk::SampleCountFlagBits::e1,
           .loadOp =
               createInfo.clearDepth ? vk::AttachmentLoadOp::eClear : vk::AttachmentLoadOp::eLoad,
@@ -119,7 +125,7 @@ namespace Graphics::Utils {
                                    .dependencyCount = 1,
                                    .pDependencies = &dependency};
 
-      return createInfo.device.createRenderPass(renderPassCreateInfo);
+      return createInfo.device->createRenderPass(renderPassCreateInfo);
    }
 
 }
