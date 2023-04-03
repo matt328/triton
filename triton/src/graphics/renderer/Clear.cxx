@@ -5,8 +5,8 @@
 Clear::Clear(const RendererBaseCreateInfo& createInfo) : RendererBase(createInfo) {
 
    const auto renderPassCreateInfo =
-       Graphics::Utils::RenderPassCreateInfo{.device = createInfo.device,
-                                             .physicalDevice = createInfo.physicalDevice,
+       Graphics::Utils::RenderPassCreateInfo{.device = &createInfo.device,
+                                             .physicalDevice = &createInfo.physicalDevice,
                                              .swapchainFormat = createInfo.swapchainFormat,
                                              .clearColor = true,
                                              .clearDepth = true,
