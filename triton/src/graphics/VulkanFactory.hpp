@@ -20,6 +20,19 @@ namespace Graphics::Utils {
    struct ShaderStage {
       const vk::raii::ShaderModule* shaderModule;
       vk::ShaderStageFlags stages = vk::ShaderStageFlagBits::eAll;
+      std::vector<uint32_t> code;
+   };
+
+   struct DescriptorSetLayoutData {
+      uint32_t set_number;
+      vk::DescriptorSetLayoutCreateInfo create_info;
+      std::vector<vk::DescriptorSetLayoutBinding> bindings;
+   };
+
+   struct ReflectedBinding {
+      uint32_t set;
+      uint32_t binding;
+      vk::DescriptorType type;
    };
 
    vk::Format findSupportedFormat(const vk::raii::PhysicalDevice& physicalDevice,

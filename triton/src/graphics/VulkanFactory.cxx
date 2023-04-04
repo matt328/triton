@@ -1,6 +1,6 @@
 #include "graphics/VulkanFactory.hpp"
-#include <vulkan/vulkan_enums.hpp>
-#include <vulkan/vulkan_raii.hpp>
+#include "Log.hpp"
+#include <vulkan/vulkan_structs.hpp>
 
 namespace Graphics::Utils {
 
@@ -59,7 +59,63 @@ namespace Graphics::Utils {
    std::unique_ptr<vk::raii::PipelineLayout> createPipelineLayout(
        const std::vector<ShaderStage>& stages) {
 
-      for (const auto& stage : stages) {}
+      std::unordered_map<std::string, ReflectedBinding> bindings;
+      std::vector<DescriptorSetLayoutData> setLayouts;
+      std::vector<vk::PushConstantRange> constant_ranges;
+
+      for (const auto& stage : stages) {
+         SpvReflectShaderModule spv_module;
+         auto result = spvReflectCreateShaderModule(
+             stage.code.size() * sizeof(uint32_t), stage.code.data(), &spv_module);
+
+         uint32_t count = 0;
+         result = spvReflectEnumerateDescriptorSets(&spv_module, &count, nullptr);
+         if (result != SPV_REFLECT_RESULT_SUCCESS) {
+            throw std::runtime_error("Error reflecting SPV shader code");
+         }
+
+         std::vector<SpvReflectDescriptorSet*> sets(count);
+         result = spvReflectEnumerateDescriptorSets(&spv_module, &count, sets.data());
+         if (result != SPV_REFLECT_RESULT_SUCCESS) {
+            throw std::runtime_error("Error reflecting SPV shader code");
+         }
+
+         for (auto reflSet : sets) {
+            DescriptorSetLayoutData layout = {};
+            layout.bindings.resize(reflSet->binding_count);
+            auto reflBindings = std::span(reflSet->bindings, reflSet->binding_count);
+
+            for (uint32_t i = 0; const auto& reflBinding : reflBindings) {
+               layout.bindings[i].binding = reflBinding->binding;
+               layout.bindings[i].descriptorType =
+                   static_cast<vk::DescriptorType>(reflBinding->descriptor_type);
+               layout.bindings[i].descriptorCount = 1;
+               for (uint32_t dim = 0; dim < reflBinding->array.dims_count; ++dim) {
+                  layout.bindings[i].descriptorCount *= reflBinding->array.dims[dim];
+               }
+               layout.bindings[i].stageFlags =
+                   static_cast<vk::ShaderStageFlagBits>(spv_module.shader_stage);
+
+               ReflectedBinding reflected;
+               reflected.binding = layout.bindings[i].binding;
+               reflected.set = reflSet->set;
+               reflected.type = layout.bindings[i].descriptorType;
+
+               bindings[reflBinding->name] = reflected;
+            }
+            layout.set_number = reflSet->set;
+
+            const auto dslCreateInfo = vk::DescriptorSetLayoutCreateInfo{
+                .bindingCount = reflSet->binding_count, .pBindings = layout.bindings.data()};
+
+            layout.create_info = dslCreateInfo;
+
+            setLayouts.push_back(layout);
+         }
+      }
+      Core::Log::core->debug("SetLayouts: {}", setLayouts.size());
+
+      return std::make_unique<vk::raii::PipelineLayout>(nullptr);
    }
 
    vk::raii::RenderPass colorAndDepthRenderPass(const RenderPassCreateInfo& createInfo) {
@@ -127,5 +183,4 @@ namespace Graphics::Utils {
 
       return createInfo.device->createRenderPass(renderPassCreateInfo);
    }
-
 }
