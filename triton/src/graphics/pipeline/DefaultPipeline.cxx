@@ -34,18 +34,22 @@ DefaultPipeline::DefaultPipeline(const vk::raii::Device& device,
 
    auto vertexShaderModule = device.createShaderModule(vertexShaderCreateInfo);
 
-   const auto stage = Graphics::Utils::ShaderStage{.shaderModule = &vertexShaderModule,
-                                                   .stages = vk::ShaderStageFlagBits::eVertex,
-                                                   .code = vertexSpirv};
-
-   const auto info = std::vector<Graphics::Utils::ShaderStage>{stage};
-
-   auto pipelineLayout2 = Graphics::Utils::createPipelineLayout(info);
-
    auto fragmentShaderCreateInfo = vk::ShaderModuleCreateInfo{.codeSize = 4 * fragmentSpirv.size(),
                                                               .pCode = fragmentSpirv.data()};
 
    auto fragmentShaderModule = device.createShaderModule(fragmentShaderCreateInfo);
+
+   const auto stage = Graphics::Utils::ShaderStage{.shaderModule = &vertexShaderModule,
+                                                   .stages = vk::ShaderStageFlagBits::eVertex,
+                                                   .code = vertexSpirv};
+   const auto fragStage =
+       Graphics::Utils::ShaderStage({.shaderModule = &fragmentShaderModule,
+                                     .stages = vk::ShaderStageFlagBits::eFragment,
+                                     .code = fragmentSpirv});
+
+   const auto info = std::vector<Graphics::Utils::ShaderStage>{stage, fragStage};
+
+   auto pipelineLayout2 = Graphics::Utils::createPipelineLayout(info);
 
    auto vertexShaderStageInfo = vk::PipelineShaderStageCreateInfo{
        .stage = vk::ShaderStageFlagBits::eVertex, .module = *vertexShaderModule, .pName = "main"};
