@@ -46,6 +46,7 @@ target_precompile_headers(${name} PRIVATE
    <spdlog/sinks/dist_sink.h>
    <spdlog/sinks/msvc_sink.h>
    <spdlog/sinks/stdout_color_sinks.h>
+   <spirv_reflect.h>
    <tiny_gltf.h>
    <vulkan/vulkan_raii.hpp>
    <vulkan-memory-allocator-hpp/vk_mem_alloc.hpp>
@@ -83,11 +84,13 @@ find_package(spdlog CONFIG REQUIRED)
 find_package(Stb REQUIRED)
 find_package(unofficial-vulkan-memory-allocator-hpp CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
+find_package(unofficial-spirv-reflect CONFIG REQUIRED)
 
 target_link_libraries(${name}
    PRIVATE
    unofficial::VulkanMemoryAllocator-Hpp::VulkanMemoryAllocator-Hpp
    imgui::imgui
+   unofficial::spirv-reflect::spirv-reflect
    ${vulkan_LIBRARIES}
 )
 
