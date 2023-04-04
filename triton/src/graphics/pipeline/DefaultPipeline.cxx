@@ -4,6 +4,8 @@
 #include "SpirvHelper.hpp"
 #include "core/Utils.hpp"
 #include "Vertex.hpp"
+#include "graphics/VulkanFactory.hpp"
+#include <vulkan/vulkan_enums.hpp>
 
 using Core::Log;
 
@@ -31,6 +33,14 @@ DefaultPipeline::DefaultPipeline(const vk::raii::Device& device,
        vk::ShaderModuleCreateInfo{.codeSize = 4 * vertexSpirv.size(), .pCode = vertexSpirv.data()};
 
    auto vertexShaderModule = device.createShaderModule(vertexShaderCreateInfo);
+
+   const auto stage = Graphics::Utils::ShaderStage{.shaderModule = &vertexShaderModule,
+                                                   .stages = vk::ShaderStageFlagBits::eVertex,
+                                                   .code = vertexSpirv};
+
+   const auto info = std::vector<Graphics::Utils::ShaderStage>{stage};
+
+   auto pipelineLayout2 = Graphics::Utils::createPipelineLayout(info);
 
    auto fragmentShaderCreateInfo = vk::ShaderModuleCreateInfo{.codeSize = 4 * fragmentSpirv.size(),
                                                               .pCode = fragmentSpirv.data()};
