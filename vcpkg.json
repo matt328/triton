@@ -13,7 +13,7 @@
     },
     "nlohmann-json",
     "spdlog",
-    "spirv-reflect",
+    "spirv-cross",
     "stb",
     "tinygltf",
     "vulkan-memory-allocator-hpp"
