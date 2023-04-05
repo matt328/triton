@@ -57,9 +57,8 @@ namespace Graphics::Utils {
       return swapchainFramebuffers;
    }
 
-   std::unique_ptr<vk::raii::PipelineLayout> createPipelineLayout(
-       const std::vector<ShaderStage>& stages) {
-
+   std::unique_ptr<vk::raii::DescriptorSetLayout> createDescriptorSetLayout(
+       const vk::raii::Device* device, const std::vector<ShaderStage>& stages) {
       auto bindings = std::vector<vk::DescriptorSetLayoutBinding>{};
 
       for (const auto& stage : stages) {
@@ -83,7 +82,11 @@ namespace Graphics::Utils {
          }
       }
 
-      return std::make_unique<vk::raii::PipelineLayout>(nullptr);
+      const auto descriptorSetLayoutCreateInfo = vk::DescriptorSetLayoutCreateInfo{
+          .bindingCount = static_cast<uint32_t>(bindings.size()), .pBindings = bindings.data()};
+
+      return std::make_unique<vk::raii::DescriptorSetLayout>(
+          device->createDescriptorSetLayout(descriptorSetLayoutCreateInfo));
    }
 
    vk::raii::RenderPass colorAndDepthRenderPass(const RenderPassCreateInfo& createInfo) {
