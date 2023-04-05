@@ -24,7 +24,7 @@ namespace Models {
       static vk::PipelineVertexInputStateCreateInfo pipelineVertexInputStateCreateInfo;
 
       static vk::VertexInputBindingDescription inputBindingDescription(uint32_t binding);
-      
+
       static vk::VertexInputAttributeDescription inputAttributeDescription(
           uint32_t binding, uint32_t location, VertexComponent component);
 

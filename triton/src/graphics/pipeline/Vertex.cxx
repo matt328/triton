@@ -6,7 +6,6 @@ namespace Models {
    vk::PipelineVertexInputStateCreateInfo Vertex::pipelineVertexInputStateCreateInfo;
 
    vk::VertexInputBindingDescription Vertex::inputBindingDescription(const uint32_t binding) {
-
       return {
           .binding = binding, .stride = sizeof(Vertex), .inputRate = vk::VertexInputRate::eVertex};
    }

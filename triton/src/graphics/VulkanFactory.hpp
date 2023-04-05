@@ -53,4 +53,10 @@ namespace Graphics::Utils {
 
    std::unique_ptr<vk::raii::DescriptorSetLayout> createDescriptorSetLayout(
        const vk::raii::Device* device, const std::vector<ShaderStage>& stages);
+
+   void createVertexAttributes(const std::vector<ShaderStage>& shaderStages);
+
+   static void print_resources(const spirv_cross::Compiler& compiler,
+                               const char* tag,
+                               const spirv_cross::SmallVector<spirv_cross::Resource>& resources);
 }

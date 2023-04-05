@@ -1,6 +1,4 @@
 #pragma once
-#include <memory>
-#include <vulkan/vulkan_raii.hpp>
 
 // TODO: instead of a base class for pipeline, create a factory to create all the pieces statelessly
 // have a thin interface that pipelines must adhere to, just getPipeline, getDSL, and

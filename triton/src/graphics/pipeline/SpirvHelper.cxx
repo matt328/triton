@@ -34,7 +34,8 @@ std::vector<uint32_t> SpirvHelper::compileShader(const vk::ShaderStageFlagBits s
    }
 
    std::vector<uint32_t> spirv{};
-   glslang::GlslangToSpv(*program.getIntermediate(stage), spirv);
+   glslang::SpvOptions spvOptions{.generateDebugInfo = true};
+   glslang::GlslangToSpv(*program.getIntermediate(stage), spirv, &spvOptions);
 
    return spirv;
 }
