@@ -12,7 +12,7 @@ using Core::Log;
 DefaultPipeline::DefaultPipeline(const vk::raii::Device& device,
                                  const vk::raii::RenderPass& renderPass,
                                  const vk::Extent2D& swapchainExtent) {
-   // Configure Shader Modules
+   // Configure Shader Modules // TODO pull out shader module creation into it's own thing
    auto helper = std::make_unique<SpirvHelper>();
 
    const auto vertexFilename = (Core::Paths::SHADERS / "shader.vert").string();
@@ -39,15 +39,15 @@ DefaultPipeline::DefaultPipeline(const vk::raii::Device& device,
 
    auto fragmentShaderModule = device.createShaderModule(fragmentShaderCreateInfo);
 
-   const auto stage = Graphics::Utils::ShaderStage{.shaderModule = &vertexShaderModule,
-                                                   .stages = vk::ShaderStageFlagBits::eVertex,
-                                                   .code = vertexSpirv};
+   const auto vertStage = Graphics::Utils::ShaderStage{.shaderModule = &vertexShaderModule,
+                                                       .stages = vk::ShaderStageFlagBits::eVertex,
+                                                       .code = vertexSpirv};
    const auto fragStage =
        Graphics::Utils::ShaderStage({.shaderModule = &fragmentShaderModule,
                                      .stages = vk::ShaderStageFlagBits::eFragment,
                                      .code = fragmentSpirv});
 
-   const auto info = std::vector<Graphics::Utils::ShaderStage>{stage, fragStage};
+   const auto shaderLibraryInfo = std::vector<Graphics::Utils::ShaderStage>{vertStage, fragStage};
 
    auto vertexShaderStageInfo = vk::PipelineShaderStageCreateInfo{
        .stage = vk::ShaderStageFlagBits::eVertex, .module = *vertexShaderModule, .pName = "main"};
@@ -59,7 +59,7 @@ DefaultPipeline::DefaultPipeline(const vk::raii::Device& device,
 
    auto shaderStages = std::array{vertexShaderStageInfo, fragmentShaderStageInfo};
 
-   descriptorSetLayout = Graphics::Utils::createDescriptorSetLayout(&device, info);
+   descriptorSetLayout = Graphics::Utils::createDescriptorSetLayout(&device, shaderLibraryInfo);
 
    vk::PipelineLayoutCreateInfo pipelineLayoutInfo{
        .setLayoutCount = 1,
