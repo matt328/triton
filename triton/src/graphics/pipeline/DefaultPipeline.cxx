@@ -49,8 +49,6 @@ DefaultPipeline::DefaultPipeline(const vk::raii::Device& device,
 
    const auto info = std::vector<Graphics::Utils::ShaderStage>{stage, fragStage};
 
-   auto pipelineLayout2 = Graphics::Utils::createPipelineLayout(info);
-
    auto vertexShaderStageInfo = vk::PipelineShaderStageCreateInfo{
        .stage = vk::ShaderStageFlagBits::eVertex, .module = *vertexShaderModule, .pName = "main"};
 
@@ -61,8 +59,14 @@ DefaultPipeline::DefaultPipeline(const vk::raii::Device& device,
 
    auto shaderStages = std::array{vertexShaderStageInfo, fragmentShaderStageInfo};
 
-   descriptorSetLayout =
-       std::make_unique<vk::raii::DescriptorSetLayout>(createDescriptorSetLayout(device));
+   descriptorSetLayout = Graphics::Utils::createDescriptorSetLayout(&device, info);
+
+   vk::PipelineLayoutCreateInfo pipelineLayoutInfo{
+       .setLayoutCount = 1,
+       .pSetLayouts = &(**descriptorSetLayout)}; // This is (now even more) awkward
+
+   pipelineLayout =
+       std::make_unique<vk::raii::PipelineLayout>(device.createPipelineLayout(pipelineLayoutInfo));
 
    // Configure Vertex Attributes
    auto bindingDescription = Models::Vertex::inputBindingDescription(0);
@@ -77,13 +81,6 @@ DefaultPipeline::DefaultPipeline(const vk::raii::Device& device,
        .pVertexBindingDescriptions = &bindingDescription,
        .vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size()),
        .pVertexAttributeDescriptions = attributeDescriptions.data()};
-
-   vk::PipelineLayoutCreateInfo pipelineLayoutInfo{
-       .setLayoutCount = 1,
-       .pSetLayouts = &(**descriptorSetLayout)}; // This is (now even more) awkward
-
-   pipelineLayout =
-       std::make_unique<vk::raii::PipelineLayout>(device.createPipelineLayout(pipelineLayoutInfo));
 
    const auto viewport = vk::Viewport{.x = 0.f,
                                       .y = 0.f,
@@ -115,27 +112,4 @@ DefaultPipeline::DefaultPipeline(const vk::raii::Device& device,
    // Finally this is that it's all about
    pipeline = std::make_unique<vk::raii::Pipeline>(
        device.createGraphicsPipeline(VK_NULL_HANDLE, pipelineCreateInfo));
-}
-
-vk::raii::DescriptorSetLayout DefaultPipeline::createDescriptorSetLayout(
-    const vk::raii::Device& device) {
-   constexpr auto objectMatricesBinding = vk::DescriptorSetLayoutBinding{
-       .binding = 0,
-       .descriptorType = vk::DescriptorType::eUniformBuffer,
-       .descriptorCount = 1,
-       .stageFlags = vk::ShaderStageFlagBits::eVertex,
-   };
-
-   constexpr auto textureSamplerBinding =
-       vk::DescriptorSetLayoutBinding{.binding = 1,
-                                      .descriptorType = vk::DescriptorType::eCombinedImageSampler,
-                                      .descriptorCount = 1,
-                                      .stageFlags = vk::ShaderStageFlagBits::eFragment};
-
-   const auto bindings =
-       std::array<vk::DescriptorSetLayoutBinding, 2>{objectMatricesBinding, textureSamplerBinding};
-
-   const auto descriptorSetLayoutCreateInfo = vk::DescriptorSetLayoutCreateInfo{
-       .bindingCount = static_cast<uint32_t>(bindings.size()), .pBindings = bindings.data()};
-   return device.createDescriptorSetLayout(descriptorSetLayoutCreateInfo);
 }
