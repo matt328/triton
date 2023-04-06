@@ -14,4 +14,10 @@ class Terrain : public RendererBase {
 
    void fillCommandBuffer(const vk::raii::CommandBuffer&, size_t currentImage) override;
    void update() override;
+
+ private:
+   void createRenderPass(const vk::raii::Device* device,
+                         const vk::raii::PhysicalDevice* physicalDevice,
+                         const vk::Format swapchainFormat);
+   void createPipeline();
 };
