@@ -11,7 +11,6 @@ set(${name}_SRC
    src/graphics/pipeline/SpirvHelper.cxx
    src/graphics/pipeline/DefaultPipeline.cxx
    src/graphics/pipeline/AbstractPipeline.cxx
-   src/graphics/renderer/RendererBase.cxx
    src/graphics/renderer/Clear.cxx
    src/graphics/renderer/Finish.cxx
    src/graphics/renderer/ImGuiRenderer.cxx
