@@ -2,7 +2,10 @@
 
 #include "graphics/VulkanFactory.hpp"
 
-Clear::Clear(const RendererBaseCreateInfo& createInfo) : RendererBase(createInfo) {
+using Graphics::Utils::createFramebuffers;
+
+Clear::Clear(const RendererBaseCreateInfo& createInfo) :
+    framebufferSize(createInfo.swapchainExtent) {
 
    const auto renderPassCreateInfo =
        Graphics::Utils::RenderPassCreateInfo{.device = &createInfo.device,
@@ -15,11 +18,11 @@ Clear::Clear(const RendererBaseCreateInfo& createInfo) : RendererBase(createInfo
    renderPass = std::make_unique<vk::raii::RenderPass>(
        Graphics::Utils::colorAndDepthRenderPass(renderPassCreateInfo));
 
-   swapchainFramebuffers = Graphics::Utils::createFramebuffers(device,
-                                                               createInfo.swapchainImageViews,
-                                                               *createInfo.depthImageView,
-                                                               createInfo.swapchainExtent,
-                                                               *renderPass);
+   framebuffers = createFramebuffers(createInfo.device,
+                                     createInfo.swapchainImageViews,
+                                     *createInfo.depthImageView,
+                                     createInfo.swapchainExtent,
+                                     *renderPass);
 }
 
 void Clear::fillCommandBuffer(const vk::raii::CommandBuffer& cmd, const size_t currentImage) {
@@ -30,12 +33,11 @@ void Clear::fillCommandBuffer(const vk::raii::CommandBuffer& cmd, const size_t c
 
    const vk::Rect2D screenRect = {.offset = {0, 0}, .extent = framebufferSize};
 
-   const auto renderPassInfo =
-       vk::RenderPassBeginInfo{.renderPass = **renderPass,
-                               .framebuffer = **swapchainFramebuffers[currentImage],
-                               .renderArea = screenRect,
-                               .clearValueCount = 2,
-                               .pClearValues = clearValues.data()};
+   const auto renderPassInfo = vk::RenderPassBeginInfo{.renderPass = **renderPass,
+                                                       .framebuffer = **framebuffers[currentImage],
+                                                       .renderArea = screenRect,
+                                                       .clearValueCount = 2,
+                                                       .pClearValues = clearValues.data()};
 
    cmd.beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
    // Don't do anything, we're just clearing the framebuffers
