@@ -5,7 +5,6 @@
 #include "core/Utils.hpp"
 #include "Vertex.hpp"
 #include "graphics/VulkanFactory.hpp"
-#include <vulkan/vulkan_enums.hpp>
 
 using Core::Log;
 
