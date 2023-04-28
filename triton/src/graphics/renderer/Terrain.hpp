@@ -1,8 +1,6 @@
 #pragma once
 
 #include "graphics/renderer/RendererBase.hpp"
-#include <vulkan/vulkan_raii.hpp>
-#include <vulkan/vulkan_structs.hpp>
 
 class Terrain : public RendererBase {
  public:

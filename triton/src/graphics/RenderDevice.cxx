@@ -495,15 +495,16 @@ void RenderDevice::recordCommandBuffer(const vk::raii::CommandBuffer& cmd,
    cmd.beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
    cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, *pipeline->getPipeline());
 
-   for (const auto& mesh : meshes | std::views::values) {
-      cmd.bindVertexBuffers(0, mesh->getVertexBuffer().getBuffer(), {0});
-      cmd.bindIndexBuffer(mesh->getIndexBuffer().getBuffer(), 0, vk::IndexType::eUint32);
+   for (const auto& renderable : frameData[currentFrame]->renderables) {
+      cmd.bindVertexBuffers(0, meshes.at(renderable)->getVertexBuffer().getBuffer(), {0});
+      cmd.bindIndexBuffer(
+          meshes.at(renderable)->getIndexBuffer().getBuffer(), 0, vk::IndexType::eUint32);
       cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
                              *pipeline->getPipelineLayout(),
                              0,
                              *frameData[currentFrame]->getDescriptorSet(),
                              nullptr);
-      cmd.drawIndexed(mesh->getIndicesCount(), 1, 0, 0, 0);
+      cmd.drawIndexed(meshes.at(renderable)->getIndicesCount(), 1, 0, 0, 0);
    }
 
    frameData[currentFrame]->renderables.clear();

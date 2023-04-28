@@ -21,7 +21,6 @@ Game::Game(RenderDevice& renderDevice) {
 }
 
 void Game::update(double t, const float dt) const {
-
    renderSystem->update(*registry, dt);
 }
 

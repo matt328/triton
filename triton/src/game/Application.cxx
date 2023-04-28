@@ -48,7 +48,6 @@ void Application::run() const {
       accumulator += frameTime;
 
       while (accumulator >= dt) {
-         game->update(t, dt);
          t += dt;
          accumulator -= dt;
       }
@@ -56,6 +55,8 @@ void Application::run() const {
       const double alpha = accumulator / dt;
 
       game->blendState(alpha);
+
+      game->update(t, dt);
 
       renderDevice->render();
 
