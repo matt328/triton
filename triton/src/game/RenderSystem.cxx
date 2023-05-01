@@ -1,6 +1,9 @@
 #include "RenderSystem.hpp"
 #include "Renderable.hpp"
 #include "graphics/RenderDevice.hpp"
+#include "graphics/VulkanFactory.hpp"
+
+using Graphics::Utils::QueueFamilyIndices;
 
 RenderSystem::RenderSystem(const RenderDevice& renderDevice) : renderDevice(renderDevice) {
 }

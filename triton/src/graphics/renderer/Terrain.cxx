@@ -10,14 +10,18 @@
 using Core::Log;
 
 Terrain::Terrain(const RendererBaseCreateInfo& createInfo) {
-   createRenderPass(&createInfo.device, &createInfo.physicalDevice, createInfo.swapchainFormat);
-   createPipeline(createInfo.swapchainExtent, &createInfo.device);
+   createRenderPass(
+       &createInfo.framebufferInfo.device, &createInfo.physicalDevice, createInfo.swapchainFormat);
+   createPipeline(createInfo.framebufferInfo.swapchainExtent, &createInfo.framebufferInfo.device);
 }
 
 void Terrain::fillCommandBuffer(const vk::raii::CommandBuffer&, size_t currentImage) {
 }
 
 void Terrain::update() {
+}
+
+void Terrain::resetFramebuffers(const FramebufferInfo& info) {
 }
 
 void Terrain::createRenderPass(const vk::raii::Device* device,

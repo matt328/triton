@@ -6,6 +6,10 @@ class RenderDevice;
 
 class Game {
  public:
+   Game(const Game&) = delete;
+   Game(Game&&) = delete;
+   Game& operator=(const Game&) = delete;
+   Game& operator=(Game&&) = delete;
    explicit Game(RenderDevice& renderDevice);
    ~Game() = default;
 

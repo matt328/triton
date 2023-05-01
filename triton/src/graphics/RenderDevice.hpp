@@ -4,7 +4,9 @@
 #include "Log.hpp"
 #include "geometry/MeshFactory.hpp"
 #include "game/Renderable.hpp"
+#include "graphics/Swapchain.hpp"
 #include "graphics/renderer/RendererBase.hpp"
+#include "graphics/VulkanFactory.hpp"
 
 class Instance;
 class AbstractPipeline;
@@ -22,8 +24,6 @@ class Game;
 
 class RenderDevice {
  public:
-   void createAllocator(const Instance& instance);
-
    RenderDevice(const RenderDevice&) = delete;
    RenderDevice(RenderDevice&&) = delete;
    RenderDevice& operator=(const RenderDevice&) = delete;
@@ -44,13 +44,13 @@ class RenderDevice {
 
  private:
    std::string tempTextureId;
-   struct QueueFamilyIndices;
-   struct SwapchainSupportDetails;
 
    static constexpr uint32_t FRAMES_IN_FLIGHT = 3;
 
    uint32_t framebufferWidth = 0;
    uint32_t framebufferHeight = 0;
+
+   const Instance& instance;
 
    std::unique_ptr<vk::raii::Device> device;
 
@@ -61,12 +61,7 @@ class RenderDevice {
 
    std::unique_ptr<vk::raii::PhysicalDevice> physicalDevice;
 
-   std::unique_ptr<vk::raii::SwapchainKHR> swapchain;
-
-   std::vector<vk::Image> swapchainImages;
-   std::vector<vk::raii::ImageView> swapchainImageViews;
-   vk::Format swapchainImageFormat = vk::Format::eUndefined;
-   vk::Extent2D swapchainExtent;
+   std::unique_ptr<Swapchain> swapchain;
 
    std::unique_ptr<vk::raii::CommandPool> commandPool;
 
@@ -109,12 +104,13 @@ class RenderDevice {
    bool framebufferResized = false;
 
    // Helpers
-   void createPhysicalDevice(const Instance& instance);
-   void createLogicalDevice(const Instance& instance);
-   void createSwapchain(const Instance& instance);
+   void createPhysicalDevice();
+   void createLogicalDevice();
+   void createSwapchain();
    void createSwapchainImageViews();
-   void createCommandPools(const Instance& instance);
+   void createCommandPools();
    void createDescriptorPool();
+   void createAllocator();
 
    void createPerFrameData(const vk::raii::DescriptorSetLayout& descriptorSetLayout);
 
@@ -122,6 +118,8 @@ class RenderDevice {
    void createFramebuffers();
 
    void recreateSwapchain();
+
+   void destroySwapchain();
 
    void drawFrame();
 
@@ -155,33 +153,6 @@ class RenderDevice {
    static bool isDeviceSuitable(const vk::raii::PhysicalDevice& possibleDevice,
                                 const Instance& instance);
 
-   static QueueFamilyIndices findQueueFamilies(
-       const vk::raii::PhysicalDevice& possibleDevice,
-       const std::unique_ptr<vk::raii::SurfaceKHR>& surface);
-
    static bool checkDeviceExtensionSupport(const vk::raii::PhysicalDevice& possibleDevice,
                                            std::vector<const char*> desiredDeviceExtensions);
-
-   static SwapchainSupportDetails querySwapchainSupport(
-       const vk::raii::PhysicalDevice& possibleDevice,
-       const std::unique_ptr<vk::raii::SurfaceKHR>& surface);
-
-   // Structs
-   struct QueueFamilyIndices {
-      std::optional<uint32_t> graphicsFamily;
-      std::optional<uint32_t> presentFamily;
-      std::optional<uint32_t> transferFamily;
-      std::optional<uint32_t> computeFamily;
-
-      [[nodiscard]] bool isComplete() const {
-         return graphicsFamily.has_value() && presentFamily.has_value() &&
-                transferFamily.has_value() && computeFamily.has_value();
-      }
-   };
-
-   struct SwapchainSupportDetails {
-      vk::SurfaceCapabilitiesKHR capabilities;
-      std::vector<vk::SurfaceFormatKHR> formats;
-      std::vector<vk::PresentModeKHR> presentModes;
-   };
 };

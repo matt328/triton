@@ -10,6 +10,8 @@ class Finish : public RendererBase {
 
    void update() override;
 
+   void resetFramebuffers(const FramebufferInfo& info) override;
+
  private:
    std::vector<std::unique_ptr<vk::raii::Framebuffer>> framebuffers;
    vk::Extent2D framebufferSize;
