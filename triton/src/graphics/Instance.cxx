@@ -42,7 +42,7 @@ Instance::Instance(GLFWwindow* window,
 
    if (portabilityRequired) {
       instanceCreateInfo.flags |= vk::InstanceCreateFlagBits::eEnumeratePortabilityKHR;
-      desiredDeviceExtensions.push_back("VK_KHR_portability_subset");
+      // desiredDeviceExtensions.push_back("VK_KHR_portability_subset");
    }
 
    const auto debugCreateInfo = vk::DebugUtilsMessengerCreateInfoEXT{

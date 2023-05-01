@@ -13,33 +13,34 @@
 #include "graphics/texture/Texture.hpp"
 #include "graphics/texture/TextureFactory.hpp"
 #include "graphics/VulkanFactory.hpp"
-#include <stdexcept>
-#include <vulkan/vulkan_core.h>
-#include <vulkan/vulkan_enums.hpp>
-#include <vulkan/vulkan_structs.hpp>
+#include "graphics/Swapchain.hpp"
 
 using Core::Log;
+using namespace Graphics;
 
-RenderDevice::RenderDevice(const Instance& instance) {
-   createPhysicalDevice(instance);
-   createLogicalDevice(instance);
-   createSwapchain(instance);
-   createSwapchainImageViews();
-   createCommandPools(instance);
+RenderDevice::RenderDevice(const Instance& instance) : instance(instance) {
+   createPhysicalDevice();
+   createLogicalDevice();
+   createCommandPools();
    createDescriptorPool();
-   createAllocator(instance);
+   createAllocator();
+
+   swapchain = std::make_unique<Swapchain>(instance, *physicalDevice, *device);
+
+   // TODO: Move the functionality of imageViews and framebuffers inside Swapchain class
+   // Have RenderDevice's hardcoded stuff register itself as like 'deleteme' or something.
 
    const auto renderPassCreateInfo =
        Graphics::Utils::RenderPassCreateInfo{.device = device.get(),
                                              .physicalDevice = physicalDevice.get(),
-                                             .swapchainFormat = swapchainImageFormat,
+                                             .swapchainFormat = swapchain->getImageFormat(),
                                              .clearColor = false,
                                              .clearDepth = false};
 
    renderPass = std::make_unique<vk::raii::RenderPass>(
        Graphics::Utils::colorAndDepthRenderPass(renderPassCreateInfo));
 
-   pipeline = std::make_unique<DefaultPipeline>(*device, *renderPass, swapchainExtent);
+   pipeline = std::make_unique<DefaultPipeline>(*device, *renderPass, swapchain->getExtent());
 
    textureFactory = std::make_unique<TextureFactory>(
        *raiillocator, *device, *graphicsImmediateContext, *transferImmediateContext);
@@ -55,16 +56,20 @@ RenderDevice::RenderDevice(const Instance& instance) {
    createDepthResources();
    createFramebuffers();
 
+   // TODO: finish moving this stuff into swapchain class.
+
+   const auto framebufferInfo = FramebufferInfo{.device = *device,
+                                                .swapchainImageViews = swapchainImageViews,
+                                                .depthImageView = *depthImageView,
+                                                .swapchainExtent = swapchainExtent};
+
    const auto rendererCreateInfo =
-       RendererBaseCreateInfo{.device = *device,
+       RendererBaseCreateInfo{.swapchainFormat = swapchainImageFormat,
                               .physicalDevice = *physicalDevice,
                               .allocator = *raiillocator,
                               .depthTexture = this->depthImage->getImage(),
-                              .swapchainExtent = swapchainExtent,
                               .swapchainImages = swapchainImages,
-                              .swapchainImageViews = swapchainImageViews,
-                              .depthImageView = *depthImageView,
-                              .swapchainFormat = swapchainImageFormat};
+                              .framebufferInfo = framebufferInfo};
 
    renderers.emplace_back(std::make_unique<Clear>(rendererCreateInfo));
    finishRenderer = std::make_unique<Finish>(rendererCreateInfo);
@@ -93,7 +98,7 @@ void RenderDevice::enqueue(const Renderable& renderable) const {
    frameData[currentFrame]->renderables.push_back(renderable.getMeshId());
 }
 
-void RenderDevice::createPhysicalDevice(const Instance& instance) {
+void RenderDevice::createPhysicalDevice() {
    const auto physicalDevices = instance.enumeratePhysicalDevices();
 
    if (physicalDevices.empty()) {
@@ -114,9 +119,9 @@ void RenderDevice::createPhysicalDevice(const Instance& instance) {
    Log::core->debug("Using physical device: {}", physicalDevice->getProperties().deviceName);
 }
 
-void RenderDevice::createLogicalDevice(const Instance& instance) {
+void RenderDevice::createLogicalDevice() {
    auto [graphicsFamily, presentFamily, transferFamily, computeFamily] =
-       findQueueFamilies(*physicalDevice, instance.getSurface());
+       Utils::findQueueFamilies(*physicalDevice, instance.getSurface());
 
    std::vector<vk::DeviceQueueCreateInfo> queueCreateInfos;
    std::set uniqueQueueFamilies = {graphicsFamily.value(), presentFamily.value()};
@@ -191,85 +196,9 @@ void RenderDevice::createLogicalDevice(const Instance& instance) {
    Log::core->info("Created Compute Queue");
 }
 
-void RenderDevice::createSwapchain(const Instance& instance) {
-   const auto& surface = instance.getSurface();
-   auto [capabilities, formats, presentModes] = querySwapchainSupport(*physicalDevice, surface);
-
-   const auto surfaceFormat = chooseSwapSurfaceFormat(formats);
-   const auto presentMode = chooseSwapPresentMode(presentModes);
-   const auto extent = chooseSwapExtent(capabilities, instance);
-
-   uint32_t imageCount = capabilities.minImageCount + 1;
-
-   if (capabilities.maxImageCount > 0 && imageCount > capabilities.maxImageCount) {
-      imageCount = capabilities.maxImageCount;
-   }
-
-   vk::SwapchainCreateInfoKHR createInfo{.surface = **surface,
-                                         .minImageCount = imageCount,
-                                         .imageFormat = surfaceFormat.format,
-                                         .imageColorSpace = surfaceFormat.colorSpace,
-                                         .imageExtent = extent,
-                                         .imageArrayLayers = 1,
-                                         .imageUsage = vk::ImageUsageFlagBits::eColorAttachment,
-                                         .preTransform = capabilities.currentTransform,
-                                         .compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque,
-                                         .presentMode = presentMode,
-                                         .clipped = VK_TRUE,
-                                         .oldSwapchain = VK_NULL_HANDLE};
-
+void RenderDevice::createCommandPools() {
    auto [graphicsFamily, presentFamily, transferFamily, computeFamily] =
-       findQueueFamilies(*physicalDevice, surface);
-
-   const auto queueFamilyIndices =
-       std::array<uint32_t, 2>{graphicsFamily.value(), presentFamily.value()};
-
-   if (graphicsFamily != presentFamily) {
-      createInfo.imageSharingMode = vk::SharingMode::eConcurrent;
-      createInfo.queueFamilyIndexCount = 2;
-      createInfo.pQueueFamilyIndices = queueFamilyIndices.data();
-   } else {
-      createInfo.imageSharingMode = vk::SharingMode::eExclusive;
-   }
-
-   swapchain = std::make_unique<vk::raii::SwapchainKHR>(*device, createInfo);
-   Log::core->info("Created Swapchain");
-
-   swapchainExtent = extent;
-   swapchainImageFormat = surfaceFormat.format;
-}
-
-void RenderDevice::createSwapchainImageViews() {
-   swapchainImages = swapchain->getImages();
-   swapchainImageViews.reserve(swapchainImages.size());
-
-   constexpr vk::ComponentMapping components{.r = vk::ComponentSwizzle::eIdentity,
-                                             .g = vk::ComponentSwizzle::eIdentity,
-                                             .b = vk::ComponentSwizzle::eIdentity,
-                                             .a = vk::ComponentSwizzle::eIdentity};
-
-   constexpr vk::ImageSubresourceRange subresourceRange{.aspectMask =
-                                                            vk::ImageAspectFlagBits::eColor,
-                                                        .baseMipLevel = 0,
-                                                        .levelCount = 1,
-                                                        .baseArrayLayer = 0,
-                                                        .layerCount = 1};
-
-   for (const auto& image : swapchainImages) {
-      vk::ImageViewCreateInfo createInfo{.image = image,
-                                         .viewType = vk::ImageViewType::e2D,
-                                         .format = swapchainImageFormat,
-                                         .components = components,
-                                         .subresourceRange = subresourceRange};
-
-      swapchainImageViews.emplace_back(*device, createInfo);
-   }
-   Log::core->info("Created {} swapchain image views", swapchainImageViews.size());
-}
-
-void RenderDevice::createCommandPools(const Instance& instance) {
-   auto [graphicsFamily, presentFamily, transferFamily, computeFamily] =
-       findQueueFamilies(*physicalDevice, instance.getSurface());
+       Utils::findQueueFamilies(*physicalDevice, instance.getSurface());
    auto commandPoolCreateInfo =
        vk::CommandPoolCreateInfo{.flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
                                  .queueFamilyIndex = graphicsFamily.value()};
@@ -314,7 +243,7 @@ void RenderDevice::createDescriptorPool() {
        std::make_unique<vk::raii::DescriptorPool>(device->createDescriptorPool(poolInfo, nullptr));
 }
 
-void RenderDevice::createAllocator(const Instance& instance) {
+void RenderDevice::createAllocator() {
    const auto allocatorCreateInfo =
        vma::AllocatorCreateInfo{.physicalDevice = **physicalDevice,
                                 .device = **device,
@@ -370,6 +299,56 @@ void RenderDevice::createDepthResources() {
    depthImageView = std::make_unique<vk::raii::ImageView>(device->createImageView(viewInfo));
 }
 
+void RenderDevice::createSwapchain() {
+   const auto& surface = instance.getSurface();
+   const SwapchainSupportDetails details{};
+   auto [capabilities, formats, presentModes] =
+       Swapchain::querySwapchainSupport(*physicalDevice, surface);
+
+   const auto surfaceFormat = chooseSwapSurfaceFormat(formats);
+   const auto presentMode = chooseSwapPresentMode(presentModes);
+   const auto extent = chooseSwapExtent(capabilities, instance);
+
+   uint32_t imageCount = capabilities.minImageCount + 1;
+
+   if (capabilities.maxImageCount > 0 && imageCount > capabilities.maxImageCount) {
+      imageCount = capabilities.maxImageCount;
+   }
+
+   vk::SwapchainCreateInfoKHR createInfo{.surface = **surface,
+                                         .minImageCount = imageCount,
+                                         .imageFormat = surfaceFormat.format,
+                                         .imageColorSpace = surfaceFormat.colorSpace,
+                                         .imageExtent = extent,
+                                         .imageArrayLayers = 1,
+                                         .imageUsage = vk::ImageUsageFlagBits::eColorAttachment,
+                                         .preTransform = capabilities.currentTransform,
+                                         .compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque,
+                                         .presentMode = presentMode,
+                                         .clipped = VK_TRUE,
+                                         .oldSwapchain = VK_NULL_HANDLE};
+
+   auto [graphicsFamily, presentFamily, transferFamily, computeFamily] =
+       Utils::findQueueFamilies(*physicalDevice, surface);
+
+   const auto queueFamilyIndices =
+       std::array<uint32_t, 2>{graphicsFamily.value(), presentFamily.value()};
+
+   if (graphicsFamily != presentFamily) {
+      createInfo.imageSharingMode = vk::SharingMode::eConcurrent;
+      createInfo.queueFamilyIndexCount = 2;
+      createInfo.pQueueFamilyIndices = queueFamilyIndices.data();
+   } else {
+      createInfo.imageSharingMode = vk::SharingMode::eExclusive;
+   }
+
+   swapchain = std::make_unique<vk::raii::SwapchainKHR>(*device, createInfo);
+   Log::core->info("Created Swapchain");
+
+   swapchainExtent = extent;
+   swapchainImageFormat = surfaceFormat.format;
+}
+
 void RenderDevice::createFramebuffers() {
    swapchainFramebuffers.reserve(swapchainImageViews.size());
    std::array<vk::ImageView, 2> attachments;
@@ -389,7 +368,49 @@ void RenderDevice::createFramebuffers() {
    }
 }
 
+void RenderDevice::createSwapchainImageViews() {
+   swapchainImages = swapchain->getImages();
+   swapchainImageViews.reserve(swapchainImages.size());
+
+   constexpr vk::ComponentMapping components{.r = vk::ComponentSwizzle::eIdentity,
+                                             .g = vk::ComponentSwizzle::eIdentity,
+                                             .b = vk::ComponentSwizzle::eIdentity,
+                                             .a = vk::ComponentSwizzle::eIdentity};
+
+   constexpr vk::ImageSubresourceRange subresourceRange{.aspectMask =
+                                                            vk::ImageAspectFlagBits::eColor,
+                                                        .baseMipLevel = 0,
+                                                        .levelCount = 1,
+                                                        .baseArrayLayer = 0,
+                                                        .layerCount = 1};
+
+   for (const auto& image : swapchainImages) {
+      vk::ImageViewCreateInfo createInfo{.image = image,
+                                         .viewType = vk::ImageViewType::e2D,
+                                         .format = swapchainImageFormat,
+                                         .components = components,
+                                         .subresourceRange = subresourceRange};
+
+      swapchainImageViews.emplace_back(*device, createInfo);
+   }
+   Log::core->info("Created {} swapchain image views", swapchainImageViews.size());
+}
+
 void RenderDevice::recreateSwapchain() {
+   device->waitIdle();
+
+   destroySwapchain();
+
+   createSwapchain();
+   createSwapchainImageViews();
+   createFramebuffers();
+}
+
+void RenderDevice::destroySwapchain() {
+   swapchainFramebuffers.clear();
+   swapchainImageViews.clear();
+   swapchainImages.clear();
+   swapchain.reset();
 }
 
 void RenderDevice::drawFrame() {
@@ -584,16 +605,16 @@ vk::Extent2D RenderDevice::chooseSwapExtent(const vk::SurfaceCapabilitiesKHR& ca
 
 bool RenderDevice::isDeviceSuitable(const vk::raii::PhysicalDevice& possibleDevice,
                                     const Instance& instance) {
-   const QueueFamilyIndices queueFamilyIndices =
-       findQueueFamilies(possibleDevice, instance.getSurface());
+   const auto queueFamilyIndices = Utils::findQueueFamilies(possibleDevice, instance.getSurface());
 
    const bool extensionsSupported =
        checkDeviceExtensionSupport(possibleDevice, instance.getDesiredDeviceExtensions());
 
    bool swapchainAdequate = false;
    if (extensionsSupported) {
+      const SwapchainSupportDetails details{};
       auto [capabilities, formats, presentModes] =
-          querySwapchainSupport(possibleDevice, instance.getSurface());
+          Swapchain::querySwapchainSupport(possibleDevice, instance.getSurface());
       swapchainAdequate = !formats.empty() && !presentModes.empty();
    }
 
@@ -601,38 +622,6 @@ bool RenderDevice::isDeviceSuitable(const vk::raii::PhysicalDevice& possibleDevi
 
    return queueFamilyIndices.isComplete() && extensionsSupported && swapchainAdequate &&
           features.samplerAnisotropy && features.tessellationShader;
-}
-
-RenderDevice::QueueFamilyIndices RenderDevice::findQueueFamilies(
-    const vk::raii::PhysicalDevice& possibleDevice,
-    const std::unique_ptr<vk::raii::SurfaceKHR>& surface) {
-   QueueFamilyIndices queueFamilyIndices;
-
-   const auto queueFamilies = possibleDevice.getQueueFamilyProperties();
-
-   for (int i = 0; const auto& queueFamily : queueFamilies) {
-      if (queueFamily.queueFlags & vk::QueueFlagBits::eGraphics) {
-         queueFamilyIndices.graphicsFamily = i;
-      }
-
-      if (possibleDevice.getSurfaceSupportKHR(i, **surface)) {
-         queueFamilyIndices.presentFamily = i;
-      }
-
-      if (queueFamily.queueFlags & vk::QueueFlagBits::eTransfer) {
-         queueFamilyIndices.transferFamily = i;
-      }
-
-      if ((queueFamily.queueFlags & vk::QueueFlagBits::eCompute)) {
-         queueFamilyIndices.computeFamily = i;
-      }
-
-      if (queueFamilyIndices.isComplete()) {
-         break;
-      }
-      i++;
-   }
-   return queueFamilyIndices;
 }
 
 bool RenderDevice::checkDeviceExtensionSupport(
@@ -648,14 +637,4 @@ bool RenderDevice::checkDeviceExtensionSupport(
    }
 
    return requiredExtensions.empty();
-}
-
-RenderDevice::SwapchainSupportDetails RenderDevice::querySwapchainSupport(
-    const vk::raii::PhysicalDevice& possibleDevice,
-    const std::unique_ptr<vk::raii::SurfaceKHR>& surface) {
-   SwapchainSupportDetails details;
-   details.capabilities = possibleDevice.getSurfaceCapabilitiesKHR(**surface);
-   details.formats = possibleDevice.getSurfaceFormatsKHR(**surface);
-   details.presentModes = possibleDevice.getSurfacePresentModesKHR(**surface);
-   return details;
 }

@@ -11,15 +11,19 @@ using namespace Graphics::Utils;
 using Core::Log;
 
 ModelRenderer::ModelRenderer(const RendererBaseCreateInfo& createInfo) :
-    framebufferSize(createInfo.swapchainExtent) {
-   createRenderPass(&createInfo.device, &createInfo.physicalDevice, createInfo.swapchainFormat);
-   createPipeline(createInfo.swapchainExtent, &createInfo.device);
+    framebufferSize(createInfo.framebufferInfo.swapchainExtent) {
+   createRenderPass(
+       &createInfo.framebufferInfo.device, &createInfo.physicalDevice, createInfo.swapchainFormat);
+   createPipeline(createInfo.framebufferInfo.swapchainExtent, &createInfo.framebufferInfo.device);
 }
 
 void ModelRenderer::fillCommandBuffer(const vk::raii::CommandBuffer&, size_t currentImage) {
 }
 
 void ModelRenderer::update() {
+}
+
+void ModelRenderer::resetFramebuffers(const FramebufferInfo& info) {
 }
 
 void ModelRenderer::createRenderPass(const vk::raii::Device* device,
