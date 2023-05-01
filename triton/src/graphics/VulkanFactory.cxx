@@ -1,5 +1,6 @@
 #include "graphics/VulkanFactory.hpp"
 #include "Log.hpp"
+#include "graphics/renderer/RendererBase.hpp"
 #include <spirv.hpp>
 #include <vulkan/vulkan_structs.hpp>
 
@@ -30,29 +31,25 @@ namespace Graphics::Utils {
    }
 
    std::vector<std::unique_ptr<vk::raii::Framebuffer>> createFramebuffers(
-       const vk::raii::Device& device,
-       const std::vector<vk::raii::ImageView>& swapchainImageViews,
-       const vk::ImageView& depthImageView,
-       const vk::Extent2D swapchainExtent,
-       const vk::raii::RenderPass& renderPass) {
+       const FramebufferInfo& framebufferInfo, const vk::raii::RenderPass& renderPass) {
 
       auto swapchainFramebuffers = std::vector<std::unique_ptr<vk::raii::Framebuffer>>{};
-      swapchainFramebuffers.reserve(swapchainImageViews.size());
+      swapchainFramebuffers.reserve(framebufferInfo.swapchainImageViews.size());
       std::array<vk::ImageView, 2> attachments;
 
-      for (const auto& imageView : swapchainImageViews) {
+      for (const auto& imageView : framebufferInfo.swapchainImageViews) {
          attachments[0] = *imageView;
-         attachments[1] = depthImageView;
+         attachments[1] = *framebufferInfo.depthImageView;
 
          const auto framebufferCreateInfo =
              vk::FramebufferCreateInfo{.renderPass = *renderPass,
                                        .attachmentCount = static_cast<uint32_t>(attachments.size()),
                                        .pAttachments = attachments.data(),
-                                       .width = swapchainExtent.width,
-                                       .height = swapchainExtent.height,
+                                       .width = framebufferInfo.swapchainExtent.width,
+                                       .height = framebufferInfo.swapchainExtent.height,
                                        .layers = 1};
          swapchainFramebuffers.emplace_back(std::make_unique<vk::raii::Framebuffer>(
-             device.createFramebuffer(framebufferCreateInfo)));
+             framebufferInfo.device.createFramebuffer(framebufferCreateInfo)));
       }
       return swapchainFramebuffers;
    }
@@ -153,5 +150,36 @@ namespace Graphics::Utils {
                                    .pDependencies = &dependency};
 
       return createInfo.device->createRenderPass(renderPassCreateInfo);
+   }
+
+   QueueFamilyIndices findQueueFamilies(const vk::raii::PhysicalDevice& possibleDevice,
+                                        const std::unique_ptr<vk::raii::SurfaceKHR>& surface) {
+      QueueFamilyIndices queueFamilyIndices;
+
+      const auto queueFamilies = possibleDevice.getQueueFamilyProperties();
+
+      for (int i = 0; const auto& queueFamily : queueFamilies) {
+         if (queueFamily.queueFlags & vk::QueueFlagBits::eGraphics) {
+            queueFamilyIndices.graphicsFamily = i;
+         }
+
+         if (possibleDevice.getSurfaceSupportKHR(i, **surface)) {
+            queueFamilyIndices.presentFamily = i;
+         }
+
+         if (queueFamily.queueFlags & vk::QueueFlagBits::eTransfer) {
+            queueFamilyIndices.transferFamily = i;
+         }
+
+         if ((queueFamily.queueFlags & vk::QueueFlagBits::eCompute)) {
+            queueFamilyIndices.computeFamily = i;
+         }
+
+         if (queueFamilyIndices.isComplete()) {
+            break;
+         }
+         i++;
+      }
+      return queueFamilyIndices;
    }
 }
