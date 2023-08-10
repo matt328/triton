@@ -9,6 +9,3 @@ void ImGuiRenderer::fillCommandBuffer(const vk::raii::CommandBuffer& cmd, size_t
 
 void ImGuiRenderer::update() {
 }
-
-void ImGuiRenderer::resetFramebuffers(const FramebufferInfo& info) {
-}

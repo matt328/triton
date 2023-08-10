@@ -1,6 +1,5 @@
 #pragma once
 
-#include "graphics/renderer/RendererBase.hpp"
 #include <vulkan/vulkan_raii.hpp>
 namespace Graphics::Utils {
 
@@ -36,18 +35,6 @@ namespace Graphics::Utils {
       vk::DescriptorType type;
    };
 
-   struct QueueFamilyIndices {
-      std::optional<uint32_t> graphicsFamily;
-      std::optional<uint32_t> presentFamily;
-      std::optional<uint32_t> transferFamily;
-      std::optional<uint32_t> computeFamily;
-
-      [[nodiscard]] bool isComplete() const {
-         return graphicsFamily.has_value() && presentFamily.has_value() &&
-                transferFamily.has_value() && computeFamily.has_value();
-      }
-   };
-
    vk::Format findSupportedFormat(const vk::raii::PhysicalDevice& physicalDevice,
                                   const std::vector<vk::Format>& candidates,
                                   const vk::ImageTiling tiling,
@@ -55,13 +42,14 @@ namespace Graphics::Utils {
 
    vk::Format findDepthFormat(const vk::raii::PhysicalDevice& physicalDevice);
 
-   QueueFamilyIndices findQueueFamilies(const vk::raii::PhysicalDevice& possibleDevice,
-                                        const std::unique_ptr<vk::raii::SurfaceKHR>& surface);
-
    vk::raii::RenderPass colorAndDepthRenderPass(const RenderPassCreateInfo& createInfo);
 
    std::vector<std::unique_ptr<vk::raii::Framebuffer>> createFramebuffers(
-       const FramebufferInfo& framebufferInfo, const vk::raii::RenderPass& renderPass);
+       const vk::raii::Device& device,
+       const std::vector<vk::raii::ImageView>& swapchainImageViews,
+       const vk::ImageView& depthImageView,
+       const vk::Extent2D swapchainExtent,
+       const vk::raii::RenderPass& renderPass);
 
    std::unique_ptr<vk::raii::DescriptorSetLayout> createDescriptorSetLayout(
        const vk::raii::Device* device, const std::vector<ShaderStage>& stages);
@@ -71,5 +59,4 @@ namespace Graphics::Utils {
    static void print_resources(const spirv_cross::Compiler& compiler,
                                const char* tag,
                                const spirv_cross::SmallVector<spirv_cross::Resource>& resources);
-
 }

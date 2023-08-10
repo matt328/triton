@@ -11,8 +11,6 @@ class ImGuiRenderer : public RendererBase {
 
    void update() override;
 
-   void resetFramebuffers(const FramebufferInfo& info) override;
-
  private:
    const ImDrawData* drawData = nullptr;
 
