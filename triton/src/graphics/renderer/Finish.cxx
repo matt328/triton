@@ -5,7 +5,7 @@ using namespace Graphics::Utils;
 
 Finish::Finish(const RendererBaseCreateInfo& createInfo) {
    const auto renderPassCreateInfo =
-       RenderPassCreateInfo{.device = &createInfo.framebufferInfo.device,
+       RenderPassCreateInfo{.device = &createInfo.device,
                             .physicalDevice = &createInfo.physicalDevice,
                             .swapchainFormat = createInfo.swapchainFormat,
                             .clearColor = false,
@@ -15,7 +15,11 @@ Finish::Finish(const RendererBaseCreateInfo& createInfo) {
    renderPass =
        std::make_unique<vk::raii::RenderPass>(colorAndDepthRenderPass(renderPassCreateInfo));
 
-   framebuffers = createFramebuffers(createInfo.framebufferInfo, *renderPass);
+   framebuffers = createFramebuffers(createInfo.device,
+                                     createInfo.swapchainImageViews,
+                                     *createInfo.depthImageView,
+                                     createInfo.swapchainExtent,
+                                     *renderPass);
 }
 
 void Finish::fillCommandBuffer(const vk::raii::CommandBuffer& cmd, size_t currentImage) {
@@ -31,7 +35,4 @@ void Finish::fillCommandBuffer(const vk::raii::CommandBuffer& cmd, size_t curren
 }
 
 void Finish::update() {
-}
-
-void Finish::resetFramebuffers(const FramebufferInfo& info) {
 }

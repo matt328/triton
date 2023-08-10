@@ -21,7 +21,6 @@ set(${name}_SRC
    src/graphics/FrameData.cxx
    src/graphics/ImmediateContext.cxx
    src/graphics/VulkanFactory.cxx
-   src/graphics/Swapchain.cxx
    src/graphics/texture/Texture.cxx
    src/graphics/texture/TextureFactory.cxx
    src/graphics/geometry/MeshFactory.cxx
