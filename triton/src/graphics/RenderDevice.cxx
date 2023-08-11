@@ -74,11 +74,7 @@ RenderDevice::RenderDevice(const Instance& instance) {
    finishRenderer = std::make_unique<Finish>(rendererCreateInfo);
 }
 
-RenderDevice::~RenderDevice() {
-   for (auto i : frameContexts) {
-      TracyVkDestroy(i);
-   }
-}
+RenderDevice::~RenderDevice() = default;
 
 void RenderDevice::waitIdle() const {
    device->waitIdle();
@@ -335,16 +331,14 @@ void RenderDevice::createPerFrameData(const vk::raii::DescriptorSetLayout& descr
    for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++) {
       frameData.push_back(
           std::make_unique<FrameData>(*device,
+                                      *physicalDevice,
                                       *commandPool,
                                       *raiillocator,
                                       *descriptorPool,
                                       descriptorSetLayout,
-                                      textures[tempTextureId]->getDescriptorImageInfo()));
-      const auto queue = *(*graphicsQueue);
-      auto cmdbuf = (*frameData[i]->getCommandBuffer());
-
-      auto ctx = TracyVkContext(*(*physicalDevice), *(*device), queue, cmdbuf);
-      frameContexts.push_back(ctx);
+                                      textures[tempTextureId]->getDescriptorImageInfo(),
+                                      *graphicsQueue,
+                                      std::format("Frame {}", i)));
    }
 }
 
@@ -466,7 +460,7 @@ void RenderDevice::drawFrame() {
 
    {
 
-      recordCommandBuffer(currentFrameData->getCommandBuffer(), imageIndex);
+      recordCommandBuffer(*currentFrameData, imageIndex);
 
       graphicsQueue->submit(submitInfo, *currentFrameData->getInFlightFence());
    }
@@ -488,51 +482,53 @@ void RenderDevice::drawFrame() {
    currentFrame = (currentFrame + 1) % FRAMES_IN_FLIGHT;
 }
 
-void RenderDevice::recordCommandBuffer(const vk::raii::CommandBuffer& cmd,
-                                       const unsigned imageIndex) const {
+void RenderDevice::recordCommandBuffer(FrameData& frameData, const unsigned imageIndex) const {
 
    constexpr auto beginInfo =
        vk::CommandBufferBeginInfo{.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse};
+   auto& cmd = frameData.getCommandBuffer();
    cmd.begin(beginInfo);
+   {
+      auto ctx = frameData.getTracyContext();
 
-   auto ctx = frameContexts[currentFrame];
-   VkCommandBuffer b = *cmd;
-   TracyVkZone(ctx, b, "render room");
+      TracyVkZone(ctx, *cmd, "render room");
 
-   for (const auto& renderer : renderers) {
-      renderer->update();
-      renderer->fillCommandBuffer(cmd, imageIndex);
+      for (const auto& renderer : renderers) {
+         renderer->update();
+         renderer->fillCommandBuffer(cmd, imageIndex);
+      }
+
+      const auto renderArea = vk::Rect2D{.offset = {0, 0}, .extent = swapchainExtent};
+
+      const auto renderPassInfo =
+          vk::RenderPassBeginInfo{.renderPass = *(*renderPass),
+                                  .framebuffer = *swapchainFramebuffers[imageIndex],
+                                  .renderArea = renderArea};
+
+      cmd.beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
+      cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, *pipeline->getPipeline());
+
+      for (const auto& renderable : frameData.renderables) {
+         cmd.bindVertexBuffers(0, meshes.at(renderable)->getVertexBuffer().getBuffer(), {0});
+         cmd.bindIndexBuffer(
+             meshes.at(renderable)->getIndexBuffer().getBuffer(), 0, vk::IndexType::eUint32);
+         cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
+                                *pipeline->getPipelineLayout(),
+                                0,
+                                *frameData.getDescriptorSet(),
+                                nullptr);
+         cmd.drawIndexed(meshes.at(renderable)->getIndicesCount(), 1, 0, 0, 0);
+      }
+
+      frameData.renderables.clear();
+
+      cmd.endRenderPass();
+
+      finishRenderer->update();
+      finishRenderer->fillCommandBuffer(cmd, imageIndex);
+      TracyVkCollect(ctx, *cmd);
    }
 
-   const auto renderArea = vk::Rect2D{.offset = {0, 0}, .extent = swapchainExtent};
-
-   const auto renderPassInfo =
-       vk::RenderPassBeginInfo{.renderPass = *(*renderPass),
-                               .framebuffer = *swapchainFramebuffers[imageIndex],
-                               .renderArea = renderArea};
-
-   cmd.beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
-   cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, *pipeline->getPipeline());
-
-   for (const auto& renderable : frameData[currentFrame]->renderables) {
-      cmd.bindVertexBuffers(0, meshes.at(renderable)->getVertexBuffer().getBuffer(), {0});
-      cmd.bindIndexBuffer(
-          meshes.at(renderable)->getIndexBuffer().getBuffer(), 0, vk::IndexType::eUint32);
-      cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
-                             *pipeline->getPipelineLayout(),
-                             0,
-                             *frameData[currentFrame]->getDescriptorSet(),
-                             nullptr);
-      cmd.drawIndexed(meshes.at(renderable)->getIndicesCount(), 1, 0, 0, 0);
-   }
-
-   frameData[currentFrame]->renderables.clear();
-
-   cmd.endRenderPass();
-
-   finishRenderer->update();
-   finishRenderer->fillCommandBuffer(cmd, imageIndex);
-   // TracyVkCollect(ctx, b);
    cmd.end();
 }
 
