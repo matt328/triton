@@ -74,7 +74,11 @@ RenderDevice::RenderDevice(const Instance& instance) {
    finishRenderer = std::make_unique<Finish>(rendererCreateInfo);
 }
 
-RenderDevice::~RenderDevice() = default;
+RenderDevice::~RenderDevice() {
+   for (auto i : frameContexts) {
+      TracyVkDestroy(i);
+   }
+}
 
 void RenderDevice::waitIdle() const {
    device->waitIdle();
@@ -338,8 +342,9 @@ void RenderDevice::createPerFrameData(const vk::raii::DescriptorSetLayout& descr
                                       textures[tempTextureId]->getDescriptorImageInfo()));
       const auto queue = *(*graphicsQueue);
       auto cmdbuf = (*frameData[i]->getCommandBuffer());
-      // TODO: capture and then destroy ctx
+
       auto ctx = TracyVkContext(*(*physicalDevice), *(*device), queue, cmdbuf);
+      frameContexts.push_back(ctx);
    }
 }
 
@@ -442,8 +447,6 @@ void RenderDevice::drawFrame() {
    currentFrameData->getObjectMatricesBuffer().updateBufferValue(&objectMatrices,
                                                                  sizeof(ObjectMatrices));
 
-   recordCommandBuffer(currentFrameData->getCommandBuffer(), imageIndex);
-
    constexpr auto waitStages =
        std::array<vk::PipelineStageFlags, 1>{vk::PipelineStageFlagBits::eColorAttachmentOutput};
 
@@ -461,8 +464,12 @@ void RenderDevice::drawFrame() {
                       .signalSemaphoreCount = 1,
                       .pSignalSemaphores = signalSemaphores.data()};
 
-   graphicsQueue->submit(submitInfo, *currentFrameData->getInFlightFence());
+   {
 
+      recordCommandBuffer(currentFrameData->getCommandBuffer(), imageIndex);
+
+      graphicsQueue->submit(submitInfo, *currentFrameData->getInFlightFence());
+   }
    const auto presentInfo = vk::PresentInfoKHR{.waitSemaphoreCount = 1,
                                                .pWaitSemaphores = signalSemaphores.data(),
                                                .swapchainCount = 1,
@@ -487,6 +494,10 @@ void RenderDevice::recordCommandBuffer(const vk::raii::CommandBuffer& cmd,
    constexpr auto beginInfo =
        vk::CommandBufferBeginInfo{.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse};
    cmd.begin(beginInfo);
+
+   auto ctx = frameContexts[currentFrame];
+   VkCommandBuffer b = *cmd;
+   TracyVkZone(ctx, b, "render room");
 
    for (const auto& renderer : renderers) {
       renderer->update();
@@ -521,7 +532,7 @@ void RenderDevice::recordCommandBuffer(const vk::raii::CommandBuffer& cmd,
 
    finishRenderer->update();
    finishRenderer->fillCommandBuffer(cmd, imageIndex);
-
+   // TracyVkCollect(ctx, b);
    cmd.end();
 }
 
