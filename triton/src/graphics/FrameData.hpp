@@ -1,5 +1,6 @@
 #pragma once
 #include "core/vma_raii.hpp"
+#include <vulkan/vulkan_raii.hpp>
 
 namespace vk::raii {
    class DescriptorPool;
@@ -15,12 +16,15 @@ namespace vk::raii {
 class FrameData {
  public:
    FrameData(const vk::raii::Device& device,
+             const vk::raii::PhysicalDevice& physicalDevice,
              const vk::raii::CommandPool& commandPool,
              const vma::raii::Allocator& raiillocator,
              const vk::raii::DescriptorPool& descriptorPool,
              const vk::raii::DescriptorSetLayout& descriptorSetLayout,
-             vk::DescriptorImageInfo textureImageInfo);
-   ~FrameData() = default;
+             vk::DescriptorImageInfo textureImageInfo,
+             const vk::raii::Queue& queue,
+             const std::string_view name);
+   ~FrameData();
 
    FrameData(const FrameData&) = delete;
    FrameData(FrameData&&) = delete;
@@ -55,6 +59,10 @@ class FrameData {
       return *descriptorSet;
    };
 
+   [[nodiscard]] tracy::VkCtx* getTracyContext() const {
+      return tracyContext;
+   }
+
    std::vector<std::string> renderables;
 
  private:
@@ -67,4 +75,5 @@ class FrameData {
 
    std::unique_ptr<vk::raii::DescriptorSetLayout> descriptorSetLayout = nullptr;
    std::unique_ptr<vk::raii::DescriptorSet> descriptorSet = nullptr;
+   tracy::VkCtx* tracyContext = nullptr;
 };

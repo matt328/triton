@@ -1,14 +1,18 @@
 #include "FrameData.hpp"
 #include "graphics/pipeline/ObjectMatrices.hpp"
+#include <vulkan/vulkan_raii.hpp>
 
 using Core::Log;
 
 FrameData::FrameData(const vk::raii::Device& device,
+                     const vk::raii::PhysicalDevice& physicalDevice,
                      const vk::raii::CommandPool& commandPool,
                      const vma::raii::Allocator& raiillocator,
                      const vk::raii::DescriptorPool& descriptorPool,
                      const vk::raii::DescriptorSetLayout& descriptorSetLayout,
-                     const vk::DescriptorImageInfo textureImageInfo) {
+                     const vk::DescriptorImageInfo textureImageInfo,
+                     const vk::raii::Queue& queue,
+                     const std::string_view name) {
 
    const auto allocInfo = vk::CommandBufferAllocateInfo{.commandPool = *commandPool,
                                                         .level = vk::CommandBufferLevel::ePrimary,
@@ -20,7 +24,11 @@ FrameData::FrameData(const vk::raii::Device& device,
        vk::FenceCreateInfo{.flags = vk::FenceCreateFlagBits::eSignaled};
 
    commandBuffer = std::make_unique<vk::raii::CommandBuffer>(std::move(commandBuffers[0]));
-   imageAvailableSemaphore = std::make_unique<vk::raii::Semaphore>(device, semaphoreCreateInfo);
+
+   tracyContext = TracyVkContext((*physicalDevice), (*device), *queue, *(*commandBuffer));
+   TracyVkContextName(tracyContext, name.data(), name.length())
+
+       imageAvailableSemaphore = std::make_unique<vk::raii::Semaphore>(device, semaphoreCreateInfo);
    renderFinishedSemaphore = std::make_unique<vk::raii::Semaphore>(device, semaphoreCreateInfo);
    inFlightFence = std::make_unique<vk::raii::Fence>(device, fenceCreateInfo);
 
@@ -73,4 +81,8 @@ FrameData::FrameData(const vk::raii::Device& device,
    const auto dest = raiillocator.mapMemory(*objectMatricesBuffer);
    memcpy(dest, &objectMatrices, sizeof(ObjectMatrices));
    raiillocator.unmapMemory(*objectMatricesBuffer);
+}
+
+FrameData::~FrameData() {
+   TracyVkDestroy(tracyContext);
 }
