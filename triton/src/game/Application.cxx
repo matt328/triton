@@ -2,6 +2,7 @@
 #include "Game.hpp"
 #include "graphics/Instance.hpp"
 #include "graphics/RenderDevice.hpp"
+#include <client/TracyProfiler.hpp>
 
 const auto width = 1366;
 const auto height = 768;
@@ -43,6 +44,7 @@ void Application::run() const {
       if (frameTime > frameTimeThreshold) {
          frameTime = frameTimeThreshold;
       }
+
       currentTime = newTime;
 
       accumulator += frameTime;
@@ -54,11 +56,22 @@ void Application::run() const {
 
       const double alpha = accumulator / dt;
 
-      game->blendState(alpha);
+      {
+         ZoneNamedN(blendState, "Blend State", true);
+         game->blendState(alpha);
+      }
 
-      game->update(t, dt);
+      {
+         ZoneNamedN(update, "Update", true);
+         game->update(t, dt);
+      }
 
-      renderDevice->render();
+      {
+         ZoneNamedN(render, "Render", true);
+         renderDevice->render();
+      }
+
+      FrameMark;
 
       glfwPollEvents();
    }

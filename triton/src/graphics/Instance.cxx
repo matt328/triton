@@ -40,10 +40,12 @@ Instance::Instance(GLFWwindow* window,
        .ppEnabledExtensionNames = extensions.data(),
    };
 
-   if (portabilityRequired) {
-      instanceCreateInfo.flags |= vk::InstanceCreateFlagBits::eEnumeratePortabilityKHR;
-      desiredDeviceExtensions.push_back("VK_KHR_portability_subset");
-   }
+   // For some reason, now Win64 decides portability is required
+   // TODO: need to revisit determining whether portability is required or not
+   // if (portabilityRequired) {
+   //    instanceCreateInfo.flags |= vk::InstanceCreateFlagBits::eEnumeratePortabilityKHR;
+   //    desiredDeviceExtensions.push_back("VK_KHR_portability_subset");
+   // }
 
    const auto debugCreateInfo = vk::DebugUtilsMessengerCreateInfoEXT{
        .messageSeverity = vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
