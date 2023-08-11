@@ -53,6 +53,8 @@ target_precompile_headers(${name} PRIVATE
    <GLFW/glfw3.h>
    <entt/entt.hpp>
    <stb_image.h>
+   <tracy/Tracy.hpp>
+   <tracy/TracyVulkan.hpp>
 )
 
 if(MSVC)
@@ -68,6 +70,7 @@ add_compile_definitions(
    GLM_FORCE_RADIANS
    GLM_FORCE_DEPTH_ZERO_TO_ONE
    GLM_ENABLE_EXPERIMENTAL
+   TRACY_ENABLE
 )
 
 if(WIN32)
@@ -87,6 +90,7 @@ find_package(imgui CONFIG REQUIRED)
 find_package(spirv_cross_core CONFIG REQUIRED)
 find_package(spirv_cross_glsl CONFIG REQUIRED)
 find_package(spirv_cross_cpp CONFIG REQUIRED)
+find_package(Tracy CONFIG REQUIRED)
 
 target_link_libraries(${name}
    PRIVATE
@@ -94,6 +98,7 @@ target_link_libraries(${name}
    imgui::imgui
    spirv-cross-core
    spirv-cross-cpp
+   Tracy::TracyClient
    ${vulkan_LIBRARIES}
 )
 
