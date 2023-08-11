@@ -41,11 +41,11 @@ Instance::Instance(GLFWwindow* window,
    };
 
    // For some reason, now Win64 decides portability is required
-   // TODO: need to revisit determining whether portability is required or not
-   // if (portabilityRequired) {
-   //    instanceCreateInfo.flags |= vk::InstanceCreateFlagBits::eEnumeratePortabilityKHR;
-   //    desiredDeviceExtensions.push_back("VK_KHR_portability_subset");
-   // }
+   // Added an override to only even try to detect portability on __APPLE__
+   if (portabilityRequired) {
+      instanceCreateInfo.flags |= vk::InstanceCreateFlagBits::eEnumeratePortabilityKHR;
+      desiredDeviceExtensions.push_back("VK_KHR_portability_subset");
+   }
 
    const auto debugCreateInfo = vk::DebugUtilsMessengerCreateInfoEXT{
        .messageSeverity = vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
@@ -128,13 +128,17 @@ std::pair<std::vector<const char*>, bool> Instance::getRequiredExtensions() cons
       extNames.push_back(ext.extensionName);
    }
 
-   auto portabilityPresent = std::ranges::find_if(extNames, [](const std::string& name) {
-                                return name == VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME;
-                             }) != extNames.end();
+   auto portabilityPresent = false;
+
+#ifdef __APPLE__
+   portabilityPresent = std::ranges::find_if(extNames, [](const std::string& name) {
+                           return name == VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME;
+                        }) != extNames.end();
 
    if (portabilityPresent) {
       extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
    }
+#endif
 
    return std::make_pair(extensions, portabilityPresent);
 }

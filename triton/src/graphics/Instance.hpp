@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vulkan/vulkan_core.h>
 #define VK_NO_PROTOTYPES
 #include <vulkan/vulkan_raii.hpp>
 
