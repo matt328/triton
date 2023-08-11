@@ -20,6 +20,12 @@ class ImmediateContext;
 
 class Game;
 
+struct CtxDeleter {
+   void operator()(tracy::VkCtx* ctx) {
+      TracyVkDestroy(ctx);
+   }
+};
+
 class RenderDevice {
  public:
    void createAllocator(const Instance& instance);
@@ -92,6 +98,9 @@ class RenderDevice {
    std::unique_ptr<vk::raii::ImageView> depthImageView;
    std::vector<vk::raii::Framebuffer> swapchainFramebuffers;
 
+   // Raw pointers are real greasy julian, but this will eventually be #ifdef'd away in release
+   // builds anyway. Wrap it in an RAII type if you really want to get rid of this.
+   std::vector<tracy::VkCtx*> frameContexts;
    std::vector<std::unique_ptr<FrameData>> frameData;
 
    std::unique_ptr<vma::raii::AllocatedBuffer> testBuffer;
