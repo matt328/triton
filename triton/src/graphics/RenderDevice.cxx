@@ -29,6 +29,10 @@ RenderDevice::RenderDevice(const Instance& instance) {
    createDescriptorPool();
    createAllocator(instance);
 
+   // TODO: Left off setting up tracy gpu profiling.  Need to read up more, and possibly rework
+   // how rendering works here as we need both devices, a queue, and a command buffer to init
+   // tracy's gpu tracing. TracyVkContext(physicalDevice.get(), device.get(), )
+
    const auto renderPassCreateInfo =
        Graphics::Utils::RenderPassCreateInfo{.device = device.get(),
                                              .physicalDevice = physicalDevice.get(),
@@ -332,6 +336,10 @@ void RenderDevice::createPerFrameData(const vk::raii::DescriptorSetLayout& descr
                                       *descriptorPool,
                                       descriptorSetLayout,
                                       textures[tempTextureId]->getDescriptorImageInfo()));
+      const auto queue = *(*graphicsQueue);
+      auto cmdbuf = (*frameData[i]->getCommandBuffer());
+      // TODO: capture and then destroy ctx
+      auto ctx = TracyVkContext(*(*physicalDevice), *(*device), queue, cmdbuf);
    }
 }
 

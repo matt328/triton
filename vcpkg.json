@@ -1,21 +1,25 @@
 {
-  "name": "triton",
-  "version-string": "0.1.0",
-  "dependencies": [
-    "entt",
-    "fmt",
-    "glfw3",
-    "glm",
-    "glslang",
-    {
-      "name": "imgui",
-      "features": ["vulkan-binding", "glfw-binding"]
-    },
-    "nlohmann-json",
-    "spdlog",
-    "spirv-cross",
-    "stb",
-    "tinygltf",
-    "vulkan-memory-allocator-hpp"
-  ]
+   "name": "triton",
+   "version-string": "0.1.0",
+   "dependencies": [
+      "entt",
+      "fmt",
+      "glfw3",
+      "glm",
+      "glslang",
+      {
+         "name": "imgui",
+         "features": [
+            "vulkan-binding",
+            "glfw-binding"
+         ]
+      },
+      "nlohmann-json",
+      "spdlog",
+      "spirv-cross",
+      "stb",
+      "tinygltf",
+      "tracy",
+      "vulkan-memory-allocator-hpp"
+   ]
 }

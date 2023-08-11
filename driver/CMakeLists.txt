@@ -15,6 +15,7 @@ set_property(TARGET ${project_name} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CM
 find_package(spdlog)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glslang CONFIG REQUIRED)
+find_package(Tracy CONFIG REQUIRED)
 
 target_link_libraries(${project_name}
    PRIVATE
@@ -22,6 +23,7 @@ target_link_libraries(${project_name}
    glslang::glslang
    glslang::glslang-default-resource-limits
    glslang::SPIRV
+   Tracy::TracyClient
    triton
    spdlog::spdlog_header_only
    ${vulkan_LIBRARIES}

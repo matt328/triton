@@ -17,7 +17,20 @@
 #include "Application.hpp"
 #include "Log.hpp"
 
+#define TRACY_ENABLED
+#include "tracy/Tracy.hpp"
+
 using Core::Log;
+
+void* operator new(std ::size_t count) {
+   auto ptr = malloc(count);
+   TracyAlloc(ptr, count);
+   return ptr;
+}
+void operator delete(void* ptr) noexcept {
+   TracyFree(ptr);
+   free(ptr);
+}
 
 int main() {
    Log::init();
