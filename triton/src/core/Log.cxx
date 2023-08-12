@@ -15,7 +15,10 @@ namespace Core {
       distSink->add_sink(vsOutputSink);
 #endif
 
+      const auto tracySink = std::make_shared<TracySink<std::mutex>>();
+
       distSink->add_sink(stdoutColorSink);
+      distSink->add_sink(tracySink);
       distSink->set_pattern(LOG_PATTERN);
 
       core = std::make_shared<spdlog::logger>("triton", distSink);
@@ -24,4 +27,5 @@ namespace Core {
       game = std::make_shared<spdlog::logger>("game", distSink);
       game->set_level(spdlog::level::debug);
    }
+
 }

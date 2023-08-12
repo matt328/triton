@@ -14,6 +14,7 @@
 #include "graphics/texture/TextureFactory.hpp"
 #include "graphics/VulkanFactory.hpp"
 #include <stdexcept>
+#include <tracy/Tracy.hpp>
 #include <vulkan/vulkan_core.h>
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_structs.hpp>
@@ -115,7 +116,9 @@ void RenderDevice::createPhysicalDevice(const Instance& instance) {
       throw std::runtime_error("Failed to find a suitable GPU");
    }
 
-   Log::core->debug("Using physical device: {}", physicalDevice->getProperties().deviceName);
+   auto msg2 =
+       std::format("Using physical device: {}", physicalDevice->getProperties().deviceName.data());
+   TracyMessage(msg2.c_str(), msg2.length());
 }
 
 void RenderDevice::createLogicalDevice(const Instance& instance) {
