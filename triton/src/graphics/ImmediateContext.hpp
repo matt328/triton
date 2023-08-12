@@ -11,15 +11,8 @@ namespace vk::raii {
 
 class ImmediateContext {
  public:
-   /**
-    * Constructs an ImmediateContext with the given device, queue, and queueFamily.  Make
-    * sure to match the queue and queueFamily params, apparently once you create a queue, you have
-    * no idea which family it came from and we need that info to create a command pool for that
-    * queue
-    * \param device const ref to the Device's unique_ptr.
-    * \param newQueue shared_ptr of the queue to use.
-    * \param queueFamily family index matching the aforementioned queue.
-    */
+   // Constructs an immediate context which can be (re)used to execute command
+   // buffers.
    ImmediateContext(const vk::raii::Device& device,
                     const vk::raii::PhysicalDevice& physicalDevice,
                     const vk::raii::Queue& newQueue,
@@ -32,6 +25,7 @@ class ImmediateContext {
    ImmediateContext& operator=(const ImmediateContext&) = delete;
    ImmediateContext& operator=(ImmediateContext&&) = delete;
 
+   // Executes the given function on the given command buffer in this context.
    void submit(std::function<void(vk::raii::CommandBuffer& cmd)>&& fn) const;
 
  private:
