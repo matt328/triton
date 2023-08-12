@@ -35,10 +35,13 @@ class ImmediateContext {
    void submit(std::function<void(vk::raii::CommandBuffer& cmd)>&& fn) const;
 
  private:
-   const vk::raii::Device& device;
+   const vk::raii::Device& device; // NOLINT this is fine
    tracy::VkCtx* tracyContext;
-   const vk::raii::Queue& queue;
+   const vk::raii::Queue& queue; // NOLINT this is also file
    std::unique_ptr<vk::raii::Fence> fence = nullptr;
    std::unique_ptr<vk::raii::CommandPool> commandPool = nullptr;
    std::unique_ptr<vk::raii::CommandBuffer> commandBuffer = nullptr;
+
+   // It's fine because RenderDevice will surely outlive ImmediateContext.  It's understood that
+   // ImmediateContexts are not utility classes to be used wherever.
 };
