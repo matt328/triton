@@ -25,6 +25,7 @@ FrameData::FrameData(const vk::raii::Device& device,
 
    commandBuffer = std::make_unique<vk::raii::CommandBuffer>(std::move(commandBuffers[0]));
 
+   // NOLINTNEXTLINE I'd like to init this in the ctor init, but TracyVkContext is a macro
    tracyContext = TracyVkContext((*physicalDevice), (*device), *queue, *(*commandBuffer));
    TracyVkContextName(tracyContext, name.data(), name.length())
 
