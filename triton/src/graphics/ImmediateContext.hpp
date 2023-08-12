@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vulkan/vulkan_raii.hpp>
 namespace vk::raii {
    class Device;
    class CommandBuffer;
@@ -20,9 +21,11 @@ class ImmediateContext {
     * \param queueFamily family index matching the aforementioned queue.
     */
    ImmediateContext(const vk::raii::Device& device,
+                    const vk::raii::PhysicalDevice& physicalDevice,
                     const vk::raii::Queue& newQueue,
-                    uint32_t queueFamily);
-   ~ImmediateContext() = default;
+                    uint32_t queueFamily,
+                    const std::string_view& name = "unnamed immediate context");
+   ~ImmediateContext();
 
    ImmediateContext(const ImmediateContext&) = delete;
    ImmediateContext(ImmediateContext&&) = delete;
@@ -33,6 +36,7 @@ class ImmediateContext {
 
  private:
    const vk::raii::Device& device;
+   tracy::VkCtx* tracyContext;
    const vk::raii::Queue& queue;
    std::unique_ptr<vk::raii::Fence> fence = nullptr;
    std::unique_ptr<vk::raii::CommandPool> commandPool = nullptr;

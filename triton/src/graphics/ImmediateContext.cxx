@@ -1,15 +1,22 @@
 #include "ImmediateContext.hpp"
 #include "Log.hpp"
+#include "graphics/ImmediateContext.hpp"
+#include <vulkan/vulkan_raii.hpp>
 
 using Core::Log;
 
 ImmediateContext::ImmediateContext(const vk::raii::Device& device,
+                                   const vk::raii::PhysicalDevice& physicalDevice,
                                    const vk::raii::Queue& newQueue,
-                                   const uint32_t queueFamily) :
+                                   const uint32_t queueFamily,
+                                   const std::string_view& name) :
     device(device),
     queue(newQueue) {
    // Create Command Pool
-   const vk::CommandPoolCreateInfo transferCommandPoolCreateInfo{.queueFamilyIndex = queueFamily};
+   const vk::CommandPoolCreateInfo transferCommandPoolCreateInfo{
+       .flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
+       .queueFamilyIndex = queueFamily,
+   };
 
    commandPool = std::make_unique<vk::raii::CommandPool>(
        device.createCommandPool(transferCommandPoolCreateInfo));
@@ -23,8 +30,16 @@ ImmediateContext::ImmediateContext(const vk::raii::Device& device,
    commandBuffer = std::make_unique<vk::raii::CommandBuffer>(
        std::move(device.allocateCommandBuffers(uploadAllocInfo)[0]));
 
+   tracyContext = TracyVkContext((*physicalDevice), (*device), *queue, *(*commandBuffer));
+
+   TracyVkContextName(tracyContext, name.data(), name.length());
+
    // Create Fence
    fence = std::make_unique<vk::raii::Fence>(device.createFence(vk::FenceCreateInfo{}));
+}
+
+ImmediateContext::~ImmediateContext() {
+   TracyVkDestroy(tracyContext);
 }
 
 void ImmediateContext::submit(std::function<void(vk::raii::CommandBuffer& cmd)>&& fn) const {
@@ -32,9 +47,11 @@ void ImmediateContext::submit(std::function<void(vk::raii::CommandBuffer& cmd)>&
        .flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit};
 
    commandBuffer->begin(cmdBeginInfo);
-
-   fn(*commandBuffer);
-
+   {
+      TracyVkZone(tracyContext, *(*commandBuffer), "immediate submit");
+      fn(*commandBuffer);
+      TracyVkCollect(tracyContext, *(*commandBuffer));
+   }
    commandBuffer->end();
 
    const auto submitInfo =
