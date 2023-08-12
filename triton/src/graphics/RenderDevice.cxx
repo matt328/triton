@@ -291,11 +291,17 @@ void RenderDevice::createCommandPools(const Instance& instance) {
                  (*computeCommandPool).debugReportObjectType,
                  "Compute Command Pool");
 
-   transferImmediateContext =
-       std::make_unique<ImmediateContext>(*device.get(), *transferQueue, transferFamily.value());
+   transferImmediateContext = std::make_unique<ImmediateContext>(*device.get(),
+                                                                 *physicalDevice,
+                                                                 *transferQueue,
+                                                                 transferFamily.value(),
+                                                                 "Transfer Immediate Context");
 
-   graphicsImmediateContext =
-       std::make_unique<ImmediateContext>(*device.get(), *graphicsQueue, graphicsFamily.value());
+   graphicsImmediateContext = std::make_unique<ImmediateContext>(*device.get(),
+                                                                 *physicalDevice,
+                                                                 *graphicsQueue,
+                                                                 graphicsFamily.value(),
+                                                                 "Graphics Immediate Context");
 }
 
 void RenderDevice::createDescriptorPool() {
