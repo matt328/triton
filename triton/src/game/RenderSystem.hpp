@@ -1,14 +1,24 @@
 #pragma once
 
-class RenderDevice;
+#include "game/RenderObject.hpp"
+#include "game/Renderable.hpp"
 
 class RenderSystem {
  public:
-   explicit RenderSystem(const RenderDevice& renderDevice);
+   RenderSystem() = default;
    ~RenderSystem() = default;
 
-   void update(entt::registry& registry, float dt) const;
+   RenderSystem(const RenderSystem&) = default;
+   RenderSystem(RenderSystem&&) = delete;
+   RenderSystem& operator=(const RenderSystem&) = delete;
+   RenderSystem& operator=(RenderSystem&&) = delete;
+
+   void update(entt::registry& registry, float dt);
+
+   [[nodiscard]] const std::vector<RenderObject>& getRenderObjects() const {
+      return renderObjects;
+   };
 
  private:
-   const RenderDevice& renderDevice;
+   std::vector<RenderObject> renderObjects;
 };

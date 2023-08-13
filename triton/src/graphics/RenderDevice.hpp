@@ -2,6 +2,7 @@
 
 #include "FrameData.hpp"
 #include "Log.hpp"
+#include "game/RenderSystem.hpp"
 #include "geometry/MeshFactory.hpp"
 #include "game/Renderable.hpp"
 #include "graphics/renderer/RendererBase.hpp"
@@ -46,7 +47,7 @@ class RenderDevice {
    std::string createMesh(const std::string_view& filename);
    std::string createTexture(const std::string_view& filename);
 
-   void enqueue(const Renderable& renderable) const;
+   void registerRenderSystem(std::shared_ptr<RenderSystem> renderSystem);
 
  private:
    std::string tempTextureId;
@@ -110,6 +111,8 @@ class RenderDevice {
 
    std::vector<std::unique_ptr<RendererBase>> renderers;
    std::unique_ptr<RendererBase> finishRenderer;
+
+   std::shared_ptr<RenderSystem> renderSystem = nullptr;
 
    uint32_t currentFrame = 0;
    bool framebufferResized = false;

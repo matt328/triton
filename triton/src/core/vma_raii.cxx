@@ -73,8 +73,7 @@ namespace vma::raii {
    }
 
    void* Allocator::mapMemory(const AllocatedBuffer& allocatedBuffer) const {
-      const auto a = allocator.mapMemory(allocatedBuffer.getAllocation());
-      return a;
+      return allocator.mapMemory(allocatedBuffer.getAllocation());
    }
 
    void Allocator::unmapMemory(const AllocatedBuffer& allocatedBuffer) const {

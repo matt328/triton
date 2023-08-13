@@ -1,5 +1,6 @@
 set(Textures
    viking_room.png
+   grass.png
 )
 
 get_property(GENERATOR_IS_MULTI_CONFIG GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
