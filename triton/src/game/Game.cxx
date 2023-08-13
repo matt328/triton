@@ -1,14 +1,19 @@
 #include "Game.hpp"
 
 #include "Renderable.hpp"
+#include "Transform.hpp"
 #include "core/Utils.hpp"
 #include "RenderSystem.hpp"
+#include "TransformSystem.hpp"
 #include "graphics/RenderDevice.hpp"
 
 Game::Game(RenderDevice& renderDevice) {
    registry = std::make_unique<entt::registry>();
 
-   renderSystem = std::make_unique<RenderSystem>(renderDevice);
+   renderSystem = std::make_shared<RenderSystem>();
+   transformSystem = std::make_unique<TransformSystem>();
+
+   renderDevice.registerRenderSystem(renderSystem);
 
    const auto textureFilename = (Core::Paths::TEXTURES / "viking_room.png").string();
    const auto filename = (Core::Paths::MODELS / "viking_room.gltf").string();
@@ -18,9 +23,14 @@ Game::Game(RenderDevice& renderDevice) {
 
    const auto room = registry->create();
    registry->emplace<Renderable>(room, meshId, textureId);
+
+   const auto identity = glm::identity<glm::mat4>();
+
+   registry->emplace<Transform>(room);
 }
 
 void Game::update(double t, const float dt) const {
+   transformSystem->update(*registry, dt);
    renderSystem->update(*registry, dt);
 }
 

@@ -66,6 +66,7 @@ FrameData::FrameData(const vk::raii::Device& device,
        .pBufferInfo = &objectMatricesBufferInfo,
    };
 
+   // TODO Figure out how to handle multiple textures
    const auto textureDescriptorWrite = vk::WriteDescriptorSet{
        .dstSet = **descriptorSet,
        .dstBinding = 1,

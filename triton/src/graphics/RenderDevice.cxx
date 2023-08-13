@@ -94,10 +94,6 @@ std::string RenderDevice::createTexture(const std::string_view& filename) {
    return filename.data();
 }
 
-void RenderDevice::enqueue(const Renderable& renderable) const {
-   frameData[currentFrame]->renderables.push_back(renderable.getMeshId());
-}
-
 void RenderDevice::createPhysicalDevice(const Instance& instance) {
    const auto physicalDevices = instance.enumeratePhysicalDevices();
 
@@ -337,6 +333,15 @@ void RenderDevice::createAllocator(const Instance& instance) {
 }
 
 void RenderDevice::createPerFrameData(const vk::raii::DescriptorSetLayout& descriptorSetLayout) {
+   // Move the texture's DescriptorImageInfo out of FrameData
+   // Need to think about how to handle the uniform buffer as well,
+   // probably shouldn't have to have FRAMES_IN_FLIGHT copies of it
+   // answer: a single copy of the data, and multiple buffers that the data gets
+   // mapped into during that frame's rendering.
+   /*
+      i think for each object's texture, we can just call device.updateDescriptorSets
+      with a writedescriptorset pointing to the object's textureImageInfo
+   */
    for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++) {
       frameData.push_back(
           std::make_unique<FrameData>(*device,
@@ -408,6 +413,10 @@ void RenderDevice::createFramebuffers() {
 void RenderDevice::recreateSwapchain() {
 }
 
+void RenderDevice::registerRenderSystem(std::shared_ptr<RenderSystem> renderSystem) {
+   this->renderSystem = renderSystem;
+}
+
 void RenderDevice::drawFrame() {
    const auto& currentFrameData = frameData[currentFrame];
 
@@ -432,31 +441,30 @@ void RenderDevice::drawFrame() {
 
    currentFrameData->getCommandBuffer().reset();
 
-   const auto cameraPosition = glm::vec3{0.f, 0.f, 5.f};
-   const auto cameraTarget = glm::vec3{0.f, 0.f, 0.f};
-   const auto cameraUp = glm::vec3{0.f, 1.f, 0.f};
-   const auto view = glm::lookAt(cameraPosition, cameraTarget, cameraUp);
+   // const auto cameraPosition = glm::vec3{0.f, 0.f, 5.f};
+   // const auto cameraTarget = glm::vec3{0.f, 0.f, 0.f};
+   // const auto cameraUp = glm::vec3{0.f, 1.f, 0.f};
+   // const auto view = glm::lookAt(cameraPosition, cameraTarget, cameraUp);
 
-   constexpr float fov = glm::radians(60.f);
-   const float aspectRatio =
-       static_cast<float>(swapchainExtent.width) / static_cast<float>(swapchainExtent.height);
-   constexpr float nearPlane = 0.1f;
-   constexpr float farPlane = 1000.f;
+   // constexpr float fov = glm::radians(60.f);
+   // const float aspectRatio =
+   //     static_cast<float>(swapchainExtent.width) / static_cast<float>(swapchainExtent.height);
+   // constexpr float nearPlane = 0.1f;
+   // constexpr float farPlane = 1000.f;
 
-   const auto projection = glm::perspective(fov, aspectRatio, nearPlane, farPlane);
+   // const auto projection = glm::perspective(fov, aspectRatio, nearPlane, farPlane);
 
-   auto objectMatrices = ObjectMatrices{.model = glm::mat4{1.f}, .view = view, .proj = projection};
+   // auto objectMatrices = ObjectMatrices{.model = glm::mat4{1.f}, .view = view, .proj =
+   // projection};
 
-   currentFrameData->getObjectMatricesBuffer().updateBufferValue(&objectMatrices,
-                                                                 sizeof(ObjectMatrices));
+   // currentFrameData->getObjectMatricesBuffer().updateBufferValue(&objectMatrices,
+   //                                                               sizeof(ObjectMatrices));
 
    constexpr auto waitStages =
        std::array<vk::PipelineStageFlags, 1>{vk::PipelineStageFlagBits::eColorAttachmentOutput};
 
    const auto signalSemaphores =
        std::array<vk::Semaphore, 1>{*currentFrameData->getRenderFinishedSemaphore()};
-
-   updateUniformBuffer(currentFrame);
 
    const auto submitInfo =
        vk::SubmitInfo{.waitSemaphoreCount = 1,
@@ -517,19 +525,53 @@ void RenderDevice::recordCommandBuffer(FrameData& frameData, const unsigned imag
       cmd.beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
       cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, *pipeline->getPipeline());
 
-      for (const auto& renderable : frameData.renderables) {
-         cmd.bindVertexBuffers(0, meshes.at(renderable)->getVertexBuffer().getBuffer(), {0});
-         cmd.bindIndexBuffer(
-             meshes.at(renderable)->getIndexBuffer().getBuffer(), 0, vk::IndexType::eUint32);
+      const auto& renderObjects = renderSystem->getRenderObjects();
+
+      for (const auto& renderObject : renderObjects) {
+         const auto& mesh = meshes.at(renderObject.meshId);
+
+         cmd.bindVertexBuffers(0, mesh->getVertexBuffer().getBuffer(), {0});
+         cmd.bindIndexBuffer(mesh->getIndexBuffer().getBuffer(), 0, vk::IndexType::eUint32);
+
+         auto& texture = textures.at(renderObject.textureId);
+         const auto imageInfo = texture->getDescriptorImageInfo();
+
+         /* Should move this logic somewhere else?
+            Some of this is texture specific, so could pass the descriptorset reference
+            into the texture to produce the write.
+            It seems like maybe being able to group writes is needed, so the texture
+            itself should probably not call updateDescriptorSets
+          */
+         const auto textureWrite = std::array{vk::WriteDescriptorSet{
+             .dstSet = *frameData.getDescriptorSet(),
+             .dstBinding = 1,
+             .dstArrayElement = 0,
+             .descriptorCount = 1,
+             .descriptorType = vk::DescriptorType::eCombinedImageSampler,
+             .pImageInfo = &imageInfo,
+         }};
+
+         ObjectMatrices ubo{.model = renderObject.modelMatrix,
+                            .view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f),
+                                                glm::vec3(0.0f, 0.0f, 0.0f),
+                                                glm::vec3(0.0f, -1.0f, 0.0f)),
+                            .proj = glm::perspective(glm::radians(60.0f),
+                                                     static_cast<float>(swapchainExtent.width) /
+                                                         static_cast<float>(swapchainExtent.height),
+                                                     0.1f,
+                                                     1000.0f)};
+
+         frameData.getObjectMatricesBuffer().updateBufferValue(&ubo, sizeof(ubo));
+
+         device->updateDescriptorSets(textureWrite, nullptr);
+
          cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
                                 *pipeline->getPipelineLayout(),
                                 0,
                                 *frameData.getDescriptorSet(),
                                 nullptr);
-         cmd.drawIndexed(meshes.at(renderable)->getIndicesCount(), 1, 0, 0, 0);
+         cmd.drawIndexed(mesh->getIndicesCount(), 1, 0, 0, 0);
       }
-
-      frameData.renderables.clear();
 
       cmd.endRenderPass();
 

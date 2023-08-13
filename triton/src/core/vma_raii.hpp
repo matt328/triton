@@ -4,97 +4,112 @@
 
 namespace vma::raii {
 
-      class AllocatedImage {
-       public:
-         AllocatedImage(const vma::Allocator& newAllocator,
-                        const vk::Image newImage,
-                        const vma::Allocation newAllocation) :
-             image(newImage),
-             allocation(newAllocation), allocator(newAllocator) {
-         }
+   class AllocatedImage {
+    public:
+      AllocatedImage(const AllocatedImage&) = default;
+      AllocatedImage(AllocatedImage&&) = delete;
+      AllocatedImage& operator=(const AllocatedImage&) = default;
+      AllocatedImage& operator=(AllocatedImage&&) = delete;
 
-         ~AllocatedImage() {
-            allocator.destroyImage(image, allocation);
-         }
+      AllocatedImage(const vma::Allocator& newAllocator,
+                     const vk::Image newImage,
+                     const vma::Allocation newAllocation) :
+          image(newImage),
+          allocation(newAllocation), allocator(newAllocator) {
+      }
 
-         const vk::Image& getImage() const {
-            return image;
-         }
+      ~AllocatedImage() {
+         allocator.destroyImage(image, allocation);
+      }
 
-         const vma::Allocation& getAllocation() const {
-            return allocation;
-         }
+      [[nodiscard]] const vk::Image& getImage() const {
+         return image;
+      }
 
-       private:
-         vk::Image image;
-         vma::Allocation allocation;
-         vma::Allocator allocator;
-      };
+      [[nodiscard]] const vma::Allocation& getAllocation() const {
+         return allocation;
+      }
 
-      class AllocatedBuffer {
-       public:
-         AllocatedBuffer(const vma::Allocator& newAllocator,
-                         const vk::Buffer newBuffer,
-                         const vma::Allocation newAllocation) :
-             buffer(newBuffer),
-             allocation(newAllocation), allocator(newAllocator) {
-         }
+    private:
+      vk::Image image;
+      vma::Allocation allocation;
+      vma::Allocator allocator;
+   };
 
-         ~AllocatedBuffer() {
-            allocator.destroyBuffer(buffer, allocation);
-         }
+   class AllocatedBuffer {
+    public:
+      AllocatedBuffer(const AllocatedBuffer&) = default;
+      AllocatedBuffer(AllocatedBuffer&&) = delete;
+      AllocatedBuffer& operator=(const AllocatedBuffer&) = default;
+      AllocatedBuffer& operator=(AllocatedBuffer&&) = delete;
 
-         void updateBufferValue(void* data, const size_t dataSize) const {
-            const auto dst = allocator.mapMemory(allocation);
-            memcpy(dst, &data, dataSize);
-            allocator.unmapMemory(allocation);
-         }
+      AllocatedBuffer(const vma::Allocator& newAllocator,
+                      const vk::Buffer newBuffer,
+                      const vma::Allocation newAllocation) :
+          buffer(newBuffer),
+          allocation(newAllocation), allocator(newAllocator) {
+      }
 
-         const vk::Buffer& getBuffer() const {
-            return buffer;
-         }
+      ~AllocatedBuffer() {
+         allocator.destroyBuffer(buffer, allocation);
+      }
 
-         const vma::Allocation& getAllocation() const {
-            return allocation;
-         }
+      void updateBufferValue(void* data, const size_t dataSize) const {
+         auto dst = allocator.mapMemory(allocation);
+         memcpy(dst, data, dataSize);
+         allocator.unmapMemory(allocation);
+      }
 
-       private:
-         vk::Buffer buffer;
-         vma::Allocation allocation;
-         vma::Allocator allocator;
-      };
+      [[nodiscard]] const vk::Buffer& getBuffer() const {
+         return buffer;
+      }
 
-      class Allocator {
-       public:
-         explicit Allocator(const vma::AllocatorCreateInfo& createInfo);
-         ~Allocator();
+      [[nodiscard]] const vma::Allocation& getAllocation() const {
+         return allocation;
+      }
 
-         std::unique_ptr<AllocatedBuffer> createBuffer(
-             const vk::BufferCreateInfo* bci,
-             const vma::AllocationCreateInfo* aci,
-             const std::string_view& name = "unnamed buffer") const;
+    private:
+      vk::Buffer buffer;
+      vma::Allocation allocation;
+      vma::Allocator allocator;
+   };
 
-         std::unique_ptr<AllocatedBuffer> createStagingBuffer(
-             size_t size, const std::string_view& name = "unnamed buffer") const;
+   class Allocator {
+    public:
+      explicit Allocator(const vma::AllocatorCreateInfo& createInfo);
 
-         std::unique_ptr<AllocatedBuffer> createGpuVertexBuffer(
-             size_t size, const std::string_view& name = "unnamed buffer") const;
+      Allocator(const Allocator&) = default;
+      Allocator(Allocator&&) = delete;
+      Allocator& operator=(const Allocator&) = default;
+      Allocator& operator=(Allocator&&) = delete;
+      ~Allocator();
 
-         std::unique_ptr<AllocatedImage> createImage(
-             const vk::ImageCreateInfo& imageCreateInfo,
-             const vma::AllocationCreateInfo& allocationCreateInfo,
-             const std::string_view& newName = "unnamed image") const;
+      std::unique_ptr<AllocatedBuffer> createBuffer(
+          const vk::BufferCreateInfo* bci,
+          const vma::AllocationCreateInfo* aci,
+          const std::string_view& name = "unnamed buffer") const;
 
-         std::unique_ptr<AllocatedBuffer> createGpuIndexBuffer(size_t size,
-                                                               const std::string_view& name) const;
+      [[nodiscard]] std::unique_ptr<AllocatedBuffer> createStagingBuffer(
+          size_t size, const std::string_view& name = "unnamed buffer") const;
 
-         void* mapMemory(const AllocatedBuffer& allocatedBuffer) const;
-         void unmapMemory(const AllocatedBuffer& allocatedBuffer) const;
+      [[nodiscard]] std::unique_ptr<AllocatedBuffer> createGpuVertexBuffer(
+          size_t size, const std::string_view& name = "unnamed buffer") const;
 
-         void* mapMemory(const AllocatedImage& allocatedImage) const;
-         void unmapMemory(const AllocatedImage& allocatedImage) const;
+      [[nodiscard]] std::unique_ptr<AllocatedImage> createImage(
+          const vk::ImageCreateInfo& imageCreateInfo,
+          const vma::AllocationCreateInfo& allocationCreateInfo,
+          const std::string_view& newName = "unnamed image") const;
 
-       private:
-         vma::Allocator allocator;
-      };
-   }
+      [[nodiscard]] std::unique_ptr<AllocatedBuffer> createGpuIndexBuffer(
+          size_t size, const std::string_view& name) const;
+
+      [[nodiscard]] void* mapMemory(const AllocatedBuffer& allocatedBuffer) const;
+      void unmapMemory(const AllocatedBuffer& allocatedBuffer) const;
+
+      [[nodiscard]] void* mapMemory(const AllocatedImage& allocatedImage) const;
+      void unmapMemory(const AllocatedImage& allocatedImage) const;
+
+    private:
+      vma::Allocator allocator;
+   };
+}
