@@ -5,8 +5,12 @@ struct Renderable {
        meshId(meshId.data()), textureId(textureId.data()) {
    }
 
-   std::string getMeshId() const {
+   [[nodiscard]] std::string getMeshId() const {
       return meshId;
+   }
+
+   [[nodiscard]] std::string getTextureId() const {
+      return textureId;
    }
 
  private:

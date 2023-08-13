@@ -1,13 +1,19 @@
 #include "RenderSystem.hpp"
 #include "Renderable.hpp"
 #include "graphics/RenderDevice.hpp"
+#include "Transform.hpp"
 
-RenderSystem::RenderSystem(const RenderDevice& renderDevice) : renderDevice(renderDevice) {
-}
-
-void RenderSystem::update(entt::registry& registry, float dt) const {
-   for (const auto view = registry.view<Renderable>(); const auto entity : view) {
+// Update the internal renderObjects list so the renderer can just query it.
+void RenderSystem::update(entt::registry& registry, float dt) {
+   renderObjects.clear();
+   for (const auto view = registry.view<Renderable, Transform>(); const auto entity : view) {
       auto& renderable = view.get<Renderable>(entity);
-      renderDevice.enqueue(renderable);
+      auto& model = view.get<Transform>(entity);
+      auto renderObject = RenderObject{
+          .meshId = renderable.getMeshId(),
+          .textureId = renderable.getTextureId(),
+          .modelMatrix = model.getTransform(),
+      };
+      renderObjects.push_back(renderObject);
    }
 }

@@ -7,6 +7,7 @@ set(${name}_SRC
    src/game/Game.cxx
    src/game/Application.cxx
    src/game/RenderSystem.cxx
+   src/game/TransformSystem.cxx
    src/graphics/pipeline/Vertex.cxx
    src/graphics/pipeline/SpirvHelper.cxx
    src/graphics/pipeline/DefaultPipeline.cxx
@@ -36,6 +37,8 @@ target_precompile_headers(${name} PRIVATE
    <glm/gtc/type_ptr.hpp>
    <glm/gtx/string_cast.hpp>
    <glm/gtx/matrix_decompose.hpp>
+   <glm/gtx/quaternion.hpp>
+   <glm/gtc/matrix_transform.hpp>
    <GLFW/glfw3.h>
    <glslang/SPIRV/GlslangToSpv.h>
    <imgui.h>

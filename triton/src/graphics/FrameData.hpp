@@ -63,8 +63,6 @@ class FrameData {
       return tracyContext;
    }
 
-   std::vector<std::string> renderables; // NOLINT this is bad and I feel bad but it's temporary
-
  private:
    std::unique_ptr<vk::raii::CommandBuffer> commandBuffer = nullptr;
    std::unique_ptr<vk::raii::Semaphore> imageAvailableSemaphore = nullptr;

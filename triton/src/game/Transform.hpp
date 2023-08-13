@@ -1,21 +1,29 @@
 #pragma once
 
+#include <glm/ext/quaternion_trigonometric.hpp>
 struct Transform {
-   explicit Transform(const glm::mat4 transform) : transform(transform) {
+   explicit Transform() :
+       position(glm::one<glm::vec3>()), rotation(glm::identity<glm::quat>()),
+       scale(glm::one<glm::vec3>()) {
    }
-   glm::mat4 transform;
+   glm::vec3 position;
+   glm::quat rotation;
+   glm::vec3 scale;
 
-   explicit operator glm::mat4() const {
+   [[nodiscard]] glm::mat4 getTransform() {
+      auto transform = glm::identity<glm::mat4>();
+      transform = glm::translate(transform, position);
+      transform *= glm::toMat4(rotation);
+      transform = glm::scale(transform, scale);
       return transform;
    }
 
-   glm::vec3 getPosition() const {
-      glm::vec3 scale;
-      glm::quat rotation;
-      glm::vec3 translation;
-      glm::vec3 skew;
-      glm::vec4 perspective;
-      decompose(transform, scale, rotation, translation, skew, perspective);
-      return translation;
+   void rotateByAxisAngle(glm::vec3 axis, float angle) {
+      glm::quat newRot = glm::angleAxis(glm::radians(angle), axis);
+      rotation *= newRot;
+   }
+
+   [[nodiscard]] glm::vec3 getPosition() const {
+      return position;
    }
 };

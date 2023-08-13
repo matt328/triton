@@ -1,6 +1,7 @@
 #pragma once
 
 #include "RenderSystem.hpp"
+#include "TransformSystem.hpp"
 
 class RenderDevice;
 
@@ -9,10 +10,16 @@ class Game {
    explicit Game(RenderDevice& renderDevice);
    ~Game() = default;
 
+   Game(const Game&) = delete;
+   Game(Game&&) = delete;
+   Game& operator=(const Game&) = delete;
+   Game& operator=(Game&&) = delete;
+
    void update(double t, float dt) const;
    void blendState(double alpha);
 
  private:
    std::unique_ptr<entt::registry> registry;
-   std::unique_ptr<RenderSystem> renderSystem;
+   std::shared_ptr<RenderSystem> renderSystem;
+   std::unique_ptr<TransformSystem> transformSystem;
 };
