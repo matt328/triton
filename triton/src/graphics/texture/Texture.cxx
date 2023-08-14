@@ -2,6 +2,8 @@
 
 #include "Log.hpp"
 #include "core/Utils.hpp"
+#include <vulkan/vulkan_enums.hpp>
+#include <vulkan/vulkan_structs.hpp>
 
 using Core::Log;
 
@@ -9,7 +11,8 @@ Texture::Texture(const std::string_view& filename,
                  const vma::raii::Allocator& raiillocator,
                  const vk::raii::Device& device,
                  const ImmediateContext& graphicsContext,
-                 const ImmediateContext& transferContext) {
+                 const ImmediateContext& transferContext) :
+    device(device) {
    Log::core->debug("Creating Texture from file: {}", filename.data());
 
    int width = 0, height = 0, channels = 0;
@@ -160,12 +163,22 @@ Texture::Texture(const std::string_view& filename,
    view = std::make_unique<vk::raii::ImageView>(device.createImageView(viewInfo));
 }
 
-vk::DescriptorImageInfo Texture::getDescriptorImageInfo() const {
-   return vk::DescriptorImageInfo{
+void Texture::updateDescriptorSet(const vk::raii::DescriptorSet& descriptorSet) const {
+   const auto imageInfo = vk::DescriptorImageInfo{
        .sampler = **sampler,
        .imageView = **view,
        .imageLayout = imageLayout,
    };
+   const auto textureWrite = std::array{vk::WriteDescriptorSet{
+       .dstSet = *descriptorSet,
+       .dstBinding = 1,
+       .dstArrayElement = 0,
+       .descriptorCount = 1,
+       .descriptorType = vk::DescriptorType::eCombinedImageSampler,
+       .pImageInfo = &imageInfo,
+   }};
+   const auto writes = std::array{textureWrite};
+   device.updateDescriptorSets(writes, nullptr);
 }
 
 void Texture::transitionImageLayout(const ImmediateContext& context,
