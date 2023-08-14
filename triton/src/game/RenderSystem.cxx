@@ -4,7 +4,7 @@
 #include "Transform.hpp"
 
 // Update the internal renderObjects list so the renderer can just query it.
-void RenderSystem::update(entt::registry& registry, float dt) {
+void RenderSystem::update(entt::registry& registry) {
    renderObjects.clear();
    for (const auto view = registry.view<Renderable, Transform>(); const auto entity : view) {
       auto& renderable = view.get<Renderable>(entity);

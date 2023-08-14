@@ -13,7 +13,7 @@ class RenderSystem {
    RenderSystem& operator=(const RenderSystem&) = delete;
    RenderSystem& operator=(RenderSystem&&) = delete;
 
-   void update(entt::registry& registry, float dt);
+   void update(entt::registry& registry);
 
    [[nodiscard]] const std::vector<RenderObject>& getRenderObjects() const {
       return renderObjects;
