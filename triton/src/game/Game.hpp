@@ -15,7 +15,7 @@ class Game {
    Game& operator=(const Game&) = delete;
    Game& operator=(Game&&) = delete;
 
-   void update(double t, float dt) const;
+   void update() const;
    void blendState(double alpha);
 
  private:
