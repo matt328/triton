@@ -9,5 +9,5 @@ class TransformSystem {
    TransformSystem& operator=(TransformSystem&&) = delete;
    ~TransformSystem() = default;
 
-   void update(entt::registry& registry, float dt) const;
+   void update(entt::registry& registry) const;
 };
