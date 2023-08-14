@@ -21,7 +21,6 @@ class FrameData {
              const vma::raii::Allocator& raiillocator,
              const vk::raii::DescriptorPool& descriptorPool,
              const vk::raii::DescriptorSetLayout& descriptorSetLayout,
-             vk::DescriptorImageInfo textureImageInfo,
              const vk::raii::Queue& queue,
              const std::string_view name);
    ~FrameData();

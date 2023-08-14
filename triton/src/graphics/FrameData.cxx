@@ -10,7 +10,6 @@ FrameData::FrameData(const vk::raii::Device& device,
                      const vma::raii::Allocator& raiillocator,
                      const vk::raii::DescriptorPool& descriptorPool,
                      const vk::raii::DescriptorSetLayout& descriptorSetLayout,
-                     const vk::DescriptorImageInfo textureImageInfo,
                      const vk::raii::Queue& queue,
                      const std::string_view name) {
 
@@ -66,17 +65,7 @@ FrameData::FrameData(const vk::raii::Device& device,
        .pBufferInfo = &objectMatricesBufferInfo,
    };
 
-   // TODO Figure out how to handle multiple textures
-   const auto textureDescriptorWrite = vk::WriteDescriptorSet{
-       .dstSet = **descriptorSet,
-       .dstBinding = 1,
-       .dstArrayElement = 0,
-       .descriptorCount = 1,
-       .descriptorType = vk::DescriptorType::eCombinedImageSampler,
-       .pImageInfo = &textureImageInfo,
-   };
-
-   const auto writes = std::array{objectMatricesDescriptorWrite, textureDescriptorWrite};
+   const auto writes = std::array{objectMatricesDescriptorWrite};
 
    device.updateDescriptorSets(writes, nullptr);
 
