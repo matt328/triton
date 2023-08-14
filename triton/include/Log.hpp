@@ -3,6 +3,7 @@
 #include <memory>
 #include <spdlog/spdlog.h>
 #include "spdlog/sinks/base_sink.h"
+#include <tracy/Tracy.hpp>
 
 namespace Core {
    class Log {
