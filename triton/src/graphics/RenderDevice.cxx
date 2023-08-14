@@ -112,9 +112,8 @@ void RenderDevice::createPhysicalDevice(const Instance& instance) {
       throw std::runtime_error("Failed to find a suitable GPU");
    }
 
-   auto msg2 =
-       std::format("Using physical device: {}", physicalDevice->getProperties().deviceName.data());
-   TracyMessage(msg2.c_str(), msg2.length());
+   Core::Log::core->info("Using physical device: {}",
+                         physicalDevice->getProperties().deviceName.data());
 }
 
 void RenderDevice::createLogicalDevice(const Instance& instance) {
@@ -350,7 +349,7 @@ void RenderDevice::createPerFrameData(const vk::raii::DescriptorSetLayout& descr
                                                       *descriptorPool,
                                                       descriptorSetLayout,
                                                       *graphicsQueue,
-                                                      std::format("Frame {}", i)));
+                                                      fmt::format("Frame {}", i)));
    }
 }
 
