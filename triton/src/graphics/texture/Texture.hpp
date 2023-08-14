@@ -2,6 +2,7 @@
 
 #include "graphics/ImmediateContext.hpp"
 #include "core/vma_raii.hpp"
+#include <vulkan/vulkan_raii.hpp>
 
 class Texture final {
  public:
@@ -17,9 +18,10 @@ class Texture final {
    Texture& operator=(const Texture&) = delete;
    Texture& operator=(Texture&&) = delete;
 
-   [[nodiscard]] vk::DescriptorImageInfo getDescriptorImageInfo() const;
+   void updateDescriptorSet(const vk::raii::DescriptorSet& descriptorSet) const;
 
  private:
+   const vk::raii::Device& device;
    std::unique_ptr<vma::raii::AllocatedImage> image;
    std::unique_ptr<vk::raii::ImageView> view;
 

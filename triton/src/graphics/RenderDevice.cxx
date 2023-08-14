@@ -343,16 +343,14 @@ void RenderDevice::createPerFrameData(const vk::raii::DescriptorSetLayout& descr
       with a writedescriptorset pointing to the object's textureImageInfo
    */
    for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++) {
-      frameData.push_back(
-          std::make_unique<FrameData>(*device,
-                                      *physicalDevice,
-                                      *commandPool,
-                                      *raiillocator,
-                                      *descriptorPool,
-                                      descriptorSetLayout,
-                                      textures[tempTextureId]->getDescriptorImageInfo(),
-                                      *graphicsQueue,
-                                      std::format("Frame {}", i)));
+      frameData.push_back(std::make_unique<FrameData>(*device,
+                                                      *physicalDevice,
+                                                      *commandPool,
+                                                      *raiillocator,
+                                                      *descriptorPool,
+                                                      descriptorSetLayout,
+                                                      *graphicsQueue,
+                                                      std::format("Frame {}", i)));
    }
 }
 
@@ -534,22 +532,6 @@ void RenderDevice::recordCommandBuffer(FrameData& frameData, const unsigned imag
          cmd.bindIndexBuffer(mesh->getIndexBuffer().getBuffer(), 0, vk::IndexType::eUint32);
 
          auto& texture = textures.at(renderObject.textureId);
-         const auto imageInfo = texture->getDescriptorImageInfo();
-
-         /* Should move this logic somewhere else?
-            Some of this is texture specific, so could pass the descriptorset reference
-            into the texture to produce the write.
-            It seems like maybe being able to group writes is needed, so the texture
-            itself should probably not call updateDescriptorSets
-          */
-         const auto textureWrite = std::array{vk::WriteDescriptorSet{
-             .dstSet = *frameData.getDescriptorSet(),
-             .dstBinding = 1,
-             .dstArrayElement = 0,
-             .descriptorCount = 1,
-             .descriptorType = vk::DescriptorType::eCombinedImageSampler,
-             .pImageInfo = &imageInfo,
-         }};
 
          ObjectMatrices ubo{.model = renderObject.modelMatrix,
                             .view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f),
@@ -563,7 +545,8 @@ void RenderDevice::recordCommandBuffer(FrameData& frameData, const unsigned imag
 
          frameData.getObjectMatricesBuffer().updateBufferValue(&ubo, sizeof(ubo));
 
-         device->updateDescriptorSets(textureWrite, nullptr);
+         // device->updateDescriptorSets(textureWrite1, nullptr);
+         texture->updateDescriptorSet(frameData.getDescriptorSet());
 
          cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
                                 *pipeline->getPipelineLayout(),
