@@ -2,6 +2,7 @@
 #include "Game.hpp"
 #include "graphics/Instance.hpp"
 #include "graphics/RenderDevice.hpp"
+#include <GLFW/glfw3.h>
 #include <client/TracyProfiler.hpp>
 
 const auto width = 1366;
@@ -31,39 +32,38 @@ Application::~Application() {
 void Application::run() const {
    glfwSetKeyCallback(window.get(), keyCallback);
 
-   double t = 0.0;
-   constexpr auto frameTimeThreshold = 0.25f;
-
    double currentTime = glfwGetTime();
    double accumulator = 0.f;
 
+   double previousInstant = glfwGetTime();
+   double maxFrameTime = 0.16667f;
+   double accumulatedTime = 0.f;
+   double fixedTimeStep = 1.f / 240.f;
+   double currentInstant = glfwGetTime();
+
    while (!glfwWindowShouldClose(window.get())) {
-      constexpr double dt = 0.01f;
-      const double newTime = glfwGetTime();
-      double frameTime = newTime - currentTime;
-      if (frameTime > frameTimeThreshold) {
-         frameTime = frameTimeThreshold;
+      currentInstant = glfwGetTime();
+
+      auto elapsed = currentInstant - previousInstant;
+
+      if (elapsed > maxFrameTime) {
+         elapsed = maxFrameTime;
+      }
+      accumulatedTime += elapsed;
+
+      while (accumulatedTime >= fixedTimeStep) {
+         {
+            ZoneNamedN(update, "Update", true);
+            game->update();
+         }
+         accumulatedTime -= fixedTimeStep;
       }
 
-      currentTime = newTime;
-
-      accumulator += frameTime;
-
-      while (accumulator >= dt) {
-         t += dt;
-         accumulator -= dt;
-      }
-
-      const double alpha = accumulator / dt;
+      auto blendingFactor = accumulatedTime / fixedTimeStep;
 
       {
          ZoneNamedN(blendState, "Blend State", true);
-         game->blendState(alpha);
-      }
-
-      {
-         ZoneNamedN(update, "Update", true);
-         game->update(t, dt);
+         game->blendState(blendingFactor);
       }
 
       {
@@ -72,6 +72,8 @@ void Application::run() const {
       }
 
       FrameMark;
+
+      previousInstant = currentInstant;
 
       glfwPollEvents();
    }

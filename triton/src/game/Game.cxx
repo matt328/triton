@@ -29,9 +29,9 @@ Game::Game(RenderDevice& renderDevice) {
    registry->emplace<Transform>(room);
 }
 
-void Game::update(double t, const float dt) const {
-   transformSystem->update(*registry, dt);
-   renderSystem->update(*registry, dt);
+void Game::update() const {
+   transformSystem->update(*registry);
+   renderSystem->update(*registry);
 }
 
 void Game::blendState(double alpha) {
