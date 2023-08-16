@@ -8,7 +8,7 @@ class RenderSystem {
    RenderSystem() = default;
    ~RenderSystem() = default;
 
-   RenderSystem(const RenderSystem&) = default;
+   RenderSystem(const RenderSystem&) = delete;
    RenderSystem(RenderSystem&&) = delete;
    RenderSystem& operator=(const RenderSystem&) = delete;
    RenderSystem& operator=(RenderSystem&&) = delete;

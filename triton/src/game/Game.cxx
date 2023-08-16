@@ -6,6 +6,7 @@
 #include "RenderSystem.hpp"
 #include "TransformSystem.hpp"
 #include "graphics/RenderDevice.hpp"
+#include <entt/signal/fwd.hpp>
 
 Game::Game(RenderDevice& renderDevice) {
    registry = std::make_unique<entt::registry>();
@@ -27,6 +28,12 @@ Game::Game(RenderDevice& renderDevice) {
    const auto identity = glm::identity<glm::mat4>();
 
    registry->emplace<Transform>(room);
+
+   entt::delegate<int(int)> delegate{};
+
+   delegate.connect<&TransformSystem::recieve>(transformSystem);
+
+   delegate(43);
 }
 
 void Game::update() const {

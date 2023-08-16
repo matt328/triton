@@ -6,6 +6,7 @@ set(${name}_SRC
    src/core/Log.cxx
    src/game/Game.cxx
    src/game/Application.cxx
+   src/game/CameraSystem.cxx
    src/game/RenderSystem.cxx
    src/game/TransformSystem.cxx
    src/graphics/pipeline/Vertex.cxx
