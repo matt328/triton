@@ -2,8 +2,6 @@
 #include "Game.hpp"
 #include "graphics/Instance.hpp"
 #include "graphics/RenderDevice.hpp"
-#include <GLFW/glfw3.h>
-#include <client/TracyProfiler.hpp>
 
 const auto width = 1366;
 const auto height = 768;

@@ -114,7 +114,8 @@
       "textures",
       "everything",
       "geometry",
-      "application"
+      "application",
+      "game"
    ],
    "git.ignoreLimitWarning": true,
    "workbench.colorCustomizations": {
