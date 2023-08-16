@@ -13,11 +13,6 @@
 #include "graphics/texture/Texture.hpp"
 #include "graphics/texture/TextureFactory.hpp"
 #include "graphics/VulkanFactory.hpp"
-#include <stdexcept>
-#include <tracy/Tracy.hpp>
-#include <vulkan/vulkan_core.h>
-#include <vulkan/vulkan_enums.hpp>
-#include <vulkan/vulkan_structs.hpp>
 
 using Core::Log;
 
@@ -544,7 +539,6 @@ void RenderDevice::recordCommandBuffer(FrameData& frameData, const unsigned imag
 
          frameData.getObjectMatricesBuffer().updateBufferValue(&ubo, sizeof(ubo));
 
-         // device->updateDescriptorSets(textureWrite1, nullptr);
          texture->updateDescriptorSet(frameData.getDescriptorSet());
 
          cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,

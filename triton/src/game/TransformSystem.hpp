@@ -10,4 +10,8 @@ class TransformSystem {
    ~TransformSystem() = default;
 
    void update(entt::registry& registry) const;
+
+   int recieve(const int& i) {
+      return i;
+   }
 };
