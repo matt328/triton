@@ -11,3 +11,7 @@ void TransformSystem::update(entt::registry& registry) const {
       transform.rotateByAxisAngle({0.f, 1.f, 0.f}, .25f);
    }
 }
+
+void TransformSystem::handleAction(const Actions::Action& action) {
+   Core::Log::core->info("Transform System handling action {}", Actions::toString(action));
+}

@@ -5,17 +5,19 @@
 #include "core/Utils.hpp"
 #include "RenderSystem.hpp"
 #include "TransformSystem.hpp"
+#include "game/InputSystem.hpp"
 #include "graphics/RenderDevice.hpp"
-#include <entt/signal/fwd.hpp>
 
 Game::Game(RenderDevice& renderDevice) {
    registry = std::make_unique<entt::registry>();
 
    renderSystem = std::make_shared<RenderSystem>();
    transformSystem = std::make_unique<TransformSystem>();
+   inputSystem = std::make_unique<InputSystem>();
 
    renderDevice.registerRenderSystem(renderSystem);
 
+   // Create viking room entity
    const auto textureFilename = (Core::Paths::TEXTURES / "viking_room.png").string();
    const auto filename = (Core::Paths::MODELS / "viking_room.gltf").string();
 
@@ -24,18 +26,24 @@ Game::Game(RenderDevice& renderDevice) {
 
    const auto room = registry->create();
    registry->emplace<Renderable>(room, meshId, textureId);
-
-   const auto identity = glm::identity<glm::mat4>();
-
    registry->emplace<Transform>(room);
 
-   entt::delegate<int(int)> delegate{};
+   // Create Plane area entity
+   const auto planeMeshId =
+       renderDevice.createMesh((Core::Paths::MODELS / "starting_area" / "area.gltf").string());
+   const auto planeTextureId =
+       renderDevice.createTexture((Core::Paths::TEXTURES / "grass.png").string());
 
-   delegate.connect<&TransformSystem::recieve>(transformSystem);
+   const auto floor = registry->create();
+   registry->emplace<Renderable>(floor, planeMeshId, planeTextureId);
+   registry->emplace<Transform>(floor);
 
-   delegate(43);
+   inputSystem->getActionDelegate().connect<&TransformSystem::handleAction>(transformSystem);
 }
 
+void Game::keyPressed(const int key, int scancode, const int action, int mods) const {
+   inputSystem->keyCallback(key, scancode, action, mods);
+}
 void Game::update() const {
    transformSystem->update(*registry);
    renderSystem->update(*registry);
