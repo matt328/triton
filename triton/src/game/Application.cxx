@@ -82,6 +82,7 @@ void Application::keyCallbackInt(const int key, int scancode, const int action, 
    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
       glfwSetWindowShouldClose(window.get(), GL_TRUE);
    }
+   game->keyPressed(key, scancode, action, mods);
 }
 
 void Application::framebufferResizeCallback(GLFWwindow* window, const int width, const int height) {
