@@ -2,6 +2,6 @@
 
 struct RenderObject {
    std::string meshId;
-   std::string textureId;
+   uint32_t textureId;
    glm::mat4 modelMatrix;
 };

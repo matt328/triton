@@ -27,6 +27,13 @@ struct CtxDeleter {
    }
 };
 
+const auto InitialLookAt =
+    glm::lookAt(glm::vec3(2.f, 2.f, 2.f), glm::zero<glm::vec3>(), glm::vec3(0.f, -1.f, 0.f));
+
+constexpr auto FOV = glm::radians(60.f);
+constexpr auto ZNear = 0.1f;
+constexpr auto ZFar = 1000.f;
+
 class RenderDevice {
  public:
    void createAllocator(const Instance& instance);
@@ -45,9 +52,22 @@ class RenderDevice {
    void waitIdle() const;
 
    std::string createMesh(const std::string_view& filename);
-   std::string createTexture(const std::string_view& filename);
+   uint32_t createTexture(const std::string_view& filename);
 
    void registerRenderSystem(std::shared_ptr<RenderSystem> renderSystem);
+
+   template <typename T>
+   static void setObjectName(T const& handle,
+                             const vk::raii::Device& device,
+                             const vk::DebugReportObjectTypeEXT objectType,
+                             const std::string_view name) {
+      // NOLINTNEXTLINE this is just debug anyway
+      const auto debugHandle = reinterpret_cast<uint64_t>(static_cast<typename T::CType>(handle));
+
+      const auto debugNameInfo = vk::DebugMarkerObjectNameInfoEXT{
+          .objectType = objectType, .object = debugHandle, .pObjectName = name.data()};
+      device.debugMarkerSetObjectNameEXT(debugNameInfo);
+   }
 
  private:
    std::string tempTextureId;
@@ -109,6 +129,8 @@ class RenderDevice {
    std::unordered_map<std::string, std::unique_ptr<Texture>> textures;
    std::unordered_map<std::string, std::unique_ptr<Mesh<Models::Vertex, uint32_t>>> meshes;
 
+   std::vector<std::unique_ptr<Texture>> textureList = {};
+
    std::vector<std::unique_ptr<RendererBase>> renderers;
    std::unique_ptr<RendererBase> finishRenderer;
 
@@ -125,7 +147,9 @@ class RenderDevice {
    void createCommandPools(const Instance& instance);
    void createDescriptorPool();
 
-   void createPerFrameData(const vk::raii::DescriptorSetLayout& descriptorSetLayout);
+   void createPerFrameData(const vk::raii::DescriptorSetLayout& descriptorSetLayout,
+                           const vk::raii::DescriptorSetLayout& bindlessDescriptorSetLayout,
+                           const vk::raii::DescriptorSetLayout& objectDescriptorSetLayout);
 
    void createDepthResources();
    void createFramebuffers();
@@ -139,19 +163,6 @@ class RenderDevice {
    void updateUniformBuffer(uint32_t currentFrame) const;
 
    // Utils
-
-   template <typename T>
-   static void setObjectName(T const& handle,
-                             const vk::raii::Device& device,
-                             const vk::DebugReportObjectTypeEXT objectType,
-                             const std::string_view name) {
-      // NOLINTNEXTLINE this is just debug anyway
-      const auto debugHandle = reinterpret_cast<uint64_t>(static_cast<typename T::CType>(handle));
-
-      const auto debugNameInfo = vk::DebugMarkerObjectNameInfoEXT{
-          .objectType = objectType, .object = debugHandle, .pObjectName = name.data()};
-      device.debugMarkerSetObjectNameEXT(debugNameInfo);
-   }
 
    static vk::PresentModeKHR chooseSwapPresentMode(
        const std::vector<vk::PresentModeKHR>& availablePresentModes);

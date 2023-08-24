@@ -1,5 +1,6 @@
 #pragma once
 #include "core/vma_raii.hpp"
+#include "graphics/pipeline/ObjectMatrices.hpp"
 #include <vulkan/vulkan_raii.hpp>
 
 namespace vk::raii {
@@ -21,6 +22,8 @@ class FrameData {
              const vma::raii::Allocator& raiillocator,
              const vk::raii::DescriptorPool& descriptorPool,
              const vk::raii::DescriptorSetLayout& descriptorSetLayout,
+             const vk::raii::DescriptorSetLayout& bindlessDescriptorSetLayout,
+             const vk::raii::DescriptorSetLayout& objectDescriptorSetLayout,
              const vk::raii::Queue& queue,
              const std::string_view name);
    ~FrameData();
@@ -58,9 +61,24 @@ class FrameData {
       return *descriptorSet;
    };
 
+   [[nodiscard]] const vk::raii::DescriptorSet& getBindlessDescriptorSet() const {
+      return *bindlessDescriptorSet;
+   };
+
+   [[nodiscard]] const vk::raii::DescriptorSet& getObjectDescriptorSet() const {
+      return *objectDescriptorSet;
+   };
+
    [[nodiscard]] tracy::VkCtx* getTracyContext() const {
       return tracyContext;
    }
+
+   // Can probably do better for managing per-frame items.
+   [[nodiscard]] std::vector<uint32_t>& getTexturesToBind() {
+      return texturesToBind;
+   }
+
+   void updateObjectDataBuffer(ObjectData* data, const size_t size);
 
  private:
    std::unique_ptr<vk::raii::CommandBuffer> commandBuffer = nullptr;
@@ -70,7 +88,13 @@ class FrameData {
 
    std::unique_ptr<vma::raii::AllocatedBuffer> objectMatricesBuffer = nullptr;
 
+   std::unique_ptr<vma::raii::AllocatedBuffer> objectDataBuffer = nullptr;
+
    std::unique_ptr<vk::raii::DescriptorSetLayout> descriptorSetLayout = nullptr;
    std::unique_ptr<vk::raii::DescriptorSet> descriptorSet = nullptr;
+   std::unique_ptr<vk::raii::DescriptorSet> bindlessDescriptorSet = nullptr;
+   std::unique_ptr<vk::raii::DescriptorSet> objectDescriptorSet = nullptr;
+
+   std::vector<uint32_t> texturesToBind = {};
    tracy::VkCtx* tracyContext = nullptr;
 };

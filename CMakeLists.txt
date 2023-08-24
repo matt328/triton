@@ -2,9 +2,7 @@ cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 
 set(CMAKE_TOOLCHAIN_FILE ./vcpkg/scripts/buildsystems/vcpkg.cmake)
 
-set(NAME triton)
-
-project(${NAME})
+project(triton)
 
 find_package(glm CONFIG REQUIRED)
 find_package(Vulkan REQUIRED)
