@@ -5,6 +5,7 @@
 
 #include "core/Utils.hpp"
 #include "core/vma_raii.hpp"
+#include "graphics/RenderDevice.hpp"
 #include "graphics/renderer/Clear.hpp"
 #include "graphics/pipeline/DefaultPipeline.hpp"
 #include "graphics/pipeline/ObjectMatrices.hpp"
@@ -13,6 +14,7 @@
 #include "graphics/texture/Texture.hpp"
 #include "graphics/texture/TextureFactory.hpp"
 #include "graphics/VulkanFactory.hpp"
+#include <vulkan/vulkan_structs.hpp>
 
 using Core::Log;
 
@@ -46,11 +48,9 @@ RenderDevice::RenderDevice(const Instance& instance) {
 
    meshFactory = std::make_unique<MeshFactory>(raiillocator.get(), transferImmediateContext.get());
 
-   const auto textureFilename = Core::Paths::TEXTURES / "viking_room.png";
-
-   tempTextureId = createTexture(textureFilename.string());
-
-   createPerFrameData(pipeline->getDescriptorSetLayout());
+   createPerFrameData(pipeline->getDescriptorSetLayout(),
+                      pipeline->getBindlessDescriptorSetLayout(),
+                      pipeline->getObjectDescriptorSetLayout());
 
    createDepthResources();
    createFramebuffers();
@@ -81,12 +81,15 @@ std::string RenderDevice::createMesh(const std::string_view& filename) {
    return filename.data();
 }
 
-std::string RenderDevice::createTexture(const std::string_view& filename) {
-   if (const auto it = textures.find(filename.data()); it != textures.end()) {
-      return filename.data();
+uint32_t RenderDevice::createTexture(const std::string_view& filename) {
+   auto handle = textureList.size();
+   textureList.push_back(textureFactory->createTexture2D(filename));
+   // I think we need to bind the texture once in each framedata
+   for (auto& f : frameData) {
+      f->getTexturesToBind().push_back(handle);
    }
-   textures[filename.data()] = textureFactory->createTexture2D(filename);
-   return filename.data();
+   Core::Log::core->info("added texture to bind with index {}", handle);
+   return handle;
 }
 
 void RenderDevice::createPhysicalDevice(const Instance& instance) {
@@ -135,6 +138,9 @@ void RenderDevice::createLogicalDevice(const Instance& instance) {
 
    auto indexingFeatures = features2.get<vk::PhysicalDeviceDescriptorIndexingFeatures>();
 
+   auto drawParamsFeatures = vk::PhysicalDeviceShaderDrawParametersFeatures{
+       .pNext = &indexingFeatures, .shaderDrawParameters = VK_TRUE};
+
    const auto bindlessTexturesSupported =
        indexingFeatures.descriptorBindingPartiallyBound && indexingFeatures.runtimeDescriptorArray;
 
@@ -144,7 +150,7 @@ void RenderDevice::createLogicalDevice(const Instance& instance) {
 
    auto physicalFeatures2 = physicalDevice->getFeatures2();
    physicalFeatures2.features.samplerAnisotropy = VK_TRUE;
-   physicalFeatures2.pNext = &indexingFeatures;
+   physicalFeatures2.pNext = &drawParamsFeatures;
 
    vk::DeviceCreateInfo createInfo{
        .pNext = &physicalFeatures2,
@@ -298,19 +304,22 @@ void RenderDevice::createCommandPools(const Instance& instance) {
 }
 
 void RenderDevice::createDescriptorPool() {
-   const auto poolSize =
-       std::array{vk::DescriptorPoolSize{.type = vk::DescriptorType::eUniformBuffer,
-                                         .descriptorCount = FRAMES_IN_FLIGHT * 10},
-                  vk::DescriptorPoolSize{.type = vk::DescriptorType::eCombinedImageSampler,
-                                         .descriptorCount = FRAMES_IN_FLIGHT * 10},
-                  vk::DescriptorPoolSize{.type = vk::DescriptorType::eStorageImage,
-                                         .descriptorCount = FRAMES_IN_FLIGHT * 10}};
+   const auto poolSize = std::array{
+       vk::DescriptorPoolSize{.type = vk::DescriptorType::eUniformBuffer,
+                              .descriptorCount = FRAMES_IN_FLIGHT * 10},
+       vk::DescriptorPoolSize{.type = vk::DescriptorType::eCombinedImageSampler,
+                              .descriptorCount = FRAMES_IN_FLIGHT * 10},
+       vk::DescriptorPoolSize{.type = vk::DescriptorType::eStorageImage,
+                              .descriptorCount = FRAMES_IN_FLIGHT * 10},
+       vk::DescriptorPoolSize{.type = vk::DescriptorType::eStorageBuffer,
+                              .descriptorCount = FRAMES_IN_FLIGHT * 10},
+   };
 
    const vk::DescriptorPoolCreateInfo poolInfo{
        .flags = vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet |
                 vk::DescriptorPoolCreateFlagBits::eUpdateAfterBindEXT,
-       .maxSets = FRAMES_IN_FLIGHT * 2,
-       .poolSizeCount = 3,
+       .maxSets = FRAMES_IN_FLIGHT * 10 * poolSize.size(),
+       .poolSizeCount = poolSize.size(),
        .pPoolSizes = poolSize.data()};
 
    descriptorPool =
@@ -326,16 +335,10 @@ void RenderDevice::createAllocator(const Instance& instance) {
    raiillocator = std::make_unique<vma::raii::Allocator>(allocatorCreateInfo);
 }
 
-void RenderDevice::createPerFrameData(const vk::raii::DescriptorSetLayout& descriptorSetLayout) {
-   // Move the texture's DescriptorImageInfo out of FrameData
-   // Need to think about how to handle the uniform buffer as well,
-   // probably shouldn't have to have FRAMES_IN_FLIGHT copies of it
-   // answer: a single copy of the data, and multiple buffers that the data gets
-   // mapped into during that frame's rendering.
-   /*
-      i think for each object's texture, we can just call device.updateDescriptorSets
-      with a writedescriptorset pointing to the object's textureImageInfo
-   */
+void RenderDevice::createPerFrameData(
+    const vk::raii::DescriptorSetLayout& descriptorSetLayout,
+    const vk::raii::DescriptorSetLayout& bindlessDescriptorSetLayout,
+    const vk::raii::DescriptorSetLayout& objectDescriptorSetLayout) {
    for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++) {
       frameData.push_back(std::make_unique<FrameData>(*device,
                                                       *physicalDevice,
@@ -343,6 +346,8 @@ void RenderDevice::createPerFrameData(const vk::raii::DescriptorSetLayout& descr
                                                       *raiillocator,
                                                       *descriptorPool,
                                                       descriptorSetLayout,
+                                                      bindlessDescriptorSetLayout,
+                                                      objectDescriptorSetLayout,
                                                       *graphicsQueue,
                                                       fmt::format("Frame {}", i)));
    }
@@ -429,28 +434,31 @@ void RenderDevice::drawFrame() {
       throw std::runtime_error("Failed to acquire swapchain image");
    }
 
+   {
+      ZoneNamedN(update, "Update Textures", true);
+      if (!currentFrameData->getTexturesToBind().empty()) {
+         auto writes = std::vector<vk::WriteDescriptorSet>{};
+         writes.reserve(currentFrameData->getTexturesToBind().size());
+         for (const auto t : currentFrameData->getTexturesToBind()) {
+            const auto& texture = textureList[t];
+            const auto imageInfo = texture->getImageInfo();
+            const auto& descriptorSet = currentFrameData->getBindlessDescriptorSet();
+            writes.push_back(
+                vk::WriteDescriptorSet{.dstSet = *currentFrameData->getBindlessDescriptorSet(),
+                                       .dstBinding = 3,
+                                       .dstArrayElement = t,
+                                       .descriptorCount = 1,
+                                       .descriptorType = vk::DescriptorType::eCombinedImageSampler,
+                                       .pImageInfo = texture->getImageInfo()});
+         }
+         device->updateDescriptorSets(writes, nullptr);
+         currentFrameData->getTexturesToBind().clear();
+      }
+   }
+
    device->resetFences(*currentFrameData->getInFlightFence());
 
    currentFrameData->getCommandBuffer().reset();
-
-   // const auto cameraPosition = glm::vec3{0.f, 0.f, 5.f};
-   // const auto cameraTarget = glm::vec3{0.f, 0.f, 0.f};
-   // const auto cameraUp = glm::vec3{0.f, 1.f, 0.f};
-   // const auto view = glm::lookAt(cameraPosition, cameraTarget, cameraUp);
-
-   // constexpr float fov = glm::radians(60.f);
-   // const float aspectRatio =
-   //     static_cast<float>(swapchainExtent.width) / static_cast<float>(swapchainExtent.height);
-   // constexpr float nearPlane = 0.1f;
-   // constexpr float farPlane = 1000.f;
-
-   // const auto projection = glm::perspective(fov, aspectRatio, nearPlane, farPlane);
-
-   // auto objectMatrices = ObjectMatrices{.model = glm::mat4{1.f}, .view = view, .proj =
-   // projection};
-
-   // currentFrameData->getObjectMatricesBuffer().updateBufferValue(&objectMatrices,
-   //                                                               sizeof(ObjectMatrices));
 
    constexpr auto waitStages =
        std::array<vk::PipelineStageFlags, 1>{vk::PipelineStageFlagBits::eColorAttachmentOutput};
@@ -496,6 +504,24 @@ void RenderDevice::recordCommandBuffer(FrameData& frameData, const unsigned imag
    constexpr auto beginInfo =
        vk::CommandBufferBeginInfo{.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse};
    auto& cmd = frameData.getCommandBuffer();
+
+   // TODO: think more about when and where this should happen from a multi threaded perspective
+   // we're looping through objects once here and again down below to bind their index and vertex
+   // buffers.  When I finish implementing a fully bindless pipeline that won't matter
+   // since the vertices and indices will be accumulated in a giant buffer, and I think
+   // all the data handed off between the rendersystem and renderdevice will be copyable
+   auto objectDataList = std::vector<ObjectData>{};
+   const auto renderObjects = renderSystem->getRenderObjects();
+   for (const auto& renderObject : renderObjects) {
+      objectDataList.push_back(
+          ObjectData{.model = renderObject.modelMatrix,
+                     .textureId = static_cast<TextureHandle>(renderObject.textureId)});
+   }
+
+   // Profile this and see if it's worth checking if something actually changed or not
+   frameData.updateObjectDataBuffer(objectDataList.data(),
+                                    sizeof(ObjectData) * objectDataList.size());
+
    cmd.begin(beginInfo);
    {
       auto ctx = frameData.getTracyContext();
@@ -519,40 +545,41 @@ void RenderDevice::recordCommandBuffer(FrameData& frameData, const unsigned imag
 
       const auto& renderObjects = renderSystem->getRenderObjects();
 
-      for (const auto& renderObject : renderObjects) {
+      for (uint32_t i = 0; const auto& renderObject : renderObjects) {
          const auto& mesh = meshes.at(renderObject.meshId);
 
          cmd.bindVertexBuffers(0, mesh->getVertexBuffer().getBuffer(), {0});
          cmd.bindIndexBuffer(mesh->getIndexBuffer().getBuffer(), 0, vk::IndexType::eUint32);
 
-         auto& texture = textures.at(renderObject.textureId);
-
-         ObjectMatrices ubo{.model = renderObject.modelMatrix,
-                            .view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f),
-                                                glm::vec3(0.0f, 0.0f, 0.0f),
-                                                glm::vec3(0.0f, -1.0f, 0.0f)),
-                            .proj = glm::perspective(glm::radians(60.0f),
-                                                     static_cast<float>(swapchainExtent.width) /
-                                                         static_cast<float>(swapchainExtent.height),
-                                                     0.1f,
-                                                     1000.0f)};
-
-         frameData.getObjectMatricesBuffer().updateBufferValue(&ubo, sizeof(ubo));
-
-         texture->updateDescriptorSet(frameData.getDescriptorSet());
-
-         cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
-                                *pipeline->getPipelineLayout(),
-                                0,
-                                *frameData.getDescriptorSet(),
-                                nullptr);
-         cmd.drawIndexed(mesh->getIndicesCount(), 1, 0, 0, 0);
+         const auto set0 = *frameData.getDescriptorSet();
+         const auto set1 = *frameData.getBindlessDescriptorSet();
+         const auto set2 = *frameData.getObjectDescriptorSet();
+         const auto allSets = std::array<vk::DescriptorSet, 3>{set0, set1, set2};
+         cmd.bindDescriptorSets(
+             vk::PipelineBindPoint::eGraphics, *pipeline->getPipelineLayout(), 0, allSets, nullptr);
+         // This is real greasy but it'll do for now
+         cmd.drawIndexed(mesh->getIndicesCount(), 1, 0, 0, i);
+         i++;
       }
 
       cmd.endRenderPass();
 
       finishRenderer->update();
       finishRenderer->fillCommandBuffer(cmd, imageIndex);
+
+      for (const auto& renderObject : renderObjects) {
+         // TODO: buffer can only be updated 1x per frame
+         ObjectMatrices ubo{.model = renderObject.modelMatrix,
+                            .view = InitialLookAt,
+                            .proj = glm::perspective(FOV,
+                                                     static_cast<float>(swapchainExtent.width) /
+                                                         static_cast<float>(swapchainExtent.height),
+                                                     ZNear,
+                                                     ZFar),
+                            .textureId = renderObject.textureId};
+
+         frameData.getObjectMatricesBuffer().updateBufferValue(&ubo, sizeof(ubo));
+      }
       TracyVkCollect(ctx, *cmd);
    }
 

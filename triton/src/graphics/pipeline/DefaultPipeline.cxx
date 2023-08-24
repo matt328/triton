@@ -59,10 +59,14 @@ DefaultPipeline::DefaultPipeline(const vk::raii::Device& device,
    auto shaderStages = std::array{vertexShaderStageInfo, fragmentShaderStageInfo};
 
    descriptorSetLayout = Graphics::Utils::createDescriptorSetLayout(&device, shaderLibraryInfo);
+   bindlessDescriptorSetLayout = Graphics::Utils::createBindlessDescriptorSetLayout(device);
+   objectDescriptorSetLayout = Graphics::Utils::createSSBODescriptorSetLayout(device);
 
-   vk::PipelineLayoutCreateInfo pipelineLayoutInfo{
-       .setLayoutCount = 1,
-       .pSetLayouts = &(**descriptorSetLayout)}; // This is (now even more) awkward
+   const auto setLayouts = std::array{
+       *(*descriptorSetLayout), *(*bindlessDescriptorSetLayout), *(*objectDescriptorSetLayout)};
+
+   vk::PipelineLayoutCreateInfo pipelineLayoutInfo{.setLayoutCount = setLayouts.size(),
+                                                   .pSetLayouts = setLayouts.data()};
 
    pipelineLayout =
        std::make_unique<vk::raii::PipelineLayout>(device.createPipelineLayout(pipelineLayoutInfo));

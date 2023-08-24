@@ -3,6 +3,7 @@
 #include "graphics/ImmediateContext.hpp"
 #include "core/vma_raii.hpp"
 #include <vulkan/vulkan_raii.hpp>
+#include <vulkan/vulkan_structs.hpp>
 
 class Texture final {
  public:
@@ -20,6 +21,10 @@ class Texture final {
 
    void updateDescriptorSet(const vk::raii::DescriptorSet& descriptorSet) const;
 
+   const vk::DescriptorImageInfo* getImageInfo() {
+      return &imageInfo;
+   }
+
  private:
    const vk::raii::Device& device;
    std::unique_ptr<vma::raii::AllocatedImage> image;
@@ -28,6 +33,7 @@ class Texture final {
    vk::ImageLayout imageLayout;
 
    std::unique_ptr<vk::raii::Sampler> sampler;
+   vk::DescriptorImageInfo imageInfo;
 
    static void transitionImageLayout(const ImmediateContext& context,
                                      const vk::Image& image,

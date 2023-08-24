@@ -52,7 +52,8 @@ class Instance {
    uint32_t height = 0;
    uint32_t width = 0;
 
-   std::vector<const char*> desiredDeviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+   std::vector<const char*> desiredDeviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+                                                       VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME};
    std::vector<const char*> desiredValidationLayers = {"VK_LAYER_KHRONOS_validation"};
 
    std::unique_ptr<vk::raii::Context> context;

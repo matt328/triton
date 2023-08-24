@@ -3,8 +3,8 @@ set(name, "models")
 set(Models
     viking_room.gltf
     viking_room.bin
-    starting_area/area.gltf
-    starting_area/area.bin
+    area.gltf
+    area.bin
 )
 
 get_property(GENERATOR_IS_MULTI_CONFIG GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)

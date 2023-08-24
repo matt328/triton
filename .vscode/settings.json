@@ -115,7 +115,9 @@
       "everything",
       "geometry",
       "application",
-      "game"
+      "game",
+      "profiling",
+      "build"
    ],
    "git.ignoreLimitWarning": true,
    "workbench.colorCustomizations": {

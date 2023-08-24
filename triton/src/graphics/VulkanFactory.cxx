@@ -1,6 +1,7 @@
 #include "graphics/VulkanFactory.hpp"
 #include "Log.hpp"
 #include <spirv.hpp>
+#include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_structs.hpp>
 
 namespace Graphics::Utils {
@@ -55,6 +56,45 @@ namespace Graphics::Utils {
              device.createFramebuffer(framebufferCreateInfo)));
       }
       return swapchainFramebuffers;
+   }
+
+   std::unique_ptr<vk::raii::DescriptorSetLayout> createSSBODescriptorSetLayout(
+       const vk::raii::Device& device) {
+      const auto ssboBinding =
+          vk::DescriptorSetLayoutBinding{.binding = 0,
+                                         .descriptorType = vk::DescriptorType::eStorageBuffer,
+                                         .descriptorCount = 1,
+                                         .stageFlags = vk::ShaderStageFlagBits::eVertex};
+      const auto createInfo =
+          vk::DescriptorSetLayoutCreateInfo{.bindingCount = 1, .pBindings = &ssboBinding};
+
+      return std::make_unique<vk::raii::DescriptorSetLayout>(
+          device.createDescriptorSetLayout(createInfo));
+   }
+
+   std::unique_ptr<vk::raii::DescriptorSetLayout> createBindlessDescriptorSetLayout(
+       const vk::raii::Device& device) {
+      const auto textureBinding = vk::DescriptorSetLayoutBinding{
+          .binding = 3,
+          .descriptorType = vk::DescriptorType::eCombinedImageSampler,
+          .descriptorCount = 16,
+          .stageFlags = vk::ShaderStageFlagBits::eAll,
+          .pImmutableSamplers = nullptr};
+
+      const auto bindlessFlags = vk::DescriptorBindingFlagBits::ePartiallyBound |
+                                 vk::DescriptorBindingFlagBits::eUpdateAfterBind;
+
+      const auto extendedInfo = vk::DescriptorSetLayoutBindingFlagsCreateInfoEXT{
+          .bindingCount = 1, .pBindingFlags = &bindlessFlags};
+
+      const auto dslCreateInfo = vk::DescriptorSetLayoutCreateInfo{
+          .pNext = &extendedInfo,
+          .flags = vk::DescriptorSetLayoutCreateFlagBits::eUpdateAfterBindPool,
+          .bindingCount = 1,
+          .pBindings = &textureBinding};
+
+      return std::make_unique<vk::raii::DescriptorSetLayout>(
+          device.createDescriptorSetLayout(dslCreateInfo));
    }
 
    std::unique_ptr<vk::raii::DescriptorSetLayout> createDescriptorSetLayout(
