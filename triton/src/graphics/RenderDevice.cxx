@@ -14,6 +14,8 @@
 #include "graphics/texture/Texture.hpp"
 #include "graphics/texture/TextureFactory.hpp"
 #include "graphics/VulkanFactory.hpp"
+#include "graphics/RenderDeviceHelpers.hpp"
+#include "graphics/DebugHelpers.hpp"
 #include <vulkan/vulkan_structs.hpp>
 
 using Core::Log;
@@ -26,10 +28,6 @@ RenderDevice::RenderDevice(const Instance& instance) {
    createCommandPools(instance);
    createDescriptorPool();
    createAllocator(instance);
-
-   // TODO: Left off setting up tracy gpu profiling.  Need to read up more, and possibly rework
-   // how rendering works here as we need both devices, a queue, and a command buffer to init
-   // tracy's gpu tracing. TracyVkContext(physicalDevice.get(), device.get(), )
 
    const auto renderPassCreateInfo =
        Graphics::Utils::RenderPassCreateInfo{.device = device.get(),
@@ -100,7 +98,7 @@ void RenderDevice::createPhysicalDevice(const Instance& instance) {
    }
 
    for (const auto& possibleDevice : physicalDevices) {
-      if (isDeviceSuitable(possibleDevice, instance)) {
+      if (graphics::isDeviceSuitable(possibleDevice, instance)) {
          physicalDevice = std::make_unique<vk::raii::PhysicalDevice>(possibleDevice);
          break;
       }
@@ -116,7 +114,7 @@ void RenderDevice::createPhysicalDevice(const Instance& instance) {
 
 void RenderDevice::createLogicalDevice(const Instance& instance) {
    auto [graphicsFamily, presentFamily, transferFamily, computeFamily] =
-       findQueueFamilies(*physicalDevice, instance.getSurface());
+       graphics::findQueueFamilies(*physicalDevice, instance.getSurface());
 
    std::vector<vk::DeviceQueueCreateInfo> queueCreateInfos;
    std::set uniqueQueueFamilies = {graphicsFamily.value(), presentFamily.value()};
@@ -168,39 +166,40 @@ void RenderDevice::createLogicalDevice(const Instance& instance) {
 
    device = std::make_unique<vk::raii::Device>(physicalDevice->createDevice(createInfo, nullptr));
 
-   setObjectName(
+   graphics::setObjectName(
        **device, *device.get(), vk::raii::Device::debugReportObjectType, "Primary Device");
 
    Log::core->info("Created Logical Device");
 
    graphicsQueue = std::make_unique<vk::raii::Queue>(device->getQueue(graphicsFamily.value(), 0));
-   setObjectName(
+   graphics::setObjectName(
        **graphicsQueue, *device.get(), (**graphicsQueue).debugReportObjectType, "Graphics Queue");
    Log::core->info("Created Graphics Queue");
 
    presentQueue = std::make_unique<vk::raii::Queue>(device->getQueue(presentFamily.value(), 0));
-   setObjectName(
+   graphics::setObjectName(
        **presentQueue, *device.get(), (**presentQueue).debugReportObjectType, "Present Queue");
    Log::core->info("Created Present Queue");
 
    transferQueue = std::make_shared<vk::raii::Queue>(device->getQueue(transferFamily.value(), 0));
-   setObjectName(
+   graphics::setObjectName(
        **transferQueue, *device.get(), (**transferQueue).debugReportObjectType, "Transfer Queue");
    Log::core->info("Created Transfer Queue");
 
    computeQueue = std::make_unique<vk::raii::Queue>(device->getQueue(computeFamily.value(), 0));
-   setObjectName(
+   graphics::setObjectName(
        **computeQueue, *device.get(), (**computeQueue).debugReportObjectType, "Compute Queue");
    Log::core->info("Created Compute Queue");
 }
 
 void RenderDevice::createSwapchain(const Instance& instance) {
    const auto& surface = instance.getSurface();
-   auto [capabilities, formats, presentModes] = querySwapchainSupport(*physicalDevice, surface);
+   auto [capabilities, formats, presentModes] =
+       graphics::querySwapchainSupport(*physicalDevice, surface);
 
-   const auto surfaceFormat = chooseSwapSurfaceFormat(formats);
-   const auto presentMode = chooseSwapPresentMode(presentModes);
-   const auto extent = chooseSwapExtent(capabilities, instance);
+   const auto surfaceFormat = graphics::chooseSwapSurfaceFormat(formats);
+   const auto presentMode = graphics::chooseSwapPresentMode(presentModes);
+   const auto extent = graphics::chooseSwapExtent(capabilities, instance);
 
    uint32_t imageCount = capabilities.minImageCount + 1;
 
@@ -222,7 +221,7 @@ void RenderDevice::createSwapchain(const Instance& instance) {
                                          .oldSwapchain = VK_NULL_HANDLE};
 
    auto [graphicsFamily, presentFamily, transferFamily, computeFamily] =
-       findQueueFamilies(*physicalDevice, surface);
+       graphics::findQueueFamilies(*physicalDevice, surface);
 
    const auto queueFamilyIndices =
        std::array<uint32_t, 2>{graphicsFamily.value(), presentFamily.value()};
@@ -272,23 +271,15 @@ void RenderDevice::createSwapchainImageViews() {
 
 void RenderDevice::createCommandPools(const Instance& instance) {
    auto [graphicsFamily, presentFamily, transferFamily, computeFamily] =
-       findQueueFamilies(*physicalDevice, instance.getSurface());
+       graphics::findQueueFamilies(*physicalDevice, instance.getSurface());
    auto commandPoolCreateInfo =
        vk::CommandPoolCreateInfo{.flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
                                  .queueFamilyIndex = graphicsFamily.value()};
 
    commandPool =
        std::make_unique<vk::raii::CommandPool>(device->createCommandPool(commandPoolCreateInfo));
-   setObjectName(
+   graphics::setObjectName(
        **commandPool, *device.get(), (*commandPool).debugReportObjectType, "Graphics Command Pool");
-
-   commandPoolCreateInfo.queueFamilyIndex = computeFamily.value();
-   computeCommandPool =
-       std::make_unique<vk::raii::CommandPool>(device->createCommandPool(commandPoolCreateInfo));
-   setObjectName(**computeCommandPool,
-                 *device.get(),
-                 (*computeCommandPool).debugReportObjectType,
-                 "Compute Command Pool");
 
    transferImmediateContext = std::make_unique<ImmediateContext>(*device.get(),
                                                                  *physicalDevice,
@@ -609,122 +600,4 @@ void RenderDevice::updateUniformBuffer(const uint32_t currentFrame) const {
    const auto dest = raiillocator->mapMemory(frameData[currentFrame]->getObjectMatricesBuffer());
    memcpy(dest, &ubo, sizeof(ubo));
    raiillocator->unmapMemory(frameData[currentFrame]->getObjectMatricesBuffer());
-}
-
-vk::PresentModeKHR RenderDevice::chooseSwapPresentMode(
-    const std::vector<vk::PresentModeKHR>& availablePresentModes) {
-   for (const auto& availablePresentMode : availablePresentModes) {
-      if (availablePresentMode == vk::PresentModeKHR::eMailbox) {
-         return availablePresentMode;
-      }
-   }
-   return vk::PresentModeKHR::eFifo;
-}
-
-vk::SurfaceFormatKHR RenderDevice::chooseSwapSurfaceFormat(
-    const std::vector<vk::SurfaceFormatKHR>& availableFormats) {
-   for (const auto& availableFormat : availableFormats) {
-      if (availableFormat.format == vk::Format::eB8G8R8A8Srgb &&
-          availableFormat.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear) {
-         return availableFormat;
-      }
-   }
-   return availableFormats[0];
-}
-
-vk::Extent2D RenderDevice::chooseSwapExtent(const vk::SurfaceCapabilitiesKHR& capabilities,
-                                            const Instance& instance) const {
-   if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
-      return capabilities.currentExtent;
-   } else {
-      const auto& [width, height] = instance.getWindowSize();
-
-      vk::Extent2D actualExtent = {width, height};
-
-      actualExtent.width = std::clamp(
-          actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
-      actualExtent.height = std::clamp(actualExtent.height,
-                                       capabilities.minImageExtent.height,
-                                       capabilities.maxImageExtent.height);
-
-      return actualExtent;
-   }
-}
-
-bool RenderDevice::isDeviceSuitable(const vk::raii::PhysicalDevice& possibleDevice,
-                                    const Instance& instance) {
-   const QueueFamilyIndices queueFamilyIndices =
-       findQueueFamilies(possibleDevice, instance.getSurface());
-
-   const bool extensionsSupported =
-       checkDeviceExtensionSupport(possibleDevice, instance.getDesiredDeviceExtensions());
-
-   bool swapchainAdequate = false;
-   if (extensionsSupported) {
-      auto [capabilities, formats, presentModes] =
-          querySwapchainSupport(possibleDevice, instance.getSurface());
-      swapchainAdequate = !formats.empty() && !presentModes.empty();
-   }
-
-   const auto features = possibleDevice.getFeatures();
-
-   return queueFamilyIndices.isComplete() && extensionsSupported && swapchainAdequate &&
-          features.samplerAnisotropy && features.tessellationShader;
-}
-
-RenderDevice::QueueFamilyIndices RenderDevice::findQueueFamilies(
-    const vk::raii::PhysicalDevice& possibleDevice,
-    const std::unique_ptr<vk::raii::SurfaceKHR>& surface) {
-   QueueFamilyIndices queueFamilyIndices;
-
-   const auto queueFamilies = possibleDevice.getQueueFamilyProperties();
-
-   for (int i = 0; const auto& queueFamily : queueFamilies) {
-      if (queueFamily.queueFlags & vk::QueueFlagBits::eGraphics) {
-         queueFamilyIndices.graphicsFamily = i;
-      }
-
-      if (possibleDevice.getSurfaceSupportKHR(i, **surface)) {
-         queueFamilyIndices.presentFamily = i;
-      }
-
-      if (queueFamily.queueFlags & vk::QueueFlagBits::eTransfer) {
-         queueFamilyIndices.transferFamily = i;
-      }
-
-      if ((queueFamily.queueFlags & vk::QueueFlagBits::eCompute)) {
-         queueFamilyIndices.computeFamily = i;
-      }
-
-      if (queueFamilyIndices.isComplete()) {
-         break;
-      }
-      i++;
-   }
-   return queueFamilyIndices;
-}
-
-bool RenderDevice::checkDeviceExtensionSupport(
-    const vk::raii::PhysicalDevice& possibleDevice,
-    const std::vector<const char*> desiredDeviceExtensions) {
-   const auto availableExtensions = possibleDevice.enumerateDeviceExtensionProperties();
-
-   std::set<std::string> requiredExtensions(desiredDeviceExtensions.begin(),
-                                            desiredDeviceExtensions.end());
-
-   for (const auto& extension : availableExtensions) {
-      requiredExtensions.erase(extension.extensionName);
-   }
-
-   return requiredExtensions.empty();
-}
-
-RenderDevice::SwapchainSupportDetails RenderDevice::querySwapchainSupport(
-    const vk::raii::PhysicalDevice& possibleDevice,
-    const std::unique_ptr<vk::raii::SurfaceKHR>& surface) {
-   SwapchainSupportDetails details;
-   details.capabilities = possibleDevice.getSurfaceCapabilitiesKHR(**surface);
-   details.formats = possibleDevice.getSurfaceFormatsKHR(**surface);
-   details.presentModes = possibleDevice.getSurfacePresentModesKHR(**surface);
-   return details;
 }
