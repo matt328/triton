@@ -1,6 +1,8 @@
 #include "FrameData.hpp"
 #include "graphics/RenderDevice.hpp"
 #include "graphics/pipeline/ObjectMatrices.hpp"
+#include "graphics/DebugHelpers.hpp"
+
 #include <vulkan-memory-allocator-hpp/vk_mem_alloc_structs.hpp>
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_raii.hpp>
@@ -71,10 +73,10 @@ FrameData::FrameData(const vk::raii::Device& device,
 
    objectDescriptorSet = std::make_unique<vk::raii::DescriptorSet>(
        std::move(device.allocateDescriptorSets(objectDSAllocateInfo).front()));
-   RenderDevice::setObjectName(**objectDescriptorSet,
-                               device,
-                               vk::raii::DescriptorSet::debugReportObjectType,
-                               "Object Descriptor Set");
+   graphics::setObjectName(**objectDescriptorSet,
+                           device,
+                           vk::raii::DescriptorSet::debugReportObjectType,
+                           "Object Descriptor Set");
 
    // Create the bindless descriptor set
    const auto bindlessDescriptorSetAllocateInfo =
@@ -85,10 +87,10 @@ FrameData::FrameData(const vk::raii::Device& device,
    bindlessDescriptorSet = std::make_unique<vk::raii::DescriptorSet>(
        std::move(device.allocateDescriptorSets(bindlessDescriptorSetAllocateInfo).front()));
 
-   RenderDevice::setObjectName(**bindlessDescriptorSet,
-                               device,
-                               vk::raii::DescriptorSet::debugReportObjectType,
-                               "Bindless Descriptor Set");
+   graphics::setObjectName(**bindlessDescriptorSet,
+                           device,
+                           vk::raii::DescriptorSet::debugReportObjectType,
+                           "Bindless Descriptor Set");
 
    const auto descriptorSetAllocateInfo =
        vk::DescriptorSetAllocateInfo{.descriptorPool = *descriptorPool,
