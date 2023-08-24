@@ -161,6 +161,12 @@ Texture::Texture(const std::string_view& filename,
                                                  .subresourceRange = range};
 
    view = std::make_unique<vk::raii::ImageView>(device.createImageView(viewInfo));
+
+   imageInfo = vk::DescriptorImageInfo{
+       .sampler = **sampler,
+       .imageView = **view,
+       .imageLayout = imageLayout,
+   };
 }
 
 void Texture::updateDescriptorSet(const vk::raii::DescriptorSet& descriptorSet) const {

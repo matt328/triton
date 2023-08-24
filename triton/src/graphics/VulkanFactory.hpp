@@ -51,8 +51,14 @@ namespace Graphics::Utils {
        const vk::Extent2D swapchainExtent,
        const vk::raii::RenderPass& renderPass);
 
+   std::unique_ptr<vk::raii::DescriptorSetLayout> createSSBODescriptorSetLayout(
+       const vk::raii::Device& device);
+
    std::unique_ptr<vk::raii::DescriptorSetLayout> createDescriptorSetLayout(
        const vk::raii::Device* device, const std::vector<ShaderStage>& stages);
+
+   std::unique_ptr<vk::raii::DescriptorSetLayout> createBindlessDescriptorSetLayout(
+       const vk::raii::Device& device);
 
    void createVertexAttributes(const std::vector<ShaderStage>& shaderStages);
 

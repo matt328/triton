@@ -1,3 +1,34 @@
+#define TRACY_ENABLED
+#define TRACY_ON_DEMAND
+#include "tracy/Tracy.hpp"
+
+// void* operator new(size_t size) {
+//    void* ptr = malloc(size);
+
+//    TracySecureAlloc(ptr, size);
+//    return ptr;
+// }
+
+// void* operator new[](size_t size) {
+//    void* ptr = malloc(size);
+//    TracySecureAlloc(ptr, size);
+//    return ptr;
+// }
+
+// void operator delete(void* ptr) noexcept {
+//    if (ptr) {
+//       TracySecureFree(ptr);
+//       free(ptr);
+//    }
+// }
+
+// void operator delete[](void* ptr) noexcept {
+//    if (ptr) {
+//       TracySecureFree(ptr);
+//       free(ptr);
+//    }
+// }
+
 #include <memory>
 
 #define GLFW_INCLUDE_VULKAN
@@ -6,6 +37,7 @@
 // This all needs to be here since I don't understand all the preprocessor black
 // magic happening in this library
 #define TINYGLTF_IMPLEMENTATION
+
 #define STB_IMAGE_IMPLEMENTATION
 #include <tiny_gltf.h>
 
@@ -17,20 +49,7 @@
 #include "Application.hpp"
 #include "Log.hpp"
 
-#define TRACY_ENABLED
-#include "tracy/Tracy.hpp"
-
 using Core::Log;
-
-void* operator new(std ::size_t count) {
-   auto ptr = malloc(count);
-   TracyAlloc(ptr, count);
-   return ptr;
-}
-void operator delete(void* ptr) noexcept {
-   TracyFree(ptr);
-   free(ptr);
-}
 
 int main() {
    Log::init();

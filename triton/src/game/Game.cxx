@@ -29,8 +29,7 @@ Game::Game(RenderDevice& renderDevice) {
    registry->emplace<Transform>(room);
 
    // Create Plane area entity
-   const auto planeMeshId =
-       renderDevice.createMesh((Core::Paths::MODELS / "starting_area" / "area.gltf").string());
+   const auto planeMeshId = renderDevice.createMesh((Core::Paths::MODELS / "area.gltf").string());
    const auto planeTextureId =
        renderDevice.createTexture((Core::Paths::TEXTURES / "grass.png").string());
 
