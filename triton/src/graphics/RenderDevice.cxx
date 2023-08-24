@@ -576,28 +576,3 @@ void RenderDevice::recordCommandBuffer(FrameData& frameData, const unsigned imag
 
    cmd.end();
 }
-
-void RenderDevice::updateUniformBuffer(const uint32_t currentFrame) const {
-   static auto startTime = std::chrono::high_resolution_clock::now();
-   const auto currentTime = std::chrono::high_resolution_clock::now();
-   const float time =
-       std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
-
-   //      time = 0; // stop rotation
-
-   const ObjectMatrices ubo{
-       .model =
-           glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f)),
-       .view = glm::lookAt(
-           glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)),
-       .proj = glm::perspective(glm::radians(60.0f),
-                                static_cast<float>(swapchainExtent.width) /
-                                    static_cast<float>(swapchainExtent.height),
-                                0.1f,
-                                100.0f)};
-   // ubo.proj[1][1] *= -1;
-
-   const auto dest = raiillocator->mapMemory(frameData[currentFrame]->getObjectMatricesBuffer());
-   memcpy(dest, &ubo, sizeof(ubo));
-   raiillocator->unmapMemory(frameData[currentFrame]->getObjectMatricesBuffer());
-}

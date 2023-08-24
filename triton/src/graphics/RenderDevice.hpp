@@ -56,6 +56,10 @@ class RenderDevice {
 
    void registerRenderSystem(std::shared_ptr<RenderSystem> renderSystem);
 
+   [[nodiscard]] const vk::Extent2D getSwapchainExtent() const {
+      return swapchainExtent;
+   }
+
  private:
    struct QueueFamilyIndices;
    struct SwapchainSupportDetails;
@@ -131,6 +135,4 @@ class RenderDevice {
    void drawFrame();
 
    void recordCommandBuffer(FrameData& frameData, unsigned imageIndex) const;
-
-   void updateUniformBuffer(uint32_t currentFrame) const;
 };

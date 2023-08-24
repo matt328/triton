@@ -8,6 +8,12 @@ layout(binding = 0) uniform UniformBufferObject {
 }
 ubo;
 
+struct CameraData {
+   mat4 view;
+   mat4 proj;
+   mat4 viewProj;
+};
+
 struct ObjectData {
    mat4 model;
    uint textureId;
