@@ -5,6 +5,7 @@
 #include "core/Utils.hpp"
 #include "RenderSystem.hpp"
 #include "TransformSystem.hpp"
+#include "game/Camera.hpp"
 #include "game/InputSystem.hpp"
 #include "graphics/RenderDevice.hpp"
 
@@ -36,6 +37,12 @@ Game::Game(RenderDevice& renderDevice) {
    const auto floor = registry->create();
    registry->emplace<Renderable>(floor, planeMeshId, planeTextureId);
    registry->emplace<Transform>(floor);
+
+   // Create Camera entity
+   const auto extent = renderDevice.getSwapchainExtent();
+   const auto camera = registry->create();
+   registry->emplace<Camera>(
+       camera, 60.f, extent.width, extent.height, 0.1f, 1000.f, glm::zero<glm::vec3>());
 
    inputSystem->getActionDelegate().connect<&TransformSystem::handleAction>(transformSystem);
 }
