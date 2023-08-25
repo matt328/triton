@@ -46,8 +46,7 @@ RenderDevice::RenderDevice(const Instance& instance) {
 
    meshFactory = std::make_unique<MeshFactory>(raiillocator.get(), transferImmediateContext.get());
 
-   createPerFrameData(pipeline->getDescriptorSetLayout(),
-                      pipeline->getBindlessDescriptorSetLayout(),
+   createPerFrameData(pipeline->getBindlessDescriptorSetLayout(),
                       pipeline->getObjectDescriptorSetLayout(),
                       pipeline->getPerFrameDescriptorSetLayout());
 
@@ -328,7 +327,6 @@ void RenderDevice::createAllocator(const Instance& instance) {
 }
 
 void RenderDevice::createPerFrameData(
-    const vk::raii::DescriptorSetLayout& descriptorSetLayout,
     const vk::raii::DescriptorSetLayout& bindlessDescriptorSetLayout,
     const vk::raii::DescriptorSetLayout& objectDescriptorSetLayout,
     const vk::raii::DescriptorSetLayout& perFrameDescriptorSetLayout) {
@@ -338,7 +336,6 @@ void RenderDevice::createPerFrameData(
                                                       *commandPool,
                                                       *raiillocator,
                                                       *descriptorPool,
-                                                      descriptorSetLayout,
                                                       bindlessDescriptorSetLayout,
                                                       objectDescriptorSetLayout,
                                                       perFrameDescriptorSetLayout,
@@ -553,11 +550,10 @@ void RenderDevice::recordCommandBuffer(FrameData& frameData, const unsigned imag
          cmd.bindVertexBuffers(0, mesh->getVertexBuffer().getBuffer(), {0});
          cmd.bindIndexBuffer(mesh->getIndexBuffer().getBuffer(), 0, vk::IndexType::eUint32);
 
-         const auto set0 = *frameData.getDescriptorSet();
          const auto set1 = *frameData.getBindlessDescriptorSet();
          const auto set2 = *frameData.getObjectDescriptorSet();
          const auto set3 = *frameData.getPerFrameDescriptorSet();
-         const auto allSets = std::array<vk::DescriptorSet, 4>{set0, set1, set2, set3};
+         const auto allSets = std::array{set1, set2, set3};
          cmd.bindDescriptorSets(
              vk::PipelineBindPoint::eGraphics, *pipeline->getPipelineLayout(), 0, allSets, nullptr);
          // This is real greasy but it'll do for now
@@ -570,19 +566,6 @@ void RenderDevice::recordCommandBuffer(FrameData& frameData, const unsigned imag
       finishRenderer->update();
       finishRenderer->fillCommandBuffer(cmd, imageIndex);
 
-      for (const auto& renderObject : renderObjects) {
-         // TODO: buffer can only be updated 1x per frame
-         ObjectMatrices ubo{.model = renderObject.modelMatrix,
-                            .view = InitialLookAt,
-                            .proj = glm::perspective(FOV,
-                                                     static_cast<float>(swapchainExtent.width) /
-                                                         static_cast<float>(swapchainExtent.height),
-                                                     ZNear,
-                                                     ZFar),
-                            .textureId = renderObject.textureId};
-
-         frameData.getObjectMatricesBuffer().updateBufferValue(&ubo, sizeof(ubo));
-      }
       TracyVkCollect(ctx, *cmd);
    }
 
