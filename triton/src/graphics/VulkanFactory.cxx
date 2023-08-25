@@ -2,6 +2,7 @@
 #include "Log.hpp"
 #include <spirv.hpp>
 #include <vulkan/vulkan_enums.hpp>
+#include <vulkan/vulkan_raii.hpp>
 #include <vulkan/vulkan_structs.hpp>
 
 namespace Graphics::Utils {
@@ -56,6 +57,19 @@ namespace Graphics::Utils {
              device.createFramebuffer(framebufferCreateInfo)));
       }
       return swapchainFramebuffers;
+   }
+
+   std::unique_ptr<vk::raii::DescriptorSetLayout> createPerFrameDescriptorSetLayout(
+       const vk::raii::Device& device) {
+      const auto binding =
+          vk::DescriptorSetLayoutBinding{.binding = 0,
+                                         .descriptorType = vk::DescriptorType::eUniformBuffer,
+                                         .descriptorCount = 1,
+                                         .stageFlags = vk::ShaderStageFlagBits::eVertex};
+      const auto createInfo =
+          vk::DescriptorSetLayoutCreateInfo{.bindingCount = 1, .pBindings = &binding};
+      return std::make_unique<vk::raii::DescriptorSetLayout>(
+          device.createDescriptorSetLayout(createInfo));
    }
 
    std::unique_ptr<vk::raii::DescriptorSetLayout> createSSBODescriptorSetLayout(

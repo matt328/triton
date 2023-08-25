@@ -42,7 +42,8 @@ Game::Game(RenderDevice& renderDevice) {
    const auto extent = renderDevice.getSwapchainExtent();
    const auto camera = registry->create();
    registry->emplace<Camera>(
-       camera, 60.f, extent.width, extent.height, 0.1f, 1000.f, glm::zero<glm::vec3>());
+       camera, 60.f, extent.width, extent.height, 0.1f, 1000.f, glm::vec3(2.f, 2.f, 2.f));
+   registry->emplace<Transform>(camera);
 
    inputSystem->getActionDelegate().connect<&TransformSystem::handleAction>(transformSystem);
 }

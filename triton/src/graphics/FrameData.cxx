@@ -18,6 +18,7 @@ FrameData::FrameData(const vk::raii::Device& device,
                      const vk::raii::DescriptorSetLayout& descriptorSetLayout,
                      const vk::raii::DescriptorSetLayout& bindlessDescriptorSetLayout,
                      const vk::raii::DescriptorSetLayout& objectDescriptorSetLayout,
+                     const vk::raii::DescriptorSetLayout& perFrameDescriptorSetLayout,
                      const vk::raii::Queue& queue,
                      const std::string_view name) {
 
@@ -62,6 +63,17 @@ FrameData::FrameData(const vk::raii::Device& device,
    objectDataBuffer = raiillocator.createBuffer(
        &objectDataBufferCreateInfo, &allocationCreateInfo, "Object Data Buffer");
 
+   // create cameradata buffer
+   constexpr auto cameraDataBufferCreateInfo = vk::BufferCreateInfo{
+       .size = sizeof(CameraData), .usage = vk::BufferUsageFlagBits::eUniformBuffer};
+
+   constexpr auto cameraDataAllocationCreateInfo =
+       vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eCpuToGpu,
+                                 .requiredFlags = vk::MemoryPropertyFlagBits::eHostCoherent};
+
+   cameraDataBuffer = raiillocator.createBuffer(
+       &cameraDataBufferCreateInfo, &cameraDataAllocationCreateInfo, "Camera Data Buffer");
+
    // create data for objectMatrices
    auto objectMatrices =
        ObjectMatrices{.model = glm::mat4{1.f}, .view = glm::mat4{1.f}, .proj = glm::mat4{1.f}};
@@ -77,6 +89,18 @@ FrameData::FrameData(const vk::raii::Device& device,
                            device,
                            vk::raii::DescriptorSet::debugReportObjectType,
                            "Object Descriptor Set");
+
+   // Create the cameradata descriptor set
+   const auto cameraDSAllocateInfo =
+       vk::DescriptorSetAllocateInfo{.descriptorPool = *descriptorPool,
+                                     .descriptorSetCount = 1,
+                                     .pSetLayouts = &(*perFrameDescriptorSetLayout)};
+   perFrameDescriptorSet = std::make_unique<vk::raii::DescriptorSet>(
+       std::move(device.allocateDescriptorSets(cameraDSAllocateInfo).front()));
+   graphics::setObjectName(**perFrameDescriptorSet,
+                           device,
+                           vk::raii::DescriptorSet::debugReportObjectType,
+                           "Per Frame Descriptor Set");
 
    // Create the bindless descriptor set
    const auto bindlessDescriptorSetAllocateInfo =
@@ -127,7 +151,19 @@ FrameData::FrameData(const vk::raii::Device& device,
                               .descriptorType = vk::DescriptorType::eStorageBuffer,
                               .pBufferInfo = &objectDataBufferInfo};
 
-   const auto writes = std::array{objectMatricesDescriptorWrite, objectDataDescriptorWrite};
+   // create a write for the cameradata descriptor
+   const auto perFrameDataBufferInfo = vk::DescriptorBufferInfo{
+       .buffer = cameraDataBuffer->getBuffer(), .offset = 0, .range = sizeof(CameraData)};
+   const auto perFrameDataDescriptorWrite =
+       vk::WriteDescriptorSet{.dstSet = **perFrameDescriptorSet,
+                              .dstBinding = 0,
+                              .dstArrayElement = 0,
+                              .descriptorCount = 1,
+                              .descriptorType = vk::DescriptorType::eUniformBuffer,
+                              .pBufferInfo = &perFrameDataBufferInfo};
+
+   const auto writes = std::array{
+       objectMatricesDescriptorWrite, objectDataDescriptorWrite, perFrameDataDescriptorWrite};
 
    device.updateDescriptorSets(writes, nullptr);
 

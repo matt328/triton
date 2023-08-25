@@ -51,6 +51,9 @@ namespace Graphics::Utils {
        const vk::Extent2D swapchainExtent,
        const vk::raii::RenderPass& renderPass);
 
+   std::unique_ptr<vk::raii::DescriptorSetLayout> createPerFrameDescriptorSetLayout(
+       const vk::raii::Device& device);
+
    std::unique_ptr<vk::raii::DescriptorSetLayout> createSSBODescriptorSetLayout(
        const vk::raii::Device& device);
 

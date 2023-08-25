@@ -6,6 +6,7 @@
 #include "geometry/MeshFactory.hpp"
 #include "game/Renderable.hpp"
 #include "graphics/renderer/RendererBase.hpp"
+#include <vulkan/vulkan_raii.hpp>
 
 class Instance;
 class AbstractPipeline;
@@ -125,7 +126,8 @@ class RenderDevice {
 
    void createPerFrameData(const vk::raii::DescriptorSetLayout& descriptorSetLayout,
                            const vk::raii::DescriptorSetLayout& bindlessDescriptorSetLayout,
-                           const vk::raii::DescriptorSetLayout& objectDescriptorSetLayout);
+                           const vk::raii::DescriptorSetLayout& objectDescriptorSetLayout,
+                           const vk::raii::DescriptorSetLayout& perFrameDescriptorSetLayout);
 
    void createDepthResources();
    void createFramebuffers();

@@ -48,7 +48,8 @@ RenderDevice::RenderDevice(const Instance& instance) {
 
    createPerFrameData(pipeline->getDescriptorSetLayout(),
                       pipeline->getBindlessDescriptorSetLayout(),
-                      pipeline->getObjectDescriptorSetLayout());
+                      pipeline->getObjectDescriptorSetLayout(),
+                      pipeline->getPerFrameDescriptorSetLayout());
 
    createDepthResources();
    createFramebuffers();
@@ -329,7 +330,8 @@ void RenderDevice::createAllocator(const Instance& instance) {
 void RenderDevice::createPerFrameData(
     const vk::raii::DescriptorSetLayout& descriptorSetLayout,
     const vk::raii::DescriptorSetLayout& bindlessDescriptorSetLayout,
-    const vk::raii::DescriptorSetLayout& objectDescriptorSetLayout) {
+    const vk::raii::DescriptorSetLayout& objectDescriptorSetLayout,
+    const vk::raii::DescriptorSetLayout& perFrameDescriptorSetLayout) {
    for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++) {
       frameData.push_back(std::make_unique<FrameData>(*device,
                                                       *physicalDevice,
@@ -339,6 +341,7 @@ void RenderDevice::createPerFrameData(
                                                       descriptorSetLayout,
                                                       bindlessDescriptorSetLayout,
                                                       objectDescriptorSetLayout,
+                                                      perFrameDescriptorSetLayout,
                                                       *graphicsQueue,
                                                       fmt::format("Frame {}", i)));
    }
@@ -426,7 +429,7 @@ void RenderDevice::drawFrame() {
    }
 
    {
-      ZoneNamedN(update, "Update Textures", true);
+      ZoneNamedN(updateTextures, "Update Textures", true);
       if (!currentFrameData->getTexturesToBind().empty()) {
          auto writes = std::vector<vk::WriteDescriptorSet>{};
          writes.reserve(currentFrameData->getTexturesToBind().size());
@@ -445,6 +448,14 @@ void RenderDevice::drawFrame() {
          device->updateDescriptorSets(writes, nullptr);
          currentFrameData->getTexturesToBind().clear();
       }
+   }
+
+   {
+      ZoneNamedN(updateCameraData, "Update Camera Data", true);
+      // This is awesome feature of C++ idc
+      const auto [view, proj, viewProj] = renderSystem->getCameraParams();
+      const auto cameraData = CameraData{.view = view, .proj = proj, .viewProj = viewProj};
+      currentFrameData->getCameraBuffer().updateBufferValue(&cameraData, sizeof(CameraData));
    }
 
    device->resetFences(*currentFrameData->getInFlightFence());
@@ -545,7 +556,8 @@ void RenderDevice::recordCommandBuffer(FrameData& frameData, const unsigned imag
          const auto set0 = *frameData.getDescriptorSet();
          const auto set1 = *frameData.getBindlessDescriptorSet();
          const auto set2 = *frameData.getObjectDescriptorSet();
-         const auto allSets = std::array<vk::DescriptorSet, 3>{set0, set1, set2};
+         const auto set3 = *frameData.getPerFrameDescriptorSet();
+         const auto allSets = std::array<vk::DescriptorSet, 4>{set0, set1, set2, set3};
          cmd.bindDescriptorSets(
              vk::PipelineBindPoint::eGraphics, *pipeline->getPipelineLayout(), 0, allSets, nullptr);
          // This is real greasy but it'll do for now
