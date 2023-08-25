@@ -57,9 +57,6 @@ namespace Graphics::Utils {
    std::unique_ptr<vk::raii::DescriptorSetLayout> createSSBODescriptorSetLayout(
        const vk::raii::Device& device);
 
-   std::unique_ptr<vk::raii::DescriptorSetLayout> createDescriptorSetLayout(
-       const vk::raii::Device* device, const std::vector<ShaderStage>& stages);
-
    std::unique_ptr<vk::raii::DescriptorSetLayout> createBindlessDescriptorSetLayout(
        const vk::raii::Device& device);
 

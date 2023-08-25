@@ -58,13 +58,11 @@ DefaultPipeline::DefaultPipeline(const vk::raii::Device& device,
 
    auto shaderStages = std::array{vertexShaderStageInfo, fragmentShaderStageInfo};
 
-   descriptorSetLayout = Graphics::Utils::createDescriptorSetLayout(&device, shaderLibraryInfo);
    bindlessDescriptorSetLayout = Graphics::Utils::createBindlessDescriptorSetLayout(device);
    objectDescriptorSetLayout = Graphics::Utils::createSSBODescriptorSetLayout(device);
    perFrameDescriptorSetLayout = Graphics::Utils::createPerFrameDescriptorSetLayout(device);
 
-   const auto setLayouts = std::array{*(*descriptorSetLayout),
-                                      *(*bindlessDescriptorSetLayout),
+   const auto setLayouts = std::array{*(*bindlessDescriptorSetLayout),
                                       *(*objectDescriptorSetLayout),
                                       *(*perFrameDescriptorSetLayout)};
 

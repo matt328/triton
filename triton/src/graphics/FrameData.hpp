@@ -21,7 +21,6 @@ class FrameData {
              const vk::raii::CommandPool& commandPool,
              const vma::raii::Allocator& raiillocator,
              const vk::raii::DescriptorPool& descriptorPool,
-             const vk::raii::DescriptorSetLayout& descriptorSetLayout,
              const vk::raii::DescriptorSetLayout& bindlessDescriptorSetLayout,
              const vk::raii::DescriptorSetLayout& objectDescriptorSetLayout,
              const vk::raii::DescriptorSetLayout& perFrameDescriptorSetLayout,
@@ -48,18 +47,6 @@ class FrameData {
 
    [[nodiscard]] const vk::raii::Fence& getInFlightFence() const {
       return *inFlightFence;
-   };
-
-   [[nodiscard]] const vma::raii::AllocatedBuffer& getObjectMatricesBuffer() const {
-      return *objectMatricesBuffer;
-   };
-
-   [[nodiscard]] const vk::raii::DescriptorSetLayout& getDescriptorSetLayout() const {
-      return *descriptorSetLayout;
-   };
-
-   [[nodiscard]] const vk::raii::DescriptorSet& getDescriptorSet() const {
-      return *descriptorSet;
    };
 
    [[nodiscard]] const vk::raii::DescriptorSet& getBindlessDescriptorSet() const {
@@ -95,13 +82,9 @@ class FrameData {
    std::unique_ptr<vk::raii::Semaphore> renderFinishedSemaphore;
    std::unique_ptr<vk::raii::Fence> inFlightFence;
 
-   std::unique_ptr<vma::raii::AllocatedBuffer> objectMatricesBuffer;
-
    std::unique_ptr<vma::raii::AllocatedBuffer> objectDataBuffer;
    std::unique_ptr<vma::raii::AllocatedBuffer> cameraDataBuffer;
 
-   std::unique_ptr<vk::raii::DescriptorSetLayout> descriptorSetLayout;
-   std::unique_ptr<vk::raii::DescriptorSet> descriptorSet;
    std::unique_ptr<vk::raii::DescriptorSet> bindlessDescriptorSet;
    std::unique_ptr<vk::raii::DescriptorSet> objectDescriptorSet;
    std::unique_ptr<vk::raii::DescriptorSet> perFrameDescriptorSet;

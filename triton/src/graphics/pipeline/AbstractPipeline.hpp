@@ -16,10 +16,6 @@ class AbstractPipeline {
       return *pipeline;
    };
 
-   [[nodiscard]] const vk::raii::DescriptorSetLayout& getDescriptorSetLayout() const {
-      return *descriptorSetLayout;
-   };
-
    [[nodiscard]] const vk::raii::DescriptorSetLayout& getBindlessDescriptorSetLayout() const {
       return *bindlessDescriptorSetLayout;
    };
@@ -41,7 +37,6 @@ class AbstractPipeline {
 
    std::unique_ptr<vk::raii::Pipeline> pipeline;
 
-   std::unique_ptr<vk::raii::DescriptorSetLayout> descriptorSetLayout;
    std::unique_ptr<vk::raii::DescriptorSetLayout> bindlessDescriptorSetLayout;
    std::unique_ptr<vk::raii::DescriptorSetLayout> objectDescriptorSetLayout;
    std::unique_ptr<vk::raii::DescriptorSetLayout> perFrameDescriptorSetLayout;

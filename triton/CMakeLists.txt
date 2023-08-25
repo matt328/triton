@@ -16,8 +16,6 @@ set(${name}_SRC
    src/graphics/renderer/Clear.cxx
    src/graphics/renderer/Finish.cxx
    src/graphics/renderer/ImGuiRenderer.cxx
-   src/graphics/renderer/ModelRenderer.cxx
-   src/graphics/renderer/Terrain.cxx
    src/graphics/Instance.cxx
    src/graphics/RenderDevice.cxx
    src/graphics/FrameData.cxx

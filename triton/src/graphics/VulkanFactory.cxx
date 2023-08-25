@@ -111,38 +111,6 @@ namespace Graphics::Utils {
           device.createDescriptorSetLayout(dslCreateInfo));
    }
 
-   std::unique_ptr<vk::raii::DescriptorSetLayout> createDescriptorSetLayout(
-       const vk::raii::Device* device, const std::vector<ShaderStage>& stages) {
-      auto bindings = std::vector<vk::DescriptorSetLayoutBinding>{};
-
-      for (const auto& stage : stages) {
-         spirv_cross::Compiler comp(std::move(stage.code));
-         const auto resources = comp.get_shader_resources();
-
-         for (const auto& ubo : resources.uniform_buffers) {
-            bindings.push_back(vk::DescriptorSetLayoutBinding{
-                .binding = comp.get_decoration(ubo.id, spv::DecorationBinding),
-                .descriptorType = vk::DescriptorType::eUniformBuffer,
-                .descriptorCount = 1,
-                .stageFlags = stage.stages});
-         }
-
-         for (const auto& sampledImage : resources.sampled_images) {
-            bindings.push_back(vk::DescriptorSetLayoutBinding{
-                .binding = comp.get_decoration(sampledImage.id, spv::DecorationBinding),
-                .descriptorType = vk::DescriptorType::eCombinedImageSampler,
-                .descriptorCount = 1,
-                .stageFlags = stage.stages});
-         }
-      }
-
-      const auto descriptorSetLayoutCreateInfo = vk::DescriptorSetLayoutCreateInfo{
-          .bindingCount = static_cast<uint32_t>(bindings.size()), .pBindings = bindings.data()};
-
-      return std::make_unique<vk::raii::DescriptorSetLayout>(
-          device->createDescriptorSetLayout(descriptorSetLayoutCreateInfo));
-   }
-
    vk::raii::RenderPass colorAndDepthRenderPass(const RenderPassCreateInfo& createInfo) {
       const bool first = createInfo.flags & eRenderPassBit_First;
       const bool last = createInfo.flags & eRenderPassBit_Last;

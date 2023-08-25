@@ -5,12 +5,12 @@ struct ObjectData {
    uint textureId;
 };
 
-layout(std140, set = 2, binding = 0) readonly buffer ObjectBuffer {
+layout(std140, set = 1, binding = 0) readonly buffer ObjectBuffer {
    ObjectData objects[];
 }
 objectBuffer;
 
-layout(set = 3, binding = 0) uniform CamerData {
+layout(set = 2, binding = 0) uniform CamerData {
    mat4 view;
    mat4 proj;
    mat4 viewProj;
