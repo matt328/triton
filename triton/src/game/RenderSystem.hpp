@@ -1,5 +1,6 @@
 #pragma once
 
+#include "game/Camera.hpp"
 #include "game/RenderObject.hpp"
 #include "game/Renderable.hpp"
 
@@ -19,6 +20,9 @@ class RenderSystem {
       return renderObjects;
    };
 
+   [[nodiscard]] std::tuple<glm::mat4, glm::mat4, glm::mat4> getCameraParams() const;
+
  private:
    std::vector<RenderObject> renderObjects;
+   Camera currentCamera;
 };
