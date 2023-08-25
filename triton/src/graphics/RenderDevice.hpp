@@ -124,8 +124,7 @@ class RenderDevice {
    void createCommandPools(const Instance& instance);
    void createDescriptorPool();
 
-   void createPerFrameData(const vk::raii::DescriptorSetLayout& descriptorSetLayout,
-                           const vk::raii::DescriptorSetLayout& bindlessDescriptorSetLayout,
+   void createPerFrameData(const vk::raii::DescriptorSetLayout& bindlessDescriptorSetLayout,
                            const vk::raii::DescriptorSetLayout& objectDescriptorSetLayout,
                            const vk::raii::DescriptorSetLayout& perFrameDescriptorSetLayout);
 
