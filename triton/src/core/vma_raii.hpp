@@ -54,7 +54,7 @@ namespace vma::raii {
          allocator.destroyBuffer(buffer, allocation);
       }
 
-      void updateBufferValue(void* data, const size_t dataSize) const {
+      void updateBufferValue(const void* data, const size_t dataSize) const {
          auto dst = allocator.mapMemory(allocation);
          memcpy(dst, data, dataSize);
          allocator.unmapMemory(allocation);

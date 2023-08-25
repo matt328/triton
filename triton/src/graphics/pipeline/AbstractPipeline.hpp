@@ -28,6 +28,10 @@ class AbstractPipeline {
       return *objectDescriptorSetLayout;
    };
 
+   [[nodiscard]] const vk::raii::DescriptorSetLayout& getPerFrameDescriptorSetLayout() const {
+      return *perFrameDescriptorSetLayout;
+   };
+
    [[nodiscard]] virtual const vk::raii::PipelineLayout& getPipelineLayout() const = 0;
 
  protected:
@@ -40,6 +44,7 @@ class AbstractPipeline {
    std::unique_ptr<vk::raii::DescriptorSetLayout> descriptorSetLayout;
    std::unique_ptr<vk::raii::DescriptorSetLayout> bindlessDescriptorSetLayout;
    std::unique_ptr<vk::raii::DescriptorSetLayout> objectDescriptorSetLayout;
+   std::unique_ptr<vk::raii::DescriptorSetLayout> perFrameDescriptorSetLayout;
 
    const vk::PipelineInputAssemblyStateCreateInfo inputAssembly{
        .topology = vk::PrimitiveTopology::eTriangleList, .primitiveRestartEnable = VK_FALSE};

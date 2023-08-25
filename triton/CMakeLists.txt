@@ -46,6 +46,7 @@ target_precompile_headers(${name} PRIVATE
    <memory>
    <ranges>
    <set>
+   <tuple>
    <format>
    <spdlog/sinks/dist_sink.h>
    <spdlog/sinks/msvc_sink.h>

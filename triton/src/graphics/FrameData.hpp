@@ -24,6 +24,7 @@ class FrameData {
              const vk::raii::DescriptorSetLayout& descriptorSetLayout,
              const vk::raii::DescriptorSetLayout& bindlessDescriptorSetLayout,
              const vk::raii::DescriptorSetLayout& objectDescriptorSetLayout,
+             const vk::raii::DescriptorSetLayout& perFrameDescriptorSetLayout,
              const vk::raii::Queue& queue,
              const std::string_view name);
    ~FrameData();
@@ -78,23 +79,33 @@ class FrameData {
       return texturesToBind;
    }
 
+   [[nodiscard]] const vma::raii::AllocatedBuffer& getCameraBuffer() const {
+      return *cameraDataBuffer;
+   }
+
+   [[nodiscard]] const vk::raii::DescriptorSet& getPerFrameDescriptorSet() const {
+      return *perFrameDescriptorSet;
+   }
+
    void updateObjectDataBuffer(ObjectData* data, const size_t size);
 
  private:
-   std::unique_ptr<vk::raii::CommandBuffer> commandBuffer = nullptr;
-   std::unique_ptr<vk::raii::Semaphore> imageAvailableSemaphore = nullptr;
-   std::unique_ptr<vk::raii::Semaphore> renderFinishedSemaphore = nullptr;
-   std::unique_ptr<vk::raii::Fence> inFlightFence = nullptr;
+   std::unique_ptr<vk::raii::CommandBuffer> commandBuffer;
+   std::unique_ptr<vk::raii::Semaphore> imageAvailableSemaphore;
+   std::unique_ptr<vk::raii::Semaphore> renderFinishedSemaphore;
+   std::unique_ptr<vk::raii::Fence> inFlightFence;
 
-   std::unique_ptr<vma::raii::AllocatedBuffer> objectMatricesBuffer = nullptr;
+   std::unique_ptr<vma::raii::AllocatedBuffer> objectMatricesBuffer;
 
-   std::unique_ptr<vma::raii::AllocatedBuffer> objectDataBuffer = nullptr;
+   std::unique_ptr<vma::raii::AllocatedBuffer> objectDataBuffer;
+   std::unique_ptr<vma::raii::AllocatedBuffer> cameraDataBuffer;
 
-   std::unique_ptr<vk::raii::DescriptorSetLayout> descriptorSetLayout = nullptr;
-   std::unique_ptr<vk::raii::DescriptorSet> descriptorSet = nullptr;
-   std::unique_ptr<vk::raii::DescriptorSet> bindlessDescriptorSet = nullptr;
-   std::unique_ptr<vk::raii::DescriptorSet> objectDescriptorSet = nullptr;
+   std::unique_ptr<vk::raii::DescriptorSetLayout> descriptorSetLayout;
+   std::unique_ptr<vk::raii::DescriptorSet> descriptorSet;
+   std::unique_ptr<vk::raii::DescriptorSet> bindlessDescriptorSet;
+   std::unique_ptr<vk::raii::DescriptorSet> objectDescriptorSet;
+   std::unique_ptr<vk::raii::DescriptorSet> perFrameDescriptorSet;
 
    std::vector<uint32_t> texturesToBind = {};
-   tracy::VkCtx* tracyContext = nullptr;
+   tracy::VkCtx* tracyContext;
 };
