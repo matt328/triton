@@ -26,7 +26,7 @@ namespace Actions {
 }
 
 using ActionDelegate = entt::delegate<void(const Actions::Action&)>;
-
+// TODO: Remove GLFW dependency from game lib
 class InputSystem {
  public:
    InputSystem() : actionMap({}) {

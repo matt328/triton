@@ -36,6 +36,6 @@ class ImmediateContext {
    std::unique_ptr<vk::raii::CommandPool> commandPool = nullptr;
    std::unique_ptr<vk::raii::CommandBuffer> commandBuffer = nullptr;
 
-   // It's fine because RenderDevice will surely outlive ImmediateContext.  It's understood that
+   // It's fine because GraphicsContext will surely outlive ImmediateContext.  It's understood that
    // ImmediateContexts are not utility classes to be used wherever.
 };
