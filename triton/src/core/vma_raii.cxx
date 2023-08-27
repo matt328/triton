@@ -1,5 +1,9 @@
 #include "vma_raii.hpp"
 
+#define VMA_IMPLEMENTATION
+#include <vk_mem_alloc.h>
+#include <vulkan-memory-allocator-hpp/vk_mem_alloc.hpp>
+
 using Core::Log;
 
 namespace vma::raii {

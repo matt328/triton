@@ -1,6 +1,6 @@
 #pragma once
 
-#include "graphics/RenderDevice.hpp"
+#include "core/vma_raii.hpp"
 
 namespace vk {
    enum class Format;
