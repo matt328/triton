@@ -1,5 +1,9 @@
 #include "MeshFactory.hpp"
 
+#define TINYGLTF_IMPLEMENTATION
+#define STB_IMAGE_IMPLEMENTATION
+#include <tiny_gltf.h>
+
 using Core::Log;
 
 MeshFactory::MeshFactory(vma::raii::Allocator* allocator, ImmediateContext* transferContext) :

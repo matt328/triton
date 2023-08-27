@@ -1,12 +1,7 @@
 #include "Application.hpp"
 #include "Context.hpp"
 #include "ResourceFactory.hpp"
-#include <GLFW/glfw3.h>
 #include "Log.hpp"
-
-#define TINYGLTF_IMPLEMENTATION
-#define STB_IMAGE_IMPLEMENTATION
-#include <tiny_gltf.h>
 
 class Application::ApplicationImpl {
  public:

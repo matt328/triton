@@ -18,9 +18,6 @@
 #include "RenderObject.hpp"
 #include "Log.hpp"
 
-#define TRACY_ENABLED
-#include "tracy/Tracy.hpp"
-
 namespace graphics {
 
    using Core::Log;
