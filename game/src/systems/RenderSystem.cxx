@@ -1,7 +1,7 @@
 #include "RenderSystem.hpp"
-#include "Renderable.hpp"
-#include "graphics/RenderDevice.hpp"
-#include "Transform.hpp"
+#include "RenderObject.hpp"
+#include "components/Renderable.hpp"
+#include "components/Transform.hpp"
 
 // Update the internal renderObjects list so the renderer can just query it.
 using std::tuple;

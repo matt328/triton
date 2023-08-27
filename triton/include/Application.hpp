@@ -1,18 +1,15 @@
 #pragma once
 
-class RenderDevice;
-class Instance;
-class Game;
+#include <memory>
+#include <string>
+#include <functional>
 
-struct DestroyGlfwWindow {
-   void operator()(GLFWwindow* ptr) const {
-      glfwDestroyWindow(ptr);
-   }
-};
+#include "IGame.hpp"
+#include "ResourceFactory.hpp"
 
 class Application {
  public:
-   Application();
+   Application(int width, int height);
    ~Application();
 
    Application(const Application&) = delete;
@@ -22,16 +19,19 @@ class Application {
 
    void run() const;
 
+   IResourceFactory* getResourceFactory();
+
+   size_t registerUpdate(std::function<void(void)> fn);
+   size_t registerUpdateBlendState(std::function<void(double)> fn);
+   size_t registerKeyHandler(std::function<void(int, int, int, int)> fn);
+
+   void registerGame(std::shared_ptr<IGame> game);
+
+   void deregisterUpdate(const size_t num);
+   void deregisterUpdateBlendState(const size_t num);
+   void deregisterKeyHandler(const size_t num);
+
  private:
-   std::unique_ptr<GLFWwindow, DestroyGlfwWindow> window = nullptr;
-   std::unique_ptr<Instance> instance;
-   std::unique_ptr<RenderDevice> renderDevice;
-   std::unique_ptr<Game> game;
-
-   inline static constexpr double FRAME_TIME = 1.f / 60.f;
-
-   void keyCallbackInt(int key, int scancode, int action, int mods) const;
-
-   static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
-   static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+   class ApplicationImpl;
+   std::unique_ptr<ApplicationImpl> impl;
 };

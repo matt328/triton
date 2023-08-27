@@ -8,10 +8,7 @@ struct GLFWwindow;
 
 class Instance {
  public:
-   explicit Instance(GLFWwindow* window,
-                     bool validationEnabled = false,
-                     uint32_t initialHeight = 1366,
-                     uint32_t initialWidth = 768);
+   explicit Instance(GLFWwindow* window, bool validationEnabled = false);
 
    ~Instance() = default;
    Instance(const Instance&) = delete;
@@ -49,8 +46,8 @@ class Instance {
 
  private:
    bool validationEnabled;
-   uint32_t height = 0;
-   uint32_t width = 0;
+   int height = 0;
+   int width = 0;
 
    std::vector<const char*> desiredDeviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME,
                                                        VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME};

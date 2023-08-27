@@ -4,11 +4,8 @@ set(${name}_SRC
    src/core/stb.cxx
    src/core/vma_raii.cxx
    src/core/Log.cxx
-   src/game/Game.cxx
-   src/game/Application.cxx
-   src/game/CameraSystem.cxx
-   src/game/RenderSystem.cxx
-   src/game/TransformSystem.cxx
+   src/Application.cxx
+   src/Context.cxx
    src/graphics/pipeline/Vertex.cxx
    src/graphics/pipeline/SpirvHelper.cxx
    src/graphics/pipeline/DefaultPipeline.cxx
@@ -17,7 +14,6 @@ set(${name}_SRC
    src/graphics/renderer/Finish.cxx
    src/graphics/renderer/ImGuiRenderer.cxx
    src/graphics/Instance.cxx
-   src/graphics/RenderDevice.cxx
    src/graphics/FrameData.cxx
    src/graphics/ImmediateContext.cxx
    src/graphics/VulkanFactory.cxx
@@ -54,8 +50,8 @@ target_precompile_headers(${name} PRIVATE
    <vulkan/vulkan_raii.hpp>
    <vulkan-memory-allocator-hpp/vk_mem_alloc.hpp>
    <GLFW/glfw3.h>
-   <entt/entt.hpp>
    <stb_image.h>
+   <string_view>
    <tracy/Tracy.hpp>
    <tracy/TracyVulkan.hpp>
 )
@@ -94,14 +90,16 @@ find_package(spirv_cross_core CONFIG REQUIRED)
 find_package(spirv_cross_glsl CONFIG REQUIRED)
 find_package(spirv_cross_cpp CONFIG REQUIRED)
 find_package(Tracy CONFIG REQUIRED)
+find_package(unofficial-vulkan-memory-allocator CONFIG REQUIRED)
 
 target_link_libraries(${name}
    PRIVATE
-   unofficial::VulkanMemoryAllocator-Hpp::VulkanMemoryAllocator-Hpp
    imgui::imgui
    spirv-cross-core
    spirv-cross-cpp
    Tracy::TracyClient
+   unofficial::vulkan-memory-allocator::vulkan-memory-allocator
+   unofficial::VulkanMemoryAllocator-Hpp::VulkanMemoryAllocator-Hpp
    ${vulkan_LIBRARIES}
 )
 

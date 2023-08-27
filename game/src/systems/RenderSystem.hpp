@@ -1,8 +1,8 @@
 #pragma once
 
-#include "game/Camera.hpp"
-#include "game/RenderObject.hpp"
-#include "game/Renderable.hpp"
+#include "components/Camera.hpp"
+#include "RenderObject.hpp"
+#include "components/Renderable.hpp"
 
 class RenderSystem {
  public:

@@ -5,12 +5,9 @@ using Core::Log;
 
 const std::vector DESIRED_VALIDATION_LAYERS = {"VK_LAYER_KHRONOS_validation"};
 
-Instance::Instance(GLFWwindow* window,
-                   const bool validationEnabled,
-                   const uint32_t initialHeight,
-                   const uint32_t initialWidth) :
-    validationEnabled(validationEnabled),
-    height(initialHeight), width(initialWidth) {
+Instance::Instance(GLFWwindow* window, const bool validationEnabled) :
+    validationEnabled(validationEnabled) {
+   glfwGetWindowSize(window, &width, &height);
    context = std::make_unique<vk::raii::Context>();
 
    // Log available extensions

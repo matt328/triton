@@ -24,6 +24,7 @@ target_link_libraries(${project_name}
    glslang::glslang-default-resource-limits
    glslang::SPIRV
    Tracy::TracyClient
+   game
    triton
    spdlog::spdlog_header_only
    ${vulkan_LIBRARIES}
