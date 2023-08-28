@@ -59,6 +59,10 @@ void ImmediateContext::submit(std::function<void(vk::raii::CommandBuffer& cmd)>&
 
    queue.submit(submitInfo, **fence);
 
+   // Eventually, this process needs barriers and stuff and should
+   // just be waited for in the main rendering loop i think somehow further research is needed
+   // In general, create an abstraction over loading textures that can be done
+   // from an asnyc task
    if (const auto result = device.waitForFences(**fence, true, UINT64_MAX);
        result != vk::Result::eSuccess) {
       Log::core->warn("During Immediate Submit, timeout waiting for fence");

@@ -2,8 +2,6 @@
 
 #include "Log.hpp"
 #include "core/Utils.hpp"
-#include <vulkan/vulkan_enums.hpp>
-#include <vulkan/vulkan_structs.hpp>
 
 using Core::Log;
 
@@ -56,12 +54,6 @@ Texture::Texture(const std::string_view& filename,
 
    for (uint32_t i = 0; i < mipLevels; i++) {
       vk::DeviceSize offset{0};
-      // ktx_size_t offset;
-      // if (const auto result = ktxTexture_GetImageOffset(ktxTexture, i, 0, 0, &offset);
-      //     result != KTX_SUCCESS) {
-      //    throw new std::runtime_error(
-      //        std::format("Error getting image offset for mip level {}", i));
-      // }
 
       const auto bufferCopyRegion =
           vk::BufferImageCopy{.bufferOffset = offset,
