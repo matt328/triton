@@ -60,7 +60,7 @@ class Application::ApplicationImpl {
 
    void run() const {
       if (game == nullptr) {
-         throw std::exception{"Game not registered, bailing out"};
+         throw std::runtime_error{"Game not registered, bailing out"};
       }
       glfwSetKeyCallback(window.get(), keyCallback);
 
