@@ -1,6 +1,7 @@
 #include "Application.hpp"
 #include "Log.hpp"
 #include "Game.hpp"
+#include "config.h"
 
 using Core::Log;
 
@@ -9,6 +10,12 @@ constexpr int height = 768;
 
 int main() {
    Log::init();
+
+#ifdef _DEBUG
+   Log::core->info("Debug Build");
+#else
+   Log::core->info("NON Debug Build");
+#endif
 
    try {
       auto app = Application{width, height};
