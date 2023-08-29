@@ -23,17 +23,6 @@ target_precompile_headers(${name} PRIVATE
    <filesystem>
 )
 
-if(MSVC)
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++latest")
-else()
-   add_compile_options(-Wall -Wextra -pedantic)
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20")
-endif(MSVC)
-
-add_compile_definitions(
-
-)
-
 find_package(glfw3 CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 

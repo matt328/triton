@@ -15,8 +15,7 @@
 namespace game {
    class Game::GameImpl {
     public:
-      GameImpl(IResourceFactory* factory, int width, int height) :
-          resourceFactory(factory), width(width), height(height) {
+      GameImpl(IResourceFactory* factory, int width, int height) : resourceFactory(factory) {
          registry = std::make_unique<entt::registry>();
 
          renderSystem = std::make_shared<RenderSystem>();
@@ -81,7 +80,6 @@ namespace game {
       std::shared_ptr<RenderSystem> renderSystem;
       std::unique_ptr<TransformSystem> transformSystem;
       std::unique_ptr<InputSystem> inputSystem;
-      int width, height;
    };
 
    Game::Game(IResourceFactory* factory, int width, int height) : IGame() {

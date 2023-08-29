@@ -13,10 +13,10 @@ namespace Graphics::Utils {
                                   const vk::FormatFeatureFlags features) {
       for (const auto format : candidates) {
          auto props = physicalDevice.getFormatProperties(format);
-         if (tiling == vk::ImageTiling::eLinear &&
-                 (props.linearTilingFeatures & features) == features ||
-             tiling == vk::ImageTiling::eOptimal &&
-                 (props.optimalTilingFeatures & features) == features) {
+         if ((tiling == vk::ImageTiling::eLinear &&
+              (props.linearTilingFeatures & features) == features) ||
+             (tiling == vk::ImageTiling::eOptimal &&
+              (props.optimalTilingFeatures & features) == features)) {
             return format;
          }
       }

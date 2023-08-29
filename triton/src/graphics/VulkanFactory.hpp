@@ -61,8 +61,4 @@ namespace Graphics::Utils {
        const vk::raii::Device& device);
 
    void createVertexAttributes(const std::vector<ShaderStage>& shaderStages);
-
-   static void print_resources(const spirv_cross::Compiler& compiler,
-                               const char* tag,
-                               const spirv_cross::SmallVector<spirv_cross::Resource>& resources);
 }

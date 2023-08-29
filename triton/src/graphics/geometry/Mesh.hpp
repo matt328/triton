@@ -9,64 +9,64 @@ class Mesh {
         const std::vector<T>& vertexData,
         const std::vector<R>& indexData,
         ImmediateContext* transferContext) :
-       indicesCount(indexData.size()) {
+       indicesCount(indexData.size()){
 
-      const auto a = 5; // This has to be here or else clang-format flips out
-      {
-         auto size = sizeof(vertexData[0]) * vertexData.size();
+           {auto size = sizeof(vertexData[0]) * vertexData.size();
 
-         const auto stagingBuffer = allocator->createStagingBuffer(size, "Mesh Vertex Staging");
+   const auto stagingBuffer = allocator->createStagingBuffer(size, "Mesh Vertex Staging");
 
-         void* data = allocator->mapMemory(*stagingBuffer);
-         memcpy(data, vertexData.data(), static_cast<size_t>(size));
-         allocator->unmapMemory(*stagingBuffer);
+   void* data = allocator->mapMemory(*stagingBuffer);
+   memcpy(data, vertexData.data(), static_cast<size_t>(size));
+   allocator->unmapMemory(*stagingBuffer);
 
-         vertexBuffer = allocator->createGpuVertexBuffer(size, "GPU Vertex");
+   vertexBuffer = allocator->createGpuVertexBuffer(size, "GPU Vertex");
 
-         transferContext->submit([&](const vk::raii::CommandBuffer& cmd) {
-            const auto copy = vk::BufferCopy{.srcOffset = 0, .dstOffset = 0, .size = size};
-            cmd.copyBuffer(stagingBuffer->getBuffer(), vertexBuffer->getBuffer(), copy);
-         });
-      }
+   transferContext->submit([&](const vk::raii::CommandBuffer& cmd) {
+      const auto copy = vk::BufferCopy{.srcOffset = 0, .dstOffset = 0, .size = size};
+      cmd.copyBuffer(stagingBuffer->getBuffer(), vertexBuffer->getBuffer(), copy);
+   });
+}
 
-      {
-         auto size = sizeof(indexData[0]) * indexData.size();
+{
+   auto size = sizeof(indexData[0]) * indexData.size();
 
-         const auto stagingBuffer = allocator->createStagingBuffer(size, "Mesh Index Staging");
-         auto data = allocator->mapMemory(*stagingBuffer);
-         memcpy(data, indexData.data(), static_cast<size_t>(size));
-         allocator->unmapMemory(*stagingBuffer);
+   const auto stagingBuffer = allocator->createStagingBuffer(size, "Mesh Index Staging");
+   auto data = allocator->mapMemory(*stagingBuffer);
+   memcpy(data, indexData.data(), static_cast<size_t>(size));
+   allocator->unmapMemory(*stagingBuffer);
 
-         indexBuffer = allocator->createGpuIndexBuffer(size, "GPU Index");
+   indexBuffer = allocator->createGpuIndexBuffer(size, "GPU Index");
 
-         transferContext->submit([&](const vk::raii::CommandBuffer& cmd) {
-            const auto copy = vk::BufferCopy{.srcOffset = 0, .dstOffset = 0, .size = size};
-            cmd.copyBuffer(stagingBuffer->getBuffer(), indexBuffer->getBuffer(), copy);
-         });
-      }
-   };
+   transferContext->submit([&](const vk::raii::CommandBuffer& cmd) {
+      const auto copy = vk::BufferCopy{.srcOffset = 0, .dstOffset = 0, .size = size};
+      cmd.copyBuffer(stagingBuffer->getBuffer(), indexBuffer->getBuffer(), copy);
+   });
+}
+}
+;
 
-   Mesh(const Mesh&) = delete;
-   Mesh(Mesh&&) = delete;
-   Mesh& operator=(const Mesh&) = delete;
-   Mesh& operator=(Mesh&&) = delete;
+Mesh(const Mesh&) = delete;
+Mesh(Mesh&&) = delete;
+Mesh& operator=(const Mesh&) = delete;
+Mesh& operator=(Mesh&&) = delete;
 
-   [[nodiscard]] const vma::raii::AllocatedBuffer& getVertexBuffer() const {
-      return *vertexBuffer;
-   }
+[[nodiscard]] const vma::raii::AllocatedBuffer& getVertexBuffer() const {
+   return *vertexBuffer;
+}
 
-   [[nodiscard]] const vma::raii::AllocatedBuffer& getIndexBuffer() const {
-      return *indexBuffer;
-   }
+[[nodiscard]] const vma::raii::AllocatedBuffer& getIndexBuffer() const {
+   return *indexBuffer;
+}
 
-   [[nodiscard]] uint32_t getIndicesCount() const {
-      return indicesCount;
-   }
+[[nodiscard]] uint32_t getIndicesCount() const {
+   return indicesCount;
+}
 
-   ~Mesh() = default;
+~Mesh() = default;
 
- private:
-   std::unique_ptr<vma::raii::AllocatedBuffer> vertexBuffer;
-   std::unique_ptr<vma::raii::AllocatedBuffer> indexBuffer;
-   uint32_t indicesCount;
-};
+private:
+std::unique_ptr<vma::raii::AllocatedBuffer> vertexBuffer;
+std::unique_ptr<vma::raii::AllocatedBuffer> indexBuffer;
+uint32_t indicesCount;
+}
+;
