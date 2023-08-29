@@ -115,7 +115,7 @@ namespace graphics {
       struct QueueFamilyIndices;
       struct SwapchainSupportDetails;
 
-      static constexpr uint32_t FRAMES_IN_FLIGHT = 3;
+      static constexpr uint32_t FRAMES_IN_FLIGHT = 2;
 
       std::unique_ptr<Instance> instance;
 
@@ -499,12 +499,23 @@ namespace graphics {
       void drawFrame() {
          const auto& currentFrameData = frameData[currentFrame];
 
+         /*
+            We have multiple 'frames in flight'.  A frame is basically a command buffer, and all the
+            resources used by the commands enqueued into it by the cpu each frame.
+            Wait for the current frame's in flight fence
+            This fence will be signaled when the GPU is done working off
+            this frame's command buffer, so it's safe to reset it and start recording another
+         */
          if (const auto res =
                  device->waitForFences(*currentFrameData->getInFlightFence(), VK_TRUE, UINT64_MAX);
              res != vk::Result::eSuccess) {
             throw std::runtime_error("Error waiting for fences");
          }
 
+         /*
+            Tell the swapchain to grab the next image, signaling this semaphore when
+            an image has been acquired
+         */
          const auto [result, imageIndex] = swapchain->acquireNextImage(
              UINT64_MAX, *currentFrameData->getImageAvailableSemaphore(), nullptr);
 
@@ -546,14 +557,19 @@ namespace graphics {
             currentFrameData->getCameraBuffer().updateBufferValue(&cameraData, sizeof(CameraData));
          }
 
+         /*
+            We've already waited on this fence, so we can safely reset it so we can signal it again
+         */
          device->resetFences(*currentFrameData->getInFlightFence());
 
          currentFrameData->getCommandBuffer().reset();
 
+         recordCommandBuffer(*currentFrameData, imageIndex);
+
          constexpr auto waitStages = std::array<vk::PipelineStageFlags, 1>{
              vk::PipelineStageFlagBits::eColorAttachmentOutput};
 
-         const auto signalSemaphores =
+         const auto renderFinishedSemaphores =
              std::array<vk::Semaphore, 1>{*currentFrameData->getRenderFinishedSemaphore()};
 
          const auto submitInfo =
@@ -563,19 +579,27 @@ namespace graphics {
                             .commandBufferCount = 1,
                             .pCommandBuffers = &*currentFrameData->getCommandBuffer(),
                             .signalSemaphoreCount = 1,
-                            .pSignalSemaphores = signalSemaphores.data()};
+                            .pSignalSemaphores = renderFinishedSemaphores.data()};
+         /*
+            Submit this command buffer, waiting for the acquire image semaphore, and also signaling
+            the renderFinished semaphore once it's done. Note rendering here means working off the
+            command buffer and drawing to the framebuffer image.  Presenting the framebuffer to the
+            screen is another process...
+         */
+         graphicsQueue->submit(submitInfo, *currentFrameData->getInFlightFence());
 
-         {
-            recordCommandBuffer(*currentFrameData, imageIndex);
-            graphicsQueue->submit(submitInfo, *currentFrameData->getInFlightFence());
-         }
+         const auto presentInfo =
+             vk::PresentInfoKHR{.waitSemaphoreCount = 1,
+                                .pWaitSemaphores = renderFinishedSemaphores.data(),
+                                .swapchainCount = 1,
+                                .pSwapchains = &(*(*swapchain)),
+                                .pImageIndices = &imageIndex};
 
-         const auto presentInfo = vk::PresentInfoKHR{.waitSemaphoreCount = 1,
-                                                     .pWaitSemaphores = signalSemaphores.data(),
-                                                     .swapchainCount = 1,
-                                                     .pSwapchains = &(*(*swapchain)),
-                                                     .pImageIndices = &imageIndex};
-
+         /*
+            Since the submit call is async, the present call needs to wait on the render finished
+            semaphore before actually presenting the new image to the screen so it can display it
+            at the next vblank period.
+         */
          if (const auto pResult = graphicsQueue->presentKHR(presentInfo);
              pResult == vk::Result::eErrorOutOfDateKHR || pResult == vk::Result::eSuboptimalKHR ||
              framebufferResized) {
