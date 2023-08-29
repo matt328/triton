@@ -56,13 +56,6 @@ target_precompile_headers(${name} PRIVATE
    <tracy/TracyVulkan.hpp>
 )
 
-if(MSVC)
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++latest")
-else()
-   add_compile_options(-Wall -Wextra -pedantic)
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20")
-endif(MSVC)
-
 add_compile_definitions(
    GLFW_INCLUDE_VULKAN=1
    VULKAN_HPP_NO_CONSTRUCTORS
@@ -71,16 +64,6 @@ add_compile_definitions(
    GLM_ENABLE_EXPERIMENTAL
    TRACY_ENABLED
 )
-
-if(WIN32)
-   add_compile_definitions(
-      VK_USE_PLATFORM_WIN32_KHR
-   )
-elseif(APPLE)
-   add_compile_definitions(
-      VK_USE_PLATFORM_MACOS_MVK
-   )
-endif(WIN32)
 
 find_package(spdlog CONFIG REQUIRED)
 find_package(Stb REQUIRED)
