@@ -28,9 +28,8 @@ std::unique_ptr<Mesh<Models::Vertex, uint32_t>> MeshFactory::loadMeshFromGltf(
       std::vector<Models::Vertex> vertexBuffer;
       std::vector<uint32_t> indexBuffer;
       if (const auto node = model.nodes[scene.nodes[0]]; node.mesh > -1) {
-         for (const auto mesh = model.meshes[node.mesh]; const auto primitive : mesh.primitives) {
+         for (const auto mesh = model.meshes[node.mesh]; const auto& primitive : mesh.primitives) {
             auto vertexStart = static_cast<uint32_t>(vertexBuffer.size());
-            uint32_t indexCount = 0;
             const float* positionBuffer = nullptr;
             const float* normalsBuffer = nullptr;
             const float* texCoordsBuffer = nullptr;
