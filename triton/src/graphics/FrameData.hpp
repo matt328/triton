@@ -82,6 +82,12 @@ class FrameData {
    std::unique_ptr<vk::raii::Semaphore> renderFinishedSemaphore;
    std::unique_ptr<vk::raii::Fence> inFlightFence;
 
+   /*
+      Keeping one of all of these per frame in flight doubles the memory usage, but also cuts out a
+      mess of synchronization that must be done between frames in flight.  Otherwise you would have
+      to acquire a lock after updating, and not be able to release it until after the render
+      finished fence signals, leaving a very narrow window of time to update any of these buffers.
+   */
    std::unique_ptr<vma::raii::AllocatedBuffer> objectDataBuffer;
    std::unique_ptr<vma::raii::AllocatedBuffer> cameraDataBuffer;
 
