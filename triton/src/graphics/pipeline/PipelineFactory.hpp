@@ -51,6 +51,6 @@ namespace Graphics::Pipeline {
          file.close();
          return shaderCode;
       }
-      throw std::runtime_error(fmt::format("Failed to read shader from file {}", filename.data()));
+      throw std::runtime_error(std::format("Failed to read shader from file {}", filename.data()));
    }
 }

@@ -7,6 +7,8 @@ project(triton VERSION "0.0.1")
 find_package(glm CONFIG REQUIRED)
 find_package(Vulkan REQUIRED)
 
+configure_file(driver/config.h.in config.h)
+
 add_compile_definitions(
    NOMINMAX
    VULKAN_HPP_NO_STRUCT_CONSTRUCTORS
@@ -14,6 +16,7 @@ add_compile_definitions(
 )
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 
+SET(CMAKE_CXX_STANDARD 20)
 if(MSVC)
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++latest")
 else()
@@ -44,3 +47,4 @@ add_subdirectory(game)
 add_subdirectory(triton)
 add_subdirectory(assets)
 add_subdirectory(driver)
+add_subdirectory(testarea)

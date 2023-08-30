@@ -19,7 +19,7 @@ Texture::Texture(const std::string_view& filename,
    stbi_uc* pixels = stbi_load(filename.data(), &width, &height, &channels, STBI_rgb_alpha);
 
    if (!pixels) {
-      throw std::runtime_error(fmt::format("Failed to load texture file: {}", filename.data()));
+      throw std::runtime_error(std::format("Failed to load texture file: {}", filename.data()));
    }
 
    vk::DeviceSize textureSize = width * height * 4;

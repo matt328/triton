@@ -24,7 +24,6 @@ target_precompile_headers(${name} PRIVATE
 )
 
 find_package(glfw3 CONFIG REQUIRED)
-find_package(spdlog CONFIG REQUIRED)
 
 target_link_libraries(${name}
    PRIVATE

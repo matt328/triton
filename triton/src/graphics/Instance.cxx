@@ -12,11 +12,6 @@ Instance::Instance(GLFWwindow* window, const bool validationEnabled) :
 
    // Log available extensions
    const auto instanceExtensions = context->enumerateInstanceExtensionProperties();
-   // std::string logString = "Available Instance Extensions\n";
-   // for (const auto& [extensionName, specVersion] : instanceExtensions) {
-   //    logString.append(fmt::format("   {}: v{}\n", extensionName, specVersion));
-   // }
-   // Log::core->debug("{}", logString);
 
    if (validationEnabled && !checkValidationLayerSupport()) {
       throw std::runtime_error("Validation layers requested but not available");

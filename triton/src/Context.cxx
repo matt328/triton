@@ -16,11 +16,9 @@
 #include "graphics/GraphicsHelpers.hpp"
 #include "graphics/DebugHelpers.hpp"
 #include "RenderObject.hpp"
-#include "Log.hpp"
+#include "Logger.hpp"
 
 namespace graphics {
-
-   using Core::Log;
 
    class Context::ContextImpl {
     public:
@@ -102,7 +100,7 @@ namespace graphics {
          for (auto& f : frameData) {
             f->getTexturesToBind().push_back(handle);
          }
-         Core::Log::core->info("added texture to bind with index {}", handle);
+         Log::debug << "added texture to bind with index" << handle << std::endl;
          return handle;
       }
 
@@ -435,7 +433,7 @@ namespace graphics {
                                                             objectDescriptorSetLayout,
                                                             perFrameDescriptorSetLayout,
                                                             *graphicsQueue,
-                                                            fmt::format("Frame {}", i)));
+                                                            std::format("Frame {}", i)));
          }
       }
 

@@ -3,7 +3,6 @@
    "version-string": "0.1.0",
    "dependencies": [
       "entt",
-      "fmt",
       "glfw3",
       "glm",
       "glslang",
@@ -15,7 +14,6 @@
          ]
       },
       "nlohmann-json",
-      "spdlog",
       "spirv-cross",
       "stb",
       "tinygltf",

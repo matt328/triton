@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Log.hpp"
-
 namespace Actions {
    enum Action {
       MoveForward = 0,

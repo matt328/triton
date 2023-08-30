@@ -9,7 +9,7 @@
 
 class Application {
  public:
-   Application(int width, int height);
+   Application(int width, int height, const std::string_view& windowTitle);
    ~Application();
 
    Application(const Application&) = delete;

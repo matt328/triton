@@ -1,24 +1,30 @@
 #include "Application.hpp"
-#include "Log.hpp"
+#include "Logger.hpp"
 #include "Game.hpp"
 #include "config.h"
-
-using Core::Log;
 
 constexpr int width = 1366;
 constexpr int height = 768;
 
 int main() {
-   Log::init();
+   Log::LogManager::getInstance().setMinLevel(Log::Level::Trace);
 
 #ifdef _DEBUG
-   Log::core->info("Debug Build");
+   Log::info << "Debug Build" << std::endl;
 #else
-   Log::core->info("NON Debug Build");
+   Log::info << "Release Build" << std::endl;
+#endif
+
+   auto windowTitle = std::string{PROJECT_NAME}.append(" - ").append(PROJECT_VER);
+
+#ifdef _DEBUG
+   windowTitle.append(" - Debug Build");
+#else
+   windowTitle.append(" - Release Build");
 #endif
 
    try {
-      auto app = Application{width, height};
+      auto app = Application{width, height, windowTitle};
       auto resourceFactory = app.getResourceFactory();
 
       auto game = std::make_shared<game::Game>(resourceFactory, width, height);
