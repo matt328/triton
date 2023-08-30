@@ -7,7 +7,10 @@ set_property(TARGET ${project_name} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CM
 
 configure_file(config.h.in config.h)
 
-find_package(spdlog)
+option(CMAKE_USE_WIN32_THREADS_INIT "using WIN32 threads" ON)
+
+find_package(Threads REQUIRED)
+
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glslang CONFIG REQUIRED)
 find_package(Tracy CONFIG REQUIRED)
@@ -21,7 +24,6 @@ target_link_libraries(${project_name}
    Tracy::TracyClient
    game
    triton
-   spdlog::spdlog_header_only
    ${vulkan_LIBRARIES}
 )
 

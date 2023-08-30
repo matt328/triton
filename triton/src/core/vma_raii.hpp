@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Log.hpp"
-
 namespace vma::raii {
 
    class AllocatedImage {

@@ -37,12 +37,12 @@ class Application::ApplicationImpl {
       app->keyCallbackInt(key, scancode, action, mods);
    }
 
-   ApplicationImpl(int width, int height) : width(width), height(height) {
+   ApplicationImpl(int width, int height, const std::string_view& windowTitle) {
       glfwInit();
       glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
       glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-      window.reset(glfwCreateWindow(width, height, "Vulkan", nullptr, nullptr));
+      window.reset(glfwCreateWindow(width, height, windowTitle.data(), nullptr, nullptr));
 
       glfwSetWindowUserPointer(window.get(), this);
       glfwSetFramebufferSizeCallback(window.get(), framebufferResizeCallback);
@@ -63,9 +63,6 @@ class Application::ApplicationImpl {
          throw std::runtime_error{"Game not registered, bailing out"};
       }
       glfwSetKeyCallback(window.get(), keyCallback);
-
-      double currentTime = glfwGetTime();
-      double accumulator = 0.f;
 
       double previousInstant = glfwGetTime();
       constexpr double maxFrameTime = 0.16667f;
@@ -126,11 +123,10 @@ class Application::ApplicationImpl {
    std::shared_ptr<IGame> game;
 
    inline static constexpr double FRAME_TIME = 1.f / 60.f;
-   int width, height;
 };
 
-Application::Application(int width, int height) {
-   impl = std::make_unique<ApplicationImpl>(width, height);
+Application::Application(int width, int height, const std::string_view& windowTitle) {
+   impl = std::make_unique<ApplicationImpl>(width, height, windowTitle);
 }
 
 Application::~Application() = default;

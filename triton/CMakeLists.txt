@@ -3,7 +3,6 @@ set(name triton)
 set(${name}_SRC
    src/core/stb.cxx
    src/core/vma_raii.cxx
-   src/core/Log.cxx
    src/Application.cxx
    src/Context.cxx
    src/graphics/pipeline/Vertex.cxx
@@ -28,7 +27,6 @@ add_library(${name} STATIC ${triton_SRC})
 
 target_precompile_headers(${name} PRIVATE
    <fstream>
-   <fmt/format.h>
    <glm/gtc/type_ptr.hpp>
    <glm/gtx/string_cast.hpp>
    <glm/gtx/matrix_decompose.hpp>
@@ -42,9 +40,6 @@ target_precompile_headers(${name} PRIVATE
    <set>
    <tuple>
    <format>
-   <spdlog/sinks/dist_sink.h>
-   <spdlog/sinks/msvc_sink.h>
-   <spdlog/sinks/stdout_color_sinks.h>
    <spirv_cross.hpp>
    <tiny_gltf.h>
    <vulkan/vulkan_raii.hpp>
@@ -65,7 +60,10 @@ add_compile_definitions(
    TRACY_ENABLED
 )
 
-find_package(spdlog CONFIG REQUIRED)
+option(CMAKE_USE_WIN32_THREADS_INIT "using WIN32 threads" ON)
+
+find_package(Threads REQUIRED)
+
 find_package(Stb REQUIRED)
 find_package(unofficial-vulkan-memory-allocator-hpp CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)

@@ -22,14 +22,14 @@ std::vector<uint32_t> SpirvHelper::compileShader(const vk::ShaderStageFlagBits s
    shader.setStrings(shaderStrings.data(), 1);
 
    if (!shader.parse(&resources, 100, false, messages)) {
-      throw std::runtime_error(fmt::format(
+      throw std::runtime_error(std::format(
           "Shader Compile Fail: {}, {}", shader.getInfoLog(), shader.getInfoDebugLog()));
    }
 
    program.addShader(&shader);
 
    if (!program.link(messages)) {
-      throw std::runtime_error(fmt::format(
+      throw std::runtime_error(std::format(
           "Shader Compile Fail: {}, {}", shader.getInfoLog(), shader.getInfoDebugLog()));
    }
 
