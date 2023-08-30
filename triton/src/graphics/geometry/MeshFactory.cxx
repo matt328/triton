@@ -103,7 +103,7 @@ std::unique_ptr<Mesh<Models::Vertex, uint32_t>> MeshFactory::loadMeshFromGltf(
                }
                default:
                   throw std::runtime_error(
-                      fmt::format("Index component type {} not supported", accessor.componentType));
+                      std::format("Index component type {} not supported", accessor.componentType));
             }
          }
       }
@@ -111,5 +111,5 @@ std::unique_ptr<Mesh<Models::Vertex, uint32_t>> MeshFactory::loadMeshFromGltf(
       return std::make_unique<Mesh<Models::Vertex, uint32_t>>(
           allocator, vertexBuffer, indexBuffer, transferContext);
    }
-   throw std::runtime_error(fmt::format("Error loading model {}", filename));
+   throw std::runtime_error(std::format("Error loading model {}", filename));
 }
