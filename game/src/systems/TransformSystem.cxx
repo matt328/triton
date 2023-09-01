@@ -1,5 +1,6 @@
 #include "TransformSystem.hpp"
 #include "components/Transform.hpp"
+#include "Logger.hpp"
 
 TransformSystem::TransformSystem() = default;
 
@@ -13,5 +14,5 @@ void TransformSystem::update(entt::registry& registry) const {
 }
 
 void TransformSystem::handleAction(const Actions::Action& action) {
-   Core::Log::core->info("Transform System handling action {}", Actions::toString(action));
+   Log::info << "Transform System handling action " << Actions::toString(action) << std::endl;
 }

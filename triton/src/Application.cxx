@@ -1,7 +1,7 @@
 #include "Application.hpp"
 #include "Context.hpp"
 #include "ResourceFactory.hpp"
-#include "Log.hpp"
+#include "Logger.hpp"
 
 class Application::ApplicationImpl {
  public:
@@ -22,7 +22,7 @@ class Application::ApplicationImpl {
       if (game != nullptr) {
          game->keyPressed(key, scancode, action, mods);
       } else {
-         Core::Log::core->warn("Keys pressed before game was registered");
+         Log::warn << "Keys pressed before game was registered" << std::endl;
       }
    }
 

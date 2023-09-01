@@ -182,8 +182,8 @@ namespace graphics {
             throw std::runtime_error("Failed to find a suitable GPU");
          }
 
-         Core::Log::core->info("Using physical device: {}",
-                               physicalDevice->getProperties().deviceName.data());
+         Log::info << "Using physical device: " << physicalDevice->getProperties().deviceName.data()
+                   << std::endl;
       }
 
       void createLogicalDevice(const Instance& instance) {
@@ -246,7 +246,7 @@ namespace graphics {
          graphics::setObjectName(
              **device, *device.get(), vk::raii::Device::debugReportObjectType, "Primary Device");
 
-         Log::core->info("Created Logical Device");
+         Log::info << "Created Logical Device" << std::endl;
 
          graphicsQueue =
              std::make_unique<vk::raii::Queue>(device->getQueue(graphicsFamily.value(), 0));
@@ -254,7 +254,7 @@ namespace graphics {
                                  *device.get(),
                                  (**graphicsQueue).debugReportObjectType,
                                  "Graphics Queue");
-         Log::core->info("Created Graphics Queue");
+         Log::info << "Created Graphics Queue" << std::endl;
 
          presentQueue =
              std::make_unique<vk::raii::Queue>(device->getQueue(presentFamily.value(), 0));
@@ -262,7 +262,7 @@ namespace graphics {
                                  *device.get(),
                                  (**presentQueue).debugReportObjectType,
                                  "Present Queue");
-         Log::core->info("Created Present Queue");
+         Log::info << "Created Present Queue" << std::endl;
 
          transferQueue =
              std::make_shared<vk::raii::Queue>(device->getQueue(transferFamily.value(), 0));
@@ -270,7 +270,7 @@ namespace graphics {
                                  *device.get(),
                                  (**transferQueue).debugReportObjectType,
                                  "Transfer Queue");
-         Log::core->info("Created Transfer Queue");
+         Log::info << "Created Transfer Queue" << std::endl;
 
          computeQueue =
              std::make_unique<vk::raii::Queue>(device->getQueue(computeFamily.value(), 0));
@@ -278,7 +278,7 @@ namespace graphics {
                                  *device.get(),
                                  (**computeQueue).debugReportObjectType,
                                  "Compute Queue");
-         Log::core->info("Created Compute Queue");
+         Log::info << "Created Compute Queue" << std::endl;
       }
 
       void createSwapchain(const Instance& instance) {
@@ -289,6 +289,8 @@ namespace graphics {
          const auto surfaceFormat = graphics::chooseSwapSurfaceFormat(formats);
          const auto presentMode = graphics::chooseSwapPresentMode(presentModes);
          const auto extent = graphics::chooseSwapExtent(capabilities, instance);
+
+         Log::debug << "Extent.width: " << extent.width << std::endl;
 
          uint32_t imageCount = capabilities.minImageCount + 1;
 
@@ -325,7 +327,7 @@ namespace graphics {
          }
 
          swapchain = std::make_unique<vk::raii::SwapchainKHR>(*device, createInfo);
-         Log::core->info("Created Swapchain");
+         Log::info << "Created Swapchain" << std::endl;
 
          swapchainExtent = extent;
          swapchainImageFormat = surfaceFormat.format;
@@ -356,7 +358,8 @@ namespace graphics {
 
             swapchainImageViews.emplace_back(*device, createInfo);
          }
-         Log::core->info("Created {} swapchain image views", swapchainImageViews.size());
+         Log::info << "Created " << swapchainImageViews.size() << " swapchain image views"
+                   << std::endl;
       }
 
       void createCommandPools(const Instance& instance) {
@@ -424,6 +427,8 @@ namespace graphics {
                               const vk::raii::DescriptorSetLayout& objectDescriptorSetLayout,
                               const vk::raii::DescriptorSetLayout& perFrameDescriptorSetLayout) {
          for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++) {
+            auto name = std::stringstream{};
+            name << "Frame " << i;
             frameData.push_back(std::make_unique<FrameData>(*device,
                                                             *physicalDevice,
                                                             *commandPool,
@@ -433,7 +438,7 @@ namespace graphics {
                                                             objectDescriptorSetLayout,
                                                             perFrameDescriptorSetLayout,
                                                             *graphicsQueue,
-                                                            std::format("Frame {}", i)));
+                                                            name.str()));
          }
       }
 
@@ -532,8 +537,6 @@ namespace graphics {
                writes.reserve(currentFrameData->getTexturesToBind().size());
                for (const auto t : currentFrameData->getTexturesToBind()) {
                   const auto& texture = textureList[t];
-                  const auto imageInfo = texture->getImageInfo();
-                  const auto& descriptorSet = currentFrameData->getBindlessDescriptorSet();
                   writes.push_back(vk::WriteDescriptorSet{
                       .dstSet = *currentFrameData->getBindlessDescriptorSet(),
                       .dstBinding = 3,

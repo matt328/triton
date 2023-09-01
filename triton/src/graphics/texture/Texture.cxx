@@ -1,9 +1,7 @@
 #include "Texture.hpp"
 
-#include "Log.hpp"
+#include "Logger.hpp"
 #include "core/Utils.hpp"
-
-using Core::Log;
 
 Texture::Texture(const std::string_view& filename,
                  const vma::raii::Allocator& raiillocator,
@@ -11,7 +9,7 @@ Texture::Texture(const std::string_view& filename,
                  const ImmediateContext& graphicsContext,
                  const ImmediateContext& transferContext) :
     device(device) {
-   Log::core->debug("Creating Texture from file: {}", filename.data());
+   Log::debug << "Creating Texture from file: " << filename.data() << std::endl;
 
    int width = 0, height = 0, channels = 0;
    const auto format = vk::Format::eR8G8B8A8Srgb;
@@ -19,7 +17,7 @@ Texture::Texture(const std::string_view& filename,
    stbi_uc* pixels = stbi_load(filename.data(), &width, &height, &channels, STBI_rgb_alpha);
 
    if (!pixels) {
-      throw std::runtime_error(std::format("Failed to load texture file: {}", filename.data()));
+      throw std::runtime_error("Failed to load texture");
    }
 
    vk::DeviceSize textureSize = width * height * 4;

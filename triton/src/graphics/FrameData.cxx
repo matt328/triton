@@ -1,8 +1,7 @@
 #include "FrameData.hpp"
+#include "Logger.hpp"
 #include "graphics/pipeline/ObjectMatrices.hpp"
 #include "graphics/DebugHelpers.hpp"
-
-using Core::Log;
 
 FrameData::FrameData(const vk::raii::Device& device,
                      const vk::raii::PhysicalDevice& physicalDevice,

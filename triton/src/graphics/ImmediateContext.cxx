@@ -1,9 +1,7 @@
 #include "ImmediateContext.hpp"
-#include "Log.hpp"
+#include "Logger.hpp"
 #include "graphics/ImmediateContext.hpp"
 #include <vulkan/vulkan_raii.hpp>
-
-using Core::Log;
 
 ImmediateContext::ImmediateContext(const vk::raii::Device& device,
                                    const vk::raii::PhysicalDevice& physicalDevice,
@@ -12,6 +10,7 @@ ImmediateContext::ImmediateContext(const vk::raii::Device& device,
                                    const std::string_view& name) :
     device(device),
     queue(newQueue) {
+
    // Create Command Pool
    const vk::CommandPoolCreateInfo transferCommandPoolCreateInfo{
        .flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
@@ -65,7 +64,7 @@ void ImmediateContext::submit(std::function<void(vk::raii::CommandBuffer& cmd)>&
    // from an asnyc task
    if (const auto result = device.waitForFences(**fence, true, UINT64_MAX);
        result != vk::Result::eSuccess) {
-      Log::core->warn("During Immediate Submit, timeout waiting for fence");
+      Log::warn << "During Immediate Submit, timeout waiting for fence" << std::endl;
    }
    device.resetFences(**fence);
    commandPool->reset();

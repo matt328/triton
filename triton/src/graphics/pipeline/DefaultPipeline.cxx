@@ -1,12 +1,10 @@
 #include "DefaultPipeline.hpp"
 
-#include "Log.hpp"
+#include "Logger.hpp"
 #include "SpirvHelper.hpp"
 #include "core/Utils.hpp"
 #include "Vertex.hpp"
 #include "graphics/VulkanFactory.hpp"
-
-using Core::Log;
 
 DefaultPipeline::DefaultPipeline(const vk::raii::Device& device,
                                  const vk::raii::RenderPass& renderPass,
@@ -22,11 +20,11 @@ DefaultPipeline::DefaultPipeline(const vk::raii::Device& device,
 
    const auto vertexSpirv =
        helper->compileShader(vk::ShaderStageFlagBits::eVertex, vertexShaderCode.data());
-   Log::core->debug("Compiled shader {}", vertexFilename);
+   Log::debug << "Compiled shader " << vertexFilename << std::endl;
 
    const auto fragmentSpirv =
        helper->compileShader(vk::ShaderStageFlagBits::eFragment, fragmentShaderCode.data());
-   Log::core->debug("Compiled shader {}", fragmentFilename);
+   Log::debug << "Compiled shader " << fragmentFilename << std::endl;
 
    auto vertexShaderCreateInfo =
        vk::ShaderModuleCreateInfo{.codeSize = 4 * vertexSpirv.size(), .pCode = vertexSpirv.data()};
