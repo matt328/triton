@@ -1,7 +1,5 @@
 #include "Instance.hpp"
-#include "Log.hpp"
-
-using Core::Log;
+#include "Logger.hpp"
 
 const std::vector DESIRED_VALIDATION_LAYERS = {"VK_LAYER_KHRONOS_validation"};
 
@@ -139,7 +137,7 @@ VkBool32 Instance::debugCallbackFn(VkDebugUtilsMessageSeverityFlagBitsEXT messag
                                    VkDebugUtilsMessageTypeFlagsEXT messageType,
                                    const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
                                    void* pUserData) {
-   Log::core->debug("Validation Layer: {}", pCallbackData->pMessage);
+   // Log::debug << "Validation Layer: " << pCallbackData->pMessage << std::endl;
    return VK_FALSE;
 }
 
@@ -154,6 +152,6 @@ VkBool32 Instance::vulkanDebugReportCallback(VkDebugReportFlagsEXT flags,
    if (!strcmp(pLayerPrefix, "Loader Message")) {
       return VK_FALSE;
    }
-   Log::core->debug("Debug Callback ({}): {}", pLayerPrefix, pMessage);
+   Log::debug << "Debug Callback (" << pLayerPrefix << "): " << pMessage << std::endl;
    return VK_FALSE;
 }

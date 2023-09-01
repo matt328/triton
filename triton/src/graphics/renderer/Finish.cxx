@@ -3,7 +3,8 @@
 
 using namespace Graphics::Utils;
 
-Finish::Finish(const RendererBaseCreateInfo& createInfo) {
+Finish::Finish(const RendererBaseCreateInfo& createInfo) :
+    framebufferSize(createInfo.swapchainExtent) {
    const auto renderPassCreateInfo =
        RenderPassCreateInfo{.device = &createInfo.device,
                             .physicalDevice = &createInfo.physicalDevice,

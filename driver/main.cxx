@@ -33,5 +33,5 @@ int main() {
 
       app.run();
 
-   } catch (const std::exception& e) { Log::game->error(e.what()); }
+   } catch (const std::exception& e) { Log::error << e.what() << std::endl; }
 }

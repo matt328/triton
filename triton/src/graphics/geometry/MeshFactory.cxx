@@ -1,10 +1,10 @@
 #include "MeshFactory.hpp"
 
+#include "Logger.hpp"
+
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 #include <tiny_gltf.h>
-
-using Core::Log;
 
 MeshFactory::MeshFactory(vma::raii::Allocator* allocator, ImmediateContext* transferContext) :
     allocator(allocator), transferContext(transferContext) {
@@ -21,8 +21,8 @@ std::unique_ptr<Mesh<Models::Vertex, uint32_t>> MeshFactory::loadMeshFromGltf(
       const tinygltf::Scene& scene = model.scenes[model.defaultScene > -1 ? model.defaultScene : 0];
 
       if (scene.nodes.size() > 1) {
-         Log::core->warn("model {} contains more than one node, only loading the first one",
-                         filename);
+         Log::warn << "model " << filename
+                   << " contains more than one node, only loading the first one" << std::endl;
       }
 
       std::vector<Models::Vertex> vertexBuffer;
@@ -102,8 +102,9 @@ std::unique_ptr<Mesh<Models::Vertex, uint32_t>> MeshFactory::loadMeshFromGltf(
                   break;
                }
                default:
-                  throw std::runtime_error(
-                      std::format("Index component type {} not supported", accessor.componentType));
+                  std::stringstream err;
+                  err << "Index component type " << accessor.componentType;
+                  throw std::runtime_error(err.str());
             }
          }
       }
@@ -111,5 +112,7 @@ std::unique_ptr<Mesh<Models::Vertex, uint32_t>> MeshFactory::loadMeshFromGltf(
       return std::make_unique<Mesh<Models::Vertex, uint32_t>>(
           allocator, vertexBuffer, indexBuffer, transferContext);
    }
-   throw std::runtime_error(std::format("Error loading model {}", filename));
+   std::stringstream err;
+   err << "Error loading model " << filename;
+   throw std::runtime_error(err.str());
 }

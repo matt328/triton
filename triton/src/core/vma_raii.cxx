@@ -1,10 +1,10 @@
 #include "vma_raii.hpp"
 
+#include "Logger.hpp"
+
 #define VMA_IMPLEMENTATION
 #include <vk_mem_alloc.h>
 #include <vulkan-memory-allocator-hpp/vk_mem_alloc.hpp>
-
-using Core::Log;
 
 namespace vma::raii {
 
@@ -13,7 +13,7 @@ namespace vma::raii {
    }
 
    Allocator::~Allocator() {
-      Log::core->debug("Destroying Allocator");
+      Log::debug << "Destroying Allocator" << std::endl;
       allocator.destroy();
    }
 
