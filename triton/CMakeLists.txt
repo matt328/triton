@@ -39,12 +39,10 @@ target_precompile_headers(${name} PRIVATE
    <ranges>
    <set>
    <tuple>
-   <format>
    <spirv_cross.hpp>
    <tiny_gltf.h>
    <vulkan/vulkan_raii.hpp>
    <vulkan-memory-allocator-hpp/vk_mem_alloc.hpp>
-   <GLFW/glfw3.h>
    <stb_image.h>
    <string_view>
    <tracy/Tracy.hpp>
@@ -70,6 +68,7 @@ find_package(imgui CONFIG REQUIRED)
 find_package(spirv_cross_core CONFIG REQUIRED)
 find_package(spirv_cross_glsl CONFIG REQUIRED)
 find_package(spirv_cross_cpp CONFIG REQUIRED)
+find_package(glslang CONFIG REQUIRED)
 find_package(Tracy CONFIG REQUIRED)
 find_package(unofficial-vulkan-memory-allocator CONFIG REQUIRED)
 
@@ -78,6 +77,7 @@ target_link_libraries(${name}
    imgui::imgui
    spirv-cross-core
    spirv-cross-cpp
+   glslang::SPIRV
    Tracy::TracyClient
    unofficial::vulkan-memory-allocator::vulkan-memory-allocator
    unofficial::VulkanMemoryAllocator-Hpp::VulkanMemoryAllocator-Hpp
