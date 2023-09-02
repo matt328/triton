@@ -14,10 +14,12 @@ std::unique_ptr<Texture> TextureFactory::createTexture2D(const std::string_view&
        filename, raiillocator, device, graphicsContext, transferContext);
 }
 
-std::unique_ptr<Texture> TextureFactory::createTexture2DFromBuffer(void* buffer,
-                                                                   vk::DeviceSize bufferSize,
-                                                                   vk::Format format,
-                                                                   uint32_t texWidth,
-                                                                   uint32_t texHeight) {
+std::unique_ptr<Texture> TextureFactory::createTexture2DFromBuffer(
+    [[maybe_unused]] void* buffer,
+    [[maybe_unused]] vk::DeviceSize bufferSize,
+    [[maybe_unused]] vk::Format format,
+    [[maybe_unused]] uint32_t texWidth,
+    [[maybe_unused]] uint32_t texHeight) {
+   // TODO Use or get rid of this
    return nullptr;
 }

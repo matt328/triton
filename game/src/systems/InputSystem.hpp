@@ -7,7 +7,7 @@ namespace Actions {
       StrafeLeft,
       StrafeRight
    };
-   static std::string toString(const Action actionId) {
+   [[maybe_unused]] static std::string toString(const Action actionId) {
       switch (actionId) {
          case Action::MoveForward:
             return "Move Forward";
@@ -40,7 +40,10 @@ class InputSystem {
    InputSystem& operator=(InputSystem&&) = delete;
    ~InputSystem() = default;
 
-   void keyCallback(const int key, int scancode, const int action, int mods) const {
+   void keyCallback(const int key,
+                    [[maybe_unused]] int scancode,
+                    const int action,
+                    [[maybe_unused]] int mods) const {
       if (action == GLFW_PRESS && actionMap.find(key) != actionMap.end()) {
          // Change Action to a struct so it has a payload of which entity it should go to
          // Consult some map to determine which entities are responding to which Actions

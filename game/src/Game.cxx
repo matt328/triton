@@ -45,8 +45,10 @@ namespace game {
 
          // Create Camera entity
          const auto camera = registry->create();
+         // NOLINTBEGIN TODO move these somewhere else
          registry->emplace<Camera>(
              camera, 60.f, width, height, 0.1f, 1000.f, glm::vec3(2.f, 2.f, 2.f));
+         // NOLINTEND
          registry->emplace<Transform>(camera);
 
          inputSystem->getActionDelegate().connect<&TransformSystem::handleAction>(transformSystem);
@@ -60,7 +62,7 @@ namespace game {
          renderSystem->update(*registry);
       }
 
-      void blendState(double alpha) {
+      void blendState([[maybe_unused]] double alpha) {
          // state = currentState * alpha + previousState * (1.0 - alpha);
          // Log::core->debug("blendState(), alpha: {}", alpha);
       }

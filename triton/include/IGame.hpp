@@ -2,7 +2,7 @@
 
 #include <glm/fwd.hpp>
 
-class RenderObject;
+struct RenderObject;
 
 class IGame {
  public:

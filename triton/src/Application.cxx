@@ -2,6 +2,7 @@
 #include "Context.hpp"
 #include "ResourceFactory.hpp"
 #include "Logger.hpp"
+#include <GLFW/glfw3.h>
 
 class Application::ApplicationImpl {
  public:
@@ -37,8 +38,14 @@ class Application::ApplicationImpl {
       app->keyCallbackInt(key, scancode, action, mods);
    }
 
+   static void errorCallback(int code, const char* description) {
+      Log::error << "GLFW Error. Code: " << code << ", description: " << description << std::endl;
+      throw std::runtime_error("GLFW Error. See log output for details");
+   }
+
    ApplicationImpl(int width, int height, const std::string_view& windowTitle) {
       glfwInit();
+      glfwSetErrorCallback(errorCallback);
       glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
       glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
@@ -111,11 +118,11 @@ class Application::ApplicationImpl {
 
  private:
    struct DestroyGlfwWindow {
-      void operator()(GLFWwindow* ptr) const {
-         glfwDestroyWindow(ptr);
+      void operator()([[maybe_unused]] GLFWwindow* ptr) const {
+         // This only exists to trick unique_ptr into allowing me to forward declare the impl
       }
    };
-   std::unique_ptr<GLFWwindow, DestroyGlfwWindow> window = nullptr;
+   std::unique_ptr<GLFWwindow, DestroyGlfwWindow> window;
    std::shared_ptr<graphics::Context> context;
    std::vector<std::function<void(void)>> updates;
    std::vector<std::function<void(double)>> blendUpdates;
