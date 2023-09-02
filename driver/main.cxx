@@ -7,7 +7,7 @@ constexpr int width = 1366;
 constexpr int height = 768;
 
 int main() {
-   Log::LogManager::getInstance().setMinLevel(Log::Level::Trace);
+   Log::LogManager::getInstance().setMinLevel(Log::Level::Debug);
 
 #ifdef _DEBUG
    Log::info << "Debug Build" << std::endl;

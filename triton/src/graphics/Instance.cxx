@@ -54,6 +54,8 @@ Instance::Instance(GLFWwindow* window, const bool validationEnabled) :
 
    instance = std::make_unique<vk::raii::Instance>(*context, instanceCreateInfo);
 
+   Log::trace << "Created Instance" << std::endl;
+
    const vk::DebugReportCallbackCreateInfoEXT ci = {
        .pNext = nullptr,
        .flags = vk::DebugReportFlagBitsEXT::eWarning |
@@ -70,6 +72,7 @@ Instance::Instance(GLFWwindow* window, const bool validationEnabled) :
 
    VkSurfaceKHR tempSurface = nullptr;
    glfwCreateWindowSurface(**instance, window, nullptr, &tempSurface);
+   Log::trace << "Created Surface" << std::endl;
    surface = std::make_unique<vk::raii::SurfaceKHR>(*instance, tempSurface);
 }
 
@@ -78,12 +81,15 @@ std::vector<vk::raii::PhysicalDevice> Instance::enumeratePhysicalDevices() const
 }
 
 void Instance::resizeWindow(const uint32_t newHeight, const uint32_t newWidth) {
-   height = newHeight;
-   width = newWidth;
+   height = static_cast<int>(newHeight);
+   width = static_cast<int>(newWidth);
 }
 
 bool Instance::checkValidationLayerSupport() const {
    const auto availableLayers = context->enumerateInstanceLayerProperties();
+   for (const auto& layerProps : availableLayers) {
+      Log::trace << layerProps.layerName << std::endl;
+   }
    for (const auto layerName : DESIRED_VALIDATION_LAYERS) {
       bool layerFound = false;
       for (const auto& layerProperties : availableLayers) {
@@ -103,6 +109,7 @@ std::pair<std::vector<const char*>, bool> Instance::getRequiredExtensions() cons
    uint32_t glfwExtensionCount = 0;
    const auto glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
+   // NOLINTNEXTLINE This is ok because glfw's C api sucks.
    std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
 
    if (validationEnabled) {
@@ -133,22 +140,23 @@ std::pair<std::vector<const char*>, bool> Instance::getRequiredExtensions() cons
    return std::make_pair(extensions, portabilityPresent);
 }
 
-VkBool32 Instance::debugCallbackFn(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-                                   VkDebugUtilsMessageTypeFlagsEXT messageType,
-                                   const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
-                                   void* pUserData) {
+VkBool32 Instance::debugCallbackFn(
+    [[maybe_unused]] VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+    [[maybe_unused]] VkDebugUtilsMessageTypeFlagsEXT messageType,
+    [[maybe_unused]] const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+    [[maybe_unused]] void* pUserData) {
    // Log::debug << "Validation Layer: " << pCallbackData->pMessage << std::endl;
    return VK_FALSE;
 }
 
-VkBool32 Instance::vulkanDebugReportCallback(VkDebugReportFlagsEXT flags,
-                                             VkDebugReportObjectTypeEXT objectType,
-                                             uint64_t object,
-                                             size_t location,
-                                             int32_t messageCode,
+VkBool32 Instance::vulkanDebugReportCallback([[maybe_unused]] VkDebugReportFlagsEXT flags,
+                                             [[maybe_unused]] VkDebugReportObjectTypeEXT objectType,
+                                             [[maybe_unused]] uint64_t object,
+                                             [[maybe_unused]] size_t location,
+                                             [[maybe_unused]] int32_t messageCode,
                                              const char* pLayerPrefix,
                                              const char* pMessage,
-                                             void* userData) {
+                                             [[maybe_unused]] void* userData) {
    if (!strcmp(pLayerPrefix, "Loader Message")) {
       return VK_FALSE;
    }

@@ -203,7 +203,9 @@ namespace graphics {
          }
 
          auto desiredDeviceExtensions = instance.getDesiredDeviceExtensions();
-         desiredDeviceExtensions.push_back(VK_EXT_DEBUG_MARKER_EXTENSION_NAME);
+         if (instance.isValidationEnabled()) {
+            desiredDeviceExtensions.push_back(VK_EXT_DEBUG_MARKER_EXTENSION_NAME);
+         }
 
          auto features2 =
              physicalDevice->getFeatures2<vk::PhysicalDeviceFeatures2,
@@ -246,7 +248,7 @@ namespace graphics {
          graphics::setObjectName(
              **device, *device.get(), vk::raii::Device::debugReportObjectType, "Primary Device");
 
-         Log::info << "Created Logical Device" << std::endl;
+         Log::trace << "Created Logical Device" << std::endl;
 
          graphicsQueue =
              std::make_unique<vk::raii::Queue>(device->getQueue(graphicsFamily.value(), 0));
@@ -254,7 +256,7 @@ namespace graphics {
                                  *device.get(),
                                  (**graphicsQueue).debugReportObjectType,
                                  "Graphics Queue");
-         Log::info << "Created Graphics Queue" << std::endl;
+         Log::trace << "Created Graphics Queue" << std::endl;
 
          presentQueue =
              std::make_unique<vk::raii::Queue>(device->getQueue(presentFamily.value(), 0));
@@ -262,7 +264,7 @@ namespace graphics {
                                  *device.get(),
                                  (**presentQueue).debugReportObjectType,
                                  "Present Queue");
-         Log::info << "Created Present Queue" << std::endl;
+         Log::trace << "Created Present Queue" << std::endl;
 
          transferQueue =
              std::make_shared<vk::raii::Queue>(device->getQueue(transferFamily.value(), 0));
@@ -270,7 +272,7 @@ namespace graphics {
                                  *device.get(),
                                  (**transferQueue).debugReportObjectType,
                                  "Transfer Queue");
-         Log::info << "Created Transfer Queue" << std::endl;
+         Log::trace << "Created Transfer Queue" << std::endl;
 
          computeQueue =
              std::make_unique<vk::raii::Queue>(device->getQueue(computeFamily.value(), 0));
@@ -278,7 +280,7 @@ namespace graphics {
                                  *device.get(),
                                  (**computeQueue).debugReportObjectType,
                                  "Compute Queue");
-         Log::info << "Created Compute Queue" << std::endl;
+         Log::trace << "Created Compute Queue" << std::endl;
       }
 
       void createSwapchain(const Instance& instance) {
@@ -289,8 +291,6 @@ namespace graphics {
          const auto surfaceFormat = graphics::chooseSwapSurfaceFormat(formats);
          const auto presentMode = graphics::chooseSwapPresentMode(presentModes);
          const auto extent = graphics::chooseSwapExtent(capabilities, instance);
-
-         Log::debug << "Extent.width: " << extent.width << std::endl;
 
          uint32_t imageCount = capabilities.minImageCount + 1;
 
