@@ -123,5 +123,14 @@
    "workbench.colorCustomizations": {
       "editor.wordHighlightBackground": "#228ca7a8",
       "editor.wordHighlightStrongBackground": "#a72222a8"
-   }
+   },
+   // Bracket-pair guides
+   "editor.guides.bracketPairs": true,
+   "editor.guides.bracketPairsHorizontal": true, // shows horizontal line
+   "editor.guides.highlightActiveBracketPair": true, // highlight both horizontal and vertical lines
+   // Bracket-pair colorization
+   "editor.bracketPairColorization.enabled": false,
+   "editor.bracketPairColorization.independentColorPoolPerBracketType": true,
+   // Indentation lines
+   "editor.guides.indentation": true // shows vertical lines
 }
