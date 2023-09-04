@@ -63,14 +63,13 @@ option(CMAKE_USE_WIN32_THREADS_INIT "using WIN32 threads" ON)
 find_package(Threads REQUIRED)
 
 find_package(Stb REQUIRED)
-find_package(unofficial-vulkan-memory-allocator-hpp CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
 find_package(spirv_cross_core CONFIG REQUIRED)
 find_package(spirv_cross_glsl CONFIG REQUIRED)
 find_package(spirv_cross_cpp CONFIG REQUIRED)
 find_package(glslang CONFIG REQUIRED)
 find_package(Tracy CONFIG REQUIRED)
-find_package(unofficial-vulkan-memory-allocator CONFIG REQUIRED)
+find_package(unofficial-vulkan-memory-allocator-hpp CONFIG REQUIRED)
 
 target_link_libraries(${name}
    PRIVATE
@@ -79,7 +78,6 @@ target_link_libraries(${name}
    spirv-cross-cpp
    glslang::SPIRV
    Tracy::TracyClient
-   unofficial::vulkan-memory-allocator::vulkan-memory-allocator
    unofficial::VulkanMemoryAllocator-Hpp::VulkanMemoryAllocator-Hpp
    ${vulkan_LIBRARIES}
 )
