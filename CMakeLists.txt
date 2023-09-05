@@ -50,6 +50,7 @@ ENDIF(LINUX)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin/")
 
+add_subdirectory(input)
 add_subdirectory(game)
 add_subdirectory(triton)
 add_subdirectory(assets)

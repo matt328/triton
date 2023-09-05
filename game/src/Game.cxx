@@ -11,6 +11,7 @@
 #include "systems/TransformSystem.hpp"
 #include "systems/InputSystem.hpp"
 #include "Paths.hpp"
+#include "Logger.hpp"
 
 namespace game {
    class Game::GameImpl {
@@ -51,7 +52,7 @@ namespace game {
          // NOLINTEND
          registry->emplace<Transform>(camera);
 
-         inputSystem->getActionDelegate().connect<&TransformSystem::handleAction>(transformSystem);
+         // inputSystem->getActionDelegate().connect<&TransformSystem::handleAction>(transformSystem);
       }
 
       void keyPressed(const int key, int scancode, const int action, int mods) const {
@@ -60,6 +61,9 @@ namespace game {
       void update() const {
          transformSystem->update(*registry);
          renderSystem->update(*registry);
+         if (inputSystem->isActionActive(Actions::Action::MoveForward)) {
+            Log::info << "Move Forward Active" << std::endl;
+         };
       }
 
       void blendState([[maybe_unused]] double alpha) {

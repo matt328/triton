@@ -1,7 +1,11 @@
 #pragma once
 
+#include "GlfwKeyMap.hpp"
+#include "Key.hpp"
+#include <GLFW/glfw3.h>
+
 namespace Actions {
-   enum Action {
+   enum class Action : uint32_t {
       MoveForward = 0,
       MoveBackward,
       StrafeLeft,
@@ -23,15 +27,28 @@ namespace Actions {
    };
 }
 
+enum class KeyState {
+   Up,
+   Pressed,
+   Down,
+   Released
+};
+
 using ActionDelegate = entt::delegate<void(const Actions::Action&)>;
 // TODO: Remove GLFW dependency from game lib
 class InputSystem {
  public:
    InputSystem() : actionMap({}) {
-      actionMap.insert({{GLFW_KEY_W, Actions::Action::MoveForward},
-                        {GLFW_KEY_S, Actions::Action::MoveBackward},
-                        {GLFW_KEY_A, Actions::Action::StrafeLeft},
-                        {GLFW_KEY_D, Actions::Action::StrafeRight}});
+
+      Input::initializeGlfwKeyMap(keyMap);
+
+      actionMap.insert({{Input::Key::W, Actions::Action::MoveForward},
+                        {Input::Key::S, Actions::Action::MoveBackward},
+                        {Input::Key::A, Actions::Action::StrafeLeft},
+                        {Input::Key::D, Actions::Action::StrafeRight}});
+
+      allActionsMap.insert({{Actions::Action::MoveForward, {Input::Key::W, Input::Key::Up}}});
+
       actionDelegate = ActionDelegate{};
    };
    InputSystem(const InputSystem&) = default;
@@ -43,12 +60,29 @@ class InputSystem {
    void keyCallback(const int key,
                     [[maybe_unused]] int scancode,
                     const int action,
-                    [[maybe_unused]] int mods) const {
-      if (action == GLFW_PRESS && actionMap.find(key) != actionMap.end()) {
-         // Change Action to a struct so it has a payload of which entity it should go to
-         // Consult some map to determine which entities are responding to which Actions
-         actionDelegate(actionMap.at(key));
+                    [[maybe_unused]] int mods) {
+      const auto mappedKey = keyMap.getKey(key);
+      if (action == GLFW_PRESS) {
+         keyStateMap[mappedKey] = KeyState::Down;
+      } else if (action == GLFW_RELEASE) {
+         keyStateMap[mappedKey] = KeyState::Up;
       }
+   }
+
+   float getActionValue(const Actions::Action& action) {
+      return 0.f;
+   }
+
+   bool isActionActive(const Actions::Action& action) {
+      if (allActionsMap.find(action) != allActionsMap.end()) {
+         const auto inputKeys = allActionsMap.at(action);
+         for (const auto key : inputKeys) {
+            if (keyStateMap.find(key) != keyStateMap.end()) {
+               return keyStateMap.at(key) == KeyState::Down;
+            }
+         }
+      }
+      return false;
    }
 
    ActionDelegate& getActionDelegate() {
@@ -56,6 +90,11 @@ class InputSystem {
    }
 
  private:
-   std::unordered_map<int, const Actions::Action> actionMap = {};
+   std::unordered_map<const Actions::Action, std::vector<Input::Key>> allActionsMap = {};
+   std::unordered_map<Input::Key, const Actions::Action> actionMap = {};
    ActionDelegate actionDelegate;
+
+   std::unordered_map<Input::Key, KeyState> keyStateMap;
+
+   Input::Bimap<Input::Key, int> keyMap;
 };
