@@ -2,7 +2,6 @@
 
 #include "ActionType.hpp"
 #include "Vec2.hpp"
-#include <variant>
 
 namespace Input {
 
