@@ -12,6 +12,9 @@ target_precompile_headers(${name}
    PRIVATE
    <GLFW/glfw3.h>
    <map>
+   <utility>
+   <variant>
+   <cassert>
 )
 
 find_package(glfw3 CONFIG REQUIRED)
