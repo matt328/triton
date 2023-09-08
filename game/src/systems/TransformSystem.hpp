@@ -1,6 +1,7 @@
 #pragma once
 
 #include "InputSystem.hpp"
+#include "ActionMapper.hpp"
 
 class TransformSystem {
  public:
@@ -13,7 +14,7 @@ class TransformSystem {
 
    void update(entt::registry& registry) const;
 
-   void handleAction(const Actions::Action& action);
+   void handleAction(const Input::Action& action);
 
    int recieve(const int& i) {
       return i;
