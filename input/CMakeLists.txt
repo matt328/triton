@@ -15,6 +15,8 @@ target_precompile_headers(${name}
    <utility>
    <variant>
    <cassert>
+   <functional>
+   <unordered_map>
 )
 
 find_package(glfw3 CONFIG REQUIRED)
