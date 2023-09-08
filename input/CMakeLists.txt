@@ -10,11 +10,10 @@ set(${name}_INCLUDE "include")
 add_library(${name} STATIC ${input_SRC})
 
 target_precompile_headers(${name}
-   PRIVATE
+   PUBLIC
    <GLFW/glfw3.h>
    <map>
    <utility>
-   <variant>
    <cassert>
    <functional>
    <unordered_map>
