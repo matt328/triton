@@ -2,6 +2,7 @@
 
 #include "ActionType.hpp"
 #include "Vec2.hpp"
+#include <variant>
 
 namespace Input {
 
@@ -19,7 +20,7 @@ namespace Input {
       }
 
       [[nodiscard]] const Vec2& getVec2Value() const {
-         assert(std::holds_alternative<glm::vec2>(value));
+         assert(std::holds_alternative<Vec2>(value));
          return std::get<Vec2>(value);
       }
 

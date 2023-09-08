@@ -3,7 +3,7 @@
 #include "GlfwKeyMap.hpp"
 #include "Key.hpp"
 #include "KeyState.hpp"
-#include "ActionMapper.hpp"
+#include "ActionManager.hpp"
 
 // TODO: Remove GLFW dependency from game lib
 class InputSystem {
