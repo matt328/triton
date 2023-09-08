@@ -56,14 +56,14 @@ namespace game {
       }
 
       void keyPressed(const int key, int scancode, const int action, int mods) const {
-         inputSystem->keyCallback(key, scancode, action, mods);
+         // inputSystem->keyCallback(key, scancode, action, mods);
       }
       void update() const {
          transformSystem->update(*registry);
          renderSystem->update(*registry);
-         if (inputSystem->isActionActive(Actions::Action::MoveForward)) {
-            Log::info << "Move Forward Active" << std::endl;
-         };
+         // if (inputSystem->isActionActive(Actions::Action::MoveForward)) {
+         //    Log::info << "Move Forward Active" << std::endl;
+         // };
       }
 
       void blendState([[maybe_unused]] double alpha) {

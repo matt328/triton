@@ -2,6 +2,7 @@ set(name input)
 
 set(${name}_SRC
    src/GlfwKeyMap.cxx
+   src/ActionManager.cxx
 )
 
 set(${name}_INCLUDE "include")
@@ -17,6 +18,7 @@ target_precompile_headers(${name}
    <cassert>
    <functional>
    <unordered_map>
+   <variant>
 )
 
 find_package(glfw3 CONFIG REQUIRED)
