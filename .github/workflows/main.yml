@@ -30,6 +30,10 @@ jobs:
         packages: libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev pkg-config
         version: 1.0
 
+    - name: List $RUNNER_WORKSPACE before build
+      run: find $RUNNER_WORKSPACE
+      shell: bash
+
     - name: Restore artifacts, or setup vcpkg for building artifacts
       uses: lukka/run-vcpkg@v10
       id: runvcpkg
@@ -42,11 +46,7 @@ jobs:
       env:
         CC: '/home/runner/work/triton/triton/llvm/clang'
         CXX: '/home/runner/work/triton/triton/llvm/clang++'
-
-    - name: List $RUNNER_WORKSPACE before build
-      run: find $RUNNER_WORKSPACE
-      shell: bash
-  
+ 
     - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
       run: cmake --build build --target=driver -j 18
