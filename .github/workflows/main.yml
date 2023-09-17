@@ -40,8 +40,8 @@ jobs:
     - name: CMake Generate
       run: cmake -B build -S . -G "Unix Makefiles"
       env:
-        CC: 'C:\Program Files\LLVM\bin\clang.exe'
-        CXX: 'C:\Program FIles\LLVM\bin\clang++.exe'
+        CC: '/home/runner/work/triton/triton/llvm/clang'
+        CXX: '/home/runner/work/triton/triton/llvm/clang++'
 
     - name: List $RUNNER_WORKSPACE before build
       run: find $RUNNER_WORKSPACE
