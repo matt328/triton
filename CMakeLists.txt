@@ -41,8 +41,6 @@ ENDIF(LINUX)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin/")
 
-set(CMAKE_VERBOSE_MAKEFILE ON)
-
 add_subdirectory(input)
 add_subdirectory(game)
 add_subdirectory(triton)
