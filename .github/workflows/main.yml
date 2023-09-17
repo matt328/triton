@@ -10,10 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     steps:
-    - name: Install LLVM and Clang
-      uses: KyleMayes/install-llvm-action@v1
-      with:
-        version: "16.0"
+
     - uses: actions/checkout@v3
       with:
         submodules: 'true'
@@ -29,6 +26,11 @@ jobs:
       with:
         packages: libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev pkg-config
         version: 1.0
+
+    - name: Install LLVM and Clang
+      uses: KyleMayes/install-llvm-action@v1
+      with:
+        version: "16.0"
 
     - name: List $RUNNER_WORKSPACE before build
       run: find $RUNNER_WORKSPACE
