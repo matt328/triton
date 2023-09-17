@@ -46,8 +46,8 @@ jobs:
     - name: CMake Generate
       run: cmake -B build -S . -G "Unix Makefiles"
       env:
-        CC: '/home/runner/work/triton/triton/llvm/clang'
-        CXX: '/home/runner/work/triton/triton/llvm/clang++'
+        CC: '/home/runner/work/triton/triton/llvm/bin/clang'
+        CXX: '/home/runner/work/triton/triton/llvm/bin/clang++'
  
     - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
