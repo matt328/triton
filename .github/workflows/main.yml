@@ -38,7 +38,7 @@ jobs:
         runVcpkgInstall: true
 
     - name: CMake Generate
-      run: cmake -B build -S . -G "MinGW Makefiles"
+      run: cmake -B build -S . -G "Unix Makefiles"
       env:
         CC: 'C:\Program Files\LLVM\bin\clang.exe'
         CXX: 'C:\Program FIles\LLVM\bin\clang++.exe'
