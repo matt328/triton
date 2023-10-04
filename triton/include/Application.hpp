@@ -6,6 +6,7 @@
 
 #include "IGame.hpp"
 #include "ResourceFactory.hpp"
+#include "Events.hpp"
 
 class Application {
  public:
