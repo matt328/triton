@@ -5,7 +5,6 @@
 #include "KeyState.hpp"
 #include "ActionManager.hpp"
 
-// TODO: Remove GLFW dependency from game lib
 class InputSystem {
  public:
    InputSystem() {

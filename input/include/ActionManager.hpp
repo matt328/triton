@@ -16,10 +16,12 @@ namespace Input {
       void keyPressed(Key key);
       void keyReleased(Key key);
 
-      void onAction(ActionType aType, std::function<void(Action)> fn);
+      size_t onAction(ActionType aType, std::function<void(Action)> fn);
+      void offAction(ActionType aType, size_t position);
 
     private:
       std::multimap<Key, ActionType> actionMap;
       std::unordered_map<ActionType, Delegate> delegatesMap;
    };
+
 }

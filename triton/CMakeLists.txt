@@ -36,6 +36,7 @@ target_precompile_headers(${name} PRIVATE
    <glslang/SPIRV/GlslangToSpv.h>
    <imgui.h>
    <memory>
+   <ostream>
    <ranges>
    <set>
    <tuple>
