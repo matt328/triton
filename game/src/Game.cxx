@@ -1,5 +1,8 @@
+#include <GL/glext.h>
 #include <utility>
 
+#include "ActionManager.hpp"
+#include "ActionType.hpp"
 #include "Game.hpp"
 
 #include "ResourceFactory.hpp"
@@ -12,12 +15,19 @@
 #include "systems/InputSystem.hpp"
 #include "Paths.hpp"
 #include "Logger.hpp"
+#include "systems/CameraController.hpp"
+#include "InputMapper.hpp"
 
 namespace game {
    class Game::GameImpl {
     public:
       GameImpl(IResourceFactory* factory, int width, int height) : resourceFactory(factory) {
          registry = std::make_unique<entt::registry>();
+
+         actionManager = std::make_unique<Input::ActionManager>();
+         inputMapper = std::make_unique<Input::InputMapper>(*actionManager);
+         actionManager->mapKey(Input::Key::Up, Input::ActionType::MoveForward);
+         actionManager->mapKey(Input::Key::W, Input::ActionType::MoveForward);
 
          renderSystem = std::make_shared<RenderSystem>();
          transformSystem = std::make_unique<TransformSystem>();
@@ -52,11 +62,18 @@ namespace game {
          // NOLINTEND
          registry->emplace<Transform>(camera);
 
-         // inputSystem->getActionDelegate().connect<&TransformSystem::handleAction>(transformSystem);
+         auto cameraController = std::make_unique<CameraController>();
+
+         // cameraController->setActiveCamera(camera);
+
+         // Bind up all the camera controller's actions it knows how to handle
+         actionManager->onAction(
+             Input::ActionType::MoveForward,
+             [&cameraController](Input::Action a) -> void { cameraController->moveForward(a); });
       }
 
       void keyPressed(const int key, int scancode, const int action, int mods) const {
-         // inputSystem->keyCallback(key, scancode, action, mods);
+         inputMapper->keyCallback(key, scancode, action, mods);
       }
       void update() const {
          transformSystem->update(*registry);
@@ -86,6 +103,8 @@ namespace game {
       std::shared_ptr<RenderSystem> renderSystem;
       std::unique_ptr<TransformSystem> transformSystem;
       std::unique_ptr<InputSystem> inputSystem;
+      std::unique_ptr<Input::ActionManager> actionManager;
+      std::unique_ptr<Input::InputMapper> inputMapper;
    };
 
    Game::Game(IResourceFactory* factory, int width, int height) : IGame() {

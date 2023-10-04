@@ -19,15 +19,33 @@ namespace Input {
          return;
       }
 
+      // TODO: how to figure out what payload goes with what actions here?
+      // Maybe there are different delegateMaps for different types?
+      // KeyPressed -> bool for is key repeated
+      // JoystickAnalogAction -> vector for analog input state
+      // MouseMoved -> vector for mouse delta from last frame
       delegateIt->second(Action{actionType, false});
    };
+
    void ActionManager::keyReleased(Key key) {
    }
 
-   void ActionManager::onAction(ActionType aType, std::function<void(Action)> fn) {
+   size_t ActionManager::onAction(ActionType aType, std::function<void(Action)> fn) {
       const auto it = delegatesMap.find(aType);
-      if (it != delegatesMap.end()) {
-         it->second.addDelegate(fn);
+      size_t pos = -1;
+      if (it == delegatesMap.end()) {
+         auto del = Delegate{};
+         pos = del.addDelegate(fn);
+         delegatesMap.emplace(aType, std::move(del));
+      } else {
+         pos = it->second.addDelegate(fn);
       }
+      return pos;
+   }
+
+   void ActionManager::offAction(ActionType aType, size_t position) {
+      const auto it = delegatesMap.find(aType);
+      assert(it != delegatesMap.end());
+      it->second.removeDelegate(position);
    }
 }
