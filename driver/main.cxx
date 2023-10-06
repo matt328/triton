@@ -29,6 +29,8 @@ int main() {
 
       auto game = std::make_shared<game::Game>(resourceFactory, width, height);
 
+      app.setEventCallbackFn([game](Events::Event& e) -> void { game.onEvent(e); });
+
       app.registerGame(game);
 
       app.run();

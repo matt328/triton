@@ -1,6 +1,8 @@
 #pragma once
 
 #include "IGame.hpp"
+#include "Events.hpp"
+
 class RenderSystem;
 class TransformSystem;
 class InputSystem;
@@ -25,8 +27,11 @@ namespace game {
       std::vector<RenderObject> getRenderObjects() override;
       std::tuple<glm::mat4, glm::mat4, glm::mat4> getCameraParams() override;
 
+      void onEvent(Events::Event& e);
+
     private:
       class GameImpl;
       std::unique_ptr<GameImpl> impl;
    };
+
 }

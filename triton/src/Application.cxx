@@ -3,6 +3,7 @@
 #include "ResourceFactory.hpp"
 #include "Logger.hpp"
 #include <GLFW/glfw3.h>
+#include "Events.hpp"
 
 class Application::ApplicationImpl {
  public:
@@ -10,6 +11,10 @@ class Application::ApplicationImpl {
    ApplicationImpl(ApplicationImpl&&) = delete;
    ApplicationImpl& operator=(const ApplicationImpl&) = delete;
    ApplicationImpl& operator=(ApplicationImpl&&) = delete;
+
+   void setEventCallbackFn(std::function<void(Events::Event&)> fn) {
+      this->eventCallbackFn = fn;
+   }
 
    void registerGame(std::shared_ptr<IGame> game) {
       this->game = game;
@@ -129,6 +134,8 @@ class Application::ApplicationImpl {
    std::vector<std::function<void(int, int, int, int)>> keyHandlers;
    std::shared_ptr<IGame> game;
 
+   std::function<void(Events::Event&)> eventCallbackFn;
+
    inline static constexpr double FRAME_TIME = 1.f / 60.f;
 };
 
@@ -148,4 +155,8 @@ void Application::registerGame(std::shared_ptr<IGame> game) {
 
 IResourceFactory* Application::getResourceFactory() {
    return impl->getResourceFactory();
+}
+
+void Application::setEventCallbackFn(std::function<void(Events::Event&)> fn) {
+   impl->setEventCallbackFn(fn);
 }

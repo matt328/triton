@@ -3,6 +3,7 @@
 
 #include "ActionManager.hpp"
 #include "ActionType.hpp"
+#include "Events.hpp"
 #include "Game.hpp"
 
 #include "ResourceFactory.hpp"
@@ -72,6 +73,15 @@ namespace game {
              [&cameraController](Input::Action a) -> void { cameraController->moveForward(a); });
       }
 
+      void onEvent(Events::Event& e) {
+         auto dispatcher = Events::EventDispatcher{e};
+
+         dispatcher.dispatch<Events::EventType::KeyPressed>(std)
+      }
+
+      void keyEvent(Events::&kpe) {
+      }
+
       void keyPressed(const int key, int scancode, const int action, int mods) const {
          inputMapper->keyCallback(key, scancode, action, mods);
       }
@@ -131,6 +141,10 @@ namespace game {
 
    std::tuple<glm::mat4, glm::mat4, glm::mat4> Game::getCameraParams() {
       return impl->getCameraParams();
+   }
+
+   void Game::onEvent(Events::Event& e) {
+      impl->onEvent(e);
    }
 
 };

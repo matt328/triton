@@ -32,6 +32,8 @@ class Application {
    void deregisterUpdateBlendState(const size_t num);
    void deregisterKeyHandler(const size_t num);
 
+   void setEventCallbackFn(std::function<void(Events::Event&)> fn);
+
  private:
    class ApplicationImpl;
    std::unique_ptr<ApplicationImpl> impl;
