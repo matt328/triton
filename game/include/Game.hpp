@@ -1,31 +1,29 @@
 #pragma once
 
-#include "IGame.hpp"
 #include "Events.hpp"
+#include "TransferData.hpp"
 
 class RenderSystem;
 class TransformSystem;
-class InputSystem;
 class IResourceFactory;
 
 namespace game {
 
-   class Game : public IGame {
+   class Game {
     public:
       explicit Game(IResourceFactory* factory, int width, int height);
-      ~Game() override;
+      ~Game();
 
       Game(const Game&) = delete;
       Game(Game&&) = delete;
       Game& operator=(const Game&) = delete;
       Game& operator=(Game&&) = delete;
 
-      void update() override;
-      void blendState(double alpha) override;
-      void keyPressed(const int key, int scancode, const int action, int mods) override;
+      void update();
+      void blendState(double alpha);
 
-      std::vector<RenderObject> getRenderObjects() override;
-      std::tuple<glm::mat4, glm::mat4, glm::mat4> getCameraParams() override;
+      std::vector<RenderObject> getRenderObjects();
+      std::tuple<glm::mat4, glm::mat4, glm::mat4> getCameraParams();
 
       void onEvent(Events::Event& e);
 

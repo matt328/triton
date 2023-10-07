@@ -1,7 +1,7 @@
 #include "Context.hpp"
 
-#include "IGame.hpp"
 #include "ResourceFactory.hpp"
+#include "TransferData.hpp"
 #include "graphics/Instance.hpp"
 #include "graphics/FrameData.hpp"
 #include "graphics/ImmediateContext.hpp"
@@ -104,12 +104,18 @@ namespace graphics {
          return handle;
       }
 
-      void registerGame(std::shared_ptr<IGame> game) {
-         this->game = game;
+      void registerRenderObjectProvider(std::function<std::vector<RenderObject>()> fn) {
+         this->renderObjectProvider = fn;
+      }
+
+      void registerPerFrameDataProvider(std::function<PerFrameData()> fn) {
+         this->perFrameDataProvider = fn;
       }
 
     private:
-      std::shared_ptr<IGame> game;
+      std::function<std::vector<RenderObject>()> renderObjectProvider;
+      std::function<PerFrameData()> perFrameDataProvider;
+
       struct QueueFamilyIndices;
       struct SwapchainSupportDetails;
 
@@ -553,14 +559,12 @@ namespace graphics {
          {
             ZoneNamedN(updateCameraData, "Update Camera Data", true);
             // This is awesome feature of C++ idc
-            const auto [view, proj, viewProj] = game->getCameraParams();
+            const auto [view, proj, viewProj] = perFrameDataProvider();
             const auto cameraData = CameraData{.view = view, .proj = proj, .viewProj = viewProj};
             currentFrameData->getCameraBuffer().updateBufferValue(&cameraData, sizeof(CameraData));
          }
 
-         /*
-            We've already waited on this fence, so we can safely reset it so we can signal it again
-         */
+         // We've already waited on this fence, so we can safely reset it so we can signal it again
          device->resetFences(*currentFrameData->getInFlightFence());
 
          currentFrameData->getCommandBuffer().reset();
@@ -624,7 +628,7 @@ namespace graphics {
          // won't matter since the vertices and indices will be accumulated in a giant buffer, and I
          // think all the data handed off between the rendersystem and renderdevice will be copyable
          auto objectDataList = std::vector<ObjectData>{};
-         const auto renderObjects = game->getRenderObjects();
+         const auto renderObjects = this->renderObjectProvider();
          for (const auto& renderObject : renderObjects) {
             objectDataList.push_back(
                 ObjectData{.model = renderObject.modelMatrix,
@@ -656,7 +660,7 @@ namespace graphics {
             cmd.beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
             cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, *pipeline->getPipeline());
 
-            const auto& renderObjects = game->getRenderObjects();
+            const auto& renderObjects = this->renderObjectProvider();
 
             for (uint32_t i = 0; const auto& renderObject : renderObjects) {
                const auto& mesh = meshes.at(renderObject.meshId);
@@ -720,8 +724,13 @@ namespace graphics {
       return impl->getWindowSize();
    }
 
-   void Context::registerGame(std::shared_ptr<IGame> game) {
-      impl->registerGame(game);
+   void Context::registerRenderObjectProvider(
+       std::function<std::vector<RenderObject>()> renderObjectProvider) {
+      impl->registerRenderObjectProvider(renderObjectProvider);
+   }
+
+   void Context::registerPerFrameDataProvider(std::function<PerFrameData()> perFrameDataProvider) {
+      impl->registerPerFrameDataProvider(perFrameDataProvider);
    }
 
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Input {
+namespace Core {
    enum class Key : uint32_t {
       None = 0,
 

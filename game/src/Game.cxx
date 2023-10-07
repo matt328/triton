@@ -1,8 +1,7 @@
 #include <GL/glext.h>
 #include <utility>
 
-#include "ActionManager.hpp"
-#include "ActionType.hpp"
+#include "ApplicationEvent.h"
 #include "Events.hpp"
 #include "Game.hpp"
 
@@ -13,11 +12,9 @@
 
 #include "systems/RenderSystem.hpp"
 #include "systems/TransformSystem.hpp"
-#include "systems/InputSystem.hpp"
 #include "Paths.hpp"
 #include "Logger.hpp"
-#include "systems/CameraController.hpp"
-#include "InputMapper.hpp"
+#include "KeyEvent.h"
 
 namespace game {
    class Game::GameImpl {
@@ -25,14 +22,8 @@ namespace game {
       GameImpl(IResourceFactory* factory, int width, int height) : resourceFactory(factory) {
          registry = std::make_unique<entt::registry>();
 
-         actionManager = std::make_unique<Input::ActionManager>();
-         inputMapper = std::make_unique<Input::InputMapper>(*actionManager);
-         actionManager->mapKey(Input::Key::Up, Input::ActionType::MoveForward);
-         actionManager->mapKey(Input::Key::W, Input::ActionType::MoveForward);
-
          renderSystem = std::make_shared<RenderSystem>();
          transformSystem = std::make_unique<TransformSystem>();
-         inputSystem = std::make_unique<InputSystem>();
 
          // Create viking room entity
          const auto textureFilename = (Core::Paths::TEXTURES / "viking_room.png").string();
@@ -62,35 +53,34 @@ namespace game {
              camera, 60.f, width, height, 0.1f, 1000.f, glm::vec3(2.f, 2.f, 2.f));
          // NOLINTEND
          registry->emplace<Transform>(camera);
-
-         auto cameraController = std::make_unique<CameraController>();
-
-         // cameraController->setActiveCamera(camera);
-
-         // Bind up all the camera controller's actions it knows how to handle
-         actionManager->onAction(
-             Input::ActionType::MoveForward,
-             [&cameraController](Input::Action a) -> void { cameraController->moveForward(a); });
       }
 
       void onEvent(Events::Event& e) {
          auto dispatcher = Events::EventDispatcher{e};
 
-         dispatcher.dispatch<Events::EventType::KeyPressed>(std)
+         dispatcher.dispatch<Events::KeyPressedEvent>(
+             [this](Events::KeyPressedEvent& kpe) { return this->keyEvent(kpe); });
+
+         dispatcher.dispatch<Events::UpdateEvent>([this](Events::UpdateEvent& event) {
+            this->blendState(event.getBlendFactor());
+            return true;
+         });
+
+         dispatcher.dispatch<Events::FixedUpdateEvent>(
+             [this]([[maybe_unused]] Events::FixedUpdateEvent& event) {
+                this->update();
+                return true;
+             });
       }
 
-      void keyEvent(Events::&kpe) {
+      bool keyEvent(Events::KeyPressedEvent& kpe) {
+         Log::debug << kpe << std::endl;
+         return true;
       }
 
-      void keyPressed(const int key, int scancode, const int action, int mods) const {
-         inputMapper->keyCallback(key, scancode, action, mods);
-      }
       void update() const {
          transformSystem->update(*registry);
          renderSystem->update(*registry);
-         // if (inputSystem->isActionActive(Actions::Action::MoveForward)) {
-         //    Log::info << "Move Forward Active" << std::endl;
-         // };
       }
 
       void blendState([[maybe_unused]] double alpha) {
@@ -112,12 +102,9 @@ namespace game {
       std::unique_ptr<entt::registry> registry;
       std::shared_ptr<RenderSystem> renderSystem;
       std::unique_ptr<TransformSystem> transformSystem;
-      std::unique_ptr<InputSystem> inputSystem;
-      std::unique_ptr<Input::ActionManager> actionManager;
-      std::unique_ptr<Input::InputMapper> inputMapper;
    };
 
-   Game::Game(IResourceFactory* factory, int width, int height) : IGame() {
+   Game::Game(IResourceFactory* factory, int width, int height) {
       impl = std::make_unique<GameImpl>(factory, width, height);
    }
 
@@ -129,10 +116,6 @@ namespace game {
 
    void Game::blendState(double alpha) {
       impl->blendState(alpha);
-   }
-
-   void Game::keyPressed(const int key, int scancode, const int action, int mods) {
-      impl->keyPressed(key, scancode, action, mods);
    }
 
    std::vector<RenderObject> Game::getRenderObjects() {
