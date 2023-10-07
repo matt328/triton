@@ -1,6 +1,8 @@
 #pragma once
 
+#include "RenderObject.hpp"
 #include "ResourceFactory.hpp"
+#include "TransferData.hpp"
 #include <string_view>
 
 class RenderSystem;
@@ -25,11 +27,17 @@ namespace graphics {
       uint32_t createTexture(const std::string_view& filename) override;
 
       void registerGame(std::shared_ptr<IGame> game);
+      void registerRenderObjectProvider(
+          std::function<std::vector<RenderObject>()> renderObjectProvider);
+
+      void registerPerFrameDataProvider(std::function<PerFrameData()> perFrameDataProvider);
 
       [[nodiscard]] const std::tuple<int, int> getWindowSize() const;
 
     private:
       class ContextImpl;
       std::unique_ptr<ContextImpl> impl;
+      std::function<std::vector<RenderObject>()> renderObjectProvider;
+      std::function<PerFrameData()> perFrameDataProvider;
    };
 }

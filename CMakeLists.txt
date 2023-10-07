@@ -2,10 +2,7 @@ cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 
 set(CMAKE_TOOLCHAIN_FILE ./vcpkg/scripts/buildsystems/vcpkg.cmake)
 
-project(triton VERSION "0.0.1")
-
-find_package(glm CONFIG REQUIRED)
-find_package(Vulkan REQUIRED)
+project(triton VERSION "0.0.1" LANGUAGES CXX)
 
 configure_file(driver/config.h.in config.h)
 
@@ -14,19 +11,12 @@ add_compile_definitions(
    VULKAN_HPP_NO_STRUCT_CONSTRUCTORS
    TINYGLTF_NO_STB_IMAGE_WRITE
 )
-add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 
 SET(CMAKE_CXX_STANDARD 20)
-
-if(MSVC)
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++latest")
-else()
-   add_compile_options(-Wall -Wextra -pedantic)
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20")
-endif(MSVC)
+SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 IF(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-nullability-extension -Wno-nullability-completeness -Wno-deprecated-volatile")
+   add_compile_options(-Wall -Wextra -pedantic -Wno-nullability-extension -Wno-nullability-completeness -Wno-deprecated-volatile)
 ENDIF()
 
 IF(APPLE)
@@ -38,7 +28,8 @@ IF(APPLE)
 ENDIF(APPLE)
 
 IF(WIN32)
-   link_libraries(${XCB_LIBRARIES} ${Vulkan_LIBRARY} ${DIRECTFB_LIBRARIES} ${WAYLAND_CLIENT_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+   link_libraries(${Vulkan_LIBRARY} ${DIRECTFB_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+   add_definitions(-D_CRT_SECURE_NO_WARNINGS)
    add_compile_definitions(
       VK_USE_PLATFORM_WIN32_KHR
    )
