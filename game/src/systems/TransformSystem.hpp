@@ -1,7 +1,5 @@
 #pragma once
 
-#include "InputSystem.hpp"
-
 class TransformSystem {
  public:
    explicit TransformSystem();
@@ -12,8 +10,6 @@ class TransformSystem {
    ~TransformSystem() = default;
 
    void update(entt::registry& registry) const;
-
-   void handleAction(const Input::Action& action);
 
    int recieve(const int& i) {
       return i;

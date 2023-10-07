@@ -3,6 +3,7 @@ set(name triton)
 set(${name}_SRC
    src/core/stb.cxx
    src/core/vma_raii.cxx
+   src/core/KeyMap.cxx
    src/Application.cxx
    src/Context.cxx
    src/graphics/pipeline/Vertex.cxx
