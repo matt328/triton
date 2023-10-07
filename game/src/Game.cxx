@@ -97,7 +97,6 @@ namespace game {
       }
 
     private:
-      entt::delegate<void(int, int, int, int)> keyDelegate;
       IResourceFactory* resourceFactory;
       std::unique_ptr<entt::registry> registry;
       std::shared_ptr<RenderSystem> renderSystem;
