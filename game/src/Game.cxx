@@ -1,5 +1,8 @@
+#include <GL/glext.h>
 #include <utility>
 
+#include "ApplicationEvent.h"
+#include "Events.hpp"
 #include "Game.hpp"
 
 #include "ResourceFactory.hpp"
@@ -9,8 +12,9 @@
 
 #include "systems/RenderSystem.hpp"
 #include "systems/TransformSystem.hpp"
-#include "systems/InputSystem.hpp"
 #include "Paths.hpp"
+#include "Logger.hpp"
+#include "KeyEvent.h"
 
 namespace game {
    class Game::GameImpl {
@@ -20,7 +24,6 @@ namespace game {
 
          renderSystem = std::make_shared<RenderSystem>();
          transformSystem = std::make_unique<TransformSystem>();
-         inputSystem = std::make_unique<InputSystem>();
 
          // Create viking room entity
          const auto textureFilename = (Core::Paths::TEXTURES / "viking_room.png").string();
@@ -50,13 +53,31 @@ namespace game {
              camera, 60.f, width, height, 0.1f, 1000.f, glm::vec3(2.f, 2.f, 2.f));
          // NOLINTEND
          registry->emplace<Transform>(camera);
-
-         inputSystem->getActionDelegate().connect<&TransformSystem::handleAction>(transformSystem);
       }
 
-      void keyPressed(const int key, int scancode, const int action, int mods) const {
-         inputSystem->keyCallback(key, scancode, action, mods);
+      void onEvent(Events::Event& e) {
+         auto dispatcher = Events::EventDispatcher{e};
+
+         dispatcher.dispatch<Events::KeyPressedEvent>(
+             [this](Events::KeyPressedEvent& kpe) { return this->keyEvent(kpe); });
+
+         dispatcher.dispatch<Events::UpdateEvent>([this](Events::UpdateEvent& event) {
+            this->blendState(event.getBlendFactor());
+            return true;
+         });
+
+         dispatcher.dispatch<Events::FixedUpdateEvent>(
+             [this]([[maybe_unused]] Events::FixedUpdateEvent& event) {
+                this->update();
+                return true;
+             });
       }
+
+      bool keyEvent(Events::KeyPressedEvent& kpe) {
+         Log::debug << kpe << std::endl;
+         return true;
+      }
+
       void update() const {
          transformSystem->update(*registry);
          renderSystem->update(*registry);
@@ -76,15 +97,13 @@ namespace game {
       }
 
     private:
-      entt::delegate<void(int, int, int, int)> keyDelegate;
       IResourceFactory* resourceFactory;
       std::unique_ptr<entt::registry> registry;
       std::shared_ptr<RenderSystem> renderSystem;
       std::unique_ptr<TransformSystem> transformSystem;
-      std::unique_ptr<InputSystem> inputSystem;
    };
 
-   Game::Game(IResourceFactory* factory, int width, int height) : IGame() {
+   Game::Game(IResourceFactory* factory, int width, int height) {
       impl = std::make_unique<GameImpl>(factory, width, height);
    }
 
@@ -98,16 +117,16 @@ namespace game {
       impl->blendState(alpha);
    }
 
-   void Game::keyPressed(const int key, int scancode, const int action, int mods) {
-      impl->keyPressed(key, scancode, action, mods);
-   }
-
    std::vector<RenderObject> Game::getRenderObjects() {
       return impl->getRenderObjects();
    }
 
    std::tuple<glm::mat4, glm::mat4, glm::mat4> Game::getCameraParams() {
       return impl->getCameraParams();
+   }
+
+   void Game::onEvent(Events::Event& e) {
+      impl->onEvent(e);
    }
 
 };
