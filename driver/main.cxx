@@ -27,9 +27,11 @@ int main() {
       auto app = Application{width, height, windowTitle};
       auto resourceFactory = app.getResourceFactory();
 
-      auto game = std::make_shared<game::Game>(resourceFactory, width, height);
+      auto game = std::make_unique<game::Game>(resourceFactory, width, height);
 
-      app.registerGame(game);
+      app.setEventCallbackFn([&game](Events::Event& e) -> void { game->onEvent(e); });
+      app.registerRenderObjectProvider([&game]() { return game->getRenderObjects(); });
+      app.registerPerFrameDataProvider([&game]() { return game->getCameraParams(); });
 
       app.run();
 
