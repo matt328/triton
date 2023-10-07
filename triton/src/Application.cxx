@@ -1,9 +1,12 @@
 #include "Application.hpp"
+#include "ApplicationEvent.h"
 #include "Context.hpp"
+#include "KeyEvent.h"
 #include "ResourceFactory.hpp"
 #include "Logger.hpp"
 #include <GLFW/glfw3.h>
 #include "Events.hpp"
+#include "core/KeyMap.hpp"
 
 class Application::ApplicationImpl {
  public:
@@ -16,31 +19,17 @@ class Application::ApplicationImpl {
       this->eventCallbackFn = fn;
    }
 
-   void registerGame(std::shared_ptr<IGame> game) {
-      this->game = game;
-      this->context->registerGame(game);
+   void registerRenderObjectProvider(std::function<std::vector<RenderObject>()> fn) {
+      context->registerRenderObjectProvider(fn);
    }
 
-   void keyCallbackInt(const int key, int scancode, const int action, int mods) const {
-      if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-         glfwSetWindowShouldClose(window.get(), GL_TRUE);
-      }
-      if (game != nullptr) {
-         game->keyPressed(key, scancode, action, mods);
-      } else {
-         Log::warn << "Keys pressed before game was registered" << std::endl;
-      }
+   void registerPerFrameDataProvider(std::function<PerFrameData()> fn) {
+      context->registerPerFrameDataProvider(fn);
    }
 
    static void framebufferResizeCallback(GLFWwindow* window, const int width, const int height) {
       const auto app = static_cast<ApplicationImpl*>(glfwGetWindowUserPointer(window));
       app->context->windowResized(height, width);
-   }
-
-   static void keyCallback(
-       GLFWwindow* window, const int key, const int scancode, const int action, const int mods) {
-      const auto app = static_cast<ApplicationImpl*>(glfwGetWindowUserPointer(window));
-      app->keyCallbackInt(key, scancode, action, mods);
    }
 
    static void errorCallback(int code, const char* description) {
@@ -71,10 +60,48 @@ class Application::ApplicationImpl {
    }
 
    void run() const {
-      if (game == nullptr) {
-         throw std::runtime_error{"Game not registered, bailing out"};
-      }
-      glfwSetKeyCallback(window.get(), keyCallback);
+      glfwSetKeyCallback(window.get(),
+                         [](GLFWwindow* window,
+                            int key,
+                            [[maybe_unused]] int scancode,
+                            int ation,
+                            [[maybe_unused]] int mods) {
+                            auto app =
+                                static_cast<ApplicationImpl*>(glfwGetWindowUserPointer(window));
+                            const auto mappedKey = Core::keyMap[key];
+                            switch (ation) {
+                               case GLFW_PRESS: {
+                                  Events::KeyPressedEvent event{mappedKey};
+                                  app->eventCallbackFn(event);
+                                  break;
+                               }
+                               case GLFW_RELEASE: {
+                                  Events::KeyReleasedEvent event{mappedKey};
+                                  app->eventCallbackFn(event);
+                                  break;
+                               }
+                               case GLFW_REPEAT: {
+                                  Events::KeyPressedEvent event{mappedKey, true};
+                                  app->eventCallbackFn(event);
+                                  break;
+                               }
+                            }
+                         });
+
+      glfwSetCharCallback(window.get(), [](GLFWwindow* window, unsigned int keyCode) {
+         auto app = static_cast<ApplicationImpl*>(glfwGetWindowUserPointer(window));
+         // Need to check this if we start collectingb char input
+         const auto mappedKey = Core::keyMap[(int)keyCode];
+         Events::KeyTypedEvent event{mappedKey};
+         app->eventCallbackFn(event);
+      });
+
+      glfwSetWindowCloseCallback(window.get(), [](GLFWwindow* window) {
+         auto app = static_cast<ApplicationImpl*>(glfwGetWindowUserPointer(window));
+         auto event = Events::WindowCloseEvent{};
+         app->eventCallbackFn(event);
+         app->running = false;
+      });
 
       double previousInstant = glfwGetTime();
       constexpr double maxFrameTime = 0.16667f;
@@ -82,7 +109,7 @@ class Application::ApplicationImpl {
       constexpr double fixedTimeStep = 1.f / 240.f;
       double currentInstant = glfwGetTime();
 
-      while (!glfwWindowShouldClose(window.get())) {
+      while (running) {
          currentInstant = glfwGetTime();
 
          auto elapsed = currentInstant - previousInstant;
@@ -95,7 +122,8 @@ class Application::ApplicationImpl {
          while (accumulatedTime >= fixedTimeStep) {
             {
                ZoneNamedN(update, "Update", true);
-               game->update();
+               auto event = Events::FixedUpdateEvent{};
+               eventCallbackFn(event);
             }
             accumulatedTime -= fixedTimeStep;
          }
@@ -104,11 +132,14 @@ class Application::ApplicationImpl {
 
          {
             ZoneNamedN(blendState, "Blend State", true);
-            game->blendState(blendingFactor);
+            auto event = Events::UpdateEvent{blendingFactor};
+            eventCallbackFn(event);
          }
 
          {
             ZoneNamedN(render, "Render", true);
+            auto event = Events::RenderEvent{};
+            eventCallbackFn(event);
             context->render();
          }
 
@@ -118,6 +149,8 @@ class Application::ApplicationImpl {
 
          glfwPollEvents();
       }
+      auto event = Events::ShutdownEvent{};
+      eventCallbackFn(event);
       context->waitIdle();
    }
 
@@ -132,11 +165,11 @@ class Application::ApplicationImpl {
    std::vector<std::function<void(void)>> updates;
    std::vector<std::function<void(double)>> blendUpdates;
    std::vector<std::function<void(int, int, int, int)>> keyHandlers;
-   std::shared_ptr<IGame> game;
 
    std::function<void(Events::Event&)> eventCallbackFn;
 
    inline static constexpr double FRAME_TIME = 1.f / 60.f;
+   bool running = true;
 };
 
 Application::Application(int width, int height, const std::string_view& windowTitle) {
@@ -149,14 +182,18 @@ void Application::run() const {
    impl->run();
 }
 
-void Application::registerGame(std::shared_ptr<IGame> game) {
-   impl->registerGame(game);
-}
-
 IResourceFactory* Application::getResourceFactory() {
    return impl->getResourceFactory();
 }
 
 void Application::setEventCallbackFn(std::function<void(Events::Event&)> fn) {
    impl->setEventCallbackFn(fn);
+}
+
+void Application::registerRenderObjectProvider(std::function<std::vector<RenderObject>()> fn) {
+   impl->registerRenderObjectProvider(fn);
+}
+
+void Application::registerPerFrameDataProvider(std::function<PerFrameData()> fn) {
+   impl->registerPerFrameDataProvider(fn);
 }

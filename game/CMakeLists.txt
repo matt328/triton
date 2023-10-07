@@ -27,7 +27,6 @@ find_package(glfw3 CONFIG REQUIRED)
 
 target_link_libraries(${name}
    PRIVATE
-   input
    glfw
    triton
 )
