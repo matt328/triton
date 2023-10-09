@@ -4,6 +4,7 @@ set(${name}_SRC
    src/Game.cxx
    src/systems/CameraSystem.cxx
    src/systems/RenderSystem.cxx
+   src/systems/ScriptingSystem.cxx
    src/systems/TransformSystem.cxx
 )
 

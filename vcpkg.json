@@ -13,7 +13,9 @@
             "glfw-binding"
          ]
       },
+      "lua",
       "nlohmann-json",
+      "sol2",
       "spirv-cross",
       "stb",
       "tinygltf",

@@ -2,3 +2,4 @@ build
 bin
 .cache
 cmake-build-debug
+vcpkg_installed
