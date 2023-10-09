@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Instance.hpp"
+#include <vulkan/vulkan_enums.hpp>
 
 namespace graphics {
 
@@ -135,7 +136,10 @@ namespace graphics {
 
       const auto features = possibleDevice.getFeatures();
 
+      const auto props = possibleDevice.getProperties();
+      const auto isDiscrete = props.deviceType == vk::PhysicalDeviceType::eDiscreteGpu;
+
       return queueFamilyIndices.isComplete() && extensionsSupported && swapchainAdequate &&
-             features.samplerAnisotropy && features.tessellationShader;
+             isDiscrete && features.samplerAnisotropy && features.tessellationShader;
    }
 }
