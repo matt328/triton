@@ -13,4 +13,5 @@ struct Camera {
 
    float pitch = 0.f;
    float yaw = 0.f;
+   bool active = false;
 };

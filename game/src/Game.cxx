@@ -8,8 +8,10 @@
 #include "components/Renderable.hpp"
 #include "components/Transform.hpp"
 #include "components/Camera.hpp"
+#include "components/Script.hpp"
 
 #include "systems/RenderSystem.hpp"
+#include "systems/ScriptingSystem.hpp"
 #include "systems/TransformSystem.hpp"
 #include "Paths.hpp"
 #include "Logger.hpp"
@@ -23,6 +25,7 @@ namespace game {
 
          renderSystem = std::make_shared<RenderSystem>();
          transformSystem = std::make_unique<TransformSystem>();
+         scriptingSytem = std::make_unique<ScriptingSystem>();
 
          // Create viking room entity
          const auto textureFilename = (Core::Paths::TEXTURES / "viking_room.png").string();
@@ -34,6 +37,7 @@ namespace game {
          const auto room = registry->create();
          registry->emplace<Renderable>(room, meshId, textureId);
          registry->emplace<Transform>(room);
+         registry->emplace<Script>(room);
 
          // Create Plane area entity
          const auto planeMeshId =
@@ -100,6 +104,7 @@ namespace game {
       std::unique_ptr<entt::registry> registry;
       std::shared_ptr<RenderSystem> renderSystem;
       std::unique_ptr<TransformSystem> transformSystem;
+      std::unique_ptr<ScriptingSystem> scriptingSytem;
    };
 
    Game::Game(IResourceFactory* factory, int width, int height) {
