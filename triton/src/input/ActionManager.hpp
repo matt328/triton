@@ -16,8 +16,8 @@ namespace Input {
       void keyPressed(Key key);
       void keyReleased(Key key);
 
-      size_t onAction(ActionType aType, std::function<void(Action)> fn);
-      void offAction(ActionType aType, size_t position);
+      size_t addActionListener(ActionType aType, std::function<void(Action)> fn);
+      void removeActionListener(ActionType aType, size_t position);
 
     private:
       std::multimap<Key, ActionType> actionMap;

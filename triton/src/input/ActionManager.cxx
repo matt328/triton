@@ -1,10 +1,12 @@
 #include "ActionManager.hpp"
 
 namespace Input {
+   // Map a key event to fire an action
    void ActionManager::mapKey(Key key, ActionType actionType) {
       actionMap.insert(std::make_pair(key, actionType));
    }
 
+   // Call this when a Key is pressed
    void ActionManager::keyPressed(Key key) {
       const auto it = actionMap.find(key);
       if (it == actionMap.end()) {
@@ -27,10 +29,11 @@ namespace Input {
       delegateIt->second(Action{actionType, false});
    };
 
+   // Call this when a key is released
    void ActionManager::keyReleased(Key key) {
    }
 
-   size_t ActionManager::onAction(ActionType aType, std::function<void(Action)> fn) {
+   size_t ActionManager::addActionListener(ActionType aType, std::function<void(Action)> fn) {
       const auto it = delegatesMap.find(aType);
       size_t pos = -1;
       if (it == delegatesMap.end()) {
@@ -43,7 +46,7 @@ namespace Input {
       return pos;
    }
 
-   void ActionManager::offAction(ActionType aType, size_t position) {
+   void ActionManager::removeActionListener(ActionType aType, size_t position) {
       const auto it = delegatesMap.find(aType);
       assert(it != delegatesMap.end());
       it->second.removeDelegate(position);
