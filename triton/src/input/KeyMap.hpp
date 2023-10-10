@@ -2,6 +2,6 @@
 
 #include "Keys.hpp"
 
-namespace Core {
+namespace Input {
    extern std::unordered_map<int, Core::Key> keyMap;
 };

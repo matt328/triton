@@ -3,7 +3,7 @@ set(name triton)
 set(${name}_SRC
    src/core/stb.cxx
    src/core/vma_raii.cxx
-   src/core/KeyMap.cxx
+   src/input/KeyMap.cxx
    src/Application.cxx
    src/Context.cxx
    src/graphics/pipeline/Vertex.cxx
@@ -51,6 +51,7 @@ target_precompile_headers(${name} PRIVATE
    <string_view>
    <tracy/Tracy.hpp>
    <tracy/TracyVulkan.hpp>
+   <variant>
 )
 
 add_compile_definitions(
