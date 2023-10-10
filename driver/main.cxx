@@ -1,10 +1,14 @@
 #include "Application.hpp"
+#include "GameContainer.hpp"
 #include "Logger.hpp"
 #include "Game.hpp"
 #include "config.h"
+#include "GameContainer.hpp"
 
 constexpr int width = 1366;
 constexpr int height = 768;
+
+using Triton::GameContainer;
 
 int main() {
    Log::LogManager::getInstance().setMinLevel(Log::Level::Debug);
@@ -22,6 +26,17 @@ int main() {
 #else
    windowTitle.append(" - Release Build");
 #endif
+
+   class MyGame : public GameContainer {
+    public:
+      MyGame(int width, int height) : GameContainer(width, height) {
+         Log::debug << "Created MyGame" << std::endl;
+      }
+   };
+
+   auto myGame = MyGame{width, height};
+
+   myGame.run();
 
    try {
       auto app = Application{width, height, windowTitle};

@@ -6,7 +6,7 @@
 #include "Logger.hpp"
 #include <GLFW/glfw3.h>
 #include "Events.hpp"
-#include "core/KeyMap.hpp"
+#include "input/KeyMap.hpp"
 
 class Application::ApplicationImpl {
  public:
@@ -68,7 +68,7 @@ class Application::ApplicationImpl {
                             [[maybe_unused]] int mods) {
                             auto app =
                                 static_cast<ApplicationImpl*>(glfwGetWindowUserPointer(window));
-                            const auto mappedKey = Core::keyMap[key];
+                            const auto mappedKey = Input::keyMap[key];
                             switch (ation) {
                                case GLFW_PRESS: {
                                   Events::KeyPressedEvent event{mappedKey};
@@ -91,7 +91,7 @@ class Application::ApplicationImpl {
       glfwSetCharCallback(window.get(), [](GLFWwindow* window, unsigned int keyCode) {
          auto app = static_cast<ApplicationImpl*>(glfwGetWindowUserPointer(window));
          // Need to check this if we start collectingb char input
-         const auto mappedKey = Core::keyMap[(int)keyCode];
+         const auto mappedKey = Input::keyMap[(int)keyCode];
          Events::KeyTypedEvent event{mappedKey};
          app->eventCallbackFn(event);
       });
