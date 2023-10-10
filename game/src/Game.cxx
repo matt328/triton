@@ -16,7 +16,6 @@
 #include "Paths.hpp"
 #include "Logger.hpp"
 #include "KeyEvent.h"
-#include "input/ActionManager.hpp"
 
 namespace game {
    class Game::GameImpl {
@@ -57,8 +56,6 @@ namespace game {
              camera, 60.f, width, height, 0.1f, 1000.f, glm::vec3(2.f, 2.f, 2.f));
          // NOLINTEND
          registry->emplace<Transform>(camera);
-
-         actionManager = std::make_unique<Input::ActionManager>();
       }
 
       void onEvent(Events::Event& e) {
@@ -108,8 +105,6 @@ namespace game {
       std::shared_ptr<RenderSystem> renderSystem;
       std::unique_ptr<TransformSystem> transformSystem;
       std::unique_ptr<ScriptingSystem> scriptingSytem;
-
-      std::unique_ptr<Input::ActionManager> actionManager;
    };
 
    Game::Game(IResourceFactory* factory, int width, int height) {

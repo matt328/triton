@@ -6,6 +6,7 @@ set(${name}_SRC
    src/input/KeyMap.cxx
    src/Application.cxx
    src/Context.cxx
+   src/GameContainer.cxx
    src/graphics/pipeline/Vertex.cxx
    src/graphics/pipeline/SpirvHelper.cxx
    src/graphics/pipeline/DefaultPipeline.cxx
