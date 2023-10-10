@@ -29,12 +29,13 @@ int main() {
 
    class MyGame : public GameContainer {
     public:
-      MyGame(int width, int height) : GameContainer(width, height) {
+      MyGame(int width, int height, const std::string_view& windowTitle) :
+          GameContainer(width, height, windowTitle) {
          Log::debug << "Created MyGame" << std::endl;
       }
    };
 
-   auto myGame = MyGame{width, height};
+   auto myGame = MyGame{width, height, windowTitle};
 
    myGame.run();
 
