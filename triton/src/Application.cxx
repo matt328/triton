@@ -162,9 +162,6 @@ class Application::ApplicationImpl {
    };
    std::unique_ptr<GLFWwindow, DestroyGlfwWindow> window;
    std::shared_ptr<graphics::Context> context;
-   std::vector<std::function<void(void)>> updates;
-   std::vector<std::function<void(double)>> blendUpdates;
-   std::vector<std::function<void(int, int, int, int)>> keyHandlers;
 
    std::function<void(Events::Event&)> eventCallbackFn;
 
