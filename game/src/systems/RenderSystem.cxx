@@ -11,7 +11,7 @@ void RenderSystem::update(entt::registry& registry) {
    for (const auto view = registry.view<Renderable, Transform>(); const auto entity : view) {
       auto& renderable = view.get<Renderable>(entity);
       auto& model = view.get<Transform>(entity);
-      auto renderObject = RenderObject{
+      auto renderObject = Triton::RenderObject{
           .meshId = renderable.getMeshId(),
           .textureId = renderable.getTextureId(),
           .modelMatrix = model.getTransform(),

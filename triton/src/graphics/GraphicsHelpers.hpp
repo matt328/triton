@@ -3,7 +3,7 @@
 #include "Instance.hpp"
 #include <vulkan/vulkan_enums.hpp>
 
-namespace graphics {
+namespace Triton {
 
    // Structs
    struct QueueFamilyIndices {

@@ -22,7 +22,7 @@ namespace game {
       void update();
       void blendState(double alpha);
 
-      std::vector<RenderObject> getRenderObjects();
+      std::vector<Triton::RenderObject> getRenderObjects();
       std::tuple<glm::mat4, glm::mat4, glm::mat4> getCameraParams();
 
       void onEvent(Events::Event& e);

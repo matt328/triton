@@ -91,7 +91,7 @@ namespace game {
          // Log::core->debug("blendState(), alpha: {}", alpha);
       }
 
-      std::vector<RenderObject> getRenderObjects() {
+      std::vector<Triton::RenderObject> getRenderObjects() {
          return renderSystem->getRenderObjects();
       }
 
@@ -121,7 +121,7 @@ namespace game {
       impl->blendState(alpha);
    }
 
-   std::vector<RenderObject> Game::getRenderObjects() {
+   std::vector<Triton::RenderObject> Game::getRenderObjects() {
       return impl->getRenderObjects();
    }
 

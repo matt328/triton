@@ -16,13 +16,13 @@ class RenderSystem {
 
    void update(entt::registry& registry);
 
-   [[nodiscard]] const std::vector<RenderObject>& getRenderObjects() const {
+   [[nodiscard]] const std::vector<Triton::RenderObject>& getRenderObjects() const {
       return renderObjects;
    };
 
    [[nodiscard]] std::tuple<glm::mat4, glm::mat4, glm::mat4> getCameraParams() const;
 
  private:
-   std::vector<RenderObject> renderObjects;
+   std::vector<Triton::RenderObject> renderObjects;
    Camera currentCamera;
 };

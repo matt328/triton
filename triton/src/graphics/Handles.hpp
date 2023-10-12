@@ -1,3 +1,8 @@
-enum class TextureHandle : uint32_t {
-   INVALID = 0
-};
+#pragma once
+
+namespace Triton {
+
+   enum class TextureHandle : uint32_t {
+      INVALID = 0
+   };
+}

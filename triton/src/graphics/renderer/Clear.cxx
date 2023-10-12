@@ -2,47 +2,51 @@
 
 #include "graphics/VulkanFactory.hpp"
 
-using Graphics::Utils::createFramebuffers;
+namespace Triton {
 
-Clear::Clear(const RendererBaseCreateInfo& createInfo) :
-    framebufferSize(createInfo.swapchainExtent) {
+   using Utils::createFramebuffers;
 
-   const auto renderPassCreateInfo =
-       Graphics::Utils::RenderPassCreateInfo{.device = &createInfo.device,
-                                             .physicalDevice = &createInfo.physicalDevice,
-                                             .swapchainFormat = createInfo.swapchainFormat,
-                                             .clearColor = true,
-                                             .clearDepth = true,
-                                             .flags = Graphics::Utils::eRenderPassBit_First};
+   Clear::Clear(const RendererBaseCreateInfo& createInfo) :
+       framebufferSize(createInfo.swapchainExtent) {
 
-   renderPass = std::make_unique<vk::raii::RenderPass>(
-       Graphics::Utils::colorAndDepthRenderPass(renderPassCreateInfo));
+      const auto renderPassCreateInfo =
+          Utils::RenderPassCreateInfo{.device = &createInfo.device,
+                                      .physicalDevice = &createInfo.physicalDevice,
+                                      .swapchainFormat = createInfo.swapchainFormat,
+                                      .clearColor = true,
+                                      .clearDepth = true,
+                                      .flags = Utils::eRenderPassBit_First};
 
-   framebuffers = createFramebuffers(createInfo.device,
-                                     createInfo.swapchainImageViews,
-                                     *createInfo.depthImageView,
-                                     createInfo.swapchainExtent,
-                                     *renderPass);
-}
+      renderPass = std::make_unique<vk::raii::RenderPass>(
+          Utils::colorAndDepthRenderPass(renderPassCreateInfo));
 
-void Clear::fillCommandBuffer(const vk::raii::CommandBuffer& cmd, const size_t currentImage) {
-   const std::array<vk::ClearValue, 2> clearValues{
-       vk::ClearValue{.color =
-                          vk::ClearColorValue{std::array<float, 4>({{0.39f, 0.58f, 0.93f, 1.f}})}},
-       vk::ClearValue{.depthStencil = vk::ClearDepthStencilValue{.depth = 1.f, .stencil = 0}}};
+      framebuffers = createFramebuffers(createInfo.device,
+                                        createInfo.swapchainImageViews,
+                                        *createInfo.depthImageView,
+                                        createInfo.swapchainExtent,
+                                        *renderPass);
+   }
 
-   const vk::Rect2D screenRect = {.offset = {0, 0}, .extent = framebufferSize};
+   void Clear::fillCommandBuffer(const vk::raii::CommandBuffer& cmd, const size_t currentImage) {
+      const std::array<vk::ClearValue, 2> clearValues{
+          vk::ClearValue{
+              .color = vk::ClearColorValue{std::array<float, 4>({{0.39f, 0.58f, 0.93f, 1.f}})}},
+          vk::ClearValue{.depthStencil = vk::ClearDepthStencilValue{.depth = 1.f, .stencil = 0}}};
 
-   const auto renderPassInfo = vk::RenderPassBeginInfo{.renderPass = **renderPass,
-                                                       .framebuffer = **framebuffers[currentImage],
-                                                       .renderArea = screenRect,
-                                                       .clearValueCount = 2,
-                                                       .pClearValues = clearValues.data()};
+      const vk::Rect2D screenRect = {.offset = {0, 0}, .extent = framebufferSize};
 
-   cmd.beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
-   // Don't do anything, we're just clearing the framebuffers
-   cmd.endRenderPass();
-}
+      const auto renderPassInfo =
+          vk::RenderPassBeginInfo{.renderPass = **renderPass,
+                                  .framebuffer = **framebuffers[currentImage],
+                                  .renderArea = screenRect,
+                                  .clearValueCount = 2,
+                                  .pClearValues = clearValues.data()};
 
-void Clear::update() {
+      cmd.beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
+      // Don't do anything, we're just clearing the framebuffers
+      cmd.endRenderPass();
+   }
+
+   void Clear::update() {
+   }
 }

@@ -5,45 +5,48 @@
 #include <vulkan/vulkan_raii.hpp>
 #include <vulkan/vulkan_structs.hpp>
 
-class Texture final {
- public:
-   explicit Texture(const std::string_view& filename,
-                    const vma::raii::Allocator& raiillocator,
-                    const vk::raii::Device& device,
-                    const ImmediateContext& graphicsContext,
-                    const ImmediateContext& transferContext);
-   ~Texture() = default;
+namespace Triton {
 
-   Texture(const Texture&) = delete;
-   Texture(Texture&&) = delete;
-   Texture& operator=(const Texture&) = delete;
-   Texture& operator=(Texture&&) = delete;
+   class Texture final {
+    public:
+      explicit Texture(const std::string_view& filename,
+                       const vma::raii::Allocator& raiillocator,
+                       const vk::raii::Device& device,
+                       const ImmediateContext& graphicsContext,
+                       const ImmediateContext& transferContext);
+      ~Texture() = default;
 
-   void updateDescriptorSet(const vk::raii::DescriptorSet& descriptorSet) const;
+      Texture(const Texture&) = delete;
+      Texture(Texture&&) = delete;
+      Texture& operator=(const Texture&) = delete;
+      Texture& operator=(Texture&&) = delete;
 
-   const vk::DescriptorImageInfo* getImageInfo() {
-      return &imageInfo;
-   }
+      void updateDescriptorSet(const vk::raii::DescriptorSet& descriptorSet) const;
 
- private:
-   const vk::raii::Device& device;
-   std::unique_ptr<vma::raii::AllocatedImage> image;
-   std::unique_ptr<vk::raii::ImageView> view;
+      const vk::DescriptorImageInfo* getImageInfo() {
+         return &imageInfo;
+      }
 
-   vk::ImageLayout imageLayout;
+    private:
+      const vk::raii::Device& device;
+      std::unique_ptr<vma::raii::AllocatedImage> image;
+      std::unique_ptr<vk::raii::ImageView> view;
 
-   std::unique_ptr<vk::raii::Sampler> sampler;
-   vk::DescriptorImageInfo imageInfo;
+      vk::ImageLayout imageLayout;
 
-   static void transitionImageLayout(const ImmediateContext& context,
-                                     const vk::Image& image,
-                                     vk::ImageLayout oldLayout,
-                                     vk::ImageLayout newLayout,
-                                     vk::ImageSubresourceRange subresourceRange);
+      std::unique_ptr<vk::raii::Sampler> sampler;
+      vk::DescriptorImageInfo imageInfo;
 
-   static void copyBufferToImage(const ImmediateContext& context,
-                                 const vk::Buffer& buffer,
-                                 const vk::Image& image,
-                                 vk::ImageLayout imageLayout,
-                                 const std::vector<vk::BufferImageCopy>& regions);
-};
+      static void transitionImageLayout(const ImmediateContext& context,
+                                        const vk::Image& image,
+                                        vk::ImageLayout oldLayout,
+                                        vk::ImageLayout newLayout,
+                                        vk::ImageSubresourceRange subresourceRange);
+
+      static void copyBufferToImage(const ImmediateContext& context,
+                                    const vk::Buffer& buffer,
+                                    const vk::Image& image,
+                                    vk::ImageLayout imageLayout,
+                                    const std::vector<vk::BufferImageCopy>& regions);
+   };
+}

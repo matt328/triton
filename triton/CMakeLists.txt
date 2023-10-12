@@ -5,7 +5,8 @@ set(${name}_SRC
    src/core/vma_raii.cxx
    src/input/KeyMap.cxx
    src/Application.cxx
-   src/Context.cxx
+   src/Renderer.cxx
+   src/ApplicationContext.cxx
    src/GameContainer.cxx
    src/graphics/pipeline/Vertex.cxx
    src/graphics/pipeline/SpirvHelper.cxx
@@ -27,13 +28,14 @@ set(${name}_INCLUDE "include")
 
 add_library(${name} STATIC ${triton_SRC})
 
-target_precompile_headers(${name} PRIVATE
+target_precompile_headers(${name} PUBLIC
    <fstream>
+   <functional>
+   <glm/gtc/matrix_transform.hpp>
    <glm/gtc/type_ptr.hpp>
-   <glm/gtx/string_cast.hpp>
    <glm/gtx/matrix_decompose.hpp>
    <glm/gtx/quaternion.hpp>
-   <glm/gtc/matrix_transform.hpp>
+   <glm/gtx/string_cast.hpp>
    <GLFW/glfw3.h>
    <glslang/SPIRV/GlslangToSpv.h>
    <imgui.h>
@@ -43,16 +45,19 @@ target_precompile_headers(${name} PRIVATE
    <sstream>
    <ranges>
    <set>
-   <tuple>
-   <spirv_cross.hpp>
-   <tiny_gltf.h>
-   <vulkan/vulkan_raii.hpp>
-   <vulkan-memory-allocator-hpp/vk_mem_alloc.hpp>
    <stb_image.h>
    <string_view>
+   <tiny_gltf.h>
    <tracy/Tracy.hpp>
    <tracy/TracyVulkan.hpp>
+   <tuple>
    <variant>
+   <vulkan-memory-allocator-hpp/vk_mem_alloc.hpp>
+   <vulkan/vulkan_raii.hpp>
+)
+
+target_precompile_headers(${name} PRIVATE
+   <spirv_cross.hpp>
 )
 
 add_compile_definitions(
