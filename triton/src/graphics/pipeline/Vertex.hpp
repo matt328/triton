@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Models {
+namespace Triton::Models {
    enum class VertexComponent {
       Position,
       Normal,

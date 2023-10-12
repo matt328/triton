@@ -1,39 +1,43 @@
 #include "Finish.hpp"
 #include "graphics/VulkanFactory.hpp"
 
-using namespace Graphics::Utils;
+namespace Triton {
 
-Finish::Finish(const RendererBaseCreateInfo& createInfo) :
-    framebufferSize(createInfo.swapchainExtent) {
-   const auto renderPassCreateInfo =
-       RenderPassCreateInfo{.device = &createInfo.device,
-                            .physicalDevice = &createInfo.physicalDevice,
-                            .swapchainFormat = createInfo.swapchainFormat,
-                            .clearColor = false,
-                            .clearDepth = false,
-                            .flags = Graphics::Utils::eRenderPassBit_Last};
+   using namespace Utils;
 
-   renderPass =
-       std::make_unique<vk::raii::RenderPass>(colorAndDepthRenderPass(renderPassCreateInfo));
+   Finish::Finish(const RendererBaseCreateInfo& createInfo) :
+       framebufferSize(createInfo.swapchainExtent) {
+      const auto renderPassCreateInfo =
+          RenderPassCreateInfo{.device = &createInfo.device,
+                               .physicalDevice = &createInfo.physicalDevice,
+                               .swapchainFormat = createInfo.swapchainFormat,
+                               .clearColor = false,
+                               .clearDepth = false,
+                               .flags = Utils::eRenderPassBit_Last};
 
-   framebuffers = createFramebuffers(createInfo.device,
-                                     createInfo.swapchainImageViews,
-                                     *createInfo.depthImageView,
-                                     createInfo.swapchainExtent,
-                                     *renderPass);
-}
+      renderPass =
+          std::make_unique<vk::raii::RenderPass>(colorAndDepthRenderPass(renderPassCreateInfo));
 
-void Finish::fillCommandBuffer(const vk::raii::CommandBuffer& cmd, size_t currentImage) {
+      framebuffers = createFramebuffers(createInfo.device,
+                                        createInfo.swapchainImageViews,
+                                        *createInfo.depthImageView,
+                                        createInfo.swapchainExtent,
+                                        *renderPass);
+   }
 
-   const vk::Rect2D screenRect = {.offset = {0, 0}, .extent = framebufferSize};
+   void Finish::fillCommandBuffer(const vk::raii::CommandBuffer& cmd, size_t currentImage) {
 
-   const auto renderPassInfo = vk::RenderPassBeginInfo{.renderPass = *(*renderPass),
-                                                       .framebuffer = **framebuffers[currentImage],
-                                                       .renderArea = screenRect};
+      const vk::Rect2D screenRect = {.offset = {0, 0}, .extent = framebufferSize};
 
-   cmd.beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
-   cmd.endRenderPass();
-}
+      const auto renderPassInfo =
+          vk::RenderPassBeginInfo{.renderPass = *(*renderPass),
+                                  .framebuffer = **framebuffers[currentImage],
+                                  .renderArea = screenRect};
 
-void Finish::update() {
+      cmd.beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
+      cmd.endRenderPass();
+   }
+
+   void Finish::update() {
+   }
 }

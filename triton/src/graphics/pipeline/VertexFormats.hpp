@@ -1,6 +1,6 @@
 #pragma once
 
-namespace VertexFormats {
+namespace Triton::VertexFormats {
    struct PositionColorTexture {
       glm::vec3 pos;
       glm::vec3 color;

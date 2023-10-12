@@ -1,43 +1,16 @@
 #include "Application.hpp"
 #include "ApplicationEvent.h"
-#include "Context.hpp"
+#include "Renderer.hpp"
 #include "KeyEvent.h"
 #include "ResourceFactory.hpp"
 #include "Logger.hpp"
-#include <GLFW/glfw3.h>
 #include "Events.hpp"
 #include "input/KeyMap.hpp"
+#include "GLFW/glfw3.h"
 
-class Application::ApplicationImpl {
- public:
-   ApplicationImpl(const ApplicationImpl&) = delete;
-   ApplicationImpl(ApplicationImpl&&) = delete;
-   ApplicationImpl& operator=(const ApplicationImpl&) = delete;
-   ApplicationImpl& operator=(ApplicationImpl&&) = delete;
+namespace Triton {
 
-   void setEventCallbackFn(std::function<void(Events::Event&)> fn) {
-      this->eventCallbackFn = fn;
-   }
-
-   void registerRenderObjectProvider(std::function<std::vector<RenderObject>()> fn) {
-      context->registerRenderObjectProvider(fn);
-   }
-
-   void registerPerFrameDataProvider(std::function<PerFrameData()> fn) {
-      context->registerPerFrameDataProvider(fn);
-   }
-
-   static void framebufferResizeCallback(GLFWwindow* window, const int width, const int height) {
-      const auto app = static_cast<ApplicationImpl*>(glfwGetWindowUserPointer(window));
-      app->context->windowResized(height, width);
-   }
-
-   static void errorCallback(int code, const char* description) {
-      Log::error << "GLFW Error. Code: " << code << ", description: " << description << std::endl;
-      throw std::runtime_error("GLFW Error. See log output for details");
-   }
-
-   ApplicationImpl(int width, int height, const std::string_view& windowTitle) {
+   Application::Application(int width, int height, const std::string_view& windowTitle) {
       glfwInit();
       glfwSetErrorCallback(errorCallback);
       glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -47,27 +20,20 @@ class Application::ApplicationImpl {
 
       glfwSetWindowUserPointer(window.get(), this);
       glfwSetFramebufferSizeCallback(window.get(), framebufferResizeCallback);
-
-      context = std::make_shared<graphics::Context>(window.get());
    }
 
-   IResourceFactory* getResourceFactory() {
-      return context.get();
-   }
-
-   ~ApplicationImpl() {
+   Application::~Application() {
       glfwTerminate();
-   }
+   };
 
-   void run() const {
+   void Application::run() const {
       glfwSetKeyCallback(window.get(),
                          [](GLFWwindow* window,
                             int key,
                             [[maybe_unused]] int scancode,
                             int ation,
                             [[maybe_unused]] int mods) {
-                            auto app =
-                                static_cast<ApplicationImpl*>(glfwGetWindowUserPointer(window));
+                            auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
                             const auto mappedKey = Input::keyMap[key];
                             switch (ation) {
                                case GLFW_PRESS: {
@@ -89,15 +55,15 @@ class Application::ApplicationImpl {
                          });
 
       glfwSetCharCallback(window.get(), [](GLFWwindow* window, unsigned int keyCode) {
-         auto app = static_cast<ApplicationImpl*>(glfwGetWindowUserPointer(window));
-         // Need to check this if we start collectingb char input
+         auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
+         // Need to check this if we start collecting char input
          const auto mappedKey = Input::keyMap[(int)keyCode];
          Events::KeyTypedEvent event{mappedKey};
          app->eventCallbackFn(event);
       });
 
       glfwSetWindowCloseCallback(window.get(), [](GLFWwindow* window) {
-         auto app = static_cast<ApplicationImpl*>(glfwGetWindowUserPointer(window));
+         auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
          auto event = Events::WindowCloseEvent{};
          app->eventCallbackFn(event);
          app->running = false;
@@ -154,43 +120,19 @@ class Application::ApplicationImpl {
       context->waitIdle();
    }
 
- private:
-   struct DestroyGlfwWindow {
-      void operator()([[maybe_unused]] GLFWwindow* ptr) const {
-         // This only exists to trick unique_ptr into allowing me to forward declare the impl
-      }
-   };
-   std::unique_ptr<GLFWwindow, DestroyGlfwWindow> window;
-   std::shared_ptr<graphics::Context> context;
+   void Application::setEventCallbackFn(std::function<void(Events::Event&)> fn) {
+      this->eventCallbackFn = fn;
+   }
 
-   std::function<void(Events::Event&)> eventCallbackFn;
+   void Application::framebufferResizeCallback(GLFWwindow* window,
+                                               const int width,
+                                               const int height) {
+      const auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
+      app->context->windowResized(height, width);
+   }
 
-   inline static constexpr double FRAME_TIME = 1.f / 60.f;
-   bool running = true;
-};
-
-Application::Application(int width, int height, const std::string_view& windowTitle) {
-   impl = std::make_unique<ApplicationImpl>(width, height, windowTitle);
-}
-
-Application::~Application() = default;
-
-void Application::run() const {
-   impl->run();
-}
-
-IResourceFactory* Application::getResourceFactory() {
-   return impl->getResourceFactory();
-}
-
-void Application::setEventCallbackFn(std::function<void(Events::Event&)> fn) {
-   impl->setEventCallbackFn(fn);
-}
-
-void Application::registerRenderObjectProvider(std::function<std::vector<RenderObject>()> fn) {
-   impl->registerRenderObjectProvider(fn);
-}
-
-void Application::registerPerFrameDataProvider(std::function<PerFrameData()> fn) {
-   impl->registerPerFrameDataProvider(fn);
+   void Application::errorCallback(int code, const char* description) {
+      Log::error << "GLFW Error. Code: " << code << ", description: " << description << std::endl;
+      throw std::runtime_error("GLFW Error. See log output for details");
+   }
 }

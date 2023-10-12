@@ -1,6 +1,6 @@
 #include "Vertex.hpp"
 
-namespace Models {
+namespace Triton::Models {
    vk::VertexInputBindingDescription Vertex::vertexInputBindingDescription;
    std::vector<vk::VertexInputAttributeDescription> Vertex::vertexInputAttributeDescriptions;
    vk::PipelineVertexInputStateCreateInfo Vertex::pipelineVertexInputStateCreateInfo;

@@ -5,7 +5,7 @@
 #include <vulkan/vulkan_raii.hpp>
 #include <vulkan/vulkan_structs.hpp>
 
-namespace Graphics::Utils {
+namespace Triton::Utils {
 
    vk::Format findSupportedFormat(const vk::raii::PhysicalDevice& physicalDevice,
                                   const std::vector<vk::Format>& candidates,

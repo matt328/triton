@@ -1,4 +1,4 @@
-#include "Application.hpp"
+#include "ApplicationContext.hpp"
 #include "GameContainer.hpp"
 #include "Logger.hpp"
 #include "Game.hpp"
@@ -8,7 +8,7 @@
 constexpr int width = 1366;
 constexpr int height = 768;
 
-using Triton::GameContainer;
+using Triton::ApplicationContext;
 
 int main() {
    Log::LogManager::getInstance().setMinLevel(Log::Level::Debug);
@@ -27,29 +27,10 @@ int main() {
    windowTitle.append(" - Release Build");
 #endif
 
-   class MyGame : public GameContainer {
-    public:
-      MyGame(int width, int height, const std::string_view& windowTitle) :
-          GameContainer(width, height, windowTitle) {
-         Log::debug << "Created MyGame" << std::endl;
-      }
-   };
-
-   auto myGame = MyGame{width, height, windowTitle};
-
-   myGame.run();
-
    try {
-      auto app = Application{width, height, windowTitle};
-      auto resourceFactory = app.getResourceFactory();
+      auto appContext = ApplicationContext{width, height, windowTitle};
 
-      auto game = std::make_unique<game::Game>(resourceFactory, width, height);
-
-      app.setEventCallbackFn([&game](Events::Event& e) -> void { game->onEvent(e); });
-      app.registerRenderObjectProvider([&game]() { return game->getRenderObjects(); });
-      app.registerPerFrameDataProvider([&game]() { return game->getCameraParams(); });
-
-      app.run();
+      appContext.start();
 
    } catch (const std::exception& e) { Log::error << e.what() << std::endl; }
 }

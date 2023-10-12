@@ -1,6 +1,6 @@
 #pragma once
 
-namespace graphics {
+namespace Triton {
    template <typename T>
    void setObjectName(T const& handle,
                       [[maybe_unused]] const vk::raii::Device& device,
