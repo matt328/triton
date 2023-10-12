@@ -2,16 +2,19 @@
 
 #include "graphics/renderer/RendererBase.hpp"
 
-class Finish : public RendererBase {
- public:
-   explicit Finish(const RendererBaseCreateInfo& createInfo);
+namespace Triton {
 
-   void fillCommandBuffer(const vk::raii::CommandBuffer& cmd, size_t currentImage) override;
+   class Finish : public RendererBase {
+    public:
+      explicit Finish(const RendererBaseCreateInfo& createInfo);
 
-   void update() override;
+      void fillCommandBuffer(const vk::raii::CommandBuffer& cmd, size_t currentImage) override;
 
- private:
-   std::vector<std::unique_ptr<vk::raii::Framebuffer>> framebuffers;
-   vk::Extent2D framebufferSize;
-   std::unique_ptr<vk::raii::RenderPass> renderPass;
-};
+      void update() override;
+
+    private:
+      std::vector<std::unique_ptr<vk::raii::Framebuffer>> framebuffers;
+      vk::Extent2D framebufferSize;
+      std::unique_ptr<vk::raii::RenderPass> renderPass;
+   };
+}

@@ -1,20 +1,23 @@
 #pragma once
 
-class SpirvHelper {
- public:
-   SpirvHelper();
-   ~SpirvHelper();
+namespace Triton {
 
-   SpirvHelper(const SpirvHelper&) = default;
-   SpirvHelper(SpirvHelper&&) = delete;
-   SpirvHelper& operator=(const SpirvHelper&) = default;
-   SpirvHelper& operator=(SpirvHelper&&) = delete;
+   class SpirvHelper {
+    public:
+      SpirvHelper();
+      ~SpirvHelper();
 
-   std::vector<uint32_t> compileShader(vk::ShaderStageFlagBits shaderType,
-                                       const char* shaderCode) const;
+      SpirvHelper(const SpirvHelper&) = default;
+      SpirvHelper(SpirvHelper&&) = delete;
+      SpirvHelper& operator=(const SpirvHelper&) = default;
+      SpirvHelper& operator=(SpirvHelper&&) = delete;
 
- private:
-   static TBuiltInResource initResources();
+      std::vector<uint32_t> compileShader(vk::ShaderStageFlagBits shaderType,
+                                          const char* shaderCode) const;
 
-   static EShLanguage findLanguage(vk::ShaderStageFlagBits shaderType);
-};
+    private:
+      static TBuiltInResource initResources();
+
+      static EShLanguage findLanguage(vk::ShaderStageFlagBits shaderType);
+   };
+}

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vulkan/vulkan_raii.hpp>
-namespace Graphics::Utils {
+namespace Triton::Utils {
 
    enum eRenderPassBit : uint8_t {
       eRenderPassBit_First = 0x01,

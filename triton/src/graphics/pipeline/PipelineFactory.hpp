@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Graphics::Pipeline {
+namespace Triton::Pipeline {
    const auto defaultInputAssembly = vk::PipelineInputAssemblyStateCreateInfo{
        .topology = vk::PrimitiveTopology::eTriangleList, .primitiveRestartEnable = VK_FALSE};
 

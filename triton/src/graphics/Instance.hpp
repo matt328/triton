@@ -6,76 +6,79 @@
 
 struct GLFWwindow;
 
-class Instance {
- public:
-   explicit Instance(GLFWwindow* window, bool validationEnabled = false);
+namespace Triton {
 
-   ~Instance() = default;
-   Instance(const Instance&) = delete;
-   Instance(Instance&&) = delete;
-   Instance& operator=(const Instance&) = delete;
-   Instance& operator=(Instance&&) = delete;
+   class Instance {
+    public:
+      explicit Instance(GLFWwindow* window, bool validationEnabled = false);
 
-   [[nodiscard]] std::vector<vk::raii::PhysicalDevice> enumeratePhysicalDevices() const;
+      ~Instance() = default;
+      Instance(const Instance&) = delete;
+      Instance(Instance&&) = delete;
+      Instance& operator=(const Instance&) = delete;
+      Instance& operator=(Instance&&) = delete;
 
-   [[nodiscard]] std::pair<uint32_t, uint32_t> getWindowSize() const {
-      return std::make_pair(height, width);
-   }
+      [[nodiscard]] std::vector<vk::raii::PhysicalDevice> enumeratePhysicalDevices() const;
 
-   [[nodiscard]] std::vector<const char*> getDesiredDeviceExtensions() const {
-      return desiredDeviceExtensions;
-   }
+      [[nodiscard]] std::pair<uint32_t, uint32_t> getWindowSize() const {
+         return std::make_pair(height, width);
+      }
 
-   [[nodiscard]] std::vector<const char*> getDesiredValidationLayers() const {
-      return desiredValidationLayers;
-   }
+      [[nodiscard]] std::vector<const char*> getDesiredDeviceExtensions() const {
+         return desiredDeviceExtensions;
+      }
 
-   [[nodiscard]] const std::unique_ptr<vk::raii::SurfaceKHR>& getSurface() const {
-      return surface;
-   }
+      [[nodiscard]] std::vector<const char*> getDesiredValidationLayers() const {
+         return desiredValidationLayers;
+      }
 
-   [[nodiscard]] bool isValidationEnabled() const {
-      return validationEnabled;
-   }
+      [[nodiscard]] const std::unique_ptr<vk::raii::SurfaceKHR>& getSurface() const {
+         return surface;
+      }
 
-   [[nodiscard]] const std::unique_ptr<vk::raii::Instance>& getVkInstance() const {
-      return instance;
-   }
+      [[nodiscard]] bool isValidationEnabled() const {
+         return validationEnabled;
+      }
 
-   void resizeWindow(uint32_t newHeight, uint32_t newWidth);
+      [[nodiscard]] const std::unique_ptr<vk::raii::Instance>& getVkInstance() const {
+         return instance;
+      }
 
- private:
-   bool validationEnabled;
-   int height = 0;
-   int width = 0;
+      void resizeWindow(uint32_t newHeight, uint32_t newWidth);
 
-   std::vector<const char*> desiredDeviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-                                                       VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME};
-   std::vector<const char*> desiredValidationLayers = {"VK_LAYER_KHRONOS_validation"};
+    private:
+      bool validationEnabled;
+      int height = 0;
+      int width = 0;
 
-   std::unique_ptr<vk::raii::Context> context;
-   std::unique_ptr<vk::raii::Instance> instance;
-   std::unique_ptr<vk::raii::SurfaceKHR> surface;
-   std::unique_ptr<vk::raii::DebugUtilsMessengerEXT> debugCallback;
-   std::unique_ptr<vk::raii::DebugReportCallbackEXT> reportCallback;
+      std::vector<const char*> desiredDeviceExtensions = {
+          VK_KHR_SWAPCHAIN_EXTENSION_NAME, VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME};
+      std::vector<const char*> desiredValidationLayers = {"VK_LAYER_KHRONOS_validation"};
 
-   [[nodiscard]] bool checkValidationLayerSupport() const;
+      std::unique_ptr<vk::raii::Context> context;
+      std::unique_ptr<vk::raii::Instance> instance;
+      std::unique_ptr<vk::raii::SurfaceKHR> surface;
+      std::unique_ptr<vk::raii::DebugUtilsMessengerEXT> debugCallback;
+      std::unique_ptr<vk::raii::DebugReportCallbackEXT> reportCallback;
 
-   [[nodiscard]] std::pair<std::vector<const char*>, bool> getRequiredExtensions() const;
+      [[nodiscard]] bool checkValidationLayerSupport() const;
 
-   VKAPI_ATTR static VkBool32 VKAPI_CALL
-   debugCallbackFn(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-                   VkDebugUtilsMessageTypeFlagsEXT messageType,
-                   const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
-                   void* pUserData);
+      [[nodiscard]] std::pair<std::vector<const char*>, bool> getRequiredExtensions() const;
 
-   static VKAPI_ATTR VkBool32 VKAPI_CALL
-   vulkanDebugReportCallback(VkDebugReportFlagsEXT flags,
-                             VkDebugReportObjectTypeEXT objectType,
-                             uint64_t object,
-                             size_t location,
-                             int32_t messageCode,
-                             const char* pLayerPrefix,
-                             const char* pMessage,
-                             void* userData);
-};
+      VKAPI_ATTR static VkBool32 VKAPI_CALL
+      debugCallbackFn(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+                      VkDebugUtilsMessageTypeFlagsEXT messageType,
+                      const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+                      void* pUserData);
+
+      static VKAPI_ATTR VkBool32 VKAPI_CALL
+      vulkanDebugReportCallback(VkDebugReportFlagsEXT flags,
+                                VkDebugReportObjectTypeEXT objectType,
+                                uint64_t object,
+                                size_t location,
+                                int32_t messageCode,
+                                const char* pLayerPrefix,
+                                const char* pMessage,
+                                void* userData);
+   };
+}

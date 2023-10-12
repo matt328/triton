@@ -3,130 +3,135 @@
 #include "graphics/pipeline/ObjectMatrices.hpp"
 #include "graphics/DebugHelpers.hpp"
 
-FrameData::FrameData(const vk::raii::Device& device,
-                     const vk::raii::PhysicalDevice& physicalDevice,
-                     const vk::raii::CommandPool& commandPool,
-                     const vma::raii::Allocator& raiillocator,
-                     const vk::raii::DescriptorPool& descriptorPool,
-                     const vk::raii::DescriptorSetLayout& bindlessDescriptorSetLayout,
-                     const vk::raii::DescriptorSetLayout& objectDescriptorSetLayout,
-                     const vk::raii::DescriptorSetLayout& perFrameDescriptorSetLayout,
-                     const vk::raii::Queue& queue,
-                     const std::string_view name) {
+namespace Triton {
 
-   const auto allocInfo = vk::CommandBufferAllocateInfo{.commandPool = *commandPool,
-                                                        .level = vk::CommandBufferLevel::ePrimary,
-                                                        .commandBufferCount = 1};
-   auto commandBuffers = device.allocateCommandBuffers(allocInfo);
+   FrameData::FrameData(const vk::raii::Device& device,
+                        const vk::raii::PhysicalDevice& physicalDevice,
+                        const vk::raii::CommandPool& commandPool,
+                        const vma::raii::Allocator& raiillocator,
+                        const vk::raii::DescriptorPool& descriptorPool,
+                        const vk::raii::DescriptorSetLayout& bindlessDescriptorSetLayout,
+                        const vk::raii::DescriptorSetLayout& objectDescriptorSetLayout,
+                        const vk::raii::DescriptorSetLayout& perFrameDescriptorSetLayout,
+                        const vk::raii::Queue& queue,
+                        const std::string_view name) {
 
-   constexpr auto semaphoreCreateInfo = vk::SemaphoreCreateInfo{};
-   constexpr auto fenceCreateInfo =
-       vk::FenceCreateInfo{.flags = vk::FenceCreateFlagBits::eSignaled};
+      const auto allocInfo =
+          vk::CommandBufferAllocateInfo{.commandPool = *commandPool,
+                                        .level = vk::CommandBufferLevel::ePrimary,
+                                        .commandBufferCount = 1};
+      auto commandBuffers = device.allocateCommandBuffers(allocInfo);
 
-   commandBuffer = std::make_unique<vk::raii::CommandBuffer>(std::move(commandBuffers[0]));
+      constexpr auto semaphoreCreateInfo = vk::SemaphoreCreateInfo{};
+      constexpr auto fenceCreateInfo =
+          vk::FenceCreateInfo{.flags = vk::FenceCreateFlagBits::eSignaled};
 
-   // NOLINTNEXTLINE I'd like to init this in the ctor init, but TracyVkContext is a macro
-   tracyContext = TracyVkContext((*physicalDevice), (*device), *queue, *(*commandBuffer));
-   TracyVkContextName(tracyContext, name.data(), name.length());
+      commandBuffer = std::make_unique<vk::raii::CommandBuffer>(std::move(commandBuffers[0]));
 
-   imageAvailableSemaphore = std::make_unique<vk::raii::Semaphore>(device, semaphoreCreateInfo);
-   renderFinishedSemaphore = std::make_unique<vk::raii::Semaphore>(device, semaphoreCreateInfo);
-   inFlightFence = std::make_unique<vk::raii::Fence>(device, fenceCreateInfo);
+      // NOLINTNEXTLINE I'd like to init this in the ctor init, but TracyVkContext is a macro
+      tracyContext = TracyVkContext((*physicalDevice), (*device), *queue, *(*commandBuffer));
+      TracyVkContextName(tracyContext, name.data(), name.length());
 
-   // Create an ObjectData buffer
-   constexpr auto objectDataBufferCreateInfo = vk::BufferCreateInfo{
-       .size = sizeof(ObjectData) * MAX_OBJECTS, .usage = vk::BufferUsageFlagBits::eStorageBuffer};
+      imageAvailableSemaphore = std::make_unique<vk::raii::Semaphore>(device, semaphoreCreateInfo);
+      renderFinishedSemaphore = std::make_unique<vk::raii::Semaphore>(device, semaphoreCreateInfo);
+      inFlightFence = std::make_unique<vk::raii::Fence>(device, fenceCreateInfo);
 
-   constexpr auto objectDataAllocationCreateInfo =
-       vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eCpuToGpu,
-                                 .requiredFlags = vk::MemoryPropertyFlagBits::eHostCoherent};
+      // Create an ObjectData buffer
+      constexpr auto objectDataBufferCreateInfo =
+          vk::BufferCreateInfo{.size = sizeof(ObjectData) * MAX_OBJECTS,
+                               .usage = vk::BufferUsageFlagBits::eStorageBuffer};
 
-   objectDataBuffer = raiillocator.createBuffer(
-       &objectDataBufferCreateInfo, &objectDataAllocationCreateInfo, "Object Data Buffer");
+      constexpr auto objectDataAllocationCreateInfo =
+          vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eCpuToGpu,
+                                    .requiredFlags = vk::MemoryPropertyFlagBits::eHostCoherent};
 
-   // create cameradata buffer
-   constexpr auto cameraDataBufferCreateInfo = vk::BufferCreateInfo{
-       .size = sizeof(CameraData), .usage = vk::BufferUsageFlagBits::eUniformBuffer};
+      objectDataBuffer = raiillocator.createBuffer(
+          &objectDataBufferCreateInfo, &objectDataAllocationCreateInfo, "Object Data Buffer");
 
-   constexpr auto cameraDataAllocationCreateInfo =
-       vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eCpuToGpu,
-                                 .requiredFlags = vk::MemoryPropertyFlagBits::eHostCoherent};
+      // create cameradata buffer
+      constexpr auto cameraDataBufferCreateInfo = vk::BufferCreateInfo{
+          .size = sizeof(CameraData), .usage = vk::BufferUsageFlagBits::eUniformBuffer};
 
-   cameraDataBuffer = raiillocator.createBuffer(
-       &cameraDataBufferCreateInfo, &cameraDataAllocationCreateInfo, "Camera Data Buffer");
+      constexpr auto cameraDataAllocationCreateInfo =
+          vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eCpuToGpu,
+                                    .requiredFlags = vk::MemoryPropertyFlagBits::eHostCoherent};
 
-   const auto objectDSAllocateInfo =
-       vk::DescriptorSetAllocateInfo{.descriptorPool = *descriptorPool,
-                                     .descriptorSetCount = 1,
-                                     .pSetLayouts = &(*objectDescriptorSetLayout)};
+      cameraDataBuffer = raiillocator.createBuffer(
+          &cameraDataBufferCreateInfo, &cameraDataAllocationCreateInfo, "Camera Data Buffer");
 
-   objectDescriptorSet = std::make_unique<vk::raii::DescriptorSet>(
-       std::move(device.allocateDescriptorSets(objectDSAllocateInfo).front()));
-   graphics::setObjectName(**objectDescriptorSet,
-                           device,
-                           vk::raii::DescriptorSet::debugReportObjectType,
-                           "Object Descriptor Set");
+      const auto objectDSAllocateInfo =
+          vk::DescriptorSetAllocateInfo{.descriptorPool = *descriptorPool,
+                                        .descriptorSetCount = 1,
+                                        .pSetLayouts = &(*objectDescriptorSetLayout)};
 
-   // Create the cameradata descriptor set
-   const auto cameraDSAllocateInfo =
-       vk::DescriptorSetAllocateInfo{.descriptorPool = *descriptorPool,
-                                     .descriptorSetCount = 1,
-                                     .pSetLayouts = &(*perFrameDescriptorSetLayout)};
-   perFrameDescriptorSet = std::make_unique<vk::raii::DescriptorSet>(
-       std::move(device.allocateDescriptorSets(cameraDSAllocateInfo).front()));
-   graphics::setObjectName(**perFrameDescriptorSet,
-                           device,
-                           vk::raii::DescriptorSet::debugReportObjectType,
-                           "Per Frame Descriptor Set");
+      objectDescriptorSet = std::make_unique<vk::raii::DescriptorSet>(
+          std::move(device.allocateDescriptorSets(objectDSAllocateInfo).front()));
+      setObjectName(**objectDescriptorSet,
+                    device,
+                    vk::raii::DescriptorSet::debugReportObjectType,
+                    "Object Descriptor Set");
 
-   // Create the bindless descriptor set
-   const auto bindlessDescriptorSetAllocateInfo =
-       vk::DescriptorSetAllocateInfo{.descriptorPool = *descriptorPool,
-                                     .descriptorSetCount = 1,
-                                     .pSetLayouts = &(*bindlessDescriptorSetLayout)};
+      // Create the cameradata descriptor set
+      const auto cameraDSAllocateInfo =
+          vk::DescriptorSetAllocateInfo{.descriptorPool = *descriptorPool,
+                                        .descriptorSetCount = 1,
+                                        .pSetLayouts = &(*perFrameDescriptorSetLayout)};
+      perFrameDescriptorSet = std::make_unique<vk::raii::DescriptorSet>(
+          std::move(device.allocateDescriptorSets(cameraDSAllocateInfo).front()));
+      setObjectName(**perFrameDescriptorSet,
+                    device,
+                    vk::raii::DescriptorSet::debugReportObjectType,
+                    "Per Frame Descriptor Set");
 
-   bindlessDescriptorSet = std::make_unique<vk::raii::DescriptorSet>(
-       std::move(device.allocateDescriptorSets(bindlessDescriptorSetAllocateInfo).front()));
+      // Create the bindless descriptor set
+      const auto bindlessDescriptorSetAllocateInfo =
+          vk::DescriptorSetAllocateInfo{.descriptorPool = *descriptorPool,
+                                        .descriptorSetCount = 1,
+                                        .pSetLayouts = &(*bindlessDescriptorSetLayout)};
 
-   graphics::setObjectName(**bindlessDescriptorSet,
-                           device,
-                           vk::raii::DescriptorSet::debugReportObjectType,
-                           "Bindless Descriptor Set");
+      bindlessDescriptorSet = std::make_unique<vk::raii::DescriptorSet>(
+          std::move(device.allocateDescriptorSets(bindlessDescriptorSetAllocateInfo).front()));
 
-   // create a write for the objectData descriptor
-   const auto objectDataBufferInfo =
-       vk::DescriptorBufferInfo{.buffer = objectDataBuffer->getBuffer(),
-                                .offset = 0,
-                                .range = sizeof(ObjectData) * MAX_OBJECTS};
+      setObjectName(**bindlessDescriptorSet,
+                    device,
+                    vk::raii::DescriptorSet::debugReportObjectType,
+                    "Bindless Descriptor Set");
 
-   const auto objectDataDescriptorWrite =
-       vk::WriteDescriptorSet{.dstSet = **objectDescriptorSet,
-                              .dstBinding = 0,
-                              .dstArrayElement = 0,
-                              .descriptorCount = 1,
-                              .descriptorType = vk::DescriptorType::eStorageBuffer,
-                              .pBufferInfo = &objectDataBufferInfo};
+      // create a write for the objectData descriptor
+      const auto objectDataBufferInfo =
+          vk::DescriptorBufferInfo{.buffer = objectDataBuffer->getBuffer(),
+                                   .offset = 0,
+                                   .range = sizeof(ObjectData) * MAX_OBJECTS};
 
-   // create a write for the cameradata descriptor
-   const auto perFrameDataBufferInfo = vk::DescriptorBufferInfo{
-       .buffer = cameraDataBuffer->getBuffer(), .offset = 0, .range = sizeof(CameraData)};
-   const auto perFrameDataDescriptorWrite =
-       vk::WriteDescriptorSet{.dstSet = **perFrameDescriptorSet,
-                              .dstBinding = 0,
-                              .dstArrayElement = 0,
-                              .descriptorCount = 1,
-                              .descriptorType = vk::DescriptorType::eUniformBuffer,
-                              .pBufferInfo = &perFrameDataBufferInfo};
+      const auto objectDataDescriptorWrite =
+          vk::WriteDescriptorSet{.dstSet = **objectDescriptorSet,
+                                 .dstBinding = 0,
+                                 .dstArrayElement = 0,
+                                 .descriptorCount = 1,
+                                 .descriptorType = vk::DescriptorType::eStorageBuffer,
+                                 .pBufferInfo = &objectDataBufferInfo};
 
-   const auto writes = std::array{objectDataDescriptorWrite, perFrameDataDescriptorWrite};
+      // create a write for the cameradata descriptor
+      const auto perFrameDataBufferInfo = vk::DescriptorBufferInfo{
+          .buffer = cameraDataBuffer->getBuffer(), .offset = 0, .range = sizeof(CameraData)};
+      const auto perFrameDataDescriptorWrite =
+          vk::WriteDescriptorSet{.dstSet = **perFrameDescriptorSet,
+                                 .dstBinding = 0,
+                                 .dstArrayElement = 0,
+                                 .descriptorCount = 1,
+                                 .descriptorType = vk::DescriptorType::eUniformBuffer,
+                                 .pBufferInfo = &perFrameDataBufferInfo};
 
-   device.updateDescriptorSets(writes, nullptr);
-}
+      const auto writes = std::array{objectDataDescriptorWrite, perFrameDataDescriptorWrite};
 
-void FrameData::updateObjectDataBuffer(ObjectData* data, const size_t size) {
-   this->objectDataBuffer->updateBufferValue(data, size);
-}
+      device.updateDescriptorSets(writes, nullptr);
+   }
 
-FrameData::~FrameData() {
-   TracyVkDestroy(tracyContext);
+   void FrameData::updateObjectDataBuffer(ObjectData* data, const size_t size) {
+      this->objectDataBuffer->updateBufferValue(data, size);
+   }
+
+   FrameData::~FrameData() {
+      TracyVkDestroy(tracyContext);
+   }
 }
