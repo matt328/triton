@@ -3,7 +3,7 @@ set(name triton)
 set(${name}_SRC
    src/core/stb.cxx
    src/core/vma_raii.cxx
-   src/input/KeyMap.cxx
+   src/actions/KeyMap.cxx
    src/Application.cxx
    src/Renderer.cxx
    src/ApplicationContext.cxx
@@ -28,7 +28,7 @@ set(${name}_INCLUDE "include")
 
 add_library(${name} STATIC ${triton_SRC})
 
-target_precompile_headers(${name} PUBLIC
+target_precompile_headers(${name} PRIVATE
    <fstream>
    <functional>
    <glm/gtc/matrix_transform.hpp>
@@ -45,8 +45,8 @@ target_precompile_headers(${name} PUBLIC
    <sstream>
    <ranges>
    <set>
+   <spirv_cross.hpp>
    <stb_image.h>
-   <string_view>
    <tiny_gltf.h>
    <tracy/Tracy.hpp>
    <tracy/TracyVulkan.hpp>
@@ -56,8 +56,9 @@ target_precompile_headers(${name} PUBLIC
    <vulkan/vulkan_raii.hpp>
 )
 
-target_precompile_headers(${name} PRIVATE
-   <spirv_cross.hpp>
+target_precompile_headers(${name} PUBLIC
+   <string_view>
+   <memory>
 )
 
 add_compile_definitions(

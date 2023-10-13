@@ -1,6 +1,6 @@
 #pragma once
 
-namespace vma::raii {
+namespace Triton::Memory {
 
    class AllocatedImage {
     public:

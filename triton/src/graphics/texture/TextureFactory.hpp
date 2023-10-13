@@ -17,7 +17,7 @@ namespace Triton {
 
    class TextureFactory {
     public:
-      TextureFactory(const vma::raii::Allocator& raiillocator,
+      TextureFactory(const Triton::Memory::Allocator& raiillocator,
                      const vk::raii::Device& device,
                      const ImmediateContext& graphicsContext,
                      const ImmediateContext& transferContext);
@@ -32,7 +32,7 @@ namespace Triton {
                                                                 uint32_t texHeight);
 
     private:
-      const vma::raii::Allocator& raiillocator;
+      const Triton::Memory::Allocator& raiillocator;
       const vk::raii::Device& device;
       const ImmediateContext& graphicsContext;
       const ImmediateContext& transferContext;

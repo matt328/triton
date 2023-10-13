@@ -8,7 +8,7 @@ namespace Triton {
    FrameData::FrameData(const vk::raii::Device& device,
                         const vk::raii::PhysicalDevice& physicalDevice,
                         const vk::raii::CommandPool& commandPool,
-                        const vma::raii::Allocator& raiillocator,
+                        const Triton::Memory::Allocator& raiillocator,
                         const vk::raii::DescriptorPool& descriptorPool,
                         const vk::raii::DescriptorSetLayout& bindlessDescriptorSetLayout,
                         const vk::raii::DescriptorSetLayout& objectDescriptorSetLayout,

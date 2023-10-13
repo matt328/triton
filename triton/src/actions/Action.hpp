@@ -3,7 +3,7 @@
 #include "ActionType.hpp"
 #include "Vec2.hpp"
 
-namespace Input {
+namespace Triton::Actions {
 
    using ActionTypes = std::variant<bool, float, Vec2>;
 

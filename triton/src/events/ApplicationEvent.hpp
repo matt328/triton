@@ -2,7 +2,7 @@
 
 #include "Events.hpp"
 
-namespace Events {
+namespace Triton::Events {
 
    class WindowCloseEvent : public Event {
     public:

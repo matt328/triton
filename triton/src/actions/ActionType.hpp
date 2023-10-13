@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Input {
+namespace Triton::Actions {
    enum class ActionType : uint32_t {
       MoveForward = 0,
       MoveBackward,

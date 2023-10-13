@@ -1,9 +1,7 @@
 #include "ApplicationContext.hpp"
-#include "GameContainer.hpp"
 #include "Logger.hpp"
-#include "Game.hpp"
+
 #include "config.h"
-#include "GameContainer.hpp"
 
 constexpr int width = 1366;
 constexpr int height = 768;

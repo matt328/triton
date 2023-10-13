@@ -1,6 +1,6 @@
 #pragma once
 
-namespace vma::raii {
+namespace Triton::Memory {
    class Allocator;
    class AllocatedImage;
 };
@@ -81,9 +81,9 @@ namespace Triton {
       std::unique_ptr<vk::raii::RenderPass> renderPass;
       std::unique_ptr<AbstractPipeline> pipeline;
 
-      std::unique_ptr<vma::raii::Allocator> raiillocator;
+      std::unique_ptr<Triton::Memory::Allocator> raiillocator;
 
-      std::unique_ptr<vma::raii::AllocatedImage> depthImage;
+      std::unique_ptr<Triton::Memory::AllocatedImage> depthImage;
       std::unique_ptr<vk::raii::ImageView> depthImageView;
       std::vector<vk::raii::Framebuffer> swapchainFramebuffers;
 

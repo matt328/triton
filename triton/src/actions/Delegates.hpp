@@ -2,7 +2,7 @@
 
 #include "Action.hpp"
 
-namespace Input {
+namespace Triton::Actions {
    class Delegate {
     public:
       Delegate() = default;

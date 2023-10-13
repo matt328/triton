@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Input {
+namespace Triton::Actions {
    struct Vec2 {
       float x, y;
    };

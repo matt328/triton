@@ -7,7 +7,7 @@ namespace Triton {
    struct RendererBaseCreateInfo {
       const vk::raii::Device& device;
       const vk::raii::PhysicalDevice& physicalDevice;
-      const vma::raii::Allocator& allocator;
+      const Triton::Memory::Allocator& allocator;
       const vk::Image& depthTexture;
       const vk::Extent2D& swapchainExtent;
       const std::vector<vk::Image>& swapchainImages;
