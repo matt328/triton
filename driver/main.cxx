@@ -1,3 +1,5 @@
+#include "ActionManager.hpp"
+#include "ActionManagerProxy.hpp"
 #include "ApplicationContext.hpp"
 #include "Logger.hpp"
 
@@ -27,6 +29,8 @@ int main() {
 
    try {
       auto appContext = ApplicationContext{width, height, windowTitle};
+
+      auto actionManager = appContext.getActionManager();
 
       appContext.start();
 

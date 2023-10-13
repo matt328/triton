@@ -7,7 +7,6 @@ set(${name}_SRC
    src/Application.cxx
    src/Renderer.cxx
    src/ApplicationContext.cxx
-   src/GameContainer.cxx
    src/graphics/pipeline/Vertex.cxx
    src/graphics/pipeline/SpirvHelper.cxx
    src/graphics/pipeline/DefaultPipeline.cxx
@@ -30,7 +29,6 @@ add_library(${name} STATIC ${triton_SRC})
 
 target_precompile_headers(${name} PRIVATE
    <fstream>
-   <functional>
    <glm/gtc/matrix_transform.hpp>
    <glm/gtc/type_ptr.hpp>
    <glm/gtx/matrix_decompose.hpp>
@@ -51,14 +49,18 @@ target_precompile_headers(${name} PRIVATE
    <tracy/Tracy.hpp>
    <tracy/TracyVulkan.hpp>
    <tuple>
-   <variant>
    <vulkan-memory-allocator-hpp/vk_mem_alloc.hpp>
    <vulkan/vulkan_raii.hpp>
 )
 
 target_precompile_headers(${name} PUBLIC
-   <string_view>
+   <assert.h>
+   <functional>
    <memory>
+   <map>
+   <string_view>
+   <variant>
+   <vector>
 )
 
 add_compile_definitions(
