@@ -7,7 +7,7 @@ namespace Triton {
    template <typename T, typename R>
    class Mesh {
     public:
-      Mesh(vma::raii::Allocator* allocator,
+      Mesh(Triton::Memory::Allocator* allocator,
            const std::vector<T>& vertexData,
            const std::vector<R>& indexData,
            ImmediateContext* transferContext) :
@@ -53,11 +53,11 @@ namespace Triton {
       Mesh& operator=(const Mesh&) = delete;
       Mesh& operator=(Mesh&&) = delete;
 
-      [[nodiscard]] const vma::raii::AllocatedBuffer& getVertexBuffer() const {
+      [[nodiscard]] const Triton::Memory::AllocatedBuffer& getVertexBuffer() const {
          return *vertexBuffer;
       }
 
-      [[nodiscard]] const vma::raii::AllocatedBuffer& getIndexBuffer() const {
+      [[nodiscard]] const Triton::Memory::AllocatedBuffer& getIndexBuffer() const {
          return *indexBuffer;
       }
 
@@ -68,8 +68,8 @@ namespace Triton {
       ~Mesh() = default;
 
     private:
-      std::unique_ptr<vma::raii::AllocatedBuffer> vertexBuffer;
-      std::unique_ptr<vma::raii::AllocatedBuffer> indexBuffer;
+      std::unique_ptr<Triton::Memory::AllocatedBuffer> vertexBuffer;
+      std::unique_ptr<Triton::Memory::AllocatedBuffer> indexBuffer;
       uint32_t indicesCount;
    };
 }

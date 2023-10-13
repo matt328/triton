@@ -1,6 +1,6 @@
 #include <utility>
 
-#include "ApplicationEvent.h"
+#include "ApplicationEvent.hpp"
 #include "Events.hpp"
 #include "Game.hpp"
 
@@ -17,7 +17,7 @@
 #include "Logger.hpp"
 #include "KeyEvent.h"
 
-namespace game {
+namespace Triton {
    class Game::GameImpl {
     public:
       GameImpl(IResourceFactory* factory, int width, int height) : resourceFactory(factory) {

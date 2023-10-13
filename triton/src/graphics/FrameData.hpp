@@ -21,7 +21,7 @@ namespace Triton {
       FrameData(const vk::raii::Device& device,
                 const vk::raii::PhysicalDevice& physicalDevice,
                 const vk::raii::CommandPool& commandPool,
-                const vma::raii::Allocator& raiillocator,
+                const Triton::Memory::Allocator& raiillocator,
                 const vk::raii::DescriptorPool& descriptorPool,
                 const vk::raii::DescriptorSetLayout& bindlessDescriptorSetLayout,
                 const vk::raii::DescriptorSetLayout& objectDescriptorSetLayout,
@@ -68,7 +68,7 @@ namespace Triton {
          return texturesToBind;
       }
 
-      [[nodiscard]] const vma::raii::AllocatedBuffer& getCameraBuffer() const {
+      [[nodiscard]] const Triton::Memory::AllocatedBuffer& getCameraBuffer() const {
          return *cameraDataBuffer;
       }
 
@@ -91,8 +91,8 @@ namespace Triton {
          finished fence signals, leaving a very narrow window of time to update any of these
          buffers.
       */
-      std::unique_ptr<vma::raii::AllocatedBuffer> objectDataBuffer;
-      std::unique_ptr<vma::raii::AllocatedBuffer> cameraDataBuffer;
+      std::unique_ptr<Triton::Memory::AllocatedBuffer> objectDataBuffer;
+      std::unique_ptr<Triton::Memory::AllocatedBuffer> cameraDataBuffer;
 
       std::unique_ptr<vk::raii::DescriptorSet> bindlessDescriptorSet;
       std::unique_ptr<vk::raii::DescriptorSet> objectDescriptorSet;

@@ -320,7 +320,7 @@ namespace Triton {
                                    .device = **device,
                                    .instance = **instance.getVkInstance()};
 
-      raiillocator = std::make_unique<vma::raii::Allocator>(allocatorCreateInfo);
+      raiillocator = std::make_unique<Triton::Memory::Allocator>(allocatorCreateInfo);
    }
 
    void Renderer::createPerFrameData(

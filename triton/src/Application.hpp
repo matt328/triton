@@ -2,7 +2,7 @@
 
 #include "Renderer.hpp"
 #include "ResourceFactory.hpp"
-#include "Events.hpp"
+#include "events/Events.hpp"
 #include "TransferData.hpp"
 
 namespace Triton {

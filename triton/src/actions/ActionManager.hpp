@@ -5,7 +5,7 @@
 #include "ActionType.hpp"
 #include "Vec2.hpp"
 
-namespace Input {
+namespace Triton::Actions {
 
    class ActionManager {
     public:

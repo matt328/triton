@@ -1,8 +1,9 @@
 #pragma once
 
+namespace Triton::Events {
+
 #define BIT(x) (1 << x)
 
-namespace Events {
    enum class EventType {
       None = 0,
       WindowClose,

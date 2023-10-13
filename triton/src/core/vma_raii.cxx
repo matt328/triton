@@ -6,9 +6,9 @@
 #include <vk_mem_alloc.h>
 #include <vulkan-memory-allocator-hpp/vk_mem_alloc.hpp>
 
-namespace vma::raii {
+namespace Triton::Memory {
 
-   Allocator::Allocator(const AllocatorCreateInfo& createInfo) {
+   Allocator::Allocator(const vma::AllocatorCreateInfo& createInfo) {
       allocator = createAllocator(createInfo);
    }
 
@@ -18,7 +18,7 @@ namespace vma::raii {
    }
 
    std::unique_ptr<AllocatedBuffer> Allocator::createBuffer(const vk::BufferCreateInfo* bci,
-                                                            const AllocationCreateInfo* aci,
+                                                            const vma::AllocationCreateInfo* aci,
                                                             const std::string_view& name) const {
 
       auto [buffer, allocation] = allocator.createBuffer(*bci, *aci);
@@ -35,9 +35,9 @@ namespace vma::raii {
                                .usage = vk::BufferUsageFlagBits::eTransferSrc,
                                .sharingMode = vk::SharingMode::eExclusive};
       const auto allocationCreateInfo =
-          AllocationCreateInfo{.usage = MemoryUsage::eCpuOnly,
-                               .requiredFlags = vk::MemoryPropertyFlagBits::eHostVisible |
-                                                vk::MemoryPropertyFlagBits::eHostCoherent};
+          vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eCpuOnly,
+                                    .requiredFlags = vk::MemoryPropertyFlagBits::eHostVisible |
+                                                     vk::MemoryPropertyFlagBits::eHostCoherent};
 
       return createBuffer(&bufferCreateInfo, &allocationCreateInfo, name);
    }
@@ -49,14 +49,15 @@ namespace vma::raii {
           .size = size,
           .usage = vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst,
           .sharingMode = vk::SharingMode::eExclusive};
-      constexpr auto allocationCreateInfo = AllocationCreateInfo{.usage = MemoryUsage::eGpuOnly};
+      constexpr auto allocationCreateInfo =
+          vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eGpuOnly};
 
       return createBuffer(&bufferCreateInfo, &allocationCreateInfo, name);
    }
 
    std::unique_ptr<AllocatedImage> Allocator::createImage(
        const vk::ImageCreateInfo& imageCreateInfo,
-       const AllocationCreateInfo& allocationCreateInfo,
+       const vma::AllocationCreateInfo& allocationCreateInfo,
        const std::string_view& newName) const {
 
       auto [image, allocation] = allocator.createImage(imageCreateInfo, allocationCreateInfo);
@@ -71,7 +72,8 @@ namespace vma::raii {
           .size = size,
           .usage = vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst,
           .sharingMode = vk::SharingMode::eExclusive};
-      constexpr auto allocationCreateInfo = AllocationCreateInfo{.usage = MemoryUsage::eGpuOnly};
+      constexpr auto allocationCreateInfo =
+          vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eGpuOnly};
 
       return createBuffer(&bufferCreateInfo, &allocationCreateInfo, name);
    }

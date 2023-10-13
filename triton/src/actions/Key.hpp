@@ -1,6 +1,6 @@
 #pragma once
-namespace Core {
 
+namespace Triton::Actions {
    enum class Key : uint32_t {
       None = 0,
 
@@ -71,4 +71,4 @@ namespace Core {
       Y,
       Z,
    };
-};
+}

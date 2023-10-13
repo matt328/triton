@@ -1,6 +1,6 @@
 #pragma once
+namespace Triton::Actions {
 
-namespace Input {
    enum class Key : uint32_t {
       None = 0,
 
@@ -71,4 +71,4 @@ namespace Input {
       Y,
       Z,
    };
-}
+};

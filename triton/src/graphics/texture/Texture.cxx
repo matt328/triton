@@ -6,7 +6,7 @@
 namespace Triton {
 
    Texture::Texture(const std::string_view& filename,
-                    const vma::raii::Allocator& raiillocator,
+                    const Triton::Memory::Allocator& raiillocator,
                     const vk::raii::Device& device,
                     const ImmediateContext& graphicsContext,
                     const ImmediateContext& transferContext) :

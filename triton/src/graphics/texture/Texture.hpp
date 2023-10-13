@@ -10,7 +10,7 @@ namespace Triton {
    class Texture final {
     public:
       explicit Texture(const std::string_view& filename,
-                       const vma::raii::Allocator& raiillocator,
+                       const Triton::Memory::Allocator& raiillocator,
                        const vk::raii::Device& device,
                        const ImmediateContext& graphicsContext,
                        const ImmediateContext& transferContext);
@@ -29,7 +29,7 @@ namespace Triton {
 
     private:
       const vk::raii::Device& device;
-      std::unique_ptr<vma::raii::AllocatedImage> image;
+      std::unique_ptr<Triton::Memory::AllocatedImage> image;
       std::unique_ptr<vk::raii::ImageView> view;
 
       vk::ImageLayout imageLayout;
