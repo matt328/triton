@@ -1,6 +1,7 @@
 #include "ActionManager.hpp"
 
 namespace Triton::Actions {
+
    // Map a key event to fire an action
    void ActionManager::mapKey(Key key, ActionType actionType) {
       actionMap.insert(std::make_pair(key, actionType));

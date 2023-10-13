@@ -19,7 +19,7 @@ namespace Triton {
 
       void run() const;
 
-      IResourceFactory* getResourceFactory();
+      ResourceFactory* getResourceFactory();
 
       size_t registerUpdate(std::function<void(void)> fn);
       size_t registerUpdateBlendState(std::function<void(double)> fn);
