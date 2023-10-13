@@ -1,12 +1,11 @@
 #include "Application.hpp"
-#include "ApplicationEvent.h"
+#include "events/ApplicationEvent.hpp"
 #include "Renderer.hpp"
-#include "KeyEvent.h"
+#include "events/KeyEvent.hpp"
 #include "ResourceFactory.hpp"
 #include "Logger.hpp"
-#include "Events.hpp"
-#include "input/KeyMap.hpp"
-#include "GLFW/glfw3.h"
+#include "events/Events.hpp"
+#include "actions/KeyMap.hpp"
 
 namespace Triton {
 
@@ -34,7 +33,7 @@ namespace Triton {
                             int ation,
                             [[maybe_unused]] int mods) {
                             auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
-                            const auto mappedKey = Input::keyMap[key];
+                            const auto mappedKey = Actions::keyMap[key];
                             switch (ation) {
                                case GLFW_PRESS: {
                                   Events::KeyPressedEvent event{mappedKey};
@@ -57,7 +56,7 @@ namespace Triton {
       glfwSetCharCallback(window.get(), [](GLFWwindow* window, unsigned int keyCode) {
          auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
          // Need to check this if we start collecting char input
-         const auto mappedKey = Input::keyMap[(int)keyCode];
+         const auto mappedKey = Actions::keyMap[(int)keyCode];
          Events::KeyTypedEvent event{mappedKey};
          app->eventCallbackFn(event);
       });

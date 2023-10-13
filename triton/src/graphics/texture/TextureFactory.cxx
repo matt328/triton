@@ -3,7 +3,7 @@
 
 namespace Triton {
 
-   TextureFactory::TextureFactory(const vma::raii::Allocator& raiillocator,
+   TextureFactory::TextureFactory(const Triton::Memory::Allocator& raiillocator,
                                   const vk::raii::Device& device,
                                   const ImmediateContext& graphicsContext,
                                   const ImmediateContext& transferContext) :

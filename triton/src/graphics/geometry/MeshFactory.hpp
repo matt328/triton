@@ -9,7 +9,7 @@ namespace Triton {
 
    class MeshFactory {
     public:
-      MeshFactory(vma::raii::Allocator* allocator, ImmediateContext* transferContext);
+      MeshFactory(Triton::Memory::Allocator* allocator, ImmediateContext* transferContext);
       ~MeshFactory() = default;
       MeshFactory(const MeshFactory&) = default;
       MeshFactory(MeshFactory&&) = delete;
@@ -20,7 +20,7 @@ namespace Triton {
           const std::string_view& filename) const;
 
     private:
-      vma::raii::Allocator* allocator;
+      Triton::Memory::Allocator* allocator;
       ImmediateContext* transferContext;
    };
 }

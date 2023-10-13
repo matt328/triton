@@ -7,7 +7,7 @@ class RenderSystem;
 class TransformSystem;
 class IResourceFactory;
 
-namespace game {
+namespace Triton {
 
    class Game {
     public:

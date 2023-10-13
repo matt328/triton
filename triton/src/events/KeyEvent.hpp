@@ -1,28 +1,28 @@
 #pragma once
 
 #include "Events.hpp"
-#include "Keys.hpp"
+#include "actions/Keys.hpp"
 
-namespace Events {
+namespace Triton::Events {
    class KeyEvent : public Event {
     public:
-      [[nodiscard]] Core::Key getKey() const {
+      [[nodiscard]] Actions::Key getKey() const {
          return key;
       }
 
       EVENT_CLASS_CATEGORY(EventCategoryKeyboard | EventCategoryInput)
 
     protected:
-      KeyEvent(const Core::Key key) : Event(), key(key) {
+      KeyEvent(const Actions::Key key) : Event(), key(key) {
       }
 
     private:
-      Core::Key key;
+      Actions::Key key;
    };
 
    class KeyPressedEvent : public KeyEvent {
     public:
-      KeyPressedEvent(const Core::Key key, bool isRepeat = false) :
+      KeyPressedEvent(const Actions::Key key, bool isRepeat = false) :
           KeyEvent(key), isRepeated(isRepeat) {
       }
 
@@ -42,7 +42,7 @@ namespace Events {
 
    class KeyReleasedEvent : public KeyEvent {
     public:
-      KeyReleasedEvent(const Core::Key key) : KeyEvent(key) {
+      KeyReleasedEvent(const Actions::Key key) : KeyEvent(key) {
       }
 
       [[nodiscard]] std::string toString() const override {
@@ -56,7 +56,7 @@ namespace Events {
 
    class KeyTypedEvent : public KeyEvent {
     public:
-      KeyTypedEvent(const Core::Key key) : KeyEvent(key) {
+      KeyTypedEvent(const Actions::Key key) : KeyEvent(key) {
       }
 
       [[nodiscard]] std::string toString() const override {

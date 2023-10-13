@@ -8,8 +8,10 @@
 
 namespace Triton {
 
-   MeshFactory::MeshFactory(vma::raii::Allocator* allocator, ImmediateContext* transferContext) :
-       allocator(allocator), transferContext(transferContext) {
+   MeshFactory::MeshFactory(Triton::Memory::Allocator* allocator,
+                            ImmediateContext* transferContext) :
+       allocator(allocator),
+       transferContext(transferContext) {
    }
 
    std::unique_ptr<Mesh<Models::Vertex, uint32_t>> MeshFactory::loadMeshFromGltf(
