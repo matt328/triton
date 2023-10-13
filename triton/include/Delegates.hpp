@@ -3,6 +3,7 @@
 #include "Action.hpp"
 
 namespace Triton::Actions {
+
    class Delegate {
     public:
       Delegate() = default;

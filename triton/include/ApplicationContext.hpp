@@ -2,6 +2,10 @@
 
 namespace Triton {
 
+   namespace Actions {
+      class ActionManager;
+   }
+
    class ApplicationContext {
     public:
       explicit ApplicationContext(int width, int height, const std::string_view& windowTitle);
@@ -13,6 +17,8 @@ namespace Triton {
       ApplicationContext& operator=(ApplicationContext&&) = delete;
 
       void start();
+
+      [[nodiscard]] std::shared_ptr<Actions::ActionManager> getActionManager();
 
     private:
       class ApplicationContextImpl;
