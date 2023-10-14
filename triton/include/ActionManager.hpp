@@ -1,22 +1,19 @@
 #pragma once
 
-#include "ActionManagerProxy.hpp"
+#include "Delegates.hpp"
+#include "Key.hpp"
+#include "ActionType.hpp"
 
 namespace Triton::Actions {
-
    class ActionManager {
     public:
-      void mapKey(Key key, ActionType actionType);
+      ActionManager& operator=(const ActionManager&) = default;
+      ActionManager& operator=(ActionManager&&) = delete;
+      virtual ~ActionManager() = default;
 
-      size_t addActionListener(ActionType aType, std::function<void(Action)> fn);
-      void removeActionListener(ActionType aType, size_t position);
+      virtual void mapKey(Key key, ActionType actionType) = 0;
 
-      void keyPressed(Key key);
-      void keyReleased(Key key);
-
-    private:
-      std::multimap<Key, ActionType> actionMap;
-      std::unordered_map<ActionType, Delegate> delegatesMap;
+      virtual size_t addActionListener(ActionType aType, std::function<void(Action)> fn) = 0;
+      virtual void removeActionListener(ActionType aType, size_t position) = 0;
    };
-
-}
+};

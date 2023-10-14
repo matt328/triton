@@ -1,14 +1,14 @@
-#include "ActionManager.hpp"
+#include "DefaultActionManager.hpp"
 
 namespace Triton::Actions {
 
    // Map a key event to fire an action
-   void ActionManager::mapKey(Key key, ActionType actionType) {
+   void DefaultActionManager::mapKey(Key key, ActionType actionType) {
       actionMap.insert(std::make_pair(key, actionType));
    }
 
    // Call this when a Key is pressed
-   void ActionManager::keyPressed(Key key) {
+   void DefaultActionManager::keyPressed(Key key) {
       const auto it = actionMap.find(key);
       if (it == actionMap.end()) {
          return;
@@ -31,10 +31,11 @@ namespace Triton::Actions {
    };
 
    // Call this when a key is released
-   void ActionManager::keyReleased(Key key) {
+   void DefaultActionManager::keyReleased(Key key) {
    }
 
-   size_t ActionManager::addActionListener(ActionType aType, std::function<void(Action)> fn) {
+   size_t DefaultActionManager::addActionListener(ActionType aType,
+                                                  std::function<void(Action)> fn) {
       const auto it = delegatesMap.find(aType);
       size_t pos = -1;
       if (it == delegatesMap.end()) {
@@ -47,7 +48,7 @@ namespace Triton::Actions {
       return pos;
    }
 
-   void ActionManager::removeActionListener(ActionType aType, size_t position) {
+   void DefaultActionManager::removeActionListener(ActionType aType, size_t position) {
       const auto it = delegatesMap.find(aType);
       assert(it != delegatesMap.end());
       it->second.removeDelegate(position);

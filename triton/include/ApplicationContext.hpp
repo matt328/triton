@@ -6,6 +6,8 @@ namespace Triton {
       class ActionManager;
    }
 
+   class ResourceFactory;
+
    class ApplicationContext {
     public:
       explicit ApplicationContext(int width, int height, const std::string_view& windowTitle);
@@ -18,7 +20,9 @@ namespace Triton {
 
       void start();
 
-      [[nodiscard]] std::shared_ptr<Actions::ActionManager> getActionManager();
+      [[nodiscard]] std::shared_ptr<Actions::ActionManager> createActionManager();
+      [[nodiscard]] std::shared_ptr<ResourceFactory> createResourceFactory(
+          std::filesystem::path rootPath);
 
     private:
       class ApplicationContextImpl;
