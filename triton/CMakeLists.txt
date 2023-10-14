@@ -1,10 +1,13 @@
 set(name triton)
 
 set(${name}_SRC
+   src/actions/DefaultActionManager.cxx
+   src/actions/KeyMap.cxx
    src/core/stb.cxx
    src/core/vma_raii.cxx
    src/actions/KeyMap.cxx
    src/Application.cxx
+   src/DefaultResourceFactory.cxx
    src/Renderer.cxx
    src/ApplicationContext.cxx
    src/graphics/pipeline/Vertex.cxx
@@ -55,6 +58,7 @@ target_precompile_headers(${name} PRIVATE
 
 target_precompile_headers(${name} PUBLIC
    <assert.h>
+   <filesystem>
    <functional>
    <memory>
    <map>

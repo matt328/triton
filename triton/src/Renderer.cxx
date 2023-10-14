@@ -455,9 +455,11 @@ namespace Triton {
       {
          ZoneNamedN(updateCameraData, "Update Camera Data", true);
          // This is awesome feature of C++ idc
-         const auto [view, proj, viewProj] = perFrameDataProvider();
-         const auto cameraData = CameraData{.view = view, .proj = proj, .viewProj = viewProj};
-         currentFrameData->getCameraBuffer().updateBufferValue(&cameraData, sizeof(CameraData));
+         if (perFrameDataProvider != nullptr) {
+            const auto [view, proj, viewProj] = perFrameDataProvider();
+            const auto cameraData = CameraData{.view = view, .proj = proj, .viewProj = viewProj};
+            currentFrameData->getCameraBuffer().updateBufferValue(&cameraData, sizeof(CameraData));
+         }
       }
 
       // We've already waited on this fence, so we can safely reset it so we can signal it again
@@ -523,14 +525,16 @@ namespace Triton {
       // index and vertex buffers.  When I finish implementing a fully bindless pipeline that
       // won't matter since the vertices and indices will be accumulated in a giant buffer, and I
       // think all the data handed off between the rendersystem and renderdevice will be copyable
-      auto objectDataList = std::vector<ObjectData>{};
-      const auto renderObjects = this->renderObjectProvider();
-      for (const auto& renderObject : renderObjects) {
-         objectDataList.push_back(
-             ObjectData{.model = renderObject.modelMatrix,
-                        .textureId = static_cast<TextureHandle>(renderObject.textureId)});
-      }
 
+      auto objectDataList = std::vector<ObjectData>{};
+      if (this->renderObjectProvider != nullptr) {
+         const auto renderObjects = this->renderObjectProvider();
+         for (const auto& renderObject : renderObjects) {
+            objectDataList.push_back(
+                ObjectData{.model = renderObject.modelMatrix,
+                           .textureId = static_cast<TextureHandle>(renderObject.textureId)});
+         }
+      }
       // Profile this and see if it's worth checking if something actually changed or not
       frameData.updateObjectDataBuffer(objectDataList.data(),
                                        sizeof(ObjectData) * objectDataList.size());
@@ -556,26 +560,28 @@ namespace Triton {
          cmd.beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
          cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, *pipeline->getPipeline());
 
-         const auto& renderObjects = this->renderObjectProvider();
+         if (this->renderObjectProvider != nullptr) {
+            const auto& renderObjects = this->renderObjectProvider();
 
-         for (uint32_t i = 0; const auto& renderObject : renderObjects) {
-            const auto& mesh = meshes.at(renderObject.meshId);
+            for (uint32_t i = 0; const auto& renderObject : renderObjects) {
+               const auto& mesh = meshes.at(renderObject.meshId);
 
-            cmd.bindVertexBuffers(0, mesh->getVertexBuffer().getBuffer(), {0});
-            cmd.bindIndexBuffer(mesh->getIndexBuffer().getBuffer(), 0, vk::IndexType::eUint32);
+               cmd.bindVertexBuffers(0, mesh->getVertexBuffer().getBuffer(), {0});
+               cmd.bindIndexBuffer(mesh->getIndexBuffer().getBuffer(), 0, vk::IndexType::eUint32);
 
-            const auto set1 = *frameData.getBindlessDescriptorSet();
-            const auto set2 = *frameData.getObjectDescriptorSet();
-            const auto set3 = *frameData.getPerFrameDescriptorSet();
-            const auto allSets = std::array{set1, set2, set3};
-            cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
-                                   *pipeline->getPipelineLayout(),
-                                   0,
-                                   allSets,
-                                   nullptr);
-            // This is real greasy but it'll do for now
-            cmd.drawIndexed(mesh->getIndicesCount(), 1, 0, 0, i);
-            i++;
+               const auto set1 = *frameData.getBindlessDescriptorSet();
+               const auto set2 = *frameData.getObjectDescriptorSet();
+               const auto set3 = *frameData.getPerFrameDescriptorSet();
+               const auto allSets = std::array{set1, set2, set3};
+               cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
+                                      *pipeline->getPipelineLayout(),
+                                      0,
+                                      allSets,
+                                      nullptr);
+               // This is real greasy but it'll do for now
+               cmd.drawIndexed(mesh->getIndicesCount(), 1, 0, 0, i);
+               i++;
+            }
          }
 
          cmd.endRenderPass();
