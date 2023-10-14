@@ -105,7 +105,6 @@ namespace Triton {
             ZoneNamedN(render, "Render", true);
             auto event = Events::RenderEvent{};
             eventCallbackFn(event);
-            context->render();
          }
 
          FrameMark;
@@ -116,7 +115,6 @@ namespace Triton {
       }
       auto event = Events::ShutdownEvent{};
       eventCallbackFn(event);
-      context->waitIdle();
    }
 
    void Application::setEventCallbackFn(std::function<void(Events::Event&)> fn) {
@@ -127,7 +125,7 @@ namespace Triton {
                                                const int width,
                                                const int height) {
       const auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
-      app->context->windowResized(height, width);
+      // app->context->windowResized(height, width);
    }
 
    void Application::errorCallback(int code, const char* description) {

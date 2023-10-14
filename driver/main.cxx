@@ -1,5 +1,5 @@
 #include "ActionManager.hpp"
-#include "ActionManagerProxy.hpp"
+#include "ResourceFactory.hpp"
 #include "ApplicationContext.hpp"
 #include "Logger.hpp"
 
@@ -30,7 +30,13 @@ int main() {
    try {
       auto appContext = ApplicationContext{width, height, windowTitle};
 
-      auto actionManager = appContext.getActionManager();
+      auto actionManager = appContext.createActionManager();
+      auto resourceFactory =
+          appContext.createResourceFactory(std::filesystem::current_path() / "assets");
+
+      const auto texture = resourceFactory->createTexture("some_texture_file");
+
+      Log::debug << "Created Texture: " << texture << std::endl;
 
       appContext.start();
 
