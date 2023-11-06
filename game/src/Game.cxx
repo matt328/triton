@@ -1,4 +1,3 @@
-#include <GL/glext.h>
 #include <utility>
 
 #include "ApplicationEvent.h"
