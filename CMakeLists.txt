@@ -15,6 +15,10 @@ add_compile_definitions(
 SET(CMAKE_CXX_STANDARD 20)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+SET(CMAKE_CXX_SCAN_FOR_MODULES OFF)
+SET(CMAKE_EXPERIMENTAL_CXX_SCANDEP_SOURCE OFF)
+set(CMAKE_EXPERIMENTAL_CXX_MODULE_DYNDEP OFF)
+
 IF(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
    add_compile_options(-Wall -Wextra -pedantic -Wno-nullability-extension -Wno-nullability-completeness -Wno-deprecated-volatile)
 ENDIF()
