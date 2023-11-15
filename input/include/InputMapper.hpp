@@ -3,12 +3,12 @@
 #include "KeyState.hpp"
 #include "Bimap.hpp"
 #include "GlfwKeyMap.hpp"
-#include "ActionManager.hpp"
+#include "ActionSet.hpp"
 
 namespace Input {
    class InputMapper {
     public:
-      InputMapper(ActionManager& actionMapper) : actionMapper(actionMapper) {
+      InputMapper(actionSet& actionMapper) : actionMapper(actionMapper) {
          initializeGlfwKeyMap(keyMap);
       }
       void keyCallback(const int key,
@@ -29,6 +29,6 @@ namespace Input {
     private:
       std::unordered_map<Key, KeyState> keyStateMap;
       Bimap<Key, int> keyMap;
-      ActionManager& actionMapper;
+      actionSet& actionMapper;
    };
 }

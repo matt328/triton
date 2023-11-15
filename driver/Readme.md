@@ -20,7 +20,7 @@
 - ResourceManager
 - Application
 - Game
-- ActionManager
+- actionSet
 - mediates communication between then
 
 ## Renderer
@@ -50,7 +50,7 @@
   - Entities can be updated via an IController component, might be hard coded behavior, or a ScriptedController
   - Can be deleted via API
 
-## ActionManager
+## actionSet
 
 - Emits Actions based on listening to events from application, and custom sources
 
