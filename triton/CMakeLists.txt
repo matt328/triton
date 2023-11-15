@@ -2,6 +2,7 @@ set(name triton)
 
 set(${name}_SRC
    src/actions/DefaultActionSet.cxx
+   src/actions/ActionManager.cxx
    src/core/stb.cxx
    src/core/vma_raii.cxx
    src/actions/KeyMap.cxx
