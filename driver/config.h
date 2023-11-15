@@ -7,5 +7,10 @@
 #define PROJECT_VER_PATCH "1"
 
 #ifndef NDEBUG
+#ifndef _DEBUG
 #define _DEBUG
 #endif
+#endif
+
+// This file is only here as a placeholder to make the IDE happy.  If you change config.h.in, you'll
+// need to copy this file into here from the 'build' directory.

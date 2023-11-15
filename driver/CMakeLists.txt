@@ -1,4 +1,9 @@
-set(driver_SRC "main.cxx")
+set(driver_SRC
+   "main.cxx"
+   "game/GameObject.cxx"
+   "game/SceneManager.cxx"
+   "game/SceneGame.cxx"
+)
 set(project_name "driver")
 
 add_executable(${project_name} ${driver_SRC})

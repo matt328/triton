@@ -25,6 +25,9 @@ namespace Triton {
       struct Vertex;
    }
 
+   using RenderObjectProviderFn = std::function<std::vector<RenderObject>()>;
+   using PerFrameDataProfiderFn = std::function<PerFrameData()>;
+
    class Renderer {
     public:
       Renderer(GLFWwindow* window);
@@ -44,9 +47,17 @@ namespace Triton {
 
       [[nodiscard]] const std::tuple<int, int> getWindowSize() const;
 
+      void registerRenderObjectProvider(RenderObjectProviderFn fn) {
+         this->renderObjectProvider = fn;
+      }
+
+      void registerPerFrameDataProvider(PerFrameDataProfiderFn fn) {
+         this->perFrameDataProvider = fn;
+      }
+
     private:
-      std::function<std::vector<RenderObject>()> renderObjectProvider;
-      std::function<PerFrameData()> perFrameDataProvider;
+      RenderObjectProviderFn renderObjectProvider;
+      PerFrameDataProfiderFn perFrameDataProvider;
 
       struct QueueFamilyIndices;
       struct SwapchainSupportDetails;
