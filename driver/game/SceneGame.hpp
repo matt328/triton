@@ -9,7 +9,7 @@ namespace Game {
    class SceneGame : public Scene {
 
     public:
-      SceneGame(std::shared_ptr<Triton::Actions::ActionManager>& actionManager);
+      SceneGame(std::shared_ptr<Triton::Actions::ActionSet>& actionSet);
       void onCreate() override;
       void onDestroy() override;
       void onActivate() override;

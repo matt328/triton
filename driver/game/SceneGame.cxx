@@ -4,8 +4,7 @@
 #include "MeshComponent.hpp"
 
 namespace Game {
-   SceneGame::SceneGame(std::shared_ptr<Triton::Actions::ActionManager>& actionManager) :
-       Scene(actionManager) {
+   SceneGame::SceneGame(std::shared_ptr<Triton::Actions::ActionSet>& actionSet) : Scene(actionSet) {
       auto gameObject = std::make_unique<GameObject>();
       gameObject->addComponent<MeshComponent>();
       gameObjects.push_back(std::move(gameObject));

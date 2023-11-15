@@ -4,20 +4,20 @@
 #include "Key.hpp"
 #include "ActionType.hpp"
 
-// Create ActionLayer class, have the ActionManager still do most of what it does
+// Create ActionLayer class, have the actionSet still do most of what it does
 // but have action layers be separate sets of actions that can mapKey then add/Rmoeve
 // ActionListeners
 
 namespace Triton::Actions {
-   class ActionManager {
+   class ActionSet {
     public:
-      ActionManager() = default;
-      ActionManager(const ActionManager&) = delete;
-      ActionManager(ActionManager&&) = delete;
-      ActionManager& operator=(const ActionManager&) = default;
-      ActionManager& operator=(ActionManager&&) = delete;
+      ActionSet() = default;
+      ActionSet(const ActionSet&) = delete;
+      ActionSet(ActionSet&&) = delete;
+      ActionSet& operator=(const ActionSet&) = default;
+      ActionSet& operator=(ActionSet&&) = delete;
 
-      virtual ~ActionManager() = default;
+      virtual ~ActionSet() = default;
 
       virtual void mapKey(Key key, ActionType actionType) = 0;
 

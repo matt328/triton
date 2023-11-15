@@ -2,7 +2,7 @@ set(name input)
 
 set(${name}_SRC
    src/GlfwKeyMap.cxx
-   src/ActionManager.cxx
+   src/actionSet.cxx
 )
 
 set(${name}_INCLUDE "include")

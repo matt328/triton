@@ -1,11 +1,10 @@
 #pragma once
 
-#include "ActionManager.hpp"
+#include "ActionSet.hpp"
 namespace Game {
    class Scene {
     public:
-      Scene(std::shared_ptr<Triton::Actions::ActionManager>& actionManager) :
-          actionManager(actionManager) {
+      Scene(std::shared_ptr<Triton::Actions::ActionSet>& actionSet) : actionSet(actionSet) {
       }
       Scene(const Scene&) = default;
       Scene(Scene&&) = delete;
@@ -24,7 +23,7 @@ namespace Game {
       virtual void draw(){};
 
     private:
-      std::shared_ptr<Triton::Actions::ActionManager> actionManager;
+      std::shared_ptr<Triton::Actions::ActionSet> actionSet;
    };
 
 }

@@ -1,4 +1,4 @@
-#include "ActionManager.hpp"
+#include "ActionSet.hpp"
 #include "ResourceFactory.hpp"
 #include "ApplicationContext.hpp"
 #include "Logger.hpp"
@@ -34,7 +34,7 @@ int main() {
    try {
       auto appContext = ApplicationContext{width, height, windowTitle};
 
-      auto actionManager = appContext.createActionManager();
+      auto actionSet = appContext.createactionSet();
       auto resourceFactory =
           appContext.createResourceFactory(std::filesystem::current_path() / "assets");
 
@@ -51,7 +51,7 @@ int main() {
       auto sceneManager = std::make_unique<Game::SceneManager>();
       sceneManager->add<Game::SceneGame>();
 
-      sceneManager->registerActionManager(actionManager);
+      sceneManager->registeractionSet(actionSet);
 
       // appContext.addUpdateListener([&sceneManager]() { sceneManager->update(); });
 

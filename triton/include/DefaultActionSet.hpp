@@ -1,10 +1,10 @@
 #pragma once
 
-#include "ActionManager.hpp"
+#include "ActionSet.hpp"
 
 namespace Triton::Actions {
 
-   class DefaultActionManager : public ActionManager {
+   class DefaultActionSet : public ActionSet {
     public:
       void mapKey(Key key, ActionType actionType) override;
 
