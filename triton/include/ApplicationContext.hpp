@@ -7,6 +7,8 @@ namespace Triton {
    }
 
    class ResourceFactory;
+   struct RenderObject;
+   struct PerFrameData;
 
    class ApplicationContext {
     public:
@@ -23,6 +25,9 @@ namespace Triton {
       [[nodiscard]] std::shared_ptr<Actions::ActionManager> createActionManager();
       [[nodiscard]] std::shared_ptr<ResourceFactory> createResourceFactory(
           std::filesystem::path rootPath);
+
+      void registerRenderObjectProvider(std::function<std::vector<RenderObject>()> fn);
+      void registerPerFrameDataProvider(std::function<PerFrameData()> fn);
 
     private:
       class ApplicationContextImpl;

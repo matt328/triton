@@ -3,6 +3,10 @@
 #include "ApplicationContext.hpp"
 #include "Logger.hpp"
 
+#include "game/SceneManager.hpp"
+#include "game/SceneGame.hpp"
+#include "game/GameObject.hpp"
+
 #include "config.h"
 
 constexpr int width = 1366;
@@ -35,10 +39,24 @@ int main() {
           appContext.createResourceFactory(std::filesystem::current_path() / "assets");
 
       const auto texture = resourceFactory->createTexture("some_texture_file");
-
       Log::debug << "Created Texture: " << texture << std::endl;
 
+      const auto mesh = resourceFactory->createMesh("some_mesh_file");
+
+      // appContext.registerRenderObjectProvider([]() { return std::vector<Triton::RenderObject>();
+      // });
+
       appContext.start();
+
+      auto sceneManager = std::make_unique<Game::SceneManager>();
+      sceneManager->add<Game::SceneGame>();
+
+      sceneManager->registerActionManager(actionManager);
+
+      // appContext.addUpdateListener([&sceneManager]() { sceneManager->update(); });
+
+      // appContext.registerRenderObjectProvider(
+      //     [&sceneManager]() { return sceneManager->getRenderObjects(); });
 
    } catch (const std::exception& e) { Log::error << e.what() << std::endl; }
 }

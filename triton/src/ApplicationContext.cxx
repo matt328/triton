@@ -19,6 +19,14 @@ namespace Triton {
          application->setEventCallbackFn([this](Events::Event& e) { this->onEvent(e); });
       }
 
+      void registerRenderObjectProvider(std::function<std::vector<RenderObject>()> fn) {
+         renderer->registerRenderObjectProvider(fn);
+      }
+
+      void registerPerFrameDataProvider(std::function<PerFrameData()> fn) {
+         renderer->registerPerFrameDataProvider(fn);
+      }
+
       void onEvent(Events::Event& e) {
          auto dispatcher = Events::EventDispatcher{e};
 
@@ -79,6 +87,15 @@ namespace Triton {
    std::shared_ptr<ResourceFactory> ApplicationContext::createResourceFactory(
        std::filesystem::path rootPath) {
       return impl->createResourceFactory(rootPath);
+   }
+
+   void ApplicationContext::registerRenderObjectProvider(
+       std::function<std::vector<RenderObject>()> fn) {
+      impl->registerRenderObjectProvider(fn);
+   }
+
+   void ApplicationContext::registerPerFrameDataProvider(std::function<PerFrameData()> fn) {
+      impl->registerPerFrameDataProvider(fn);
    }
 
 }
