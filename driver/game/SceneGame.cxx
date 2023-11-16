@@ -1,13 +1,23 @@
 #include "SceneGame.hpp"
 
+#include "ActionType.hpp"
 #include "GameObject.hpp"
+#include "Key.hpp"
 #include "MeshComponent.hpp"
+#include "Logger.hpp"
 
 namespace Game {
    SceneGame::SceneGame(std::shared_ptr<Triton::Actions::ActionSet>& actionSet) : Scene(actionSet) {
+      // Set up game objects
       auto gameObject = std::make_unique<GameObject>();
       gameObject->addComponent<MeshComponent>();
       gameObjects.push_back(std::move(gameObject));
+
+      // Set up Scene Action Mappings
+      actionSet->mapKey(Triton::Actions::Key::W, Triton::Actions::ActionType::MoveForward);
+      actionSet->addActionListener(
+          Triton::Actions::ActionType::MoveBackward,
+          [](Triton::Actions::Action a) { Log::debug << "Action " << std::endl; });
    }
 
    void SceneGame::onCreate() {
