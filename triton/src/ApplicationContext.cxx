@@ -1,12 +1,14 @@
 #include "ApplicationContext.hpp"
+#include "ActionManager.hpp"
 #include "Application.hpp"
 #include "DefaultResourceFactory.hpp"
 #include "Renderer.hpp"
-#include "DefaultActionSet.hpp"
+#include "ActionManager.hpp"
 
 #include "Logger.hpp"
 #include "events/ApplicationEvent.hpp"
 #include "events/Events.hpp"
+#include "events/KeyEvent.hpp"
 
 namespace Triton {
    class ApplicationContext::ApplicationContextImpl {
@@ -43,15 +45,20 @@ namespace Triton {
              [](Events::FixedUpdateEvent& e) { return true; });
 
          dispatcher.dispatch<Events::UpdateEvent>([](Events::UpdateEvent& e) { return true; });
+
+         dispatcher.dispatch<Events::KeyPressedEvent>([this](Events::KeyPressedEvent& e) {
+            actionManager->keyPressed(e.getKey());
+            return true;
+         });
       }
 
       void start() {
          application->run();
       }
 
-      [[nodiscard]] std::shared_ptr<Actions::ActionSet> createactionSet() {
-         actionSet = std::make_shared<Actions::DefaultActionSet>();
-         return actionSet;
+      [[nodiscard]] std::shared_ptr<Actions::ActionManager> createactionManager() {
+         actionManager = std::make_shared<Actions::ActionManager>();
+         return actionManager;
       }
 
       [[nodiscard]] std::shared_ptr<ResourceFactory> createResourceFactory(
@@ -64,7 +71,7 @@ namespace Triton {
       std::unique_ptr<Application> application;
       std::shared_ptr<Renderer> renderer;
       std::shared_ptr<ResourceFactory> resourceFactory;
-      std::shared_ptr<Actions::ActionSet> actionSet;
+      std::shared_ptr<Actions::ActionManager> actionManager;
    };
 
    ApplicationContext::ApplicationContext(int width,
@@ -79,8 +86,8 @@ namespace Triton {
       impl->start();
    }
 
-   std::shared_ptr<Actions::ActionSet> ApplicationContext::createactionSet() {
-      return impl->createactionSet();
+   std::shared_ptr<Actions::ActionManager> ApplicationContext::createActionManager() {
+      return impl->createactionManager();
    }
 
    std::shared_ptr<ResourceFactory> ApplicationContext::createResourceFactory(

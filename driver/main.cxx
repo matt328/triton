@@ -34,7 +34,7 @@ int main() {
    try {
       auto appContext = ApplicationContext{width, height, windowTitle};
 
-      auto actionSet = appContext.createactionSet();
+      auto actionManager = appContext.createActionManager();
       auto resourceFactory =
           appContext.createResourceFactory(std::filesystem::current_path() / "assets");
 
@@ -46,12 +46,13 @@ int main() {
       // appContext.registerRenderObjectProvider([]() { return std::vector<Triton::RenderObject>();
       // });
 
-      appContext.start();
-
       auto sceneManager = std::make_unique<Game::SceneManager>();
-      sceneManager->add<Game::SceneGame>();
+      sceneManager->registeractionSet(actionManager);
 
-      sceneManager->registeractionSet(actionSet);
+      auto id = sceneManager->add<Game::SceneGame>();
+      sceneManager->switchTo(id);
+
+      appContext.start();
 
       // appContext.addUpdateListener([&sceneManager]() { sceneManager->update(); });
 
