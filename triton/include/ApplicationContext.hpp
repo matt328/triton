@@ -3,7 +3,7 @@
 namespace Triton {
 
    namespace Actions {
-      class ActionSet;
+      class ActionManager;
    }
 
    class ResourceFactory;
@@ -22,7 +22,7 @@ namespace Triton {
 
       void start();
 
-      [[nodiscard]] std::shared_ptr<Actions::ActionSet> createactionSet();
+      [[nodiscard]] std::shared_ptr<Actions::ActionManager> createActionManager();
       [[nodiscard]] std::shared_ptr<ResourceFactory> createResourceFactory(
           std::filesystem::path rootPath);
 

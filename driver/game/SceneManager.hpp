@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ActionSet.hpp"
+#include "ActionManager.hpp"
 
 namespace Game {
    class Scene;
@@ -11,12 +11,16 @@ namespace Game {
 
       template <typename T, typename... Args>
       size_t add(Args&&... args) {
-         scenes.emplace_back(std::make_unique<T>(this->actionSet, args...));
+         assert(actionManager != nullptr);
+         auto actionSetId = actionManager->createActionSet();
+         auto& actionSet = actionManager->getCurrentActionSet();
+
+         scenes.emplace_back(std::make_unique<T>(actionSet, args...));
          return scenes.size() - 1;
       }
 
-      void registeractionSet(std::shared_ptr<Triton::Actions::ActionSet> actionSet) {
-         this->actionSet = actionSet;
+      void registeractionSet(std::shared_ptr<Triton::Actions::ActionManager> actionSet) {
+         this->actionManager = actionSet;
       }
 
       void switchTo(size_t id);
@@ -29,6 +33,6 @@ namespace Game {
       size_t currentScene{};
       std::vector<std::unique_ptr<Scene>> scenes;
 
-      std::shared_ptr<Triton::Actions::ActionSet> actionSet;
+      std::shared_ptr<Triton::Actions::ActionManager> actionManager;
    };
 }

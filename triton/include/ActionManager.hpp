@@ -19,7 +19,7 @@ namespace Triton::Actions {
       ActionManager& operator=(const ActionManager&) = default;
       ActionManager& operator=(ActionManager&&) = delete;
 
-      [[nodiscard]] std::unique_ptr<DefaultActionSet>& getCurrentActionSet();
+      [[nodiscard]] DefaultActionSet& getCurrentActionSet();
 
       size_t createActionSet();
       void removeActionSet(size_t id);
@@ -30,7 +30,7 @@ namespace Triton::Actions {
 
     private:
       size_t currentActionSet{};
-      std::vector<std::unique_ptr<DefaultActionSet>> actionSets;
+      std::vector<std::shared_ptr<DefaultActionSet>> actionSets;
    };
 
 }

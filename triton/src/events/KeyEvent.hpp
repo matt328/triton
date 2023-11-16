@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Events.hpp"
-#include "actions/Keys.hpp"
+#include "Key.hpp"
 
 namespace Triton::Events {
    class KeyEvent : public Event {

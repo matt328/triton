@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Keys.hpp"
+#include "Key.hpp"
 
 namespace Triton::Actions {
    extern std::unordered_map<int, Key> keyMap;
