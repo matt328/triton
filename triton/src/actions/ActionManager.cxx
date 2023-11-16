@@ -3,8 +3,8 @@
 
 namespace Triton::Actions {
 
-   std::unique_ptr<DefaultActionSet>& ActionManager::getCurrentActionSet() {
-      return actionSets[currentActionSet];
+   DefaultActionSet& ActionManager::getCurrentActionSet() {
+      return *actionSets[currentActionSet];
    }
 
    size_t ActionManager::createActionSet() {
@@ -25,11 +25,11 @@ namespace Triton::Actions {
    }
 
    void ActionManager::keyPressed(Key key) {
-      getCurrentActionSet()->keyPressed(key);
+      getCurrentActionSet().keyPressed(key);
    }
 
    void ActionManager::keyReleased(Key key) {
-      getCurrentActionSet()->keyReleased(key);
+      getCurrentActionSet().keyReleased(key);
    }
 
 }

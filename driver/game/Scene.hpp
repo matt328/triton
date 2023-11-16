@@ -4,11 +4,11 @@
 namespace Game {
    class Scene {
     public:
-      Scene(std::shared_ptr<Triton::Actions::ActionSet>& actionSet) : actionSet(actionSet) {
+      Scene(Triton::Actions::ActionSet& actionSet) : actionSet(actionSet) {
       }
       Scene(const Scene&) = default;
       Scene(Scene&&) = delete;
-      Scene& operator=(const Scene&) = default;
+      Scene& operator=(const Scene&) = delete;
       Scene& operator=(Scene&&) = delete;
 
       virtual ~Scene() = default;
@@ -23,7 +23,7 @@ namespace Game {
       virtual void draw(){};
 
     private:
-      std::shared_ptr<Triton::Actions::ActionSet> actionSet;
+      Triton::Actions::ActionSet& actionSet;
    };
 
 }
