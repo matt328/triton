@@ -50,6 +50,11 @@ namespace Triton {
             actionManager->keyPressed(e.getKey());
             return true;
          });
+
+         dispatcher.dispatch<Events::KeyReleasedEvent>([this](Events::KeyReleasedEvent& e) {
+            actionManager->keyReleased(e.getKey());
+            return true;
+         });
       }
 
       void start() {
