@@ -9,7 +9,8 @@ namespace Triton::Actions {
 
    size_t ActionManager::createActionSet() {
       actionSets.emplace_back(std::make_unique<DefaultActionSet>());
-      return actionSets.size() - 1;
+      currentActionSet = actionSets.size() - 1;
+      return currentActionSet;
    }
 
    void ActionManager::removeActionSet(size_t id) {
