@@ -8,3 +8,20 @@ namespace Triton::Actions {
       StrafeRight
    };
 }
+inline std::ostream& operator<<(std::ostream& os, const Triton::Actions::ActionType actionType) {
+   switch (actionType) {
+      case Triton::Actions::ActionType::MoveForward:
+         os << "MoveForward";
+         break;
+      case Triton::Actions::ActionType::MoveBackward:
+         os << "MoveBackward";
+         break;
+      case Triton::Actions::ActionType::StrafeLeft:
+         os << "StrafeLeft";
+         break;
+      case Triton::Actions::ActionType::StrafeRight:
+         os << "StrafeRight";
+         break;
+   }
+   return os;
+}
