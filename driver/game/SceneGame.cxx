@@ -15,9 +15,10 @@ namespace Game {
 
       // Set up Scene Action Mappings
       actionSet.mapKey(Triton::Actions::Key::W, Triton::Actions::ActionType::MoveForward);
-      actionSet.addActionListener(
-          Triton::Actions::ActionType::MoveForward,
-          [](Triton::Actions::Action a) { Log::debug << "Action " << std::endl; });
+      actionSet.addActionListener(Triton::Actions::ActionType::MoveForward,
+                                  [](Triton::Actions::Action a) {
+                                     Log::debug << "Action " << a.getActionType() << std::endl;
+                                  });
    }
 
    void SceneGame::onCreate() {
