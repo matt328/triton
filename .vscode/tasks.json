@@ -15,9 +15,8 @@
             "echo": true,
             "reveal": "always",
             "focus": false,
-            "panel": "shared",
+            "panel": "dedicated",
             "showReuseMessage": false,
-            "clear": true
          }
       }
    ]
