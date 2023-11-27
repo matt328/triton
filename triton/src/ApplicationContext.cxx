@@ -108,5 +108,4 @@ namespace Triton {
    void ApplicationContext::registerPerFrameDataProvider(std::function<PerFrameData()> fn) {
       impl->registerPerFrameDataProvider(fn);
    }
-
 }

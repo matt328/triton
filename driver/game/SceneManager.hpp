@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ActionManager.hpp"
+#include "Logger.hpp"
 
 namespace Game {
    class Scene;
@@ -13,6 +14,9 @@ namespace Game {
       size_t add(Args&&... args) {
          assert(actionManager != nullptr);
          auto actionSetId = actionManager->createActionSet();
+
+         Log::debug << "Action Set Id: " << actionSetId << std::endl;
+
          auto& actionSet = actionManager->getCurrentActionSet();
 
          scenes.emplace_back(std::make_unique<T>(actionSet, args...));

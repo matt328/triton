@@ -21,6 +21,12 @@ namespace Game {
                                   });
    }
 
+   void SceneGame::update() {
+      for (auto& gameObject : gameObjects) {
+         gameObject->update();
+      }
+   }
+
    void SceneGame::onCreate() {
    }
 

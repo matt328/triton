@@ -10,6 +10,9 @@ namespace Triton {
    struct RenderObject;
    struct PerFrameData;
 
+   // TODO: pimpl is seriously a massive PITA that's twice now, just get rid of it and forget
+   // about it.
+
    class ApplicationContext {
     public:
       explicit ApplicationContext(int width, int height, const std::string_view& windowTitle);
