@@ -2,9 +2,11 @@
 
 #include "Scene.hpp"
 
+#include "GameObject.hpp"
+
 namespace Game {
 
-   class GameObject;
+   //    class GameObject;
 
    class SceneGame : public Scene {
 
@@ -14,6 +16,8 @@ namespace Game {
       void onDestroy() override;
       void onActivate() override;
       void onDeactivate() override;
+
+      void update() override;
 
     private:
       std::vector<std::unique_ptr<GameObject>> gameObjects;
