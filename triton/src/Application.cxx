@@ -4,7 +4,7 @@
 #include "events/KeyEvent.hpp"
 #include "ResourceFactory.hpp"
 #include "Logger.hpp"
-#include "events/Events.hpp"
+#include "Events.hpp"
 #include "actions/KeyMap.hpp"
 
 namespace Triton {
@@ -25,6 +25,12 @@ namespace Triton {
       glfwTerminate();
    };
 
+   void Application::fireEvent(Events::Event& event) const {
+      for (auto& fn : this->eventCallbackFnList) {
+         fn(event);
+      }
+   }
+
    void Application::run() const {
       glfwSetKeyCallback(window.get(),
                          [](GLFWwindow* window,
@@ -37,17 +43,17 @@ namespace Triton {
                             switch (ation) {
                                case GLFW_PRESS: {
                                   Events::KeyPressedEvent event{mappedKey};
-                                  app->eventCallbackFn(event);
+                                  app->fireEvent(event);
                                   break;
                                }
                                case GLFW_RELEASE: {
                                   Events::KeyReleasedEvent event{mappedKey};
-                                  app->eventCallbackFn(event);
+                                  app->fireEvent(event);
                                   break;
                                }
                                case GLFW_REPEAT: {
                                   Events::KeyPressedEvent event{mappedKey, true};
-                                  app->eventCallbackFn(event);
+                                  app->fireEvent(event);
                                   break;
                                }
                             }
@@ -58,13 +64,13 @@ namespace Triton {
          // Need to check this if we start collecting char input
          const auto mappedKey = Actions::keyMap[(int)keyCode];
          Events::KeyTypedEvent event{mappedKey};
-         app->eventCallbackFn(event);
+         app->fireEvent(event);
       });
 
       glfwSetWindowCloseCallback(window.get(), [](GLFWwindow* window) {
          auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
          auto event = Events::WindowCloseEvent{};
-         app->eventCallbackFn(event);
+         app->fireEvent(event);
          app->running = false;
       });
 
@@ -88,7 +94,7 @@ namespace Triton {
             {
                ZoneNamedN(update, "Update", true);
                auto event = Events::FixedUpdateEvent{};
-               eventCallbackFn(event);
+               fireEvent(event);
             }
             accumulatedTime -= fixedTimeStep;
          }
@@ -98,13 +104,13 @@ namespace Triton {
          {
             ZoneNamedN(blendState, "Blend State", true);
             auto event = Events::UpdateEvent{blendingFactor};
-            eventCallbackFn(event);
+            fireEvent(event);
          }
 
          {
             ZoneNamedN(render, "Render", true);
             auto event = Events::RenderEvent{};
-            eventCallbackFn(event);
+            fireEvent(event);
          }
 
          FrameMark;
@@ -114,11 +120,13 @@ namespace Triton {
          glfwPollEvents();
       }
       auto event = Events::ShutdownEvent{};
-      eventCallbackFn(event);
+      fireEvent(event);
    }
 
-   void Application::setEventCallbackFn(std::function<void(Events::Event&)> fn) {
-      this->eventCallbackFn = fn;
+   size_t Application::addEventCallbackFn(std::function<void(Events::Event&)> fn) {
+      auto position = eventCallbackFnList.size();
+      eventCallbackFnList.push_back(fn);
+      return position;
    }
 
    void Application::framebufferResizeCallback(GLFWwindow* window,

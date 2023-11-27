@@ -1,7 +1,11 @@
+#include "ActionSet.hpp"
+#include "ActionType.hpp"
+#include "Key.hpp"
 #include "ResourceFactory.hpp"
 #include "ApplicationContext.hpp"
 #include "Logger.hpp"
 
+#include "events/ActionEvent.hpp"
 #include "game/SceneManager.hpp"
 #include "game/SceneGame.hpp"
 
@@ -49,6 +53,22 @@ int main() {
 
       auto id = sceneManager->add<Game::SceneGame>();
       sceneManager->switchTo(id);
+
+      auto as = actionManager->createActionSet();
+      actionManager->setCurrentActionSet(as);
+      actionManager->getCurrentActionSet().mapKey(Triton::Actions::Key::Up,
+                                                  Triton::Actions::ActionType::MoveForward);
+
+      appContext.addEventHandler([](Triton::Events::Event& e) {
+         auto dispatcher = Triton::Events::EventDispatcher{e};
+         dispatcher.dispatch<Triton::Events::ActionEvent>([](Triton::Events::ActionEvent& e) {
+            Log::debug << "ActionEvent: " << e << std::endl;
+            return true;
+         });
+      });
+
+      // remove the stuff where actionmanager fires actions and things subscribe to them
+      // keep the actionsets thing
 
       appContext.start();
 

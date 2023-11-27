@@ -6,8 +6,9 @@
 #include "ActionManager.hpp"
 
 #include "Logger.hpp"
+#include "events/ActionEvent.hpp"
 #include "events/ApplicationEvent.hpp"
-#include "events/Events.hpp"
+#include "Events.hpp"
 #include "events/KeyEvent.hpp"
 
 namespace Triton {
@@ -17,7 +18,11 @@ namespace Triton {
          application = std::make_unique<Application>(width, height, windowTitle);
          renderer = std::make_shared<Renderer>(application->getWindow());
 
-         application->setEventCallbackFn([this](Events::Event& e) { this->onEvent(e); });
+         application->addEventCallbackFn([this](Events::Event& e) { this->onEvent(e); });
+      }
+
+      size_t addEventHandler(std::function<void(Events::Event&)> fn) {
+         return application->addEventCallbackFn(fn);
       }
 
       void registerRenderObjectProvider(std::function<std::vector<RenderObject>()> fn) {
@@ -47,14 +52,18 @@ namespace Triton {
          dispatcher.dispatch<Events::UpdateEvent>([](Events::UpdateEvent& e) { return true; });
 
          dispatcher.dispatch<Events::KeyPressedEvent>([this](Events::KeyPressedEvent& e) {
-            actionManager->keyPressed(e.getKey());
-            return true;
+            if (actionManager->hasMapping(e.getKey())) {
+               auto actionType = actionManager->mapKeyToAction(e.getKey());
+               Events::ActionEvent event{actionType};
+               application->fireEvent(event);
+               return true;
+            } else {
+               return false;
+            }
          });
 
-         dispatcher.dispatch<Events::KeyReleasedEvent>([this](Events::KeyReleasedEvent& e) {
-            actionManager->keyReleased(e.getKey());
-            return true;
-         });
+         dispatcher.dispatch<Events::KeyReleasedEvent>(
+             [this](Events::KeyReleasedEvent& e) { return true; });
       }
 
       void start() {
@@ -86,6 +95,10 @@ namespace Triton {
    }
 
    ApplicationContext::~ApplicationContext() = default;
+
+   size_t ApplicationContext::addEventHandler(std::function<void(Events::Event&)> fn) {
+      return impl->addEventHandler(fn);
+   }
 
    void ApplicationContext::start() {
       impl->start();

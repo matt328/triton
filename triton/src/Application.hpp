@@ -2,7 +2,7 @@
 
 #include "Renderer.hpp"
 #include "ResourceFactory.hpp"
-#include "events/Events.hpp"
+#include "Events.hpp"
 #include "TransferData.hpp"
 
 namespace Triton {
@@ -29,7 +29,9 @@ namespace Triton {
       void deregisterUpdateBlendState(const size_t num);
       void deregisterKeyHandler(const size_t num);
 
-      void setEventCallbackFn(std::function<void(Events::Event&)> fn);
+      size_t addEventCallbackFn(std::function<void(Events::Event&)> fn);
+
+      void fireEvent(Events::Event& event) const;
 
       [[nodiscard]] GLFWwindow* getWindow() const {
          return window.get();
@@ -47,7 +49,7 @@ namespace Triton {
       std::unique_ptr<GLFWwindow, DestroyGlfwWindow> window;
       std::shared_ptr<Renderer> context;
 
-      std::function<void(Events::Event&)> eventCallbackFn;
+      std::vector<std::function<void(Events::Event&)>> eventCallbackFnList;
 
       inline static constexpr double FRAME_TIME = 1.f / 60.f;
       bool running = true;
