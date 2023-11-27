@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Delegates.hpp"
+#include "Events.hpp"
 #include "Key.hpp"
 #include "ActionType.hpp"
 
@@ -20,8 +21,8 @@ namespace Triton::Actions {
       virtual ~ActionSet() = default;
 
       virtual void mapKey(Key key, ActionType actionType) = 0;
+      virtual bool hasMapping(Key key) = 0;
 
-      virtual size_t addActionListener(ActionType aType, std::function<void(Action)> fn) = 0;
-      virtual void removeActionListener(ActionType aType, size_t position) = 0;
+      [[nodiscard]] virtual ActionType mapKeyToAction(Key key) const = 0;
    };
 };

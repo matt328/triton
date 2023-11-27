@@ -3,6 +3,7 @@
 #include "Action.hpp"
 #include "ActionType.hpp"
 #include "DefaultActionSet.hpp"
+#include "Events.hpp"
 #include "Key.hpp"
 
 namespace Triton::Actions {
@@ -19,14 +20,14 @@ namespace Triton::Actions {
       ActionManager& operator=(const ActionManager&) = default;
       ActionManager& operator=(ActionManager&&) = delete;
 
-      [[nodiscard]] DefaultActionSet& getCurrentActionSet();
+      [[nodiscard]] DefaultActionSet& getCurrentActionSet() const;
+
+      [[nodiscard]] bool hasMapping(Key key) const;
+      [[nodiscard]] ActionType mapKeyToAction(Key key) const;
 
       size_t createActionSet();
       void removeActionSet(size_t id);
       void setCurrentActionSet(size_t id);
-
-      void keyPressed(Key key);
-      void keyReleased(Key key);
 
     private:
       size_t currentActionSet{};

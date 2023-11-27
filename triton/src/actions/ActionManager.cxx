@@ -1,10 +1,19 @@
 #include "ActionManager.hpp"
+#include "ActionType.hpp"
 #include "DefaultActionSet.hpp"
 
 namespace Triton::Actions {
 
-   DefaultActionSet& ActionManager::getCurrentActionSet() {
+   DefaultActionSet& ActionManager::getCurrentActionSet() const {
       return *actionSets[currentActionSet];
+   }
+
+   bool ActionManager::hasMapping(Key key) const {
+      return getCurrentActionSet().hasMapping(key);
+   }
+
+   ActionType ActionManager::mapKeyToAction(Key key) const {
+      return getCurrentActionSet().mapKeyToAction(key);
    }
 
    size_t ActionManager::createActionSet() {
@@ -23,14 +32,6 @@ namespace Triton::Actions {
 
    void ActionManager::setCurrentActionSet(size_t id) {
       currentActionSet = id;
-   }
-
-   void ActionManager::keyPressed(Key key) {
-      getCurrentActionSet().keyPressed(key);
-   }
-
-   void ActionManager::keyReleased(Key key) {
-      getCurrentActionSet().keyReleased(key);
    }
 
 }

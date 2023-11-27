@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Events.hpp"
 namespace Triton {
 
    namespace Actions {
@@ -31,6 +32,8 @@ namespace Triton {
 
       void registerRenderObjectProvider(std::function<std::vector<RenderObject>()> fn);
       void registerPerFrameDataProvider(std::function<PerFrameData()> fn);
+
+      size_t addEventHandler(std::function<void(Events::Event&)> fn);
 
     private:
       class ApplicationContextImpl;
