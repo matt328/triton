@@ -3,8 +3,8 @@
 #include "Component.hpp"
 
 namespace Game {
-   void GameObject::update() {
-      for (auto& component : allComponents) {
+   void GameObject::update() const {
+      for (const auto& component : allComponents) {
          component->update();
       }
    }

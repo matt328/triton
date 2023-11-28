@@ -8,7 +8,7 @@ set(project_name "driver")
 
 add_executable(${project_name} ${driver_SRC})
 
-set_property(TARGET ${project_name} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIR}")
+# set_property(TARGET ${project_name} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIR}")
 
 configure_file(config.h.in config.h)
 
