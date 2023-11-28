@@ -1,4 +1,3 @@
-#include "ActionSet.hpp"
 #include "ActionType.hpp"
 #include "Key.hpp"
 #include "ResourceFactory.hpp"
@@ -17,7 +16,7 @@ constexpr int height = 768;
 using Triton::ApplicationContext;
 
 int main() {
-   Log::LogManager::getInstance().setMinLevel(Log::Level::Debug);
+   Log::LogManager::getInstance().setMinLevel(Log::Level::Trace);
 
 #ifdef _DEBUG
    Log::info << "Debug Build" << std::endl;
@@ -35,7 +34,6 @@ int main() {
 
    try {
       auto appContext = ApplicationContext{width, height, windowTitle};
-
       auto actionManager = appContext.createActionManager();
       auto resourceFactory =
           appContext.createResourceFactory(std::filesystem::current_path() / "assets");

@@ -4,7 +4,7 @@
 namespace Game {
    class Scene {
     public:
-      Scene(Triton::Actions::ActionSet& actionSet) : actionSet(actionSet) {
+      explicit Scene(Triton::Actions::ActionSet& actionSet) : actionSet(actionSet) {
       }
       Scene(const Scene&) = default;
       Scene(Scene&&) = delete;
