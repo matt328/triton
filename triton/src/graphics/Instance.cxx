@@ -10,8 +10,9 @@ namespace Triton {
       glfwGetWindowSize(window, &width, &height);
       context = std::make_unique<vk::raii::Context>();
 
+
       // Log available extensions
-      const auto instanceExtensions = context->enumerateInstanceExtensionProperties();
+      // const auto instanceExtensions = context->enumerateInstanceExtensionProperties();
 
       if (validationEnabled && !checkValidationLayerSupport()) {
          throw std::runtime_error("Validation layers requested but not available");
@@ -92,6 +93,7 @@ namespace Triton {
       for (const auto& layerProps : availableLayers) {
          Log::trace << layerProps.layerName << std::endl;
       }
+
       for (const auto layerName : DESIRED_VALIDATION_LAYERS) {
          bool layerFound = false;
          for (const auto& layerProperties : availableLayers) {

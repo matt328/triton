@@ -4,7 +4,6 @@
 #include "GameObject.hpp"
 #include "Key.hpp"
 #include "MeshComponent.hpp"
-#include "Logger.hpp"
 
 namespace Game {
    SceneGame::SceneGame(Triton::Actions::ActionSet& actionSet) : Scene(actionSet) {
@@ -16,6 +15,11 @@ namespace Game {
       // Set up Scene Action Mappings
       actionSet.mapKey(Triton::Actions::Key::W, Triton::Actions::ActionType::MoveForward);
    }
+
+   void SceneGame::update() {
+
+   }
+
 
    void SceneGame::onCreate() {
    }

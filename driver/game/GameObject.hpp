@@ -6,11 +6,11 @@ namespace Game {
 
    class GameObject {
     public:
-      void update();
+      void update() const;
 
       template <typename T, typename... Args>
       std::shared_ptr<T> addComponent(Args&&... args) {
-         static_assert(std::is_base_of<Component, T>::value, "T Must derive from Component");
+         static_assert(std::is_base_of_v<Component, T>, "T Must derive from Component");
 
          for (auto& existingComponent : allComponents) {
             if (std::dynamic_pointer_cast<T>(existingComponent)) {
@@ -26,7 +26,7 @@ namespace Game {
 
       template <typename T>
       std::shared_ptr<T> getComponent() {
-         static_assert(std::is_base_of<Component, T>::value, "T Must derive from Component");
+         static_assert(std::is_base_of_v<Component, T>, "T Must derive from Component");
          for (auto& existingComponent : allComponents) {
             if (std::dynamic_pointer_cast<T>(existingComponent)) {
                return std::dynamic_pointer_cast<T>(existingComponent);
