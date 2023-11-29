@@ -34,8 +34,8 @@ int main() {
 
    try {
       auto appContext = ApplicationContext{width, height, windowTitle};
-      auto actionManager = appContext.createActionManager();
-      auto resourceFactory =
+      const auto actionManager = appContext.createActionManager();
+      const auto resourceFactory =
           appContext.createResourceFactory(std::filesystem::current_path() / "assets");
 
       const auto texture = resourceFactory->createTexture("some_texture_file");

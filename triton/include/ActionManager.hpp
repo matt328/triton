@@ -1,9 +1,7 @@
 #pragma once
 
-#include "Action.hpp"
 #include "ActionType.hpp"
-#include "DefaultActionSet.hpp"
-#include "Events.hpp"
+#include "ActionSet.hpp"
 #include "Key.hpp"
 
 namespace Triton::Actions {
@@ -20,7 +18,7 @@ namespace Triton::Actions {
       ActionManager& operator=(const ActionManager&) = default;
       ActionManager& operator=(ActionManager&&) = delete;
 
-      [[nodiscard]] DefaultActionSet& getCurrentActionSet() const;
+      [[nodiscard]] ActionSet& getCurrentActionSet() const;
 
       [[nodiscard]] bool hasMapping(Key key) const;
       [[nodiscard]] ActionType mapKeyToAction(Key key) const;
@@ -31,7 +29,7 @@ namespace Triton::Actions {
 
     private:
       size_t currentActionSet{};
-      std::vector<std::shared_ptr<DefaultActionSet>> actionSets;
+      std::vector<std::shared_ptr<ActionSet>> actionSets;
    };
 
 }

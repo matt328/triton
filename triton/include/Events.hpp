@@ -71,14 +71,14 @@ namespace Triton::Events {
          return getName();
       }
 
-      bool isInCategory(EventCategory category) {
+      [[nodiscard]] bool isInCategory(const EventCategory category) const {
          return getCategoryFlags() & category;
       }
    };
 
    class EventDispatcher {
     public:
-      EventDispatcher(Event& event) : event(event) {
+      explicit EventDispatcher(Event& event) : event(event) {
       }
 
       template <typename T, typename F>
