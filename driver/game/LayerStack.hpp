@@ -1,42 +1,32 @@
 #pragma once
 
 #include "ActionManager.hpp"
-#include "Logger.hpp"
+
+#include <Events.hpp>
 
 namespace Game {
    class Layer;
 
    class LayerStack {
     public:
-      LayerStack() = default;
+      explicit LayerStack(const std::shared_ptr<Triton::Actions::ActionManager>& actionManager)
+         : actionManager(actionManager) {}
 
       template <typename T, typename... Args>
       size_t pushNew(Args&&... args) {
-         assert(actionManager != nullptr);
-         const auto actionSetId = actionManager->createActionSet();
-
-         Log::debug << "Action Set Id: " << actionSetId << std::endl;
-
-         auto& actionSet = actionManager->getCurrentActionSet();
-
-         scenes.emplace_back(std::make_unique<T>(actionSet, args...));
-         return scenes.size() - 1;
-      }
-
-      void registeractionSet(const std::shared_ptr<Triton::Actions::ActionManager>& actionSet) {
-         this->actionManager = actionSet;
+         auto actionSet = std::make_shared<Triton::Actions::ActionSet>();
+         layerStack.emplace_back(std::make_unique<T>(actionSet, args...));
+         return layerStack.size() - 1;
       }
 
       void switchTo(size_t id);
       void remove(size_t id);
-      void processInput();
-      void update();
-      void draw();
+
+      void handleEvent(Triton::Events::Event& event);
 
     private:
-      size_t currentScene{};
-      std::vector<std::unique_ptr<Layer>> scenes;
-
+      size_t currentLayer{};
+      std::vector<std::unique_ptr<Layer>> layerStack;
       std::shared_ptr<Triton::Actions::ActionManager> actionManager;
    };
 }

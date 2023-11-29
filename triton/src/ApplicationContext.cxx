@@ -21,19 +21,19 @@ namespace Triton {
          application->addEventCallbackFn([this](Events::Event& e) { this->onEvent(e); });
       }
 
-      size_t addEventHandler(std::function<void(Events::Event&)> fn) {
-         return application->addEventCallbackFn(fn);
+      size_t addEventHandler(std::function<void(Events::Event&)> fn) const {
+         return application->addEventCallbackFn(std::move(fn));
       }
 
-      void registerRenderObjectProvider(std::function<std::vector<RenderObject>()> fn) {
-         renderer->registerRenderObjectProvider(fn);
+      void registerRenderObjectProvider(std::function<std::vector<RenderObject>()> fn) const {
+         renderer->registerRenderObjectProvider(std::move(fn));
       }
 
-      void registerPerFrameDataProvider(std::function<PerFrameData()> fn) {
-         renderer->registerPerFrameDataProvider(fn);
+      void registerPerFrameDataProvider(std::function<PerFrameData()> fn) const {
+         renderer->registerPerFrameDataProvider(std::move(fn));
       }
 
-      void onEvent(Events::Event& e) {
+      void onEvent(Events::Event& e) const {
          auto dispatcher = Events::EventDispatcher{e};
 
          dispatcher.dispatch<Events::RenderEvent>([this](Events::RenderEvent& e) {
@@ -53,7 +53,7 @@ namespace Triton {
 
          dispatcher.dispatch<Events::KeyPressedEvent>([this](Events::KeyPressedEvent& e) {
             if (actionManager->hasMapping(e.getKey())) {
-               auto actionType = actionManager->mapKeyToAction(e.getKey());
+               const auto actionType = actionManager->mapKeyToAction(e.getKey());
                Events::ActionEvent event{actionType};
                application->fireEvent(event);
                return true;
@@ -66,7 +66,7 @@ namespace Triton {
              [this](Events::KeyReleasedEvent& e) { return true; });
       }
 
-      void start() {
+      void start() const {
          application->run();
       }
 

@@ -1,11 +1,14 @@
 #pragma once
 
 #include "ActionSet.hpp"
+#include "Events.hpp"
+
 namespace Game {
    class Layer {
     public:
-      explicit Layer(Triton::Actions::ActionSet& actionSet) : actionSet(actionSet) {
-      }
+      explicit Layer(const std::shared_ptr<Triton::Actions::ActionSet>& actionSet)
+         : actionSet(actionSet), active(false) {}
+
       Layer(const Layer&) = default;
       Layer(Layer&&) = delete;
       Layer& operator=(const Layer&) = delete;
@@ -13,17 +16,23 @@ namespace Game {
 
       virtual ~Layer() = default;
 
-      virtual void onCreate() = 0;
-      virtual void onDestroy() = 0;
-      virtual void onActivate() = 0;
-      virtual void onDeactivate() = 0;
+      void onActivate() {
+         active = true;
+      };
+      void onDeactivate() {
+         active = false;
+      };
 
-      virtual void processInput(){};
-      virtual void update(){};
-      virtual void draw(){};
+      [[nodiscard]] const std::shared_ptr<Triton::Actions::ActionSet>& getActionSet() const {
+         return actionSet;
+      }
 
-    private:
-      Triton::Actions::ActionSet& actionSet;
+      virtual bool handleEvent(Triton::Events::Event& event) = 0;
+
+   private:
+      std::shared_ptr<Triton::Actions::ActionSet> actionSet;
+      bool active;
+
    };
 
 }

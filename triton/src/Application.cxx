@@ -1,15 +1,13 @@
 #include "Application.hpp"
 #include "events/ApplicationEvent.hpp"
-#include "Renderer.hpp"
 #include "events/KeyEvent.hpp"
-#include "ResourceFactory.hpp"
 #include "Logger.hpp"
 #include "Events.hpp"
 #include "actions/KeyMap.hpp"
 
 namespace Triton {
 
-   Application::Application(int width, int height, const std::string_view& windowTitle) {
+   Application::Application(const int width, const int height, const std::string_view& windowTitle) {
       glfwInit();
       glfwSetErrorCallback(errorCallback);
       glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -34,11 +32,11 @@ namespace Triton {
    void Application::run() const {
       glfwSetKeyCallback(window.get(),
                          [](GLFWwindow* window,
-                            int key,
+                            const int key,
                             [[maybe_unused]] int scancode,
-                            int ation,
+                            const int ation,
                             [[maybe_unused]] int mods) {
-                            auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
+                            const auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
                             const auto mappedKey = Actions::keyMap[key];
                             switch (ation) {
                                case GLFW_PRESS: {
@@ -56,19 +54,21 @@ namespace Triton {
                                   app->fireEvent(event);
                                   break;
                                }
+                               default: {
+                                  break;
+                               }
                             }
                          });
 
-      glfwSetCharCallback(window.get(), [](GLFWwindow* window, unsigned int keyCode) {
-         auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
-         // Need to check this if we start collecting char input
-         const auto mappedKey = Actions::keyMap[(int)keyCode];
+      glfwSetCharCallback(window.get(), [](GLFWwindow* window, const unsigned int keyCode) {
+         const auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
+         const auto mappedKey = Actions::keyMap[static_cast<int>(keyCode)];
          Events::KeyTypedEvent event{mappedKey};
          app->fireEvent(event);
       });
 
       glfwSetWindowCloseCallback(window.get(), [](GLFWwindow* window) {
-         auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
+         const auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
          auto event = Events::WindowCloseEvent{};
          app->fireEvent(event);
          app->running = false;
@@ -99,9 +99,9 @@ namespace Triton {
             accumulatedTime -= fixedTimeStep;
          }
 
-         auto blendingFactor = accumulatedTime / fixedTimeStep;
 
          {
+            const auto blendingFactor = accumulatedTime / fixedTimeStep;
             ZoneNamedN(blendState, "Blend State", true);
             auto event = Events::UpdateEvent{blendingFactor};
             fireEvent(event);
@@ -124,7 +124,7 @@ namespace Triton {
    }
 
    size_t Application::addEventCallbackFn(std::function<void(Events::Event&)> fn) {
-      auto position = eventCallbackFnList.size();
+      const auto position = eventCallbackFnList.size();
       eventCallbackFnList.push_back(fn);
       return position;
    }
@@ -133,7 +133,7 @@ namespace Triton {
                                                const int width,
                                                const int height) {
       const auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
-      // app->context->windowResized(height, width);
+      app->context->windowResized(height, width);
    }
 
    void Application::errorCallback(int code, const char* description) {

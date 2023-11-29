@@ -3,7 +3,6 @@
 #include "Renderer.hpp"
 #include "ResourceFactory.hpp"
 #include "Events.hpp"
-#include "TransferData.hpp"
 
 namespace Triton {
 
@@ -25,9 +24,9 @@ namespace Triton {
       size_t registerUpdateBlendState(std::function<void(double)> fn);
       size_t registerKeyHandler(std::function<void(int, int, int, int)> fn);
 
-      void deregisterUpdate(const size_t num);
-      void deregisterUpdateBlendState(const size_t num);
-      void deregisterKeyHandler(const size_t num);
+      void deregisterUpdate(size_t num);
+      void deregisterUpdateBlendState(size_t num);
+      void deregisterKeyHandler(size_t num);
 
       size_t addEventCallbackFn(std::function<void(Events::Event&)> fn);
 
@@ -37,7 +36,7 @@ namespace Triton {
          return window.get();
       }
 
-      static void framebufferResizeCallback(GLFWwindow* window, const int width, const int height);
+      static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
       static void errorCallback(int code, const char* description);
 
     private:

@@ -4,34 +4,20 @@
 
 namespace Triton::Actions {
 
-   ActionSet& ActionManager::getCurrentActionSet() const {
-      return *actionSets[currentActionSet];
-   }
-
-   bool ActionManager::hasMapping(const Key key) const {
-      return getCurrentActionSet().hasMapping(key);
-   }
-
-   ActionType ActionManager::mapKeyToAction(const Key key) const {
-      return getCurrentActionSet().mapKeyToAction(key);
-   }
-
-   size_t ActionManager::createActionSet() {
-      actionSets.emplace_back(std::make_unique<ActionSet>());
-      currentActionSet = actionSets.size() - 1;
+   std::shared_ptr<ActionSet> ActionManager::getCurrentActionSet() const {
       return currentActionSet;
    }
 
-   void ActionManager::removeActionSet(const size_t id) {
-      assert(id != currentActionSet);
-
-      if (id < actionSets.size()) {
-         actionSets.erase(actionSets.begin() + id);
-      }
+   bool ActionManager::hasMapping(const Key key) const {
+      return getCurrentActionSet()->hasMapping(key);
    }
 
-   void ActionManager::setCurrentActionSet(const size_t id) {
-      currentActionSet = id;
+   ActionType ActionManager::mapKeyToAction(const Key key) const {
+      return getCurrentActionSet()->mapKeyToAction(key);
+   }
+
+   void ActionManager::setCurrentActionSet(const std::shared_ptr<ActionSet>& newCurrent) {
+      currentActionSet = newCurrent;
    }
 
 }
