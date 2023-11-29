@@ -15,4 +15,4 @@ AllowShortBlocksOnASingleLine: Always
 ExperimentalAutoDetectBinPacking: false
 ColumnLimit: 100
 FixNamespaceComments: false
-SortIncludes: false
+SortIncludes: Never

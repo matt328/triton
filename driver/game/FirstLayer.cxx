@@ -4,30 +4,31 @@
 #include "GameObject.hpp"
 #include "Key.hpp"
 #include "MeshComponent.hpp"
+#include "Logger.hpp"
+
+#include <events/ActionEvent.hpp>
 
 namespace Game {
-   FirstLayer::FirstLayer(Triton::Actions::ActionSet& actionSet) : Layer(actionSet) {
-      // Set up game objects
+   FirstLayer::FirstLayer(const std::shared_ptr<Triton::Actions::ActionSet>& actionSet) :
+       Layer(actionSet) {
       auto gameObject = std::make_unique<GameObject>();
       gameObject->addComponent<MeshComponent>();
       gameObjects.push_back(std::move(gameObject));
 
-      // Set up Layer Action Mappings
-      actionSet.mapKey(Triton::Actions::Key::W, Triton::Actions::ActionType::MoveForward);
+      // Map Actions
+      actionSet->mapKey(Triton::Actions::Key::A, Triton::Actions::ActionType::StrafeLeft);
    }
 
-   void FirstLayer::update() {
-
+   bool FirstLayer::handleEvent(Triton::Events::Event& event) {
+      auto dispatcher = Triton::Events::EventDispatcher{event};
+      return dispatcher.dispatch<Triton::Events::ActionEvent>([this](Triton::Events::ActionEvent& e) {
+         return handleAction(e.getActionType());
+      });
    }
 
-
-   void FirstLayer::onCreate() {
+   bool FirstLayer::handleAction(const Triton::Actions::ActionType action) const{
+      Log::debug << "First Layer recieved action: " << action << std::endl;
+      return true;
    }
 
-   void FirstLayer::onDestroy() {
-   }
-   void FirstLayer::onActivate() {
-   }
-   void FirstLayer::onDeactivate() {
-   }
 }

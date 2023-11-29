@@ -83,7 +83,7 @@ namespace Triton::Events {
 
       template <typename T, typename F>
       bool dispatch(const F& fn) {
-         if (event.getEventType() == T::getStaticType()) {
+         if (event.getEventType() == T::getStaticType() && !event.handled) {
             event.handled |= fn(static_cast<T&>(event));
             return true;
          }
