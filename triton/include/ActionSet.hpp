@@ -15,8 +15,7 @@ namespace Triton::Actions {
       ~ActionSet() = default;
 
       void mapKey(Key key, ActionType actionType);
-      bool hasMapping(Key key) const;
-
+      [[nodiscard]] bool hasMapping(Key key) const;
       [[nodiscard]] ActionType mapKeyToAction(Key key) const;
 
    private:
