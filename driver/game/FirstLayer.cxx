@@ -1,4 +1,4 @@
-#include "SceneGame.hpp"
+#include "FirstLayer.hpp"
 
 #include "ActionType.hpp"
 #include "GameObject.hpp"
@@ -6,28 +6,28 @@
 #include "MeshComponent.hpp"
 
 namespace Game {
-   SceneGame::SceneGame(Triton::Actions::ActionSet& actionSet) : Scene(actionSet) {
+   FirstLayer::FirstLayer(Triton::Actions::ActionSet& actionSet) : Layer(actionSet) {
       // Set up game objects
       auto gameObject = std::make_unique<GameObject>();
       gameObject->addComponent<MeshComponent>();
       gameObjects.push_back(std::move(gameObject));
 
-      // Set up Scene Action Mappings
+      // Set up Layer Action Mappings
       actionSet.mapKey(Triton::Actions::Key::W, Triton::Actions::ActionType::MoveForward);
    }
 
-   void SceneGame::update() {
+   void FirstLayer::update() {
 
    }
 
 
-   void SceneGame::onCreate() {
+   void FirstLayer::onCreate() {
    }
 
-   void SceneGame::onDestroy() {
+   void FirstLayer::onDestroy() {
    }
-   void SceneGame::onActivate() {
+   void FirstLayer::onActivate() {
    }
-   void SceneGame::onDeactivate() {
+   void FirstLayer::onDeactivate() {
    }
 }

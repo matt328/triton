@@ -2,16 +2,16 @@
 
 #include "ActionSet.hpp"
 namespace Game {
-   class Scene {
+   class Layer {
     public:
-      explicit Scene(Triton::Actions::ActionSet& actionSet) : actionSet(actionSet) {
+      explicit Layer(Triton::Actions::ActionSet& actionSet) : actionSet(actionSet) {
       }
-      Scene(const Scene&) = default;
-      Scene(Scene&&) = delete;
-      Scene& operator=(const Scene&) = delete;
-      Scene& operator=(Scene&&) = delete;
+      Layer(const Layer&) = default;
+      Layer(Layer&&) = delete;
+      Layer& operator=(const Layer&) = delete;
+      Layer& operator=(Layer&&) = delete;
 
-      virtual ~Scene() = default;
+      virtual ~Layer() = default;
 
       virtual void onCreate() = 0;
       virtual void onDestroy() = 0;
