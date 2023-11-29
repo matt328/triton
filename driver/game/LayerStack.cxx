@@ -1,31 +1,31 @@
-#include "SceneManager.hpp"
+#include "LayerStack.hpp"
 
 #include "cassert"
 
-#include "Scene.hpp"
+#include "Layer.hpp"
 
 namespace Game {
-   void SceneManager::processInput() {
+   void LayerStack::processInput() {
       assert(currentScene < scenes.size());
       scenes[currentScene]->processInput();
    }
 
-   void SceneManager::update() {
+   void LayerStack::update() {
       assert(currentScene < scenes.size());
       scenes[currentScene]->update();
    }
 
-   void SceneManager::draw() {
+   void LayerStack::draw() {
       assert(currentScene < scenes.size());
       scenes[currentScene]->draw();
    }
 
-   void SceneManager::switchTo(size_t id) {
+   void LayerStack::switchTo(size_t id) {
       assert(currentScene < scenes.size());
       currentScene = id;
    }
 
-   void SceneManager::remove(size_t id) {
+   void LayerStack::remove(size_t id) {
       assert(id != currentScene);
 
       if (id < scenes.size()) {
