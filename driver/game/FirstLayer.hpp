@@ -1,17 +1,14 @@
 #pragma once
 
-#include "Scene.hpp"
+#include "Layer.hpp"
 
 #include "GameObject.hpp"
 
 namespace Game {
-
-   //    class GameObject;
-
-   class SceneGame : public Scene {
+   class FirstLayer final : public Layer {
 
     public:
-      SceneGame(Triton::Actions::ActionSet& actionSet);
+      explicit FirstLayer(Triton::Actions::ActionSet& actionSet);
       void onCreate() override;
       void onDestroy() override;
       void onActivate() override;

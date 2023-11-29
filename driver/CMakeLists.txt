@@ -1,8 +1,8 @@
 set(driver_SRC
    "main.cxx"
    "game/GameObject.cxx"
-   "game/SceneManager.cxx"
-   "game/SceneGame.cxx"
+   "game/LayerStack.cxx"
+   "game/FirstLayer.cxx"
 )
 set(project_name "driver")
 

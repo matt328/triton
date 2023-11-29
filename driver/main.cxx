@@ -5,8 +5,8 @@
 #include "Logger.hpp"
 
 #include "events/ActionEvent.hpp"
-#include "game/SceneManager.hpp"
-#include "game/SceneGame.hpp"
+#include "game/LayerStack.hpp"
+#include "game/FirstLayer.hpp"
 
 #include "config.h"
 
@@ -46,11 +46,11 @@ int main() {
       // appContext.registerRenderObjectProvider([]() { return std::vector<Triton::RenderObject>();
       // });
 
-      auto sceneManager = std::make_unique<Game::SceneManager>();
-      sceneManager->registeractionSet(actionManager);
+      auto layerStack = std::make_unique<Game::LayerStack>();
+      layerStack->registeractionSet(actionManager);
 
-      auto id = sceneManager->add<Game::SceneGame>();
-      sceneManager->switchTo(id);
+      auto id = layerStack->pushNew<Game::FirstLayer>();
+      layerStack->switchTo(id);
 
       auto as = actionManager->createActionSet();
       actionManager->setCurrentActionSet(as);
@@ -64,9 +64,6 @@ int main() {
             return true;
          });
       });
-
-      // remove the stuff where actionmanager fires actions and things subscribe to them
-      // keep the actionsets thing
 
       appContext.start();
 

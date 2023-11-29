@@ -4,16 +4,16 @@
 #include "Logger.hpp"
 
 namespace Game {
-   class Scene;
+   class Layer;
 
-   class SceneManager {
+   class LayerStack {
     public:
-      SceneManager() = default;
+      LayerStack() = default;
 
       template <typename T, typename... Args>
-      size_t add(Args&&... args) {
+      size_t pushNew(Args&&... args) {
          assert(actionManager != nullptr);
-         auto actionSetId = actionManager->createActionSet();
+         const auto actionSetId = actionManager->createActionSet();
 
          Log::debug << "Action Set Id: " << actionSetId << std::endl;
 
@@ -23,7 +23,7 @@ namespace Game {
          return scenes.size() - 1;
       }
 
-      void registeractionSet(std::shared_ptr<Triton::Actions::ActionManager> actionSet) {
+      void registeractionSet(const std::shared_ptr<Triton::Actions::ActionManager>& actionSet) {
          this->actionManager = actionSet;
       }
 
@@ -35,7 +35,7 @@ namespace Game {
 
     private:
       size_t currentScene{};
-      std::vector<std::unique_ptr<Scene>> scenes;
+      std::vector<std::unique_ptr<Layer>> scenes;
 
       std::shared_ptr<Triton::Actions::ActionManager> actionManager;
    };
