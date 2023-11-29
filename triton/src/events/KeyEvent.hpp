@@ -13,16 +13,16 @@ namespace Triton::Events {
       EVENT_CLASS_CATEGORY(EventCategoryKeyboard | EventCategoryInput)
 
     protected:
-      KeyEvent(const Actions::Key key) : Event(), key(key) {
+      explicit KeyEvent(const Actions::Key key) : Event(), key(key) {
       }
 
     private:
       Actions::Key key;
    };
 
-   class KeyPressedEvent : public KeyEvent {
+   class KeyPressedEvent final : public KeyEvent {
     public:
-      KeyPressedEvent(const Actions::Key key, bool isRepeat = false) :
+      explicit KeyPressedEvent(const Actions::Key key, bool const isRepeat = false) :
           KeyEvent(key), isRepeated(isRepeat) {
       }
 
@@ -40,9 +40,9 @@ namespace Triton::Events {
       EVENT_CLASS_TYPE(KeyPressed) private : bool isRepeated;
    };
 
-   class KeyReleasedEvent : public KeyEvent {
+   class KeyReleasedEvent final : public KeyEvent {
     public:
-      KeyReleasedEvent(const Actions::Key key) : KeyEvent(key) {
+      explicit KeyReleasedEvent(const Actions::Key key) : KeyEvent(key) {
       }
 
       [[nodiscard]] std::string toString() const override {
@@ -54,9 +54,9 @@ namespace Triton::Events {
       EVENT_CLASS_TYPE(KeyReleased)
    };
 
-   class KeyTypedEvent : public KeyEvent {
+   class KeyTypedEvent final : public KeyEvent {
     public:
-      KeyTypedEvent(const Actions::Key key) : KeyEvent(key) {
+      explicit KeyTypedEvent(const Actions::Key key) : KeyEvent(key) {
       }
 
       [[nodiscard]] std::string toString() const override {

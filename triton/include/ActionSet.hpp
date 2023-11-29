@@ -12,11 +12,14 @@ namespace Triton::Actions {
       ActionSet& operator=(const ActionSet&) = default;
       ActionSet& operator=(ActionSet&&) = delete;
 
-      virtual ~ActionSet() = default;
+      ~ActionSet() = default;
 
-      virtual void mapKey(Key key, ActionType actionType) = 0;
-      virtual bool hasMapping(Key key) = 0;
+      void mapKey(Key key, ActionType actionType);
+      bool hasMapping(Key key) const;
 
-      [[nodiscard]] virtual ActionType mapKeyToAction(Key key) const = 0;
+      [[nodiscard]] ActionType mapKeyToAction(Key key) const;
+
+   private:
+      std::multimap<Key, ActionType> actionMap;
    };
 };
