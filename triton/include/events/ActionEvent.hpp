@@ -5,13 +5,19 @@
 #include "Key.hpp"
 
 namespace Triton::Events {
-   class ActionEvent : public Event {
+   class ActionEvent final : public Event {
     public:
-      ActionEvent(const Actions::ActionType actionType) : actionType(actionType) {
+      explicit ActionEvent(const Actions::ActionType actionType) : actionType(actionType) {
       }
 
       [[nodiscard]] Actions::ActionType getActionType() const {
          return actionType;
+      }
+
+      [[nodiscard]] std::string toString() const override {
+         std::stringstream ss;
+         ss << "ActionEvent: " << getString(actionType);
+         return ss.str();
       }
 
       EVENT_CLASS_CATEGORY(EventCategoryAction)
