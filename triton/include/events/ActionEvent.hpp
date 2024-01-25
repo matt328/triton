@@ -1,8 +1,10 @@
 #pragma once
 
 #include "ActionType.hpp"
-#include "Events.hpp"
 #include "Key.hpp"
+#include "Events.hpp"
+
+#include <sstream>
 
 namespace Triton::Events {
    class ActionEvent final : public Event {
