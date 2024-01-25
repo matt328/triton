@@ -38,4 +38,4 @@ namespace Game {
     private:
       std::vector<std::shared_ptr<Component>> allComponents;
    };
-}
+} // namespace Game

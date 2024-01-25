@@ -133,5 +133,9 @@
    "editor.bracketPairColorization.enabled": true,
    "editor.bracketPairColorization.independentColorPoolPerBracketType": true,
    // Indentation lines
-   "editor.guides.indentation": true // shows vertical lines
+   "editor.guides.indentation": true, // shows vertical lines
+   "clangd.arguments": [
+      "-background-index",
+      "-compile-commands-dir=debug"
+   ]
 }

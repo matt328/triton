@@ -3,7 +3,7 @@ PointerAlignment: Left
 Standard: c++11
 AlwaysBreakTemplateDeclarations: Yes
 NamespaceIndentation: All
-ForEachMacros: [ TEST_CLASS, TEST_METHOD ]
+ForEachMacros: [TEST_CLASS, TEST_METHOD]
 IndentWidth: 3
 IndentCaseLabels: true
 BinPackArguments: false

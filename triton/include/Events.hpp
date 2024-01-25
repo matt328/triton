@@ -76,6 +76,25 @@ namespace Triton::Events {
       }
    };
 
+   class EventCategoryDispatcher {
+    public:
+      EventCategoryDispatcher(Event& event, EventCategory category) :
+          event(event), category(category) {
+      }
+      template <typename T, typename F>
+      bool dispatch(const F& fn) {
+         if (event.getCategoryFlags() & category) {
+            event.handled |= fn(static_cast<T&>(event));
+            return true;
+         }
+         return false;
+      }
+
+    private:
+      Event& event;
+      EventCategory category;
+   };
+
    class EventDispatcher {
     public:
       explicit EventDispatcher(Event& event) : event(event) {

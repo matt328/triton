@@ -3,11 +3,17 @@
 #include "events/KeyEvent.hpp"
 #include "Logger.hpp"
 #include "Events.hpp"
+#include "Renderer.hpp"
+#include "ResourceFactory.hpp"
 #include "actions/KeyMap.hpp"
+#include "events/ApplicationEvent.hpp"
+#include "events/KeyEvent.hpp"
 
 namespace Triton {
 
-   Application::Application(const int width, const int height, const std::string_view& windowTitle) {
+   Application::Application(const int width,
+                            const int height,
+                            const std::string_view& windowTitle) {
       glfwInit();
       glfwSetErrorCallback(errorCallback);
       glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -34,11 +40,12 @@ namespace Triton {
                          [](GLFWwindow* window,
                             const int key,
                             [[maybe_unused]] int scancode,
-                            const int ation,
+                            int action,
                             [[maybe_unused]] int mods) {
-                            const auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
+                            const auto app =
+                                static_cast<Application*>(glfwGetWindowUserPointer(window));
                             const auto mappedKey = Actions::keyMap[key];
-                            switch (ation) {
+                            switch (action) {
                                case GLFW_PRESS: {
                                   Events::KeyPressedEvent event{mappedKey};
                                   app->fireEvent(event);
@@ -99,7 +106,6 @@ namespace Triton {
             accumulatedTime -= fixedTimeStep;
          }
 
-
          {
             const auto blendingFactor = accumulatedTime / fixedTimeStep;
             ZoneNamedN(blendState, "Blend State", true);
@@ -140,4 +146,4 @@ namespace Triton {
       Log::error << "GLFW Error. Code: " << code << ", description: " << description << std::endl;
       throw std::runtime_error("GLFW Error. See log output for details");
    }
-}
+} // namespace Triton

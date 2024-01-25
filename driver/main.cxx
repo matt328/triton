@@ -50,6 +50,29 @@ int main() {
 
       const auto mesh = resourceFactory->createMesh("some_mesh_file");
 
+      //   auto sceneManager = std::make_unique<Game::SceneManager>();
+      //   sceneManager->registeractionSet(actionManager);
+
+      //   auto id = sceneManager->add<Game::SceneGame>();
+      //   sceneManager->switchTo(id);
+
+      //   auto as = actionManager->createActionSet();
+      //   actionManager->setCurrentActionSet(as);
+      //   actionManager->getCurrentActionSet().mapKey(Triton::Actions::Key::Up,
+      //                                               Triton::Actions::ActionType::MoveForward);
+
+      appContext.addEventHandler([](Triton::Events::Event& e) {
+         auto dispatcher =
+             Triton::Events::EventCategoryDispatcher{e, Triton::Events::EventCategoryAction};
+         dispatcher.dispatch<Triton::Events::ActionEvent>([](Triton::Events::ActionEvent& e) {
+            Log::debug << "ActionEvent: " << e << std::endl;
+            return true;
+         });
+      });
+
+      // remove the stuff where actionmanager fires actions and things subscribe to them
+      // keep the actionsets thing
+
       appContext.start();
 
    } catch (const std::exception& e) { Log::error << e.what() << std::endl; }
