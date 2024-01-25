@@ -48,10 +48,10 @@ This took me forever to rediscover. Uses LLVM, clang, lld and lldb.
 Install CMake by downloading the windows installer.
 
 Install LLVM using the installer from the github release page https://github.com/llvm/llvm-project/releases/
+Make sure this bin gets added on your path, and set `CC` and `CCX` env vars to `C:\Program Files\LLVM\bin\clang.exe` and `C:\Program Files\LLVM\bin\clang++.exe` THIS IS IMPORTANT IT WONT WORK WITHOUT THIS.
 
-Download some dude's MinGW build using LLVM from here https://github.com/mstorsjo/llvm-mingw/releases
+Download some dude's MinGW build using LLVM from here https://github.com/mstorsjo/llvm-mingw/releases I'm pretty sure we only need this for the mingw32-make.exe, but you have to put it's bin on your path also so that CMake will pick up the `MinGW Makefiles` generator.
 
-Extract it somewhere and add its `/bin` folder to your PATH
+Download the `llvm-mingw-*-ucrt-x86_64` and put it's `bin` on your path.
 
-Deal with CMake not supporting some feature of C++ that the latest version of LLVM causes it to opt
-into anyway.
+I don't know why clang gives a better experience in VSCode, I find using MSVC in VSCode doesn't work all that well since VSCode isn't VS.  The clang language service works much nicer with VSCode, and dovetails much better with clang-tidy and clang-format. IMO, anyway.
