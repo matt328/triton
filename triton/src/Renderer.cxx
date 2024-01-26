@@ -1,7 +1,5 @@
 #include "Renderer.hpp"
 
-#include "ResourceFactory.hpp"
-#include "TransferData.hpp"
 #include "graphics/Instance.hpp"
 #include "graphics/FrameData.hpp"
 #include "graphics/ImmediateContext.hpp"
