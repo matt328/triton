@@ -51,7 +51,8 @@ Install LLVM using the installer from the github release page https://github.com
 Make sure this bin gets added on your path, and set `CC` and `CCX` env vars to `C:\Program Files\LLVM\bin\clang.exe` and `C:\Program Files\LLVM\bin\clang++.exe` THIS IS IMPORTANT IT WONT WORK WITHOUT THIS.
 
 Download some dude's MinGW build using LLVM from here https://github.com/mstorsjo/llvm-mingw/releases I'm pretty sure we only need this for the mingw32-make.exe, but you have to put it's bin on your path also so that CMake will pick up the `MinGW Makefiles` generator.
+TODO: Try a more minimal MinGW installation that only contains mingw-make.exe.  Actually even try just dropping that executable on the path and see if that works.  I like using make for the build system so it's the same on all 3 platforms.
 
 Download the `llvm-mingw-*-ucrt-x86_64` and put it's `bin` on your path.
 
-I don't know why clang gives a better experience in VSCode, I find using MSVC in VSCode doesn't work all that well since VSCode isn't VS.  The clang language service works much nicer with VSCode, and dovetails much better with clang-tidy and clang-format. IMO, anyway.
+The clangd extension gives a much better experience in VSCode than microsoft's intellisense. Change my mind.
