@@ -4,7 +4,6 @@
 #include "Logger.hpp"
 #include "Events.hpp"
 #include "Renderer.hpp"
-#include "ResourceFactory.hpp"
 #include "actions/KeyMap.hpp"
 #include "events/ApplicationEvent.hpp"
 #include "events/KeyEvent.hpp"
