@@ -136,6 +136,6 @@
    "editor.guides.indentation": true, // shows vertical lines
    "clangd.arguments": [
       "-background-index",
-      "-compile-commands-dir=debug"
+      "-compile-commands-dir=build"
    ]
 }

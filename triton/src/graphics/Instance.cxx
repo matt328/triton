@@ -5,11 +5,10 @@ namespace Triton {
 
    const std::vector DESIRED_VALIDATION_LAYERS = {"VK_LAYER_KHRONOS_validation"};
 
-   Instance::Instance(GLFWwindow* window, const bool validationEnabled) :
-       validationEnabled(validationEnabled) {
+   Device::Device(GLFWwindow* window, const bool validationEnabled)
+       : validationEnabled(validationEnabled) {
       glfwGetWindowSize(window, &width, &height);
       context = std::make_unique<vk::raii::Context>();
-
 
       // Log available extensions
       // const auto instanceExtensions = context->enumerateInstanceExtensionProperties();
@@ -57,7 +56,7 @@ namespace Triton {
 
       instance = std::make_unique<vk::raii::Instance>(*context, instanceCreateInfo);
 
-      Log::trace << "Created Instance" << std::endl;
+      Log::trace << "Created Device" << std::endl;
 
       const vk::DebugReportCallbackCreateInfoEXT ci = {
           .pNext = nullptr,
@@ -79,16 +78,16 @@ namespace Triton {
       surface = std::make_unique<vk::raii::SurfaceKHR>(*instance, tempSurface);
    }
 
-   std::vector<vk::raii::PhysicalDevice> Instance::enumeratePhysicalDevices() const {
+   std::vector<vk::raii::PhysicalDevice> Device::enumeratePhysicalDevices() const {
       return instance->enumeratePhysicalDevices();
    }
 
-   void Instance::resizeWindow(const uint32_t newHeight, const uint32_t newWidth) {
+   void Device::resizeWindow(const uint32_t newHeight, const uint32_t newWidth) {
       height = static_cast<int>(newHeight);
       width = static_cast<int>(newWidth);
    }
 
-   bool Instance::checkValidationLayerSupport() const {
+   bool Device::checkValidationLayerSupport() const {
       const auto availableLayers = context->enumerateInstanceLayerProperties();
       for (const auto& layerProps : availableLayers) {
          Log::trace << layerProps.layerName << std::endl;
@@ -109,7 +108,7 @@ namespace Triton {
       return true;
    }
 
-   std::pair<std::vector<const char*>, bool> Instance::getRequiredExtensions() const {
+   std::pair<std::vector<const char*>, bool> Device::getRequiredExtensions() const {
       uint32_t glfwExtensionCount = 0;
       const auto glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
@@ -144,7 +143,7 @@ namespace Triton {
       return std::make_pair(extensions, portabilityPresent);
    }
 
-   VkBool32 Instance::debugCallbackFn(
+   VkBool32 Device::debugCallbackFn(
        [[maybe_unused]] VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
        [[maybe_unused]] VkDebugUtilsMessageTypeFlagsEXT messageType,
        [[maybe_unused]] const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
@@ -153,7 +152,7 @@ namespace Triton {
       return VK_FALSE;
    }
 
-   VkBool32 Instance::vulkanDebugReportCallback(
+   VkBool32 Device::vulkanDebugReportCallback(
        [[maybe_unused]] VkDebugReportFlagsEXT flags,
        [[maybe_unused]] VkDebugReportObjectTypeEXT objectType,
        [[maybe_unused]] uint64_t object,
