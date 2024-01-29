@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 
 set(CMAKE_TOOLCHAIN_FILE ./vcpkg/scripts/buildsystems/vcpkg.cmake)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 project(triton VERSION "0.0.1" LANGUAGES CXX)
 
 configure_file(driver/config.h.in config.h)
@@ -45,8 +47,5 @@ ENDIF(LINUX)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin/")
 
-add_subdirectory(triton)
 add_subdirectory(assets)
-add_subdirectory(driver)
-add_subdirectory(testarea)
 add_subdirectory(triton-next)

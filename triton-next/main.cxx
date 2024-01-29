@@ -1,4 +1,6 @@
 #include "config.h"
+#include "Timer.hpp"
+#include "Game.hpp"
 
 int main() {
    Log::LogManager::getInstance().setMinLevel(Log::Level::Trace);
@@ -19,6 +21,15 @@ int main() {
 #endif
 
    try {
+      bool running = true;
+      auto timer = Triton::Core::Timer(60, 4);
+
+      auto game = std::make_unique<Triton::Game::Game>();
       Log::info << "Initialized" << std::endl;
+
+      while (running) {
+         timer.tick([&]() { game->update(timer); });
+      }
+
    } catch (const std::exception& e) { Log::error << e.what() << std::endl; }
 }

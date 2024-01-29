@@ -6,13 +6,16 @@ NamespaceIndentation: All
 ForEachMacros: [TEST_CLASS, TEST_METHOD]
 IndentWidth: 3
 IndentCaseLabels: true
+
 BinPackArguments: false
 BinPackParameters: false
-BreakConstructorInitializers: AfterColon
-PackConstructorInitializers: BinPack
+ExperimentalAutoDetectBinPacking: false
+AllowAllParametersOfDeclarationOnNextLine: false
+AllowAllArgumentsOnNextLine: false
+
 BreakBeforeBraces: Attach
 AllowShortBlocksOnASingleLine: Always
-ExperimentalAutoDetectBinPacking: false
 ColumnLimit: 100
 FixNamespaceComments: false
 SortIncludes: Never
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
