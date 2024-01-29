@@ -1,9 +1,8 @@
 #pragma once
 
-#include "Instance.hpp"
 #include <vulkan/vulkan_enums.hpp>
 
-namespace Triton {
+namespace Triton::Game::Graphics::Helpers {
 
    // Structs
    struct QueueFamilyIndices {
@@ -46,11 +45,11 @@ namespace Triton {
    }
 
    vk::Extent2D chooseSwapExtent(const vk::SurfaceCapabilitiesKHR& capabilities,
-                                 const Device& device) {
+                                 const std::pair<uint32_t, uint32_t>& windowSize) {
       if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
          return capabilities.currentExtent;
       } else {
-         const auto& [width, height] = device.getWindowSize();
+         const auto& [width, height] = windowSize;
 
          vk::Extent2D actualExtent = {width, height};
 
@@ -66,7 +65,7 @@ namespace Triton {
    }
 
    QueueFamilyIndices findQueueFamilies(const vk::raii::PhysicalDevice& possibleDevice,
-                                        const std::unique_ptr<vk::raii::SurfaceKHR>& surface) {
+                                        const vk::raii::SurfaceKHR& surface) {
       QueueFamilyIndices queueFamilyIndices;
 
       const auto queueFamilies = possibleDevice.getQueueFamilyProperties();
@@ -76,7 +75,7 @@ namespace Triton {
             queueFamilyIndices.graphicsFamily = i;
          }
 
-         if (possibleDevice.getSurfaceSupportKHR(i, **surface)) {
+         if (possibleDevice.getSurfaceSupportKHR(i, *surface)) {
             queueFamilyIndices.presentFamily = i;
          }
 
@@ -110,27 +109,27 @@ namespace Triton {
       return requiredExtensions.empty();
    }
 
-   SwapchainSupportDetails querySwapchainSupport(
-       const vk::raii::PhysicalDevice& possibleDevice,
-       const std::unique_ptr<vk::raii::SurfaceKHR>& surface) {
+   SwapchainSupportDetails querySwapchainSupport(const vk::raii::PhysicalDevice& possibleDevice,
+                                                 const vk::raii::SurfaceKHR& surface) {
       SwapchainSupportDetails details;
-      details.capabilities = possibleDevice.getSurfaceCapabilitiesKHR(**surface);
-      details.formats = possibleDevice.getSurfaceFormatsKHR(**surface);
-      details.presentModes = possibleDevice.getSurfacePresentModesKHR(**surface);
+      details.capabilities = possibleDevice.getSurfaceCapabilitiesKHR(*surface);
+      details.formats = possibleDevice.getSurfaceFormatsKHR(*surface);
+      details.presentModes = possibleDevice.getSurfacePresentModesKHR(*surface);
       return details;
    }
 
-   bool isDeviceSuitable(const vk::raii::PhysicalDevice& possibleDevice, const Device& device) {
-      const QueueFamilyIndices queueFamilyIndices =
-          findQueueFamilies(possibleDevice, device.getSurface());
+   bool isDeviceSuitable(const vk::raii::PhysicalDevice& possibleDevice,
+                         const vk::raii::SurfaceKHR& surface,
+                         const std::vector<const char*>& desiredDeviceExtensions) {
+      const QueueFamilyIndices queueFamilyIndices = findQueueFamilies(possibleDevice, surface);
 
       const bool extensionsSupported =
-          checkDeviceExtensionSupport(possibleDevice, device.getDesiredDeviceExtensions());
+          checkDeviceExtensionSupport(possibleDevice, desiredDeviceExtensions);
 
       bool swapchainAdequate = false;
       if (extensionsSupported) {
          auto [capabilities, formats, presentModes] =
-             querySwapchainSupport(possibleDevice, device.getSurface());
+             querySwapchainSupport(possibleDevice, surface);
          swapchainAdequate = !formats.empty() && !presentModes.empty();
       }
 
@@ -141,5 +140,22 @@ namespace Triton {
 
       return queueFamilyIndices.isComplete() && extensionsSupported && swapchainAdequate &&
              isDiscrete && features.samplerAnisotropy && features.tessellationShader;
+   }
+
+   template <typename T>
+   void setObjectName(T const& handle,
+                      [[maybe_unused]] const vk::raii::Device& device,
+                      const vk::DebugReportObjectTypeEXT objectType,
+                      const std::string_view name) {
+      // NOLINTNEXTLINE this is just debug anyway
+      const auto debugHandle = reinterpret_cast<uint64_t>(static_cast<typename T::CType>(handle));
+
+      [[maybe_unused]] const auto debugNameInfo =
+          vk::DebugMarkerObjectNameInfoEXT{.objectType = objectType,
+                                           .object = debugHandle,
+                                           .pObjectName = name.data()};
+      // TODO: vulkan sdk 261 busted this, something is broken with vulkan_raii, when i look up
+      // the function manually it's there but vulkan_raii can't find it
+      // device.debugMarkerSetObjectNameEXT(debugNameInfo);
    }
 }

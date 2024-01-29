@@ -1,13 +1,13 @@
 #include "Application.hpp"
+
 #include "events/ApplicationEvent.hpp"
 #include "events/KeyEvent.hpp"
-#include "Logger.hpp"
-#include "Events.hpp"
-#include "Renderer.hpp"
+#include "events/Events.hpp"
+#include "events/ApplicationEvent.hpp"
+#include "events/KeyEvent.hpp"
+
+#include "graphics/Renderer.hpp"
 #include "actions/KeyMap.hpp"
-#include "events/ApplicationEvent.hpp"
-#include "events/KeyEvent.hpp"
-#include <GLFW/glfw3.h>
 
 namespace Triton {
 

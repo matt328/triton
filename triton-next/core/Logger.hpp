@@ -1,8 +1,8 @@
 #pragma once
 
-#include <iostream>
 #include <ctime>
 #include <iomanip>
+#include <iostream>
 #include <string_view>
 
 namespace Log {
@@ -89,6 +89,7 @@ namespace Log {
       bool isNextBegin{true};
    };
 
+   // I'd like to make these const but because of L82 they can't be
    inline Logger trace = Logger{Level::Trace};
    inline Logger debug = Logger{Level::Debug};
    inline Logger info = Logger{Level::Info};
