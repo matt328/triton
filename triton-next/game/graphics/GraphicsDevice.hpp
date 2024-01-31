@@ -43,6 +43,22 @@ namespace Triton::Game::Graphics {
          return instance;
       }
 
+      [[nodiscard]] const vk::Format getSwapchainFormat() const {
+         return swapchainImageFormat;
+      }
+
+      [[nodiscard]] const vk::raii::PhysicalDevice& getPhysicalDevice() const {
+         return *physicalDevice;
+      }
+
+      /// @brief Returns a const reference to the `vk::raii::Device`. This will only live as long as
+      /// the graphics device, so do not store the return value of this function unless you know
+      /// what you are doing.
+      /// @return The current Vulkan Device.
+      [[nodiscard]] const vk::raii::Device& getVulkanDevice() const {
+         return *vulkanDevice;
+      }
+
       void resizeWindow(uint32_t newHeight, uint32_t newWidth);
 
     private:
