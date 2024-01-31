@@ -199,7 +199,7 @@ namespace Triton::Game::Graphics {
 
       // Create Swapchain
       auto [capabilities, formats, presentModes] =
-          Helpers::querySwapchainSupport(*physicalDevice, surface);
+          Helpers::querySwapchainSupport(*physicalDevice, *surface);
 
       const auto surfaceFormat = Helpers::chooseSwapSurfaceFormat(formats);
       const auto presentMode = Helpers::chooseSwapPresentMode(presentModes);
