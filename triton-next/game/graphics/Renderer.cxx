@@ -7,19 +7,8 @@ namespace Triton::Game::Graphics {
    Renderer::Renderer(GLFWwindow* window) {
       graphicsDevice = std::make_unique<GraphicsDevice>(window, true);
 
-      // All the Above is boilerplate and should move into the GraphicsDevice class
-      // If anything needs something inside GraphicsDevice, just pass a const
-      // std::unique_ptr<GraphicsDevice>& and move on with your life
-
-      const auto renderPassCreateInfo =
-          Utils::RenderPassCreateInfo{.device = device.get(),
-                                      .physicalDevice = physicalDevice.get(),
-                                      .swapchainFormat = swapchainImageFormat,
-                                      .clearColor = false,
-                                      .clearDepth = false};
-
-      renderPass = std::make_unique<vk::raii::RenderPass>(
-          Utils::colorAndDepthRenderPass(renderPassCreateInfo));
+      // Create Render Pass
+      renderPass = Helpers::createBasicRenderPass(*graphicsDevice);
 
       pipeline = std::make_unique<DefaultPipeline>(*device, *renderPass, swapchainExtent);
 
