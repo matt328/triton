@@ -1,13 +1,13 @@
 #include "Renderer.hpp"
 #include "GraphicsDevice.hpp"
 #include "GraphicsHelpers.hpp"
+#include "helpers/Pipeline.hpp"
 
 namespace Triton::Game::Graphics {
 
    Renderer::Renderer(GLFWwindow* window) {
       graphicsDevice = std::make_unique<GraphicsDevice>(window, true);
 
-      // Create Render Pass
       renderPass = Helpers::createBasicRenderPass(*graphicsDevice);
 
       pipeline = std::make_unique<DefaultPipeline>(*device, *renderPass, swapchainExtent);

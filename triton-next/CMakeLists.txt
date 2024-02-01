@@ -4,6 +4,7 @@ set(next_SRC
    "game/Application.cxx"
    "game/graphics/GraphicsDevice.cxx"
    "game/graphics/ImmediateContext.cxx"
+   "game/graphics/helpers/SpirvHelper.cxx"
    "game/graphics/Renderer.cxx"
    "game/graphics/vma_raii.cxx"
    "game/actions/ActionManager.cxx"
