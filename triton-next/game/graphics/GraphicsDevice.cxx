@@ -1,5 +1,5 @@
 #include "GraphicsDevice.hpp"
-#include "GraphicsHelpers.hpp"
+#include "helpers/Vulkan.hpp"
 #include "ImmediateContext.hpp"
 #include "vma_raii.hpp"
 

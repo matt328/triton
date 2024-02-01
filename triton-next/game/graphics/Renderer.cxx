@@ -1,7 +1,7 @@
 #include "Renderer.hpp"
 #include "GraphicsDevice.hpp"
-#include "GraphicsHelpers.hpp"
 #include "helpers/Pipeline.hpp"
+#include "helpers/Renderpass.hpp"
 
 namespace Triton::Game::Graphics {
 
