@@ -7,6 +7,11 @@
 #include <fstream>
 #include <functional>
 #include <GLFW/glfw3.h>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
+#include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/string_cast.hpp>
 #include <glslang/SPIRV/GlslangToSpv.h>
 #include <map>
 #include <optional>
