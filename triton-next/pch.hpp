@@ -3,8 +3,11 @@
 // Precompiled headers go here
 
 #include "core/Logger.hpp"
+#include <filesystem>
+#include <fstream>
 #include <functional>
 #include <GLFW/glfw3.h>
+#include <glslang/SPIRV/GlslangToSpv.h>
 #include <map>
 #include <optional>
 #include <set>
