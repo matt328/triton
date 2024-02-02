@@ -8,9 +8,20 @@ namespace Triton::Game::Graphics {
    Renderer::Renderer(GLFWwindow* window) {
       graphicsDevice = std::make_unique<GraphicsDevice>(window, true);
 
+      const auto bindlessDescriptorSetLayout =
+          Helpers::createBindlessDescriptorSetLayout(graphicsDevice->getVulkanDevice());
+      const auto objectDescriptorSetLayout =
+          Helpers::createSSBODescriptorSetLayout(graphicsDevice->getVulkanDevice());
+      const auto perFrameDescriptorSetLayout =
+          Helpers::createPerFrameDescriptorSetLayout(graphicsDevice->getVulkanDevice());
+
       renderPass = Helpers::createBasicRenderPass(*graphicsDevice);
 
-      pipeline = std::make_unique<DefaultPipeline>(*device, *renderPass, swapchainExtent);
+      pipeline = Helpers::createBasicPipeline(*graphicsDevice,
+                                              *renderPass,
+                                              *bindlessDescriptorSetLayout,
+                                              *objectDescriptorSetLayout,
+                                              *perFrameDescriptorSetLayout);
 
       textureFactory = std::make_unique<TextureFactory>(*raiillocator,
                                                         *device,
@@ -20,9 +31,9 @@ namespace Triton::Game::Graphics {
       meshFactory =
           std::make_unique<MeshFactory>(raiillocator.get(), transferImmediateContext.get());
 
-      createPerFrameData(pipeline->getBindlessDescriptorSetLayout(),
-                         pipeline->getObjectDescriptorSetLayout(),
-                         pipeline->getPerFrameDescriptorSetLayout());
+      createPerFrameData(*bindlessDescriptorSetLayout,
+                         *objectDescriptorSetLayout,
+                         *perFrameDescriptorSetLayout);
 
       createDepthResources();
       createFramebuffers();

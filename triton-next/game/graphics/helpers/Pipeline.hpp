@@ -2,8 +2,14 @@
 
 #include "SpirvHelper.hpp"
 #include "Paths.hpp"
+#include "Vertex.hpp"
 
 namespace Triton::Game::Graphics::Helpers {
+
+   using BasicPipelineData = std::tuple<std::unique_ptr<vk::raii::Pipeline>,
+                                        std::unique_ptr<vk::raii::DescriptorSetLayout>,
+                                        std::unique_ptr<vk::raii::DescriptorSetLayout>,
+                                        std::unique_ptr<vk::raii::DescriptorSetLayout>>;
 
    std::string readShaderFile(const std::string_view& filename) {
       if (std::ifstream file(filename.data(), std::ios::binary); file.is_open()) {
@@ -78,13 +84,12 @@ namespace Triton::Game::Graphics::Helpers {
           device.createDescriptorSetLayout(createInfo));
    }
 
-   std::tuple<int, float, std::string> getThings() {
-      return {34, 34.f, "hello"};
-   }
-
-   std::unique_ptr<vk::raii::Pipeline> createBasicPipeline(const vk::raii::Device& device) {
-
-      auto [anInt, aFloat, aString] = getThings();
+   std::unique_ptr<vk::raii::Pipeline> createBasicPipeline(
+       const GraphicsDevice& graphicsDevice,
+       const vk::raii::RenderPass& renderpass,
+       const vk::raii::DescriptorSetLayout& bindlessDescriptorSetLayout,
+       const vk::raii::DescriptorSetLayout& ssboDescriptorSetLayout,
+       const vk::raii::DescriptorSetLayout& perFrameDescriptorSetLayout) {
 
       // Configure Shader Modules // TODO pull out shader module creation into it's own thing
       auto helper = std::make_unique<SpirvHelper>();
@@ -106,13 +111,15 @@ namespace Triton::Game::Graphics::Helpers {
       auto vertexShaderCreateInfo = vk::ShaderModuleCreateInfo{.codeSize = 4 * vertexSpirv.size(),
                                                                .pCode = vertexSpirv.data()};
 
-      auto vertexShaderModule = device.createShaderModule(vertexShaderCreateInfo);
+      auto vertexShaderModule =
+          graphicsDevice.getVulkanDevice().createShaderModule(vertexShaderCreateInfo);
 
       auto fragmentShaderCreateInfo =
           vk::ShaderModuleCreateInfo{.codeSize = 4 * fragmentSpirv.size(),
                                      .pCode = fragmentSpirv.data()};
 
-      auto fragmentShaderModule = device.createShaderModule(fragmentShaderCreateInfo);
+      auto fragmentShaderModule =
+          graphicsDevice.getVulkanDevice().createShaderModule(fragmentShaderCreateInfo);
 
       auto vertexShaderStageInfo =
           vk::PipelineShaderStageCreateInfo{.stage = vk::ShaderStageFlagBits::eVertex,
@@ -126,33 +133,29 @@ namespace Triton::Game::Graphics::Helpers {
 
       auto shaderStages = std::array{vertexShaderStageInfo, fragmentShaderStageInfo};
 
-      auto bindlessDescriptorSetLayout = createBindlessDescriptorSetLayout(device);
-      auto objectDescriptorSetLayout = createSSBODescriptorSetLayout(device);
-      auto perFrameDescriptorSetLayout = createPerFrameDescriptorSetLayout(device);
-
-      const auto setLayouts = std::array{*(*bindlessDescriptorSetLayout),
-                                         *(*objectDescriptorSetLayout),
-                                         *(*perFrameDescriptorSetLayout)};
+      const auto setLayouts = std::array{*bindlessDescriptorSetLayout,
+                                         *ssboDescriptorSetLayout,
+                                         *perFrameDescriptorSetLayout};
 
       vk::PipelineLayoutCreateInfo pipelineLayoutInfo{.setLayoutCount = setLayouts.size(),
                                                       .pSetLayouts = setLayouts.data()};
 
       auto pipelineLayout = std::make_unique<vk::raii::PipelineLayout>(
-          device.createPipelineLayout(pipelineLayoutInfo));
+          graphicsDevice.getVulkanDevice().createPipelineLayout(pipelineLayoutInfo));
 
       // Configure Vertex Attributes
-      auto bindingDescription = Models::Vertex::inputBindingDescription(0);
-      auto attributeDescriptions =
-          Models::Vertex::inputAttributeDescriptions(0,
-                                                     {Models::VertexComponent::Position,
-                                                      Models::VertexComponent::Color,
-                                                      Models::VertexComponent::UV});
+      auto bindingDescription = Vertex::inputBindingDescription(0);
+      auto attributeDescriptions = Vertex::inputAttributeDescriptions(
+          0,
+          {VertexComponent::Position, VertexComponent::Color, VertexComponent::UV});
 
       vk::PipelineVertexInputStateCreateInfo vertexInputInfo{
           .vertexBindingDescriptionCount = 1,
           .pVertexBindingDescriptions = &bindingDescription,
           .vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size()),
           .pVertexAttributeDescriptions = attributeDescriptions.data()};
+
+      const auto swapchainExtent = graphicsDevice.getSwapchainExtent();
 
       const auto viewport = vk::Viewport{.x = 0.f,
                                          .y = 0.f,
@@ -167,6 +170,42 @@ namespace Triton::Game::Graphics::Helpers {
                                                                           .pViewports = &viewport,
                                                                           .scissorCount = 1,
                                                                           .pScissors = &scissor};
+
+      const vk::PipelineInputAssemblyStateCreateInfo inputAssembly{
+          .topology = vk::PrimitiveTopology::eTriangleList,
+          .primitiveRestartEnable = VK_FALSE};
+
+      const vk::PipelineRasterizationStateCreateInfo rasterizer{
+          .depthClampEnable = false,
+          .rasterizerDiscardEnable = VK_FALSE,
+          .polygonMode = vk::PolygonMode::eFill,
+          .cullMode = vk::CullModeFlagBits::eBack,
+          .frontFace = vk::FrontFace::eClockwise,
+          .depthBiasEnable = VK_FALSE,
+          .lineWidth = 1.f};
+
+      const vk::PipelineMultisampleStateCreateInfo multisampling{
+          .rasterizationSamples = vk::SampleCountFlagBits::e1,
+          .sampleShadingEnable = VK_FALSE,
+      };
+
+      const vk::PipelineColorBlendAttachmentState colorBlendAttachment{
+          .blendEnable = VK_FALSE,
+          .colorWriteMask = vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG |
+                            vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA};
+
+      const vk::PipelineColorBlendStateCreateInfo colorBlending{.logicOpEnable = VK_FALSE,
+                                                                .attachmentCount = 1,
+                                                                .pAttachments =
+                                                                    &colorBlendAttachment};
+
+      const vk::PipelineDepthStencilStateCreateInfo depthStencil{
+          .depthTestEnable = VK_TRUE,
+          .depthWriteEnable = VK_TRUE,
+          .depthCompareOp = vk::CompareOp::eLess,
+          .depthBoundsTestEnable = VK_FALSE,
+          .stencilTestEnable = VK_FALSE,
+      };
 
       auto pipelineCreateInfo =
           vk::GraphicsPipelineCreateInfo{.stageCount = static_cast<uint32_t>(shaderStages.size()),
@@ -185,6 +224,7 @@ namespace Triton::Game::Graphics::Helpers {
                                          .basePipelineIndex = -1};
       // Finally this is that it's all about
       return std::make_unique<vk::raii::Pipeline>(
-          device.createGraphicsPipeline(VK_NULL_HANDLE, pipelineCreateInfo));
+          graphicsDevice.getVulkanDevice().createGraphicsPipeline(VK_NULL_HANDLE,
+                                                                  pipelineCreateInfo));
    }
 }

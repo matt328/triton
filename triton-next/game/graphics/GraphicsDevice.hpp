@@ -47,6 +47,10 @@ namespace Triton::Game::Graphics {
          return swapchainImageFormat;
       }
 
+      [[nodiscard]] const vk::Extent2D getSwapchainExtent() const {
+         return swapchainExtent;
+      }
+
       [[nodiscard]] const vk::raii::PhysicalDevice& getPhysicalDevice() const {
          return *physicalDevice;
       }
