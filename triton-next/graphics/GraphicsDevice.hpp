@@ -6,10 +6,18 @@
 
 struct GLFWwindow;
 
-namespace Triton::Game::Graphics {
+namespace Triton::Graphics {
 
    class ImmediateContext;
    class Allocator;
+
+   namespace Textures {
+      class TextureFactory;
+   }
+
+   namespace Geometry {
+      class MeshFactory;
+   }
 
    class GraphicsDevice {
     public:
@@ -43,7 +51,7 @@ namespace Triton::Game::Graphics {
          return instance;
       }
 
-      [[nodiscard]] const vk::Format getSwapchainFormat() const {
+      [[nodiscard]] vk::Format getSwapchainFormat() const {
          return swapchainImageFormat;
       }
 
@@ -55,12 +63,28 @@ namespace Triton::Game::Graphics {
          return *physicalDevice;
       }
 
+      [[nodiscard]] const Allocator& getAllocator() const {
+         return *raiillocator;
+      }
+
       /// @brief Returns a const reference to the `vk::raii::Device`. This will only live as long as
       /// the graphics device, so do not store the return value of this function unless you know
       /// what you are doing.
       /// @return The current Vulkan Device.
       [[nodiscard]] const vk::raii::Device& getVulkanDevice() const {
          return *vulkanDevice;
+      }
+
+      [[nodiscard]] const vk::raii::CommandPool& getCommandPool() const {
+         return *commandPool;
+      }
+
+      [[nodiscard]] const vk::raii::DescriptorPool& getDescriptorPool() const {
+         return *descriptorPool;
+      }
+
+      [[nodiscard]] const vk::raii::Queue& getGraphicsQueue() const {
+         return *graphicsQueue;
       }
 
       void resizeWindow(uint32_t newHeight, uint32_t newWidth);
@@ -103,6 +127,8 @@ namespace Triton::Game::Graphics {
       std::unique_ptr<vk::raii::Queue> computeQueue;
 
       std::unique_ptr<Allocator> raiillocator;
+      std::unique_ptr<Textures::TextureFactory> textureFactory;
+      std::unique_ptr<Geometry::MeshFactory> meshFactory;
 
       [[nodiscard]] bool checkValidationLayerSupport() const;
 

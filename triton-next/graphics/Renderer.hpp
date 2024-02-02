@@ -5,7 +5,7 @@ namespace Triton::Memory {
    class AllocatedImage;
 };
 
-namespace Triton::Game::Graphics {
+namespace Triton::Graphics {
 
    struct RenderObject;
    struct PerFrameData;
@@ -56,6 +56,8 @@ namespace Triton::Game::Graphics {
       }
 
     private:
+      static constexpr int FRAMES_IN_FLIGHT = 2;
+
       RenderObjectProviderFn renderObjectProvider;
       PerFrameDataProfiderFn perFrameDataProvider;
 
@@ -67,7 +69,7 @@ namespace Triton::Game::Graphics {
       std::unique_ptr<vk::raii::RenderPass> renderPass;
       std::unique_ptr<vk::raii::Pipeline> pipeline;
 
-      std::unique_ptr<Triton::Memory::AllocatedImage> depthImage;
+      std::unique_ptr<AllocatedImage> depthImage;
       std::unique_ptr<vk::raii::ImageView> depthImageView;
       std::vector<vk::raii::Framebuffer> swapchainFramebuffers;
 

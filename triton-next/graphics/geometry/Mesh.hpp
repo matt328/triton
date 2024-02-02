@@ -1,13 +1,13 @@
 #pragma once
 #include "../ImmediateContext.hpp"
-#include "../../core/vma_raii.hpp"
+#include "../vma_raii.hpp"
 
-namespace Triton {
+namespace Triton::Graphics::Geometry {
 
    template <typename T, typename R>
    class Mesh {
     public:
-      Mesh(Triton::Memory::Allocator* allocator,
+      Mesh(Allocator* allocator,
            const std::vector<T>& vertexData,
            const std::vector<R>& indexData,
            ImmediateContext* transferContext)

@@ -8,7 +8,7 @@ namespace vk::raii {
    class Queue;
 }
 
-namespace Triton::Game::Graphics {
+namespace Triton::Graphics {
 
    class ImmediateContext {
     public:
