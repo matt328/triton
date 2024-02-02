@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Triton::Models {
+namespace Triton::Game::Graphics {
    enum class VertexComponent {
       Position,
       Normal,
@@ -26,10 +26,13 @@ namespace Triton::Models {
       static vk::VertexInputBindingDescription inputBindingDescription(uint32_t binding);
 
       static vk::VertexInputAttributeDescription inputAttributeDescription(
-          uint32_t binding, uint32_t location, VertexComponent component);
+          uint32_t binding,
+          uint32_t location,
+          VertexComponent component);
 
       static std::vector<vk::VertexInputAttributeDescription> inputAttributeDescriptions(
-          uint32_t binding, const std::vector<VertexComponent> components);
+          uint32_t binding,
+          const std::vector<VertexComponent> components);
 
       /** @brief Returns the default pipeline vertex input state create info structure for the
        * requested vertex components */
