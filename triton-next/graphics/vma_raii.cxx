@@ -4,7 +4,7 @@
 #include <vk_mem_alloc.h>
 #include <vulkan-memory-allocator-hpp/vk_mem_alloc.hpp>
 
-namespace Triton::Game::Graphics {
+namespace Triton::Graphics {
 
    Allocator::Allocator(const vma::AllocatorCreateInfo& createInfo) {
       allocator = createAllocator(createInfo);

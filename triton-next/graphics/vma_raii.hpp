@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Triton::Game::Graphics {
+namespace Triton::Graphics {
 
    class AllocatedImage {
     public:

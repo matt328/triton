@@ -1,17 +1,22 @@
 set(next_SRC
    "main.cxx"
+
    "game/Game.cxx"
    "game/Application.cxx"
-   "game/graphics/GraphicsDevice.cxx"
-   "game/graphics/ImmediateContext.cxx"
-   "game/graphics/Renderer.cxx"
-   "game/graphics/Vertex.cxx"
-   "game/graphics/vma_raii.cxx"
-   "game/graphics/helpers/SpirvHelper.cxx"
    "game/actions/ActionManager.cxx"
    "game/actions/ActionSet.cxx"
    "game/actions/KeyMap.cxx"
-
+   
+   "graphics/FrameData.cxx"
+   "graphics/GraphicsDevice.cxx"
+   "graphics/ImmediateContext.cxx"
+   "graphics/Renderer.cxx"
+   "graphics/Vertex.cxx"
+   "graphics/vma_raii.cxx"
+   "graphics/geometry/MeshFactory.cxx"
+   "graphics/helpers/SpirvHelper.cxx"
+   "graphics/textures/Texture.cxx"
+   "graphics/textures/TextureFactory.cxx"
 )
 set(project_name "next")
 

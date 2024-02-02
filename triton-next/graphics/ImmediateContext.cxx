@@ -1,6 +1,6 @@
 #include "ImmediateContext.hpp"
 
-namespace Triton::Game::Graphics {
+namespace Triton::Graphics {
 
    ImmediateContext::ImmediateContext(const vk::raii::Device& device,
                                       const vk::raii::PhysicalDevice& physicalDevice,

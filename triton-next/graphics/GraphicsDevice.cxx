@@ -1,9 +1,11 @@
 #include "GraphicsDevice.hpp"
 #include "helpers/Vulkan.hpp"
 #include "ImmediateContext.hpp"
+#include "textures/TextureFactory.hpp"
+#include "geometry/MeshFactory.hpp"
 #include "vma_raii.hpp"
 
-namespace Triton::Game::Graphics {
+namespace Triton::Graphics {
 
    const std::vector DESIRED_VALIDATION_LAYERS = {"VK_LAYER_KHRONOS_validation"};
 
@@ -320,6 +322,16 @@ namespace Triton::Game::Graphics {
                                                                 .instance = **instance};
 
       raiillocator = std::make_unique<Allocator>(allocatorCreateInfo);
+
+      // TODO: Maybe this doesn't own this, but it should produce it
+      // not sure what should own it yet.
+      textureFactory = std::make_unique<Textures::TextureFactory>(*raiillocator,
+                                                                  *vulkanDevice,
+                                                                  *graphicsImmediateContext,
+                                                                  *transferImmediateContext);
+
+      meshFactory = std::make_unique<Geometry::MeshFactory>(raiillocator.get(),
+                                                            transferImmediateContext.get());
    }
 
    std::vector<vk::raii::PhysicalDevice> GraphicsDevice::enumeratePhysicalDevices() const {
