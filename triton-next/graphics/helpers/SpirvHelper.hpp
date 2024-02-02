@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Triton::Game::Graphics::Helpers {
+namespace Triton::Graphics::Helpers {
 
    class SpirvHelper {
     public:

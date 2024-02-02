@@ -16,6 +16,7 @@
 #include <map>
 #include <optional>
 #include <set>
+#include <stb_image.h>
 #include <string>
 #include <string_view>
 #include <sstream>

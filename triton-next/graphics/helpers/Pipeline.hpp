@@ -2,9 +2,9 @@
 
 #include "SpirvHelper.hpp"
 #include "Paths.hpp"
-#include "Vertex.hpp"
+#include "../Vertex.hpp"
 
-namespace Triton::Game::Graphics::Helpers {
+namespace Triton::Graphics::Helpers {
 
    using BasicPipelineData = std::tuple<std::unique_ptr<vk::raii::Pipeline>,
                                         std::unique_ptr<vk::raii::DescriptorSetLayout>,
@@ -86,7 +86,7 @@ namespace Triton::Game::Graphics::Helpers {
 
    std::unique_ptr<vk::raii::Pipeline> createBasicPipeline(
        const GraphicsDevice& graphicsDevice,
-       const vk::raii::RenderPass& renderpass,
+       const vk::raii::RenderPass& renderPass,
        const vk::raii::DescriptorSetLayout& bindlessDescriptorSetLayout,
        const vk::raii::DescriptorSetLayout& ssboDescriptorSetLayout,
        const vk::raii::DescriptorSetLayout& perFrameDescriptorSetLayout) {

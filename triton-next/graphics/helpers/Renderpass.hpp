@@ -3,7 +3,7 @@
 #include "../GraphicsDevice.hpp"
 #include "Vulkan.hpp"
 
-namespace Triton::Game::Graphics::Helpers {
+namespace Triton::Graphics::Helpers {
    std::unique_ptr<vk::raii::RenderPass> createBasicRenderPass(
        const GraphicsDevice& graphicsDevice) {
       const vk::AttachmentDescription colorAttachment{

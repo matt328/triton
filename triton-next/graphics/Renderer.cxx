@@ -1,9 +1,10 @@
 #include "Renderer.hpp"
+#include "FrameData.hpp"
 #include "GraphicsDevice.hpp"
 #include "helpers/Pipeline.hpp"
 #include "helpers/Renderpass.hpp"
 
-namespace Triton::Game::Graphics {
+namespace Triton::Graphics {
 
    Renderer::Renderer(GLFWwindow* window) {
       graphicsDevice = std::make_unique<GraphicsDevice>(window, true);
@@ -23,19 +24,54 @@ namespace Triton::Game::Graphics {
                                               *objectDescriptorSetLayout,
                                               *perFrameDescriptorSetLayout);
 
-      textureFactory = std::make_unique<TextureFactory>(*raiillocator,
-                                                        *device,
-                                                        *graphicsImmediateContext,
-                                                        *transferImmediateContext);
+      for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++) {
+         auto name = std::stringstream{};
+         name << "Frame " << i;
+         frameData.push_back(std::make_unique<FrameData>(*graphicsDevice,
+                                                         bindlessDescriptorSetLayout,
+                                                         objectDescriptorSetLayout,
+                                                         perFrameDescriptorSetLayout,
+                                                         name.str()));
+      }
 
-      meshFactory =
-          std::make_unique<MeshFactory>(raiillocator.get(), transferImmediateContext.get());
+      const auto depthFormat = Helpers::findDepthFormat(graphicsDevice->getPhysicalDevice());
 
-      createPerFrameData(*bindlessDescriptorSetLayout,
-                         *objectDescriptorSetLayout,
-                         *perFrameDescriptorSetLayout);
+      auto swapchainExtent = graphicsDevice->getSwapchainExtent();
 
-      createDepthResources();
+      const auto imageCreateInfo =
+          vk::ImageCreateInfo{.imageType = vk::ImageType::e2D,
+                              .format = depthFormat,
+                              .extent = vk::Extent3D{.width = swapchainExtent.width,
+                                                     .height = swapchainExtent.height,
+                                                     .depth = 1},
+                              .mipLevels = 1,
+                              .arrayLayers = 1,
+                              .samples = vk::SampleCountFlagBits::e1,
+                              .tiling = vk::ImageTiling::eOptimal,
+                              .usage = vk::ImageUsageFlagBits::eDepthStencilAttachment,
+                              .sharingMode = vk::SharingMode::eExclusive,
+                              .initialLayout = vk::ImageLayout::eUndefined};
+
+      constexpr auto allocationCreateInfo =
+          vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eGpuOnly};
+
+      depthImage =
+          graphicsDevice->getAllocator().createImage(imageCreateInfo, allocationCreateInfo);
+
+      constexpr auto range =
+          vk::ImageSubresourceRange{.aspectMask = vk::ImageAspectFlagBits::eDepth,
+                                    .baseMipLevel = 0,
+                                    .levelCount = 1,
+                                    .baseArrayLayer = 0,
+                                    .layerCount = 1};
+
+      const auto viewInfo = vk::ImageViewCreateInfo{.image = depthImage->getImage(),
+                                                    .viewType = vk::ImageViewType::e2D,
+                                                    .format = depthFormat,
+                                                    .subresourceRange = range};
+      depthImageView = std::make_unique<vk::raii::ImageView>(
+          graphicsDevice->getVulkanDevice().createImageView(viewInfo));
+
       createFramebuffers();
 
       const auto rendererCreateInfo =
@@ -55,64 +91,6 @@ namespace Triton::Game::Graphics {
 
    Renderer::~Renderer() = default;
 
-   // Helpers
-
-   void Renderer::createPerFrameData(
-       const vk::raii::DescriptorSetLayout& bindlessDescriptorSetLayout,
-       const vk::raii::DescriptorSetLayout& objectDescriptorSetLayout,
-       const vk::raii::DescriptorSetLayout& perFrameDescriptorSetLayout) {
-      for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++) {
-         auto name = std::stringstream{};
-         name << "Frame " << i;
-         frameData.push_back(std::make_unique<FrameData>(*device,
-                                                         *physicalDevice,
-                                                         *commandPool,
-                                                         *raiillocator,
-                                                         *descriptorPool,
-                                                         bindlessDescriptorSetLayout,
-                                                         objectDescriptorSetLayout,
-                                                         perFrameDescriptorSetLayout,
-                                                         *graphicsQueue,
-                                                         name.str()));
-      }
-   }
-
-   void Renderer::createDepthResources() {
-      const auto depthFormat = Utils::findDepthFormat(*physicalDevice);
-
-      const auto imageCreateInfo =
-          vk::ImageCreateInfo{.imageType = vk::ImageType::e2D,
-                              .format = depthFormat,
-                              .extent = vk::Extent3D{.width = swapchainExtent.width,
-                                                     .height = swapchainExtent.height,
-                                                     .depth = 1},
-                              .mipLevels = 1,
-                              .arrayLayers = 1,
-                              .samples = vk::SampleCountFlagBits::e1,
-                              .tiling = vk::ImageTiling::eOptimal,
-                              .usage = vk::ImageUsageFlagBits::eDepthStencilAttachment,
-                              .sharingMode = vk::SharingMode::eExclusive,
-                              .initialLayout = vk::ImageLayout::eUndefined};
-
-      constexpr auto allocationCreateInfo =
-          vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eGpuOnly};
-
-      depthImage = raiillocator->createImage(imageCreateInfo, allocationCreateInfo);
-
-      constexpr auto range =
-          vk::ImageSubresourceRange{.aspectMask = vk::ImageAspectFlagBits::eDepth,
-                                    .baseMipLevel = 0,
-                                    .levelCount = 1,
-                                    .baseArrayLayer = 0,
-                                    .layerCount = 1};
-
-      const auto viewInfo = vk::ImageViewCreateInfo{.image = depthImage->getImage(),
-                                                    .viewType = vk::ImageViewType::e2D,
-                                                    .format = depthFormat,
-                                                    .subresourceRange = range};
-      depthImageView = std::make_unique<vk::raii::ImageView>(device->createImageView(viewInfo));
-   }
-
    void Renderer::createFramebuffers() {
       swapchainFramebuffers.reserve(swapchainImageViews.size());
       std::array<vk::ImageView, 2> attachments;
@@ -128,7 +106,8 @@ namespace Triton::Game::Graphics {
                                        .width = swapchainExtent.width,
                                        .height = swapchainExtent.height,
                                        .layers = 1};
-         swapchainFramebuffers.emplace_back(device->createFramebuffer(framebufferCreateInfo));
+         swapchainFramebuffers.emplace_back(
+             graphicsDevice->getVulkanDevice().createFramebuffer(framebufferCreateInfo));
       }
    }
 

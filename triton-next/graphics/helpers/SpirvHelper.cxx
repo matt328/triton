@@ -1,6 +1,6 @@
 #include "SpirvHelper.hpp"
 
-namespace Triton::Game::Graphics::Helpers {
+namespace Triton::Graphics::Helpers {
 
    SpirvHelper::SpirvHelper() {
       glslang::InitializeProcess();

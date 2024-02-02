@@ -2,7 +2,7 @@
 
 #include <vulkan/vulkan_enums.hpp>
 
-namespace Triton::Game::Graphics::Helpers {
+namespace Triton::Graphics::Helpers {
 
    // Structs
    struct QueueFamilyIndices {
