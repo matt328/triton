@@ -1,21 +1,25 @@
 #include "Vertex.hpp"
 
-namespace Triton::Models {
+namespace Triton::Game::Graphics {
    vk::VertexInputBindingDescription Vertex::vertexInputBindingDescription;
    std::vector<vk::VertexInputAttributeDescription> Vertex::vertexInputAttributeDescriptions;
    vk::PipelineVertexInputStateCreateInfo Vertex::pipelineVertexInputStateCreateInfo;
 
    vk::VertexInputBindingDescription Vertex::inputBindingDescription(const uint32_t binding) {
-      return {
-          .binding = binding, .stride = sizeof(Vertex), .inputRate = vk::VertexInputRate::eVertex};
+      return {.binding = binding,
+              .stride = sizeof(Vertex),
+              .inputRate = vk::VertexInputRate::eVertex};
    }
 
    vk::VertexInputAttributeDescription Vertex::inputAttributeDescription(
-       const uint32_t binding, const uint32_t location, const VertexComponent component) {
+       const uint32_t binding,
+       const uint32_t location,
+       const VertexComponent component) {
       switch (component) {
          case VertexComponent::Position:
-            return {
-                .location = location, .binding = binding, .format = vk::Format::eR32G32B32Sfloat};
+            return {.location = location,
+                    .binding = binding,
+                    .format = vk::Format::eR32G32B32Sfloat};
          case VertexComponent::Normal:
             return {.location = location,
                     .binding = binding,
@@ -52,7 +56,8 @@ namespace Triton::Models {
    }
 
    std::vector<vk::VertexInputAttributeDescription> Vertex::inputAttributeDescriptions(
-       const uint32_t binding, const std::vector<VertexComponent> components) {
+       const uint32_t binding,
+       const std::vector<VertexComponent> components) {
       std::vector<vk::VertexInputAttributeDescription> result;
       uint32_t location = 0;
       for (const auto component : components) {

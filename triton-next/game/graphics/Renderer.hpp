@@ -65,7 +65,7 @@ namespace Triton::Game::Graphics {
       std::unique_ptr<GraphicsDevice> graphicsDevice;
 
       std::unique_ptr<vk::raii::RenderPass> renderPass;
-      std::unique_ptr<AbstractPipeline> pipeline;
+      std::unique_ptr<vk::raii::Pipeline> pipeline;
 
       std::unique_ptr<Triton::Memory::AllocatedImage> depthImage;
       std::unique_ptr<vk::raii::ImageView> depthImageView;
