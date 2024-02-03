@@ -1,4 +1,5 @@
 #pragma once
+
 #include "vma_raii.hpp"
 #include "ObjectData.hpp"
 #include <vulkan/vulkan_raii.hpp>
@@ -15,6 +16,8 @@ namespace vk::raii {
 }
 
 namespace Triton::Graphics {
+
+   class GraphicsDevice;
 
    class FrameData {
     public:
