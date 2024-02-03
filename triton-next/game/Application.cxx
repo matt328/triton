@@ -6,7 +6,7 @@
 #include "events/ApplicationEvent.hpp"
 #include "events/KeyEvent.hpp"
 
-#include "graphics/Renderer.hpp"
+#include "../graphics/Renderer.hpp"
 #include "actions/KeyMap.hpp"
 
 namespace Triton {

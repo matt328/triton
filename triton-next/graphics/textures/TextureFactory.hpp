@@ -11,9 +11,12 @@ namespace vk::raii {
    class Allocator;
 }
 
+namespace Triton::Graphics {
+   class ImmediateContext;
+}
+
 namespace Triton::Graphics::Textures {
    class Texture;
-   class ImmediateContext;
 
    class TextureFactory {
     public:

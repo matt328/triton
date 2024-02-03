@@ -53,11 +53,11 @@ namespace Triton::Graphics::Geometry {
       Mesh& operator=(const Mesh&) = delete;
       Mesh& operator=(Mesh&&) = delete;
 
-      [[nodiscard]] const Triton::Memory::AllocatedBuffer& getVertexBuffer() const {
+      [[nodiscard]] const AllocatedBuffer& getVertexBuffer() const {
          return *vertexBuffer;
       }
 
-      [[nodiscard]] const Triton::Memory::AllocatedBuffer& getIndexBuffer() const {
+      [[nodiscard]] const AllocatedBuffer& getIndexBuffer() const {
          return *indexBuffer;
       }
 
@@ -68,8 +68,8 @@ namespace Triton::Graphics::Geometry {
       ~Mesh() = default;
 
     private:
-      std::unique_ptr<Triton::Memory::AllocatedBuffer> vertexBuffer;
-      std::unique_ptr<Triton::Memory::AllocatedBuffer> indexBuffer;
+      std::unique_ptr<AllocatedBuffer> vertexBuffer;
+      std::unique_ptr<AllocatedBuffer> indexBuffer;
       uint32_t indicesCount;
    };
 }

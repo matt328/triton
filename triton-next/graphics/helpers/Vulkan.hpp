@@ -23,7 +23,7 @@ namespace Triton::Graphics::Helpers {
       std::vector<vk::PresentModeKHR> presentModes;
    };
 
-   vk::PresentModeKHR chooseSwapPresentMode(
+   inline vk::PresentModeKHR chooseSwapPresentMode(
        const std::vector<vk::PresentModeKHR>& availablePresentModes) {
       for (const auto& availablePresentMode : availablePresentModes) {
          if (availablePresentMode == vk::PresentModeKHR::eMailbox) {
@@ -33,7 +33,7 @@ namespace Triton::Graphics::Helpers {
       return vk::PresentModeKHR::eFifo;
    }
 
-   vk::SurfaceFormatKHR chooseSwapSurfaceFormat(
+   inline vk::SurfaceFormatKHR chooseSwapSurfaceFormat(
        const std::vector<vk::SurfaceFormatKHR>& availableFormats) {
       for (const auto& availableFormat : availableFormats) {
          if (availableFormat.format == vk::Format::eB8G8R8A8Unorm &&
@@ -44,8 +44,8 @@ namespace Triton::Graphics::Helpers {
       return availableFormats[0];
    }
 
-   vk::Extent2D chooseSwapExtent(const vk::SurfaceCapabilitiesKHR& capabilities,
-                                 const std::pair<uint32_t, uint32_t>& windowSize) {
+   inline vk::Extent2D chooseSwapExtent(const vk::SurfaceCapabilitiesKHR& capabilities,
+                                        const std::pair<uint32_t, uint32_t>& windowSize) {
       if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
          return capabilities.currentExtent;
       } else {
@@ -64,8 +64,8 @@ namespace Triton::Graphics::Helpers {
       }
    }
 
-   QueueFamilyIndices findQueueFamilies(const vk::raii::PhysicalDevice& possibleDevice,
-                                        const vk::raii::SurfaceKHR& surface) {
+   inline QueueFamilyIndices findQueueFamilies(const vk::raii::PhysicalDevice& possibleDevice,
+                                               const vk::raii::SurfaceKHR& surface) {
       QueueFamilyIndices queueFamilyIndices;
 
       const auto queueFamilies = possibleDevice.getQueueFamilyProperties();
@@ -95,8 +95,8 @@ namespace Triton::Graphics::Helpers {
       return queueFamilyIndices;
    }
 
-   bool checkDeviceExtensionSupport(const vk::raii::PhysicalDevice& possibleDevice,
-                                    const std::vector<const char*> desiredDeviceExtensions) {
+   inline bool checkDeviceExtensionSupport(const vk::raii::PhysicalDevice& possibleDevice,
+                                           const std::vector<const char*> desiredDeviceExtensions) {
       const auto availableExtensions = possibleDevice.enumerateDeviceExtensionProperties();
 
       std::set<std::string> requiredExtensions(desiredDeviceExtensions.begin(),
@@ -109,8 +109,9 @@ namespace Triton::Graphics::Helpers {
       return requiredExtensions.empty();
    }
 
-   SwapchainSupportDetails querySwapchainSupport(const vk::raii::PhysicalDevice& possibleDevice,
-                                                 const vk::raii::SurfaceKHR& surface) {
+   inline SwapchainSupportDetails querySwapchainSupport(
+       const vk::raii::PhysicalDevice& possibleDevice,
+       const vk::raii::SurfaceKHR& surface) {
       SwapchainSupportDetails details;
       details.capabilities = possibleDevice.getSurfaceCapabilitiesKHR(*surface);
       details.formats = possibleDevice.getSurfaceFormatsKHR(*surface);
@@ -118,9 +119,9 @@ namespace Triton::Graphics::Helpers {
       return details;
    }
 
-   bool isDeviceSuitable(const vk::raii::PhysicalDevice& possibleDevice,
-                         const vk::raii::SurfaceKHR& surface,
-                         const std::vector<const char*>& desiredDeviceExtensions) {
+   inline bool isDeviceSuitable(const vk::raii::PhysicalDevice& possibleDevice,
+                                const vk::raii::SurfaceKHR& surface,
+                                const std::vector<const char*>& desiredDeviceExtensions) {
       const QueueFamilyIndices queueFamilyIndices = findQueueFamilies(possibleDevice, surface);
 
       const bool extensionsSupported =
@@ -143,10 +144,10 @@ namespace Triton::Graphics::Helpers {
    }
 
    template <typename T>
-   void setObjectName(T const& handle,
-                      [[maybe_unused]] const vk::raii::Device& device,
-                      const vk::DebugReportObjectTypeEXT objectType,
-                      const std::string_view name) {
+   inline void setObjectName(T const& handle,
+                             [[maybe_unused]] const vk::raii::Device& device,
+                             const vk::DebugReportObjectTypeEXT objectType,
+                             const std::string_view name) {
       // NOLINTNEXTLINE this is just debug anyway
       const auto debugHandle = reinterpret_cast<uint64_t>(static_cast<typename T::CType>(handle));
 
@@ -159,10 +160,10 @@ namespace Triton::Graphics::Helpers {
       // device.debugMarkerSetObjectNameEXT(debugNameInfo);
    }
 
-   vk::Format findSupportedFormat(const vk::raii::PhysicalDevice& physicalDevice,
-                                  const std::vector<vk::Format>& candidates,
-                                  const vk::ImageTiling tiling,
-                                  const vk::FormatFeatureFlags features) {
+   inline vk::Format findSupportedFormat(const vk::raii::PhysicalDevice& physicalDevice,
+                                         const std::vector<vk::Format>& candidates,
+                                         const vk::ImageTiling tiling,
+                                         const vk::FormatFeatureFlags features) {
       for (const auto format : candidates) {
          auto props = physicalDevice.getFormatProperties(format);
          if ((tiling == vk::ImageTiling::eLinear &&
@@ -175,7 +176,7 @@ namespace Triton::Graphics::Helpers {
       throw std::runtime_error("Failed to find supported format");
    }
 
-   vk::Format findDepthFormat(const vk::raii::PhysicalDevice& physicalDevice) {
+   inline vk::Format findDepthFormat(const vk::raii::PhysicalDevice& physicalDevice) {
       return findSupportedFormat(
           physicalDevice,
           {vk::Format::eD32Sfloat, vk::Format::eD32SfloatS8Uint, vk::Format::eD24UnormS8Uint},

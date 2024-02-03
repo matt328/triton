@@ -6,10 +6,8 @@
 
 namespace Triton::Graphics::Helpers {
 
-   using BasicPipelineData = std::tuple<std::unique_ptr<vk::raii::Pipeline>,
-                                        std::unique_ptr<vk::raii::DescriptorSetLayout>,
-                                        std::unique_ptr<vk::raii::DescriptorSetLayout>,
-                                        std::unique_ptr<vk::raii::DescriptorSetLayout>>;
+   using BasicPipelineData =
+       std::tuple<std::unique_ptr<vk::raii::Pipeline>, std::unique_ptr<vk::raii::PipelineLayout>>;
 
    std::string readShaderFile(const std::string_view& filename) {
       if (std::ifstream file(filename.data(), std::ios::binary); file.is_open()) {
@@ -84,7 +82,7 @@ namespace Triton::Graphics::Helpers {
           device.createDescriptorSetLayout(createInfo));
    }
 
-   std::unique_ptr<vk::raii::Pipeline> createBasicPipeline(
+   BasicPipelineData createBasicPipeline(
        const GraphicsDevice& graphicsDevice,
        const vk::raii::RenderPass& renderPass,
        const vk::raii::DescriptorSetLayout& bindlessDescriptorSetLayout,
@@ -223,8 +221,13 @@ namespace Triton::Graphics::Helpers {
                                          .basePipelineHandle = VK_NULL_HANDLE,
                                          .basePipelineIndex = -1};
       // Finally this is that it's all about
-      return std::make_unique<vk::raii::Pipeline>(
+
+      auto pipeline = std::make_unique<vk::raii::Pipeline>(
           graphicsDevice.getVulkanDevice().createGraphicsPipeline(VK_NULL_HANDLE,
                                                                   pipelineCreateInfo));
+
+      auto returnValue = std::make_tuple(std::move(pipeline), std::move(pipelineLayout));
+
+      return returnValue;
    }
 }
