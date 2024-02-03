@@ -1,6 +1,5 @@
 #include "ActionSet.hpp"
 #include "ActionType.hpp"
-#include "events/ActionEvent.hpp"
 
 namespace Triton::Actions {
 
