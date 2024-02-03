@@ -50,4 +50,4 @@ jobs:
 
       - name: Build
         working-directory: ${{github.workspace}}
-        run: cmake --build build --target=driver -j 18
+        run: cmake --build build --target=triton -j 18

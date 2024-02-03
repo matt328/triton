@@ -4,7 +4,7 @@
 #include "events/Events.hpp"
 #include "../graphics/ResourceFactory.hpp"
 
-namespace Triton {
+namespace Triton::Game {
 
    class Application {
     public:

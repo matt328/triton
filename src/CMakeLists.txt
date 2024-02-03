@@ -1,4 +1,4 @@
-set(next_SRC
+set(triton_SRC
    "main.cxx"
 
    "game/Game.cxx"
@@ -18,9 +18,9 @@ set(next_SRC
    "graphics/textures/Texture.cxx"
    "graphics/textures/TextureFactory.cxx"
 )
-set(project_name "next")
+set(project_name "triton")
 
-add_executable(${project_name} ${next_SRC})
+add_executable(${project_name} ${triton_SRC})
 
 configure_file(config.h.in config.h)
 
