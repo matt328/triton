@@ -1,8 +1,8 @@
 #pragma once
 
-#include "graphics/Renderer.hpp"
+#include "../graphics/Renderer.hpp"
 #include "events/Events.hpp"
-#include "graphics/ResourceFactory.hpp"
+#include "../graphics/ResourceFactory.hpp"
 
 namespace Triton {
 
@@ -38,7 +38,7 @@ namespace Triton {
          }
       };
       std::unique_ptr<GLFWwindow, DestroyGlfwWindow> window;
-      std::shared_ptr<Game::Graphics::Renderer> context;
+      std::shared_ptr<Graphics::Renderer> context;
 
       std::vector<std::function<void(Events::Event&)>> eventCallbackFnList;
 

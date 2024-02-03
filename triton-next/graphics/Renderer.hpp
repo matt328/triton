@@ -1,10 +1,5 @@
 #pragma once
 
-namespace Triton::Memory {
-   class Allocator;
-   class AllocatedImage;
-};
-
 namespace Triton::Graphics {
 
    struct RenderObject;
@@ -13,16 +8,20 @@ namespace Triton::Graphics {
    class ImmediateContext;
    class AbstractPipeline;
    class FrameData;
-   class TextureFactory;
-   class MeshFactory;
-   class Texture;
    class RendererBase;
+   class Allocator;
+   class AllocatedImage;
+   struct Vertex;
 
-   template <typename T, typename U>
-   class Mesh;
+   namespace Textures {
+      class Texture;
+      class TextureFactory;
+   }
 
-   namespace Models {
-      struct Vertex;
+   namespace Geometry {
+      template <typename T, typename U>
+      class Mesh;
+      class MeshFactory;
    }
 
    using RenderObjectProviderFn = std::function<std::vector<RenderObject>()>;
@@ -68,6 +67,7 @@ namespace Triton::Graphics {
 
       std::unique_ptr<vk::raii::RenderPass> renderPass;
       std::unique_ptr<vk::raii::Pipeline> pipeline;
+      std::unique_ptr<vk::raii::PipelineLayout> pipelineLayout;
 
       std::unique_ptr<AllocatedImage> depthImage;
       std::unique_ptr<vk::raii::ImageView> depthImageView;
@@ -75,23 +75,15 @@ namespace Triton::Graphics {
 
       std::vector<std::unique_ptr<FrameData>> frameData;
 
-      std::unique_ptr<TextureFactory> textureFactory;
-      std::unique_ptr<MeshFactory> meshFactory;
+      std::unique_ptr<Textures::TextureFactory> textureFactory;
+      std::unique_ptr<Geometry::MeshFactory> meshFactory;
 
-      std::unordered_map<std::string, std::unique_ptr<Mesh<Models::Vertex, uint32_t>>> meshes;
-      std::vector<std::unique_ptr<Texture>> textureList;
-
-      std::vector<std::unique_ptr<RendererBase>> renderers;
-      std::unique_ptr<RendererBase> finishRenderer;
+      std::unordered_map<std::string, std::unique_ptr<Geometry::Mesh<Vertex, uint32_t>>> meshes;
+      std::vector<std::unique_ptr<Textures::Texture>> textureList;
 
       uint32_t currentFrame = 0;
       bool framebufferResized = false;
 
-      void createPerFrameData(const vk::raii::DescriptorSetLayout& bindlessDescriptorSetLayout,
-                              const vk::raii::DescriptorSetLayout& objectDescriptorSetLayout,
-                              const vk::raii::DescriptorSetLayout& perFrameDescriptorSetLayout);
-      void createDepthResources();
-      void createFramebuffers();
       void recreateSwapchain();
       void drawFrame();
       void recordCommandBuffer(FrameData& frameData, unsigned imageIndex) const;

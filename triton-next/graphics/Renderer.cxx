@@ -1,8 +1,16 @@
 #include "Renderer.hpp"
 #include "FrameData.hpp"
 #include "GraphicsDevice.hpp"
+#include "RenderObject.hpp"
+
 #include "helpers/Pipeline.hpp"
 #include "helpers/Renderpass.hpp"
+
+#include "textures/Texture.hpp"
+#include "textures/TextureFactory.hpp"
+
+#include "geometry/Mesh.hpp"
+#include "geometry/MeshFactory.hpp"
 
 namespace Triton::Graphics {
 
@@ -18,19 +26,20 @@ namespace Triton::Graphics {
 
       renderPass = Helpers::createBasicRenderPass(*graphicsDevice);
 
-      pipeline = Helpers::createBasicPipeline(*graphicsDevice,
-                                              *renderPass,
-                                              *bindlessDescriptorSetLayout,
-                                              *objectDescriptorSetLayout,
-                                              *perFrameDescriptorSetLayout);
+      std::tie(pipeline, pipelineLayout) =
+          Helpers::createBasicPipeline(*graphicsDevice,
+                                       *renderPass,
+                                       *bindlessDescriptorSetLayout,
+                                       *objectDescriptorSetLayout,
+                                       *perFrameDescriptorSetLayout);
 
       for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++) {
          auto name = std::stringstream{};
          name << "Frame " << i;
          frameData.push_back(std::make_unique<FrameData>(*graphicsDevice,
-                                                         bindlessDescriptorSetLayout,
-                                                         objectDescriptorSetLayout,
-                                                         perFrameDescriptorSetLayout,
+                                                         *bindlessDescriptorSetLayout,
+                                                         *objectDescriptorSetLayout,
+                                                         *perFrameDescriptorSetLayout,
                                                          name.str()));
       }
 
@@ -72,26 +81,8 @@ namespace Triton::Graphics {
       depthImageView = std::make_unique<vk::raii::ImageView>(
           graphicsDevice->getVulkanDevice().createImageView(viewInfo));
 
-      createFramebuffers();
-
-      const auto rendererCreateInfo =
-          RendererBaseCreateInfo{.device = *device,
-                                 .physicalDevice = *physicalDevice,
-                                 .allocator = *raiillocator,
-                                 .depthTexture = this->depthImage->getImage(),
-                                 .swapchainExtent = swapchainExtent,
-                                 .swapchainImages = swapchainImages,
-                                 .swapchainImageViews = swapchainImageViews,
-                                 .depthImageView = *depthImageView,
-                                 .swapchainFormat = swapchainImageFormat};
-
-      renderers.emplace_back(std::make_unique<Clear>(rendererCreateInfo));
-      finishRenderer = std::make_unique<Finish>(rendererCreateInfo);
-   }
-
-   Renderer::~Renderer() = default;
-
-   void Renderer::createFramebuffers() {
+      // Framebuffers
+      const auto& swapchainImageViews = graphicsDevice->getSwapchainImageViews();
       swapchainFramebuffers.reserve(swapchainImageViews.size());
       std::array<vk::ImageView, 2> attachments;
 
@@ -111,6 +102,8 @@ namespace Triton::Graphics {
       }
    }
 
+   Renderer::~Renderer() = default;
+
    void Renderer::recreateSwapchain() {
    }
 
@@ -125,7 +118,9 @@ namespace Triton::Graphics {
          this frame's command buffer, so it's safe to reset it and start recording another
       */
       if (const auto res =
-              device->waitForFences(*currentFrameData->getInFlightFence(), VK_TRUE, UINT64_MAX);
+              graphicsDevice->getVulkanDevice().waitForFences(*currentFrameData->getInFlightFence(),
+                                                              VK_TRUE,
+                                                              UINT64_MAX);
           res != vk::Result::eSuccess) {
          throw std::runtime_error("Error waiting for fences");
       }
@@ -134,10 +129,10 @@ namespace Triton::Graphics {
          Tell the swapchain to grab the next image, signaling this semaphore when
          an image has been acquired
       */
-      const auto [result, imageIndex] =
-          swapchain->acquireNextImage(UINT64_MAX,
-                                      *currentFrameData->getImageAvailableSemaphore(),
-                                      nullptr);
+      const auto [result, imageIndex] = graphicsDevice->getSwapchain().acquireNextImage(
+          UINT64_MAX,
+          *currentFrameData->getImageAvailableSemaphore(),
+          nullptr);
 
       if (result == vk::Result::eErrorOutOfDateKHR) {
          recreateSwapchain();
@@ -162,7 +157,7 @@ namespace Triton::Graphics {
                    .descriptorType = vk::DescriptorType::eCombinedImageSampler,
                    .pImageInfo = texture->getImageInfo()});
             }
-            device->updateDescriptorSets(writes, nullptr);
+            graphicsDevice->getVulkanDevice().updateDescriptorSets(writes, nullptr);
             currentFrameData->getTexturesToBind().clear();
          }
       }
@@ -178,7 +173,7 @@ namespace Triton::Graphics {
       }
 
       // We've already waited on this fence, so we can safely reset it so we can signal it again
-      device->resetFences(*currentFrameData->getInFlightFence());
+      graphicsDevice->getVulkanDevice().resetFences(*currentFrameData->getInFlightFence());
 
       currentFrameData->getCommandBuffer().reset();
 
@@ -204,13 +199,13 @@ namespace Triton::Graphics {
          command buffer and drawing to the framebuffer image.  Presenting the framebuffer to the
          screen is another process...
       */
-      graphicsQueue->submit(submitInfo, *currentFrameData->getInFlightFence());
+      graphicsDevice->getGraphicsQueue().submit(submitInfo, *currentFrameData->getInFlightFence());
 
       const auto presentInfo =
           vk::PresentInfoKHR{.waitSemaphoreCount = 1,
                              .pWaitSemaphores = renderFinishedSemaphores.data(),
                              .swapchainCount = 1,
-                             .pSwapchains = &(*(*swapchain)),
+                             .pSwapchains = &(*graphicsDevice->getSwapchain()),
                              .pImageIndices = &imageIndex};
 
       /*
@@ -218,7 +213,7 @@ namespace Triton::Graphics {
          semaphore before actually presenting the new image to the screen so it can display it
          at the next vblank period.
       */
-      if (const auto pResult = graphicsQueue->presentKHR(presentInfo);
+      if (const auto pResult = graphicsDevice->getGraphicsQueue().presentKHR(presentInfo);
           pResult == vk::Result::eErrorOutOfDateKHR || pResult == vk::Result::eSuboptimalKHR ||
           framebufferResized) {
          framebufferResized = false;
@@ -241,6 +236,7 @@ namespace Triton::Graphics {
       // won't matter since the vertices and indices will be accumulated in a giant buffer, and I
       // think all the data handed off between the rendersystem and renderdevice will be copyable
 
+      // Prepare the ObjectData list
       auto objectDataList = std::vector<ObjectData>{};
       if (this->renderObjectProvider != nullptr) {
          const auto renderObjects = this->renderObjectProvider();
@@ -260,53 +256,57 @@ namespace Triton::Graphics {
 
          TracyVkZone(ctx, *cmd, "render room");
 
-         for (const auto& renderer : renderers) {
-            renderer->update();
-            renderer->fillCommandBuffer(cmd, imageIndex);
-         }
+         const auto clearValues = std::array<vk::ClearValue, 2>{
+             vk::ClearValue{
+                 .color = vk::ClearColorValue{std::array<float, 4>({{0.39f, 0.58f, 0.93f, 1.f}})}},
+             vk::ClearValue{.depthStencil =
+                                vk::ClearDepthStencilValue{.depth = 1.f, .stencil = 0}}};
 
-         const auto renderArea = vk::Rect2D{.offset = {0, 0}, .extent = swapchainExtent};
+         const auto renderArea =
+             vk::Rect2D{.offset = {0, 0}, .extent = graphicsDevice->getSwapchainExtent()};
 
          const auto renderPassInfo =
              vk::RenderPassBeginInfo{.renderPass = *(*renderPass),
                                      .framebuffer = *swapchainFramebuffers[imageIndex],
-                                     .renderArea = renderArea};
+                                     .renderArea = renderArea,
+                                     .clearValueCount = clearValues.size(),
+                                     .pClearValues = clearValues.data()};
 
          cmd.beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
-         cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, *pipeline->getPipeline());
+         {
+            cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, **pipeline);
 
-         if (this->renderObjectProvider != nullptr) {
-            const auto& renderObjects = this->renderObjectProvider();
+            if (this->renderObjectProvider != nullptr) {
+               const auto& renderObjects = this->renderObjectProvider();
 
-            for (uint32_t i = 0; const auto& renderObject : renderObjects) {
-               const auto& mesh = meshes.at(renderObject.meshId);
+               for (uint32_t i = 0; const auto& renderObject : renderObjects) {
+                  const auto& mesh = meshes.at(renderObject.meshId);
 
-               cmd.bindVertexBuffers(0, mesh->getVertexBuffer().getBuffer(), {0});
-               cmd.bindIndexBuffer(mesh->getIndexBuffer().getBuffer(), 0, vk::IndexType::eUint32);
-
-               const auto set1 = *frameData.getBindlessDescriptorSet();
-               const auto set2 = *frameData.getObjectDescriptorSet();
-               const auto set3 = *frameData.getPerFrameDescriptorSet();
-               const auto allSets = std::array{set1, set2, set3};
-               cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
-                                      *pipeline->getPipelineLayout(),
+                  cmd.bindVertexBuffers(0, mesh->getVertexBuffer().getBuffer(), {0});
+                  cmd.bindIndexBuffer(mesh->getIndexBuffer().getBuffer(),
                                       0,
-                                      allSets,
-                                      nullptr);
-               // This is real greasy but it'll do for now
-               cmd.drawIndexed(mesh->getIndicesCount(), 1, 0, 0, i);
-               i++;
+                                      vk::IndexType::eUint32);
+
+                  const auto set1 = *frameData.getBindlessDescriptorSet();
+                  const auto set2 = *frameData.getObjectDescriptorSet();
+                  const auto set3 = *frameData.getPerFrameDescriptorSet();
+                  const auto allSets = std::array{set1, set2, set3};
+                  cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
+                                         **pipelineLayout,
+                                         0,
+                                         allSets,
+                                         nullptr);
+                  // This is real greasy but it'll do for now
+                  cmd.drawIndexed(mesh->getIndicesCount(), 1, 0, 0, i);
+                  i++;
+               }
             }
          }
 
          cmd.endRenderPass();
 
-         finishRenderer->update();
-         finishRenderer->fillCommandBuffer(cmd, imageIndex);
-
          TracyVkCollect(ctx, *cmd);
       }
-
       cmd.end();
    }
 
@@ -315,11 +315,11 @@ namespace Triton::Graphics {
    }
 
    void Renderer::waitIdle() {
-      device->waitIdle();
+      graphicsDevice->getVulkanDevice().waitIdle();
    }
 
    void Renderer::windowResized(const int height, const int width) {
-      device->resizeWindow(height, width);
+      graphicsDevice->resizeWindow(height, width);
    }
 
    std::string Renderer::createMesh(const std::string_view& filename) {

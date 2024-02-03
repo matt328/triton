@@ -1,6 +1,6 @@
 #pragma once
 
-#include "graphics/ImmediateContext.hpp"
+#include "../ImmediateContext.hpp"
 #include "../vma_raii.hpp"
 #include <vulkan/vulkan_raii.hpp>
 #include <vulkan/vulkan_structs.hpp>

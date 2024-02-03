@@ -87,6 +87,14 @@ namespace Triton::Graphics {
          return *graphicsQueue;
       }
 
+      [[nodiscard]] const std::vector<vk::raii::ImageView>& getSwapchainImageViews() const {
+         return swapchainImageViews;
+      }
+
+      [[nodiscard]] const vk::raii::SwapchainKHR& getSwapchain() const {
+         return *swapchain;
+      }
+
       void resizeWindow(uint32_t newHeight, uint32_t newWidth);
 
     private:
