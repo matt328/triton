@@ -1,0 +1,6 @@
+# This is trash and I feel bad, but it makes clangd consistent with CMake as far as headers
+# CMake uses response files, and refuses to not use them even though I asked it not to, and clangd
+# doesn't know about response files, nor does CMake add any information about header files into
+# compile_commands.json, so here we are.
+CompileFlags:
+  Add: ["-Ic:/Users/Matt/Projects/Triton/src"]

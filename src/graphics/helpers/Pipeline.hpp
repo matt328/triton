@@ -1,8 +1,9 @@
 #pragma once
 
 #include "SpirvHelper.hpp"
-#include "Paths.hpp"
+#include "../../core/Paths.hpp"
 #include "../Vertex.hpp"
+#include "../GraphicsDevice.hpp"
 
 namespace Triton::Graphics::Helpers {
 

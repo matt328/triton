@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../GraphicsDevice.hpp"
+#include "graphics/GraphicsDevice.hpp"
 #include "Vulkan.hpp"
 
 namespace Triton::Graphics::Helpers {

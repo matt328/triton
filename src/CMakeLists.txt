@@ -13,8 +13,11 @@ set(triton_SRC
    "graphics/Renderer.cxx"
    "graphics/Vertex.cxx"
    "graphics/vma_raii.cxx"
+
    "graphics/geometry/MeshFactory.cxx"
+   
    "graphics/helpers/SpirvHelper.cxx"
+   
    "graphics/textures/Texture.cxx"
    "graphics/textures/TextureFactory.cxx"
 )
@@ -66,11 +69,9 @@ target_link_libraries(${project_name}
 )
 
 target_include_directories(${project_name}
-   PRIVATE
-   core
-   game
+   PUBLIC
+   .
    ${Vulkan_INCLUDE_DIRS}
-   "${CMAKE_CURRENT_BINARY_DIR}"
 )
 
 add_dependencies(${project_name} assets)

@@ -4,6 +4,8 @@
          "name": "Win32",
          "includePath": [
             "${workspaceFolder}/**/*",
+            "${workspaceFolder}/src/core",
+            "${workspaceFolder}/src/game"
          ],
          "defines": [
             "UNICODE",

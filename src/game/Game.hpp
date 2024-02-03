@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Timer.hpp"
+#include "core/Timer.hpp"
 
 namespace Triton::Game {
    class Game {
