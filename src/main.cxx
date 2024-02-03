@@ -1,6 +1,6 @@
 #include "config.h"
-#include "Timer.hpp"
-#include "Game.hpp"
+#include "core/Timer.hpp"
+#include "game/Game.hpp"
 
 int main() {
    Log::LogManager::getInstance().setMinLevel(Log::Level::Trace);
