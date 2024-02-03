@@ -9,7 +9,7 @@
 #include "../graphics/Renderer.hpp"
 #include "actions/KeyMap.hpp"
 
-namespace Triton {
+namespace Triton::Game {
 
    Application::Application(const int width,
                             const int height,
