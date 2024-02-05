@@ -2,6 +2,9 @@
 #include "core/Timer.hpp"
 #include "game/Application.hpp"
 
+#define AMD_VULKAN_MEMORY_ALLOCATOR_H
+#include <vma/vk_mem_alloc.h>
+
 namespace Events = Triton::Events;
 
 int main() {
