@@ -1,5 +1,6 @@
 #pragma once
 
+#include "graphics/geometry/MeshFactory.hpp"
 #include <vulkan/vulkan_core.h>
 #define VK_NO_PROTOTYPES
 #include <vulkan/vulkan_raii.hpp>
@@ -23,7 +24,8 @@ namespace Triton::Graphics {
     public:
       explicit GraphicsDevice(GLFWwindow* window, bool validationEnabled = false);
 
-      ~GraphicsDevice() = default;
+      ~GraphicsDevice();
+
       GraphicsDevice(const GraphicsDevice&) = delete;
       GraphicsDevice(GraphicsDevice&&) = delete;
       GraphicsDevice& operator=(const GraphicsDevice&) = delete;
@@ -95,7 +97,15 @@ namespace Triton::Graphics {
          return *swapchain;
       }
 
-      void resizeWindow(uint32_t newHeight, uint32_t newWidth);
+      [[nodiscard]] const Geometry::MeshFactory& getMeshFactory() const {
+         return *meshFactory;
+      }
+
+      [[nodiscard]] const Textures::TextureFactory& getTextureFactory() const {
+         return *textureFactory;
+      }
+
+      void resizeWindow(uint32_t newWidth, uint32_t newHeight);
 
     private:
       bool validationEnabled;
@@ -134,9 +144,10 @@ namespace Triton::Graphics {
       std::shared_ptr<vk::raii::Queue> transferQueue;
       std::unique_ptr<vk::raii::Queue> computeQueue;
 
-      std::unique_ptr<Allocator> raiillocator;
       std::unique_ptr<Textures::TextureFactory> textureFactory;
       std::unique_ptr<Geometry::MeshFactory> meshFactory;
+
+      std::unique_ptr<Allocator> raiillocator;
 
       [[nodiscard]] bool checkValidationLayerSupport() const;
 

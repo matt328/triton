@@ -325,6 +325,8 @@ namespace Triton::Graphics {
 
       // TODO: Maybe this doesn't own this, but it should produce it
       // not sure what should own it yet.
+      // Whatever is going to own the resource handles should own the factories since
+      // the factories produce handles
       textureFactory = std::make_unique<Textures::TextureFactory>(*raiillocator,
                                                                   *vulkanDevice,
                                                                   *graphicsImmediateContext,
@@ -334,11 +336,16 @@ namespace Triton::Graphics {
                                                             transferImmediateContext.get());
    }
 
+   GraphicsDevice::~GraphicsDevice() {
+      Log::info << "destroying graphicsDevice" << std::endl;
+      vulkanDevice->waitIdle();
+   };
+
    std::vector<vk::raii::PhysicalDevice> GraphicsDevice::enumeratePhysicalDevices() const {
       return instance->enumeratePhysicalDevices();
    }
 
-   void GraphicsDevice::resizeWindow(const uint32_t newHeight, const uint32_t newWidth) {
+   void GraphicsDevice::resizeWindow(const uint32_t newWidth, const uint32_t newHeight) {
       height = static_cast<int>(newHeight);
       width = static_cast<int>(newWidth);
    }

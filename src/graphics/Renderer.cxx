@@ -17,11 +17,11 @@ namespace Triton::Graphics {
    Renderer::Renderer(GLFWwindow* window) {
       graphicsDevice = std::make_unique<GraphicsDevice>(window, true);
 
-      const auto bindlessDescriptorSetLayout =
+      bindlessDescriptorSetLayout =
           Helpers::createBindlessDescriptorSetLayout(graphicsDevice->getVulkanDevice());
-      const auto objectDescriptorSetLayout =
+      objectDescriptorSetLayout =
           Helpers::createSSBODescriptorSetLayout(graphicsDevice->getVulkanDevice());
-      const auto perFrameDescriptorSetLayout =
+      perFrameDescriptorSetLayout =
           Helpers::createPerFrameDescriptorSetLayout(graphicsDevice->getVulkanDevice());
 
       renderPass = Helpers::createBasicRenderPass(*graphicsDevice);
@@ -102,7 +102,11 @@ namespace Triton::Graphics {
       }
    }
 
-   Renderer::~Renderer() = default;
+   Renderer::~Renderer() {
+      Log::info << "destroying renderer" << std::endl;
+      meshes.clear();
+      textureList.clear();
+   }
 
    void Renderer::recreateSwapchain() {
    }
@@ -318,18 +322,23 @@ namespace Triton::Graphics {
       graphicsDevice->getVulkanDevice().waitIdle();
    }
 
-   void Renderer::windowResized(const int height, const int width) {
-      graphicsDevice->resizeWindow(height, width);
+   void Renderer::windowResized(const int width, const int height) {
+      graphicsDevice->resizeWindow(width, height);
    }
 
+   // TODO: Should the renderer be what creates these?
+   // I guess it delegates to the factory, which is created and owned by the device
+   // and the renderer is just indexing the Mesh so it knows how to access it consistently
+   // Change this around so that the meshes are indexed by their index into an ObjectData
+   // Buffer so we can leverage bindless design.
    std::string Renderer::createMesh(const std::string_view& filename) {
-      meshes[filename.data()] = meshFactory->loadMeshFromGltf(filename.data());
+      meshes[filename.data()] = graphicsDevice->getMeshFactory().loadMeshFromGltf(filename.data());
       return filename.data();
    }
 
    uint32_t Renderer::createTexture(const std::string_view& filename) {
       auto handle = textureList.size();
-      textureList.push_back(textureFactory->createTexture2D(filename));
+      textureList.push_back(graphicsDevice->getTextureFactory().createTexture2D(filename));
       // I think we need to bind the texture once in each framedata
       for (auto& f : frameData) {
          f->getTexturesToBind().push_back(handle);
