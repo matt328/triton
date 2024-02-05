@@ -96,6 +96,7 @@ find_package(Stb REQUIRED)
 find_package(spirv_cross_core CONFIG REQUIRED)
 find_package(spirv_cross_glsl CONFIG REQUIRED)
 find_package(spirv_cross_cpp CONFIG REQUIRED)
+find_package(VulkanMemoryAllocator CONFIG REQUIRED)
 find_package(unofficial-vulkan-memory-allocator-hpp CONFIG REQUIRED)
 
 target_precompile_headers(${project_name} PRIVATE
@@ -133,6 +134,7 @@ target_link_libraries(${project_name}
    spirv-cross-core
    spirv-cross-cpp
    Tracy::TracyClient
+   GPUOpen::VulkanMemoryAllocator
    unofficial::VulkanMemoryAllocator-Hpp::VulkanMemoryAllocator-Hpp
    ${Vulkan_LIBRARIES}
 )
