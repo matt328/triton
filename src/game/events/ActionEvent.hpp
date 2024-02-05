@@ -1,7 +1,6 @@
 #pragma once
 
-#include "../actions/ActionType.hpp"
-#include "Key.hpp"
+#include "game/actions/ActionType.hpp"
 #include "Events.hpp"
 
 #include <sstream>

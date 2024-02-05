@@ -3,4 +3,13 @@
 # doesn't know about response files, nor does CMake add any information about header files into
 # compile_commands.json, so here we are.
 CompileFlags:
-  Add: ["-Ic:/Users/Matt/Projects/Triton/src"]
+  Add:
+    [
+      "-Ic:/Users/Matt/Projects/Triton/src",
+      "-Wall",
+      "-Wextra",
+      "-pedantic",
+      "-Wno-nullability-extension",
+      "-Wno-nullability-completeness",
+      "-Wno-deprecated-volatile",
+    ]

@@ -1,19 +1,12 @@
 #include "Application.hpp"
 
-#include "events/ApplicationEvent.hpp"
-#include "events/KeyEvent.hpp"
-#include "events/Events.hpp"
-#include "events/ApplicationEvent.hpp"
-#include "events/KeyEvent.hpp"
-
-#include "../graphics/Renderer.hpp"
-#include "actions/KeyMap.hpp"
+#include "game/actions/KeyMap.hpp"
+#include "game/events/KeyEvent.hpp"
 
 namespace Triton::Game {
 
-   Application::Application(const int width,
-                            const int height,
-                            const std::string_view& windowTitle) {
+   Application::Application(const int width, const int height, const std::string_view& windowTitle)
+       : window(nullptr), eventCallbackFnList({}), running(true) {
       glfwInit();
       glfwSetErrorCallback(errorCallback);
       glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -23,42 +16,30 @@ namespace Triton::Game {
 
       glfwSetWindowUserPointer(window.get(), this);
       glfwSetFramebufferSizeCallback(window.get(), framebufferResizeCallback);
-   }
 
-   Application::~Application() {
-      glfwTerminate();
-   };
-
-   void Application::fireEvent(Events::Event& event) const {
-      for (auto& fn : this->eventCallbackFnList) {
-         fn(event);
-      }
-   }
-
-   void Application::run() const {
       glfwSetKeyCallback(window.get(),
                          [](GLFWwindow* window,
                             const int key,
                             [[maybe_unused]] int scancode,
                             int action,
                             [[maybe_unused]] int mods) {
-                            const auto app =
+                            const auto game =
                                 static_cast<Application*>(glfwGetWindowUserPointer(window));
                             const auto mappedKey = Actions::keyMap[key];
                             switch (action) {
                                case GLFW_PRESS: {
                                   Events::KeyPressedEvent event{mappedKey};
-                                  app->fireEvent(event);
+                                  game->fireEvent(event);
                                   break;
                                }
                                case GLFW_RELEASE: {
                                   Events::KeyReleasedEvent event{mappedKey};
-                                  app->fireEvent(event);
+                                  game->fireEvent(event);
                                   break;
                                }
                                case GLFW_REPEAT: {
                                   Events::KeyPressedEvent event{mappedKey, true};
-                                  app->fireEvent(event);
+                                  game->fireEvent(event);
                                   break;
                                }
                                default: {
@@ -68,65 +49,30 @@ namespace Triton::Game {
                          });
 
       glfwSetCharCallback(window.get(), [](GLFWwindow* window, const unsigned int keyCode) {
-         const auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
+         const auto game = static_cast<Application*>(glfwGetWindowUserPointer(window));
          const auto mappedKey = Actions::keyMap[static_cast<int>(keyCode)];
          Events::KeyTypedEvent event{mappedKey};
-         app->fireEvent(event);
+         game->fireEvent(event);
       });
 
       glfwSetWindowCloseCallback(window.get(), [](GLFWwindow* window) {
-         const auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
-         auto event = Events::WindowCloseEvent{};
-         app->fireEvent(event);
-         app->running = false;
+         const auto game = static_cast<Application*>(glfwGetWindowUserPointer(window));
+         game->running = false;
       });
 
-      double previousInstant = glfwGetTime();
-      constexpr double maxFrameTime = 0.16667f;
-      double accumulatedTime = 0.f;
-      constexpr double fixedTimeStep = 1.f / 240.f;
-      double currentInstant = glfwGetTime();
+      game = std::make_unique<Game>(window.get());
+   }
 
+   Application::~Application() {
+      glfwTerminate();
+   }
+
+   void Application::run(Core::Timer& timer) {
       while (running) {
-         currentInstant = glfwGetTime();
-
-         auto elapsed = currentInstant - previousInstant;
-
-         if (elapsed > maxFrameTime) {
-            elapsed = maxFrameTime;
-         }
-         accumulatedTime += elapsed;
-
-         while (accumulatedTime >= fixedTimeStep) {
-            {
-               ZoneNamedN(update, "Update", true);
-               auto event = Events::FixedUpdateEvent{};
-               fireEvent(event);
-            }
-            accumulatedTime -= fixedTimeStep;
-         }
-
-         {
-            const auto blendingFactor = accumulatedTime / fixedTimeStep;
-            ZoneNamedN(blendState, "Blend State", true);
-            auto event = Events::UpdateEvent{blendingFactor};
-            fireEvent(event);
-         }
-
-         {
-            ZoneNamedN(render, "Render", true);
-            auto event = Events::RenderEvent{};
-            fireEvent(event);
-         }
-
-         FrameMark;
-
-         previousInstant = currentInstant;
-
-         glfwPollEvents();
+         timer.tick([&]() { game->update(timer); });
+         game->render();
       }
-      auto event = Events::ShutdownEvent{};
-      fireEvent(event);
+      game->waitIdle();
    }
 
    size_t Application::addEventCallbackFn(std::function<void(Events::Event&)> fn) {
@@ -135,15 +81,24 @@ namespace Triton::Game {
       return position;
    }
 
-   void Application::framebufferResizeCallback(GLFWwindow* window,
-                                               const int width,
-                                               const int height) {
-      const auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
-      app->context->windowResized(height, width);
+   void Application::fireEvent(Events::Event& event) const {
+      for (auto& fn : this->eventCallbackFnList) {
+         fn(event);
+      }
+   }
+
+   void Application::resize([[maybe_unused]] const int width, [[maybe_unused]] const int height) {
    }
 
    void Application::errorCallback(int code, const char* description) {
       Log::error << "GLFW Error. Code: " << code << ", description: " << description << std::endl;
       throw std::runtime_error("GLFW Error. See log output for details");
    }
-} // namespace Triton
+
+   void Application::framebufferResizeCallback(GLFWwindow* window,
+                                               const int width,
+                                               const int height) {
+      const auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
+      app->game->resize(width, height);
+   }
+}
