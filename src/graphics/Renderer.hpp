@@ -1,5 +1,6 @@
 #pragma once
 
+#include "vulkan/vulkan_raii.hpp"
 namespace Triton::Graphics {
 
    struct RenderObject;
@@ -39,7 +40,7 @@ namespace Triton::Graphics {
 
       void render();
       void waitIdle();
-      void windowResized(const int height, const int width);
+      void windowResized(const int width, const int height);
 
       std::string createMesh(const std::string_view& filename);
       uint32_t createTexture(const std::string_view& filename);
@@ -57,13 +58,17 @@ namespace Triton::Graphics {
     private:
       static constexpr int FRAMES_IN_FLIGHT = 2;
 
+      std::unique_ptr<GraphicsDevice> graphicsDevice;
+
       RenderObjectProviderFn renderObjectProvider;
       PerFrameDataProfiderFn perFrameDataProvider;
 
       struct QueueFamilyIndices;
       struct SwapchainSupportDetails;
 
-      std::unique_ptr<GraphicsDevice> graphicsDevice;
+      std::unique_ptr<vk::raii::DescriptorSetLayout> bindlessDescriptorSetLayout;
+      std::unique_ptr<vk::raii::DescriptorSetLayout> objectDescriptorSetLayout;
+      std::unique_ptr<vk::raii::DescriptorSetLayout> perFrameDescriptorSetLayout;
 
       std::unique_ptr<vk::raii::RenderPass> renderPass;
       std::unique_ptr<vk::raii::Pipeline> pipeline;
@@ -74,9 +79,6 @@ namespace Triton::Graphics {
       std::vector<vk::raii::Framebuffer> swapchainFramebuffers;
 
       std::vector<std::unique_ptr<FrameData>> frameData;
-
-      std::unique_ptr<Textures::TextureFactory> textureFactory;
-      std::unique_ptr<Geometry::MeshFactory> meshFactory;
 
       std::unordered_map<std::string, std::unique_ptr<Geometry::Mesh<Vertex, uint32_t>>> meshes;
       std::vector<std::unique_ptr<Textures::Texture>> textureList;
