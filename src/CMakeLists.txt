@@ -9,6 +9,7 @@ set(triton_SRC
    "game/actions/KeyMap.cxx"
    
    "game/ecs/system/CameraSystem.cxx"
+   "game/ecs/system/RenderSystem.cxx"
 
    "graphics/FrameData.cxx"
    "graphics/GraphicsDevice.cxx"
@@ -123,6 +124,7 @@ target_precompile_headers(${project_name} PRIVATE
    <vulkan/vulkan_raii.hpp>
    <tracy/Tracy.hpp>
    <tracy/TracyVulkan.hpp>
+   <tracy/TracyC.h>
 )
 
 target_link_libraries(${project_name}

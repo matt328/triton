@@ -45,11 +45,9 @@ namespace Triton::Graphics {
       std::string createMesh(const std::string_view& filename);
       uint32_t createTexture(const std::string_view& filename);
 
-      [[nodiscard]] const std::tuple<int, int> getWindowSize() const;
+      void enqueueRenderObject(RenderObject&& renderObject);
 
-      void registerRenderObjectProvider(RenderObjectProviderFn fn) {
-         this->renderObjectProvider = fn;
-      }
+      [[nodiscard]] const std::tuple<int, int> getWindowSize() const;
 
       void registerPerFrameDataProvider(PerFrameDataProfiderFn fn) {
          this->perFrameDataProvider = fn;
@@ -60,7 +58,6 @@ namespace Triton::Graphics {
 
       std::unique_ptr<GraphicsDevice> graphicsDevice;
 
-      RenderObjectProviderFn renderObjectProvider;
       PerFrameDataProfiderFn perFrameDataProvider;
 
       struct QueueFamilyIndices;
@@ -82,6 +79,8 @@ namespace Triton::Graphics {
 
       std::unordered_map<std::string, std::unique_ptr<Geometry::Mesh<Vertex, uint32_t>>> meshes;
       std::vector<std::unique_ptr<Textures::Texture>> textureList;
+
+      std::vector<RenderObject> renderObjects{};
 
       uint32_t currentFrame = 0;
       bool framebufferResized = false;

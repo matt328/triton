@@ -9,7 +9,6 @@
 #include "textures/Texture.hpp"
 #include "textures/TextureFactory.hpp"
 
-#include "geometry/Mesh.hpp"
 #include "geometry/MeshFactory.hpp"
 
 namespace Triton::Graphics {
@@ -112,6 +111,7 @@ namespace Triton::Graphics {
    }
 
    void Renderer::drawFrame() {
+      ZoneNamedN(render, "Render", true);
       const auto& currentFrameData = frameData[currentFrame];
 
       /*
@@ -121,18 +121,23 @@ namespace Triton::Graphics {
          This fence will be signaled when the GPU is done working off
          this frame's command buffer, so it's safe to reset it and start recording another
       */
-      if (const auto res =
-              graphicsDevice->getVulkanDevice().waitForFences(*currentFrameData->getInFlightFence(),
-                                                              VK_TRUE,
-                                                              UINT64_MAX);
-          res != vk::Result::eSuccess) {
-         throw std::runtime_error("Error waiting for fences");
+
+      {
+         ZoneNamedN(fences, "Awaiting Fences", true);
+         if (const auto res = graphicsDevice->getVulkanDevice().waitForFences(
+                 *currentFrameData->getInFlightFence(),
+                 VK_TRUE,
+                 UINT64_MAX);
+             res != vk::Result::eSuccess) {
+            throw std::runtime_error("Error waiting for fences");
+         }
       }
 
       /*
          Tell the swapchain to grab the next image, signaling this semaphore when
          an image has been acquired
       */
+      TracyCZoneN(acquire, "Acquire Image", true);
       const auto [result, imageIndex] = graphicsDevice->getSwapchain().acquireNextImage(
           UINT64_MAX,
           *currentFrameData->getImageAvailableSemaphore(),
@@ -145,7 +150,7 @@ namespace Triton::Graphics {
       if (result != vk::Result::eSuccess && result != vk::Result::eSuboptimalKHR) {
          throw std::runtime_error("Failed to acquire swapchain image");
       }
-
+      TracyCZoneEnd(acquire);
       {
          ZoneNamedN(updateTextures, "Update Textures", true);
          if (!currentFrameData->getTexturesToBind().empty()) {
@@ -181,7 +186,10 @@ namespace Triton::Graphics {
 
       currentFrameData->getCommandBuffer().reset();
 
-      recordCommandBuffer(*currentFrameData, imageIndex);
+      {
+         ZoneNamedN(cmdBuffer, "Recording CommandBuffer", true);
+         recordCommandBuffer(*currentFrameData, imageIndex);
+      }
 
       constexpr auto waitStages =
           std::array<vk::PipelineStageFlags, 1>{vk::PipelineStageFlagBits::eColorAttachmentOutput};
@@ -241,16 +249,16 @@ namespace Triton::Graphics {
       // think all the data handed off between the rendersystem and renderdevice will be copyable
 
       // Prepare the ObjectData list
+      // TODO: the enqueue function should just do this, keep objectDatalist around
       auto objectDataList = std::vector<ObjectData>{};
-      if (this->renderObjectProvider != nullptr) {
-         const auto renderObjects = this->renderObjectProvider();
-         for (const auto& renderObject : renderObjects) {
-            objectDataList.push_back(
-                ObjectData{.model = renderObject.modelMatrix,
-                           .textureId = static_cast<TextureHandle>(renderObject.textureId)});
-         }
+      for (const auto& renderObject : renderObjects) {
+         objectDataList.emplace_back(
+             ObjectData{.model = renderObject.modelMatrix,
+                        .textureId = static_cast<TextureHandle>(renderObject.textureId)});
       }
       // Profile this and see if it's worth checking if something actually changed or not
+      // TODO: It does cause some allocations each frame so we should probably use a pool or
+      // something like that
       frameData.updateObjectDataBuffer(objectDataList.data(),
                                        sizeof(ObjectData) * objectDataList.size());
 
@@ -280,30 +288,24 @@ namespace Triton::Graphics {
          {
             cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, **pipeline);
 
-            if (this->renderObjectProvider != nullptr) {
-               const auto& renderObjects = this->renderObjectProvider();
+            for (uint32_t i = 0; const auto& renderObject : renderObjects) {
+               const auto& mesh = meshes.at(renderObject.meshId);
 
-               for (uint32_t i = 0; const auto& renderObject : renderObjects) {
-                  const auto& mesh = meshes.at(renderObject.meshId);
+               cmd.bindVertexBuffers(0, mesh->getVertexBuffer().getBuffer(), {0});
+               cmd.bindIndexBuffer(mesh->getIndexBuffer().getBuffer(), 0, vk::IndexType::eUint32);
 
-                  cmd.bindVertexBuffers(0, mesh->getVertexBuffer().getBuffer(), {0});
-                  cmd.bindIndexBuffer(mesh->getIndexBuffer().getBuffer(),
+               const auto set1 = *frameData.getBindlessDescriptorSet();
+               const auto set2 = *frameData.getObjectDescriptorSet();
+               const auto set3 = *frameData.getPerFrameDescriptorSet();
+               const auto allSets = std::array{set1, set2, set3};
+               cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
+                                      **pipelineLayout,
                                       0,
-                                      vk::IndexType::eUint32);
-
-                  const auto set1 = *frameData.getBindlessDescriptorSet();
-                  const auto set2 = *frameData.getObjectDescriptorSet();
-                  const auto set3 = *frameData.getPerFrameDescriptorSet();
-                  const auto allSets = std::array{set1, set2, set3};
-                  cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
-                                         **pipelineLayout,
-                                         0,
-                                         allSets,
-                                         nullptr);
-                  // This is real greasy but it'll do for now
-                  cmd.drawIndexed(mesh->getIndicesCount(), 1, 0, 0, i);
-                  i++;
-               }
+                                      allSets,
+                                      nullptr);
+               // This is real greasy but it'll do for now
+               cmd.drawIndexed(mesh->getIndicesCount(), 1, 0, 0, i);
+               i++;
             }
          }
 
@@ -316,6 +318,7 @@ namespace Triton::Graphics {
 
    void Renderer::render() {
       drawFrame();
+      renderObjects.clear();
    }
 
    void Renderer::waitIdle() {
@@ -349,5 +352,9 @@ namespace Triton::Graphics {
 
    const std::tuple<int, int> Renderer::getWindowSize() const {
       return {1, 1};
+   }
+
+   void Renderer::enqueueRenderObject(RenderObject&& renderObject) {
+      renderObjects.push_back(std::move(renderObject));
    }
 }
