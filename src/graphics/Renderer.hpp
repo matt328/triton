@@ -1,5 +1,6 @@
 #pragma once
 
+#include "graphics/ObjectData.hpp"
 #include "vulkan/vulkan_raii.hpp"
 namespace Triton::Graphics {
 
@@ -42,10 +43,11 @@ namespace Triton::Graphics {
       void waitIdle();
       void windowResized(const int width, const int height);
 
-      std::string createMesh(const std::string_view& filename);
+      uint32_t createMesh(const std::string_view& filename);
       uint32_t createTexture(const std::string_view& filename);
 
       void enqueueRenderObject(RenderObject&& renderObject);
+      void enqueueRenderObject2(uint32_t meshId, uint32_t textureId, glm::mat4 transform);
 
       [[nodiscard]] const std::tuple<int, int> getWindowSize() const;
 
@@ -77,10 +79,11 @@ namespace Triton::Graphics {
 
       std::vector<std::unique_ptr<FrameData>> frameData;
 
-      std::unordered_map<std::string, std::unique_ptr<Geometry::Mesh<Vertex, uint32_t>>> meshes;
+      std::vector<std::unique_ptr<Geometry::Mesh<Vertex, uint32_t>>> meshes;
       std::vector<std::unique_ptr<Textures::Texture>> textureList;
 
       std::vector<RenderObject> renderObjects{};
+      std::vector<ObjectData> objectDataList{};
 
       uint32_t currentFrame = 0;
       bool framebufferResized = false;

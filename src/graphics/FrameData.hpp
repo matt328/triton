@@ -74,7 +74,7 @@ namespace Triton::Graphics {
          return *perFrameDescriptorSet;
       }
 
-      void updateObjectDataBuffer(ObjectData* data, const size_t size);
+      void updateObjectDataBuffer(const ObjectData* data, const size_t size);
 
     private:
       std::unique_ptr<vk::raii::CommandBuffer> commandBuffer;

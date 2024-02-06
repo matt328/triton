@@ -138,7 +138,7 @@ namespace Triton::Graphics {
       graphicsDevice.getVulkanDevice().updateDescriptorSets(writes, nullptr);
    }
 
-   void FrameData::updateObjectDataBuffer(ObjectData* data, const size_t size) {
+   void FrameData::updateObjectDataBuffer(const ObjectData* data, const size_t size) {
       this->objectDataBuffer->updateBufferValue(data, size);
    }
 

@@ -3,6 +3,7 @@
 #include "GraphicsDevice.hpp"
 #include "RenderObject.hpp"
 
+#include "graphics/ObjectData.hpp"
 #include "helpers/Pipeline.hpp"
 #include "helpers/Renderpass.hpp"
 
@@ -248,17 +249,6 @@ namespace Triton::Graphics {
       // won't matter since the vertices and indices will be accumulated in a giant buffer, and I
       // think all the data handed off between the rendersystem and renderdevice will be copyable
 
-      // Prepare the ObjectData list
-      // TODO: the enqueue function should just do this, keep objectDatalist around
-      auto objectDataList = std::vector<ObjectData>{};
-      for (const auto& renderObject : renderObjects) {
-         objectDataList.emplace_back(
-             ObjectData{.model = renderObject.modelMatrix,
-                        .textureId = static_cast<TextureHandle>(renderObject.textureId)});
-      }
-      // Profile this and see if it's worth checking if something actually changed or not
-      // TODO: It does cause some allocations each frame so we should probably use a pool or
-      // something like that
       frameData.updateObjectDataBuffer(objectDataList.data(),
                                        sizeof(ObjectData) * objectDataList.size());
 
@@ -319,6 +309,7 @@ namespace Triton::Graphics {
    void Renderer::render() {
       drawFrame();
       renderObjects.clear();
+      objectDataList.clear();
    }
 
    void Renderer::waitIdle() {
@@ -334,9 +325,10 @@ namespace Triton::Graphics {
    // and the renderer is just indexing the Mesh so it knows how to access it consistently
    // Change this around so that the meshes are indexed by their index into an ObjectData
    // Buffer so we can leverage bindless design.
-   std::string Renderer::createMesh(const std::string_view& filename) {
-      meshes[filename.data()] = graphicsDevice->getMeshFactory().loadMeshFromGltf(filename.data());
-      return filename.data();
+   uint32_t Renderer::createMesh(const std::string_view& filename) {
+      auto handle = meshes.size();
+      meshes.push_back(graphicsDevice->getMeshFactory().loadMeshFromGltf(filename.data()));
+      return handle;
    }
 
    uint32_t Renderer::createTexture(const std::string_view& filename) {
@@ -355,6 +347,14 @@ namespace Triton::Graphics {
    }
 
    void Renderer::enqueueRenderObject(RenderObject&& renderObject) {
+      objectDataList.emplace_back(renderObject.modelMatrix,
+                                  static_cast<TextureHandle>(renderObject.textureId));
       renderObjects.push_back(std::move(renderObject));
+   }
+
+   void Renderer::enqueueRenderObject2(uint32_t meshId, uint32_t textureId, glm::mat4 transform) {
+      objectDataList.emplace_back(transform, static_cast<TextureHandle>(textureId));
+
+      renderObjects.emplace_back(meshId, textureId, transform);
    }
 }
