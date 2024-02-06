@@ -7,8 +7,8 @@ namespace Triton::Graphics {
           : meshId(other.meshId), textureId(other.textureId), modelMatrix(other.modelMatrix) {
       }
 
-      RenderObject(std::string meshId, uint32_t textureId, glm::mat4 modelMatrix)
-          : meshId(std::move(meshId)), textureId(textureId), modelMatrix(modelMatrix) {
+      RenderObject(uint32_t meshId, uint32_t textureId, glm::mat4 modelMatrix)
+          : meshId(meshId), textureId(textureId), modelMatrix(modelMatrix) {
       }
 
       RenderObject(const RenderObject&) = delete;
@@ -16,7 +16,7 @@ namespace Triton::Graphics {
       RenderObject& operator=(RenderObject&&) = delete;
       ~RenderObject() = default;
 
-      std::string meshId;
+      uint32_t meshId;
       uint32_t textureId;
       glm::mat4 modelMatrix;
    };
