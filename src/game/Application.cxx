@@ -71,6 +71,7 @@ namespace Triton::Game {
       while (running) {
          timer.tick([&]() { game->update(timer); });
          game->render();
+         FrameMark;
       }
       game->waitIdle();
    }

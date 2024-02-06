@@ -42,5 +42,7 @@ namespace Triton::Game {
 
     private:
       std::unique_ptr<Graphics::Renderer> renderer;
+
+      std::unique_ptr<entt::registry> registry;
    };
 }
