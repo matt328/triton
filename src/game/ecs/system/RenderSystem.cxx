@@ -4,6 +4,7 @@
 #include "game/ecs/component/Renderable.hpp"
 #include "game/ecs/component/Resources.hpp"
 #include "game/ecs/component/Transform.hpp"
+#include "graphics/RenderObject.hpp"
 
 namespace Triton::Game::Ecs::RenderSystem {
    void update(entt::registry& registry, Graphics::Renderer& renderer) {
@@ -16,7 +17,10 @@ namespace Triton::Game::Ecs::RenderSystem {
       const auto view = registry.view<Renderable, Transform>();
 
       for (auto [entity, renderable, transform] : view.each()) {
-         renderer.enqueueRenderObject(renderable.meshId, renderable.textureId, transform.transform);
+         auto renderObject = Graphics::RenderObject{std::move(renderable.meshId),
+                                                    std::move(renderable.textureId),
+                                                    std::move(transform.transform)};
+         renderer.enqueueRenderObject(std::move(renderObject));
       }
    }
 }
