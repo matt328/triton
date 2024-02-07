@@ -268,7 +268,7 @@ namespace Triton::Graphics {
             cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, **pipeline);
 
             for (uint32_t i = 0; const auto& renderObject : renderObjects) {
-               const auto& mesh = meshes.at(renderObject.meshId);
+               const auto& mesh = meshes.at(static_cast<size_t>(renderObject.meshId));
 
                cmd.bindVertexBuffers(0, mesh->getVertexBuffer().getBuffer(), {0});
                cmd.bindIndexBuffer(mesh->getIndexBuffer().getBuffer(), 0, vk::IndexType::eUint32);
@@ -314,10 +314,10 @@ namespace Triton::Graphics {
    // and the renderer is just indexing the Mesh so it knows how to access it consistently
    // Change this around so that the meshes are indexed by their index into an ObjectData
    // Buffer so we can leverage bindless design.
-   uint32_t Renderer::createMesh(const std::string_view& filename) {
+   MeshHandle Renderer::createMesh(const std::string_view& filename) {
       auto handle = meshes.size();
       meshes.push_back(graphicsDevice->getMeshFactory().loadMeshFromGltf(filename.data()));
-      return handle;
+      return static_cast<MeshHandle>(handle);
    }
 
    uint32_t Renderer::createTexture(const std::string_view& filename) {
@@ -335,7 +335,7 @@ namespace Triton::Graphics {
       return {1, 1};
    }
 
-   void Renderer::enqueueRenderObject(uint32_t meshId, uint32_t textureId, glm::mat4 transform) {
+   void Renderer::enqueueRenderObject(MeshHandle meshId, uint32_t textureId, glm::mat4 transform) {
       objectDataList.emplace_back(transform, static_cast<TextureHandle>(textureId));
 
       renderObjects.emplace_back(meshId, textureId, transform);

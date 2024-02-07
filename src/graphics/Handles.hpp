@@ -3,6 +3,8 @@
 namespace Triton::Graphics {
 
    enum class TextureHandle : uint32_t {
-      INVALID = 0
+   };
+
+   enum class MeshHandle : size_t {
    };
 }

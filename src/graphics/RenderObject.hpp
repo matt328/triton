@@ -1,5 +1,7 @@
 #pragma once
 
+#include "graphics/Handles.hpp"
+
 namespace Triton::Graphics {
 
    struct RenderObject {
@@ -7,7 +9,7 @@ namespace Triton::Graphics {
           : meshId(other.meshId), textureId(other.textureId), modelMatrix(other.modelMatrix) {
       }
 
-      RenderObject(uint32_t meshId, uint32_t textureId, glm::mat4 modelMatrix)
+      RenderObject(MeshHandle meshId, uint32_t textureId, glm::mat4 modelMatrix)
           : meshId(meshId), textureId(textureId), modelMatrix(modelMatrix) {
       }
 
@@ -16,7 +18,7 @@ namespace Triton::Graphics {
       RenderObject& operator=(RenderObject&&) = delete;
       ~RenderObject() = default;
 
-      uint32_t meshId;
+      MeshHandle meshId;
       uint32_t textureId;
       glm::mat4 modelMatrix;
    };
