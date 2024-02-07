@@ -174,12 +174,7 @@ namespace Triton::Graphics {
 
       {
          ZoneNamedN(updateCameraData, "Update Camera Data", true);
-         // This is awesome feature of C++ idc
-         if (perFrameDataProvider != nullptr) {
-            const auto [view, proj, viewProj] = perFrameDataProvider();
-            const auto cameraData = CameraData{.view = view, .proj = proj, .viewProj = viewProj};
-            currentFrameData->getCameraBuffer().updateBufferValue(&cameraData, sizeof(CameraData));
-         }
+         currentFrameData->getCameraBuffer().updateBufferValue(&cameraData, sizeof(CameraData));
       }
 
       // We've already waited on this fence, so we can safely reset it so we can signal it again
@@ -242,12 +237,6 @@ namespace Triton::Graphics {
       constexpr auto beginInfo =
           vk::CommandBufferBeginInfo{.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse};
       auto& cmd = frameData.getCommandBuffer();
-
-      // TODO: think more about when and where this should happen from a multi threaded
-      // perspective we're looping through objects once here and again down below to bind their
-      // index and vertex buffers.  When I finish implementing a fully bindless pipeline that
-      // won't matter since the vertices and indices will be accumulated in a giant buffer, and I
-      // think all the data handed off between the rendersystem and renderdevice will be copyable
 
       frameData.updateObjectDataBuffer(objectDataList.data(),
                                        sizeof(ObjectData) * objectDataList.size());
@@ -346,13 +335,7 @@ namespace Triton::Graphics {
       return {1, 1};
    }
 
-   void Renderer::enqueueRenderObject(RenderObject&& renderObject) {
-      objectDataList.emplace_back(renderObject.modelMatrix,
-                                  static_cast<TextureHandle>(renderObject.textureId));
-      renderObjects.push_back(std::move(renderObject));
-   }
-
-   void Renderer::enqueueRenderObject2(uint32_t meshId, uint32_t textureId, glm::mat4 transform) {
+   void Renderer::enqueueRenderObject(uint32_t meshId, uint32_t textureId, glm::mat4 transform) {
       objectDataList.emplace_back(transform, static_cast<TextureHandle>(textureId));
 
       renderObjects.emplace_back(meshId, textureId, transform);

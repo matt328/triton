@@ -6,6 +6,7 @@ CompileFlags:
   Add:
     [
       "-Ic:/Users/Matt/Projects/Triton/src",
+      "-IC:/Users/Matt/Projects/triton/build/vcpkg_installed/x64-windows/include",
       "-Wall",
       "-Wextra",
       "-pedantic",

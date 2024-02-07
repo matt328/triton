@@ -1,9 +1,8 @@
 #pragma once
 
 #include "graphics/ObjectData.hpp"
-#include "vulkan/vulkan_raii.hpp"
-namespace Triton::Graphics {
 
+namespace Triton::Graphics {
    struct RenderObject;
    struct PerFrameData;
    class GraphicsDevice;
@@ -46,8 +45,11 @@ namespace Triton::Graphics {
       uint32_t createMesh(const std::string_view& filename);
       uint32_t createTexture(const std::string_view& filename);
 
-      void enqueueRenderObject(RenderObject&& renderObject);
-      void enqueueRenderObject2(uint32_t meshId, uint32_t textureId, glm::mat4 transform);
+      void enqueueRenderObject(uint32_t meshId, uint32_t textureId, glm::mat4 transform);
+
+      void setCurrentCameraData(const CameraData&& cameraData) {
+         this->cameraData = cameraData;
+      }
 
       [[nodiscard]] const std::tuple<int, int> getWindowSize() const;
 
@@ -84,6 +86,7 @@ namespace Triton::Graphics {
 
       std::vector<RenderObject> renderObjects{};
       std::vector<ObjectData> objectDataList{};
+      CameraData cameraData{};
 
       uint32_t currentFrame = 0;
       bool framebufferResized = false;

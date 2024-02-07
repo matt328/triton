@@ -1,12 +1,15 @@
 #include "Game.hpp"
 
 #include "core/Paths.hpp"
+#include "game/ecs/component/Resources.hpp"
 #include "graphics/RenderObject.hpp"
 #include "graphics/Renderer.hpp"
 
 #include "game/ecs/component/Renderable.hpp"
+#include "game/ecs/component/Camera.hpp"
 #include "game/ecs/component/Transform.hpp"
 #include "game/ecs/system/RenderSystem.hpp"
+#include "game/ecs/system/CameraSystem.hpp"
 
 namespace Triton::Game {
    // HACK: This entire class.  slopping stuff in here to manually test out the renderer before
@@ -27,6 +30,14 @@ namespace Triton::Game {
       registry->emplace<Ecs::Renderable>(room, meshId, textureId);
       registry->emplace<Ecs::Transform>(room);
 
+      int width{}, height{};
+      glfwGetWindowSize(window, &width, &height);
+      const auto camera = registry->create();
+      registry->emplace<Ecs::Camera>(camera, width, height, 60.f, 0.1f, 1000.f);
+
+      registry->ctx().emplace<Ecs::WindowDimensions>(width, height);
+      registry->ctx().emplace<Ecs::CurrentCamera>(camera);
+
       renderer->registerPerFrameDataProvider([] {
          const auto perFrameData = Graphics::PerFrameData{
              .view = glm::identity<glm::mat4>(),
@@ -43,6 +54,7 @@ namespace Triton::Game {
 
    void Game::update(const Core::Timer& timer) {
       ZoneNamedN(upd, "FixedUpdate", true);
+      Ecs::CameraSystem::update(*registry);
    }
 
    void Game::render() {
@@ -52,6 +64,7 @@ namespace Triton::Game {
 
    void Game::resize(const int width, const int height) {
       renderer->windowResized(width, height);
+      registry->ctx().emplace<Ecs::WindowDimensions>(width, height);
    }
 
    void Game::waitIdle() {
