@@ -268,7 +268,7 @@ namespace Triton::Graphics {
             cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, **pipeline);
 
             for (uint32_t i = 0; const auto& renderObject : renderObjects) {
-               const auto& mesh = meshes.at(static_cast<size_t>(renderObject.meshId));
+               const auto& mesh = meshes.at(renderObject.meshId);
 
                cmd.bindVertexBuffers(0, mesh->getVertexBuffer().getBuffer(), {0});
                cmd.bindIndexBuffer(mesh->getIndexBuffer().getBuffer(), 0, vk::IndexType::eUint32);
@@ -317,7 +317,7 @@ namespace Triton::Graphics {
    MeshHandle Renderer::createMesh(const std::string_view& filename) {
       auto handle = meshes.size();
       meshes.push_back(graphicsDevice->getMeshFactory().loadMeshFromGltf(filename.data()));
-      return static_cast<MeshHandle>(handle);
+      return handle;
    }
 
    uint32_t Renderer::createTexture(const std::string_view& filename) {
@@ -335,9 +335,8 @@ namespace Triton::Graphics {
       return {1, 1};
    }
 
-   void Renderer::enqueueRenderObject(MeshHandle meshId, uint32_t textureId, glm::mat4 transform) {
-      objectDataList.emplace_back(transform, static_cast<TextureHandle>(textureId));
-
-      renderObjects.emplace_back(meshId, textureId, transform);
+   void Renderer::enqueueRenderObject(RenderObject renderObject) {
+      objectDataList.emplace_back(renderObject.modelMatrix, renderObject.textureId);
+      renderObjects.push_back(std::move(renderObject));
    }
 }
