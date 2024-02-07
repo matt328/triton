@@ -13,6 +13,16 @@ namespace Triton::Graphics {
    };
 
    struct CameraData {
+      CameraData(glm::mat4 view, glm::mat4 proj, glm::mat4 viewProj)
+          : view(view), proj(proj), viewProj(viewProj) {
+      }
+      CameraData(CameraData&& other) noexcept = default;
+
+      CameraData(const CameraData&) = delete;
+      CameraData& operator=(const CameraData&) = delete;
+      CameraData& operator=(CameraData&&) = default;
+      ~CameraData() = default;
+
       glm::mat4 view;
       glm::mat4 proj;
       glm::mat4 viewProj;
