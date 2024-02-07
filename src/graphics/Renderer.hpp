@@ -42,10 +42,10 @@ namespace Triton::Graphics {
       void waitIdle();
       void windowResized(const int width, const int height);
 
-      uint32_t createMesh(const std::string_view& filename);
+      MeshHandle createMesh(const std::string_view& filename);
       uint32_t createTexture(const std::string_view& filename);
 
-      void enqueueRenderObject(uint32_t meshId, uint32_t textureId, glm::mat4 transform);
+      void enqueueRenderObject(MeshHandle meshId, uint32_t textureId, glm::mat4 transform);
 
       void setCurrentCameraData(const CameraData&& cameraData) {
          this->cameraData = cameraData;

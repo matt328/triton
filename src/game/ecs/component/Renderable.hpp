@@ -1,9 +1,11 @@
 #pragma once
 
+#include "graphics/Handles.hpp"
+
 namespace Triton::Game::Ecs {
    // HACK: eventually create Handle enum for these
    struct Renderable {
-      uint32_t meshId;
+      Graphics::MeshHandle meshId;
       uint32_t textureId;
    };
 }
