@@ -45,7 +45,7 @@ namespace Triton::Graphics {
       MeshHandle createMesh(const std::string_view& filename);
       uint32_t createTexture(const std::string_view& filename);
 
-      void enqueueRenderObject(MeshHandle meshId, uint32_t textureId, glm::mat4 transform);
+      void enqueueRenderObject(RenderObject renderObject);
 
       void setCurrentCameraData(const CameraData&& cameraData) {
          this->cameraData = cameraData;

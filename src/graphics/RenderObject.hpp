@@ -13,6 +13,8 @@ namespace Triton::Graphics {
           : meshId(meshId), textureId(textureId), modelMatrix(modelMatrix) {
       }
 
+      // Avoid accidentally copying this because lots of these are moved around during the rendering
+      // loop so always std::move() this when passing it around.
       RenderObject(const RenderObject&) = delete;
       RenderObject& operator=(const RenderObject&) = delete;
       RenderObject& operator=(RenderObject&&) = delete;
