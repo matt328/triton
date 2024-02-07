@@ -7,7 +7,7 @@ namespace Triton::Graphics {
    struct RenderObject {
       RenderObject(RenderObject&& other) noexcept = default;
 
-      RenderObject(MeshHandle meshId, uint32_t textureId, glm::mat4 modelMatrix)
+      RenderObject(MeshHandle meshId, TextureHandle textureId, glm::mat4 modelMatrix)
           : meshId(meshId), textureId(textureId), modelMatrix(modelMatrix) {
       }
 
@@ -19,7 +19,7 @@ namespace Triton::Graphics {
       ~RenderObject() = default;
 
       MeshHandle meshId;
-      uint32_t textureId;
+      TextureHandle textureId;
       glm::mat4 modelMatrix;
    };
 
