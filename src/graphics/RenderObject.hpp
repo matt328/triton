@@ -5,9 +5,7 @@
 namespace Triton::Graphics {
 
    struct RenderObject {
-      RenderObject(RenderObject&& other) noexcept
-          : meshId(other.meshId), textureId(other.textureId), modelMatrix(other.modelMatrix) {
-      }
+      RenderObject(RenderObject&& other) noexcept = default;
 
       RenderObject(MeshHandle meshId, uint32_t textureId, glm::mat4 modelMatrix)
           : meshId(meshId), textureId(textureId), modelMatrix(modelMatrix) {

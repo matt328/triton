@@ -17,9 +17,8 @@ namespace Triton::Game::Ecs::RenderSystem {
       const auto view = registry.view<Renderable, Transform>();
 
       for (auto [entity, renderable, transform] : view.each()) {
-         auto renderObject = Graphics::RenderObject{std::move(renderable.meshId),
-                                                    std::move(renderable.textureId),
-                                                    std::move(transform.transform)};
+         auto renderObject =
+             Graphics::RenderObject{renderable.meshId, renderable.textureId, transform.transform};
          renderer.enqueueRenderObject(std::move(renderObject));
       }
    }
