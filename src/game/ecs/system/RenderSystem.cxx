@@ -12,7 +12,7 @@ namespace Triton::Game::Ecs::RenderSystem {
       const auto cam = registry.get<Camera>(cameraEntity.currentCamera);
 
       renderer.setCurrentCameraData(
-          std::move(Graphics::CameraData{cam.view, cam.projection, cam.view * cam.projection}));
+          Graphics::CameraData{cam.view, cam.projection, cam.view * cam.projection});
 
       const auto view = registry.view<Renderable, Transform>();
 

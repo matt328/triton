@@ -1,6 +1,7 @@
 #pragma once
 
 #include "graphics/ObjectData.hpp"
+#include <glm/ext/matrix_transform.hpp>
 
 namespace Triton::Graphics {
    struct RenderObject;
@@ -47,8 +48,8 @@ namespace Triton::Graphics {
 
       void enqueueRenderObject(RenderObject renderObject);
 
-      void setCurrentCameraData(const CameraData&& cameraData) {
-         this->cameraData = cameraData;
+      void setCurrentCameraData(CameraData&& cameraData) {
+         this->cameraData = std::move(cameraData);
       }
 
       [[nodiscard]] const std::tuple<int, int> getWindowSize() const;
@@ -86,7 +87,9 @@ namespace Triton::Graphics {
 
       std::vector<RenderObject> renderObjects{};
       std::vector<ObjectData> objectDataList{};
-      CameraData cameraData{};
+      CameraData cameraData{glm::identity<glm::mat4>(),
+                            glm::identity<glm::mat4>(),
+                            glm::identity<glm::mat4>()};
 
       uint32_t currentFrame = 0;
       bool framebufferResized = false;
