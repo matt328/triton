@@ -1,4 +1,5 @@
 #include "vma_raii.hpp"
+#include "graphics/helpers/Vulkan.hpp"
 
 #define VMA_IMPLEMENTATION
 #include <vk_mem_alloc.h>
@@ -62,7 +63,6 @@ namespace Triton::Graphics {
 
       auto [image, allocation] = allocator.createImage(imageCreateInfo, allocationCreateInfo);
       allocator.setAllocationName(allocation, newName.data());
-
       return std::make_unique<AllocatedImage>(allocator, std::move(image), std::move(allocation));
    }
 

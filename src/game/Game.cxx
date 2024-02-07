@@ -52,7 +52,7 @@ namespace Triton::Game {
       Log::info << "destroying game" << std::endl;
    };
 
-   void Game::update(const Core::Timer& timer) {
+   void Game::update([[maybe_unused]] const Core::Timer& timer) {
       ZoneNamedN(upd, "FixedUpdate", true);
       Ecs::CameraSystem::update(*registry);
    }

@@ -32,8 +32,10 @@ namespace Triton::Graphics::Textures {
                                     .requiredFlags = vk::MemoryPropertyFlagBits::eHostVisible |
                                                      vk::MemoryPropertyFlagBits::eHostCoherent};
 
+      const auto textureFilename = std::filesystem::path(filename).filename().string();
+      const auto textureName = "staging buffer - " + textureFilename;
       const auto stagingBuffer =
-          raiillocator.createBuffer(&bufferCreateInfo, &allocationCreateInfo);
+          raiillocator.createBuffer(&bufferCreateInfo, &allocationCreateInfo, textureName);
 
       // Copy the texture data into the staging buffer
       const auto data = raiillocator.mapMemory(*stagingBuffer);
@@ -88,7 +90,8 @@ namespace Triton::Graphics::Textures {
           vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eGpuOnly,
                                     .requiredFlags = vk::MemoryPropertyFlagBits::eDeviceLocal};
 
-      image = raiillocator.createImage(imageCreateInfo, imageAllocateCreateInfo);
+      const auto imageName = "image - " + textureFilename;
+      image = raiillocator.createImage(imageCreateInfo, imageAllocateCreateInfo, imageName);
 
       const auto subresourceRange =
           vk::ImageSubresourceRange{.aspectMask = vk::ImageAspectFlagBits::eColor,

@@ -155,9 +155,7 @@ namespace Triton::Graphics::Helpers {
           vk::DebugMarkerObjectNameInfoEXT{.objectType = objectType,
                                            .object = debugHandle,
                                            .pObjectName = name.data()};
-      // TODO: vulkan sdk 261 busted this, something is broken with vulkan_raii, when i look up
-      // the function manually it's there but vulkan_raii can't find it
-      // device.debugMarkerSetObjectNameEXT(debugNameInfo);
+      device.debugMarkerSetObjectNameEXT(debugNameInfo);
    }
 
    inline vk::Format findSupportedFormat(const vk::raii::PhysicalDevice& physicalDevice,
