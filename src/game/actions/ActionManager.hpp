@@ -1,10 +1,14 @@
 #pragma once
 
-#include "ActionType.hpp"
 #include "ActionSet.hpp"
 #include "../events/Key.hpp"
 
 namespace Triton::Actions {
+
+   enum class ActionSets : uint32_t {
+      Main = 0,
+      Menu
+   };
 
    class ActionSet;
 
@@ -18,14 +22,16 @@ namespace Triton::Actions {
       ActionManager& operator=(const ActionManager&) = default;
       ActionManager& operator=(ActionManager&&) = delete;
 
-      [[nodiscard]] bool hasMapping(Key key) const;
-      [[nodiscard]] ActionType mapKeyToAction(Key key) const;
+      ActionSet& createActionSet(ActionSets name);
+      void setActiveSet(ActionSets newActiveSet);
 
-      void setCurrentActionSet(const std::shared_ptr<ActionSet>& newCurrent);
-      [[nodiscard]] std::shared_ptr<ActionSet> getCurrentActionSet() const;
+      void keyPressed(Actions::Key key);
+      void keyReleased(Actions::Key key);
 
     private:
-      std::shared_ptr<ActionSet> currentActionSet;
+      std::unordered_map<ActionSets, ActionSet> actionSetMap;
+      std::unordered_map<
+      ActionSets activeSet{};
    };
 
 }
