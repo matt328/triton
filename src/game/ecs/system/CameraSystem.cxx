@@ -2,11 +2,18 @@
 
 #include "game/ecs/component/Camera.hpp"
 #include "game/ecs/component/Resources.hpp"
+#include "game/Actions.hpp"
 
 namespace Triton::Game::Ecs::CameraSystem {
    void update(entt::registry& registry) {
       const auto view = registry.view<Camera>();
       const auto [width, height] = registry.ctx().get<const WindowDimensions>();
+
+      auto& mainMap = registry.ctx().get<gainput::InputMap>();
+
+      // if (mainMap.GetBoolWasDown(Actions::Button::ButtonConfirm)) {
+      //    Log::info << "ButtonConfirm" << std::endl;
+      // }
 
       for (auto [entity, cam] : view.each()) {
          // TODO: Update camera position, yaw and pitch based on input state from a context variable
