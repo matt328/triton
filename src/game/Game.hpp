@@ -1,6 +1,8 @@
 #pragma once
 
 #include "core/Timer.hpp"
+#include "events/Events.hpp"
+#include "game/actions/ActionManager.hpp"
 /*
    Game's responsibility will be to own and handle interactions with the entity system
    Entity System
@@ -39,10 +41,18 @@ namespace Triton::Game {
       void render();
       void resize(const int width, const int height);
       void waitIdle();
+      void keyPressed(Actions::Key key);
+      void keyReleased(Actions::Key key);
+
+      [[nodiscard]] Actions::ActionManager& getActionManager() const {
+         return *actionManager;
+      }
 
     private:
       std::unique_ptr<Graphics::Renderer> renderer;
 
       std::unique_ptr<entt::registry> registry;
+
+      std::unique_ptr<Actions::ActionManager> actionManager;
    };
 }

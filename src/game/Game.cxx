@@ -1,6 +1,7 @@
 #include "Game.hpp"
 
 #include "core/Paths.hpp"
+#include "game/actions/ActionSet.hpp"
 #include "game/ecs/component/Resources.hpp"
 #include "graphics/RenderObject.hpp"
 #include "graphics/Renderer.hpp"
@@ -12,9 +13,15 @@
 #include "game/ecs/system/CameraSystem.hpp"
 
 namespace Triton::Game {
+
+   using Source = Actions::Source;
+   using Key = Actions::Key;
+   using ActionSets = Actions::ActionSets;
+   using ActionTypes = Actions::ActionType;
+
    // HACK: This entire class.  slopping stuff in here to manually test out the renderer before
    // adding proper ECS.
-   Game::Game(GLFWwindow* window) {
+   Game::Game(GLFWwindow* window) : actionManager{std::make_unique<Actions::ActionManager>()} {
       renderer = std::make_unique<Graphics::Renderer>(window);
 
       registry = std::make_unique<entt::registry>();
@@ -46,6 +53,16 @@ namespace Triton::Game {
          };
          return perFrameData;
       });
+
+      auto& mainSet = actionManager->createActionSet(ActionSets::Main);
+      mainSet.bindSource(Source{Key::Up}, ActionTypes::MoveForward);
+
+      auto& menuSet = actionManager->createActionSet(ActionSets::Menu);
+      menuSet.bindSource(Source{Key::Right}, ActionTypes::SelectionForward);
+      menuSet.bindSource(Source{Key::Left}, ActionTypes::SelectionBack);
+      menuSet.bindSource(Source{Key::Space}, ActionTypes::Ok);
+
+      actionManager->setActiveSet(ActionSets::Main);
    }
 
    Game::~Game() {

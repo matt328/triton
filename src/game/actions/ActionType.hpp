@@ -5,7 +5,11 @@ namespace Triton::Actions {
       MoveForward = 0,
       MoveBackward,
       StrafeLeft,
-      StrafeRight
+      StrafeRight,
+      SelectionForward,
+      SelectionBack,
+      Ok,
+      Cancel
    };
 }
 
