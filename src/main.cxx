@@ -2,8 +2,6 @@
 #include "core/Timer.hpp"
 #include "game/Application.hpp"
 
-namespace Events = Triton::Events;
-
 void* operator new(std ::size_t count) {
    auto ptr = malloc(count);
    TracyAllocS(ptr, count, 12);

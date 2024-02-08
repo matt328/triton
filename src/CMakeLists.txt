@@ -3,11 +3,7 @@ set(triton_SRC
 
    "game/Application.cxx"
    "game/Game.cxx"
-   
-   "game/actions/ActionManager.cxx"
-   "game/actions/ActionSet.cxx"
-   "game/actions/KeyMap.cxx"
-   
+      
    "game/ecs/system/CameraSystem.cxx"
    "game/ecs/system/RenderSystem.cxx"
 
@@ -32,6 +28,7 @@ add_executable(${project_name} ${triton_SRC})
 configure_file(config.h.in config.h)
 
 add_compile_definitions(
+   GLFW_EXPOSE_NATIVE_WIN32
    GLFW_INCLUDE_VULKAN=1
    VULKAN_HPP_NO_CONSTRUCTORS
    GLM_FORCE_RADIANS
@@ -90,6 +87,7 @@ endif()
 
 
 find_package(Threads REQUIRED)
+find_package(unofficial-gainput CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glslang CONFIG REQUIRED)
 find_package(Tracy CONFIG REQUIRED)
@@ -106,6 +104,7 @@ target_precompile_headers(${project_name} PRIVATE
    <filesystem>
    <fstream>
    <functional>
+   <gainput/gainput.h>
    <glm/gtc/matrix_transform.hpp>
    <glm/gtc/type_ptr.hpp>
    <glm/gtx/matrix_decompose.hpp>
@@ -120,6 +119,7 @@ target_precompile_headers(${project_name} PRIVATE
    <string_view>
    <sstream>
    <GLFW/glfw3.h>
+   <GLFW/glfw3native.h>
    <vulkan-memory-allocator-hpp/vk_mem_alloc.hpp>
    <vulkan/vulkan_raii.hpp>
    <tracy/Tracy.hpp>
@@ -129,6 +129,7 @@ target_precompile_headers(${project_name} PRIVATE
 
 target_link_libraries(${project_name}
    PRIVATE
+   unofficial::gainput::gainput
    glfw
    glslang::glslang
    glslang::glslang-default-resource-limits

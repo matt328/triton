@@ -1,7 +1,6 @@
 #include "Game.hpp"
 
 #include "core/Paths.hpp"
-#include "game/actions/ActionSet.hpp"
 #include "game/ecs/component/Resources.hpp"
 #include "graphics/RenderObject.hpp"
 #include "graphics/Renderer.hpp"
@@ -11,20 +10,31 @@
 #include "game/ecs/component/Transform.hpp"
 #include "game/ecs/system/RenderSystem.hpp"
 #include "game/ecs/system/CameraSystem.hpp"
+#include <gainput/GainputInputManager.h>
+#include <gainput/GainputInputMap.h>
+#include "game/Actions.hpp"
 
 namespace Triton::Game {
 
-   using Source = Actions::Source;
-   using Key = Actions::Key;
-   using ActionSets = Actions::ActionSets;
-   using ActionTypes = Actions::ActionType;
-
    // HACK: This entire class.  slopping stuff in here to manually test out the renderer before
    // adding proper ECS.
-   Game::Game(GLFWwindow* window) : actionManager{std::make_unique<Actions::ActionManager>()} {
+   Game::Game(GLFWwindow* window) {
+      int width{}, height{};
+      glfwGetWindowSize(window, &width, &height);
+
       renderer = std::make_unique<Graphics::Renderer>(window);
 
       registry = std::make_unique<entt::registry>();
+
+      inputManager = std::make_unique<gainput::InputManager>();
+      inputManager->SetDisplaySize(width, height);
+
+      const gainput::DeviceId keyboardId =
+          inputManager->CreateDevice<gainput::InputDeviceKeyboard>();
+
+      auto& map = registry->ctx().emplace<gainput::InputMap>(*inputManager);
+
+      map.MapBool(Actions::Button::ButtonConfirm, keyboardId, gainput::KeyReturn);
 
       // Create viking room entity
       const auto textureFilename = (Core::Paths::TEXTURES / "viking_room.png").string();
@@ -37,8 +47,6 @@ namespace Triton::Game {
       registry->emplace<Ecs::Renderable>(room, meshId, textureId);
       registry->emplace<Ecs::Transform>(room);
 
-      int width{}, height{};
-      glfwGetWindowSize(window, &width, &height);
       const auto camera = registry->create();
       registry->emplace<Ecs::Camera>(camera, width, height, 60.f, 0.1f, 1000.f);
 
@@ -53,28 +61,34 @@ namespace Triton::Game {
          };
          return perFrameData;
       });
-
-      auto& mainSet = actionManager->createActionSet(ActionSets::Main);
-      mainSet.bindSource(Source{Key::Up}, ActionTypes::MoveForward);
-
-      auto& menuSet = actionManager->createActionSet(ActionSets::Menu);
-      menuSet.bindSource(Source{Key::Right}, ActionTypes::SelectionForward);
-      menuSet.bindSource(Source{Key::Left}, ActionTypes::SelectionBack);
-      menuSet.bindSource(Source{Key::Space}, ActionTypes::Ok);
-
-      actionManager->setActiveSet(ActionSets::Main);
    }
 
    Game::~Game() {
       Log::info << "destroying game" << std::endl;
    };
 
-   void Game::update([[maybe_unused]] const Core::Timer& timer) {
+   void Game::handleMessage(MSG msg) {
+      TracyMessageL("handleMessage");
+      inputManager->HandleMessage(msg);
+   }
+
+   void Game::preUpdate() {
+      TracyMessageL("preUpdate");
+      inputManager->Update();
+   }
+
+   void Game::fixedUpdate([[maybe_unused]] const Core::Timer& timer) {
+      TracyMessageL("fixedUpdate");
       ZoneNamedN(upd, "FixedUpdate", true);
       Ecs::CameraSystem::update(*registry);
+      auto& mainMap = registry->ctx().get<gainput::InputMap>();
+      if (mainMap.GetBoolWasDown(Actions::Button::ButtonConfirm)) {
+         Log::info << "ButtonConfirm" << std::endl;
+      }
    }
 
    void Game::render() {
+      TracyMessageL("render");
       Ecs::RenderSystem::update(*registry, *renderer);
       renderer->render();
    }
