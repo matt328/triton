@@ -36,8 +36,6 @@ namespace Triton::Core {
          }
 
          blendingFactor = accumulatedTime / fixedTimeStep;
-
-         glfwPollEvents();
       }
 
       [[nodiscard]] double getBlendingFactor() const {
