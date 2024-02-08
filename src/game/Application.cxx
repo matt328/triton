@@ -23,23 +23,23 @@ namespace Triton::Game {
                             [[maybe_unused]] int scancode,
                             int action,
                             [[maybe_unused]] int mods) {
-                            const auto game =
+                            const auto application =
                                 static_cast<Application*>(glfwGetWindowUserPointer(window));
                             const auto mappedKey = Actions::keyMap[key];
                             switch (action) {
                                case GLFW_PRESS: {
                                   Events::KeyPressedEvent event{mappedKey};
-                                  game->fireEvent(event);
+                                  application->game->getActionManager().keyPressed(mappedKey);
                                   break;
                                }
                                case GLFW_RELEASE: {
                                   Events::KeyReleasedEvent event{mappedKey};
-                                  game->fireEvent(event);
+                                  application->game->getActionManager().keyReleased(mappedKey);
                                   break;
                                }
                                case GLFW_REPEAT: {
                                   Events::KeyPressedEvent event{mappedKey, true};
-                                  game->fireEvent(event);
+                                  application->fireEvent(event);
                                   break;
                                }
                                default: {
@@ -49,15 +49,15 @@ namespace Triton::Game {
                          });
 
       glfwSetCharCallback(window.get(), [](GLFWwindow* window, const unsigned int keyCode) {
-         const auto game = static_cast<Application*>(glfwGetWindowUserPointer(window));
+         const auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
          const auto mappedKey = Actions::keyMap[static_cast<int>(keyCode)];
          Events::KeyTypedEvent event{mappedKey};
-         game->fireEvent(event);
+         app->fireEvent(event);
       });
 
       glfwSetWindowCloseCallback(window.get(), [](GLFWwindow* window) {
-         const auto game = static_cast<Application*>(glfwGetWindowUserPointer(window));
-         game->running = false;
+         const auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
+         app->running = false;
       });
 
       game = std::make_unique<Game>(window.get());

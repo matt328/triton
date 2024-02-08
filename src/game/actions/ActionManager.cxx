@@ -1,23 +1,28 @@
 #include "ActionManager.hpp"
-#include "ActionType.hpp"
 #include "ActionSet.hpp"
 
 namespace Triton::Actions {
 
-   std::shared_ptr<ActionSet> ActionManager::getCurrentActionSet() const {
-      return currentActionSet;
+   ActionSet& ActionManager::createActionSet(ActionSets name) {
+      auto [iter, inserted] = actionSetMap.emplace(name, ActionSet{});
+      return iter->second;
    }
 
-   bool ActionManager::hasMapping(const Key key) const {
-      return getCurrentActionSet()->hasMapping(key);
+   void ActionManager::setActiveSet(ActionSets newActiveSet) {
+      activeSet = newActiveSet;
    }
 
-   ActionType ActionManager::mapKeyToAction(const Key key) const {
-      return getCurrentActionSet()->mapKeyToAction(key);
+   void ActionManager::keyPressed(Key key) {
+      auto& actionSet = actionSetMap.at(activeSet);
+
+      const auto actionType = actionSet.getActionForKey(key);
+      auto sourceEvent = SourceEvent{Source{key}};
+
+      
+
    }
 
-   void ActionManager::setCurrentActionSet(const std::shared_ptr<ActionSet>& newCurrent) {
-      currentActionSet = newCurrent;
+   void ActionManager::keyReleased(Key key) {
    }
 
 }
