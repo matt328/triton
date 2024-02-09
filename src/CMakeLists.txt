@@ -1,6 +1,10 @@
 set(triton_SRC
    "main.cxx"
 
+   "actions/ActionSet.cxx"
+   "actions/ActionSystem.cxx"
+   "actions/KeyMap.cxx"
+
    "game/Application.cxx"
    "game/Game.cxx"
       
