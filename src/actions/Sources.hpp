@@ -2,14 +2,20 @@
 
 #include "Key.hpp"
 #include "Mouse.hpp"
+#include "Gamepad.hpp"
 
 namespace Triton::Actions {
    struct Source {
       Source(MouseInput me) : src{me} {
       }
+
       Source(Key key) : src(key) {
       }
-      std::variant<MouseInput, Key> src;
+
+      Source(GamepadInput in) : src(in) {
+      }
+
+      std::variant<MouseInput, Key, GamepadInput> src;
    };
 
    struct SourceEvent : public Source {

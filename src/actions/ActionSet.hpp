@@ -3,6 +3,7 @@
 #include "Key.hpp"
 #include "ActionType.hpp"
 #include "Mouse.hpp"
+#include "Gamepad.hpp"
 #include "Sources.hpp"
 
 /*
@@ -35,20 +36,22 @@ namespace Triton::Actions {
 
       ~ActionSet() = default;
 
-      void mapKey(Key key, ActionType actionType);
-      [[nodiscard]] bool hasMapping(Key key) const;
+      [[nodiscard]] const std::unordered_map<Key, ActionType>& getKeyMap() const {
+         return keyMap;
+      }
+
       [[nodiscard]] ActionType getActionForKey(Key key) const;
       [[nodiscard]] ActionType getActionForMouse(MouseInput mouse) const;
+      [[nodiscard]] ActionType getActionForGamepad(GamepadInput gp) const;
 
       [[nodiscard]] ActionType getActionForSourceEvent(const SourceEvent source) const;
 
-      void bindSource(Key key, ActionType actionType);
-      void bindSource(MouseInput mouse, ActionType actionType);
       void bindSource(Source src, ActionType actionType);
 
     private:
-      std::multimap<Key, ActionType> keyMap;
-      std::multimap<MouseInput, ActionType> mouseMap;
+      std::unordered_map<Key, ActionType> keyMap;
+      std::unordered_map<MouseInput, ActionType> mouseMap;
+      std::unordered_map<GamepadInput, ActionType> gamepadMap;
    };
 
 }
