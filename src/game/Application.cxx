@@ -1,5 +1,4 @@
 #include "Application.hpp"
-#include <GLFW/glfw3.h>
 
 namespace Triton::Game {
 
@@ -12,6 +11,7 @@ namespace Triton::Game {
 
       window.reset(glfwCreateWindow(width, height, windowTitle.data(), nullptr, nullptr));
 
+      glfwSetInputMode(window.get(), GLFW_STICKY_KEYS, GLFW_TRUE);
       glfwSetWindowUserPointer(window.get(), this);
       glfwSetFramebufferSizeCallback(window.get(), framebufferResizeCallback);
 
