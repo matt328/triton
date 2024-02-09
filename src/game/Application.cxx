@@ -31,17 +31,31 @@ namespace Triton::Game {
       auto hWnd = glfwGetWin32Window(window.get());
       MSG msg;
       while (running) {
-         game->preUpdate();
+         game->beginFrame();
+
+         // Allow the game to process any messages
          while (PeekMessageW(&msg, hWnd, 0, 0, PM_REMOVE)) {
             TranslateMessage(&msg);
             DispatchMessageW(&msg);
             game->handleMessage(msg);
          }
+
+         game->earlyUpdate();
+
          timer.tick([&]() { game->fixedUpdate(timer); });
-         game->render();
+
+         game->update();
          FrameMark;
       }
       game->waitIdle();
+   }
+
+   void Application::doTheThing(std::function<void()> fn) {
+      int x = 0;
+      while (x < 5) {
+         fn();
+         x++;
+      }
    }
 
    void Application::resize([[maybe_unused]] const int width, [[maybe_unused]] const int height) {

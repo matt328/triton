@@ -17,8 +17,7 @@ namespace Triton::Core {
 
       /// Call this method once per 'frame' and following it, call your Render function
       /// This method will get as close to
-      template <typename TUpdate>
-      void tick(const TUpdate& update) {
+      void tick(std::function<void()> update) {
          currentInstant = glfwGetTime();
 
          auto elapsed = currentInstant - previousInstant;

@@ -36,9 +36,10 @@ namespace Triton::Game {
       Game& operator=(const Game&) = delete;
       Game& operator=(Game&&) = delete;
 
-      void preUpdate();
+      void beginFrame();
+      void earlyUpdate();
       void fixedUpdate(const Core::Timer& timer);
-      void render();
+      void update();
       void resize(const int width, const int height);
       void waitIdle();
       void handleMessage(MSG msg);
