@@ -72,22 +72,21 @@ namespace Triton::Game {
       inputManager->HandleMessage(msg);
    }
 
-   void Game::preUpdate() {
+   void Game::beginFrame() {
       TracyMessageL("preUpdate");
       inputManager->Update();
+   }
+
+   void Game::earlyUpdate() {
    }
 
    void Game::fixedUpdate([[maybe_unused]] const Core::Timer& timer) {
       TracyMessageL("fixedUpdate");
       ZoneNamedN(upd, "FixedUpdate", true);
-      Ecs::CameraSystem::update(*registry);
-      auto& mainMap = registry->ctx().get<gainput::InputMap>();
-      if (mainMap.GetBoolWasDown(Actions::Button::ButtonConfirm)) {
-         Log::info << "ButtonConfirm" << std::endl;
-      }
+      Ecs::CameraSystem::fixedUpdate(*registry);
    }
 
-   void Game::render() {
+   void Game::update() {
       TracyMessageL("render");
       Ecs::RenderSystem::update(*registry, *renderer);
       renderer->render();
