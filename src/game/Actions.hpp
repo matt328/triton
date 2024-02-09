@@ -1,7 +1,12 @@
 #pragma once
 
-namespace Triton::Game::Actions {
-   enum Button {
-      ButtonConfirm
+namespace Triton::Game {
+   enum Actions {
+      MoveForward,
+      MoveBackward,
+      StrafeLeft,
+      StrafeRight,
+      LookVertical,
+      LookHorizontal
    };
 }

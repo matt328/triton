@@ -10,6 +10,7 @@
 #include "game/ecs/component/Transform.hpp"
 #include "game/ecs/system/RenderSystem.hpp"
 #include "game/ecs/system/CameraSystem.hpp"
+#include <gainput/GainputInputDeviceKeyboard.h>
 #include <gainput/GainputInputManager.h>
 #include <gainput/GainputInputMap.h>
 #include "game/Actions.hpp"
@@ -34,7 +35,17 @@ namespace Triton::Game {
 
       auto& map = registry->ctx().emplace<gainput::InputMap>(*inputManager);
 
-      map.MapBool(Actions::Button::ButtonConfirm, keyboardId, gainput::KeyReturn);
+      map.MapBool(Actions::MoveForward, keyboardId, gainput::KeyUp);
+      map.MapBool(Actions::MoveForward, keyboardId, gainput::KeyW);
+
+      map.MapBool(Actions::MoveBackward, keyboardId, gainput::KeyDown);
+      map.MapBool(Actions::MoveBackward, keyboardId, gainput::KeyS);
+
+      map.MapBool(Actions::StrafeRight, keyboardId, gainput::KeyRight);
+      map.MapBool(Actions::StrafeRight, keyboardId, gainput::KeyD);
+
+      map.MapBool(Actions::StrafeLeft, keyboardId, gainput::KeyLeft);
+      map.MapBool(Actions::StrafeLeft, keyboardId, gainput::KeyA);
 
       // Create viking room entity
       const auto textureFilename = (Core::Paths::TEXTURES / "viking_room.png").string();
