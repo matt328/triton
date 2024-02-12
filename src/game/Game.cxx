@@ -1,8 +1,12 @@
 #include "Game.hpp"
 
 #include "core/Paths.hpp"
+#include "game/actions/ActionSet.hpp"
+#include "game/actions/ActionSystem.hpp"
+#include "game/actions/ActionType.hpp"
+#include "game/actions/Sources.hpp"
 #include "game/ecs/component/Resources.hpp"
-#include "graphics/RenderObject.hpp"
+
 #include "graphics/Renderer.hpp"
 
 #include "game/ecs/component/Renderable.hpp"
@@ -10,12 +14,10 @@
 #include "game/ecs/component/Transform.hpp"
 #include "game/ecs/system/RenderSystem.hpp"
 #include "game/ecs/system/CameraSystem.hpp"
-#include <gainput/GainputInputDeviceKeyboard.h>
-#include <gainput/GainputInputManager.h>
-#include <gainput/GainputInputMap.h>
-#include "game/Actions.hpp"
 
 namespace Triton::Game {
+
+   using namespace Actions;
 
    // HACK: This entire class.  slopping stuff in here to manually test out the renderer before
    // adding proper ECS.
@@ -27,29 +29,30 @@ namespace Triton::Game {
 
       registry = std::make_unique<entt::registry>();
 
-      inputManager = std::make_unique<gainput::InputManager>();
-      inputManager->SetDisplaySize(width, height);
+      actionSystem = std::make_unique<ActionSystem>(*window);
 
-      const gainput::DeviceId keyboardId =
-          inputManager->CreateDevice<gainput::InputDeviceKeyboard>();
+      registry->ctx().emplace<ActionState&>(actionSystem->getActionState());
 
-      auto& map = registry->ctx().emplace<gainput::InputMap>(*inputManager);
+      auto& map = actionSystem->createActionSet(ActionSets::Main);
 
-      map.MapBool(Actions::MoveForward, keyboardId, gainput::KeyUp);
-      map.MapBool(Actions::MoveForward, keyboardId, gainput::KeyW);
+      map.bindSource(Source{Key::Up}, ActionType::MoveForward);
+      map.bindSource(Source{Key::W}, ActionType::MoveForward);
 
-      map.MapBool(Actions::MoveBackward, keyboardId, gainput::KeyDown);
-      map.MapBool(Actions::MoveBackward, keyboardId, gainput::KeyS);
+      map.bindSource(Source{Key::Down}, ActionType::MoveBackward);
+      map.bindSource(Source{Key::S}, ActionType::MoveBackward);
 
-      map.MapBool(Actions::StrafeRight, keyboardId, gainput::KeyRight);
-      map.MapBool(Actions::StrafeRight, keyboardId, gainput::KeyD);
+      map.bindSource(Source{Key::Right}, ActionType::StrafeRight);
+      map.bindSource(Source{Key::D}, ActionType::StrafeRight);
 
-      map.MapBool(Actions::StrafeLeft, keyboardId, gainput::KeyLeft);
-      map.MapBool(Actions::StrafeLeft, keyboardId, gainput::KeyA);
+      map.bindSource(Source{Key::Left}, ActionType::StrafeLeft);
+      map.bindSource(Source{Key::A}, ActionType::StrafeLeft);
+
+      map.bindSource(Source{MouseInput::MOVE_X}, ActionType::LookHorizontal);
+      map.bindSource(Source{MouseInput::MOVE_Y}, ActionType::LookVertical);
 
       // Create viking room entity
-      const auto textureFilename = (Core::Paths::TEXTURES / "viking_room.png").string();
-      const auto filename = (Core::Paths::MODELS / "viking_room.gltf").string();
+      const auto textureFilename = (Core::Paths::TEXTURES / "grass.png").string();
+      const auto filename = (Core::Paths::MODELS / "area.gltf").string();
 
       const auto meshId = renderer->createMesh(filename);
       const auto textureId = renderer->createTexture(textureFilename);
@@ -63,32 +66,15 @@ namespace Triton::Game {
 
       registry->ctx().emplace<Ecs::WindowDimensions>(width, height);
       registry->ctx().emplace<Ecs::CurrentCamera>(camera);
-
-      renderer->registerPerFrameDataProvider([] {
-         const auto perFrameData = Graphics::PerFrameData{
-             .view = glm::identity<glm::mat4>(),
-             .proj = glm::identity<glm::mat4>(),
-             .viewProj = glm::identity<glm::mat4>(),
-         };
-         return perFrameData;
-      });
    }
 
    Game::~Game() {
       Log::info << "destroying game" << std::endl;
    };
 
-   void Game::handleMessage(MSG msg) {
-      TracyMessageL("handleMessage");
-      inputManager->HandleMessage(msg);
-   }
-
    void Game::beginFrame() {
-      TracyMessageL("preUpdate");
-      inputManager->Update();
-   }
-
-   void Game::earlyUpdate() {
+      TracyMessageL("beginFrame");
+      actionSystem->update();
    }
 
    void Game::fixedUpdate([[maybe_unused]] const Core::Timer& timer) {
