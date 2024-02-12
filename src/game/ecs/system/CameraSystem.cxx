@@ -38,8 +38,6 @@ namespace Triton::Game::Ecs::CameraSystem {
          const auto xOffset = actionState.getFloatDelta(ActionType::LookHorizontal);
          const auto yOffset = actionState.getFloatDelta(ActionType::LookVertical);
 
-         // Log::info << "x: " << xOffset << "y: " << yOffset << std::endl;
-
          cam.yaw += xOffset;
          cam.pitch += yOffset;
 

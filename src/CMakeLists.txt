@@ -116,6 +116,7 @@ target_precompile_headers(${project_name} PRIVATE
    <glslang/SPIRV/GlslangToSpv.h>
    <map>
    <optional>
+   <ranges>
    <set>
    <stb_image.h>
    <string>

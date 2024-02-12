@@ -35,6 +35,8 @@ namespace Triton::Game {
 
       auto& map = actionSystem->createActionSet(ActionSets::Main);
 
+      // map.addBinding(ActionType::MoveForward, {Source{Key::Up}, Source{Key::W}});
+
       map.bindSource(Source{Key::Up}, ActionType::MoveForward);
       map.bindSource(Source{Key::W}, ActionType::MoveForward);
 
