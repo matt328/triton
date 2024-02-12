@@ -11,7 +11,7 @@ namespace Triton::Game {
 
       window.reset(glfwCreateWindow(width, height, windowTitle.data(), nullptr, nullptr));
 
-      glfwSetInputMode(window.get(), GLFW_STICKY_KEYS, GLFW_TRUE);
+      glfwSetInputMode(window.get(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
       glfwSetWindowUserPointer(window.get(), this);
       glfwSetFramebufferSizeCallback(window.get(), framebufferResizeCallback);
 
@@ -28,34 +28,14 @@ namespace Triton::Game {
    }
 
    void Application::run(Core::Timer& timer) {
-      auto hWnd = glfwGetWin32Window(window.get());
-      MSG msg;
       while (running) {
+         glfwPollEvents();
          game->beginFrame();
-
-         // Allow the game to process any messages
-         while (PeekMessageW(&msg, hWnd, 0, 0, PM_REMOVE)) {
-            TranslateMessage(&msg);
-            DispatchMessageW(&msg);
-            game->handleMessage(msg);
-         }
-
-         game->earlyUpdate();
-
          timer.tick([&]() { game->fixedUpdate(timer); });
-
          game->update();
          FrameMark;
       }
       game->waitIdle();
-   }
-
-   void Application::doTheThing(std::function<void()> fn) {
-      int x = 0;
-      while (x < 5) {
-         fn();
-         x++;
-      }
    }
 
    void Application::resize([[maybe_unused]] const int width, [[maybe_unused]] const int height) {

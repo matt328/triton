@@ -26,8 +26,8 @@ layout(location = 1) out vec2 fragTexCoord;
 layout(location = 2) out uint textureId;
 
 void main() {
-   gl_Position =
-       camData.viewProj * objectBuffer.objects[gl_BaseInstance].model * vec4(inPosition, 1.0);
+   gl_Position = (camData.proj * camData.view * objectBuffer.objects[gl_BaseInstance].model) *
+                 vec4(inPosition, 1.0);
    fragColor = inColor;
    fragTexCoord = inTexCoord;
    textureId = objectBuffer.objects[gl_BaseInstance].textureId;

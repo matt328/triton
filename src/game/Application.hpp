@@ -30,8 +30,6 @@ namespace Triton::Game {
       std::unique_ptr<Game> game;
       bool running;
 
-      void doTheThing(std::function<void()> fn);
-
       static void errorCallback(int code, const char* description);
       static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
    };

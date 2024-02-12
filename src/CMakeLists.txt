@@ -3,7 +3,12 @@ set(triton_SRC
 
    "game/Application.cxx"
    "game/Game.cxx"
-      
+   
+   "game/actions/ActionSet.cxx"
+   "game/actions/ActionSystem.cxx"
+   "game/actions/KeyMap.cxx"
+   "game/actions/ActionState.cxx"
+
    "game/ecs/system/CameraSystem.cxx"
    "game/ecs/system/RenderSystem.cxx"
 
@@ -87,7 +92,6 @@ endif()
 
 
 find_package(Threads REQUIRED)
-find_package(unofficial-gainput CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glslang CONFIG REQUIRED)
 find_package(Tracy CONFIG REQUIRED)
@@ -104,7 +108,6 @@ target_precompile_headers(${project_name} PRIVATE
    <filesystem>
    <fstream>
    <functional>
-   <gainput/gainput.h>
    <glm/gtc/matrix_transform.hpp>
    <glm/gtc/type_ptr.hpp>
    <glm/gtx/matrix_decompose.hpp>
@@ -129,7 +132,6 @@ target_precompile_headers(${project_name} PRIVATE
 
 target_link_libraries(${project_name}
    PRIVATE
-   unofficial::gainput::gainput
    glfw
    glslang::glslang
    glslang::glslang-default-resource-limits
