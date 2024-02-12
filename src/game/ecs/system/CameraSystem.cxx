@@ -1,52 +1,61 @@
 #include "CameraSystem.hpp"
 
+#include "game/actions/ActionState.hpp"
 #include "game/ecs/component/Camera.hpp"
 #include "game/ecs/component/Resources.hpp"
-#include "game/Actions.hpp"
+#include "game/actions/ActionType.hpp"
 
 namespace Triton::Game::Ecs::CameraSystem {
+
+   using namespace Actions;
+
    void fixedUpdate(entt::registry& registry) {
       const auto view = registry.view<Camera>();
       const auto [width, height] = registry.ctx().get<const WindowDimensions>();
 
-      auto& mainMap = registry.ctx().get<gainput::InputMap>();
+      auto& actionState = registry.ctx().get<ActionState>();
+
+      const auto cameraSpeed = 0.005f;
 
       for (auto [entity, cam] : view.each()) {
-         // TODO: Update camera position, yaw and pitch based on input state from a context variable
-         if (mainMap.GetBool(Actions::MoveForward)) {
-            cam.position = cam.position + (cam.direction * 0.005f);
-         }
-         if (mainMap.GetBool(Actions::MoveBackward)) {
-            cam.position = cam.position - (cam.direction * 0.005f);
+
+         if (actionState.getBool(ActionType::MoveForward)) {
+            cam.position += cameraSpeed * cam.front;
          }
 
-         auto rightVector = glm::cross(cam.position, {0.f, 1.f, 0.f});
-         if (mainMap.GetBool(Actions::StrafeLeft)) {
-            cam.position = cam.position + (rightVector * 0.005f);
+         if (actionState.getBool(ActionType::MoveBackward)) {
+            cam.position -= cameraSpeed * cam.front;
          }
 
-         if (mainMap.GetBool(Actions::StrafeRight)) {
-            cam.position = cam.position - (rightVector * 0.005f);
+         if (actionState.getBool(ActionType::StrafeLeft)) {
+            cam.position -= glm::normalize(glm::cross(cam.front, cam.cameraUp)) * cameraSpeed;
          }
 
-         // Update the camera's direction vector based on yaw and pitch
-         // This needs to be kept up to date for future movement
-         glm::quat orientation =
-             glm::angleAxis(glm::radians(cam.yaw), glm::vec3(0.0f, 1.0f, 0.0f)) *
-             glm::angleAxis(glm::radians(cam.pitch), glm::vec3(1.0f, 0.0f, 0.0f));
+         if (actionState.getBool(ActionType::StrafeRight)) {
+            cam.position += glm::normalize(glm::cross(cam.front, cam.cameraUp)) * cameraSpeed;
+         }
 
-         cam.direction = glm::normalize(glm::rotate(orientation, glm::vec3(0.0f, 0.0f, -1.0f)));
+         const auto xOffset = actionState.getFloatDelta(ActionType::LookHorizontal);
+         const auto yOffset = actionState.getFloatDelta(ActionType::LookVertical);
 
-         // Update the camera's view
-         cam.view = glm::lookAt(cam.position, cam.direction, {0.f, 1.f, 0.f});
+         // Log::info << "x: " << xOffset << "y: " << yOffset << std::endl;
 
-         // Update the camera's projection matrix
-         cam.width = width;
-         cam.height = height;
-         cam.projection = glm::perspective(cam.fov,
-                                           (float)((float)cam.width / (float)cam.height),
-                                           cam.nearClip,
-                                           cam.farClip);
+         cam.yaw += xOffset;
+         cam.pitch += yOffset;
+
+         cam.yaw = std::min(cam.yaw, 89.f);
+         cam.pitch = std::max(cam.pitch, -89.f);
+
+         auto direction = glm::vec3{cos(glm::radians(cam.yaw)) * cos(glm::radians(cam.pitch)),
+                                    sin(glm::radians(cam.pitch)),
+                                    sin(glm::radians(cam.yaw)) * cos(glm::radians(cam.pitch))};
+
+         cam.front = glm::normalize(direction);
+
+         cam.view = glm::lookAt(cam.position, cam.position + cam.front, cam.cameraUp);
+
+         float aspect = static_cast<float>(width) / static_cast<float>(height);
+         cam.projection = glm::perspective(glm::radians(cam.fov), aspect, 0.1f, 1000.f);
       }
    }
 }

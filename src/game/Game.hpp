@@ -1,7 +1,7 @@
 #pragma once
 
 #include "core/Timer.hpp"
-#include <gainput/GainputInputManager.h>
+#include "actions/ActionSystem.hpp"
 /*
    Game's responsibility will be to own and handle interactions with the entity system
    Entity System
@@ -37,7 +37,6 @@ namespace Triton::Game {
       Game& operator=(Game&&) = delete;
 
       void beginFrame();
-      void earlyUpdate();
       void fixedUpdate(const Core::Timer& timer);
       void update();
       void resize(const int width, const int height);
@@ -47,6 +46,6 @@ namespace Triton::Game {
     private:
       std::unique_ptr<Graphics::Renderer> renderer;
       std::unique_ptr<entt::registry> registry;
-      std::unique_ptr<gainput::InputManager> inputManager;
+      std::unique_ptr<Actions::ActionSystem> actionSystem;
    };
 }
