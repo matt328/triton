@@ -34,5 +34,7 @@ namespace Triton::Actions {
       std::unordered_map<ActionSets, ActionSet> actionSetMap;
       ActionSets activeSet{};
       ActionState actionState{};
+
+      [[nodiscard]] bool sourceToBool(const Source source) const;
    };
 }
