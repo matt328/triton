@@ -10,10 +10,6 @@ namespace Triton::Actions {
    }
 
    void ActionState::setBool(ActionType actionType, bool value) {
-      if (value) {
-         Log::info << "setBool value: " << value
-                   << " actionType: " << static_cast<uint32_t>(actionType) << std::endl;
-      }
       currentBoolMap.insert({actionType, value});
    }
 
@@ -24,10 +20,6 @@ namespace Triton::Actions {
    bool ActionState::getBool(ActionType actionType) const {
       const auto it = currentBoolMap.find(actionType);
       const auto value = (it != currentBoolMap.end() ? it->second : false);
-      if (value) {
-         Log::info << "getBool value: " << value
-                   << " actionType: " << static_cast<uint32_t>(actionType) << std::endl;
-      }
       return value;
    }
 
