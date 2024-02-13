@@ -114,6 +114,7 @@ target_precompile_headers(${project_name} PRIVATE
    <glm/gtx/quaternion.hpp>
    <glm/gtx/string_cast.hpp>
    <glslang/SPIRV/GlslangToSpv.h>
+   <limits>
    <map>
    <optional>
    <ranges>
