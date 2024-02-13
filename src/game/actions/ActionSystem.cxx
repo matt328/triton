@@ -6,20 +6,15 @@
 namespace Triton::Actions {
 
    void ActionSystem::update() {
-      // There are a lot of allocations here that need dealt with.
-      // Might need to rethink the approach of this being infinitely flexible
-      // basically just need to query glfw state in the ecs, maybe just toss the window in a
-      // context variable
-      // move current state into previous state, clear current state
       actionState.nextFrame();
       // Iterate the actionMap, for each action, calculate the ActionState for it's set of sources
-      auto actionTypeMap = actionSetMap.at(activeSet).getActionTypeMap();
+      const auto& actionTypeMap = actionSetMap.at(activeSet).getActionTypeMap();
 
-      for (auto& it : actionTypeMap) {
-         auto actionType = it.first;
+      for (const auto& it : actionTypeMap) {
+         const auto actionType = it.first;
          auto range = actionTypeMap.equal_range(actionType);
          auto set = false;
-         for (auto i = range.first; i != range.second; ++i) {
+         for (auto& i = range.first; i != range.second; ++i) {
             if (sourceToBool(i->second)) {
                actionState.setBool(actionType, true);
                set = true;
