@@ -37,5 +37,6 @@ namespace Triton::Actions {
 
       [[nodiscard]] bool sourceToBool(const Source& source) const;
       [[nodiscard]] float sourceToFloat(const Source& source) const;
+      long long frameNumber{};
    };
 }
