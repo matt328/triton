@@ -12,6 +12,10 @@ namespace Triton::Game {
       window.reset(glfwCreateWindow(width, height, windowTitle.data(), nullptr, nullptr));
 
       glfwSetInputMode(window.get(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+      if (glfwRawMouseMotionSupported())
+         glfwSetInputMode(window.get(), GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+
       glfwSetWindowUserPointer(window.get(), this);
       glfwSetFramebufferSizeCallback(window.get(), framebufferResizeCallback);
 

@@ -1,10 +1,14 @@
 #pragma once
 
 namespace Triton::Game::Ecs {
+
+   const auto DefaultYaw = -90.f;
    constexpr glm::vec3 worldUp = {0.f, 1.f, 0.f};
+
    struct Camera {
-      Camera(int width, int height, float fov, float nearClip, float farClip)
-          : projection(
+      Camera(int width, int height, float fov, float nearClip, float farClip, glm::vec3 position)
+          : position{position},
+            projection(
                 glm::perspective(glm::radians(fov), (float)(width / height), nearClip, farClip)),
             width(width),
             height(height),
@@ -12,9 +16,9 @@ namespace Triton::Game::Ecs {
             nearClip(nearClip),
             farClip(farClip) {
       }
-      float yaw{-90.f}, pitch{0.f};
+      float yaw{DefaultYaw}, pitch{0.f};
 
-      glm::vec3 position{0.f, -1.f, 3.f};
+      glm::vec3 position{};
       glm::vec3 front{0.f, 0.f, -1.f};
       glm::vec3 cameraUp = worldUp; // for now
 
