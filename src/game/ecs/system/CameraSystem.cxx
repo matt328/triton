@@ -16,6 +16,7 @@ namespace Triton::Game::Ecs::CameraSystem {
       auto& actionState = registry.ctx().get<ActionState>();
 
       const auto cameraSpeed = 0.005f;
+      const auto c = 0.0025f;
 
       for (auto [entity, cam] : view.each()) {
 
@@ -38,10 +39,10 @@ namespace Triton::Game::Ecs::CameraSystem {
          const auto xOffset = actionState.getFloatDelta(ActionType::LookHorizontal);
          const auto yOffset = actionState.getFloatDelta(ActionType::LookVertical);
 
-         cam.yaw += xOffset;
-         cam.pitch += yOffset;
+         cam.yaw += (xOffset * c);
+         cam.pitch += (yOffset * c);
 
-         cam.yaw = std::min(cam.yaw, 89.f);
+         cam.pitch = std::min(cam.pitch, 89.f);
          cam.pitch = std::max(cam.pitch, -89.f);
 
          auto direction = glm::vec3{cos(glm::radians(cam.yaw)) * cos(glm::radians(cam.pitch)),

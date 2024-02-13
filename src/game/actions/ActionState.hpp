@@ -11,7 +11,7 @@ namespace Triton::Actions {
     public:
       ActionState() = default;
 
-      void nextFrame();
+      void nextFrame(long long frameNumber);
 
       void setBool(ActionType actionType, bool value);
       void setFloat(ActionType actionType, float value);
@@ -28,5 +28,9 @@ namespace Triton::Actions {
 
       FloatMap currentFloatMap{};
       FloatMap previousFloatMap{};
+
+      long long frameNumber{};
+      bool firstMouseX = true;
+      bool firstMouseY = true;
    };
 }
