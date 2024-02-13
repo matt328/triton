@@ -2,7 +2,8 @@
 
 namespace Triton::Actions {
 
-   void ActionState::nextFrame() {
+   void ActionState::nextFrame(long long frameNumber) {
+      this->frameNumber = frameNumber;
       previousBoolMap = currentBoolMap;
       previousFloatMap = currentFloatMap;
    }
@@ -12,7 +13,16 @@ namespace Triton::Actions {
    }
 
    void ActionState::setFloat(ActionType actionType, float value) {
-      currentFloatMap.insert({actionType, value});
+      // Prevent a large jump when first capturing mouse
+      if (firstMouseX && actionType == ActionType::LookHorizontal) {
+         previousFloatMap.insert_or_assign(actionType, value);
+         firstMouseX = false;
+      }
+      if (firstMouseY && actionType == ActionType::LookVertical) {
+         previousFloatMap.insert_or_assign(actionType, value);
+         firstMouseY = false;
+      }
+      currentFloatMap.insert_or_assign(actionType, value);
    }
 
    bool ActionState::getBool(ActionType actionType) const {
