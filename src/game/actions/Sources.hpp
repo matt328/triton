@@ -5,6 +5,11 @@
 #include "Gamepad.hpp"
 
 namespace Triton::Actions {
+   enum class SourceType : uint32_t {
+      Boolean = 0,
+      Float
+   };
+
    struct Source {
       Source(MouseInput me) : src{me} {
       }
@@ -16,15 +21,5 @@ namespace Triton::Actions {
       }
 
       std::variant<MouseInput, Key, GamepadInput> src;
-   };
-
-   struct SourceEvent : public Source {
-
-      SourceEvent(const Source s) : Source{s} {
-      }
-
-      SourceEvent(const Source s, float value) : Source{s}, value{value} {
-      }
-      std::optional<float> value{};
    };
 }

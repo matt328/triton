@@ -2,7 +2,10 @@
 
 namespace Triton::Actions {
 
-   void ActionSet::bindSource(Source source, ActionType actionType) {
+   void ActionSet::mapBool(Source source, ActionType actionType) {
       actionTypeMap.insert({actionType, source});
+   }
+
+   void ActionSet::mapFloat(Source source, ActionType actionType) {
    }
 }
