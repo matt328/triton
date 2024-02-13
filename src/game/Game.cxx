@@ -37,20 +37,20 @@ namespace Triton::Game {
 
       // map.addBinding(ActionType::MoveForward, {Source{Key::Up}, Source{Key::W}});
 
-      map.bindSource(Source{Key::Up}, ActionType::MoveForward);
-      map.bindSource(Source{Key::W}, ActionType::MoveForward);
+      map.mapBool(Source{Key::Up}, ActionType::MoveForward);
+      map.mapBool(Source{Key::W}, ActionType::MoveForward);
 
-      map.bindSource(Source{Key::Down}, ActionType::MoveBackward);
-      map.bindSource(Source{Key::S}, ActionType::MoveBackward);
+      map.mapBool(Source{Key::Down}, ActionType::MoveBackward);
+      map.mapBool(Source{Key::S}, ActionType::MoveBackward);
 
-      map.bindSource(Source{Key::Right}, ActionType::StrafeRight);
-      map.bindSource(Source{Key::D}, ActionType::StrafeRight);
+      map.mapBool(Source{Key::Right}, ActionType::StrafeRight);
+      map.mapBool(Source{Key::D}, ActionType::StrafeRight);
 
-      map.bindSource(Source{Key::Left}, ActionType::StrafeLeft);
-      map.bindSource(Source{Key::A}, ActionType::StrafeLeft);
+      map.mapBool(Source{Key::Left}, ActionType::StrafeLeft);
+      map.mapBool(Source{Key::A}, ActionType::StrafeLeft);
 
-      map.bindSource(Source{MouseInput::MOVE_X}, ActionType::LookHorizontal);
-      map.bindSource(Source{MouseInput::MOVE_Y}, ActionType::LookVertical);
+      map.mapFloat(Source{MouseInput::MOVE_X}, ActionType::LookHorizontal);
+      map.mapFloat(Source{MouseInput::MOVE_Y}, ActionType::LookVertical);
 
       // Create viking room entity
       const auto textureFilename = (Core::Paths::TEXTURES / "grass.png").string();

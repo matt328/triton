@@ -36,14 +36,21 @@ namespace Triton::Actions {
 
       ~ActionSet() = default;
 
-      [[nodiscard]] const auto& getActionTypeMap() const {
-         return actionTypeMap;
+      [[nodiscard]] const auto& getBoolMap() const {
+         return boolMap;
       }
 
-      void bindSource(Source src, ActionType actionType);
+      [[nodiscard]] const auto& getFloatMap() const {
+         return floatMap;
+      }
+
+      void mapBool(Source src, ActionType actionType);
+
+      void mapFloat(Source src, ActionType actionType);
 
     private:
-      std::multimap<ActionType, Source> actionTypeMap;
+      std::unordered_multimap<ActionType, Source> boolMap;
+      std::unordered_multimap<ActionType, Source> floatMap;
    };
 
 }
