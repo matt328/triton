@@ -5,12 +5,10 @@ namespace Triton::Actions {
    void ActionState::nextFrame() {
       previousBoolMap = currentBoolMap;
       previousFloatMap = currentFloatMap;
-      currentBoolMap.clear();
-      previousFloatMap.clear();
    }
 
    void ActionState::setBool(ActionType actionType, bool value) {
-      currentBoolMap.insert({actionType, value});
+      currentBoolMap.insert_or_assign(actionType, value);
    }
 
    void ActionState::setFloat(ActionType actionType, float value) {
