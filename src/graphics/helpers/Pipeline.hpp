@@ -179,7 +179,7 @@ namespace Triton::Graphics::Helpers {
           .rasterizerDiscardEnable = VK_FALSE,
           .polygonMode = vk::PolygonMode::eFill,
           .cullMode = vk::CullModeFlagBits::eBack,
-          .frontFace = vk::FrontFace::eCounterClockwise,
+          .frontFace = vk::FrontFace::eClockwise,
           .depthBiasEnable = VK_FALSE,
           .lineWidth = 1.f};
 

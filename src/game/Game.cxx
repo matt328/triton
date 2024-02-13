@@ -19,6 +19,10 @@ namespace Triton::Game {
 
    using namespace Actions;
 
+   const auto ZNear = 0.1f;
+   const auto ZFar = 1000.f;
+   const auto Fov = 60.f;
+
    // HACK: This entire class.  slopping stuff in here to manually test out the renderer before
    // adding proper ECS.
    Game::Game(GLFWwindow* window) {
@@ -34,8 +38,6 @@ namespace Triton::Game {
       registry->ctx().emplace<ActionState&>(actionSystem->getActionState());
 
       auto& map = actionSystem->createActionSet(ActionSets::Main);
-
-      // map.addBinding(ActionType::MoveForward, {Source{Key::Up}, Source{Key::W}});
 
       map.mapBool(Source{Key::Up}, ActionType::MoveForward);
       map.mapBool(Source{Key::W}, ActionType::MoveForward);
@@ -53,8 +55,8 @@ namespace Triton::Game {
       map.mapFloat(Source{MouseInput::MOVE_Y}, ActionType::LookVertical);
 
       // Create viking room entity
-      const auto textureFilename = (Core::Paths::TEXTURES / "grass.png").string();
-      const auto filename = (Core::Paths::MODELS / "area.gltf").string();
+      const auto textureFilename = (Core::Paths::TEXTURES / "viking_room.png").string();
+      const auto filename = (Core::Paths::MODELS / "viking_room.gltf").string();
 
       const auto meshId = renderer->createMesh(filename);
       const auto textureId = renderer->createTexture(textureFilename);
@@ -64,7 +66,8 @@ namespace Triton::Game {
       registry->emplace<Ecs::Transform>(room);
 
       const auto camera = registry->create();
-      registry->emplace<Ecs::Camera>(camera, width, height, 60.f, 0.1f, 1000.f);
+      registry
+          ->emplace<Ecs::Camera>(camera, width, height, Fov, ZNear, ZFar, glm::vec3{0.f, 1.f, 3.f});
 
       registry->ctx().emplace<Ecs::WindowDimensions>(width, height);
       registry->ctx().emplace<Ecs::CurrentCamera>(camera);
