@@ -36,6 +36,6 @@ namespace Triton::Actions {
       ActionState actionState{};
 
       [[nodiscard]] bool sourceToBool(const Source& source) const;
-      [[nodiscard]] float sourceToFloat(const Source& source) const
+      [[nodiscard]] float sourceToFloat(const Source& source) const;
    };
 }

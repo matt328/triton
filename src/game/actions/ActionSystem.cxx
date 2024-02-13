@@ -2,7 +2,7 @@
 
 #include "ActionSet.hpp"
 #include "game/actions/KeyMap.hpp"
-#include <limits>
+#include "game/actions/Mouse.hpp"
 
 namespace Triton::Actions {
 
@@ -52,6 +52,18 @@ namespace Triton::Actions {
    }
 
    float ActionSystem::sourceToFloat(const Source& source) const {
+      auto mouseInput = std::get_if<MouseInput>(&source.src);
+      if (mouseInput != nullptr) {
+         if (*mouseInput == MouseInput::MOVE_X || *mouseInput == MouseInput::MOVE_Y) {
+            double x{}, y{};
+            glfwGetCursorPos(&window, &x, &y);
+            if (*mouseInput == MouseInput::MOVE_X) {
+               return static_cast<float>(x);
+            } else if (*mouseInput == MouseInput::MOVE_Y) {
+               return static_cast<float>(y);
+            }
+         }
+      }
       return 0.f;
    }
 
