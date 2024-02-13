@@ -4,8 +4,8 @@
 
 namespace Triton::Actions {
 
-   using BoolMap = std::unordered_multimap<ActionType, bool>;
-   using FloatMap = std::unordered_multimap<ActionType, float>;
+   using BoolMap = std::unordered_map<ActionType, bool>;
+   using FloatMap = std::unordered_map<ActionType, float>;
 
    class ActionState {
     public:
