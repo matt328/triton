@@ -2,6 +2,7 @@
 
 #include "ActionState.hpp"
 #include "ActionSet.hpp"
+#include "Action.hpp"
 
 namespace Triton::Actions {
    enum class ActionSets : uint32_t {
@@ -11,8 +12,7 @@ namespace Triton::Actions {
 
    class ActionSystem {
     public:
-      ActionSystem(GLFWwindow& window) : window(window) {
-      }
+      ActionSystem(GLFWwindow& window);
       ~ActionSystem() = default;
 
       ActionSystem(const ActionSystem&) = default;
@@ -27,9 +27,13 @@ namespace Triton::Actions {
          return actionState;
       }
 
+      [[nodiscard]] entt::delegate<void(Action)>& getDelegate() {
+         return actionDelegate;
+      }
+
       void update();
 
-      void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+      void keyCallback(int key, int scancode, int action, int mods);
 
     private:
       GLFWwindow& window;
@@ -40,5 +44,7 @@ namespace Triton::Actions {
       [[nodiscard]] bool sourceToBool(const Source& source) const;
       [[nodiscard]] float sourceToFloat(const Source& source) const;
       long long frameNumber{};
+
+      entt::delegate<void(Action)> actionDelegate{};
    };
 }
