@@ -35,6 +35,10 @@ namespace Triton::Game {
 
       actionSystem = std::make_unique<ActionSystem>(*window);
 
+      auto& reg = *registry;
+
+      actionSystem->getDelegate().connect<&Ecs::CameraSystem::handleAction>(reg);
+
       registry->ctx().emplace<ActionState&>(actionSystem->getActionState());
 
       auto& map = actionSystem->createActionSet(ActionSets::Main);
@@ -103,7 +107,7 @@ namespace Triton::Game {
       renderer->waitIdle();
    }
 
-   void Game::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-      actionSystem->keyCallback(window, key, scancode, action, mods);
+   void Game::keyCallback(int key, int scancode, int action, int mods) {
+      actionSystem->keyCallback(key, scancode, action, mods);
    }
 }
