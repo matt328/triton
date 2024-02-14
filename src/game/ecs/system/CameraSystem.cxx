@@ -4,6 +4,7 @@
 #include "game/ecs/component/Camera.hpp"
 #include "game/ecs/component/Resources.hpp"
 #include "game/actions/ActionType.hpp"
+#include <glm/ext/matrix_clip_space.hpp>
 
 namespace Triton::Game::Ecs::CameraSystem {
 
@@ -41,7 +42,7 @@ namespace Triton::Game::Ecs::CameraSystem {
          const auto yOffset = actionState.getFloatDelta(ActionType::LookVertical);
 
          cam.yaw += (xOffset * MouseSensitivity);
-         cam.pitch += (yOffset * MouseSensitivity);
+         cam.pitch -= (yOffset * MouseSensitivity);
 
          cam.pitch = std::min(cam.pitch, PitchExtent);
          cam.pitch = std::max(cam.pitch, -PitchExtent);
@@ -57,6 +58,9 @@ namespace Triton::Game::Ecs::CameraSystem {
          float aspect = static_cast<float>(width) / static_cast<float>(height);
          cam.projection =
              glm::perspective(glm::radians(cam.fov), aspect, cam.nearClip, cam.farClip);
+         // Apparently everyone except me knew glm was for OpenGL and you have to adjust these
+         // matrices for Vulkan
+         cam.projection[1][1] *= -1;
       }
    }
 }
