@@ -102,4 +102,8 @@ namespace Triton::Game {
    void Game::waitIdle() {
       renderer->waitIdle();
    }
+
+   void Game::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+      actionSystem->keyCallback(window, key, scancode, action, mods);
+   }
 }
