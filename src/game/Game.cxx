@@ -67,7 +67,7 @@ namespace Triton::Game {
 
       const auto camera = registry->create();
       registry
-          ->emplace<Ecs::Camera>(camera, width, height, Fov, ZNear, ZFar, glm::vec3{0.f, 1.f, 3.f});
+          ->emplace<Ecs::Camera>(camera, width, height, Fov, ZNear, ZFar, glm::vec3{1.f, 1.f, 3.f});
 
       registry->ctx().emplace<Ecs::WindowDimensions>(width, height);
       registry->ctx().emplace<Ecs::CurrentCamera>(camera);
