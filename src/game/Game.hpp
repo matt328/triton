@@ -44,7 +44,7 @@ namespace Triton::Game {
       void handleMessage(MSG msg);
 
       // Input Handlers
-      void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+      void keyCallback(int key, int scancode, int action, int mods);
 
     private:
       std::unique_ptr<Graphics::Renderer> renderer;
