@@ -1,10 +1,33 @@
 #include "ActionSystem.hpp"
 
 #include "ActionSet.hpp"
+#include "game/actions/ActionType.hpp"
 #include "game/actions/KeyMap.hpp"
 #include "game/actions/Mouse.hpp"
+#include <GLFW/glfw3.h>
 
 namespace Triton::Actions {
+
+   void ActionSystem::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+      // Need to reverse the keymap (again)
+      const auto actionKey = keyMap.at(key);
+      auto bindings = std::unordered_map<Source, ActionType>{};
+      for (const auto& it : bindings) {
+         const auto source = it.first;
+         const auto actionType = it.second;
+         // TODO: if 2 keys for the same action are down, releasing either of them will
+         // set the action to false. Might should do something about this, but would require polling
+         // the other keys associated with this action.  Bindings would have to be a bimap.
+         if (bindingMatches(actionKey)) {
+            if (action == GLFW_PRESS || action == GLFW_REPEAT) {
+               actionState.setBool(actionType, true);
+            } else if (action == GLFW_RELEASE) {
+               actionState.setBool(actionType, false);
+            }
+         }
+      }
+      // Loop through all the bindings and see if this key is involved
+   }
 
    void ActionSystem::update() {
       actionState.nextFrame(frameNumber);

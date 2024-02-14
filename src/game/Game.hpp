@@ -43,6 +43,9 @@ namespace Triton::Game {
       void waitIdle();
       void handleMessage(MSG msg);
 
+      // Input Handlers
+      void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+
     private:
       std::unique_ptr<Graphics::Renderer> renderer;
       std::unique_ptr<entt::registry> registry;
