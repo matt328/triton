@@ -29,6 +29,8 @@ namespace Triton::Actions {
 
       void update();
 
+      void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+
     private:
       GLFWwindow& window;
       std::unordered_map<ActionSets, ActionSet> actionSetMap;
