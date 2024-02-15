@@ -39,22 +39,21 @@ namespace Triton::Game {
 
       actionSystem->getDelegate().connect<&Ecs::CameraSystem::handleAction>(reg);
 
-      auto& map = actionSystem->createActionSet(ActionSets::Main);
+      // Forward
+      actionSystem->mapKey(Key::Up, ActionType::MoveForward, StateType::State);
+      actionSystem->mapKey(Key::W, ActionType::MoveForward, StateType::State);
+      // Backward
+      actionSystem->mapKey(Key::Down, ActionType::MoveBackward, StateType::State);
+      actionSystem->mapKey(Key::S, ActionType::MoveBackward, StateType::State);
+      // Left
+      actionSystem->mapKey(Key::Left, ActionType::StrafeLeft, StateType::State);
+      actionSystem->mapKey(Key::A, ActionType::StrafeLeft, StateType::State);
+      // Right
+      actionSystem->mapKey(Key::Right, ActionType::StrafeRight, StateType::State);
+      actionSystem->mapKey(Key::D, ActionType::StrafeRight, StateType::State);
 
-      map.mapBool(Source{Key::Up}, ActionType::MoveForward);
-      map.mapBool(Source{Key::W}, ActionType::MoveForward);
-
-      map.mapBool(Source{Key::Down}, ActionType::MoveBackward);
-      map.mapBool(Source{Key::S}, ActionType::MoveBackward);
-
-      map.mapBool(Source{Key::Right}, ActionType::StrafeRight);
-      map.mapBool(Source{Key::D}, ActionType::StrafeRight);
-
-      map.mapBool(Source{Key::Left}, ActionType::StrafeLeft);
-      map.mapBool(Source{Key::A}, ActionType::StrafeLeft);
-
-      map.mapFloat(Source{MouseInput::MOVE_X}, ActionType::LookHorizontal);
-      map.mapFloat(Source{MouseInput::MOVE_Y}, ActionType::LookVertical);
+      // map.mapFloat(Source{MouseInput::MOVE_X}, ActionType::LookHorizontal);
+      // map.mapFloat(Source{MouseInput::MOVE_Y}, ActionType::LookVertical);
 
       // Create viking room entity
       const auto textureFilename = (Core::Paths::TEXTURES / "viking_room.png").string();
