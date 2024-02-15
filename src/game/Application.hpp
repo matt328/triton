@@ -28,7 +28,8 @@ namespace Triton::Game {
       };
       std::unique_ptr<GLFWwindow, DestroyGlfwWindow> window;
       std::unique_ptr<Game> game;
-      bool running;
+      bool running{};
+      bool mouseCaptured{};
 
       static void errorCallback(int code, const char* description);
       static void framebufferResizeCallback(GLFWwindow* window, int width, int height);

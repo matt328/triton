@@ -111,4 +111,12 @@ namespace Triton::Game {
    void Game::cursorPosCallback(double xpos, double ypos) {
       actionSystem->cursorPosCallback(xpos, ypos);
    }
+
+   void Game::mouseButtonCallback(int button, int action, int mods) {
+      actionSystem->mouseButtonCallback(button, action, mods);
+   }
+
+   void Game::setMouseState(bool captured) {
+      actionSystem->setMouseState(captured);
+   }
 }
