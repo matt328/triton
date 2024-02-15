@@ -1,95 +1,65 @@
 #include "ActionSystem.hpp"
 
 #include "ActionSet.hpp"
-#include "game/actions/KeyMap.hpp"
-#include "game/actions/Mouse.hpp"
-#include <GLFW/glfw3.h>
 
 namespace Triton::Actions {
 
    ActionSystem::ActionSystem(GLFWwindow& newWindow) : window(newWindow) {
    }
 
-   void ActionSystem::keyCallback(int key, int scancode, int action, int mods) {
-      if (key == GLFW_KEY_LEFT) {
+   void ActionSystem::cursorPosCallback(double xpos, double ypos) {
+      const auto deltaX = static_cast<float>(prevX - xpos);
+      const auto deltaY = static_cast<float>(prevY - ypos);
+
+      prevX = xpos;
+      prevY = ypos;
+
+      if (firstMouse) {
+         firstMouse = !firstMouse;
+         return;
+      }
+
+      if (deltaX != 0) {
+         actionDelegate(Action{ActionType::LookHorizontal, StateType::Range, deltaX});
+      }
+
+      if (deltaY != 0) {
+         actionDelegate(Action{ActionType::LookVertical, StateType::Range, deltaY});
+      }
+   }
+
+   void ActionSystem::keyCallback(int key,
+                                  [[maybe_unused]] int scancode,
+                                  int action,
+                                  [[maybe_unused]] int mods) {
+      if (key == GLFW_KEY_A) {
          if (action == GLFW_PRESS) {
             actionDelegate(Action{ActionType::StrafeLeft, StateType::State, true});
          } else if (action == GLFW_RELEASE) {
             actionDelegate(Action{ActionType::StrafeLeft, StateType::State, false});
          }
       }
-      if (key == GLFW_KEY_RIGHT) {
+      if (key == GLFW_KEY_D) {
          if (action == GLFW_PRESS) {
             actionDelegate(Action{ActionType::StrafeRight, StateType::State, true});
          } else if (action == GLFW_RELEASE) {
             actionDelegate(Action{ActionType::StrafeRight, StateType::State, false});
          }
       }
-   }
-
-   void ActionSystem::update() {
-      actionState.nextFrame(frameNumber);
-      // Iterate the map, for each action, calculate the ActionState for it's set of sources
-      {
-         const auto& boolMap = actionSetMap.at(activeSet).getBoolMap();
-         for (const auto& it : boolMap) {
-            const auto actionType = it.first;
-            auto range = boolMap.equal_range(actionType);
-            auto set = false;
-            for (auto& i = range.first; i != range.second; ++i) {
-               if (sourceToBool(i->second)) {
-                  actionState.setBool(actionType, true);
-                  set = true;
-                  continue; // only a single true is needed to set the ActionState to true
-               }
-            }
-            if (!set) {
-               // None were set this time, set ActionState to false this frame
-               actionState.setBool(actionType, false);
-            }
+      if (key == GLFW_KEY_W) {
+         if (action == GLFW_PRESS) {
+            actionDelegate(Action{ActionType::MoveForward, StateType::State, true});
+         } else if (action == GLFW_RELEASE) {
+            actionDelegate(Action{ActionType::MoveForward, StateType::State, false});
          }
       }
-      {
-         // Set the current float value in the ActionStateMap regardless of its value
-         const auto& floatMap = actionSetMap.at(activeSet).getFloatMap();
-         for (const auto& it : floatMap) {
-            const auto actionType = it.first;
-            auto range = floatMap.equal_range(actionType);
-            for (auto& i = range.first; i != range.second; ++i) {
-               const auto value = sourceToFloat(i->second);
-               actionState.setFloat(actionType, value);
-            }
+      if (key == GLFW_KEY_S) {
+         if (action == GLFW_PRESS) {
+            actionDelegate(Action{ActionType::MoveBackward, StateType::State, true});
+         } else if (action == GLFW_RELEASE) {
+            actionDelegate(Action{ActionType::MoveBackward, StateType::State, false});
          }
       }
-      frameNumber++;
-   }
-
-   float ActionSystem::sourceToFloat(const Source& source) const {
-      auto mouseInput = std::get_if<MouseInput>(&source.src);
-      if (mouseInput != nullptr) {
-         if (*mouseInput == MouseInput::MOVE_X || *mouseInput == MouseInput::MOVE_Y) {
-            double x{}, y{};
-            glfwGetCursorPos(&window, &x, &y);
-            if (*mouseInput == MouseInput::MOVE_X) {
-               return static_cast<float>(x);
-            } else if (*mouseInput == MouseInput::MOVE_Y) {
-               return static_cast<float>(y);
-            }
-         }
-      }
-      return 0.f;
-   }
-
-   bool ActionSystem::sourceToBool(const Source& source) const {
-      // Key
-      auto key = std::get_if<Key>(&source.src);
-      if (key != nullptr) {
-         const auto glfwKey = keyMap.at(*key);
-         if (glfwGetKey(&window, glfwKey) == GLFW_PRESS) {
-            return true;
-         }
-      }
-      return false;
    }
 
    ActionSet& ActionSystem::createActionSet(ActionSets name) {

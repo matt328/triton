@@ -1,5 +1,4 @@
 #include "Application.hpp"
-#include <GLFW/glfw3.h>
 
 namespace Triton::Game {
 
@@ -31,6 +30,11 @@ namespace Triton::Game {
                                 static_cast<Application*>(glfwGetWindowUserPointer(window));
                             app->game->keyCallback(key, scancode, action, mods);
                          });
+
+      glfwSetCursorPosCallback(window.get(), [](GLFWwindow* window, double xpos, double ypos) {
+         const auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
+         app->game->cursorPosCallback(xpos, ypos);
+      });
 
       game = std::make_unique<Game>(window.get());
    }
