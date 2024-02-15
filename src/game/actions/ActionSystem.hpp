@@ -27,6 +27,8 @@ namespace Triton::Actions {
          return actionDelegate;
       }
 
+      void mapKey(Key key, ActionType aType, StateType sType);
+
       void keyCallback(int key, int scancode, int action, int mods);
       void cursorPosCallback(double xpos, double ypos);
       void mouseButtonCallback(int button, int action, int mods);
@@ -41,5 +43,6 @@ namespace Triton::Actions {
 
       double prevX{}, prevY{};
       bool firstMouse = true;
+      std::unordered_map<Key, Action> keyActionMap{};
    };
 }
