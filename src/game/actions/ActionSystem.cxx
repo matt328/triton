@@ -7,6 +7,15 @@ namespace Triton::Actions {
    ActionSystem::ActionSystem(GLFWwindow& newWindow) : window(newWindow) {
    }
 
+   void ActionSystem::setMouseState(bool captured) {
+      if (captured) {
+         firstMouse = true;
+      }
+   }
+
+   void ActionSystem::mouseButtonCallback(int button, int action, int mods) {
+   }
+
    void ActionSystem::cursorPosCallback(double xpos, double ypos) {
       const auto deltaX = static_cast<float>(prevX - xpos);
       const auto deltaY = static_cast<float>(prevY - ypos);
