@@ -45,6 +45,7 @@ namespace Triton::Game {
 
       // Input Handlers
       void keyCallback(int key, int scancode, int action, int mods);
+      void cursorPosCallback(double xpos, double ypos);
 
     private:
       std::unique_ptr<Graphics::Renderer> renderer;

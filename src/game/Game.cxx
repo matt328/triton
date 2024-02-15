@@ -39,8 +39,6 @@ namespace Triton::Game {
 
       actionSystem->getDelegate().connect<&Ecs::CameraSystem::handleAction>(reg);
 
-      registry->ctx().emplace<ActionState&>(actionSystem->getActionState());
-
       auto& map = actionSystem->createActionSet(ActionSets::Main);
 
       map.mapBool(Source{Key::Up}, ActionType::MoveForward);
@@ -83,7 +81,6 @@ namespace Triton::Game {
 
    void Game::beginFrame() {
       TracyMessageL("beginFrame");
-      actionSystem->update();
    }
 
    void Game::fixedUpdate([[maybe_unused]] const Core::Timer& timer) {
@@ -109,5 +106,9 @@ namespace Triton::Game {
 
    void Game::keyCallback(int key, int scancode, int action, int mods) {
       actionSystem->keyCallback(key, scancode, action, mods);
+   }
+
+   void Game::cursorPosCallback(double xpos, double ypos) {
+      actionSystem->cursorPosCallback(xpos, ypos);
    }
 }

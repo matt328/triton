@@ -26,7 +26,7 @@ namespace Triton::Game::Ecs {
       glm::vec3 direction = glm::normalize(position - target);
       glm::vec3 right = glm::normalize(glm::cross(worldUp, direction));
 
-      float velocity{};
+      glm::vec3 velocity{};
 
       glm::mat4 projection{};
       glm::mat4 view{};
