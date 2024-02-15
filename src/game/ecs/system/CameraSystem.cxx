@@ -1,6 +1,5 @@
 #include "CameraSystem.hpp"
 
-#include "game/actions/ActionState.hpp"
 #include "game/ecs/component/Camera.hpp"
 #include "game/ecs/component/Resources.hpp"
 #include "game/actions/ActionType.hpp"

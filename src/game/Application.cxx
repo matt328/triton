@@ -1,4 +1,5 @@
 #include "Application.hpp"
+#include <GLFW/glfw3.h>
 
 namespace Triton::Game {
 
@@ -10,8 +11,6 @@ namespace Triton::Game {
       glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
       window.reset(glfwCreateWindow(width, height, windowTitle.data(), nullptr, nullptr));
-
-      glfwSetInputMode(window.get(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
       if (glfwRawMouseMotionSupported())
          glfwSetInputMode(window.get(), GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
@@ -33,8 +32,26 @@ namespace Triton::Game {
 
       glfwSetCursorPosCallback(window.get(), [](GLFWwindow* window, double xpos, double ypos) {
          const auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
-         app->game->cursorPosCallback(xpos, ypos);
+         if (app->mouseCaptured) {
+            app->game->cursorPosCallback(xpos, ypos);
+         }
       });
+
+      glfwSetMouseButtonCallback(
+          window.get(),
+          [](GLFWwindow* window, int button, int action, int mods) {
+             const auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
+             if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_RELEASE) {
+                if (!app->mouseCaptured) {
+                   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+                } else {
+                   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+                }
+                app->mouseCaptured = !app->mouseCaptured;
+                app->game->setMouseState(app->mouseCaptured);
+             }
+             app->game->mouseButtonCallback(button, action, mods);
+          });
 
       game = std::make_unique<Game>(window.get());
    }
