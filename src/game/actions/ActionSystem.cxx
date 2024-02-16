@@ -1,17 +1,23 @@
 #include "ActionSystem.hpp"
 
-#include "ActionSet.hpp"
 #include "KeyMap.hpp"
-#include "game/actions/Action.hpp"
-#include <GLFW/glfw3.h>
+#include "Action.hpp"
+#include "game/actions/Gamepad.hpp"
 
 namespace Triton::Actions {
 
-   ActionSystem::ActionSystem(GLFWwindow& newWindow) : window(newWindow) {
-   }
-
-   void ActionSystem::mapKey(Key key, ActionType aType, StateType sType) {
-      keyActionMap.insert_or_assign(key, Action{aType, sType});
+   void ActionSystem::mapSource(Source source, StateType sType, ActionType aType) {
+      std::visit(
+          [&](auto&& arg) {
+             using T = std::decay_t<decltype(arg)>; // Remove & or const/volatile from the type
+             if constexpr (std::is_same_v<T, Key>) {
+                keyActionMap.insert_or_assign(arg, Action{aType, sType});
+             } else if constexpr (std::is_same_v<T, MouseInput>) {
+                mouseActionMap.insert_or_assign(arg, Action{aType, sType});
+             } else if constexpr (std::is_same_v<T, GamepadInput>) {
+             }
+          },
+          source.src);
    }
 
    void ActionSystem::setMouseState(bool captured) {
@@ -38,11 +44,17 @@ namespace Triton::Actions {
       }
 
       if (deltaX != 0) {
-         actionDelegate(Action{ActionType::LookHorizontal, StateType::Range, deltaX});
+         const auto xit = mouseActionMap.find(MouseInput::MOVE_X);
+         if (xit != mouseActionMap.end()) {
+            actionDelegate(Action{xit->second.actionType, xit->second.stateType, deltaX});
+         }
       }
 
       if (deltaY != 0) {
-         actionDelegate(Action{ActionType::LookVertical, StateType::Range, deltaY});
+         const auto yit = mouseActionMap.find(MouseInput::MOVE_Y);
+         if (yit != mouseActionMap.end()) {
+            actionDelegate(Action{yit->second.actionType, yit->second.stateType, deltaY});
+         }
       }
    }
 
@@ -70,12 +82,4 @@ namespace Triton::Actions {
       }
    }
 
-   ActionSet& ActionSystem::createActionSet(ActionSets name) {
-      auto [iter, inserted] = actionSetMap.emplace(name, ActionSet());
-      return iter->second;
-   }
-
-   void ActionSystem::setActiveSet(ActionSets newActiveSet) {
-      activeSet = newActiveSet;
-   }
 }

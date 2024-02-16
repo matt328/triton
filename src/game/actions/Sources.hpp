@@ -11,15 +11,16 @@ namespace Triton::Actions {
    };
 
    struct Source {
-      Source(MouseInput me) : src{me} {
+      Source(MouseInput me, SourceType sType) : src{me}, sourceType{sType} {
       }
 
-      Source(Key key) : src(key) {
+      Source(Key key, SourceType sType) : src{key}, sourceType{sType} {
       }
 
-      Source(GamepadInput in) : src(in) {
+      Source(GamepadInput in) : src{in} {
       }
 
       std::variant<MouseInput, Key, GamepadInput> src;
+      SourceType sourceType;
    };
 }

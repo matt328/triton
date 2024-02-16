@@ -12,22 +12,22 @@ namespace Triton::Actions {
 
    class ActionSystem {
     public:
-      ActionSystem(GLFWwindow& window);
+      ActionSystem() = default;
       ~ActionSystem() = default;
 
       ActionSystem(const ActionSystem&) = default;
-      ActionSystem(ActionSystem&&) = default;
+      ActionSystem(ActionSystem&&) noexcept = default;
       ActionSystem& operator=(const ActionSystem&) = delete;
       ActionSystem& operator=(ActionSystem&&) = delete;
-
-      ActionSet& createActionSet(ActionSets name);
-      void setActiveSet(ActionSets newActiveSet);
 
       [[nodiscard]] entt::delegate<void(Action)>& getDelegate() {
          return actionDelegate;
       }
 
-      void mapKey(Key key, ActionType aType, StateType sType);
+      void mapSource(Source source, StateType sType, ActionType aType);
+
+      void mapKeyState(Key key, ActionType aType);
+      void mapKeyAction(Key, ActionType aType);
 
       void keyCallback(int key, int scancode, int action, int mods);
       void cursorPosCallback(double xpos, double ypos);
@@ -35,14 +35,11 @@ namespace Triton::Actions {
       void setMouseState(bool captured);
 
     private:
-      GLFWwindow& window;
-      std::unordered_map<ActionSets, ActionSet> actionSetMap;
-      ActionSets activeSet{};
-
       entt::delegate<void(Action)> actionDelegate{};
 
       double prevX{}, prevY{};
       bool firstMouse = true;
       std::unordered_map<Key, Action> keyActionMap{};
+      std::unordered_map<MouseInput, Action> mouseActionMap{};
    };
 }
