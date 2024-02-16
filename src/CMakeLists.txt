@@ -4,10 +4,8 @@ set(triton_SRC
    "game/Application.cxx"
    "game/Game.cxx"
    
-   "game/actions/ActionSet.cxx"
    "game/actions/ActionSystem.cxx"
    "game/actions/KeyMap.cxx"
-   "game/actions/ActionState.cxx"
 
    "game/ecs/system/CameraSystem.cxx"
    "game/ecs/system/RenderSystem.cxx"
