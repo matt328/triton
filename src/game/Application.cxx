@@ -1,5 +1,4 @@
 #include "Application.hpp"
-#include <GLFW/glfw3.h>
 
 namespace Triton::Game {
 
@@ -8,7 +7,7 @@ namespace Triton::Game {
       glfwInit();
       glfwSetErrorCallback(errorCallback);
       glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-      glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+      glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
       window.reset(glfwCreateWindow(width, height, windowTitle.data(), nullptr, nullptr));
 
@@ -53,6 +52,8 @@ namespace Triton::Game {
              app->game->mouseButtonCallback(button, action, mods);
           });
 
+      glfwSetWindowIconifyCallback(window.get(), windowIconifiedCallback);
+
       game = std::make_unique<Game>(window.get());
    }
 
@@ -63,15 +64,17 @@ namespace Triton::Game {
    void Application::run(Core::Timer& timer) {
       while (running) {
          glfwPollEvents();
+         if (paused) {
+            // avoid crushing the cpu
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            continue;
+         }
          game->beginFrame();
          timer.tick([&]() { game->fixedUpdate(timer); });
          game->update();
          FrameMark;
       }
       game->waitIdle();
-   }
-
-   void Application::resize([[maybe_unused]] const int width, [[maybe_unused]] const int height) {
    }
 
    void Application::errorCallback(int code, const char* description) {
@@ -84,5 +87,11 @@ namespace Triton::Game {
                                                const int height) {
       const auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
       app->game->resize(width, height);
+   }
+
+   void Application::windowIconifiedCallback(GLFWwindow* window, int iconified) {
+      const auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
+      // Just stop crashing for now.
+      app->paused = iconified;
    }
 }
