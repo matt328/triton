@@ -1,7 +1,6 @@
 #include "Game.hpp"
 
 #include "core/Paths.hpp"
-#include "game/actions/ActionSet.hpp"
 #include "game/actions/ActionSystem.hpp"
 #include "game/actions/ActionType.hpp"
 #include "game/actions/Sources.hpp"
@@ -33,27 +32,48 @@ namespace Triton::Game {
 
       registry = std::make_unique<entt::registry>();
 
-      actionSystem = std::make_unique<ActionSystem>(*window);
+      actionSystem = std::make_unique<ActionSystem>();
 
       auto& reg = *registry;
 
       actionSystem->getDelegate().connect<&Ecs::CameraSystem::handleAction>(reg);
 
       // Forward
-      actionSystem->mapKey(Key::Up, ActionType::MoveForward, StateType::State);
-      actionSystem->mapKey(Key::W, ActionType::MoveForward, StateType::State);
-      // Backward
-      actionSystem->mapKey(Key::Down, ActionType::MoveBackward, StateType::State);
-      actionSystem->mapKey(Key::S, ActionType::MoveBackward, StateType::State);
-      // Left
-      actionSystem->mapKey(Key::Left, ActionType::StrafeLeft, StateType::State);
-      actionSystem->mapKey(Key::A, ActionType::StrafeLeft, StateType::State);
-      // Right
-      actionSystem->mapKey(Key::Right, ActionType::StrafeRight, StateType::State);
-      actionSystem->mapKey(Key::D, ActionType::StrafeRight, StateType::State);
+      actionSystem->mapSource(Source{Key::Up, SourceType::Boolean},
+                              StateType::State,
+                              ActionType::MoveForward);
+      actionSystem->mapSource(Source{Key::W, SourceType::Boolean},
+                              StateType::State,
+                              ActionType::MoveForward);
 
-      // map.mapFloat(Source{MouseInput::MOVE_X}, ActionType::LookHorizontal);
-      // map.mapFloat(Source{MouseInput::MOVE_Y}, ActionType::LookVertical);
+      // Backward
+      actionSystem->mapSource(Source{Key::Down, SourceType::Boolean},
+                              StateType::State,
+                              ActionType::MoveBackward);
+      actionSystem->mapSource(Source{Key::S, SourceType::Boolean},
+                              StateType::State,
+                              ActionType::MoveBackward);
+      // Left
+      actionSystem->mapSource(Source{Key::Left, SourceType::Boolean},
+                              StateType::State,
+                              ActionType::StrafeLeft);
+      actionSystem->mapSource(Source{Key::A, SourceType::Boolean},
+                              StateType::State,
+                              ActionType::StrafeLeft);
+      // Right
+      actionSystem->mapSource(Source{Key::Right, SourceType::Boolean},
+                              StateType::State,
+                              ActionType::StrafeRight);
+      actionSystem->mapSource(Source{Key::D, SourceType::Boolean},
+                              StateType::State,
+                              ActionType::StrafeRight);
+      // Look
+      actionSystem->mapSource(Source{MouseInput::MOVE_X, SourceType::Float},
+                              StateType::Range,
+                              ActionType::LookHorizontal);
+      actionSystem->mapSource(Source{MouseInput::MOVE_Y, SourceType::Float},
+                              StateType::Range,
+                              ActionType::LookVertical);
 
       // Create viking room entity
       const auto textureFilename = (Core::Paths::TEXTURES / "viking_room.png").string();

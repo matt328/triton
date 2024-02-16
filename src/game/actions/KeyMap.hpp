@@ -3,5 +3,5 @@
 #include "Key.hpp"
 
 namespace Triton::Actions {
-   extern std::unordered_map<int, Key> keyMap;
+   extern const std::unordered_map<int, Key> keyMap;
 };
