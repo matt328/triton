@@ -109,6 +109,7 @@ namespace Triton::Graphics {
    }
 
    void Renderer::recreateSwapchain() {
+      waitIdle();
    }
 
    void Renderer::drawFrame() {
