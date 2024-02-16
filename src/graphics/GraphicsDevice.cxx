@@ -134,11 +134,8 @@ namespace Triton::Graphics {
 
       auto indexingFeatures = features2.get<vk::PhysicalDeviceDescriptorIndexingFeatures>();
 
-      indexingFeatures.pNext = &drfs;
-
       auto drawParamsFeatures =
-          vk::PhysicalDeviceShaderDrawParametersFeatures{.pNext = &indexingFeatures,
-                                                         .shaderDrawParameters = VK_TRUE};
+          vk::PhysicalDeviceShaderDrawParametersFeatures{.shaderDrawParameters = VK_TRUE};
 
       const auto bindlessTexturesSupported = indexingFeatures.descriptorBindingPartiallyBound &&
                                              indexingFeatures.runtimeDescriptorArray;
@@ -149,10 +146,8 @@ namespace Triton::Graphics {
 
       auto physicalFeatures2 = physicalDevice->getFeatures2();
       physicalFeatures2.features.samplerAnisotropy = VK_TRUE;
-      physicalFeatures2.pNext = &drawParamsFeatures;
 
       vk::DeviceCreateInfo createInfo{
-          .pNext = &physicalFeatures2,
           .queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size()),
           .pQueueCreateInfos = queueCreateInfos.data(),
           .enabledLayerCount = 0,
@@ -164,8 +159,15 @@ namespace Triton::Graphics {
          createInfo.ppEnabledLayerNames = desiredValidationLayers.data();
       }
 
+      const vk::StructureChain<vk::DeviceCreateInfo,
+                               vk::PhysicalDeviceFeatures2,
+                               vk::PhysicalDeviceShaderDrawParametersFeatures,
+                               vk::PhysicalDeviceDescriptorIndexingFeatures,
+                               vk::PhysicalDeviceDynamicRenderingFeaturesKHR>
+          c{createInfo, physicalFeatures2, drawParamsFeatures, indexingFeatures, drfs};
+
       vulkanDevice =
-          std::make_unique<vk::raii::Device>(physicalDevice->createDevice(createInfo, nullptr));
+          std::make_unique<vk::raii::Device>(physicalDevice->createDevice(c.get(), nullptr));
 
       Helpers::setObjectName(**vulkanDevice,
                              *vulkanDevice.get(),
