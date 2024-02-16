@@ -5,7 +5,6 @@
 
 #include "graphics/ObjectData.hpp"
 #include "helpers/Pipeline.hpp"
-#include "helpers/Renderpass.hpp"
 
 #include "textures/Texture.hpp"
 #include "textures/TextureFactory.hpp"
@@ -24,11 +23,8 @@ namespace Triton::Graphics {
       perFrameDescriptorSetLayout =
           Helpers::createPerFrameDescriptorSetLayout(graphicsDevice->getVulkanDevice());
 
-      renderPass = Helpers::createBasicRenderPass(*graphicsDevice);
-
       std::tie(pipeline, pipelineLayout) =
           Helpers::createBasicPipeline(*graphicsDevice,
-                                       *renderPass,
                                        *bindlessDescriptorSetLayout,
                                        *objectDescriptorSetLayout,
                                        *perFrameDescriptorSetLayout);
@@ -80,26 +76,6 @@ namespace Triton::Graphics {
                                                     .subresourceRange = range};
       depthImageView = std::make_unique<vk::raii::ImageView>(
           graphicsDevice->getVulkanDevice().createImageView(viewInfo));
-
-      // Framebuffers
-      const auto& swapchainImageViews = graphicsDevice->getSwapchainImageViews();
-      swapchainFramebuffers.reserve(swapchainImageViews.size());
-      std::array<vk::ImageView, 2> attachments;
-
-      for (const auto& imageView : swapchainImageViews) {
-         attachments[0] = *imageView;
-         attachments[1] = **depthImageView;
-
-         const auto framebufferCreateInfo =
-             vk::FramebufferCreateInfo{.renderPass = **renderPass,
-                                       .attachmentCount = static_cast<uint32_t>(attachments.size()),
-                                       .pAttachments = attachments.data(),
-                                       .width = swapchainExtent.width,
-                                       .height = swapchainExtent.height,
-                                       .layers = 1};
-         swapchainFramebuffers.emplace_back(
-             graphicsDevice->getVulkanDevice().createFramebuffer(framebufferCreateInfo));
-      }
    }
 
    Renderer::~Renderer() {
@@ -248,6 +224,23 @@ namespace Triton::Graphics {
 
          TracyVkZone(ctx, *cmd, "render room");
 
+         // TODO: transition depth image as well
+         const auto b2 = vk::ImageMemoryBarrier{
+             .dstAccessMask = vk::AccessFlagBits::eColorAttachmentWrite,
+             .oldLayout = vk::ImageLayout::eUndefined,
+             .newLayout = vk::ImageLayout::eColorAttachmentOptimal,
+             .image = graphicsDevice->getSwapchainImages()[imageIndex],
+             .subresourceRange = {.aspectMask = vk::ImageAspectFlagBits::eColor,
+                                  .levelCount = 1,
+                                  .layerCount = 1}};
+
+         cmd.pipelineBarrier(vk::PipelineStageFlagBits::eTopOfPipe,
+                             vk::PipelineStageFlagBits::eColorAttachmentOutput,
+                             vk::DependencyFlagBits{}, // None
+                             {},
+                             {},
+                             b2);
+
          const auto clearValues = std::array<vk::ClearValue, 2>{
              vk::ClearValue{
                  .color = vk::ClearColorValue{std::array<float, 4>({{0.39f, 0.58f, 0.93f, 1.f}})}},
@@ -257,14 +250,29 @@ namespace Triton::Graphics {
          const auto renderArea =
              vk::Rect2D{.offset = {0, 0}, .extent = graphicsDevice->getSwapchainExtent()};
 
-         const auto renderPassInfo =
-             vk::RenderPassBeginInfo{.renderPass = *(*renderPass),
-                                     .framebuffer = *swapchainFramebuffers[imageIndex],
-                                     .renderArea = renderArea,
-                                     .clearValueCount = clearValues.size(),
-                                     .pClearValues = clearValues.data()};
+         const auto colorAttachmentInfo = vk::RenderingAttachmentInfo{
+             .imageView = *graphicsDevice->getSwapchainImageViews()[imageIndex],
+             .imageLayout = vk::ImageLayout::eAttachmentOptimal,
+             .loadOp = vk::AttachmentLoadOp::eClear,
+             .storeOp = vk::AttachmentStoreOp::eStore,
+             .clearValue = clearValues[0],
+         };
 
-         cmd.beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
+         const auto depthAttachmentInfo = vk::RenderingAttachmentInfo{
+             .imageView = **depthImageView,
+             .imageLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal,
+             .loadOp = vk::AttachmentLoadOp::eClear,
+             .storeOp = vk::AttachmentStoreOp::eStore,
+             .clearValue = clearValues[1],
+         };
+
+         const auto renderingInfo = vk::RenderingInfo{.renderArea = renderArea,
+                                                      .layerCount = 1,
+                                                      .colorAttachmentCount = 1,
+                                                      .pColorAttachments = &colorAttachmentInfo,
+                                                      .pDepthAttachment = &depthAttachmentInfo};
+
+         cmd.beginRendering(renderingInfo);
          {
             cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, **pipeline);
 
@@ -289,8 +297,23 @@ namespace Triton::Graphics {
             }
          }
 
-         cmd.endRenderPass();
+         cmd.endRendering();
 
+         const auto b = vk::ImageMemoryBarrier{
+             .srcAccessMask = vk::AccessFlagBits::eColorAttachmentWrite,
+             .oldLayout = vk::ImageLayout::eColorAttachmentOptimal,
+             .newLayout = vk::ImageLayout::ePresentSrcKHR,
+             .image = graphicsDevice->getSwapchainImages()[imageIndex],
+             .subresourceRange = {.aspectMask = vk::ImageAspectFlagBits::eColor,
+                                  .levelCount = 1,
+                                  .layerCount = 1}};
+
+         cmd.pipelineBarrier(vk::PipelineStageFlagBits::eColorAttachmentOutput,
+                             vk::PipelineStageFlagBits::eBottomOfPipe,
+                             vk::DependencyFlagBits{}, // None
+                             {},
+                             {},
+                             b);
          TracyVkCollect(ctx, *cmd);
       }
       cmd.end();

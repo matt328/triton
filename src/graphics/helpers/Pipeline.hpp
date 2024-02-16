@@ -4,6 +4,8 @@
 #include "../../core/Paths.hpp"
 #include "../Vertex.hpp"
 #include "../GraphicsDevice.hpp"
+#include <vulkan/vulkan_structs.hpp>
+#include "./Vulkan.hpp"
 
 namespace Triton::Graphics::Helpers {
 
@@ -85,7 +87,6 @@ namespace Triton::Graphics::Helpers {
 
    BasicPipelineData createBasicPipeline(
        const GraphicsDevice& graphicsDevice,
-       const vk::raii::RenderPass& renderPass,
        const vk::raii::DescriptorSetLayout& bindlessDescriptorSetLayout,
        const vk::raii::DescriptorSetLayout& ssboDescriptorSetLayout,
        const vk::raii::DescriptorSetLayout& perFrameDescriptorSetLayout) {
@@ -206,8 +207,17 @@ namespace Triton::Graphics::Helpers {
           .stencilTestEnable = VK_FALSE,
       };
 
+      const auto colorFormat = graphicsDevice.getSwapchainFormat();
+      const auto depthFormat = Helpers::findDepthFormat(graphicsDevice.getPhysicalDevice());
+
+      const auto renderingInfo =
+          vk::PipelineRenderingCreateInfo{.colorAttachmentCount = 1,
+                                          .pColorAttachmentFormats = &colorFormat,
+                                          .depthAttachmentFormat = depthFormat};
+
       auto pipelineCreateInfo =
-          vk::GraphicsPipelineCreateInfo{.stageCount = static_cast<uint32_t>(shaderStages.size()),
+          vk::GraphicsPipelineCreateInfo{.pNext = &renderingInfo,
+                                         .stageCount = static_cast<uint32_t>(shaderStages.size()),
                                          .pStages = shaderStages.data(),
                                          .pVertexInputState = &vertexInputInfo,
                                          .pInputAssemblyState = &inputAssembly,
@@ -217,12 +227,10 @@ namespace Triton::Graphics::Helpers {
                                          .pDepthStencilState = &depthStencil,
                                          .pColorBlendState = &colorBlending,
                                          .layout = *(*pipelineLayout),
-                                         .renderPass = *renderPass,
                                          .subpass = 0,
                                          .basePipelineHandle = VK_NULL_HANDLE,
                                          .basePipelineIndex = -1};
       // Finally this is that it's all about
-
       auto pipeline = std::make_unique<vk::raii::Pipeline>(
           graphicsDevice.getVulkanDevice().createGraphicsPipeline(VK_NULL_HANDLE,
                                                                   pipelineCreateInfo));

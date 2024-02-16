@@ -4,6 +4,7 @@
 #include "textures/TextureFactory.hpp"
 #include "geometry/MeshFactory.hpp"
 #include "vma_raii.hpp"
+#include <vulkan/vulkan_handles.hpp>
 
 namespace Triton::Graphics {
 
@@ -27,7 +28,7 @@ namespace Triton::Graphics {
                                   .applicationVersion = VK_MAKE_API_VERSION(0, 0, 0, 1),
                                   .pEngineName = "Triton Engine",
                                   .engineVersion = VK_MAKE_API_VERSION(0, 0, 0, 1),
-                                  .apiVersion = VK_API_VERSION_1_1};
+                                  .apiVersion = VK_API_VERSION_1_3};
 
       vk::InstanceCreateInfo instanceCreateInfo{
           .pApplicationInfo = &appInfo,
@@ -122,12 +123,18 @@ namespace Triton::Graphics {
          desiredDeviceExtensions.push_back(VK_EXT_DEBUG_MARKER_EXTENSION_NAME);
       }
 
+      auto drfs = vk::PhysicalDeviceDynamicRenderingFeaturesKHR{
+          .dynamicRendering = VK_TRUE,
+      };
+
       auto features2 =
           physicalDevice->getFeatures2<vk::PhysicalDeviceFeatures2,
                                        vk::PhysicalDevice16BitStorageFeatures,
                                        vk::PhysicalDeviceDescriptorIndexingFeaturesEXT>();
 
       auto indexingFeatures = features2.get<vk::PhysicalDeviceDescriptorIndexingFeatures>();
+
+      indexingFeatures.pNext = &drfs;
 
       auto drawParamsFeatures =
           vk::PhysicalDeviceShaderDrawParametersFeatures{.pNext = &indexingFeatures,
