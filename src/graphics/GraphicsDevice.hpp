@@ -93,6 +93,10 @@ namespace Triton::Graphics {
          return swapchainImageViews;
       }
 
+      [[nodiscard]] const std::vector<vk::Image>& getSwapchainImages() const {
+         return swapchainImages;
+      }
+
       [[nodiscard]] const vk::raii::SwapchainKHR& getSwapchain() const {
          return *swapchain;
       }
@@ -116,6 +120,9 @@ namespace Triton::Graphics {
 
       std::vector<const char*> desiredDeviceExtensions = {
           VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+          VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
+          VK_KHR_DEPTH_STENCIL_RESOLVE_EXTENSION_NAME,
+          VK_KHR_CREATE_RENDERPASS_2_EXTENSION_NAME,
           VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME};
       std::vector<const char*> desiredValidationLayers = {"VK_LAYER_KHRONOS_validation"};
 

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "graphics/ObjectData.hpp"
-#include <glm/ext/matrix_transform.hpp>
 
 namespace Triton::Graphics {
    struct RenderObject;
@@ -72,13 +71,11 @@ namespace Triton::Graphics {
       std::unique_ptr<vk::raii::DescriptorSetLayout> objectDescriptorSetLayout;
       std::unique_ptr<vk::raii::DescriptorSetLayout> perFrameDescriptorSetLayout;
 
-      std::unique_ptr<vk::raii::RenderPass> renderPass;
       std::unique_ptr<vk::raii::Pipeline> pipeline;
       std::unique_ptr<vk::raii::PipelineLayout> pipelineLayout;
 
       std::unique_ptr<AllocatedImage> depthImage;
       std::unique_ptr<vk::raii::ImageView> depthImageView;
-      std::vector<vk::raii::Framebuffer> swapchainFramebuffers;
 
       std::vector<std::unique_ptr<FrameData>> frameData;
 
