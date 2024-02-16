@@ -65,9 +65,7 @@ namespace Triton::Graphics {
 
       constexpr auto range =
           vk::ImageSubresourceRange{.aspectMask = vk::ImageAspectFlagBits::eDepth,
-                                    .baseMipLevel = 0,
                                     .levelCount = 1,
-                                    .baseArrayLayer = 0,
                                     .layerCount = 1};
 
       const auto viewInfo = vk::ImageViewCreateInfo{.image = depthImage->getImage(),
