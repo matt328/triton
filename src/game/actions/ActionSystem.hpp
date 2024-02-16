@@ -1,8 +1,7 @@
 #pragma once
 
-#include "ActionState.hpp"
-#include "ActionSet.hpp"
 #include "Action.hpp"
+#include "Sources.hpp"
 
 namespace Triton::Actions {
    enum class ActionSets : uint32_t {
