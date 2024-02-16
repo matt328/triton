@@ -17,8 +17,6 @@ namespace Triton::Game {
       void update(const Core::Timer& timer);
       void render();
 
-      void resize(const int width, const int height);
-
       void run(Core::Timer& timer);
 
     private:
@@ -29,9 +27,11 @@ namespace Triton::Game {
       std::unique_ptr<GLFWwindow, DestroyGlfwWindow> window;
       std::unique_ptr<Game> game;
       bool running{};
+      bool paused{};
       bool mouseCaptured{};
 
       static void errorCallback(int code, const char* description);
       static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
+      static void windowIconifiedCallback(GLFWwindow* window, int iconified);
    };
 }
