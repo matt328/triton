@@ -90,6 +90,9 @@ namespace Triton::Graphics {
 
       uint32_t currentFrame = 0;
       bool framebufferResized = false;
+      int width{}, height{};
+
+      void init();
 
       void recreateSwapchain();
       void drawFrame();
