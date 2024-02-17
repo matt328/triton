@@ -10,12 +10,24 @@
 #include "textures/TextureFactory.hpp"
 
 #include "geometry/MeshFactory.hpp"
+#include <tracy/Tracy.hpp>
 
 namespace Triton::Graphics {
 
    Renderer::Renderer(GLFWwindow* window) {
+      glfwGetWindowSize(window, &width, &height);
       graphicsDevice = std::make_unique<GraphicsDevice>(window, true);
 
+      init();
+   }
+
+   Renderer::~Renderer() {
+      Log::info << "destroying renderer" << std::endl;
+      meshes.clear();
+      textureList.clear();
+   }
+
+   void Renderer::init() {
       bindlessDescriptorSetLayout =
           Helpers::createBindlessDescriptorSetLayout(graphicsDevice->getVulkanDevice());
       objectDescriptorSetLayout =
@@ -29,6 +41,8 @@ namespace Triton::Graphics {
                                        *objectDescriptorSetLayout,
                                        *perFrameDescriptorSetLayout);
 
+      frameData.clear();
+      frameData.reserve(FRAMES_IN_FLIGHT);
       for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++) {
          auto name = std::stringstream{};
          name << "Frame " << i;
@@ -76,14 +90,11 @@ namespace Triton::Graphics {
           graphicsDevice->getVulkanDevice().createImageView(viewInfo));
    }
 
-   Renderer::~Renderer() {
-      Log::info << "destroying renderer" << std::endl;
-      meshes.clear();
-      textureList.clear();
-   }
-
    void Renderer::recreateSwapchain() {
       waitIdle();
+      frameData.clear();
+      graphicsDevice->recreateSwapchain();
+      init();
    }
 
    void Renderer::drawFrame() {
@@ -114,18 +125,29 @@ namespace Triton::Graphics {
          an image has been acquired
       */
       TracyCZoneN(acquire, "Acquire Image", true);
-      const auto [result, imageIndex] = graphicsDevice->getSwapchain().acquireNextImage(
-          UINT64_MAX,
-          *currentFrameData->getImageAvailableSemaphore(),
-          nullptr);
+      vk::Result result{};
+      unsigned int imageIndex{};
+      try {
+         std::tie(result, imageIndex) = graphicsDevice->getSwapchain().acquireNextImage(
+             UINT64_MAX,
+             *currentFrameData->getImageAvailableSemaphore(),
+             nullptr);
 
-      if (result == vk::Result::eErrorOutOfDateKHR) {
+         if (result == vk::Result::eErrorOutOfDateKHR) {
+            TracyMessageL("acquire fail");
+            recreateSwapchain();
+            return;
+         }
+
+         if (result != vk::Result::eSuccess && result != vk::Result::eSuboptimalKHR) {
+            throw std::runtime_error("Failed to acquire swapchain image");
+         }
+      } catch (const std::exception& ex) {
+         Log::error << "exception acquiring: " << ex.what() << std::endl;
          recreateSwapchain();
          return;
       }
-      if (result != vk::Result::eSuccess && result != vk::Result::eSuboptimalKHR) {
-         throw std::runtime_error("Failed to acquire swapchain image");
-      }
+
       TracyCZoneEnd(acquire);
       {
          ZoneNamedN(updateTextures, "Update Textures", true);
@@ -196,13 +218,19 @@ namespace Triton::Graphics {
          semaphore before actually presenting the new image to the screen so it can display it
          at the next vblank period.
       */
-      if (const auto pResult = graphicsDevice->getGraphicsQueue().presentKHR(presentInfo);
-          pResult == vk::Result::eErrorOutOfDateKHR || pResult == vk::Result::eSuboptimalKHR ||
-          framebufferResized) {
-         framebufferResized = false;
+      try {
+         if (const auto pResult = graphicsDevice->getGraphicsQueue().presentKHR(presentInfo);
+             pResult == vk::Result::eErrorOutOfDateKHR || pResult == vk::Result::eSuboptimalKHR ||
+             framebufferResized) {
+            TracyMessageL("present fail");
+            framebufferResized = false;
+            recreateSwapchain();
+         } else if (pResult != vk::Result::eSuccess) {
+            throw std::runtime_error("Failed to present swapchain image");
+         }
+      } catch (const std::exception& ex) {
+         Log::error << "caught error: " << ex.what() << std::endl;
          recreateSwapchain();
-      } else if (result != vk::Result::eSuccess) {
-         throw std::runtime_error("Failed to present swapchain image");
       }
 
       currentFrame = (currentFrame + 1) % FRAMES_IN_FLIGHT;
@@ -213,9 +241,10 @@ namespace Triton::Graphics {
           vk::CommandBufferBeginInfo{.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse};
       auto& cmd = frameData.getCommandBuffer();
 
+      cmd.reset();
+
       frameData.updateObjectDataBuffer(objectDataList.data(),
                                        sizeof(ObjectData) * objectDataList.size());
-
       cmd.begin(beginInfo);
       {
          auto ctx = frameData.getTracyContext();
@@ -328,6 +357,9 @@ namespace Triton::Graphics {
    }
 
    void Renderer::windowResized(const int width, const int height) {
+      this->width = width;
+      this->height = height;
+      TracyMessageL("WindowResized");
       graphicsDevice->resizeWindow(width, height);
    }
 
@@ -354,7 +386,7 @@ namespace Triton::Graphics {
    }
 
    const std::tuple<int, int> Renderer::getWindowSize() const {
-      return {1, 1};
+      return {width, height};
    }
 
    void Renderer::enqueueRenderObject(RenderObject renderObject) {

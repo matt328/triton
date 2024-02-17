@@ -111,6 +111,8 @@ namespace Triton::Graphics {
 
       void resizeWindow(uint32_t newWidth, uint32_t newHeight);
 
+      void recreateSwapchain();
+
     private:
       bool validationEnabled;
       int height = 0;
@@ -132,6 +134,7 @@ namespace Triton::Graphics {
       std::unique_ptr<vk::raii::PhysicalDevice> physicalDevice;
       std::unique_ptr<vk::raii::Device> vulkanDevice;
 
+      std::unique_ptr<vk::raii::SwapchainKHR> oldSwapchain;
       std::unique_ptr<vk::raii::SwapchainKHR> swapchain;
       std::vector<vk::Image> swapchainImages;
       std::vector<vk::raii::ImageView> swapchainImageViews;
@@ -155,6 +158,8 @@ namespace Triton::Graphics {
       std::unique_ptr<Geometry::MeshFactory> meshFactory;
 
       std::unique_ptr<Allocator> raiillocator;
+
+      void createSwapchain();
 
       [[nodiscard]] bool checkValidationLayerSupport() const;
 

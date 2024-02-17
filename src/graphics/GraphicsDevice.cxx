@@ -208,89 +208,7 @@ namespace Triton::Graphics {
                              "Compute Queue");
       Log::trace << "Created Compute Queue" << std::endl;
 
-      // Create Swapchain
-      auto [capabilities, formats, presentModes] =
-          Helpers::querySwapchainSupport(*physicalDevice, *surface);
-
-      const auto surfaceFormat = Helpers::chooseSwapSurfaceFormat(formats);
-      const auto presentMode = Helpers::chooseSwapPresentMode(presentModes);
-      const auto extent = Helpers::chooseSwapExtent(capabilities, getWindowSize());
-
-      uint32_t imageCount = capabilities.minImageCount + 1;
-
-      if (capabilities.maxImageCount > 0 && imageCount > capabilities.maxImageCount) {
-         imageCount = capabilities.maxImageCount;
-      }
-
-      vk::SwapchainCreateInfoKHR swapchainCreateInfo{
-          .surface = **surface,
-          .minImageCount = imageCount,
-          .imageFormat = surfaceFormat.format,
-          .imageColorSpace = surfaceFormat.colorSpace,
-          .imageExtent = extent,
-          .imageArrayLayers = 1,
-          .imageUsage = vk::ImageUsageFlagBits::eColorAttachment,
-          .preTransform = capabilities.currentTransform,
-          .compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque,
-          .presentMode = presentMode,
-          .clipped = VK_TRUE,
-          .oldSwapchain = VK_NULL_HANDLE};
-
-      const auto queueFamilyIndices =
-          std::array<uint32_t, 2>{graphicsFamily.value(), presentFamily.value()};
-
-      if (graphicsFamily != presentFamily) {
-         swapchainCreateInfo.imageSharingMode = vk::SharingMode::eConcurrent;
-         swapchainCreateInfo.queueFamilyIndexCount = 2;
-         swapchainCreateInfo.pQueueFamilyIndices = queueFamilyIndices.data();
-      } else {
-         swapchainCreateInfo.imageSharingMode = vk::SharingMode::eExclusive;
-      }
-
-      swapchain = std::make_unique<vk::raii::SwapchainKHR>(*vulkanDevice, swapchainCreateInfo);
-      Log::info << "Created Swapchain" << std::endl;
-
-      swapchainExtent = extent;
-      swapchainImageFormat = surfaceFormat.format;
-
-      swapchainImages = swapchain->getImages();
-      swapchainImageViews.reserve(swapchainImages.size());
-
-      constexpr vk::ComponentMapping components{.r = vk::ComponentSwizzle::eIdentity,
-                                                .g = vk::ComponentSwizzle::eIdentity,
-                                                .b = vk::ComponentSwizzle::eIdentity,
-                                                .a = vk::ComponentSwizzle::eIdentity};
-
-      constexpr vk::ImageSubresourceRange subresourceRange{.aspectMask =
-                                                               vk::ImageAspectFlagBits::eColor,
-                                                           .baseMipLevel = 0,
-                                                           .levelCount = 1,
-                                                           .baseArrayLayer = 0,
-                                                           .layerCount = 1};
-
-      for (const auto& image : swapchainImages) {
-         vk::ImageViewCreateInfo createInfo{.image = image,
-                                            .viewType = vk::ImageViewType::e2D,
-                                            .format = swapchainImageFormat,
-                                            .components = components,
-                                            .subresourceRange = subresourceRange};
-
-         swapchainImageViews.emplace_back(*vulkanDevice, createInfo);
-      }
-      Log::info << "Created " << swapchainImageViews.size() << " swapchain image views"
-                << std::endl;
-
-      // Create Command Pools
-      auto commandPoolCreateInfo =
-          vk::CommandPoolCreateInfo{.flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
-                                    .queueFamilyIndex = graphicsFamily.value()};
-
-      commandPool = std::make_unique<vk::raii::CommandPool>(
-          vulkanDevice->createCommandPool(commandPoolCreateInfo));
-      Helpers::setObjectName(**commandPool,
-                             *vulkanDevice.get(),
-                             (*commandPool).debugReportObjectType,
-                             "Graphics Command Pool");
+      createSwapchain();
 
       transferImmediateContext = std::make_unique<ImmediateContext>(*vulkanDevice.get(),
                                                                     *physicalDevice,
@@ -349,6 +267,110 @@ namespace Triton::Graphics {
       Log::info << "destroying graphicsDevice" << std::endl;
       vulkanDevice->waitIdle();
    };
+
+   void GraphicsDevice::createSwapchain() {
+      if (oldSwapchain != nullptr) {
+         commandPool.reset();
+         swapchainImages.clear();
+         swapchainImageViews.clear();
+      }
+      // Create Swapchain
+
+      auto [graphicsFamily, presentFamily, transferFamily, computeFamily] =
+          Helpers::findQueueFamilies(*physicalDevice, *surface);
+
+      auto [capabilities, formats, presentModes] =
+          Helpers::querySwapchainSupport(*physicalDevice, *surface);
+
+      const auto surfaceFormat = Helpers::chooseSwapSurfaceFormat(formats);
+      const auto presentMode = Helpers::chooseSwapPresentMode(presentModes);
+      const auto extent = Helpers::chooseSwapExtent(capabilities, getWindowSize());
+
+      uint32_t imageCount = capabilities.minImageCount + 1;
+
+      if (capabilities.maxImageCount > 0 && imageCount > capabilities.maxImageCount) {
+         imageCount = capabilities.maxImageCount;
+      }
+
+      vk::SwapchainCreateInfoKHR swapchainCreateInfo{
+          .surface = **surface,
+          .minImageCount = imageCount,
+          .imageFormat = surfaceFormat.format,
+          .imageColorSpace = surfaceFormat.colorSpace,
+          .imageExtent = extent,
+          .imageArrayLayers = 1,
+          .imageUsage = vk::ImageUsageFlagBits::eColorAttachment,
+          .preTransform = capabilities.currentTransform,
+          .compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque,
+          .presentMode = presentMode,
+          .clipped = VK_TRUE,
+          .oldSwapchain = VK_NULL_HANDLE};
+
+      if (oldSwapchain != nullptr) {
+         swapchainCreateInfo.oldSwapchain = **oldSwapchain;
+      }
+
+      const auto queueFamilyIndices =
+          std::array<uint32_t, 2>{graphicsFamily.value(), presentFamily.value()};
+
+      if (graphicsFamily != presentFamily) {
+         swapchainCreateInfo.imageSharingMode = vk::SharingMode::eConcurrent;
+         swapchainCreateInfo.queueFamilyIndexCount = 2;
+         swapchainCreateInfo.pQueueFamilyIndices = queueFamilyIndices.data();
+      } else {
+         swapchainCreateInfo.imageSharingMode = vk::SharingMode::eExclusive;
+      }
+
+      swapchain = std::make_unique<vk::raii::SwapchainKHR>(*vulkanDevice, swapchainCreateInfo);
+      Log::info << "Created Swapchain" << std::endl;
+
+      swapchainExtent = extent;
+      swapchainImageFormat = surfaceFormat.format;
+
+      swapchainImages = swapchain->getImages();
+      swapchainImageViews.reserve(swapchainImages.size());
+
+      constexpr vk::ComponentMapping components{.r = vk::ComponentSwizzle::eIdentity,
+                                                .g = vk::ComponentSwizzle::eIdentity,
+                                                .b = vk::ComponentSwizzle::eIdentity,
+                                                .a = vk::ComponentSwizzle::eIdentity};
+
+      constexpr vk::ImageSubresourceRange subresourceRange{.aspectMask =
+                                                               vk::ImageAspectFlagBits::eColor,
+                                                           .baseMipLevel = 0,
+                                                           .levelCount = 1,
+                                                           .baseArrayLayer = 0,
+                                                           .layerCount = 1};
+
+      for (const auto& image : swapchainImages) {
+         vk::ImageViewCreateInfo createInfo{.image = image,
+                                            .viewType = vk::ImageViewType::e2D,
+                                            .format = swapchainImageFormat,
+                                            .components = components,
+                                            .subresourceRange = subresourceRange};
+
+         swapchainImageViews.emplace_back(*vulkanDevice, createInfo);
+      }
+      Log::info << "Created " << swapchainImageViews.size() << " swapchain image views"
+                << std::endl;
+
+      // Create Command Pools
+      auto commandPoolCreateInfo =
+          vk::CommandPoolCreateInfo{.flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
+                                    .queueFamilyIndex = graphicsFamily.value()};
+
+      commandPool = std::make_unique<vk::raii::CommandPool>(
+          vulkanDevice->createCommandPool(commandPoolCreateInfo));
+      Helpers::setObjectName(**commandPool,
+                             *vulkanDevice.get(),
+                             (*commandPool).debugReportObjectType,
+                             "Graphics Command Pool");
+   }
+
+   void GraphicsDevice::recreateSwapchain() {
+      oldSwapchain = std::move(swapchain);
+      createSwapchain();
+   }
 
    std::vector<vk::raii::PhysicalDevice> GraphicsDevice::enumeratePhysicalDevices() const {
       return instance->enumeratePhysicalDevices();
