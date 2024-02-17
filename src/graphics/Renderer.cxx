@@ -108,7 +108,6 @@ namespace Triton::Graphics {
          This fence will be signaled when the GPU is done working off
          this frame's command buffer, so it's safe to reset it and start recording another
       */
-
       {
          ZoneNamedN(fences, "Awaiting Fences", true);
          if (const auto res = graphicsDevice->getVulkanDevice().waitForFences(
