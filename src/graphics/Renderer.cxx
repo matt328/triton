@@ -4,6 +4,7 @@
 #include "RenderObject.hpp"
 
 #include "graphics/ObjectData.hpp"
+#include "graphics/gui/ImguiHelper.hpp"
 #include "helpers/Pipeline.hpp"
 #include "helpers/Rendering.hpp"
 
@@ -11,6 +12,9 @@
 #include "textures/TextureFactory.hpp"
 
 #include "geometry/MeshFactory.hpp"
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_vulkan.h>
+#include <vulkan/vulkan_structs.hpp>
 
 namespace Triton::Graphics {
 
@@ -19,6 +23,8 @@ namespace Triton::Graphics {
       graphicsDevice = std::make_unique<GraphicsDevice>(window, true);
 
       init();
+
+      imguiHelper = std::make_unique<Gui::ImGuiHelper>(*graphicsDevice, window);
    }
 
    Renderer::~Renderer() {
@@ -298,18 +304,16 @@ namespace Triton::Graphics {
                                    graphicsDevice->DrawImageExtent2D,
                                    graphicsDevice->getSwapchainExtent());
 
-         // transition drawImage to transferSrc
-         // transition swapchain image to transferDstOptimal
-
-         // copy the drawImage to swapchain image
-
-         // continue with transitioning swapchain image like below
-
-         // Once again, without renderpasses, we have to insert barriers at certain points in time.
-         // kinda miss renderpasses doing this for me ngl
          Helpers::transitionImage(cmd,
                                   graphicsDevice->getSwapchainImages()[imageIndex],
                                   vk::ImageLayout::eTransferDstOptimal,
+                                  vk::ImageLayout::eColorAttachmentOptimal);
+
+         drawImgui(cmd, graphicsDevice->getSwapchainImageViews()[imageIndex]);
+
+         Helpers::transitionImage(cmd,
+                                  graphicsDevice->getSwapchainImages()[imageIndex],
+                                  vk::ImageLayout::eColorAttachmentOptimal,
                                   vk::ImageLayout::ePresentSrcKHR);
 
          TracyVkCollect(ctx, *cmd);
@@ -317,7 +321,39 @@ namespace Triton::Graphics {
       cmd.end();
    }
 
+   void Renderer::drawImgui(const vk::raii::CommandBuffer& cmd,
+                            const vk::raii::ImageView& imageView) const {
+      const auto colorAttachment = vk::RenderingAttachmentInfo{
+          .imageView = *imageView,
+          .imageLayout = vk::ImageLayout::eAttachmentOptimal,
+          .loadOp = vk::AttachmentLoadOp::eLoad,
+          .storeOp = vk::AttachmentStoreOp::eStore,
+      };
+
+      const auto renderInfo = vk::RenderingInfo{
+          .renderArea =
+              vk::Rect2D{.offset = {0, 0}, .extent = graphicsDevice->getSwapchainExtent()},
+          .layerCount = 1,
+          .colorAttachmentCount = 1,
+          .pColorAttachments = &colorAttachment,
+      };
+
+      cmd.beginRendering(renderInfo);
+
+      ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), *cmd);
+
+      cmd.endRendering();
+   }
+
    void Renderer::render() {
+      ImGui_ImplVulkan_NewFrame();
+      ImGui_ImplGlfw_NewFrame();
+      ImGui::NewFrame();
+
+      ImGui::ShowDemoWindow();
+
+      ImGui::Render();
+
       drawFrame();
       renderObjects.clear();
       objectDataList.clear();

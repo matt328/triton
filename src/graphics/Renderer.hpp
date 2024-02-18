@@ -1,6 +1,7 @@
 #pragma once
 
 #include "graphics/ObjectData.hpp"
+#include "graphics/gui/ImguiHelper.hpp"
 
 namespace Triton::Graphics {
    struct RenderObject;
@@ -82,6 +83,8 @@ namespace Triton::Graphics {
       std::vector<std::unique_ptr<Geometry::Mesh<Vertex, uint32_t>>> meshes;
       std::vector<std::unique_ptr<Textures::Texture>> textureList;
 
+      std::unique_ptr<Gui::ImGuiHelper> imguiHelper;
+
       std::vector<RenderObject> renderObjects{};
       std::vector<ObjectData> objectDataList{};
       CameraData cameraData{glm::identity<glm::mat4>(),
@@ -97,5 +100,6 @@ namespace Triton::Graphics {
       void recreateSwapchain();
       void drawFrame();
       void recordCommandBuffer(FrameData& frameData, unsigned imageIndex) const;
+      void drawImgui(const vk::raii::CommandBuffer& cmd, const vk::raii::ImageView& image) const;
    };
 }
