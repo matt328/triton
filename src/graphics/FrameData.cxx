@@ -2,6 +2,9 @@
 #include "ObjectData.hpp"
 #include "GraphicsDevice.hpp"
 #include "helpers/Vulkan.hpp"
+#include <vulkan/vulkan_enums.hpp>
+#include <vulkan/vulkan_raii.hpp>
+#include <vulkan/vulkan_structs.hpp>
 
 namespace Triton::Graphics {
 
@@ -136,6 +139,41 @@ namespace Triton::Graphics {
       const auto writes = std::array{objectDataDescriptorWrite, perFrameDataDescriptorWrite};
 
       graphicsDevice.getVulkanDevice().updateDescriptorSets(writes, nullptr);
+
+      const auto drawImageFormat = vk::Format::eR16G16B16A16Sfloat;
+      const auto drawImageExtent = graphicsDevice.DrawImageExtent2D;
+
+      const auto imageCreateInfo = vk::ImageCreateInfo{
+          .imageType = vk::ImageType::e2D,
+          .format = drawImageFormat,
+          .extent = vk::Extent3D{drawImageExtent.width, drawImageExtent.height, 1},
+          .mipLevels = 1,
+          .arrayLayers = 1,
+          .samples = vk::SampleCountFlagBits::e1,
+          .tiling = vk::ImageTiling::eOptimal,
+          .usage = vk::ImageUsageFlagBits::eTransferSrc | vk::ImageUsageFlagBits::eTransferDst |
+                   vk::ImageUsageFlagBits::eStorage | vk::ImageUsageFlagBits::eColorAttachment,
+          .sharingMode = vk::SharingMode::eExclusive,
+          .initialLayout = vk::ImageLayout::eUndefined};
+
+      const auto imageAllocateCreateInfo =
+          vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eGpuOnly,
+                                    .requiredFlags = vk::MemoryPropertyFlagBits::eDeviceLocal};
+      drawImage = graphicsDevice.getAllocator().createImage(imageCreateInfo,
+                                                            imageAllocateCreateInfo,
+                                                            "Draw Image");
+
+      const auto imageViewCreateInfo =
+          vk::ImageViewCreateInfo{.image = drawImage->getImage(),
+                                  .viewType = vk::ImageViewType::e2D,
+                                  .format = drawImageFormat,
+                                  .subresourceRange = {
+                                      .aspectMask = vk::ImageAspectFlagBits::eColor,
+                                      .levelCount = 1,
+                                      .layerCount = 1,
+                                  }};
+      drawImageView = std::make_unique<vk::raii::ImageView>(
+          graphicsDevice.getVulkanDevice().createImageView(imageViewCreateInfo));
    }
 
    void FrameData::updateObjectDataBuffer(const ObjectData* data, const size_t size) {

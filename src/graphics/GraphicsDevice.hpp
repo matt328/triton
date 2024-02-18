@@ -31,6 +31,8 @@ namespace Triton::Graphics {
       GraphicsDevice& operator=(const GraphicsDevice&) = delete;
       GraphicsDevice& operator=(GraphicsDevice&&) = delete;
 
+      static constexpr auto DrawImageExtent2D = vk::Extent2D{1366, 768};
+
       [[nodiscard]] std::vector<vk::raii::PhysicalDevice> enumeratePhysicalDevices() const;
 
       [[nodiscard]] std::pair<uint32_t, uint32_t> getWindowSize() const {

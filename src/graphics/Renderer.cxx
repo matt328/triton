@@ -5,12 +5,12 @@
 
 #include "graphics/ObjectData.hpp"
 #include "helpers/Pipeline.hpp"
+#include "helpers/Rendering.hpp"
 
 #include "textures/Texture.hpp"
 #include "textures/TextureFactory.hpp"
 
 #include "geometry/MeshFactory.hpp"
-#include <tracy/Tracy.hpp>
 
 namespace Triton::Graphics {
 
@@ -55,14 +55,12 @@ namespace Triton::Graphics {
 
       const auto depthFormat = Helpers::findDepthFormat(graphicsDevice->getPhysicalDevice());
 
-      auto swapchainExtent = graphicsDevice->getSwapchainExtent();
-
       const auto imageCreateInfo =
           vk::ImageCreateInfo{.imageType = vk::ImageType::e2D,
                               .format = depthFormat,
-                              .extent = vk::Extent3D{.width = swapchainExtent.width,
-                                                     .height = swapchainExtent.height,
-                                                     .depth = 1},
+                              .extent = vk::Extent3D{graphicsDevice->DrawImageExtent2D.width,
+                                                     graphicsDevice->DrawImageExtent2D.height,
+                                                     1},
                               .mipLevels = 1,
                               .arrayLayers = 1,
                               .samples = vk::SampleCountFlagBits::e1,
@@ -101,13 +99,8 @@ namespace Triton::Graphics {
       ZoneNamedN(render, "Render", true);
       const auto& currentFrameData = frameData[currentFrame];
 
-      /*
-         We have multiple 'frames in flight'.  A frame is basically a command buffer, and all the
-         resources used by the commands enqueued into it by the cpu each frame.
-         Wait for the current frame's in flight fence
-         This fence will be signaled when the GPU is done working off
-         this frame's command buffer, so it's safe to reset it and start recording another
-      */
+      // Wait for this frame's fence so we can be sure the gpu is finished with this frame's command
+      // buffer.  Which it should be since it was submitted a frame or two ago.
       {
          ZoneNamedN(fences, "Awaiting Fences", true);
          if (const auto res = graphicsDevice->getVulkanDevice().waitForFences(
@@ -119,36 +112,25 @@ namespace Triton::Graphics {
          }
       }
 
-      /*
-         Tell the swapchain to grab the next image, signaling this semaphore when
-         an image has been acquired
-      */
-      TracyCZoneN(acquire, "Acquire Image", true);
+      // Ask the swapchain to move to the next image. This call is async, and will signal the given
+      // semaphore when it's completed.
       vk::Result result{};
       unsigned int imageIndex{};
       try {
+         ZoneNamedN(acquire, "Acquire Swapchain Image", true);
          std::tie(result, imageIndex) = graphicsDevice->getSwapchain().acquireNextImage(
              UINT64_MAX,
              *currentFrameData->getImageAvailableSemaphore(),
              nullptr);
-
-         if (result == vk::Result::eErrorOutOfDateKHR) {
-            TracyMessageL("acquire fail");
-            recreateSwapchain();
-            return;
-         }
-
-         if (result != vk::Result::eSuccess && result != vk::Result::eSuboptimalKHR) {
-            throw std::runtime_error("Failed to acquire swapchain image");
-         }
       } catch (const std::exception& ex) {
-         Log::error << "exception acquiring: " << ex.what() << std::endl;
+         Log::error << "Exception acquiring: " << ex.what() << std::endl;
          recreateSwapchain();
          return;
       }
 
-      TracyCZoneEnd(acquire);
+      // Check for, and add any new textures into the bindless texture descriptor
       {
+         // TODO: Move this into another thread eventually
          ZoneNamedN(updateTextures, "Update Textures", true);
          if (!currentFrameData->getTexturesToBind().empty()) {
             auto writes = std::vector<vk::WriteDescriptorSet>{};
@@ -168,21 +150,24 @@ namespace Triton::Graphics {
          }
       }
 
+      // Update the once-per-frame data.
       {
          ZoneNamedN(updateCameraData, "Update Camera Data", true);
          currentFrameData->getCameraBuffer().updateBufferValue(&cameraData, sizeof(CameraData));
       }
 
-      // We've already waited on this fence, so we can safely reset it so we can signal it again
+      // Reset this fence
       graphicsDevice->getVulkanDevice().resetFences(*currentFrameData->getInFlightFence());
 
+      // Reset and record the current frame's command buffer.
       currentFrameData->getCommandBuffer().reset();
-
       {
          ZoneNamedN(cmdBuffer, "Recording CommandBuffer", true);
          recordCommandBuffer(*currentFrameData, imageIndex);
       }
 
+      // Build out the struct and submit the command buffer, signaling the in flight fence when it
+      // can be recorded to again
       constexpr auto waitStages =
           std::array<vk::PipelineStageFlags, 1>{vk::PipelineStageFlagBits::eColorAttachmentOutput};
 
@@ -197,91 +182,59 @@ namespace Triton::Graphics {
                          .pCommandBuffers = &*currentFrameData->getCommandBuffer(),
                          .signalSemaphoreCount = 1,
                          .pSignalSemaphores = renderFinishedSemaphores.data()};
-      /*
-         Submit this command buffer, waiting for the acquire image semaphore, and also signaling
-         the renderFinished semaphore once it's done. Note rendering here means working off the
-         command buffer and drawing to the framebuffer image.  Presenting the framebuffer to the
-         screen is another process...
-      */
+
       graphicsDevice->getGraphicsQueue().submit(submitInfo, *currentFrameData->getInFlightFence());
 
-      const auto presentInfo =
-          vk::PresentInfoKHR{.waitSemaphoreCount = 1,
-                             .pWaitSemaphores = renderFinishedSemaphores.data(),
-                             .swapchainCount = 1,
-                             .pSwapchains = &(*graphicsDevice->getSwapchain()),
-                             .pImageIndices = &imageIndex};
-
-      /*
-         Since the submit call is async, the present call needs to wait on the render finished
-         semaphore before actually presenting the new image to the screen so it can display it
-         at the next vblank period.
-      */
+      // Ask the GPU to present the image once the submit semaphore is signaled. Also trap errors
+      // here and recreate (resize) the swapchain
       try {
-         if (const auto pResult = graphicsDevice->getGraphicsQueue().presentKHR(presentInfo);
-             pResult == vk::Result::eErrorOutOfDateKHR || pResult == vk::Result::eSuboptimalKHR ||
-             framebufferResized) {
-            TracyMessageL("present fail");
-            framebufferResized = false;
+         const auto result = graphicsDevice->getGraphicsQueue().presentKHR(
+             vk::PresentInfoKHR{.waitSemaphoreCount = 1,
+                                .pWaitSemaphores = renderFinishedSemaphores.data(),
+                                .swapchainCount = 1,
+                                .pSwapchains = &(*graphicsDevice->getSwapchain()),
+                                .pImageIndices = &imageIndex});
+
+         if (result == vk::Result::eSuboptimalKHR) {
             recreateSwapchain();
-         } else if (pResult != vk::Result::eSuccess) {
-            throw std::runtime_error("Failed to present swapchain image");
          }
       } catch (const std::exception& ex) {
-         Log::error << "caught error: " << ex.what() << std::endl;
+         Log::error << "Exception Presenting: " << ex.what() << std::endl;
          recreateSwapchain();
       }
 
+      // Finally done, move to the next frame
       currentFrame = (currentFrame + 1) % FRAMES_IN_FLIGHT;
    }
 
    void Renderer::recordCommandBuffer(FrameData& frameData, unsigned imageIndex) const {
-      constexpr auto beginInfo =
-          vk::CommandBufferBeginInfo{.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse};
       auto& cmd = frameData.getCommandBuffer();
 
-      cmd.reset();
-
+      // Update the ObjectData buffer
       frameData.updateObjectDataBuffer(objectDataList.data(),
                                        sizeof(ObjectData) * objectDataList.size());
-      cmd.begin(beginInfo);
+      cmd.begin(
+          vk::CommandBufferBeginInfo{.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse});
       {
          auto ctx = frameData.getTracyContext();
-
          TracyVkZone(ctx, *cmd, "render room");
 
-         // TODO: transition depth image as well
-         const auto b2 = vk::ImageMemoryBarrier{
-             .dstAccessMask = vk::AccessFlagBits::eColorAttachmentWrite,
-             .oldLayout = vk::ImageLayout::eUndefined,
-             .newLayout = vk::ImageLayout::eColorAttachmentOptimal,
-             .image = graphicsDevice->getSwapchainImages()[imageIndex],
-             .subresourceRange = {.aspectMask = vk::ImageAspectFlagBits::eColor,
-                                  .levelCount = 1,
-                                  .layerCount = 1}};
+         // With dynamic rendering, have to manually insert image barriers into the command buffer
+         // at certain points in time. This barrier cannot be passed until the swapchain image has
+         // transitioned into the ColorAttachmentOptimal layout.
+         Helpers::transitionImage(cmd,
+                                  frameData.getDrawImage(),
+                                  vk::ImageLayout::eUndefined,
+                                  vk::ImageLayout::eColorAttachmentOptimal);
 
-         cmd.pipelineBarrier(vk::PipelineStageFlagBits::eTopOfPipe,
-                             vk::PipelineStageFlagBits::eColorAttachmentOutput,
-                             vk::DependencyFlagBits{}, // None
-                             {},
-                             {},
-                             b2);
-
-         const auto clearValues = std::array<vk::ClearValue, 2>{
-             vk::ClearValue{
-                 .color = vk::ClearColorValue{std::array<float, 4>({{0.39f, 0.58f, 0.93f, 1.f}})}},
-             vk::ClearValue{.depthStencil =
-                                vk::ClearDepthStencilValue{.depth = 1.f, .stencil = 0}}};
-
-         const auto renderArea =
-             vk::Rect2D{.offset = {0, 0}, .extent = graphicsDevice->getSwapchainExtent()};
-
+         // TODO: specify framedata.drawImageView as the color attachment here?
          const auto colorAttachmentInfo = vk::RenderingAttachmentInfo{
-             .imageView = *graphicsDevice->getSwapchainImageViews()[imageIndex],
+             .imageView = frameData.getDrawImageView(),
              .imageLayout = vk::ImageLayout::eAttachmentOptimal,
              .loadOp = vk::AttachmentLoadOp::eClear,
              .storeOp = vk::AttachmentStoreOp::eStore,
-             .clearValue = clearValues[0],
+             .clearValue = vk::ClearValue{.color = vk::ClearColorValue{std::array<float, 4>(
+                                              {{0.39f, 0.58f, 0.93f, 1.f}})}},
          };
 
          const auto depthAttachmentInfo = vk::RenderingAttachmentInfo{
@@ -289,35 +242,40 @@ namespace Triton::Graphics {
              .imageLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal,
              .loadOp = vk::AttachmentLoadOp::eClear,
              .storeOp = vk::AttachmentStoreOp::eStore,
-             .clearValue = clearValues[1],
+             .clearValue = vk::ClearValue{.depthStencil = vk::ClearDepthStencilValue{.depth = 1.f,
+                                                                                     .stencil = 0}},
          };
 
-         const auto renderingInfo = vk::RenderingInfo{.renderArea = renderArea,
-                                                      .layerCount = 1,
-                                                      .colorAttachmentCount = 1,
-                                                      .pColorAttachments = &colorAttachmentInfo,
-                                                      .pDepthAttachment = &depthAttachmentInfo};
+         const auto renderingInfo = vk::RenderingInfo{
+             .renderArea =
+                 vk::Rect2D{.offset = {0, 0}, .extent = graphicsDevice->DrawImageExtent2D},
+             .layerCount = 1,
+             .colorAttachmentCount = 1,
+             .pColorAttachments = &colorAttachmentInfo,
+             .pDepthAttachment = &depthAttachmentInfo};
 
          cmd.beginRendering(renderingInfo);
          {
             cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, **pipeline);
-
+            // For each object, bind the vertex and index buffers, descriptor sets, and finally draw
+            // the object.
+            // TODO: move the vertices and indices into a single giant buffer.
+            // Then switch this call from drawIndexed to draw*Indirect
             for (uint32_t i = 0; const auto& renderObject : renderObjects) {
                const auto& mesh = meshes.at(renderObject.meshId);
 
                cmd.bindVertexBuffers(0, mesh->getVertexBuffer().getBuffer(), {0});
                cmd.bindIndexBuffer(mesh->getIndexBuffer().getBuffer(), 0, vk::IndexType::eUint32);
 
-               const auto set1 = *frameData.getBindlessDescriptorSet();
-               const auto set2 = *frameData.getObjectDescriptorSet();
-               const auto set3 = *frameData.getPerFrameDescriptorSet();
-               const auto allSets = std::array{set1, set2, set3};
                cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
                                       **pipelineLayout,
                                       0,
-                                      allSets,
+                                      {*frameData.getBindlessDescriptorSet(),
+                                       *frameData.getObjectDescriptorSet(),
+                                       *frameData.getPerFrameDescriptorSet()},
                                       nullptr);
                // This is real greasy but it'll do for now
+               // Change this to draw*Indirect
                cmd.drawIndexed(mesh->getIndicesCount(), 1, 0, 0, i);
                i++;
             }
@@ -325,21 +283,35 @@ namespace Triton::Graphics {
 
          cmd.endRendering();
 
-         const auto b = vk::ImageMemoryBarrier{
-             .srcAccessMask = vk::AccessFlagBits::eColorAttachmentWrite,
-             .oldLayout = vk::ImageLayout::eColorAttachmentOptimal,
-             .newLayout = vk::ImageLayout::ePresentSrcKHR,
-             .image = graphicsDevice->getSwapchainImages()[imageIndex],
-             .subresourceRange = {.aspectMask = vk::ImageAspectFlagBits::eColor,
-                                  .levelCount = 1,
-                                  .layerCount = 1}};
+         Helpers::transitionImage(cmd,
+                                  frameData.getDrawImage(),
+                                  vk::ImageLayout::eColorAttachmentOptimal,
+                                  vk::ImageLayout::eTransferSrcOptimal);
+         Helpers::transitionImage(cmd,
+                                  graphicsDevice->getSwapchainImages()[imageIndex],
+                                  vk::ImageLayout::eUndefined,
+                                  vk::ImageLayout::eTransferDstOptimal);
 
-         cmd.pipelineBarrier(vk::PipelineStageFlagBits::eColorAttachmentOutput,
-                             vk::PipelineStageFlagBits::eBottomOfPipe,
-                             vk::DependencyFlagBits{}, // None
-                             {},
-                             {},
-                             b);
+         Helpers::copyImageToImage(cmd,
+                                   frameData.getDrawImage(),
+                                   graphicsDevice->getSwapchainImages()[imageIndex],
+                                   graphicsDevice->DrawImageExtent2D,
+                                   graphicsDevice->getSwapchainExtent());
+
+         // transition drawImage to transferSrc
+         // transition swapchain image to transferDstOptimal
+
+         // copy the drawImage to swapchain image
+
+         // continue with transitioning swapchain image like below
+
+         // Once again, without renderpasses, we have to insert barriers at certain points in time.
+         // kinda miss renderpasses doing this for me ngl
+         Helpers::transitionImage(cmd,
+                                  graphicsDevice->getSwapchainImages()[imageIndex],
+                                  vk::ImageLayout::eTransferDstOptimal,
+                                  vk::ImageLayout::ePresentSrcKHR);
+
          TracyVkCollect(ctx, *cmd);
       }
       cmd.end();
