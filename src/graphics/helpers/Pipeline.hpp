@@ -155,16 +155,14 @@ namespace Triton::Graphics::Helpers {
           .vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size()),
           .pVertexAttributeDescriptions = attributeDescriptions.data()};
 
-      const auto swapchainExtent = graphicsDevice.getSwapchainExtent();
-
       const auto viewport = vk::Viewport{.x = 0.f,
                                          .y = 0.f,
-                                         .width = static_cast<float>(swapchainExtent.width),
-                                         .height = static_cast<float>(swapchainExtent.height),
+                                         .width = graphicsDevice.DrawImageExtent2D.width,
+                                         .height = graphicsDevice.DrawImageExtent2D.height,
                                          .minDepth = 0.f,
                                          .maxDepth = 1.f};
 
-      const auto scissor = vk::Rect2D{.offset = {0, 0}, .extent = swapchainExtent};
+      const auto scissor = vk::Rect2D{.offset = {0, 0}, .extent = graphicsDevice.DrawImageExtent2D};
 
       const auto viewportCreateInfo = vk::PipelineViewportStateCreateInfo{.viewportCount = 1,
                                                                           .pViewports = &viewport,
@@ -207,7 +205,7 @@ namespace Triton::Graphics::Helpers {
           .stencilTestEnable = VK_FALSE,
       };
 
-      const auto colorFormat = graphicsDevice.getSwapchainFormat();
+      const auto colorFormat = vk::Format::eR16G16B16A16Sfloat;
       const auto depthFormat = Helpers::findDepthFormat(graphicsDevice.getPhysicalDevice());
 
       const auto renderingInfo =

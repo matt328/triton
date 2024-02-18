@@ -4,6 +4,7 @@
 #include "textures/TextureFactory.hpp"
 #include "geometry/MeshFactory.hpp"
 #include "vma_raii.hpp"
+#include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_handles.hpp>
 
 namespace Triton::Graphics {
@@ -299,7 +300,8 @@ namespace Triton::Graphics {
           .imageColorSpace = surfaceFormat.colorSpace,
           .imageExtent = extent,
           .imageArrayLayers = 1,
-          .imageUsage = vk::ImageUsageFlagBits::eColorAttachment,
+          .imageUsage =
+              vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferDst,
           .preTransform = capabilities.currentTransform,
           .compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque,
           .presentMode = presentMode,
