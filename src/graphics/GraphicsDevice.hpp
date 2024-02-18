@@ -51,8 +51,8 @@ namespace Triton::Graphics {
          return surface;
       }
 
-      [[nodiscard]] const std::unique_ptr<vk::raii::Instance>& getVkInstance() const {
-         return instance;
+      [[nodiscard]] const vk::Instance& getVkInstance() const {
+         return **instance;
       }
 
       [[nodiscard]] vk::Format getSwapchainFormat() const {
@@ -109,6 +109,10 @@ namespace Triton::Graphics {
 
       [[nodiscard]] const Textures::TextureFactory& getTextureFactory() const {
          return *textureFactory;
+      }
+
+      [[nodiscard]] const ImmediateContext& getTransferContext() const {
+         return *transferImmediateContext;
       }
 
       void resizeWindow(uint32_t newWidth, uint32_t newHeight);
