@@ -10,22 +10,22 @@ namespace Triton::Graphics {
        : device(device), queue(newQueue) {
 
       // Create Command Pool
-      const vk::CommandPoolCreateInfo transferCommandPoolCreateInfo{
+      const auto poolCreateInfo = vk::CommandPoolCreateInfo{
           .flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
           .queueFamilyIndex = queueFamily,
       };
 
-      commandPool = std::make_unique<vk::raii::CommandPool>(
-          device.createCommandPool(transferCommandPoolCreateInfo));
+      commandPool =
+          std::make_unique<vk::raii::CommandPool>(device.createCommandPool(poolCreateInfo));
 
       // Create Command Buffer
-      const auto uploadAllocInfo =
+      const auto cmdAllocInfo =
           vk::CommandBufferAllocateInfo{.commandPool = **commandPool,
                                         .level = vk::CommandBufferLevel::ePrimary,
                                         .commandBufferCount = 1};
 
       commandBuffer = std::make_unique<vk::raii::CommandBuffer>(
-          std::move(device.allocateCommandBuffers(uploadAllocInfo)[0]));
+          std::move(device.allocateCommandBuffers(cmdAllocInfo)[0]));
 
       tracyContext = TracyVkContext((*physicalDevice), (*device), *queue, *(*commandBuffer));
 
@@ -56,10 +56,6 @@ namespace Triton::Graphics {
 
       queue.submit(submitInfo, **fence);
 
-      // Eventually, this process needs barriers and stuff and should
-      // just be waited for in the main rendering loop i think somehow further research is needed
-      // In general, create an abstraction over loading textures that can be done
-      // from an asnyc task
       if (const auto result = device.waitForFences(**fence, true, UINT64_MAX);
           result != vk::Result::eSuccess) {
          Log::warn << "During Immediate Submit, timeout waiting for fence" << std::endl;

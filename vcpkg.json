@@ -11,6 +11,13 @@
       "tinygltf",
       "tracy",
       "vulkan-memory-allocator",
-      "vulkan-memory-allocator-hpp"
+      "vulkan-memory-allocator-hpp",
+      {
+         "name": "imgui",
+         "features": [
+            "glfw-binding",
+            "vulkan-binding"
+         ]
+      }
    ]
 }

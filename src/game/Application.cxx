@@ -1,5 +1,5 @@
 #include "Application.hpp"
-#include <GLFW/glfw3.h>
+#include "imgui.h"
 
 namespace Triton::Game {
 
@@ -79,6 +79,9 @@ namespace Triton::Game {
    }
 
    void Application::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+      if (ImGui::GetIO().WantCaptureKeyboard || ImGui::GetIO().WantTextInput) {
+         return;
+      }
       const auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
       if (key == GLFW_KEY_ENTER && mods == GLFW_MOD_ALT && action == GLFW_RELEASE) {
          if (app->fullscreen) {
@@ -117,6 +120,9 @@ namespace Triton::Game {
    }
 
    void Application::mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
+      if (ImGui::GetIO().WantCaptureMouse) {
+         return;
+      }
       const auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
       if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_RELEASE) {
          if (!app->mouseCaptured) {
