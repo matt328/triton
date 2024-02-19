@@ -14,7 +14,6 @@
 #include "geometry/MeshFactory.hpp"
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_vulkan.h>
-#include <vulkan/vulkan_structs.hpp>
 
 namespace Triton::Graphics {
 
@@ -346,11 +345,6 @@ namespace Triton::Graphics {
    }
 
    void Renderer::render() {
-      ImGui_ImplVulkan_NewFrame();
-      ImGui_ImplGlfw_NewFrame();
-      ImGui::NewFrame();
-
-      ImGui::ShowDemoWindow();
 
       ImGui::Render();
 

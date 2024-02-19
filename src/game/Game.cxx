@@ -1,5 +1,8 @@
 #include "Game.hpp"
 
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_vulkan.h>
+
 #include "core/Paths.hpp"
 #include "game/actions/ActionSystem.hpp"
 #include "game/actions/ActionType.hpp"
@@ -82,7 +85,7 @@ namespace Triton::Game {
       const auto meshId = renderer->createMesh(filename);
       const auto textureId = renderer->createTexture(textureFilename);
 
-      const auto room = registry->create();
+      room = registry->create();
       registry->emplace<Ecs::Renderable>(room, meshId, textureId);
       registry->emplace<Ecs::Transform>(room);
 
@@ -92,6 +95,12 @@ namespace Triton::Game {
 
       registry->ctx().emplace<Ecs::WindowDimensions>(width, height);
       registry->ctx().emplace<Ecs::CurrentCamera>(camera);
+
+      entityEditor = std::make_unique<MM::EntityEditor<entt::entity>>();
+
+      entityEditor->registerComponent<Ecs::Transform>("Transform");
+      entityEditor->registerComponent<Ecs::Renderable>("Renderable");
+      entityEditor->registerComponent<Ecs::Camera>("Camera");
    }
 
    Game::~Game() {
@@ -111,6 +120,15 @@ namespace Triton::Game {
    void Game::update() {
       TracyMessageL("render");
       Ecs::RenderSystem::update(*registry, *renderer);
+
+      ImGui_ImplVulkan_NewFrame();
+      ImGui_ImplGlfw_NewFrame();
+      ImGui::NewFrame();
+
+      ImGui::ShowDemoWindow();
+
+      entityEditor->renderSimpleCombo(*registry, room);
+
       renderer->render();
    }
 
