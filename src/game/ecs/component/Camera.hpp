@@ -6,6 +6,7 @@ namespace Triton::Game::Ecs {
    constexpr glm::vec3 worldUp = {0.f, 1.f, 0.f};
 
    struct Camera {
+      Camera() = default;
       Camera(int width, int height, float fov, float nearClip, float farClip, glm::vec3 position)
           : position{position},
             projection(
