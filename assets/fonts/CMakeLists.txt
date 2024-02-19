@@ -1,7 +1,6 @@
 set(name, "fonts")
 
 set(Fonts
-   segoeui.ttf
    Roboto-Regular.ttf
 )
 
