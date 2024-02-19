@@ -32,7 +32,7 @@ add_custom_command(
     -E copy_if_different
     "${TO_COPY}"
     "${COPY_TO}"
-    COMMENT "Processing Assets"
+    COMMENT "Processing Models"
     COMMAND_EXPAND_LISTS
     DEPENDS ${OUTPUT_DIR}
 )

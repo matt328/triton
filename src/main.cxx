@@ -18,8 +18,8 @@ int main() {
    static constexpr int TARGET_FPS = 60;
    static constexpr int MAX_UPDATES = 4;
 
-   static constexpr int width = 1366;
-   static constexpr int height = 768;
+   static constexpr int width = 1920;
+   static constexpr int height = 1080;
 
 #ifdef _DEBUG
    Log::info << "Debug Build" << std::endl;

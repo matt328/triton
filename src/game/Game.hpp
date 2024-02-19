@@ -2,6 +2,8 @@
 
 #include "core/Timer.hpp"
 #include "actions/ActionSystem.hpp"
+
+#include "graphics/gui/EntityEditor.hpp"
 /*
    Game's responsibility will be to own and handle interactions with the entity system
    Entity System
@@ -53,5 +55,7 @@ namespace Triton::Game {
       std::unique_ptr<Graphics::Renderer> renderer;
       std::unique_ptr<entt::registry> registry;
       std::unique_ptr<Actions::ActionSystem> actionSystem;
+      std::unique_ptr<MM::EntityEditor<entt::entity>> entityEditor;
+      entt::entity room;
    };
 }
