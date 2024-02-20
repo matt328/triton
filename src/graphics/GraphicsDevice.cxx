@@ -281,7 +281,6 @@ namespace Triton::Graphics {
          swapchainImageViews.clear();
       }
       // Create Swapchain
-
       auto [graphicsFamily, presentFamily, transferFamily, computeFamily] =
           Helpers::findQueueFamilies(*physicalDevice, *surface);
 
