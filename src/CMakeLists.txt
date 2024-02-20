@@ -125,7 +125,6 @@ target_precompile_headers(${project_name} PRIVATE
    <string_view>
    <sstream>
    <GLFW/glfw3.h>
-   <GLFW/glfw3native.h>
    <vulkan-memory-allocator-hpp/vk_mem_alloc.hpp>
    <vulkan/vulkan_raii.hpp>
    <tracy/Tracy.hpp>

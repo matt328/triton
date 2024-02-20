@@ -118,7 +118,8 @@
       "game",
       "profiling",
       "build",
-      "input"
+      "input",
+      "gui"
    ],
    "git.ignoreLimitWarning": true,
    "workbench.colorCustomizations": {
