@@ -20,18 +20,6 @@ namespace Triton::Graphics {
    Renderer::Renderer(GLFWwindow* window) {
       graphicsDevice = std::make_unique<GraphicsDevice>(window, true);
 
-      init();
-
-      imguiHelper = std::make_unique<Gui::ImGuiHelper>(*graphicsDevice, window);
-   }
-
-   Renderer::~Renderer() {
-      Log::info << "destroying renderer" << std::endl;
-      meshes.clear();
-      textureList.clear();
-   }
-
-   void Renderer::init() {
       bindlessDescriptorSetLayout =
           Helpers::createBindlessDescriptorSetLayout(graphicsDevice->getVulkanDevice());
       objectDescriptorSetLayout =
@@ -39,13 +27,6 @@ namespace Triton::Graphics {
       perFrameDescriptorSetLayout =
           Helpers::createPerFrameDescriptorSetLayout(graphicsDevice->getVulkanDevice());
 
-      std::tie(pipeline, pipelineLayout) =
-          Helpers::createBasicPipeline(*graphicsDevice,
-                                       *bindlessDescriptorSetLayout,
-                                       *objectDescriptorSetLayout,
-                                       *perFrameDescriptorSetLayout);
-
-      frameData.clear();
       frameData.reserve(FRAMES_IN_FLIGHT);
       for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++) {
          auto name = std::stringstream{};
@@ -56,6 +37,32 @@ namespace Triton::Graphics {
                                                          *perFrameDescriptorSetLayout,
                                                          name.str()));
       }
+
+      createSwapchainResources();
+
+      imguiHelper = std::make_unique<Gui::ImGuiHelper>(*graphicsDevice, window);
+   }
+
+   Renderer::~Renderer() {
+      Log::info << "destroying renderer" << std::endl;
+      meshes.clear();
+      textureList.clear();
+   }
+
+   void Renderer::destroySwapchainResources() {
+      depthImage.reset();
+      depthImageView.reset();
+      pipeline.reset();
+      pipelineLayout.reset();
+   }
+
+   void Renderer::createSwapchainResources() {
+
+      std::tie(pipeline, pipelineLayout) =
+          Helpers::createBasicPipeline(*graphicsDevice,
+                                       *bindlessDescriptorSetLayout,
+                                       *objectDescriptorSetLayout,
+                                       *perFrameDescriptorSetLayout);
 
       const auto depthFormat = Helpers::findDepthFormat(graphicsDevice->getPhysicalDevice());
 
@@ -100,13 +107,15 @@ namespace Triton::Graphics {
          fd->destroySwapchainResources();
       }
 
+      destroySwapchainResources();
+
       graphicsDevice->recreateSwapchain();
 
       for (const auto& fd : frameData) {
          fd->createSwapchainResources(*graphicsDevice);
       }
 
-      init();
+      createSwapchainResources();
    }
 
    void Renderer::drawFrame() {

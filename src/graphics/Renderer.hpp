@@ -102,7 +102,8 @@ namespace Triton::Graphics {
 
       ResizeDelegateType resizeDelegate{};
 
-      void init();
+      void createSwapchainResources();
+      void destroySwapchainResources();
 
       void recreateSwapchain();
       void drawFrame();
