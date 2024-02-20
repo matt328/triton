@@ -1,5 +1,6 @@
 #include "Game.hpp"
 
+#include <cstdint>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_vulkan.h>
 
@@ -99,6 +100,8 @@ namespace Triton::Game {
       entityEditor->registerComponent<Ecs::Transform>("Transform");
       entityEditor->registerComponent<Ecs::Renderable>("Renderable");
       entityEditor->registerComponent<Ecs::Camera>("Camera");
+
+      renderer->getResizeDelegate().connect<&Game::resize>(this);
    }
 
    Game::~Game() {
@@ -128,8 +131,8 @@ namespace Triton::Game {
       renderer->render();
    }
 
-   void Game::resize(const int width, const int height) {
-      registry->ctx().emplace<Ecs::WindowDimensions>(width, height);
+   void Game::resize(const std::pair<uint32_t, uint32_t> size) {
+      registry->ctx().emplace<Ecs::WindowDimensions>(size.first, size.second);
    }
 
    void Game::waitIdle() {

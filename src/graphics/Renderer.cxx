@@ -93,14 +93,8 @@ namespace Triton::Graphics {
    }
 
    void Renderer::recreateSwapchain() {
-      // TODO this is the most brute force scorched earth way of handling this.
-      // try to be a little more precise.
-      /*
-         Resizes should originate from here, not a window callback
-         grab the new size from the device and broadcast the change to listeners
-         game will listen so it can update the cameras' projection matrices
-      */
       waitIdle();
+      resizeDelegate(graphicsDevice->getCurrentSize());
       frameData.clear();
       graphicsDevice->recreateSwapchain();
       init();

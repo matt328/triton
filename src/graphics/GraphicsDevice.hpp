@@ -111,6 +111,8 @@ namespace Triton::Graphics {
          return *transferImmediateContext;
       }
 
+      [[nodiscard]] const std::pair<uint32_t, uint32_t> getCurrentSize() const;
+
       void recreateSwapchain();
 
     private:
