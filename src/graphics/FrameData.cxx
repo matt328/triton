@@ -2,9 +2,6 @@
 #include "ObjectData.hpp"
 #include "GraphicsDevice.hpp"
 #include "helpers/Vulkan.hpp"
-#include <vulkan/vulkan_enums.hpp>
-#include <vulkan/vulkan_raii.hpp>
-#include <vulkan/vulkan_structs.hpp>
 
 namespace Triton::Graphics {
 
@@ -14,18 +11,7 @@ namespace Triton::Graphics {
                         const vk::raii::DescriptorSetLayout& perFrameDescriptorSetLayout,
                         const std::string_view name) {
 
-      const auto allocInfo =
-          vk::CommandBufferAllocateInfo{.commandPool = *graphicsDevice.getCommandPool(),
-                                        .level = vk::CommandBufferLevel::ePrimary,
-                                        .commandBufferCount = 1};
-
-      auto commandBuffers = graphicsDevice.getVulkanDevice().allocateCommandBuffers(allocInfo);
-
-      constexpr auto semaphoreCreateInfo = vk::SemaphoreCreateInfo{};
-      constexpr auto fenceCreateInfo =
-          vk::FenceCreateInfo{.flags = vk::FenceCreateFlagBits::eSignaled};
-
-      commandBuffer = std::make_unique<vk::raii::CommandBuffer>(std::move(commandBuffers[0]));
+      createSwapchainResources(graphicsDevice);
 
       // NOLINTNEXTLINE I'd like to init this in the ctor init, but TracyVkContext is a macro
       tracyContext = TracyVkContext(*graphicsDevice.getPhysicalDevice(),
@@ -34,6 +20,9 @@ namespace Triton::Graphics {
                                     *(*commandBuffer));
       TracyVkContextName(tracyContext, name.data(), name.length());
 
+      constexpr auto semaphoreCreateInfo = vk::SemaphoreCreateInfo{};
+      constexpr auto fenceCreateInfo =
+          vk::FenceCreateInfo{.flags = vk::FenceCreateFlagBits::eSignaled};
       imageAvailableSemaphore =
           std::make_unique<vk::raii::Semaphore>(graphicsDevice.getVulkanDevice(),
                                                 semaphoreCreateInfo);
@@ -178,6 +167,19 @@ namespace Triton::Graphics {
 
    void FrameData::updateObjectDataBuffer(const ObjectData* data, const size_t size) {
       this->objectDataBuffer->updateBufferValue(data, size);
+   }
+
+   void FrameData::destroySwapchainResources() {
+      commandBuffer.reset();
+   }
+
+   void FrameData::createSwapchainResources(const GraphicsDevice& graphicsDevice) {
+      const auto allocInfo =
+          vk::CommandBufferAllocateInfo{.commandPool = *graphicsDevice.getCommandPool(),
+                                        .level = vk::CommandBufferLevel::ePrimary,
+                                        .commandBufferCount = 1};
+      auto commandBuffers = graphicsDevice.getVulkanDevice().allocateCommandBuffers(allocInfo);
+      commandBuffer = std::make_unique<vk::raii::CommandBuffer>(std::move(commandBuffers[0]));
    }
 
    FrameData::~FrameData() {

@@ -95,8 +95,17 @@ namespace Triton::Graphics {
    void Renderer::recreateSwapchain() {
       waitIdle();
       resizeDelegate(graphicsDevice->getCurrentSize());
-      frameData.clear();
+
+      for (const auto& fd : frameData) {
+         fd->destroySwapchainResources();
+      }
+
       graphicsDevice->recreateSwapchain();
+
+      for (const auto& fd : frameData) {
+         fd->createSwapchainResources(*graphicsDevice);
+      }
+
       init();
    }
 
@@ -128,7 +137,7 @@ namespace Triton::Graphics {
              *currentFrameData->getImageAvailableSemaphore(),
              nullptr);
       } catch (const std::exception& ex) {
-         Log::error << "Exception acquiring: " << ex.what() << std::endl;
+         Log::error << "Swapchain needs resized: " << ex.what() << std::endl;
          recreateSwapchain();
          return;
       }
@@ -204,7 +213,7 @@ namespace Triton::Graphics {
             recreateSwapchain();
          }
       } catch (const std::exception& ex) {
-         Log::error << "Exception Presenting: " << ex.what() << std::endl;
+         Log::info << "swapchain needs recreated: " << ex.what() << std::endl;
          recreateSwapchain();
       }
 
