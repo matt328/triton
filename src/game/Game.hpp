@@ -43,7 +43,6 @@ namespace Triton::Game {
       void update();
       void resize(const int width, const int height);
       void waitIdle();
-      void handleMessage(MSG msg);
 
       // Input Handlers
       void keyCallback(int key, int scancode, int action, int mods);

@@ -18,7 +18,6 @@
 namespace Triton::Graphics {
 
    Renderer::Renderer(GLFWwindow* window) {
-      glfwGetWindowSize(window, &width, &height);
       graphicsDevice = std::make_unique<GraphicsDevice>(window, true);
 
       init();
@@ -94,6 +93,13 @@ namespace Triton::Graphics {
    }
 
    void Renderer::recreateSwapchain() {
+      // TODO this is the most brute force scorched earth way of handling this.
+      // try to be a little more precise.
+      /*
+         Resizes should originate from here, not a window callback
+         grab the new size from the device and broadcast the change to listeners
+         game will listen so it can update the cameras' projection matrices
+      */
       waitIdle();
       frameData.clear();
       graphicsDevice->recreateSwapchain();
@@ -357,13 +363,6 @@ namespace Triton::Graphics {
       graphicsDevice->getVulkanDevice().waitIdle();
    }
 
-   void Renderer::windowResized(const int width, const int height) {
-      this->width = width;
-      this->height = height;
-      TracyMessageL("WindowResized");
-      graphicsDevice->resizeWindow(width, height);
-   }
-
    // TODO: Should the renderer be what creates these?
    // I guess it delegates to the factory, which is created and owned by the device
    // and the renderer is just indexing the Mesh so it knows how to access it consistently
@@ -384,10 +383,6 @@ namespace Triton::Graphics {
       }
       Log::debug << "added texture to bind with index" << handle << std::endl;
       return handle;
-   }
-
-   const std::tuple<int, int> Renderer::getWindowSize() const {
-      return {width, height};
    }
 
    void Renderer::enqueueRenderObject(RenderObject renderObject) {

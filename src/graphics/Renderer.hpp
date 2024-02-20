@@ -41,7 +41,6 @@ namespace Triton::Graphics {
 
       void render();
       void waitIdle();
-      void windowResized(const int width, const int height);
 
       MeshHandle createMesh(const std::string_view& filename);
       uint32_t createTexture(const std::string_view& filename);
@@ -93,7 +92,6 @@ namespace Triton::Graphics {
 
       uint32_t currentFrame = 0;
       bool framebufferResized = false;
-      int width{}, height{};
 
       void init();
 
