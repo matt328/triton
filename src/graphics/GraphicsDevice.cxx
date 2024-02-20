@@ -13,7 +13,6 @@ namespace Triton::Graphics {
 
    GraphicsDevice::GraphicsDevice(GLFWwindow* window, const bool validationEnabled)
        : validationEnabled(validationEnabled) {
-      glfwGetWindowSize(window, &width, &height);
       context = std::make_unique<vk::raii::Context>();
 
       // Log available extensions
@@ -283,9 +282,13 @@ namespace Triton::Graphics {
       auto [capabilities, formats, presentModes] =
           Helpers::querySwapchainSupport(*physicalDevice, *surface);
 
+      const auto surfaceCaps = physicalDevice->getSurfaceCapabilitiesKHR(**surface);
+
       const auto surfaceFormat = Helpers::chooseSwapSurfaceFormat(formats);
       const auto presentMode = Helpers::chooseSwapPresentMode(presentModes);
-      const auto extent = Helpers::chooseSwapExtent(capabilities, getWindowSize());
+      const auto extent = Helpers::chooseSwapExtent(
+          capabilities,
+          std::make_pair(surfaceCaps.currentExtent.width, surfaceCaps.currentExtent.height));
 
       uint32_t imageCount = capabilities.minImageCount + 1;
 
@@ -376,11 +379,6 @@ namespace Triton::Graphics {
 
    std::vector<vk::raii::PhysicalDevice> GraphicsDevice::enumeratePhysicalDevices() const {
       return instance->enumeratePhysicalDevices();
-   }
-
-   void GraphicsDevice::resizeWindow(const uint32_t newWidth, const uint32_t newHeight) {
-      height = static_cast<int>(newHeight);
-      width = static_cast<int>(newWidth);
    }
 
    bool GraphicsDevice::checkValidationLayerSupport() const {
