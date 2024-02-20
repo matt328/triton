@@ -4,6 +4,7 @@
 #include "textures/TextureFactory.hpp"
 #include "geometry/MeshFactory.hpp"
 #include "vma_raii.hpp"
+#include <cstdint>
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_handles.hpp>
 
@@ -268,6 +269,11 @@ namespace Triton::Graphics {
       vulkanDevice->waitIdle();
    };
 
+   const std::pair<uint32_t, uint32_t> GraphicsDevice::getCurrentSize() const {
+      const auto surfaceCaps = physicalDevice->getSurfaceCapabilitiesKHR(**surface);
+      return std::make_pair(surfaceCaps.currentExtent.width, surfaceCaps.currentExtent.height);
+   }
+
    void GraphicsDevice::createSwapchain() {
       if (oldSwapchain != nullptr) {
          commandPool.reset();
@@ -282,13 +288,9 @@ namespace Triton::Graphics {
       auto [capabilities, formats, presentModes] =
           Helpers::querySwapchainSupport(*physicalDevice, *surface);
 
-      const auto surfaceCaps = physicalDevice->getSurfaceCapabilitiesKHR(**surface);
-
       const auto surfaceFormat = Helpers::chooseSwapSurfaceFormat(formats);
       const auto presentMode = Helpers::chooseSwapPresentMode(presentModes);
-      const auto extent = Helpers::chooseSwapExtent(
-          capabilities,
-          std::make_pair(surfaceCaps.currentExtent.width, surfaceCaps.currentExtent.height));
+      const auto extent = Helpers::chooseSwapExtent(capabilities, getCurrentSize());
 
       uint32_t imageCount = capabilities.minImageCount + 1;
 

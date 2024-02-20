@@ -4,6 +4,8 @@
 #include "actions/ActionSystem.hpp"
 
 #include "graphics/gui/EntityEditor.hpp"
+#include <cstdint>
+#include <glm/ext/scalar_uint_sized.hpp>
 /*
    Game's responsibility will be to own and handle interactions with the entity system
    Entity System
@@ -41,7 +43,7 @@ namespace Triton::Game {
       void beginFrame();
       void fixedUpdate(const Core::Timer& timer);
       void update();
-      void resize(const int width, const int height);
+      void resize(const std::pair<uint32_t, uint32_t>);
       void waitIdle();
 
       // Input Handlers
