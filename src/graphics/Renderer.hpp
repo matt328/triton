@@ -2,6 +2,7 @@
 
 #include "graphics/ObjectData.hpp"
 #include "graphics/gui/ImguiHelper.hpp"
+#include <entt/signal/fwd.hpp>
 
 namespace Triton::Graphics {
    struct RenderObject;
@@ -29,6 +30,8 @@ namespace Triton::Graphics {
    using RenderObjectProviderFn = std::function<std::vector<RenderObject>()>;
    using PerFrameDataProfiderFn = std::function<PerFrameData()>;
 
+   using ResizeDelegateType = entt::delegate<void(std::pair<uint32_t, uint32_t>)>;
+
    class Renderer {
     public:
       Renderer(GLFWwindow* window);
@@ -52,6 +55,10 @@ namespace Triton::Graphics {
       }
 
       [[nodiscard]] const std::tuple<int, int> getWindowSize() const;
+
+      [[nodiscard]] entt::delegate<void(std::pair<uint32_t, uint32_t>)>& getResizeDelegate() {
+         return resizeDelegate;
+      }
 
       void registerPerFrameDataProvider(PerFrameDataProfiderFn fn) {
          this->perFrameDataProvider = fn;
@@ -92,6 +99,8 @@ namespace Triton::Graphics {
 
       uint32_t currentFrame = 0;
       bool framebufferResized = false;
+
+      ResizeDelegateType resizeDelegate{};
 
       void init();
 
