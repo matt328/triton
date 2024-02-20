@@ -85,6 +85,8 @@ namespace MM {
     private:
       std::map<ComponentTypeID, ComponentInfo> component_infos;
 
+      std::map<ComponentTypeID, ComponentInfo&> has_not{};
+
       bool entityHasComponent(Registry& registry, EntityType& entity, ComponentTypeID type_id) {
          const auto* storage_ptr = registry.storage(type_id);
          return storage_ptr != nullptr && storage_ptr->contains(entity);
@@ -159,8 +161,10 @@ namespace MM {
 
          if (registry.valid(e)) {
             ImGui::PushID(static_cast<int>(entt::to_integral(e)));
-            std::map<ComponentTypeID, ComponentInfo> has_not;
-            for (auto& [component_type_id, ci] : component_infos) {
+            has_not.clear();
+            for (auto it = component_infos.begin(); it != component_infos.end(); ++it) {
+               auto& component_type_id = it->first;
+               ComponentInfo& ci = it->second;
                if (entityHasComponent(registry, e, component_type_id)) {
                   ImGui::PushID(component_type_id);
                   if (ImGui::Button("-")) {
@@ -180,7 +184,7 @@ namespace MM {
                   }
                   ImGui::PopID();
                } else {
-                  has_not[component_type_id] = ci;
+                  has_not.insert_or_assign(component_type_id, ci);
                }
             }
 

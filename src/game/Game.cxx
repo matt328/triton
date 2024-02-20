@@ -27,13 +27,12 @@ namespace Triton::Game {
 
    // HACK: This entire class.  slopping stuff in here to manually test out the renderer before
    // adding proper ECS.
-   Game::Game(GLFWwindow* window) {
+   Game::Game(GLFWwindow* window)
+       : registry{std::make_unique<entt::registry>()}, room{registry->create()} {
       int width{}, height{};
       glfwGetWindowSize(window, &width, &height);
 
       renderer = std::make_unique<Graphics::Renderer>(window);
-
-      registry = std::make_unique<entt::registry>();
 
       actionSystem = std::make_unique<ActionSystem>();
 
@@ -85,7 +84,6 @@ namespace Triton::Game {
       const auto meshId = renderer->createMesh(filename);
       const auto textureId = renderer->createTexture(textureFilename);
 
-      room = registry->create();
       registry->emplace<Ecs::Renderable>(room, meshId, textureId);
       registry->emplace<Ecs::Transform>(room);
 
@@ -124,8 +122,6 @@ namespace Triton::Game {
       ImGui_ImplVulkan_NewFrame();
       ImGui_ImplGlfw_NewFrame();
       ImGui::NewFrame();
-
-      ImGui::ShowDemoWindow();
 
       entityEditor->renderSimpleCombo(*registry, room);
 
