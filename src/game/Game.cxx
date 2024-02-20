@@ -132,7 +132,8 @@ namespace Triton::Game {
    }
 
    void Game::resize(const std::pair<uint32_t, uint32_t> size) {
-      registry->ctx().emplace<Ecs::WindowDimensions>(size.first, size.second);
+      registry->ctx().insert_or_assign<Ecs::WindowDimensions>(
+          Ecs::WindowDimensions{static_cast<int>(size.first), static_cast<int>(size.second)});
    }
 
    void Game::waitIdle() {
