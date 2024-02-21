@@ -1,11 +1,10 @@
 set(triton_SRC
    "main.cxx"
 
-   "game/Application.cxx"
+   "Application.cxx"
    "game/Game.cxx"
    
    "game/actions/ActionSystem.cxx"
-   "game/actions/KeyMap.cxx"
 
    "game/ecs/system/CameraSystem.cxx"
    "game/ecs/system/RenderSystem.cxx"
@@ -14,10 +13,10 @@ set(triton_SRC
    "graphics/GraphicsDevice.cxx"
    "graphics/ImmediateContext.cxx"
    "graphics/Renderer.cxx"
-   "graphics/Vertex.cxx"
    "graphics/vma_raii.cxx"
 
    "graphics/geometry/MeshFactory.cxx"
+   "graphics/geometry/Vertex.cxx"
 
    "graphics/gui/ImguiHelper.cxx"
    
@@ -90,7 +89,6 @@ else()
 	endif()
 endif()
 
-
 find_package(Threads REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glslang CONFIG REQUIRED)
@@ -104,7 +102,7 @@ find_package(VulkanMemoryAllocator CONFIG REQUIRED)
 find_package(unofficial-vulkan-memory-allocator-hpp CONFIG REQUIRED)
 
 target_precompile_headers(${project_name} PRIVATE
-   "core/Logger.hpp"
+   "util/Logger.hpp"
    <entt/entt.hpp>
    <filesystem>
    <fstream>
@@ -115,6 +113,9 @@ target_precompile_headers(${project_name} PRIVATE
    <glm/gtx/quaternion.hpp>
    <glm/gtx/string_cast.hpp>
    <glslang/SPIRV/GlslangToSpv.h>
+   <imgui.h>
+   <imgui_impl_glfw.h>
+   <imgui_impl_vulkan.h>
    <limits>
    <map>
    <optional>

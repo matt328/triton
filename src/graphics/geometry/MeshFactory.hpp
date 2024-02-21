@@ -1,9 +1,9 @@
 #pragma once
-#include "../ImmediateContext.hpp"
-#include "../vma_raii.hpp"
+#include "graphics/ImmediateContext.hpp"
+#include "graphics/vma_raii.hpp"
 
 #include "Mesh.hpp"
-#include "../Vertex.hpp"
+#include "Vertex.hpp"
 
 namespace Triton::Graphics::Geometry {
 

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../Vertex.hpp"
-#include "../GraphicsDevice.hpp"
-#include "./Vulkan.hpp"
+#include "graphics/geometry/Vertex.hpp"
+#include "graphics/GraphicsDevice.hpp"
+#include "Vulkan.hpp"
 
 namespace Triton::Graphics::Helpers {
 
@@ -113,10 +113,12 @@ namespace Triton::Graphics::Helpers {
           graphicsDevice.getVulkanDevice().createPipelineLayout(pipelineLayoutInfo));
 
       // Configure Vertex Attributes
-      auto bindingDescription = Vertex::inputBindingDescription(0);
-      auto attributeDescriptions = Vertex::inputAttributeDescriptions(
-          0,
-          {VertexComponent::Position, VertexComponent::Color, VertexComponent::UV});
+      auto bindingDescription = Geometry::Vertex::inputBindingDescription(0);
+      auto attributeDescriptions =
+          Geometry::Vertex::inputAttributeDescriptions(0,
+                                                       {Geometry::VertexComponent::Position,
+                                                        Geometry::VertexComponent::Color,
+                                                        Geometry::VertexComponent::UV});
 
       vk::PipelineVertexInputStateCreateInfo vertexInputInfo{
           .vertexBindingDescriptionCount = 1,

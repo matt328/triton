@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/Timer.hpp"
+#include "util/Timer.hpp"
 #include "actions/ActionSystem.hpp"
 
 #include "graphics/gui/EntityEditor.hpp"
@@ -41,7 +41,7 @@ namespace Triton::Game {
       Game& operator=(Game&&) = delete;
 
       void beginFrame();
-      void fixedUpdate(const Core::Timer& timer);
+      void fixedUpdate(const Util::Timer& timer);
       void update();
       void resize(const std::pair<uint32_t, uint32_t>);
       void waitIdle();

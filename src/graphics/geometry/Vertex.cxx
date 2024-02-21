@@ -1,6 +1,6 @@
 #include "Vertex.hpp"
 
-namespace Triton::Graphics {
+namespace Triton::Graphics::Geometry {
    vk::VertexInputBindingDescription Vertex::vertexInputBindingDescription;
    std::vector<vk::VertexInputAttributeDescription> Vertex::vertexInputAttributeDescriptions;
    vk::PipelineVertexInputStateCreateInfo Vertex::pipelineVertexInputStateCreateInfo;

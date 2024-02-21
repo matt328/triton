@@ -1,6 +1,26 @@
 #pragma once
 
 namespace Triton::Actions {
+   enum class GamepadInput : uint32_t {
+      None = 0,
+      Button_X,
+      Button_Y,
+      Button_A,
+      Button_B,
+      LeftJoystickAxisX,
+      LeftJoystickAxisY
+      // TODO
+   };
+
+   enum class MouseInput {
+      MOVE_X,
+      MOVE_Y,
+      CLICK_LEFT,
+      CLICK_RIGHT,
+      CLICK_MIDDLE,
+      SCROLL_X,
+      SCROLL_Y
+   };
    enum class Key : uint32_t {
       None = 0,
 

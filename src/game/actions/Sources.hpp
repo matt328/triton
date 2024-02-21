@@ -1,8 +1,6 @@
 #pragma once
 
-#include "Key.hpp"
-#include "Mouse.hpp"
-#include "Gamepad.hpp"
+#include "Inputs.hpp"
 
 namespace Triton::Actions {
    enum class SourceType : uint32_t {
@@ -17,7 +15,7 @@ namespace Triton::Actions {
       Source(Key key, SourceType sType) : src{key}, sourceType{sType} {
       }
 
-      Source(GamepadInput in) : src{in} {
+      Source(GamepadInput in, SourceType sType) : src{in}, sourceType{sType} {
       }
 
       std::variant<MouseInput, Key, GamepadInput> src;

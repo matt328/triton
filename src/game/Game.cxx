@@ -4,7 +4,7 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_vulkan.h>
 
-#include "core/Paths.hpp"
+#include "util/Paths.hpp"
 #include "game/actions/ActionSystem.hpp"
 #include "game/actions/ActionType.hpp"
 #include "game/actions/Sources.hpp"
@@ -80,8 +80,8 @@ namespace Triton::Game {
                               ActionType::LookVertical);
 
       // Create viking room entity
-      const auto textureFilename = (Core::Paths::TEXTURES / "viking_room.png").string();
-      const auto filename = (Core::Paths::MODELS / "viking_room.gltf").string();
+      const auto textureFilename = (Util::Paths::TEXTURES / "viking_room.png").string();
+      const auto filename = (Util::Paths::MODELS / "viking_room.gltf").string();
 
       const auto meshId = renderer->createMesh(filename);
       const auto textureId = renderer->createTexture(textureFilename);
@@ -112,7 +112,7 @@ namespace Triton::Game {
       TracyMessageL("beginFrame");
    }
 
-   void Game::fixedUpdate([[maybe_unused]] const Core::Timer& timer) {
+   void Game::fixedUpdate([[maybe_unused]] const Util::Timer& timer) {
       TracyMessageL("fixedUpdate");
       ZoneNamedN(upd, "FixedUpdate", true);
       Ecs::CameraSystem::fixedUpdate(*registry);
