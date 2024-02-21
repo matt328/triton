@@ -14,25 +14,14 @@
 #include "geometry/MeshFactory.hpp"
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_vulkan.h>
+#include "helpers/SpirvHelper.hpp"
+#include "core/Paths.hpp"
 
 namespace Triton::Graphics {
 
    Renderer::Renderer(GLFWwindow* window) {
-      glfwGetWindowSize(window, &width, &height);
       graphicsDevice = std::make_unique<GraphicsDevice>(window, true);
 
-      init();
-
-      imguiHelper = std::make_unique<Gui::ImGuiHelper>(*graphicsDevice, window);
-   }
-
-   Renderer::~Renderer() {
-      Log::info << "destroying renderer" << std::endl;
-      meshes.clear();
-      textureList.clear();
-   }
-
-   void Renderer::init() {
       bindlessDescriptorSetLayout =
           Helpers::createBindlessDescriptorSetLayout(graphicsDevice->getVulkanDevice());
       objectDescriptorSetLayout =
@@ -40,13 +29,6 @@ namespace Triton::Graphics {
       perFrameDescriptorSetLayout =
           Helpers::createPerFrameDescriptorSetLayout(graphicsDevice->getVulkanDevice());
 
-      std::tie(pipeline, pipelineLayout) =
-          Helpers::createBasicPipeline(*graphicsDevice,
-                                       *bindlessDescriptorSetLayout,
-                                       *objectDescriptorSetLayout,
-                                       *perFrameDescriptorSetLayout);
-
-      frameData.clear();
       frameData.reserve(FRAMES_IN_FLIGHT);
       for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++) {
          auto name = std::stringstream{};
@@ -57,6 +39,63 @@ namespace Triton::Graphics {
                                                          *perFrameDescriptorSetLayout,
                                                          name.str()));
       }
+
+      auto helper = std::make_unique<Helpers::SpirvHelper>();
+
+      const auto vertexFilename = (Core::Paths::SHADERS / "shader.vert").string();
+      const auto fragmentFilename = (Core::Paths::SHADERS / "shader.frag").string();
+
+      auto vertexShaderCode = Helpers::readShaderFile(vertexFilename);
+      auto fragmentShaderCode = Helpers::readShaderFile(fragmentFilename);
+
+      const auto vertexSpirv =
+          helper->compileShader(vk::ShaderStageFlagBits::eVertex, vertexShaderCode.data());
+      Log::debug << "Compiled shader " << vertexFilename << std::endl;
+
+      const auto fragmentSpirv =
+          helper->compileShader(vk::ShaderStageFlagBits::eFragment, fragmentShaderCode.data());
+      Log::debug << "Compiled shader " << fragmentFilename << std::endl;
+
+      auto vertexShaderCreateInfo = vk::ShaderModuleCreateInfo{.codeSize = 4 * vertexSpirv.size(),
+                                                               .pCode = vertexSpirv.data()};
+
+      vertexShaderModule = std::make_unique<vk::raii::ShaderModule>(
+          graphicsDevice->getVulkanDevice().createShaderModule(vertexShaderCreateInfo));
+
+      auto fragmentShaderCreateInfo =
+          vk::ShaderModuleCreateInfo{.codeSize = 4 * fragmentSpirv.size(),
+                                     .pCode = fragmentSpirv.data()};
+
+      fragmentShaderModule = std::make_unique<vk::raii::ShaderModule>(
+          graphicsDevice->getVulkanDevice().createShaderModule(fragmentShaderCreateInfo));
+
+      createSwapchainResources();
+
+      imguiHelper = std::make_unique<Gui::ImGuiHelper>(*graphicsDevice, window);
+   }
+
+   Renderer::~Renderer() {
+      Log::info << "destroying renderer" << std::endl;
+      meshes.clear();
+      textureList.clear();
+   }
+
+   void Renderer::destroySwapchainResources() {
+      depthImage.reset();
+      depthImageView.reset();
+      pipeline.reset();
+      pipelineLayout.reset();
+   }
+
+   void Renderer::createSwapchainResources() {
+
+      std::tie(pipeline, pipelineLayout) =
+          Helpers::createBasicPipeline(*graphicsDevice,
+                                       *bindlessDescriptorSetLayout,
+                                       *objectDescriptorSetLayout,
+                                       *perFrameDescriptorSetLayout,
+                                       *vertexShaderModule,
+                                       *fragmentShaderModule);
 
       const auto depthFormat = Helpers::findDepthFormat(graphicsDevice->getPhysicalDevice());
 
@@ -95,9 +134,21 @@ namespace Triton::Graphics {
 
    void Renderer::recreateSwapchain() {
       waitIdle();
-      frameData.clear();
+      resizeDelegate(graphicsDevice->getCurrentSize());
+
+      for (const auto& fd : frameData) {
+         fd->destroySwapchainResources();
+      }
+
+      destroySwapchainResources();
+
       graphicsDevice->recreateSwapchain();
-      init();
+
+      for (const auto& fd : frameData) {
+         fd->createSwapchainResources(*graphicsDevice);
+      }
+
+      createSwapchainResources();
    }
 
    void Renderer::drawFrame() {
@@ -128,7 +179,7 @@ namespace Triton::Graphics {
              *currentFrameData->getImageAvailableSemaphore(),
              nullptr);
       } catch (const std::exception& ex) {
-         Log::error << "Exception acquiring: " << ex.what() << std::endl;
+         Log::error << "Swapchain needs resized: " << ex.what() << std::endl;
          recreateSwapchain();
          return;
       }
@@ -204,7 +255,7 @@ namespace Triton::Graphics {
             recreateSwapchain();
          }
       } catch (const std::exception& ex) {
-         Log::error << "Exception Presenting: " << ex.what() << std::endl;
+         Log::info << "swapchain needs recreated: " << ex.what() << std::endl;
          recreateSwapchain();
       }
 
@@ -357,13 +408,6 @@ namespace Triton::Graphics {
       graphicsDevice->getVulkanDevice().waitIdle();
    }
 
-   void Renderer::windowResized(const int width, const int height) {
-      this->width = width;
-      this->height = height;
-      TracyMessageL("WindowResized");
-      graphicsDevice->resizeWindow(width, height);
-   }
-
    // TODO: Should the renderer be what creates these?
    // I guess it delegates to the factory, which is created and owned by the device
    // and the renderer is just indexing the Mesh so it knows how to access it consistently
@@ -384,10 +428,6 @@ namespace Triton::Graphics {
       }
       Log::debug << "added texture to bind with index" << handle << std::endl;
       return handle;
-   }
-
-   const std::tuple<int, int> Renderer::getWindowSize() const {
-      return {width, height};
    }
 
    void Renderer::enqueueRenderObject(RenderObject renderObject) {
