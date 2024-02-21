@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/Timer.hpp"
+#include "util/Timer.hpp"
 #include "game/Game.hpp"
 
 namespace Triton::Game {
@@ -14,10 +14,10 @@ namespace Triton::Game {
       Application& operator=(const Application&) = delete;
       Application& operator=(Application&&) = delete;
 
-      void update(const Core::Timer& timer);
+      void update(const Util::Timer& timer);
       void render();
 
-      void run(Core::Timer& timer);
+      void run(Util::Timer& timer);
 
     private:
       struct DestroyGlfwWindow {
