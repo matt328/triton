@@ -14,6 +14,8 @@
 #include "geometry/MeshFactory.hpp"
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_vulkan.h>
+#include "helpers/SpirvHelper.hpp"
+#include "core/Paths.hpp"
 
 namespace Triton::Graphics {
 
@@ -37,6 +39,35 @@ namespace Triton::Graphics {
                                                          *perFrameDescriptorSetLayout,
                                                          name.str()));
       }
+
+      auto helper = std::make_unique<Helpers::SpirvHelper>();
+
+      const auto vertexFilename = (Core::Paths::SHADERS / "shader.vert").string();
+      const auto fragmentFilename = (Core::Paths::SHADERS / "shader.frag").string();
+
+      auto vertexShaderCode = Helpers::readShaderFile(vertexFilename);
+      auto fragmentShaderCode = Helpers::readShaderFile(fragmentFilename);
+
+      const auto vertexSpirv =
+          helper->compileShader(vk::ShaderStageFlagBits::eVertex, vertexShaderCode.data());
+      Log::debug << "Compiled shader " << vertexFilename << std::endl;
+
+      const auto fragmentSpirv =
+          helper->compileShader(vk::ShaderStageFlagBits::eFragment, fragmentShaderCode.data());
+      Log::debug << "Compiled shader " << fragmentFilename << std::endl;
+
+      auto vertexShaderCreateInfo = vk::ShaderModuleCreateInfo{.codeSize = 4 * vertexSpirv.size(),
+                                                               .pCode = vertexSpirv.data()};
+
+      vertexShaderModule = std::make_unique<vk::raii::ShaderModule>(
+          graphicsDevice->getVulkanDevice().createShaderModule(vertexShaderCreateInfo));
+
+      auto fragmentShaderCreateInfo =
+          vk::ShaderModuleCreateInfo{.codeSize = 4 * fragmentSpirv.size(),
+                                     .pCode = fragmentSpirv.data()};
+
+      fragmentShaderModule = std::make_unique<vk::raii::ShaderModule>(
+          graphicsDevice->getVulkanDevice().createShaderModule(fragmentShaderCreateInfo));
 
       createSwapchainResources();
 
@@ -62,7 +93,9 @@ namespace Triton::Graphics {
           Helpers::createBasicPipeline(*graphicsDevice,
                                        *bindlessDescriptorSetLayout,
                                        *objectDescriptorSetLayout,
-                                       *perFrameDescriptorSetLayout);
+                                       *perFrameDescriptorSetLayout,
+                                       *vertexShaderModule,
+                                       *fragmentShaderModule);
 
       const auto depthFormat = Helpers::findDepthFormat(graphicsDevice->getPhysicalDevice());
 

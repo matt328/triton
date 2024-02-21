@@ -78,6 +78,8 @@ namespace Triton::Graphics {
       std::unique_ptr<vk::raii::DescriptorSetLayout> objectDescriptorSetLayout;
       std::unique_ptr<vk::raii::DescriptorSetLayout> perFrameDescriptorSetLayout;
 
+      std::unique_ptr<vk::raii::ShaderModule> vertexShaderModule;
+      std::unique_ptr<vk::raii::ShaderModule> fragmentShaderModule;
       std::unique_ptr<vk::raii::Pipeline> pipeline;
       std::unique_ptr<vk::raii::PipelineLayout> pipelineLayout;
 
