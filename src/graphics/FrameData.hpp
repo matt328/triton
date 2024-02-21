@@ -2,7 +2,6 @@
 
 #include "vma_raii.hpp"
 #include "ObjectData.hpp"
-#include <vulkan/vulkan_raii.hpp>
 
 namespace vk::raii {
    class DescriptorPool;
@@ -83,6 +82,8 @@ namespace Triton::Graphics {
       }
 
       void updateObjectDataBuffer(const ObjectData* data, const size_t size);
+      void destroySwapchainResources();
+      void createSwapchainResources(const GraphicsDevice& graphicsDevice);
 
     private:
       std::unique_ptr<vk::raii::CommandBuffer> commandBuffer;
@@ -113,22 +114,5 @@ namespace Triton::Graphics {
       std::unique_ptr<AllocatedImage> drawImage;
       std::unique_ptr<vk::raii::ImageView> drawImageView;
       vk::Extent3D drawExtent;
-
-      /*
-         Plan for rendering to an intermediate image and then blitting that into a swapchain image:
-         why
-            In the future, this image's size can differ from the presented image, and you can do all
-         sorts of image enhancement when blitting from one to the other. Also it's cool.
-         Approach:
-            - Create an image in the frame data to hold the intermediate image.
-            - experiment with different image formats and sizes
-            - change ~L235 of Renderer.cpp to give the intermediate image as the color attachment
-            - after you draw to the image, transition both the image and swapchain image to be ready
-         for a copy
-            - execute the copy
-            - transition the swapchain image to get ready for presenting
-         - Update the swapchain recreation to be more efficient about what it recreates. Blowing
-         away and recreating the entire FrameData struct seems like overkill
-      */
    };
 }

@@ -1,10 +1,7 @@
 #pragma once
 
-#include "SpirvHelper.hpp"
-#include "../../core/Paths.hpp"
 #include "../Vertex.hpp"
 #include "../GraphicsDevice.hpp"
-#include <vulkan/vulkan_structs.hpp>
 #include "./Vulkan.hpp"
 
 namespace Triton::Graphics::Helpers {
@@ -89,37 +86,9 @@ namespace Triton::Graphics::Helpers {
        const GraphicsDevice& graphicsDevice,
        const vk::raii::DescriptorSetLayout& bindlessDescriptorSetLayout,
        const vk::raii::DescriptorSetLayout& ssboDescriptorSetLayout,
-       const vk::raii::DescriptorSetLayout& perFrameDescriptorSetLayout) {
-
-      // Configure Shader Modules // TODO pull out shader module creation into it's own thing
-      auto helper = std::make_unique<SpirvHelper>();
-
-      const auto vertexFilename = (Core::Paths::SHADERS / "shader.vert").string();
-      const auto fragmentFilename = (Core::Paths::SHADERS / "shader.frag").string();
-
-      auto vertexShaderCode = readShaderFile(vertexFilename);
-      auto fragmentShaderCode = readShaderFile(fragmentFilename);
-
-      const auto vertexSpirv =
-          helper->compileShader(vk::ShaderStageFlagBits::eVertex, vertexShaderCode.data());
-      Log::debug << "Compiled shader " << vertexFilename << std::endl;
-
-      const auto fragmentSpirv =
-          helper->compileShader(vk::ShaderStageFlagBits::eFragment, fragmentShaderCode.data());
-      Log::debug << "Compiled shader " << fragmentFilename << std::endl;
-
-      auto vertexShaderCreateInfo = vk::ShaderModuleCreateInfo{.codeSize = 4 * vertexSpirv.size(),
-                                                               .pCode = vertexSpirv.data()};
-
-      auto vertexShaderModule =
-          graphicsDevice.getVulkanDevice().createShaderModule(vertexShaderCreateInfo);
-
-      auto fragmentShaderCreateInfo =
-          vk::ShaderModuleCreateInfo{.codeSize = 4 * fragmentSpirv.size(),
-                                     .pCode = fragmentSpirv.data()};
-
-      auto fragmentShaderModule =
-          graphicsDevice.getVulkanDevice().createShaderModule(fragmentShaderCreateInfo);
+       const vk::raii::DescriptorSetLayout& perFrameDescriptorSetLayout,
+       const vk::raii::ShaderModule& vertexShaderModule,
+       const vk::raii::ShaderModule& fragmentShaderModule) {
 
       auto vertexShaderStageInfo =
           vk::PipelineShaderStageCreateInfo{.stage = vk::ShaderStageFlagBits::eVertex,

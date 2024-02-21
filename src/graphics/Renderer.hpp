@@ -2,6 +2,7 @@
 
 #include "graphics/ObjectData.hpp"
 #include "graphics/gui/ImguiHelper.hpp"
+#include <entt/signal/fwd.hpp>
 
 namespace Triton::Graphics {
    struct RenderObject;
@@ -29,6 +30,8 @@ namespace Triton::Graphics {
    using RenderObjectProviderFn = std::function<std::vector<RenderObject>()>;
    using PerFrameDataProfiderFn = std::function<PerFrameData()>;
 
+   using ResizeDelegateType = entt::delegate<void(std::pair<uint32_t, uint32_t>)>;
+
    class Renderer {
     public:
       Renderer(GLFWwindow* window);
@@ -41,7 +44,6 @@ namespace Triton::Graphics {
 
       void render();
       void waitIdle();
-      void windowResized(const int width, const int height);
 
       MeshHandle createMesh(const std::string_view& filename);
       uint32_t createTexture(const std::string_view& filename);
@@ -53,6 +55,10 @@ namespace Triton::Graphics {
       }
 
       [[nodiscard]] const std::tuple<int, int> getWindowSize() const;
+
+      [[nodiscard]] entt::delegate<void(std::pair<uint32_t, uint32_t>)>& getResizeDelegate() {
+         return resizeDelegate;
+      }
 
       void registerPerFrameDataProvider(PerFrameDataProfiderFn fn) {
          this->perFrameDataProvider = fn;
@@ -72,6 +78,8 @@ namespace Triton::Graphics {
       std::unique_ptr<vk::raii::DescriptorSetLayout> objectDescriptorSetLayout;
       std::unique_ptr<vk::raii::DescriptorSetLayout> perFrameDescriptorSetLayout;
 
+      std::unique_ptr<vk::raii::ShaderModule> vertexShaderModule;
+      std::unique_ptr<vk::raii::ShaderModule> fragmentShaderModule;
       std::unique_ptr<vk::raii::Pipeline> pipeline;
       std::unique_ptr<vk::raii::PipelineLayout> pipelineLayout;
 
@@ -93,9 +101,11 @@ namespace Triton::Graphics {
 
       uint32_t currentFrame = 0;
       bool framebufferResized = false;
-      int width{}, height{};
 
-      void init();
+      ResizeDelegateType resizeDelegate{};
+
+      void createSwapchainResources();
+      void destroySwapchainResources();
 
       void recreateSwapchain();
       void drawFrame();

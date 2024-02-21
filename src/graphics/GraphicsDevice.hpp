@@ -31,13 +31,9 @@ namespace Triton::Graphics {
       GraphicsDevice& operator=(const GraphicsDevice&) = delete;
       GraphicsDevice& operator=(GraphicsDevice&&) = delete;
 
-      static constexpr auto DrawImageExtent2D = vk::Extent2D{1366, 768};
+      static constexpr auto DrawImageExtent2D = vk::Extent2D{1920, 1080};
 
       [[nodiscard]] std::vector<vk::raii::PhysicalDevice> enumeratePhysicalDevices() const;
-
-      [[nodiscard]] std::pair<uint32_t, uint32_t> getWindowSize() const {
-         return std::make_pair(height, width);
-      }
 
       [[nodiscard]] std::vector<const char*> getDesiredDeviceExtensions() const {
          return desiredDeviceExtensions;
@@ -115,14 +111,12 @@ namespace Triton::Graphics {
          return *transferImmediateContext;
       }
 
-      void resizeWindow(uint32_t newWidth, uint32_t newHeight);
+      [[nodiscard]] const std::pair<uint32_t, uint32_t> getCurrentSize() const;
 
       void recreateSwapchain();
 
     private:
       bool validationEnabled;
-      int height = 0;
-      int width = 0;
 
       static constexpr uint32_t FRAMES_IN_FLIGHT = 2;
 

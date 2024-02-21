@@ -1,5 +1,6 @@
 #include "Game.hpp"
 
+#include <cstdint>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_vulkan.h>
 
@@ -24,6 +25,7 @@ namespace Triton::Game {
    const auto ZNear = 0.1f;
    const auto ZFar = 1000.f;
    const auto Fov = 60.f;
+   const auto CamStart = glm::vec3{1.f, 1.f, 3.f};
 
    // HACK: This entire class.  slopping stuff in here to manually test out the renderer before
    // adding proper ECS.
@@ -88,8 +90,7 @@ namespace Triton::Game {
       registry->emplace<Ecs::Transform>(room);
 
       const auto camera = registry->create();
-      registry
-          ->emplace<Ecs::Camera>(camera, width, height, Fov, ZNear, ZFar, glm::vec3{1.f, 1.f, 3.f});
+      registry->emplace<Ecs::Camera>(camera, width, height, Fov, ZNear, ZFar, CamStart);
 
       registry->ctx().emplace<Ecs::WindowDimensions>(width, height);
       registry->ctx().emplace<Ecs::CurrentCamera>(camera);
@@ -99,6 +100,8 @@ namespace Triton::Game {
       entityEditor->registerComponent<Ecs::Transform>("Transform");
       entityEditor->registerComponent<Ecs::Renderable>("Renderable");
       entityEditor->registerComponent<Ecs::Camera>("Camera");
+
+      renderer->getResizeDelegate().connect<&Game::resize>(this);
    }
 
    Game::~Game() {
@@ -128,9 +131,9 @@ namespace Triton::Game {
       renderer->render();
    }
 
-   void Game::resize(const int width, const int height) {
-      renderer->windowResized(width, height);
-      registry->ctx().emplace<Ecs::WindowDimensions>(width, height);
+   void Game::resize(const std::pair<uint32_t, uint32_t> size) {
+      registry->ctx().insert_or_assign<Ecs::WindowDimensions>(
+          Ecs::WindowDimensions{static_cast<int>(size.first), static_cast<int>(size.second)});
    }
 
    void Game::waitIdle() {

@@ -33,7 +33,6 @@ namespace Triton::Game {
       int prevXPos{}, prevYPos{}, prevWidth{}, prevHeight{};
 
       static void errorCallback(int code, const char* description);
-      static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
       static void windowIconifiedCallback(GLFWwindow* window, int iconified);
       static void windowCloseCallback(GLFWwindow* window);
       static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
