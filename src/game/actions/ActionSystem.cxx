@@ -2,7 +2,7 @@
 
 #include "KeyMap.hpp"
 #include "Action.hpp"
-#include "game/actions/Gamepad.hpp"
+#include "Inputs.hpp"
 
 namespace Triton::Actions {
 

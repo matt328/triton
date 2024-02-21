@@ -14,7 +14,6 @@ namespace Triton::Graphics {
    class RendererBase;
    class Allocator;
    class AllocatedImage;
-   struct Vertex;
 
    namespace Textures {
       class Texture;
@@ -25,6 +24,7 @@ namespace Triton::Graphics {
       template <typename T, typename U>
       class Mesh;
       class MeshFactory;
+      struct Vertex;
    }
 
    using RenderObjectProviderFn = std::function<std::vector<RenderObject>()>;
@@ -88,7 +88,7 @@ namespace Triton::Graphics {
 
       std::vector<std::unique_ptr<FrameData>> frameData;
 
-      std::vector<std::unique_ptr<Geometry::Mesh<Vertex, uint32_t>>> meshes;
+      std::vector<std::unique_ptr<Geometry::Mesh<Geometry::Vertex, uint32_t>>> meshes;
       std::vector<std::unique_ptr<Textures::Texture>> textureList;
 
       std::unique_ptr<Gui::ImGuiHelper> imguiHelper;

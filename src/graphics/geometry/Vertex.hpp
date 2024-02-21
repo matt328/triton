@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Triton::Graphics {
+namespace Triton::Graphics::Geometry {
    enum class VertexComponent {
       Position,
       Normal,

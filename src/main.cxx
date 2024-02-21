@@ -1,6 +1,6 @@
 #include "config.h"
-#include "core/Timer.hpp"
-#include "game/Application.hpp"
+#include "util/Timer.hpp"
+#include "Application.hpp"
 
 void* operator new(std ::size_t count) {
    auto ptr = malloc(count);
@@ -37,7 +37,7 @@ int main() {
 #endif
 
    try {
-      auto timer = Triton::Core::Timer(TARGET_FPS, MAX_UPDATES);
+      auto timer = Triton::Util::Timer(TARGET_FPS, MAX_UPDATES);
 
       auto app = std::make_unique<Triton::Game::Application>(width, height, windowTitle);
       Log::info << "Initialized" << std::endl;

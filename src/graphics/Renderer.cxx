@@ -12,10 +12,8 @@
 #include "textures/TextureFactory.hpp"
 
 #include "geometry/MeshFactory.hpp"
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_vulkan.h>
 #include "helpers/SpirvHelper.hpp"
-#include "core/Paths.hpp"
+#include "util/Paths.hpp"
 
 namespace Triton::Graphics {
 
@@ -42,8 +40,8 @@ namespace Triton::Graphics {
 
       auto helper = std::make_unique<Helpers::SpirvHelper>();
 
-      const auto vertexFilename = (Core::Paths::SHADERS / "shader.vert").string();
-      const auto fragmentFilename = (Core::Paths::SHADERS / "shader.frag").string();
+      const auto vertexFilename = (Util::Paths::SHADERS / "shader.vert").string();
+      const auto fragmentFilename = (Util::Paths::SHADERS / "shader.frag").string();
 
       auto vertexShaderCode = Helpers::readShaderFile(vertexFilename);
       auto fragmentShaderCode = Helpers::readShaderFile(fragmentFilename);

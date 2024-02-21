@@ -1,5 +1,4 @@
 #include "Application.hpp"
-#include "imgui.h"
 
 namespace Triton::Game {
 
@@ -35,7 +34,7 @@ namespace Triton::Game {
       glfwTerminate();
    }
 
-   void Application::run(Core::Timer& timer) {
+   void Application::run(Util::Timer& timer) {
       while (running) {
          glfwPollEvents();
          if (paused) {
