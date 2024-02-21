@@ -4,6 +4,7 @@
 #include "textures/TextureFactory.hpp"
 #include "geometry/MeshFactory.hpp"
 #include "vma_raii.hpp"
+#include <cstdint>
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_handles.hpp>
 
@@ -13,7 +14,6 @@ namespace Triton::Graphics {
 
    GraphicsDevice::GraphicsDevice(GLFWwindow* window, const bool validationEnabled)
        : validationEnabled(validationEnabled) {
-      glfwGetWindowSize(window, &width, &height);
       context = std::make_unique<vk::raii::Context>();
 
       // Log available extensions
@@ -269,6 +269,11 @@ namespace Triton::Graphics {
       vulkanDevice->waitIdle();
    };
 
+   const std::pair<uint32_t, uint32_t> GraphicsDevice::getCurrentSize() const {
+      const auto surfaceCaps = physicalDevice->getSurfaceCapabilitiesKHR(**surface);
+      return std::make_pair(surfaceCaps.currentExtent.width, surfaceCaps.currentExtent.height);
+   }
+
    void GraphicsDevice::createSwapchain() {
       if (oldSwapchain != nullptr) {
          commandPool.reset();
@@ -276,7 +281,6 @@ namespace Triton::Graphics {
          swapchainImageViews.clear();
       }
       // Create Swapchain
-
       auto [graphicsFamily, presentFamily, transferFamily, computeFamily] =
           Helpers::findQueueFamilies(*physicalDevice, *surface);
 
@@ -285,7 +289,7 @@ namespace Triton::Graphics {
 
       const auto surfaceFormat = Helpers::chooseSwapSurfaceFormat(formats);
       const auto presentMode = Helpers::chooseSwapPresentMode(presentModes);
-      const auto extent = Helpers::chooseSwapExtent(capabilities, getWindowSize());
+      const auto extent = Helpers::chooseSwapExtent(capabilities, getCurrentSize());
 
       uint32_t imageCount = capabilities.minImageCount + 1;
 
@@ -376,11 +380,6 @@ namespace Triton::Graphics {
 
    std::vector<vk::raii::PhysicalDevice> GraphicsDevice::enumeratePhysicalDevices() const {
       return instance->enumeratePhysicalDevices();
-   }
-
-   void GraphicsDevice::resizeWindow(const uint32_t newWidth, const uint32_t newHeight) {
-      height = static_cast<int>(newHeight);
-      width = static_cast<int>(newWidth);
    }
 
    bool GraphicsDevice::checkValidationLayerSupport() const {
