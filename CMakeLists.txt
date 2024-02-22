@@ -7,8 +7,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 
 project(triton VERSION "0.0.1" LANGUAGES CXX)
 
-configure_file(src/config.h.in config.h)
-
 add_compile_definitions(
    NOMINMAX
    VULKAN_HPP_NO_STRUCT_CONSTRUCTORS
@@ -49,4 +47,5 @@ ENDIF(LINUX)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin/")
 
 add_subdirectory(assets)
-add_subdirectory(src)
+add_subdirectory(triton)
+add_subdirectory(editor)
