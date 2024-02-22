@@ -1,5 +1,6 @@
 set(editor_SRC
    "main.cxx"
+   "Application.cxx"
 )
 set(project_name "editor")
 

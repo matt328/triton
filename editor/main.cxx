@@ -2,6 +2,18 @@
 #include "util/Timer.hpp"
 #include "Application.hpp"
 
+/*
+   TODO:
+   - pull whole Game namespace into another lib
+      - game namespace will contain ecs, scripting system, input mappings
+      - try to keep it generic so that editor project can be used to create a game file
+        that the game ns can load and run autonomously when in an executable game
+      - come up with some other name other than game
+      - editor and <game executable> will both depend on it
+   - Remove refs to glfw from triton
+
+*/
+
 #if defined(TRACY_ENABLE)
 void* operator new(std::size_t count) {
    auto ptr = malloc(count);

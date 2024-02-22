@@ -4,9 +4,6 @@
 #include "textures/TextureFactory.hpp"
 #include "geometry/MeshFactory.hpp"
 #include "vma_raii.hpp"
-#include <cstdint>
-#include <vulkan/vulkan_enums.hpp>
-#include <vulkan/vulkan_handles.hpp>
 
 namespace Triton::Graphics {
 
@@ -79,6 +76,9 @@ namespace Triton::Graphics {
           instance->createDebugReportCallbackEXT(ci));
 
       VkSurfaceKHR tempSurface = nullptr;
+      // TODO: register a callback to create a surface
+      // std::function<std::unique_ptr<vk::raii::SurfaceKHR>(const vk::raii::Instance&)>
+      // Should try to remove any glfw from triton, keep all of that in the 'client'
       glfwCreateWindowSurface(**instance, window, nullptr, &tempSurface);
       Log::trace << "Created Surface" << std::endl;
       surface = std::make_unique<vk::raii::SurfaceKHR>(*instance, tempSurface);

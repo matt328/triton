@@ -1,8 +1,5 @@
 #include "Application.hpp"
 
-#include "game/Game.hpp"
-#include "util/Timer.hpp"
-
 namespace Triton {
 
    constexpr auto MinHeight = 300;
@@ -47,15 +44,13 @@ namespace Triton {
             std::this_thread::sleep_for(std::chrono::milliseconds(SleepMillis));
             continue;
          }
-         game->beginFrame();
          timer.tick([&]() { game->fixedUpdate(timer); });
          game->update();
-         FrameMark;
       }
       game->waitIdle();
    }
 
-   // Callbacks
+   // GLFW Callbacks
    void Application::errorCallback(int code, const char* description) {
       Log::error << "GLFW Error. Code: " << code << ", description: " << description << std::endl;
       throw std::runtime_error("GLFW Error. See log output for details");

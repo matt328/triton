@@ -1,5 +1,7 @@
 #pragma once
 
+#include <entt/fwd.hpp>
+
 namespace MM {
    template <class EntityType>
    class EntityEditor;
@@ -28,7 +30,6 @@ namespace Triton::Game {
       Game& operator=(const Game&) = delete;
       Game& operator=(Game&&) = delete;
 
-      void beginFrame();
       void fixedUpdate(const Util::Timer& timer);
       void update();
       void resize(const std::pair<uint32_t, uint32_t>);
