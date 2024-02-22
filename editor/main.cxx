@@ -1,3 +1,4 @@
+#include "config.h"
 #include "util/Timer.hpp"
 #include "Application.hpp"
 
@@ -28,19 +29,20 @@ int main() {
    Log::info << "Release Build" << std::endl;
 #endif
 
-   auto windowTitle = std::string{"Triton Editor"};
+   auto ss = std::stringstream{};
+   ss << PROJECT_NAME << " v" << PROJECT_VER;
 
 #ifdef _DEBUG
 
-   windowTitle.append(" - Debug Build");
+   ss << " - Debug Build";
 #else
-   windowTitle.append(" - Release Build");
+   ss << " - Release Build";
 #endif
 
    try {
       auto timer = Triton::Util::Timer(TARGET_FPS, MAX_UPDATES);
 
-      auto app = std::make_unique<Triton::Application>(width, height, windowTitle);
+      auto app = std::make_unique<Triton::Application>(width, height, ss.str());
       Log::info << "Initialized" << std::endl;
 
       app->run(timer);
