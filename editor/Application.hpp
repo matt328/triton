@@ -1,14 +1,9 @@
 #pragma once
 
-namespace Triton::Util {
-   class Timer;
-}
+#include "Game.hpp"
+#include "util/Timer.hpp"
 
 namespace Triton {
-
-   namespace Game {
-      class Game;
-   }
 
    class Application {
     public:

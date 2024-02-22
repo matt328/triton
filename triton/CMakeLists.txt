@@ -1,5 +1,4 @@
 set(triton_SRC
-   "src/Application.cxx"
    "src/game/Game.cxx"
 
    "src/game/actions/ActionSystem.cxx"
@@ -61,7 +60,6 @@ target_precompile_headers(${project_name}
    <glm/gtx/quaternion.hpp>
    <glm/gtx/string_cast.hpp>
    <glslang/SPIRV/GlslangToSpv.h>
-   <imgui.h>
    <imgui_impl_glfw.h>
    <imgui_impl_vulkan.h>
    <limits>
@@ -76,6 +74,7 @@ target_precompile_headers(${project_name}
    PUBLIC
    "include/util/Logger.hpp"
    <GLFW/glfw3.h>
+   <imgui.h>
    <vulkan-memory-allocator-hpp/vk_mem_alloc.hpp>
    <vulkan/vulkan_raii.hpp>
    <tracy/Tracy.hpp>
