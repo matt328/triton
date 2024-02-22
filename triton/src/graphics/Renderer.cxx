@@ -1,7 +1,7 @@
-#include "Renderer.hpp"
+#include "graphics/Renderer.hpp"
 #include "FrameData.hpp"
 #include "GraphicsDevice.hpp"
-#include "RenderObject.hpp"
+#include "graphics/RenderObject.hpp"
 
 #include "graphics/ObjectData.hpp"
 #include "graphics/gui/ImguiHelper.hpp"

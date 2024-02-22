@@ -1,5 +1,5 @@
 #include "FrameData.hpp"
-#include "ObjectData.hpp"
+#include "graphics/ObjectData.hpp"
 #include "GraphicsDevice.hpp"
 #include "helpers/Vulkan.hpp"
 #include "vma_raii.hpp"

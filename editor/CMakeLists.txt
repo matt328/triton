@@ -12,15 +12,20 @@ configure_file(config.h.in ${CMAKE_CURRENT_SOURCE_DIR}/config.h)
 
 add_compile_definitions(
    TRACY_ENABLE
+   GLM_FORCE_RADIANS
+   GLM_FORCE_DEPTH_ZERO_TO_ONE
+   GLM_ENABLE_EXPERIMENTAL
 )
 
 target_precompile_headers(${project_name} PRIVATE
+   <entt/entt.hpp>
    <functional>
    <sstream>
 )
 
 target_link_libraries(${project_name}
    PRIVATE
+   game
    triton
 )
 
