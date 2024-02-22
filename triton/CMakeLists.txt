@@ -1,34 +1,40 @@
+project("triton")
+
 set(triton_SRC
    "src/graphics/FrameData.cxx"
    "src/graphics/GraphicsDevice.cxx"
    "src/graphics/ImmediateContext.cxx"
    "src/graphics/Renderer.cxx"
    "src/graphics/vma_raii.cxx"
-
    "src/graphics/geometry/MeshFactory.cxx"
    "src/graphics/geometry/Vertex.cxx"
-
    "src/graphics/gui/ImguiHelper.cxx"
-
    "src/graphics/helpers/SpirvHelper.cxx"
-
    "src/graphics/textures/Texture.cxx"
    "src/graphics/textures/TextureFactory.cxx"
 )
-set(project_name "triton")
 
-add_library(${project_name} STATIC ${triton_SRC})
+add_library(${PROJECT_NAME} STATIC ${triton_SRC})
 
-add_compile_definitions(
-   GLFW_EXPOSE_NATIVE_WIN32
-   GLFW_INCLUDE_VULKAN=1
-   VULKAN_HPP_NO_CONSTRUCTORS
-   GLM_FORCE_RADIANS
-   GLM_FORCE_DEPTH_ZERO_TO_ONE
-   GLM_ENABLE_EXPERIMENTAL
-)
+IF(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+   target_compile_options(${PROJECT_NAME} PRIVATE ${TRITON_COMPILE_OPTIONS})
+ENDIF()
 
-find_package(Threads REQUIRED)
+IF(WIN32)
+   target_compile_definitions(${PROJECT_NAME}
+      PRIVATE
+      -D_CRT_SECURE_NO_WARNINGS
+      VK_USE_PLATFORM_WIN32_KHR
+   )
+ENDIF(WIN32)
+
+IF(APPLE)
+   target_compile_definitions(${PROJECT_NAME}
+      PRIVATE
+      VK_USE_PLATFORM_MACOS_MVK
+   )
+ENDIF(APPLE)
+
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glslang CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
@@ -41,7 +47,20 @@ find_package(VulkanMemoryAllocator CONFIG REQUIRED)
 find_package(unofficial-vulkan-memory-allocator-hpp CONFIG REQUIRED)
 find_package(Vulkan REQUIRED)
 
-target_precompile_headers(${project_name}
+target_compile_definitions(${PROJECT_NAME}
+   PRIVATE
+   GLFW_EXPOSE_NATIVE_WIN32
+   GLFW_INCLUDE_VULKAN=1
+   VULKAN_HPP_NO_CONSTRUCTORS
+   GLM_FORCE_RADIANS
+   GLM_FORCE_DEPTH_ZERO_TO_ONE
+   GLM_ENABLE_EXPERIMENTAL
+   NOMINMAX
+   VULKAN_HPP_NO_STRUCT_CONSTRUCTORS
+   TINYGLTF_NO_STB_IMAGE_WRITE
+)
+
+target_precompile_headers(${PROJECT_NAME}
    PRIVATE
    <entt/entt.hpp>
    <filesystem>
@@ -75,7 +94,7 @@ target_precompile_headers(${project_name}
    <tracy/TracyC.h>
 )
 
-target_link_libraries(${project_name}
+target_link_libraries(${PROJECT_NAME}
    PUBLIC
    glfw
    GPUOpen::VulkanMemoryAllocator
@@ -91,7 +110,7 @@ target_link_libraries(${project_name}
    ${Vulkan_LIBRARIES}
 )
 
-target_include_directories(${project_name}
+target_include_directories(${PROJECT_NAME}
    PUBLIC
    include
    PRIVATE
@@ -99,4 +118,4 @@ target_include_directories(${project_name}
    ${Vulkan_INCLUDE_DIRS}
 )
 
-add_dependencies(${project_name} assets)
+add_dependencies(${PROJECT_NAME} assets)

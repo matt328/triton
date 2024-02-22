@@ -30,7 +30,7 @@ I have been taking some time to refactor this brute force prototype code into a 
 
 ## Building/Running
 
-This has recently been migrated to using CMake, and I use vscode primarily for development. So far everything works well on Windows ~~as well as OS X and linux~~.
+This has recently been migrated to using CMake, and I use vscode primarily for development. So far everything works well on Windows as well as OS X ~~and linux~~.
 
 While my goal has been to leverage vcpkg and not have to struggle with dependencies, I'm still just installing the Vulkan SDK and setting the VULKAN_SDK env var and relying on CMake's `find_package()` to do the thing. This area admittedly needs a little more research and understanding to make locating the Vulkan headers and libraries a bit more consistent across machines and platforms.
 
@@ -64,3 +64,9 @@ Download [Ninja](https://github.com/ninja-build/ninja/releases). Make sure `ninj
 You can set `CC` and `CCX` env vars to `path\to\clang.exe` and `path\to\clang++.exe` if you don't want to risk VSCode detecting the wrong 'kit'. This isn't a big deal, you just have to use the quick menu and select `CMake: Select a Kit` and select the kit that will use clang and clang++ you installed earlier.
 
 The clangd extension gives a much better experience in VSCode than Microsoft's Intellisense. Once you get it configured correctly. Include paths are kind of wonky. See the `.clangd` file at the root of the project.
+
+## OS X Specific Things
+
+- Apple Clang is always inconsistent with llvm, so for some consistency I `brew install llvm` and make sure `CC` and `CXX` env vars point to those compilers' executables
+- have to set `MVK_CONFIG_USE_METAL_ARGUMENT_BUFFERS=1` in order for the executables to run on OS X.
+- TODO: Figure out how to produce an app bundle so this env var can be bundled in there and you can just double click the app bundle.

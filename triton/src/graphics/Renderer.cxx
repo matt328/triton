@@ -284,7 +284,7 @@ namespace Triton::Graphics {
          // TODO: specify framedata.drawImageView as the color attachment here?
          const auto colorAttachmentInfo = vk::RenderingAttachmentInfo{
              .imageView = frameData.getDrawImageView(),
-             .imageLayout = vk::ImageLayout::eAttachmentOptimal,
+             .imageLayout = vk::ImageLayout::eColorAttachmentOptimal,
              .loadOp = vk::AttachmentLoadOp::eClear,
              .storeOp = vk::AttachmentStoreOp::eStore,
              .clearValue = vk::ClearValue{.color = vk::ClearColorValue{std::array<float, 4>(
@@ -373,7 +373,7 @@ namespace Triton::Graphics {
                             const vk::raii::ImageView& imageView) const {
       const auto colorAttachment = vk::RenderingAttachmentInfo{
           .imageView = *imageView,
-          .imageLayout = vk::ImageLayout::eAttachmentOptimal,
+          .imageLayout = vk::ImageLayout::eColorAttachmentOptimal,
           .loadOp = vk::AttachmentLoadOp::eLoad,
           .storeOp = vk::AttachmentStoreOp::eStore,
       };

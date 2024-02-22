@@ -1,37 +1,41 @@
+project("editor" VERSION "0.0.1" LANGUAGES CXX)
+
 set(editor_SRC
-   "main.cxx"
-   "Application.cxx"
+   "src/main.cxx"
+   "src/Application.cxx"
 )
-set(project_name "editor")
 
-project("Triton Editor" VERSION "0.0.1" LANGUAGES CXX)
+add_executable(${PROJECT_NAME} ${editor_SRC})
 
-add_executable(${project_name} ${editor_SRC})
+IF(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+   target_compile_options(${PROJECT_NAME} PRIVATE ${TRITON_COMPILE_OPTIONS})
+ENDIF()
 
-configure_file(config.h.in ${CMAKE_CURRENT_SOURCE_DIR}/config.h)
+configure_file(src/config.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/config.h)
 
-add_compile_definitions(
+target_compile_definitions(${PROJECT_NAME}
+   PRIVATE
    TRACY_ENABLE
    GLM_FORCE_RADIANS
    GLM_FORCE_DEPTH_ZERO_TO_ONE
    GLM_ENABLE_EXPERIMENTAL
 )
 
-target_precompile_headers(${project_name} PRIVATE
-   <entt/entt.hpp>
+target_precompile_headers(${PROJECT_NAME}
+   PRIVATE
    <functional>
    <sstream>
 )
 
-target_link_libraries(${project_name}
+target_link_libraries(${PROJECT_NAME}
    PRIVATE
    game
    triton
 )
 
-target_include_directories(${project_name}
+target_include_directories(${PROJECT_NAME}
    PUBLIC
    .
 )
 
-add_dependencies(${project_name} assets)
+add_dependencies(${PROJECT_NAME} assets)

@@ -119,7 +119,8 @@
       "profiling",
       "build",
       "input",
-      "gui"
+      "gui",
+      "ci"
    ],
    "git.ignoreLimitWarning": true,
    "workbench.colorCustomizations": {

@@ -1,6 +1,7 @@
 {
    "name": "triton",
    "version-string": "0.1.0",
+   "builtin-baseline": "37c3e63a1306562f7f59c4c3c8892ddd50fdf992",
    "dependencies": [
       "entt",
       "glfw3",
@@ -18,6 +19,12 @@
             "glfw-binding",
             "vulkan-binding"
          ]
+      }
+   ],
+   "overrides": [
+      {
+         "name": "glm",
+         "version": "0.9.9.8"
       }
    ]
 }
