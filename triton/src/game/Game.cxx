@@ -107,10 +107,6 @@ namespace Triton::Game {
       Log::info << "destroying game" << std::endl;
    };
 
-   void Game::beginFrame() {
-      TracyMessageL("beginFrame");
-   }
-
    void Game::fixedUpdate([[maybe_unused]] const Util::Timer& timer) {
       TracyMessageL("fixedUpdate");
       ZoneNamedN(upd, "FixedUpdate", true);
@@ -128,6 +124,7 @@ namespace Triton::Game {
       entityEditor->renderSimpleCombo(*registry, room);
 
       renderer->render();
+      FrameMark;
    }
 
    void Game::resize(const std::pair<uint32_t, uint32_t> size) {
