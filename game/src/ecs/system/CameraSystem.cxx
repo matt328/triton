@@ -1,9 +1,9 @@
 #include "CameraSystem.hpp"
 
-#include "game/ecs/component/Camera.hpp"
-#include "game/ecs/component/Resources.hpp"
-#include "game/actions/ActionType.hpp"
-#include "game/actions/Action.hpp"
+#include "ecs/component/Camera.hpp"
+#include "ecs/component/Resources.hpp"
+#include "actions/ActionType.hpp"
+#include "actions/Action.hpp"
 
 namespace Triton::Game::Ecs::CameraSystem {
 

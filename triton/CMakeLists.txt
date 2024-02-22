@@ -1,11 +1,4 @@
 set(triton_SRC
-   "src/game/Game.cxx"
-
-   "src/game/actions/ActionSystem.cxx"
-
-   "src/game/ecs/system/CameraSystem.cxx"
-   "src/game/ecs/system/RenderSystem.cxx"
-
    "src/graphics/FrameData.cxx"
    "src/graphics/GraphicsDevice.cxx"
    "src/graphics/ImmediateContext.cxx"
@@ -54,14 +47,7 @@ target_precompile_headers(${project_name}
    <filesystem>
    <fstream>
    <functional>
-   <glm/gtc/matrix_transform.hpp>
-   <glm/gtc/type_ptr.hpp>
-   <glm/gtx/matrix_decompose.hpp>
-   <glm/gtx/quaternion.hpp>
-   <glm/gtx/string_cast.hpp>
    <glslang/SPIRV/GlslangToSpv.h>
-   <imgui_impl_glfw.h>
-   <imgui_impl_vulkan.h>
    <limits>
    <map>
    <optional>
@@ -74,6 +60,13 @@ target_precompile_headers(${project_name}
    PUBLIC
    "include/util/Logger.hpp"
    <GLFW/glfw3.h>
+   <imgui_impl_glfw.h>
+   <imgui_impl_vulkan.h>
+   <glm/gtc/matrix_transform.hpp>
+   <glm/gtc/type_ptr.hpp>
+   <glm/gtx/matrix_decompose.hpp>
+   <glm/gtx/quaternion.hpp>
+   <glm/gtx/string_cast.hpp>
    <imgui.h>
    <vulkan-memory-allocator-hpp/vk_mem_alloc.hpp>
    <vulkan/vulkan_raii.hpp>
