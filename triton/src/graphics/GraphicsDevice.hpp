@@ -124,6 +124,9 @@ namespace Triton::Graphics {
           VK_KHR_SWAPCHAIN_EXTENSION_NAME,
           VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
           VK_KHR_DEPTH_STENCIL_RESOLVE_EXTENSION_NAME,
+#ifdef __APPLE__
+          VK_KHR_COPY_COMMANDS_2_EXTENSION_NAME,
+#endif
           VK_KHR_CREATE_RENDERPASS_2_EXTENSION_NAME,
           VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME};
       std::vector<const char*> desiredValidationLayers = {"VK_LAYER_KHRONOS_validation"};

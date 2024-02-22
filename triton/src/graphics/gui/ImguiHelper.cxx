@@ -55,7 +55,11 @@ namespace Triton::Graphics::Gui {
       ImGui_ImplVulkan_Init(&initInfo, VK_NULL_HANDLE);
 
       auto& io = ImGui::GetIO();
+#ifdef __WIN32__
       io.Fonts->AddFontFromFileTTF("assets\\fonts\\Roboto-Regular.ttf", 18);
+#else
+      io.Fonts->AddFontFromFileTTF("assets/fonts/Roboto-Regular.ttf", 18);
+#endif
 
       ImGui_ImplVulkan_CreateFontsTexture();
    }

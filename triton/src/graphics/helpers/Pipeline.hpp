@@ -126,12 +126,13 @@ namespace Triton::Graphics::Helpers {
           .vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size()),
           .pVertexAttributeDescriptions = attributeDescriptions.data()};
 
-      const auto viewport = vk::Viewport{.x = 0.f,
-                                         .y = 0.f,
-                                         .width = graphicsDevice.DrawImageExtent2D.width,
-                                         .height = graphicsDevice.DrawImageExtent2D.height,
-                                         .minDepth = 0.f,
-                                         .maxDepth = 1.f};
+      const auto viewport =
+          vk::Viewport{.x = 0.f,
+                       .y = 0.f,
+                       .width = static_cast<float>(graphicsDevice.DrawImageExtent2D.width),
+                       .height = static_cast<float>(graphicsDevice.DrawImageExtent2D.height),
+                       .minDepth = 0.f,
+                       .maxDepth = 1.f};
 
       const auto scissor = vk::Rect2D{.offset = {0, 0}, .extent = graphicsDevice.DrawImageExtent2D};
 
