@@ -1,7 +1,6 @@
 #pragma once
 
 #include "graphics/ObjectData.hpp"
-#include "graphics/gui/ImguiHelper.hpp"
 #include <entt/signal/fwd.hpp>
 
 namespace Triton::Graphics {
@@ -25,6 +24,10 @@ namespace Triton::Graphics {
       class Mesh;
       class MeshFactory;
       struct Vertex;
+   }
+
+   namespace Gui {
+      class ImGuiHelper;
    }
 
    using RenderObjectProviderFn = std::function<std::vector<RenderObject>()>;

@@ -1,9 +1,9 @@
 #include "RenderSystem.hpp"
 
-#include "game/ecs/component/Camera.hpp"
-#include "game/ecs/component/Renderable.hpp"
-#include "game/ecs/component/Resources.hpp"
-#include "game/ecs/component/Transform.hpp"
+#include "ecs/component/Camera.hpp"
+#include "ecs/component/Renderable.hpp"
+#include "ecs/component/Resources.hpp"
+#include "ecs/Transform.hpp"
 #include "graphics/Renderer.hpp"
 #include "graphics/RenderObject.hpp"
 
@@ -35,21 +35,5 @@ namespace Triton::Game::Ecs::RenderSystem {
              Graphics::RenderObject{renderable.meshId, renderable.textureId, transformMatrix};
          renderer.enqueueRenderObject(std::move(renderObject));
       }
-   }
-}
-
-namespace MM {
-   template <>
-   void ComponentEditorWidget<Triton::Game::Ecs::Transform>(entt::registry& reg,
-                                                            entt::registry::entity_type e) {
-      auto& t = reg.get<Triton::Game::Ecs::Transform>(e);
-      // the "##Transform" ensures that you can use the name "x" in multiple labels
-      ImGui::DragFloat("x##Transform", &t.x, 0.1f);
-      ImGui::DragFloat("y##Transform", &t.y, 0.1f);
-      ImGui::DragFloat("z##Transform", &t.z, 0.1f);
-
-      ImGui::DragFloat("xRot##Transform", &t.xRot, 0.1f);
-      ImGui::DragFloat("yRot##Transform", &t.yRot, 0.1f);
-      ImGui::DragFloat("zRot##Transform", &t.zRot, 0.1f);
    }
 }

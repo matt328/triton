@@ -1,21 +1,21 @@
 #include "Game.hpp"
 
-#include "game/actions/ActionType.hpp"
+#include "actions/ActionType.hpp"
 #include "util/Paths.hpp"
-#include "game/actions/ActionSystem.hpp"
-#include "game/actions/Inputs.hpp"
-#include "game/actions/Action.hpp"
-#include "game/actions/Sources.hpp"
+#include "actions/ActionSystem.hpp"
+#include "actions/Inputs.hpp"
+#include "actions/Action.hpp"
+#include "actions/Sources.hpp"
 
-#include "game/ecs/component/Resources.hpp"
+#include "ecs/component/Resources.hpp"
 
 #include "graphics/Renderer.hpp"
 
-#include "game/ecs/component/Renderable.hpp"
-#include "game/ecs/component/Camera.hpp"
-#include "game/ecs/component/Transform.hpp"
-#include "game/ecs/system/RenderSystem.hpp"
-#include "game/ecs/system/CameraSystem.hpp"
+#include "ecs/component/Renderable.hpp"
+#include "ecs/component/Camera.hpp"
+#include "ecs/Transform.hpp"
+#include "ecs/system/RenderSystem.hpp"
+#include "ecs/system/CameraSystem.hpp"
 
 namespace Triton::Game {
 
@@ -94,12 +94,6 @@ namespace Triton::Game {
       registry->ctx().emplace<Ecs::WindowDimensions>(width, height);
       registry->ctx().emplace<Ecs::CurrentCamera>(camera);
 
-      entityEditor = std::make_unique<MM::EntityEditor<entt::entity>>();
-
-      entityEditor->registerComponent<Ecs::Transform>("Transform");
-      entityEditor->registerComponent<Ecs::Renderable>("Renderable");
-      entityEditor->registerComponent<Ecs::Camera>("Camera");
-
       renderer->getResizeDelegate().connect<&Game::resize>(this);
    }
 
@@ -120,8 +114,6 @@ namespace Triton::Game {
       ImGui_ImplVulkan_NewFrame();
       ImGui_ImplGlfw_NewFrame();
       ImGui::NewFrame();
-
-      entityEditor->renderSimpleCombo(*registry, room);
 
       renderer->render();
       FrameMark;

@@ -45,7 +45,6 @@ namespace Triton::Game {
       std::unique_ptr<Graphics::Renderer> renderer;
       std::unique_ptr<entt::registry> registry;
       std::unique_ptr<Triton::Actions::ActionSystem> actionSystem;
-      std::unique_ptr<MM::EntityEditor<entt::entity>> entityEditor;
       entt::entity room;
    };
 }
