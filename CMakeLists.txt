@@ -2,10 +2,10 @@ cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 
 set(CMAKE_TOOLCHAIN_FILE ./vcpkg/scripts/buildsystems/vcpkg.cmake)
 
+project(Triton)
+
 set(CMAKE_CXX_USE_RESPONSE_FILE_FOR_INCLUDES 0)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
-
-project(triton VERSION "0.0.1" LANGUAGES CXX)
 
 add_compile_definitions(
    NOMINMAX
@@ -15,10 +15,6 @@ add_compile_definitions(
 
 SET(CMAKE_CXX_STANDARD 20)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-SET(CMAKE_CXX_SCAN_FOR_MODULES OFF)
-SET(CMAKE_EXPERIMENTAL_CXX_SCANDEP_SOURCE OFF)
-set(CMAKE_EXPERIMENTAL_CXX_MODULE_DYNDEP OFF)
 
 IF(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
    add_compile_options(-Wall -Wextra -pedantic -Wno-nullability-extension -Wno-nullability-completeness -Wno-deprecated-volatile)

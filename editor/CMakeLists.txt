@@ -3,11 +3,11 @@ set(editor_SRC
 )
 set(project_name "editor")
 
-project(Triton-Editor VERSION "0.0.1" LANGUAGES CXX)
+project("Triton Editor" VERSION "0.0.1" LANGUAGES CXX)
 
 add_executable(${project_name} ${editor_SRC})
 
-configure_file(config.h.in config.h)
+configure_file(config.h.in ${CMAKE_CURRENT_SOURCE_DIR}/config.h)
 
 add_compile_definitions(
    TRACY_ENABLE
@@ -15,6 +15,7 @@ add_compile_definitions(
 
 target_precompile_headers(${project_name} PRIVATE
    <functional>
+   <sstream>
 )
 
 target_link_libraries(${project_name}
