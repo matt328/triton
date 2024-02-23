@@ -2,7 +2,7 @@ set(triton_SRC
    "src/graphics/FrameData.cxx"
    "src/graphics/GraphicsDevice.cxx"
    "src/graphics/ImmediateContext.cxx"
-   "src/graphics/Renderer.cxx"
+   "src/graphics/VkRenderer.cxx"
    "src/graphics/vma_raii.cxx"
 
    "src/graphics/geometry/MeshFactory.cxx"

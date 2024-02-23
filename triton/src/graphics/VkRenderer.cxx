@@ -1,4 +1,4 @@
-#include "graphics/Renderer.hpp"
+#include "graphics/VkRenderer.hpp"
 #include "FrameData.hpp"
 #include "GraphicsDevice.hpp"
 #include "graphics/RenderObject.hpp"
@@ -17,7 +17,7 @@
 
 namespace Triton::Graphics {
 
-   Renderer::Renderer(GLFWwindow* window) {
+   VkRenderer::VkRenderer(GLFWwindow* window) {
       graphicsDevice = std::make_unique<GraphicsDevice>(window, true);
 
       bindlessDescriptorSetLayout =
@@ -72,20 +72,20 @@ namespace Triton::Graphics {
       imguiHelper = std::make_unique<Gui::ImGuiHelper>(*graphicsDevice, window);
    }
 
-   Renderer::~Renderer() {
+   VkRenderer::~VkRenderer() {
       Log::info << "destroying renderer" << std::endl;
       meshes.clear();
       textureList.clear();
    }
 
-   void Renderer::destroySwapchainResources() {
+   void VkRenderer::destroySwapchainResources() {
       depthImage.reset();
       depthImageView.reset();
       pipeline.reset();
       pipelineLayout.reset();
    }
 
-   void Renderer::createSwapchainResources() {
+   void VkRenderer::createSwapchainResources() {
 
       std::tie(pipeline, pipelineLayout) =
           Helpers::createBasicPipeline(*graphicsDevice,
@@ -130,7 +130,7 @@ namespace Triton::Graphics {
           graphicsDevice->getVulkanDevice().createImageView(viewInfo));
    }
 
-   void Renderer::recreateSwapchain() {
+   void VkRenderer::recreateSwapchain() {
       waitIdle();
       resizeDelegate(graphicsDevice->getCurrentSize());
 
@@ -149,7 +149,7 @@ namespace Triton::Graphics {
       createSwapchainResources();
    }
 
-   void Renderer::drawFrame() {
+   void VkRenderer::drawFrame() {
       ZoneNamedN(render, "Render", true);
       const auto& currentFrameData = frameData[currentFrame];
 
@@ -261,7 +261,7 @@ namespace Triton::Graphics {
       currentFrame = (currentFrame + 1) % FRAMES_IN_FLIGHT;
    }
 
-   void Renderer::recordCommandBuffer(FrameData& frameData, unsigned imageIndex) const {
+   void VkRenderer::recordCommandBuffer(FrameData& frameData, unsigned imageIndex) const {
       auto& cmd = frameData.getCommandBuffer();
 
       // Update the ObjectData buffer
@@ -369,8 +369,8 @@ namespace Triton::Graphics {
       cmd.end();
    }
 
-   void Renderer::drawImgui(const vk::raii::CommandBuffer& cmd,
-                            const vk::raii::ImageView& imageView) const {
+   void VkRenderer::drawImgui(const vk::raii::CommandBuffer& cmd,
+                              const vk::raii::ImageView& imageView) const {
       const auto colorAttachment = vk::RenderingAttachmentInfo{
           .imageView = *imageView,
           .imageLayout = vk::ImageLayout::eAttachmentOptimal,
@@ -393,7 +393,7 @@ namespace Triton::Graphics {
       cmd.endRendering();
    }
 
-   void Renderer::render() {
+   void VkRenderer::render() {
 
       ImGui::Render();
 
@@ -402,7 +402,7 @@ namespace Triton::Graphics {
       objectDataList.clear();
    }
 
-   void Renderer::waitIdle() {
+   void VkRenderer::waitIdle() {
       graphicsDevice->getVulkanDevice().waitIdle();
    }
 
@@ -411,13 +411,13 @@ namespace Triton::Graphics {
    // and the renderer is just indexing the Mesh so it knows how to access it consistently
    // Change this around so that the meshes are indexed by their index into an ObjectData
    // Buffer so we can leverage bindless design.
-   MeshHandle Renderer::createMesh(const std::string_view& filename) {
+   MeshHandle VkRenderer::createMesh(const std::string_view& filename) {
       auto handle = meshes.size();
       meshes.push_back(graphicsDevice->getMeshFactory().loadMeshFromGltf(filename.data()));
       return handle;
    }
 
-   uint32_t Renderer::createTexture(const std::string_view& filename) {
+   uint32_t VkRenderer::createTexture(const std::string_view& filename) {
       auto handle = textureList.size();
       textureList.push_back(graphicsDevice->getTextureFactory().createTexture2D(filename));
       // I think we need to bind the texture once in each framedata
@@ -428,7 +428,7 @@ namespace Triton::Graphics {
       return handle;
    }
 
-   void Renderer::enqueueRenderObject(RenderObject renderObject) {
+   void VkRenderer::enqueueRenderObject(RenderObject renderObject) {
       objectDataList.emplace_back(renderObject.modelMatrix, renderObject.textureId);
       renderObjects.push_back(std::move(renderObject));
    }

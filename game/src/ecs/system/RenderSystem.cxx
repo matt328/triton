@@ -4,11 +4,11 @@
 #include "ecs/component/Renderable.hpp"
 #include "ecs/component/Resources.hpp"
 #include "ecs/Transform.hpp"
-#include "graphics/Renderer.hpp"
+#include "graphics/VkRenderer.hpp"
 #include "graphics/RenderObject.hpp"
 
 namespace Triton::Game::Ecs::RenderSystem {
-   void update(entt::registry& registry, Graphics::Renderer& renderer) {
+   void update(entt::registry& registry, Graphics::VkRenderer& renderer) {
       const auto cameraEntity = registry.ctx().get<const CurrentCamera>();
       const auto cam = registry.get<Camera>(cameraEntity.currentCamera);
 

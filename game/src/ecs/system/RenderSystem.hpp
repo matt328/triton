@@ -1,9 +1,9 @@
 #pragma once
 
 namespace Triton::Graphics {
-   class Renderer;
+   class VkRenderer;
 }
 
 namespace Triton::Game::Ecs::RenderSystem {
-   void update(entt::registry& registry, Graphics::Renderer& renderer);
+   void update(entt::registry& registry, Graphics::VkRenderer& renderer);
 }

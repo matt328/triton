@@ -9,7 +9,7 @@
 
 #include "ecs/component/Resources.hpp"
 
-#include "graphics/Renderer.hpp"
+#include "graphics/VkRenderer.hpp"
 
 #include "ecs/component/Renderable.hpp"
 #include "ecs/component/Camera.hpp"
@@ -33,7 +33,7 @@ namespace Triton::Game {
       int width{}, height{};
       glfwGetWindowSize(window, &width, &height);
 
-      renderer = std::make_unique<Graphics::Renderer>(window);
+      renderer = std::make_unique<Graphics::VkRenderer>(window);
 
       actionSystem = std::make_unique<ActionSystem>();
 

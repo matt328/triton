@@ -12,7 +12,7 @@ namespace Triton::Util {
 }
 
 namespace Triton::Graphics {
-   class Renderer;
+   class VkRenderer;
 }
 
 namespace Triton::Actions {
@@ -42,7 +42,7 @@ namespace Triton::Game {
       void setMouseState(bool captured);
 
     private:
-      std::unique_ptr<Graphics::Renderer> renderer;
+      std::unique_ptr<Graphics::VkRenderer> renderer;
       std::unique_ptr<entt::registry> registry;
       std::unique_ptr<Triton::Actions::ActionSystem> actionSystem;
       entt::entity room;

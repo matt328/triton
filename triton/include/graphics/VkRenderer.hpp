@@ -35,15 +35,15 @@ namespace Triton::Graphics {
 
    using ResizeDelegateType = entt::delegate<void(std::pair<uint32_t, uint32_t>)>;
 
-   class Renderer {
+   class VkRenderer {
     public:
-      Renderer(GLFWwindow* window);
-      ~Renderer();
+      VkRenderer(GLFWwindow* window);
+      ~VkRenderer();
 
-      Renderer(const Renderer&) = delete;
-      Renderer(Renderer&&) = delete;
-      Renderer& operator=(const Renderer&) = delete;
-      Renderer& operator=(Renderer&&) = delete;
+      VkRenderer(const VkRenderer&) = delete;
+      VkRenderer(VkRenderer&&) = delete;
+      VkRenderer& operator=(const VkRenderer&) = delete;
+      VkRenderer& operator=(VkRenderer&&) = delete;
 
       void render();
       void waitIdle();
