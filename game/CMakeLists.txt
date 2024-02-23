@@ -21,7 +21,8 @@ IF(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
    )
 ENDIF()
 
-add_compile_definitions(
+target_compile_definitions(${project_name}
+   PRIVATE
    GLM_FORCE_RADIANS
    GLM_FORCE_DEPTH_ZERO_TO_ONE
    GLM_ENABLE_EXPERIMENTAL

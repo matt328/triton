@@ -4,26 +4,55 @@ set(triton_SRC
    "src/graphics/ImmediateContext.cxx"
    "src/graphics/VkRenderer.cxx"
    "src/graphics/vma_raii.cxx"
-
    "src/graphics/geometry/MeshFactory.cxx"
    "src/graphics/geometry/Vertex.cxx"
-
    "src/graphics/gui/ImguiHelper.cxx"
-
    "src/graphics/helpers/SpirvHelper.cxx"
-
    "src/graphics/textures/Texture.cxx"
    "src/graphics/textures/TextureFactory.cxx"
 )
+
 set(project_name "triton")
 
 add_library(${project_name} STATIC ${triton_SRC})
 
+IF(APPLE)
+   include_directories(AFTER ${VULKAN_PATH})
+   link_libraries(${Vulkan_LIBRARY} "-framework AppKit" "-framework QuartzCore")
+   add_compile_definitions(
+      VK_USE_PLATFORM_MACOS_MVK
+   )
+ENDIF(APPLE)
+
+IF(WIN32)
+   link_libraries(${Vulkan_LIBRARY} ${DIRECTFB_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+   add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+   add_compile_definitions(
+      VK_USE_PLATFORM_WIN32_KHR
+   )
+ENDIF(WIN32)
+
+IF(LINUX)
+   link_libraries(${XCB_LIBRARIES} ${Vulkan_LIBRARY} ${DIRECTFB_LIBRARIES} ${WAYLAND_CLIENT_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+ENDIF(LINUX)
+
 IF(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-   target_compile_options(${project_name} PRIVATE "-Wall" "-Wextra" "-pedantic" "-Wno-nullability-extension" "-Wno-nullability-completeness" "-Wno-deprecated-volatile")
+   target_compile_options(${project_name}
+      PRIVATE
+      "-Wall"
+      "-Wextra"
+      "-pedantic"
+      "-Wno-nullability-extension"
+      "-Wno-nullability-completeness"
+      "-Wno-deprecated-volatile"
+   )
 ENDIF()
 
-add_compile_definitions(
+target_compile_definitions(${project_name}
+   PRIVATE
+   NOMINMAX
+   VULKAN_HPP_NO_STRUCT_CONSTRUCTORS
+   TINYGLTF_NO_STB_IMAGE_WRITE
    GLFW_EXPOSE_NATIVE_WIN32
    GLFW_INCLUDE_VULKAN=1
    VULKAN_HPP_NO_CONSTRUCTORS
