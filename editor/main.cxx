@@ -2,6 +2,8 @@
 #include "util/Timer.hpp"
 #include "Application.hpp"
 
+#include <dynalo/dynalo.hpp>
+
 #if defined(TRACY_ENABLE)
 void* operator new(std::size_t count) {
    auto ptr = malloc(count);
@@ -40,6 +42,8 @@ int main() {
 #endif
 
    try {
+      dynalo::library lib{"some_library"};
+
       auto timer = Triton::Util::Timer(TARGET_FPS, MAX_UPDATES);
 
       auto app = std::make_unique<Triton::Application>(width, height, ss.str());

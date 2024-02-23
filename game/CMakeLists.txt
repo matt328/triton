@@ -9,6 +9,18 @@ set(project_name "game")
 
 add_library(${project_name} STATIC ${game_SRC})
 
+IF(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+   target_compile_options(${project_name}
+      PRIVATE
+      "-Wall"
+      "-Wextra"
+      "-pedantic"
+      "-Wno-nullability-extension"
+      "-Wno-nullability-completeness"
+      "-Wno-deprecated-volatile"
+   )
+ENDIF()
+
 add_compile_definitions(
    GLM_FORCE_RADIANS
    GLM_FORCE_DEPTH_ZERO_TO_ONE

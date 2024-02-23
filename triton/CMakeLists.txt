@@ -19,6 +19,10 @@ set(project_name "triton")
 
 add_library(${project_name} STATIC ${triton_SRC})
 
+IF(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+   target_compile_options(${project_name} PRIVATE "-Wall" "-Wextra" "-pedantic" "-Wno-nullability-extension" "-Wno-nullability-completeness" "-Wno-deprecated-volatile")
+ENDIF()
+
 add_compile_definitions(
    GLFW_EXPOSE_NATIVE_WIN32
    GLFW_INCLUDE_VULKAN=1
