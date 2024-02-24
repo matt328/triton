@@ -32,6 +32,10 @@ jobs:
       with:
         version: "17.0"
 
+    - name: Install LLVM (MacOS)
+      if: ${{ matrix.os == 'macos-latest' }}
+      run: brew install llvm
+
     - name: Restore artifacts, or setup vcpkg for building artifacts
       uses: lukka/run-vcpkg@v10
       id: runvcpkg
