@@ -11,6 +11,9 @@ jobs:
       matrix:
         os: [windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
+    env:
+      CC: /usr/local/opt/llvm/bin/clang
+      CXX: /usr/local/opt/llvm/bin/clang++
 
     steps:
     - name: Checkout
