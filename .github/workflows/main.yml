@@ -39,6 +39,9 @@ jobs:
         vcpkgJsonGlob: "./vcpkg.json"
         runVcpkgInstall: true
 
+    - name: Setup Ninja
+      uses: seanmiddleditch/gha-setup-ninja@master
+
     - name: CMake Generate
       run: cmake -B build -S . -G "Ninja"
 
