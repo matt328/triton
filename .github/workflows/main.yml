@@ -22,7 +22,7 @@ jobs:
     - name: Install LLVM (Homebrew)
       run: |
         brew install llvm@17
-        echo "/usr/local/opt/llvm/bin:$PATH" >> "$GITHUB_ENV"
+        echo "PATH=/usr/local/opt/llvm/bin:$PATH" >> "$GITHUB_ENV"
 
     - name: Prepare Vulkan SDK
       uses: humbletim/setup-vulkan-sdk@v1.2.0
