@@ -5,12 +5,12 @@ set(game_SRC
    "src/ecs/system/RenderSystem.cxx"
 )
 
-set(project_name "game")
+project(game)
 
-add_library(${project_name} STATIC ${game_SRC})
+add_library(${PROJECT_NAME} STATIC ${game_SRC})
 
 IF(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-   target_compile_options(${project_name}
+   target_compile_options(${PROJECT_NAME}
       PRIVATE
       "-Wall"
       "-Wextra"
@@ -21,35 +21,30 @@ IF(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
    )
 ENDIF()
 
-target_compile_definitions(${project_name}
+target_compile_definitions(${PROJECT_NAME}
    PRIVATE
    GLM_FORCE_RADIANS
    GLM_FORCE_DEPTH_ZERO_TO_ONE
    GLM_ENABLE_EXPERIMENTAL
 )
 
-find_package(
-   EnTT CONFIG REQUIRED
-)
-
-target_precompile_headers(${project_name}
+target_precompile_headers(${PROJECT_NAME}
    PRIVATE
    <cstdint>
-   <entt/entt.hpp>
    <filesystem>
    <functional>
    <variant>
    PUBLIC
+   <entt/entt.hpp>
 )
 
-target_link_libraries(${project_name}
+target_link_libraries(${PROJECT_NAME}
    PUBLIC
-   EnTT::EnTT
    triton
    PRIVATE
 )
 
-target_include_directories(${project_name}
+target_include_directories(${PROJECT_NAME}
    PUBLIC
    include
    PRIVATE

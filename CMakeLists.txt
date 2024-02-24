@@ -12,6 +12,10 @@ SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin/")
 
+set(entt_version v3.13.1)
+set(glfw_version 3.4)
+set(glm_version 0.9.9.8)
+
 add_subdirectory(assets)
 add_subdirectory(triton)
 add_subdirectory(game)

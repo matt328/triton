@@ -42,7 +42,7 @@ int main() {
 #endif
 
    try {
-      dynalo::library lib{"some_library"};
+      // dynalo::library lib{"some_library"};
 
       auto timer = Triton::Util::Timer(TARGET_FPS, MAX_UPDATES);
 

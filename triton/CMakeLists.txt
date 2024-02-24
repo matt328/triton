@@ -11,10 +11,43 @@ set(triton_SRC
    "src/graphics/textures/Texture.cxx"
    "src/graphics/textures/TextureFactory.cxx"
 )
+project(triton)
 
-set(project_name "triton")
+add_library(${PROJECT_NAME} STATIC ${triton_SRC})
 
-add_library(${project_name} STATIC ${triton_SRC})
+include(FetchContent)
+
+fetchcontent_declare(GLFW
+   GIT_REPOSITORY https://github.com/glfw/glfw.git
+   GIT_TAG ${glfw_version}
+)
+
+fetchcontent_declare(glm
+   GIT_REPOSITORY https://github.com/g-truc/glm.git
+   GIT_TAG ${glm_version}
+)
+
+fetchcontent_declare(EnTT
+   GIT_REPOSITORY https://github.com/skypjack/entt.git
+   GIT_TAG ${entt_version}
+)
+
+fetchcontent_makeavailable(EnTT)
+fetchcontent_makeavailable(GLFW)
+fetchcontent_makeavailable(glm)
+
+IF(WIN32)
+   target_link_libraries(${PROJECT_NAME}
+      PRIVATE
+      ${Vulkan_LIBRARY}
+      ${DIRECTFB_LIBRARIES}
+      ${CMAKE_THREAD_LIBS_INIT}
+   )
+   target_compile_definitions(${PROJECT_NAME}
+      PUBLIC
+      VK_USE_PLATFORM_WIN32_KHR
+   )
+ENDIF(WIN32)
 
 IF(APPLE)
    include_directories(AFTER ${VULKAN_PATH})
@@ -24,20 +57,12 @@ IF(APPLE)
    )
 ENDIF(APPLE)
 
-IF(WIN32)
-   link_libraries(${Vulkan_LIBRARY} ${DIRECTFB_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
-   add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-   add_compile_definitions(
-      VK_USE_PLATFORM_WIN32_KHR
-   )
-ENDIF(WIN32)
-
 IF(LINUX)
    link_libraries(${XCB_LIBRARIES} ${Vulkan_LIBRARY} ${DIRECTFB_LIBRARIES} ${WAYLAND_CLIENT_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 ENDIF(LINUX)
 
 IF(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-   target_compile_options(${project_name}
+   target_compile_options(${PROJECT_NAME}
       PRIVATE
       "-Wall"
       "-Wextra"
@@ -48,7 +73,7 @@ IF(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
    )
 ENDIF()
 
-target_compile_definitions(${project_name}
+target_compile_definitions(${PROJECT_NAME}
    PRIVATE
    NOMINMAX
    VULKAN_HPP_NO_STRUCT_CONSTRUCTORS
@@ -61,8 +86,6 @@ target_compile_definitions(${project_name}
    GLM_ENABLE_EXPERIMENTAL
 )
 
-find_package(Threads REQUIRED)
-find_package(glfw3 CONFIG REQUIRED)
 find_package(glslang CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
 find_package(Tracy CONFIG REQUIRED)
@@ -74,7 +97,7 @@ find_package(VulkanMemoryAllocator CONFIG REQUIRED)
 find_package(unofficial-vulkan-memory-allocator-hpp CONFIG REQUIRED)
 find_package(Vulkan REQUIRED)
 
-target_precompile_headers(${project_name}
+target_precompile_headers(${PROJECT_NAME}
    PRIVATE
    <entt/entt.hpp>
    <filesystem>
@@ -108,15 +131,17 @@ target_precompile_headers(${project_name}
    <tracy/TracyC.h>
 )
 
-target_link_libraries(${project_name}
+target_link_libraries(${PROJECT_NAME}
    PUBLIC
+   EnTT
    glfw
+   glm::glm
    GPUOpen::VulkanMemoryAllocator
+   imgui::imgui
    PRIVATE
    glslang::glslang
    glslang::glslang-default-resource-limits
    glslang::SPIRV
-   imgui::imgui
    spirv-cross-core
    spirv-cross-cpp
    Tracy::TracyClient
@@ -124,7 +149,7 @@ target_link_libraries(${project_name}
    ${Vulkan_LIBRARIES}
 )
 
-target_include_directories(${project_name}
+target_include_directories(${PROJECT_NAME}
    PUBLIC
    include
    PRIVATE
@@ -132,4 +157,4 @@ target_include_directories(${project_name}
    ${Vulkan_INCLUDE_DIRS}
 )
 
-add_dependencies(${project_name} assets)
+add_dependencies(${PROJECT_NAME} assets)

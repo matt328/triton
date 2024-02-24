@@ -1,15 +1,14 @@
 set(editor_SRC
-   "main.cxx"
-   "Application.cxx"
+   "src/main.cxx"
+   "src/Application.cxx"
 )
-set(project_name "editor")
 
-project("Triton Editor" VERSION "0.0.1" LANGUAGES CXX)
+project("editor" VERSION "0.0.1" LANGUAGES CXX)
 
-add_executable(${project_name} ${editor_SRC})
+add_executable(${PROJECT_NAME} ${editor_SRC})
 
 IF(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-   target_compile_options(${project_name}
+   target_compile_options(${PROJECT_NAME}
       PRIVATE
       "-Wall"
       "-Wextra"
@@ -20,12 +19,12 @@ IF(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
    )
 ENDIF()
 
-target_compile_definitions(${project_name}
+target_compile_definitions(${PROJECT_NAME}
    PRIVATE
    NOMINMAX
 )
 
-configure_file(config.h.in ${CMAKE_CURRENT_SOURCE_DIR}/config.h)
+configure_file(src/config.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/config.h)
 
 include(FetchContent)
 
@@ -43,22 +42,22 @@ add_compile_definitions(
    GLM_ENABLE_EXPERIMENTAL
 )
 
-target_precompile_headers(${project_name} PRIVATE
-   <entt/entt.hpp>
+target_precompile_headers(${PROJECT_NAME}
+   PRIVATE
    <functional>
    <sstream>
 )
 
-target_link_libraries(${project_name}
+target_link_libraries(${PROJECT_NAME}
    PRIVATE
    game
    triton
    dynalo
 )
 
-target_include_directories(${project_name}
+target_include_directories(${PROJECT_NAME}
    PUBLIC
-   .
+   src
 )
 
-add_dependencies(${project_name} assets)
+add_dependencies(${PROJECT_NAME} assets)
