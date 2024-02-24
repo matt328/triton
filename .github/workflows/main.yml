@@ -28,10 +28,6 @@ jobs:
     - name: Install LLVM (MacOS)
       if: ${{ matrix.os == 'macos-latest' }}
       run: brew install llvm
-    
-    - name: Set LLVM on Path (MacOS)
-      if: ${{ matrix.os == 'macos-latest' }}
-      run: echo "CC=/usr/local/opt/llvm/bin/clang" && echo "CXX=/usr/local/opt/llvm/bin/clang++"
 
     - name: Prepare Vulkan SDK
       uses: humbletim/setup-vulkan-sdk@v1.2.0
@@ -52,7 +48,10 @@ jobs:
       uses: seanmiddleditch/gha-setup-ninja@master
 
     - name: CMake Generate
-      run: cmake -B build -S . -G "Ninja"
+      run: |
+        echo "CC=/usr/local/opt/llvm/bin/clang"
+        echo "CXX=/usr/local/opt/llvm/bin/clang++"
+        cmake -B build -S . -G "Ninja"
 
     - name: Build
       working-directory: ${{github.workspace}}
