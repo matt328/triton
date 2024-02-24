@@ -7,7 +7,7 @@ env:
 
 jobs:
   build-mac-os:
-    runs-on: macos-latest
+    runs-on: macos-14-large
     env:
       CC: /usr/local/opt/llvm/bin/clang
       CXX: /usr/local/opt/llvm/bin/clang++

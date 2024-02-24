@@ -40,6 +40,13 @@ IF(WIN32)
    )
 ENDIF(WIN32)
 
+IF(APPLE)
+   target_compile_definitions(${PROJECT_NAME}
+      PRIVATE
+      VK_USE_PLATFORM_MACOS_MVK
+   )
+ENDIF(APPLE)
+
 find_package(Threads REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glslang CONFIG REQUIRED)
