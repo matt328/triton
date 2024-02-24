@@ -67,4 +67,5 @@ The clangd extension gives a much better experience in VSCode than Microsoft's I
 
 ## OS X Specific Things
 
+- Apple Clang doens't work for whatever reason so `brew install llvm` and make sure `CC` and `CXX` env vars point to those compilers' executables
 - have to set `MVK_CONFIG_USE_METAL_ARGUMENT_BUFFERS=1` in order for the executables to run on OS X.
