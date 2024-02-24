@@ -35,6 +35,10 @@ jobs:
     - name: Install LLVM (MacOS)
       if: ${{ matrix.os == 'macos-latest' }}
       run: brew install llvm
+    
+    - name: Set LLVM on Path (MacOS)
+      if: ${{ matrix.os == 'macos-latest' }}
+      run: echo 'export PATH="/usr/local/opt/llvm/bin:$PATH"' >> /Users/runner/.bash_profile
 
     - name: Restore artifacts, or setup vcpkg for building artifacts
       uses: lukka/run-vcpkg@v10
