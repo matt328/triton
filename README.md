@@ -64,3 +64,7 @@ Download [Ninja](https://github.com/ninja-build/ninja/releases). Make sure `ninj
 You can set `CC` and `CCX` env vars to `path\to\clang.exe` and `path\to\clang++.exe` if you don't want to risk VSCode detecting the wrong 'kit'. This isn't a big deal, you just have to use the quick menu and select `CMake: Select a Kit` and select the kit that will use clang and clang++ you installed earlier.
 
 The clangd extension gives a much better experience in VSCode than Microsoft's Intellisense. Once you get it configured correctly. Include paths are kind of wonky. See the `.clangd` file at the root of the project.
+
+## OS X Specific Things
+
+- have to set `MVK_CONFIG_USE_METAL_ARGUMENT_BUFFERS=1` in order for the executables to run on OS X.
