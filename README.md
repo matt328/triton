@@ -30,7 +30,7 @@ I have been taking some time to refactor this brute force prototype code into a 
 
 ## Building/Running
 
-This has recently been migrated to using CMake, and I use vscode primarily for development. So far everything works well on Windows ~~as well as OS X and linux~~.
+This has recently been migrated to using CMake, and I use vscode primarily for development. So far everything works well on Windows as well as OS X ~~and linux~~.
 
 While my goal has been to leverage vcpkg and not have to struggle with dependencies, I'm still just installing the Vulkan SDK and setting the VULKAN_SDK env var and relying on CMake's `find_package()` to do the thing. This area admittedly needs a little more research and understanding to make locating the Vulkan headers and libraries a bit more consistent across machines and platforms.
 
