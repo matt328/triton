@@ -10,14 +10,7 @@ set(game_SRC
 add_library(${PROJECT_NAME} STATIC ${game_SRC})
 
 IF(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-   target_compile_options(${PROJECT_NAME}
-      PRIVATE
-      "-Wextra"
-      "-pedantic"
-      "-Wno-nullability-extension"
-      "-Wno-nullability-completeness"
-      "-Wno-deprecated-volatile"
-   )
+   target_compile_options(${PROJECT_NAME} PRIVATE ${TRITON_COMPILE_OPTIONS})
 ENDIF()
 
 find_package(EnTT CONFIG REQUIRED)

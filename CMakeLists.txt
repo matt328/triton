@@ -9,11 +9,16 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 SET(CMAKE_CXX_STANDARD 20)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-IF(LINUX)
-   link_libraries(${XCB_LIBRARIES} ${Vulkan_LIBRARY} ${DIRECTFB_LIBRARIES} ${WAYLAND_CLIENT_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
-ENDIF(LINUX)
-
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin/")
+
+set(TRITON_COMPILE_OPTIONS
+   "-Wall"
+   "-Wextra"
+   "-pedantic"
+   "-Wno-nullability-extension"
+   "-Wno-nullability-completeness"
+   "-Wno-deprecated-volatile"
+)
 
 add_subdirectory(assets)
 add_subdirectory(triton)

@@ -17,22 +17,10 @@ set(triton_SRC
 add_library(${PROJECT_NAME} STATIC ${triton_SRC})
 
 IF(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-   target_compile_options(${PROJECT_NAME}
-      PRIVATE
-      "-Wextra"
-      "-pedantic"
-      "-Wno-nullability-extension"
-      "-Wno-nullability-completeness"
-      "-Wno-deprecated-volatile"
-   )
+   target_compile_options(${PROJECT_NAME} PRIVATE ${TRITON_COMPILE_OPTIONS})
 ENDIF()
 
 IF(WIN32)
-   target_link_libraries(${PROJECT_NAME}
-      PRIVATE
-      ${DIRECTFB_LIBRARIES}
-      ${CMAKE_THREAD_LIBS_INIT}
-   )
    target_compile_definitions(${PROJECT_NAME}
       PRIVATE
       -D_CRT_SECURE_NO_WARNINGS
@@ -47,7 +35,6 @@ IF(APPLE)
    )
 ENDIF(APPLE)
 
-find_package(Threads REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glslang CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
