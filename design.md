@@ -1,31 +1,52 @@
 # Design Notes
 
-## Modules
+## Architecture Overview
 
-1. triton
-   - renderer
-   - gameplay module (ecs)
-   - Context that manages these two.
-1. editor
-   - Application
-   - Editor Component Renderers
-   - Editor Adapter that can be installed into the renderer via the frontend, and allows the editor components to be rendered by the renderer backend
-   - Editor Core that handles communication between editor components and gameplay module
-1. game
-   - Application
-   - basically just defines gameplay logic and calls gameplay.runGame()
-   - also has callbacks from the context for handling saving gamestate, windowing things, etc.
+### Triton (Engine Itself, static lib, `tr`)
 
-This is feeling overengineered already, so to start:
+#### Context `tr::ctx`
 
-- create a Context class that handles creating all the resources needed
-  - initially it will just own a Game and a Renderer.
-  - Come up with a better name for 'Game' it's basically the application of EnTT.
-- The application will just call `context.run()`.
-- Eventually context.run() will take in a thing.  That thing will be some kind of Application, either a GameApplication or an EditorApplication.
-- There probably will always be a Game/Editor pair with a shared Gameplay module between them.  The Game will just blindly execute the Gameplay module, while the editor will mainly execute the Gameplay module, but will also be able to micromanage everything about the Gameplay at any time.
-- The Gameplay module might be a shared library that can be recompiled and reloaded at runtime by the editor.  Replicating that kind of functionality with a scripting system would be cool, but not nearly as powerful.
-- Think about if context.run() could just take in a gameplay module.  I think the editor would need to be a completely standalone application that might call something like context.run(gameplayModule) and then call context.stop() then context.run(gameplayModule) after the shared library has been rebuilt and reloaded.
-- The gameplay module will be specific to a game, so should it contain the whole ECS implementation?
-  - I don't want to have the ecs implementation be in a reusable lib since that means I'd have to write an abstraction layer over the ECS and end up limiting its functionality.
-  - Maybe for now just put the ECS implementation in the game module and factor out common stuff later.
+- Contains Gameplay and Renderer
+- Handles decoupling the two so that renderer can be the only place where the graphics api is directly used.
+- Only exposes a 'run' method to clients.
+
+#### Gameplay `tr::ctx::gp`
+
+- Contain the ECS
+- Provides GameplayAPI
+
+#### Renderer `tr::ctx::rd`
+
+- Handles rendering and resource creation/management
+- is completely unaware of which platform it's running on, and which windowing system has been used. The applications should be responsible for abstracting that away
+
+### Editor (executable `tr::ed`
+
+- Contains Imgui that can be handed to the renderer to be drawn
+- Wires up window events, input callbacks etc into the context
+- Wires up events Imgui needs
+- Bridges Imgui components' inputs into the GameplayAPI
+- Knows how to query the GamplayAPI in order to store game file(s)
+- Knows how to read in game file(s) and set up the game using the GamplayAPI
+
+### Game (executable `tr::gm`)
+
+- Wires up things like window events, input callbacks, etc into the context.
+- Reads optimized game files.
+- Knows how to call the GameplayAPI with game file(s) information to set up and start the game.
+
+## Component Detail
+
+### Gameplay API
+
+This API will sit on top of the ECS and essentially be an abstraction layer over it (like I didn't want to do).  This API will be available to the scripts attached to entities.  It will also be directly usable via the Editor's components as well.
+
+API Needs:
+
+- set state on a given entity (including adding/removing script components)
+- query state of other entities
+- create entities
+- destroy entities
+- create/read/update context data
+
+Are these all anything will need to make a game? There may be certain things that make sense to build into the engine, terrain generation/paging, day night cycle for example.
