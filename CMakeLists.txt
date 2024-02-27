@@ -22,6 +22,5 @@ set(TRITON_COMPILE_OPTIONS
 
 add_subdirectory(assets)
 add_subdirectory(triton)
-add_subdirectory(game)
 add_subdirectory(editor)
 add_subdirectory(testarea)

@@ -1,9 +1,10 @@
 #pragma once
 
-#include "Game.hpp"
-#include "util/Timer.hpp"
+namespace tr::ctx {
+   class Context;
+}
 
-namespace Triton {
+namespace ed {
 
    class Application {
     public:
@@ -15,18 +16,21 @@ namespace Triton {
       Application& operator=(const Application&) = delete;
       Application& operator=(Application&&) = delete;
 
-      void update(const Util::Timer& timer);
-      void render();
-
-      void run(Util::Timer& timer);
+      void run();
 
     private:
       struct DestroyGlfwWindow {
          void operator()([[maybe_unused]] GLFWwindow* ptr) const {
          }
       };
+
+      struct DestroyContext {
+         void operator()([[maybe_unused]] tr::ctx::Context* ptr) const {
+         }
+      };
+
       std::unique_ptr<GLFWwindow, DestroyGlfwWindow> window;
-      std::unique_ptr<Game::Game> game;
+      std::unique_ptr<tr::ctx::Context> context;
       bool running{};
       bool paused{};
       bool mouseCaptured{};
