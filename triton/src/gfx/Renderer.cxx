@@ -17,7 +17,7 @@
 
 namespace tr::gfx {
 
-   Renderer::Renderer(GLFWwindow* window) {
+   Renderer::Renderer(GLFWwindow* window, bool guiEnabled) : guiEnabled{guiEnabled} {
       graphicsDevice = std::make_unique<GraphicsDevice>(window, true);
 
       bindlessDescriptorSetLayout =
@@ -69,7 +69,9 @@ namespace tr::gfx {
 
       createSwapchainResources();
 
-      imguiHelper = std::make_unique<Gui::ImGuiHelper>(*graphicsDevice, window);
+      if (guiEnabled) {
+         imguiHelper = std::make_unique<Gui::ImGuiHelper>(*graphicsDevice, window);
+      }
    }
 
    Renderer::~Renderer() {
@@ -357,7 +359,9 @@ namespace tr::gfx {
                                   vk::ImageLayout::eTransferDstOptimal,
                                   vk::ImageLayout::eColorAttachmentOptimal);
 
-         // drawImgui(cmd, graphicsDevice->getSwapchainImageViews()[imageIndex]);
+         if (guiEnabled) {
+            drawImgui(cmd, graphicsDevice->getSwapchainImageViews()[imageIndex]);
+         }
 
          Helpers::transitionImage(cmd,
                                   graphicsDevice->getSwapchainImages()[imageIndex],
