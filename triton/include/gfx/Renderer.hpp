@@ -35,7 +35,7 @@ namespace tr::gfx {
 
    class Renderer {
     public:
-      Renderer(GLFWwindow* window);
+      Renderer(GLFWwindow* window, bool guiEnabled = false);
       ~Renderer();
 
       Renderer(const Renderer&) = delete;
@@ -63,6 +63,8 @@ namespace tr::gfx {
 
     private:
       static constexpr int FRAMES_IN_FLIGHT = 2;
+
+      bool guiEnabled{};
 
       std::unique_ptr<GraphicsDevice> graphicsDevice;
 

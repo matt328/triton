@@ -8,10 +8,11 @@ namespace tr::ctx {
    static constexpr int TARGET_FPS = 60;
    static constexpr int MAX_UPDATES = 4;
 
-   Context::Context(void* nativeWindow) : timer{TARGET_FPS, MAX_UPDATES} {
+   Context::Context(void* nativeWindow, bool guiEnabled) : timer{TARGET_FPS, MAX_UPDATES} {
       gameplaySystem = std::make_unique<gp::GameplaySystem>();
 
-      renderer = std::make_unique<gfx::Renderer>(static_cast<GLFWwindow*>(nativeWindow));
+      renderer =
+          std::make_unique<gfx::Renderer>(static_cast<GLFWwindow*>(nativeWindow), guiEnabled);
 
       renderer->addResizeListener<&gp::GameplaySystem::resize>(gameplaySystem.get());
 

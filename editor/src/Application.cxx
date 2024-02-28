@@ -2,15 +2,18 @@
 #include "ctx/Context.hpp"
 #include "ctx/GameplayFacade.hpp"
 #include "util/Paths.hpp"
+#include <imgui.h>
 
 namespace ed {
 
    constexpr auto MinHeight = 300;
    constexpr auto MinWidth = 200;
-   const auto ZNear = 0.1f;
-   const auto ZFar = 1000.f;
-   const auto Fov = 60.f;
-   const auto CamStart = glm::vec3{1.f, 1.f, 3.f};
+   constexpr auto ZNear = 0.1f;
+   constexpr auto ZFar = 1000.f;
+   constexpr auto Fov = 60.f;
+   constexpr auto CamStart = glm::vec3{1.f, 1.f, 3.f};
+
+   constexpr auto ImguiEnabled = true;
 
    Application::Application(const int width, const int height, const std::string_view& windowTitle)
        : window(nullptr), context(nullptr), running(true) {
@@ -34,7 +37,7 @@ namespace ed {
       glfwSetMouseButtonCallback(window.get(), mouseButtonCallback);
       glfwSetWindowIconifyCallback(window.get(), windowIconifiedCallback);
 
-      context = std::make_unique<tr::ctx::Context>(window.get());
+      context = std::make_unique<tr::ctx::Context>(window.get(), ImguiEnabled);
 
       // Editor should provide a way to load these things from a file and call this api
       auto& facade = context->getGameplayFacade();
@@ -51,7 +54,33 @@ namespace ed {
    }
 
    void Application::run() {
-      context->start(glfwPollEvents);
+      context->start([this]() {
+         glfwPollEvents();
+         ImGui_ImplVulkan_NewFrame();
+         ImGui_ImplGlfw_NewFrame();
+         ImGui::NewFrame();
+         ImGui::ShowDemoWindow();
+
+         ImGui::Begin("My First Tool", &active, ImGuiWindowFlags_MenuBar);
+         if (ImGui::BeginMenuBar()) {
+            if (ImGui::BeginMenu("File")) {
+               if (ImGui::MenuItem("Open..", "Ctrl+O")) { /* Do stuff */
+               }
+               if (ImGui::MenuItem("Save", "Ctrl+S")) { /* Do stuff */
+               }
+               if (ImGui::MenuItem("Close", "Ctrl+W")) {
+                  active = false;
+               }
+               ImGui::EndMenu();
+            }
+            ImGui::EndMenuBar();
+         }
+
+         // Edit a color stored as 4 floats
+         ImGui::ColorEdit4("Color", (float*)&color);
+         ImGui::End();
+         ImGui::Render();
+      });
    }
 
    // GLFW Callbacks
