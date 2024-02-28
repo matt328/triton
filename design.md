@@ -6,16 +6,15 @@
 
 #### Context `tr::ctx`
 
-- Contains Gameplay and Renderer
+- Contains GameplaySystem and Renderer
 - Handles decoupling the two so that renderer can be the only place where the graphics api is directly used.
-- Only exposes a 'run' method to clients.
 
 #### Gameplay `tr::ctx::gp`
 
 - Contain the ECS
 - Provides GameplayAPI
 
-#### Renderer `tr::ctx::rd`
+#### Renderer `tr::ctx::gfx`
 
 - Handles rendering and resource creation/management
 - is completely unaware of which platform it's running on, and which windowing system has been used. The applications should be responsible for abstracting that away
@@ -37,7 +36,16 @@
 
 ## Component Detail
 
+### Context
+
+- News up a GameplaySystem and a Renderer, mediates communication between the two so they can stay decoupled.
+- Recieves some sort of abstracted native window handle to be passed into the renderer's ctor so it knows where to render its output. (Vulkan will cast this to a GLFWwindow* in order to create the vk::Surface).
+- Provides clients with a way to register application level callbacks and route them to the systems that need them.
+- Provides clients access to the GameplayAPI.
+
 ### Gameplay API
+
+Implemented as GameplayFacade class.
 
 This API will sit on top of the ECS and essentially be an abstraction layer over it (like I didn't want to do).  This API will be available to the scripts attached to entities.  It will also be directly usable via the Editor's components as well.
 

@@ -1,17 +1,23 @@
 project("triton")
 
 set(triton_SRC
-   "src/graphics/FrameData.cxx"
-   "src/graphics/GraphicsDevice.cxx"
-   "src/graphics/ImmediateContext.cxx"
-   "src/graphics/Renderer.cxx"
-   "src/graphics/vma_raii.cxx"
-   "src/graphics/geometry/MeshFactory.cxx"
-   "src/graphics/geometry/Vertex.cxx"
-   "src/graphics/gui/ImguiHelper.cxx"
-   "src/graphics/helpers/SpirvHelper.cxx"
-   "src/graphics/textures/Texture.cxx"
-   "src/graphics/textures/TextureFactory.cxx"
+   "src/ctx/Context.cxx"
+   "src/ctx/GameplayFacade.cxx"
+   "src/gfx/FrameData.cxx"
+   "src/gfx/GraphicsDevice.cxx"
+   "src/gfx/ImmediateContext.cxx"
+   "src/gfx/Renderer.cxx"
+   "src/gfx/vma_raii.cxx"
+   "src/gfx/geometry/MeshFactory.cxx"
+   "src/gfx/geometry/Vertex.cxx"
+   "src/gfx/gui/ImguiHelper.cxx"
+   "src/gfx/helpers/SpirvHelper.cxx"
+   "src/gfx/textures/Texture.cxx"
+   "src/gfx/textures/TextureFactory.cxx"
+   "src/gp/GameplaySystem.cxx"
+   "src/gp/actions/ActionSystem.cxx"
+   "src/gp/ecs/system/CameraSystem.cxx"
+   "src/gp/ecs/system/RenderSystem.cxx"
 )
 
 add_library(${PROJECT_NAME} STATIC ${triton_SRC})

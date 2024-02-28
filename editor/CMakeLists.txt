@@ -23,13 +23,13 @@ target_compile_definitions(${PROJECT_NAME}
 
 target_precompile_headers(${PROJECT_NAME}
    PRIVATE
+   <filesystem>
    <functional>
    <sstream>
 )
 
 target_link_libraries(${PROJECT_NAME}
    PRIVATE
-   game
    triton
 )
 
