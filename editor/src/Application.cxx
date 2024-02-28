@@ -1,13 +1,19 @@
 #include "Application.hpp"
+#include "ctx/Context.hpp"
+#include "ctx/GameplayFacade.hpp"
+#include "util/Paths.hpp"
 
-namespace Triton {
+namespace ed {
 
    constexpr auto MinHeight = 300;
    constexpr auto MinWidth = 200;
-   constexpr auto SleepMillis = 100;
+   const auto ZNear = 0.1f;
+   const auto ZFar = 1000.f;
+   const auto Fov = 60.f;
+   const auto CamStart = glm::vec3{1.f, 1.f, 3.f};
 
    Application::Application(const int width, const int height, const std::string_view& windowTitle)
-       : window(nullptr), running(true) {
+       : window(nullptr), context(nullptr), running(true) {
       glfwInit();
       glfwSetErrorCallback(errorCallback);
       glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -17,8 +23,9 @@ namespace Triton {
 
       glfwSetWindowSizeLimits(window.get(), MinHeight, MinWidth, GLFW_DONT_CARE, GLFW_DONT_CARE);
 
-      if (glfwRawMouseMotionSupported())
+      if (glfwRawMouseMotionSupported()) {
          glfwSetInputMode(window.get(), GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+      }
 
       glfwSetWindowUserPointer(window.get(), this);
       glfwSetWindowCloseCallback(window.get(), windowCloseCallback);
@@ -27,27 +34,24 @@ namespace Triton {
       glfwSetMouseButtonCallback(window.get(), mouseButtonCallback);
       glfwSetWindowIconifyCallback(window.get(), windowIconifiedCallback);
 
-      game = std::make_unique<Game::Game>(window.get());
+      context = std::make_unique<tr::ctx::Context>(window.get());
+
+      // Editor should provide a way to load these things from a file and call this api
+      auto& facade = context->getGameplayFacade();
+
+      facade.createStaticMeshEntity((tr::util::Paths::MODELS / "viking_room.gltf").string(),
+                                    (tr::util::Paths::TEXTURES / "viking_room.png").string());
+
+      auto camera = facade.createCamera(width, height, Fov, ZNear, ZFar, CamStart);
+      facade.setCurrentCamera(camera);
    }
 
    Application::~Application() {
       glfwTerminate();
    }
 
-   void Application::run(Util::Timer& timer) {
-      while (running) {
-         glfwPollEvents();
-         if (paused) {
-            // normally sleep is bad, but this is just a temporary way to not hammer the cpu while
-            // the application is minimized. Eventually, we'll probaby ask the game to pause itself,
-            // and it can decide what that means.
-            std::this_thread::sleep_for(std::chrono::milliseconds(SleepMillis));
-            continue;
-         }
-         timer.tick([&]() { game->fixedUpdate(timer); });
-         game->update();
-      }
-      game->waitIdle();
+   void Application::run() {
+      context->start(glfwPollEvents);
    }
 
    // GLFW Callbacks
@@ -65,6 +69,7 @@ namespace Triton {
    void Application::windowCloseCallback(GLFWwindow* window) {
       const auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
       app->running = false;
+      app->context->hostWindowClosed();
    }
 
    void Application::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
@@ -97,14 +102,14 @@ namespace Triton {
             app->fullscreen = !app->fullscreen;
          }
       } else {
-         app->game->keyCallback(key, scancode, action, mods);
+         app->context->keyCallback(key, scancode, action, mods);
       }
    }
 
    void Application::cursorPosCallback(GLFWwindow* window, double xpos, double ypos) {
       const auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
       if (app->mouseCaptured) {
-         app->game->cursorPosCallback(xpos, ypos);
+         app->context->cursorPosCallback(xpos, ypos);
       }
    }
 
@@ -120,8 +125,8 @@ namespace Triton {
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
          }
          app->mouseCaptured = !app->mouseCaptured;
-         app->game->setMouseState(app->mouseCaptured);
+         app->context->setMouseState(app->mouseCaptured);
       }
-      app->game->mouseButtonCallback(button, action, mods);
+      app->context->mouseButtonCallback(button, action, mods);
    }
 }

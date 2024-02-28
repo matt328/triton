@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Triton::Util {
+namespace tr::util {
    constexpr double frameTimeNumerator = 10.0f;
    class Timer {
     public:
