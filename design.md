@@ -58,3 +58,29 @@ API Needs:
 - create/read/update context data
 
 Are these all anything will need to make a game? There may be certain things that make sense to build into the engine, terrain generation/paging, day night cycle for example.
+
+### Editor
+
+Editor should produce the imgui draw data and context should provide a listener to recieve changes in the imgui draw data each frame.
+
+Context and renderer will only contain Imgui functions to render the draw data, nothing in here produces any draw data.
+
+Editor Application will be the only component that calls any imgui functions to actually render any imgui components.
+
+Imgui components in Editor's Application can have direct access to the GameplayFacade, this should be all they need to access in order to do what they need to do.
+
+Imgui's edit components work by taking in a reference to some data to edit. I see 2 options here:
+
+1. Create a copy of all the data in the Application and push that data into the GameplayFacade each frame
+2. Have the GameplayFacade just expose references to all the data the gui will edit.
+
+All data the editor will edit *should* be contained within the components of the ECS, so #2 is probably cleaner.
+
+Should the script interface be the GameplayFacade as well? Probably, I think I decided that earlier.  Just need to figure out converting glm to and from Lua. I don't know, maybe we shouldn't be doing vector operations in a scripting language, and favor doing them in C++ where they're fast.
+
+TODO:
+
+1. Set up the context and renderer so that Imgui draw data can be rendered while keeping concerns separated.
+2. Add support to the renderer's render method to optionally render Imgui draw data, if any has been provided.  Expose a configuration flag from the context that enables or disables Imgui since games won't be using it.
+3. Render the demo window from the application and hand off its draw data to the context.
+4. Figure out the first actual editor windows needed.
