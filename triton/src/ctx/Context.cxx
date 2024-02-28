@@ -22,6 +22,9 @@ namespace tr::ctx {
       gameplayFacade = std::make_unique<GameplayFacade>(*gameplaySystem, *renderer);
    }
 
+   // Since a default destructor doesn't have access to the complete definition of the classes
+   // wrapped in smart pointers, it cannot call the destructors of forward declared classes.
+   // In short, this has to be here so all the member smart pointers will be able to be cleaned up.
    Context::~Context() {
    }
 
