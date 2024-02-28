@@ -29,6 +29,9 @@ namespace ed {
          }
       };
 
+      glm::vec4 color{};
+      bool active = true;
+
       std::unique_ptr<GLFWwindow, DestroyGlfwWindow> window;
       std::unique_ptr<tr::ctx::Context> context;
       bool running{};
