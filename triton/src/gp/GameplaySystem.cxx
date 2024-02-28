@@ -8,13 +8,13 @@
 
 #include "gp/ecs/component/Resources.hpp"
 #include "gp/ecs/system/CameraSystem.hpp"
+#include "gp/ecs/system/RenderSystem.hpp"
 
 namespace tr::gp {
 
    using namespace tr::gp;
 
-   GameplaySystem::GameplaySystem()
-       : registry{std::make_unique<entt::registry>()}, room{registry->create()} {
+   GameplaySystem::GameplaySystem() : registry{std::make_unique<entt::registry>()} {
       actionSystem = std::make_unique<ActionSystem>();
 
       auto& reg = *registry;
@@ -57,11 +57,6 @@ namespace tr::gp {
       actionSystem->mapSource(Source{MouseInput::MOVE_Y, SourceType::Float},
                               StateType::Range,
                               ActionType::LookVertical);
-
-      // const auto camera = registry->create();
-      // registry->emplace<Ecs::Camera>(camera, width, height, Fov, ZNear, ZFar, CamStart);
-
-      // registry->ctx().emplace<Ecs::WindowDimensions>(width, height);
    }
 
    GameplaySystem::~GameplaySystem() {
@@ -75,15 +70,8 @@ namespace tr::gp {
    }
 
    void GameplaySystem::update() {
-      TracyMessageL("render");
-      // ecs::RenderSystem::update(*registry, *renderer);
-
-      ImGui_ImplVulkan_NewFrame();
-      ImGui_ImplGlfw_NewFrame();
-      ImGui::NewFrame();
-
-      // renderer->render();
-      FrameMark;
+      ZoneNamedN(upd, "Update", true);
+      ecs::RenderSystem::update(*registry, renderObjectProducer, cameraDataProducer);
    }
 
    void GameplaySystem::resize(const std::pair<uint32_t, uint32_t> size) {

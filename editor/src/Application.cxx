@@ -39,9 +39,8 @@ namespace ed {
       // Editor should provide a way to load these things from a file and call this api
       auto& facade = context->getGameplayFacade();
 
-      auto room =
-          facade.createStaticMeshEntity((tr::util::Paths::MODELS / "viking_room.gltf").string(),
-                                        (tr::util::Paths::TEXTURES / "viking_room.png").string());
+      facade.createStaticMeshEntity((tr::util::Paths::MODELS / "viking_room.gltf").string(),
+                                    (tr::util::Paths::TEXTURES / "viking_room.png").string());
 
       auto camera = facade.createCamera(width, height, Fov, ZNear, ZFar, CamStart);
       facade.setCurrentCamera(camera);

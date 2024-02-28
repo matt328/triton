@@ -8,12 +8,13 @@
 #include "gfx/RenderObject.hpp"
 
 namespace tr::gp::ecs::RenderSystem {
-   void update(entt::registry& registry, gfx::Renderer& renderer) {
+   void update(entt::registry& registry,
+               entt::delegate<void(gfx::RenderObject)>& renderObjectProducer,
+               entt::delegate<void(gfx::CameraData)>& cameraDataProducer) {
       const auto cameraEntity = registry.ctx().get<const CurrentCamera>();
       const auto cam = registry.get<Camera>(cameraEntity.currentCamera);
 
-      renderer.setCurrentCameraData(
-          gfx::CameraData{cam.view, cam.projection, cam.view * cam.projection});
+      cameraDataProducer(gfx::CameraData{cam.view, cam.projection, cam.view * cam.projection});
 
       const auto view = registry.view<Renderable, Transform>();
 
@@ -33,7 +34,7 @@ namespace tr::gp::ecs::RenderSystem {
 
          auto renderObject =
              gfx::RenderObject{renderable.meshId, renderable.textureId, transformMatrix};
-         renderer.enqueueRenderObject(std::move(renderObject));
+         renderObjectProducer(std::move(renderObject));
       }
    }
 }

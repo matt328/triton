@@ -357,7 +357,7 @@ namespace tr::gfx {
                                   vk::ImageLayout::eTransferDstOptimal,
                                   vk::ImageLayout::eColorAttachmentOptimal);
 
-         drawImgui(cmd, graphicsDevice->getSwapchainImageViews()[imageIndex]);
+         // drawImgui(cmd, graphicsDevice->getSwapchainImageViews()[imageIndex]);
 
          Helpers::transitionImage(cmd,
                                   graphicsDevice->getSwapchainImages()[imageIndex],
@@ -395,7 +395,7 @@ namespace tr::gfx {
 
    void Renderer::render() {
 
-      ImGui::Render();
+      // ImGui::Render();
 
       drawFrame();
       renderObjects.clear();

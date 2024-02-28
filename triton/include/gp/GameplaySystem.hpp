@@ -1,6 +1,10 @@
 #pragma once
 
 #include <entt/fwd.hpp>
+#include <entt/signal/delegate.hpp>
+
+#include "gfx/RenderObject.hpp"
+#include "gfx/ObjectData.hpp"
 
 namespace tr::util {
    class Timer;
@@ -20,6 +24,9 @@ namespace tr::ctx {
 
 namespace tr::gp {
    using EntityType = entt::entity;
+
+   using RenderObjectProducer = entt::delegate<void(gfx::RenderObject)>;
+   using CameraDataProducer = entt::delegate<void(gfx::CameraData)>;
 
    class GameplaySystem {
     public:
@@ -41,10 +48,23 @@ namespace tr::gp {
       void mouseButtonCallback(int button, int action, int mods);
       void setMouseState(bool captured);
 
+      template <auto Candidate, typename Type>
+      void addRenderObjectListener(Type* valueOrInstance) noexcept {
+         renderObjectProducer.connect<Candidate>(valueOrInstance);
+      }
+
+      template <auto Candidate, typename Type>
+      void addCameraDataListener(Type* valueOrInstance) noexcept {
+         cameraDataProducer.connect<Candidate>(valueOrInstance);
+      }
+
     private:
       friend class ctx::GameplayFacade;
+
       std::unique_ptr<entt::registry> registry;
       std::unique_ptr<ActionSystem> actionSystem;
-      entt::entity room;
+
+      RenderObjectProducer renderObjectProducer{};
+      CameraDataProducer cameraDataProducer{};
    };
 }

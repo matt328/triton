@@ -31,9 +31,6 @@ namespace tr::gfx {
       class ImGuiHelper;
    }
 
-   using RenderObjectProviderFn = std::function<std::vector<RenderObject>()>;
-   using PerFrameDataProfiderFn = std::function<PerFrameData()>;
-
    using ResizeDelegateType = entt::delegate<void(std::pair<uint32_t, uint32_t>)>;
 
    class Renderer {
@@ -59,21 +56,15 @@ namespace tr::gfx {
       }
 
       template <auto Candidate, typename Type>
-      void connectResize(Type* valueOrInstance) noexcept {
+      void addResizeListener(Type* valueOrInstance) noexcept {
          resizeDelegate.connect<Candidate>(valueOrInstance);
          resizeDelegate(graphicsDevice->getCurrentSize());
-      }
-
-      void registerPerFrameDataProvider(PerFrameDataProfiderFn fn) {
-         this->perFrameDataProvider = fn;
       }
 
     private:
       static constexpr int FRAMES_IN_FLIGHT = 2;
 
       std::unique_ptr<GraphicsDevice> graphicsDevice;
-
-      PerFrameDataProfiderFn perFrameDataProvider;
 
       struct QueueFamilyIndices;
       struct SwapchainSupportDetails;

@@ -13,7 +13,11 @@ namespace tr::ctx {
 
       renderer = std::make_unique<gfx::Renderer>(static_cast<GLFWwindow*>(nativeWindow));
 
-      renderer->connectResize<&gp::GameplaySystem::resize>(gameplaySystem.get());
+      renderer->addResizeListener<&gp::GameplaySystem::resize>(gameplaySystem.get());
+
+      gameplaySystem->addRenderObjectListener<&gfx::Renderer::enqueueRenderObject>(renderer.get());
+
+      gameplaySystem->addCameraDataListener<&gfx::Renderer::setCurrentCameraData>(renderer.get());
 
       gameplayFacade = std::make_unique<GameplayFacade>(*gameplaySystem, *renderer);
    }
@@ -31,7 +35,11 @@ namespace tr::ctx {
          }
          timer.tick([&]() { gameplaySystem->fixedUpdate(timer); });
          gameplaySystem->update();
+
+         renderer->render();
+         FrameMark;
       }
+      renderer->waitIdle();
    }
 
    void Context::pause(bool paused) {
