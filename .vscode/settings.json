@@ -120,7 +120,8 @@
       "build",
       "input",
       "gui",
-      "ci"
+      "ci",
+      "context"
    ],
    "git.ignoreLimitWarning": true,
    "workbench.colorCustomizations": {
