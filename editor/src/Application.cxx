@@ -70,32 +70,51 @@ namespace ed {
 
          auto es = facade.getAllEntities();
 
-         ImGui::Begin("My First Tool", &active, ImGuiWindowFlags_MenuBar);
-         if (ImGui::Button("DoAThing")) {
-            Log::info << glm::to_string(color) << std::endl;
-         }
-
-         ImGui::Text("All Entities");
-         if (ImGui::BeginListBox("##listbox 2",
-                                 ImVec2(-FLT_MIN, 5 * ImGui::GetTextLineHeightWithSpacing()))) {
-            int index = 0;
+         if (ImGui::Begin("Entity Editor", &active, ImGuiWindowFlags_MenuBar)) {
+            // Left
+            ImGui::BeginChild("left pane",
+                              ImVec2(150, 0),
+                              ImGuiChildFlags_Border | ImGuiChildFlags_ResizeX);
             for (auto e : es) {
-               const bool isSelected = (index == selectedEntity);
                if (ImGui::Selectable(std::to_string(static_cast<uint32_t>(e)).c_str(),
-                                     isSelected)) {
-                  selectedEntity = index;
+                                     selectedEntity == static_cast<uint32_t>(e))) {
+                  selectedEntity = static_cast<uint32_t>(e);
                }
-               if (isSelected) {
-                  ImGui::SetItemDefaultFocus();
-               }
-               ++index;
             }
-            ImGui::EndListBox();
+            ImGui::EndChild();
+            ImGui::SameLine();
+
+            // Right
+            {
+               ImGui::BeginGroup();
+               ImGui::BeginChild(
+                   "item view",
+                   ImVec2(0,
+                          -ImGui::GetFrameHeightWithSpacing())); // Leave room for 1 line below us
+               ImGui::Text("Entity ID: %d", selectedEntity);
+               ImGui::Separator();
+               if (ImGui::BeginTabBar("##Tabs", ImGuiTabBarFlags_None)) {
+                  if (ImGui::BeginTabItem("Description")) {
+                     ImGui::TextWrapped(
+                         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod "
+                         "tempor incididunt ut labore et dolore magna aliqua. ");
+                     ImGui::EndTabItem();
+                  }
+                  if (ImGui::BeginTabItem("Details")) {
+                     ImGui::Text("ID: 0123456789");
+                     ImGui::EndTabItem();
+                  }
+                  ImGui::EndTabBar();
+               }
+               ImGui::EndChild();
+               if (ImGui::Button("Revert")) {}
+               ImGui::SameLine();
+               if (ImGui::Button("Save")) {}
+               ImGui::EndGroup();
+            }
+            ImGui::End();
          }
 
-         // Edit a color stored as 4 floats
-         ImGui::ColorEdit4("Color", glm::value_ptr(color));
-         ImGui::End();
          ImGui::Render();
       });
    }

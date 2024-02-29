@@ -40,7 +40,7 @@ namespace ed {
       bool fullscreen{};
       int prevXPos{}, prevYPos{}, prevWidth{}, prevHeight{};
 
-      int selectedEntity{};
+      uint32_t selectedEntity{};
 
       static void errorCallback(int code, const char* description);
       static void windowIconifiedCallback(GLFWwindow* window, int iconified);

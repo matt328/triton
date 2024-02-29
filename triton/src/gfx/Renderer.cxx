@@ -421,7 +421,7 @@ namespace tr::gfx {
       return handle;
    }
 
-   uint32_t Renderer::createTexture(const std::string_view& filename) {
+   TextureHandle Renderer::createTexture(const std::string_view& filename) {
       auto handle = textureList.size();
       textureList.push_back(graphicsDevice->getTextureFactory().createTexture2D(filename));
       // I think we need to bind the texture once in each framedata
