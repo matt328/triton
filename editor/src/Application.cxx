@@ -2,6 +2,7 @@
 #include "ctx/Context.hpp"
 #include "ctx/GameplayFacade.hpp"
 #include "util/Paths.hpp"
+#include <glm/gtx/string_cast.hpp>
 #include <imgui.h>
 
 namespace ed {
@@ -44,6 +45,10 @@ namespace ed {
 
       facade.createStaticMeshEntity((tr::util::Paths::MODELS / "viking_room.gltf").string(),
                                     (tr::util::Paths::TEXTURES / "viking_room.png").string());
+      facade.createStaticMeshEntity((tr::util::Paths::MODELS / "viking_room.gltf").string(),
+                                    (tr::util::Paths::TEXTURES / "viking_room.png").string());
+      facade.createStaticMeshEntity((tr::util::Paths::MODELS / "viking_room.gltf").string(),
+                                    (tr::util::Paths::TEXTURES / "viking_room.png").string());
 
       auto camera = facade.createCamera(width, height, Fov, ZNear, ZFar, CamStart);
       facade.setCurrentCamera(camera);
@@ -61,23 +66,35 @@ namespace ed {
          ImGui::NewFrame();
          ImGui::ShowDemoWindow();
 
+         auto& facade = context->getGameplayFacade();
+
+         auto es = facade.getAllEntities();
+
          ImGui::Begin("My First Tool", &active, ImGuiWindowFlags_MenuBar);
-         if (ImGui::BeginMenuBar()) {
-            if (ImGui::BeginMenu("File")) {
-               if (ImGui::MenuItem("Open..", "Ctrl+O")) { /* Do stuff */
+         if (ImGui::Button("DoAThing")) {
+            Log::info << glm::to_string(color) << std::endl;
+         }
+
+         ImGui::Text("All Entities");
+         if (ImGui::BeginListBox("##listbox 2",
+                                 ImVec2(-FLT_MIN, 5 * ImGui::GetTextLineHeightWithSpacing()))) {
+            int index = 0;
+            for (auto e : es) {
+               const bool isSelected = (index == selectedEntity);
+               if (ImGui::Selectable(std::to_string(static_cast<uint32_t>(e)).c_str(),
+                                     isSelected)) {
+                  selectedEntity = index;
                }
-               if (ImGui::MenuItem("Save", "Ctrl+S")) { /* Do stuff */
+               if (isSelected) {
+                  ImGui::SetItemDefaultFocus();
                }
-               if (ImGui::MenuItem("Close", "Ctrl+W")) {
-                  active = false;
-               }
-               ImGui::EndMenu();
+               ++index;
             }
-            ImGui::EndMenuBar();
+            ImGui::EndListBox();
          }
 
          // Edit a color stored as 4 floats
-         ImGui::ColorEdit4("Color", (float*)&color);
+         ImGui::ColorEdit4("Color", glm::value_ptr(color));
          ImGui::End();
          ImGui::Render();
       });

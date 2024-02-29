@@ -44,4 +44,12 @@ namespace tr::ctx {
    void GameplayFacade::setCurrentCamera(gp::EntityType currentCamera) {
       gameplaySystem.registry->ctx().emplace<gp::ecs::CurrentCamera>(currentCamera);
    }
+
+   std::vector<gp::EntityType> GameplayFacade::getAllEntities() const {
+      std::vector<gp::EntityType> v{};
+      for (auto e : gameplaySystem.registry->view<gp::ecs::Renderable, gp::ecs::Transform>()) {
+         v.push_back(e);
+      }
+      return v;
+   }
 }

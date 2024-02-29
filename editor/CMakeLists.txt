@@ -26,6 +26,7 @@ target_precompile_headers(${PROJECT_NAME}
    <filesystem>
    <functional>
    <sstream>
+   <string>
 )
 
 target_link_libraries(${PROJECT_NAME}

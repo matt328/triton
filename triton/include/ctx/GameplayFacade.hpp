@@ -22,6 +22,8 @@ namespace tr::ctx {
                                   glm::vec3 position);
       void setCurrentCamera(gp::EntityType currentCamera);
 
+      [[nodiscard]] std::vector<gp::EntityType> getAllEntities() const;
+
     private:
       gp::GameplaySystem& gameplaySystem;
       gfx::Renderer& renderer;
