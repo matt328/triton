@@ -2,7 +2,8 @@
 #include "ctx/Context.hpp"
 #include "ctx/GameplayFacade.hpp"
 #include "util/Paths.hpp"
-#include <GLFW/glfw3.h>
+
+#ifdef _WIN32
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <glfw/glfw3native.h>
 #include <windows.h> // For general Windows APIs
@@ -11,6 +12,7 @@
 
 #ifndef DWMWA_USE_IMMERSIVE_DARK_MODE
 #define DWMWA_USE_IMMERSIVE_DARK_MODE 20
+#endif
 #endif
 
 namespace ed {
@@ -33,21 +35,36 @@ namespace ed {
 
       window.reset(glfwCreateWindow(width, height, windowTitle.data(), nullptr, nullptr));
 
+      int imageWidth{}, imageHeight{}, channels{};
+      unsigned char* iconData = stbi_load((tr::util::Paths::TEXTURES / "icon.png").string().c_str(),
+                                          &imageWidth,
+                                          &imageHeight,
+                                          &channels,
+                                          STBI_rgb_alpha);
+      if (!iconData) {
+         std::cerr << "Failed to load icon image" << std::endl;
+         glfwTerminate();
+      }
+
+      GLFWimage icon;
+      icon.width = imageWidth;
+      icon.height = imageHeight;
+      icon.pixels = iconData;
+      glfwSetWindowIcon(window.get(), 1, &icon);
+
+#ifdef _WIN32
       auto hWnd = glfwGetWin32Window(window.get());
-
-      bool value = true;
-
-      SetWindowTheme(hWnd, L"DarkMode_Explorer", nullptr);
-      DwmSetWindowAttribute(hWnd, 19, &value, sizeof(value));
-      DwmSetWindowAttribute(hWnd, 20, &value, sizeof(value));
+      BOOL value = TRUE;
+      ::DwmSetWindowAttribute(hWnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &value, sizeof(value));
+#endif
 
       // Paints the background of the window black
       PAINTSTRUCT ps;
       RECT rc;
       HDC hdc = BeginPaint(hWnd, &ps);
       GetClientRect(hWnd, &rc);
-      SetBkColor(hdc, BLACK_BRUSH);
-      ExtTextOut(hdc, 0, 0, ETO_OPAQUE, &rc, 0, 0, 0);
+      SetBkColor(hdc, RGB(32, 32, 32));
+      ExtTextOut(hdc, 0, 0, ETO_OPAQUE, &rc, nullptr, 0, nullptr);
       EndPaint(hWnd, &ps);
 
       glfwSetWindowSizeLimits(window.get(), MinHeight, MinWidth, GLFW_DONT_CARE, GLFW_DONT_CARE);

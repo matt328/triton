@@ -29,10 +29,19 @@ target_precompile_headers(${PROJECT_NAME}
    <filesystem>
    <functional>
    <sstream>
+   <stb_image.h>
    <glm/gtc/type_ptr.hpp>
    <glm/gtx/string_cast.hpp>
    <string>
 )
+
+if(WIN32)
+   target_link_libraries(${PROJECT_NAME}
+      PRIVATE
+      dwmapi
+      uxtheme
+   )
+endif()
 
 target_link_libraries(${PROJECT_NAME}
    PRIVATE
