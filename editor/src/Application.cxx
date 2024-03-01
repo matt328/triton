@@ -2,8 +2,16 @@
 #include "ctx/Context.hpp"
 #include "ctx/GameplayFacade.hpp"
 #include "util/Paths.hpp"
-#include <glm/gtx/string_cast.hpp>
-#include <imgui.h>
+#include <GLFW/glfw3.h>
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include <glfw/glfw3native.h>
+#include <windows.h> // For general Windows APIs
+#include <dwmapi.h>  // For DWMWINDOWATTRIBUTE
+#include <uxtheme.h>
+
+#ifndef DWMWA_USE_IMMERSIVE_DARK_MODE
+#define DWMWA_USE_IMMERSIVE_DARK_MODE 20
+#endif
 
 namespace ed {
 
@@ -24,6 +32,23 @@ namespace ed {
       glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
       window.reset(glfwCreateWindow(width, height, windowTitle.data(), nullptr, nullptr));
+
+      auto hWnd = glfwGetWin32Window(window.get());
+
+      bool value = true;
+
+      SetWindowTheme(hWnd, L"DarkMode_Explorer", nullptr);
+      DwmSetWindowAttribute(hWnd, 19, &value, sizeof(value));
+      DwmSetWindowAttribute(hWnd, 20, &value, sizeof(value));
+
+      // Paints the background of the window black
+      PAINTSTRUCT ps;
+      RECT rc;
+      HDC hdc = BeginPaint(hWnd, &ps);
+      GetClientRect(hWnd, &rc);
+      SetBkColor(hdc, BLACK_BRUSH);
+      ExtTextOut(hdc, 0, 0, ETO_OPAQUE, &rc, 0, 0, 0);
+      EndPaint(hWnd, &ps);
 
       glfwSetWindowSizeLimits(window.get(), MinHeight, MinWidth, GLFW_DONT_CARE, GLFW_DONT_CARE);
 
@@ -52,6 +77,9 @@ namespace ed {
       facade.createStaticMeshEntity((tr::util::Paths::MODELS / "viking_room.gltf").string(),
                                     (tr::util::Paths::TEXTURES / "viking_room.png").string(),
                                     "Viking Room #3");
+      facade.createStaticMeshEntity((tr::util::Paths::MODELS / "area.gltf").string(),
+                                    (tr::util::Paths::TEXTURES / "grass.png").string(),
+                                    "Grass Plane");
 
       auto camera =
           facade.createCamera(width, height, Fov, ZNear, ZFar, CamStart, "Default Camera");
@@ -131,6 +159,7 @@ namespace ed {
    void Application::windowIconifiedCallback(GLFWwindow* window, int iconified) {
       const auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
       // Just stop crashing for now.
+      app->context->pause(iconified);
       app->paused = iconified;
    }
 

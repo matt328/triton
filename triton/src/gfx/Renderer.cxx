@@ -133,6 +133,10 @@ namespace tr::gfx {
    }
 
    void Renderer::recreateSwapchain() {
+      const auto size = graphicsDevice->getCurrentSize();
+      if (size.first == 0 || size.second == 0) {
+         return;
+      }
       waitIdle();
       resizeDelegate(graphicsDevice->getCurrentSize());
 
@@ -398,9 +402,6 @@ namespace tr::gfx {
    }
 
    void Renderer::render() {
-
-      // ImGui::Render();
-
       drawFrame();
       renderObjects.clear();
       objectDataList.clear();
