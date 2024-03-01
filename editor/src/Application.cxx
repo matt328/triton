@@ -44,13 +44,17 @@ namespace ed {
       auto& facade = context->getGameplayFacade();
 
       facade.createStaticMeshEntity((tr::util::Paths::MODELS / "viking_room.gltf").string(),
-                                    (tr::util::Paths::TEXTURES / "viking_room.png").string());
+                                    (tr::util::Paths::TEXTURES / "viking_room.png").string(),
+                                    "Viking Room #1");
       facade.createStaticMeshEntity((tr::util::Paths::MODELS / "viking_room.gltf").string(),
-                                    (tr::util::Paths::TEXTURES / "viking_room.png").string());
+                                    (tr::util::Paths::TEXTURES / "viking_room.png").string(),
+                                    "Viking Room #2");
       facade.createStaticMeshEntity((tr::util::Paths::MODELS / "viking_room.gltf").string(),
-                                    (tr::util::Paths::TEXTURES / "viking_room.png").string());
+                                    (tr::util::Paths::TEXTURES / "viking_room.png").string(),
+                                    "Viking Room #3");
 
-      auto camera = facade.createCamera(width, height, Fov, ZNear, ZFar, CamStart);
+      auto camera =
+          facade.createCamera(width, height, Fov, ZNear, ZFar, CamStart, "Default Camera");
       facade.setCurrentCamera(camera);
    }
 
@@ -68,55 +72,54 @@ namespace ed {
 
          auto& facade = context->getGameplayFacade();
 
-         auto es = facade.getAllEntities();
-
-         if (ImGui::Begin("Entity Editor", &active, ImGuiWindowFlags_MenuBar)) {
-            // Left
-            ImGui::BeginChild("left pane",
-                              ImVec2(150, 0),
-                              ImGuiChildFlags_Border | ImGuiChildFlags_ResizeX);
-            for (auto e : es) {
-               if (ImGui::Selectable(std::to_string(static_cast<uint32_t>(e)).c_str(),
-                                     selectedEntity == static_cast<uint32_t>(e))) {
-                  selectedEntity = static_cast<uint32_t>(e);
-               }
-            }
-            ImGui::EndChild();
-            ImGui::SameLine();
-
-            // Right
-            {
-               ImGui::BeginGroup();
-               ImGui::BeginChild(
-                   "item view",
-                   ImVec2(0,
-                          -ImGui::GetFrameHeightWithSpacing())); // Leave room for 1 line below us
-               ImGui::Text("Entity ID: %d", selectedEntity);
-               ImGui::Separator();
-               if (ImGui::BeginTabBar("##Tabs", ImGuiTabBarFlags_None)) {
-                  if (ImGui::BeginTabItem("Description")) {
-                     ImGui::TextWrapped(
-                         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod "
-                         "tempor incididunt ut labore et dolore magna aliqua. ");
-                     ImGui::EndTabItem();
-                  }
-                  if (ImGui::BeginTabItem("Details")) {
-                     ImGui::Text("ID: 0123456789");
-                     ImGui::EndTabItem();
-                  }
-                  ImGui::EndTabBar();
-               }
-               ImGui::EndChild();
-               if (ImGui::Button("Revert")) {}
-               ImGui::SameLine();
-               if (ImGui::Button("Save")) {}
-               ImGui::EndGroup();
-            }
-            ImGui::End();
-         }
+         renderEntityEditor(facade);
 
          ImGui::Render();
       });
+   }
+
+   void Application::renderEntityEditor(tr::ctx::GameplayFacade& facade) {
+      auto& es = facade.getAllEntities();
+
+      if (ImGui::Begin("Entity Editor", &active, ImGuiWindowFlags_MenuBar)) {
+         // Left
+         ImGui::BeginChild("left pane",
+                           ImVec2(150, 0),
+                           ImGuiChildFlags_Border | ImGuiChildFlags_ResizeX);
+         for (auto e : es) {
+            auto& nameComponent = facade.getEntityName(e);
+            if (ImGui::Selectable(nameComponent.name.c_str(),
+                                  selectedEntity == static_cast<uint32_t>(e))) {
+               selectedEntity = static_cast<uint32_t>(e);
+            }
+         }
+         ImGui::EndChild();
+         ImGui::SameLine();
+
+         // Right
+         {
+            ImGui::BeginGroup();
+            ImGui::BeginChild(
+                "item view",
+                ImVec2(0,
+                       -ImGui::GetFrameHeightWithSpacing())); // Leave room for 1 line below us
+
+            ImGui::Text("Entity ID: %d", selectedEntity);
+            ImGui::SeparatorText("Transform");
+
+            auto& transform = facade.getEntityPosition(static_cast<entt::entity>(selectedEntity));
+            ImGui::DragFloat3("Position", glm::value_ptr(transform.position), .1f);
+            ImGui::DragFloat3("Rotation", glm::value_ptr(transform.rotation), .1f, -180.f, 180.f);
+            ImGui::SeparatorText("Renderable");
+
+            ImGui::EndChild();
+            if (ImGui::Button("Revert")) {}
+            ImGui::SameLine();
+            if (ImGui::Button("Save")) {}
+            ImGui::EndGroup();
+         }
+      }
+      ImGui::End();
    }
 
    // GLFW Callbacks
@@ -179,15 +182,17 @@ namespace ed {
    }
 
    void Application::mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
-      if (ImGui::GetIO().WantCaptureMouse) {
+      const auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
+      if (ImGui::GetIO().WantCaptureMouse && !app->mouseCaptured) {
          return;
       }
-      const auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
       if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_RELEASE) {
          if (!app->mouseCaptured) {
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NoMouse;
          } else {
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            ImGui::GetIO().ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
          }
          app->mouseCaptured = !app->mouseCaptured;
          app->context->setMouseState(app->mouseCaptured);

@@ -26,6 +26,7 @@ target_precompile_headers(${PROJECT_NAME}
    <filesystem>
    <functional>
    <sstream>
+   <glm/gtc/type_ptr.hpp>
    <string>
 )
 

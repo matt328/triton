@@ -2,6 +2,7 @@
 
 namespace tr::ctx {
    class Context;
+   class GameplayFacade;
 }
 
 namespace ed {
@@ -41,6 +42,8 @@ namespace ed {
       int prevXPos{}, prevYPos{}, prevWidth{}, prevHeight{};
 
       uint32_t selectedEntity{};
+
+      void renderEntityEditor(tr::ctx::GameplayFacade& facade);
 
       static void errorCallback(int code, const char* description);
       static void windowIconifiedCallback(GLFWwindow* window, int iconified);
