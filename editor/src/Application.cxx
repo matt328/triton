@@ -2,6 +2,10 @@
 #include "ctx/Context.hpp"
 #include "ctx/GameplayFacade.hpp"
 #include "util/Paths.hpp"
+#include "ImGuiStyle.hpp"
+#include "ImFileBrowser.hpp"
+#include <imgui.h>
+#include <imgui_internal.h>
 
 #ifdef _WIN32
 #define GLFW_EXPOSE_NATIVE_WIN32
@@ -9,10 +13,6 @@
 #include <windows.h> // For general Windows APIs
 #include <dwmapi.h>  // For DWMWINDOWATTRIBUTE
 #include <uxtheme.h>
-
-#ifndef DWMWA_USE_IMMERSIVE_DARK_MODE
-#define DWMWA_USE_IMMERSIVE_DARK_MODE 20
-#endif
 #endif
 
 namespace ed {
@@ -54,18 +54,36 @@ namespace ed {
 
 #ifdef _WIN32
       auto hWnd = glfwGetWin32Window(window.get());
-      BOOL value = TRUE;
-      ::DwmSetWindowAttribute(hWnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &value, sizeof(value));
-#endif
-
       // Paints the background of the window black
       PAINTSTRUCT ps;
       RECT rc;
       HDC hdc = BeginPaint(hWnd, &ps);
       GetClientRect(hWnd, &rc);
-      SetBkColor(hdc, RGB(32, 32, 32));
+      SetBkColor(hdc, RGB(0, 0, 0));
       ExtTextOut(hdc, 0, 0, ETO_OPAQUE, &rc, nullptr, 0, nullptr);
       EndPaint(hWnd, &ps);
+      BOOL value = TRUE;
+      ::DwmSetWindowAttribute(hWnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &value, sizeof(value));
+      RECT rcClient{};
+      GetWindowRect(hWnd, &rcClient);
+      // I feel like trash for this but i can't figure out how to make it repaint enough of the
+      // window to actually update it and glfw doesn't want to support dark mode yet.
+      // TODO: roll my own cross platform windowing library.
+      SetWindowPos(hWnd,
+                   nullptr,
+                   rcClient.left,
+                   rcClient.top,
+                   rcClient.right - rcClient.left - 1,
+                   rcClient.bottom - rcClient.top - 1,
+                   SWP_FRAMECHANGED);
+      SetWindowPos(hWnd,
+                   nullptr,
+                   rcClient.left,
+                   rcClient.top,
+                   rcClient.right - rcClient.left,
+                   rcClient.bottom - rcClient.top,
+                   SWP_FRAMECHANGED);
+#endif
 
       glfwSetWindowSizeLimits(window.get(), MinHeight, MinWidth, GLFW_DONT_CARE, GLFW_DONT_CARE);
 
@@ -81,6 +99,8 @@ namespace ed {
       glfwSetWindowIconifyCallback(window.get(), windowIconifiedCallback);
 
       context = std::make_unique<tr::ctx::Context>(window.get(), ImguiEnabled);
+
+      ImGuiEx::setupImGuiStyle();
 
       // Editor should provide a way to load these things from a file and call this api
       auto& facade = context->getGameplayFacade();
@@ -101,6 +121,12 @@ namespace ed {
       auto camera =
           facade.createCamera(width, height, Fov, ZNear, ZFar, CamStart, "Default Camera");
       facade.setCurrentCamera(camera);
+
+      ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
+      // (optional) set browser properties
+      fileDialog.SetTitle("title");
+      fileDialog.SetTypeFilters({".hpp", ".cxx"});
    }
 
    Application::~Application() {
@@ -117,16 +143,84 @@ namespace ed {
 
          auto& facade = context->getGameplayFacade();
 
+         renderDockSpace();
+
          renderEntityEditor(facade);
 
          ImGui::Render();
       });
    }
 
+   void Application::renderDockSpace() {
+      static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_PassthruCentralNode;
+      ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+
+      ImGuiViewport* viewport = ImGui::GetMainViewport();
+      ImGui::SetNextWindowPos(viewport->Pos);
+      ImGui::SetNextWindowSize(viewport->Size);
+      ImGui::SetNextWindowViewport(viewport->ID);
+      ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+      ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+      window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse |
+                      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+      window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+
+      if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
+         window_flags |= ImGuiWindowFlags_NoBackground;
+
+      ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+      ImGui::Begin("DockSpace", nullptr, window_flags);
+      ImGui::PopStyleVar();
+      ImGui::PopStyleVar(2);
+
+      // DockSpace
+      ImGuiIO& io = ImGui::GetIO();
+      if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable) {
+         ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
+         ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
+
+         static auto first_time = true;
+         if (first_time) {
+            first_time = false;
+
+            ImGui::DockBuilderRemoveNode(dockspace_id); // clear any previous layout
+            ImGui::DockBuilderAddNode(dockspace_id, dockspace_flags | ImGuiDockNodeFlags_DockSpace);
+            ImGui::DockBuilderSetNodeSize(dockspace_id, viewport->Size);
+            auto dock_id_left = ImGui::DockBuilderSplitNode(dockspace_id,
+                                                            ImGuiDir_Left,
+                                                            0.2f,
+                                                            nullptr,
+                                                            &dockspace_id);
+            ImGui::DockBuilderDockWindow("Entity Editor", dock_id_left);
+            ImGui::DockBuilderFinish(dockspace_id);
+         }
+      }
+      ImGui::End(); // Dockspace
+
+      if (ImGui::BeginMainMenuBar()) {
+         if (ImGui::BeginMenu("File")) {
+            if (ImGui::MenuItem("Exit", "Alt+F4")) {
+               context->hostWindowClosed();
+            }
+            ImGui::EndMenu();
+         }
+         if (ImGui::BeginMenu("Edit")) {
+            if (ImGui::MenuItem("Undo", "CTRL+Z")) {}
+            if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {} // Disabled item
+            ImGui::Separator();
+            if (ImGui::MenuItem("Cut", "CTRL+X")) {}
+            if (ImGui::MenuItem("Copy", "CTRL+C")) {}
+            if (ImGui::MenuItem("Paste", "CTRL+V")) {}
+            ImGui::EndMenu();
+         }
+         ImGui::EndMainMenuBar();
+      }
+   }
+
    void Application::renderEntityEditor(tr::ctx::GameplayFacade& facade) {
       auto& es = facade.getAllEntities();
 
-      if (ImGui::Begin("Entity Editor", &active, ImGuiWindowFlags_MenuBar)) {
+      if (ImGui::Begin("Entity Editor")) {
          // Left
          ImGui::BeginChild("left pane",
                            ImVec2(150, 0),
@@ -158,13 +252,23 @@ namespace ed {
             ImGui::SeparatorText("Renderable");
 
             ImGui::EndChild();
-            if (ImGui::Button("Revert")) {}
+            if (ImGui::Button("New...")) {
+               fileDialog.Open();
+            }
             ImGui::SameLine();
             if (ImGui::Button("Save")) {}
+
             ImGui::EndGroup();
          }
       }
       ImGui::End();
+
+      fileDialog.Display();
+
+      if (fileDialog.HasSelected()) {
+         Log::info << "Selected filename" << fileDialog.GetSelected().string() << std::endl;
+         fileDialog.ClearSelected();
+      }
    }
 
    // GLFW Callbacks

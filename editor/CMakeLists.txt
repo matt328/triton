@@ -7,9 +7,6 @@ set(editor_SRC
 
 add_executable(${PROJECT_NAME} ${editor_SRC})
 
-message("Windows SDK version: ${CMAKE_SYSTEM_VERSION}")
-set(CMAKE_SYSTEM_VERSION 10.0.22000.0)
-
 IF(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
    target_compile_options(${PROJECT_NAME} PRIVATE ${TRITON_COMPILE_OPTIONS})
 ENDIF()
