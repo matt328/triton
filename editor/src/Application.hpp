@@ -1,7 +1,10 @@
 #pragma once
 
+#include "ImFileBrowser.hpp"
+
 namespace tr::ctx {
    class Context;
+   class GameplayFacade;
 }
 
 namespace ed {
@@ -39,6 +42,13 @@ namespace ed {
       bool mouseCaptured{};
       bool fullscreen{};
       int prevXPos{}, prevYPos{}, prevWidth{}, prevHeight{};
+
+      uint32_t selectedEntity{};
+
+      ImGui::FileBrowser fileDialog;
+
+      void renderEntityEditor(tr::ctx::GameplayFacade& facade);
+      void renderDockSpace();
 
       static void errorCallback(int code, const char* description);
       static void windowIconifiedCallback(GLFWwindow* window, int iconified);

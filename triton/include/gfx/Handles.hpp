@@ -1,7 +1,6 @@
 #pragma once
 
 namespace tr::gfx {
-
-   using TextureHandle = size_t;
+   using TextureHandle = uint32_t;
    using MeshHandle = size_t;
 }
