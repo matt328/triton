@@ -80,7 +80,18 @@ Should the script interface be the GameplayFacade as well? Probably, I think I d
 
 TODO:
 
-1. Set up the context and renderer so that Imgui draw data can be rendered while keeping concerns separated.
-2. Add support to the renderer's render method to optionally render Imgui draw data, if any has been provided.  Expose a configuration flag from the context that enables or disables Imgui since games won't be using it.
-3. Render the demo window from the application and hand off its draw data to the context.
-4. Figure out the first actual editor windows needed.
+1. Editor Load/Save Game Project
+   1. Update gltf loading to account for referenced image files
+   1. Load in new entities - pick a gltf file.
+   1. Save state of the 'game', basically entities and their transforms
+   1. load the state of the 'game'
+1. Scripting for entity behaviors
+   - Attach a script to an entity
+   - Edit scripts inside the UI
+   - Expose the script interface to a UI
+1. Renderer Improvements
+   - Lighting
+   - Draw Indiret
+   - GPU Culling
+1. Finish Out Gamepad Support
+1. Terrain Generating/Rendering

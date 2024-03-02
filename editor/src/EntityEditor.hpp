@@ -11,6 +11,8 @@
 #define MM_IEEE_ENTITY_WIDGET ::MM::EntityWidget
 #endif
 
+#include <entt/entt.hpp>
+
 namespace MM {
 
    template <class EntityType>
