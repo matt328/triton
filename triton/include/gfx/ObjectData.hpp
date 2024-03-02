@@ -7,7 +7,7 @@ namespace tr::gfx {
    // Maximum size of the ObjectData buffer array
    constexpr auto MAX_OBJECTS = 1000;
 
-   struct ObjectData {
+   struct alignas(16) ObjectData {
       glm::mat4 model;
       TextureHandle textureId;
    };

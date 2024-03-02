@@ -2,7 +2,7 @@
 
 namespace tr::gp::ecs {
    struct Transform {
-      float xRot{}, yRot{}, zRot{};
-      float x{}, y{}, z{};
+      glm::vec3 rotation{};
+      glm::vec3 position{};
    };
 }
