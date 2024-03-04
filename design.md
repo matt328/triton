@@ -100,20 +100,10 @@ TODO:
 
 Initially it seems like the whole game file could be a big gltf file, but the data will be more than just geometry and materials, there will be scripts attached to entities, cameras, environmental things. Effects and actions that are more than just geometry and materials.
 
-For a naive implementation, look at entt's serialization thing, and figure out some way to link entities' geometry and materials back to the source gltf files that created them.  Maybe another editor-only component like the NameComponent.
+EnTT's serialization is a little too bare bones and experimental feeling right now, also we don't want to just snapshot the entire state of the game.  For now start a json format that can be easily read, written and parsed, that should be good enough since it's only for the editor.  An actual game's format will need to be more optimized.
 
-File Format:
+File Format see `.\project.json`
 
-```json
-{
-   "name": "project name",
-   "entities": [
-      {
-         "name": "name",
-         "components": {
+Right now, just a list of entities and their components.
 
-         }
-      }
-   ]
-}
-```
+Maybe have a EditorInfo component that only the editor uses to keep track of the assets used to create a given Renderable.  Could make the existing NameComponent more general until there is a need for the editor to query on separate components.
