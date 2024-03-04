@@ -1,0 +1,144 @@
+{
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "type": "object",
+   "properties": {
+      "name": {
+         "type": "string"
+      },
+      "activeCamera": {
+         "type": "string"
+      },
+      "entities": {
+         "type": "array",
+         "items": {
+            "type": "object",
+            "properties": {
+               "components": {
+                  "type": "array",
+                  "items": {
+                     "type": "object",
+                     "properties": {
+                        "type": {
+                           "type": "string"
+                        }
+                     },
+                     "required": [
+                        "type"
+                     ],
+                     "oneOf": [
+                        {
+                           "properties": {
+                              "type": {
+                                 "const": "transform"
+                              },
+                              "position": {
+                                 "type": "object",
+                                 "properties": {
+                                    "x": {
+                                       "type": "number"
+                                    },
+                                    "y": {
+                                       "type": "number"
+                                    },
+                                    "z": {
+                                       "type": "number"
+                                    }
+                                 },
+                                 "required": [
+                                    "x",
+                                    "y",
+                                    "z"
+                                 ]
+                              },
+                              "rotation": {
+                                 "type": "object",
+                                 "properties": {
+                                    "x": {
+                                       "type": "number"
+                                    },
+                                    "y": {
+                                       "type": "number"
+                                    },
+                                    "z": {
+                                       "type": "number"
+                                    }
+                                 },
+                                 "required": [
+                                    "x",
+                                    "y",
+                                    "z"
+                                 ]
+                              }
+                           },
+                           "required": [
+                              "position",
+                              "rotation"
+                           ]
+                        },
+                        {
+                           "properties": {
+                              "type": {
+                                 "const": "editor-info"
+                              },
+                              "name": {
+                                 "type": "string"
+                              }
+                           },
+                           "required": [
+                              "name"
+                           ]
+                        },
+                        {
+                           "properties": {
+                              "type": {
+                                 "const": "renderable-info"
+                              },
+                              "sourceMesh": {
+                                 "type": "string"
+                              },
+                              "sourceTexture": {
+                                 "type": "string"
+                              }
+                           },
+                           "required": [
+                              "sourceMesh",
+                              "sourceTexture"
+                           ]
+                        },
+                        {
+                           "properties": {
+                              "type": {
+                                 "const": "camera"
+                              },
+                              "yaw": {
+                                 "type": "number"
+                              },
+                              "pitch": {
+                                 "type": "number"
+                              },
+                              "fov": {
+                                 "type": "number"
+                              }
+                           },
+                           "required": [
+                              "yaw",
+                              "pitch",
+                              "fov"
+                           ]
+                        }
+                     ]
+                  }
+               }
+            },
+            "required": [
+               "components"
+            ]
+         }
+      }
+   },
+   "required": [
+      "name",
+      "activeCamera",
+      "entities"
+   ]
+}
