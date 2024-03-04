@@ -108,12 +108,15 @@ namespace ed {
       facade.createStaticMeshEntity((tr::util::Paths::MODELS / "viking_room.gltf").string(),
                                     (tr::util::Paths::TEXTURES / "viking_room.png").string(),
                                     "Viking Room #1");
+
       facade.createStaticMeshEntity((tr::util::Paths::MODELS / "viking_room.gltf").string(),
                                     (tr::util::Paths::TEXTURES / "viking_room.png").string(),
                                     "Viking Room #2");
+
       facade.createStaticMeshEntity((tr::util::Paths::MODELS / "viking_room.gltf").string(),
                                     (tr::util::Paths::TEXTURES / "viking_room.png").string(),
                                     "Viking Room #3");
+
       facade.createStaticMeshEntity((tr::util::Paths::MODELS / "area.gltf").string(),
                                     (tr::util::Paths::TEXTURES / "grass.png").string(),
                                     "Grass Plane");
