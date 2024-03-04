@@ -1,0 +1,53 @@
+{
+   "name": "project name",
+   "activeCamera": "Camera #1",
+   "entities": [
+      {
+         "name": "name",
+         "components": [
+            {
+               "type": "transform",
+               "position": {
+                  "x": 0.0,
+                  "y": 0.0,
+                  "z": 0.0
+               },
+               "rotation": {
+                  "x": 0.0,
+                  "y": 0.0,
+                  "z": 0.0
+               }
+            },
+            {
+               "type": "renderable",
+               "mesh": "???",
+               "texture": "???"
+            }
+         ]
+      },
+      {
+         "name": "Camera #1",
+         "components": [
+            {
+               "type": "transform",
+               "position": {
+                  "x": 0.0,
+                  "y": 0.0,
+                  "z": 0.0
+               },
+               "rotation": {
+                  "x": 0.0,
+                  "y": 0.0,
+                  "z": 0.0
+               }
+            },
+            {
+               "type": "camera",
+               "yaw": -90.0,
+               "pitch": 0.0,
+               "fov": 60.0
+            }
+         ]
+      }
+   ]
+}

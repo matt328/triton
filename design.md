@@ -95,3 +95,25 @@ TODO:
    - GPU Culling
 1. Finish Out Gamepad Support
 1. Terrain Generating/Rendering
+
+### Editor Save Data
+
+Initially it seems like the whole game file could be a big gltf file, but the data will be more than just geometry and materials, there will be scripts attached to entities, cameras, environmental things. Effects and actions that are more than just geometry and materials.
+
+For a naive implementation, look at entt's serialization thing, and figure out some way to link entities' geometry and materials back to the source gltf files that created them.  Maybe another editor-only component like the NameComponent.
+
+File Format:
+
+```json
+{
+   "name": "project name",
+   "entities": [
+      {
+         "name": "name",
+         "components": {
+
+         }
+      }
+   ]
+}
+```
