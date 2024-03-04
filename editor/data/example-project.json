@@ -3,7 +3,6 @@
    "activeCamera": "Camera #1",
    "entities": [
       {
-         "name": "name",
          "components": [
             {
                "type": "transform",
@@ -19,15 +18,22 @@
                }
             },
             {
-               "type": "renderable",
-               "mesh": "???",
-               "texture": "???"
+               "type": "editor-info",
+               "name": "entity name"
+            },
+            {
+               "type": "renderable-info",
+               "sourceMesh": "relative filename",
+               "sourceTexture": "relative filename"
             }
          ]
       },
       {
-         "name": "Camera #1",
          "components": [
+            {
+               "type": "editor-info",
+               "name": "entity name"
+            },
             {
                "type": "transform",
                "position": {
