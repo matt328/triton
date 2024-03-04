@@ -7,6 +7,7 @@
 #include <GLFW/glfw3.h>
 #include <imgui.h>
 #include <imgui_internal.h>
+#include "ProjectFile.hpp"
 
 #ifdef _WIN32
 #define GLFW_EXPOSE_NATIVE_WIN32
@@ -203,6 +204,9 @@ namespace ed {
 
       if (ImGui::BeginMainMenuBar()) {
          if (ImGui::BeginMenu("File")) {
+            if (ImGui::MenuItem("Exit", "Ctrl+S")) {
+               io::writeProjectFile(std::string_view{"some_file"});
+            }
             if (ImGui::MenuItem("Exit", "Alt+F4")) {
                context->hostWindowClosed();
             }

@@ -146,4 +146,12 @@
       "-I${workspaceFolder}/src/core",
       "-I${workspaceFolder}/src/game"
    ],
+   "json.schemas": [
+      {
+         "fileMatch": [
+            "**/*/data/projects/**/*.json"
+         ],
+         "url": "./editor/data/projects-schema.json"
+      }
+   ]
 }

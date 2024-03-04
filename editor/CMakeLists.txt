@@ -3,6 +3,7 @@ project("editor" VERSION "0.0.1" LANGUAGES CXX)
 set(editor_SRC
    "src/main.cxx"
    "src/Application.cxx"
+   "src/ProjectFile.cxx"
 )
 
 add_executable(${PROJECT_NAME} ${editor_SRC})
@@ -12,6 +13,8 @@ IF(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 ENDIF()
 
 configure_file(src/config.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/config.h)
+
+find_package(nlohmann_json CONFIG REQUIRED)
 
 target_compile_definitions(${PROJECT_NAME}
    PRIVATE
@@ -43,6 +46,7 @@ endif()
 target_link_libraries(${PROJECT_NAME}
    PRIVATE
    triton
+   nlohmann_json::nlohmann_json
 )
 
 target_include_directories(${PROJECT_NAME}
