@@ -4,6 +4,7 @@
 #include "util/Paths.hpp"
 #include "ImGuiStyle.hpp"
 #include "ImFileBrowser.hpp"
+#include <GLFW/glfw3.h>
 #include <imgui.h>
 #include <imgui_internal.h>
 
