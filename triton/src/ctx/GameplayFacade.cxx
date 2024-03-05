@@ -7,8 +7,6 @@
 #include "gp/ecs/component/Transform.hpp"
 #include "gp/ecs/component/Camera.hpp"
 #include "gp/ecs/component/Resources.hpp"
-#include <functional>
-#include <optional>
 
 namespace tr::ctx {
    GameplayFacade::GameplayFacade(gp::GameplaySystem& gameplaySystem,
@@ -62,6 +60,12 @@ namespace tr::ctx {
       gameplaySystem.registry->ctx().emplace<gp::ecs::CurrentCamera>(currentCamera);
    }
 
+   std::string& GameplayFacade::getActiveCameraName() {
+      auto c = gameplaySystem.registry->ctx().get<gp::ecs::CurrentCamera>();
+      auto e = getComponent<EditorInfoComponent>(c.currentCamera);
+      return e.value().get().name;
+   }
+
    std::vector<gp::EntityType>& GameplayFacade::getAllEntities() {
       allEntities.clear();
       for (auto e : gameplaySystem.registry->view<entt::entity>()) {
@@ -70,8 +74,7 @@ namespace tr::ctx {
       return allEntities;
    }
 
-   std::optional<std::reference_wrapper<gp::ecs::Transform>> GameplayFacade::getEntityTransform(
-       gp::EntityType entityId) {
+   OptionalRef<gp::ecs::Transform> GameplayFacade::getEntityTransform(gp::EntityType entityId) {
       if (gameplaySystem.registry->all_of<gp::ecs::Transform>(entityId)) {
          auto& v = gameplaySystem.registry->get<gp::ecs::Transform>(entityId);
          return std::optional<std::reference_wrapper<gp::ecs::Transform>>{std::ref(v)};
@@ -84,8 +87,7 @@ namespace tr::ctx {
       return nameComponent;
    }
 
-   std::optional<std::reference_wrapper<gp::ecs::Camera>> GameplayFacade::getCameraComponent(
-       const gp::EntityType entityId) {
+   OptionalRef<gp::ecs::Camera> GameplayFacade::getCameraComponent(const gp::EntityType entityId) {
       if (gameplaySystem.registry->all_of<gp::ecs::Camera>(entityId)) {
          auto& c = gameplaySystem.registry->get<gp::ecs::Camera>(entityId);
          return std::optional<std::reference_wrapper<gp::ecs::Camera>>{std::ref(c)};

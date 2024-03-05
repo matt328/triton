@@ -6,6 +6,8 @@
 #include <entt/entt.hpp>
 
 namespace tr::ctx {
+   template <typename T>
+   using OptionalRef = std::optional<std::reference_wrapper<T>>;
 
    struct EditorInfoComponent {
       std::string name;
@@ -42,22 +44,22 @@ namespace tr::ctx {
       [[nodiscard]] std::vector<gp::EntityType>& getAllEntities();
 
       template <typename T>
-      std::optional<std::reference_wrapper<T>> getComponent(gp::EntityType entityId) {
+      OptionalRef<T> getComponent(gp::EntityType entityId) {
          if (gameplaySystem.registry->all_of<T>(entityId)) {
             auto& v = gameplaySystem.registry->get<T>(entityId);
-            return std::optional<std::reference_wrapper<T>>{std::ref(v)};
+            return OptionalRef<T>{std::ref(v)};
          } else {
             return {};
          }
       }
 
-      std::optional<std::reference_wrapper<gp::ecs::Transform>> getEntityTransform(
-          gp::EntityType entityId);
+      OptionalRef<gp::ecs::Transform> getEntityTransform(gp::EntityType entityId);
 
       EditorInfoComponent& getEditorInfo(gp::EntityType entityId);
 
-      std::optional<std::reference_wrapper<gp::ecs::Camera>> getCameraComponent(
-          const gp::EntityType entity);
+      OptionalRef<gp::ecs::Camera> getCameraComponent(const gp::EntityType entity);
+
+      std::string& getActiveCameraName();
 
     private:
       bool debugEnabled{};

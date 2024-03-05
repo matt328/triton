@@ -5,5 +5,5 @@
 
 namespace ed::io {
    void writeProjectFile(std::string_view filename, tr::ctx::GameplayFacade& facade);
-   void readProjectFile(entt::registry& registry, std::string_view& filename);
+   void readProjectFile(std::string_view filename, tr::ctx::GameplayFacade& facade);
 }
