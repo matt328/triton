@@ -3,6 +3,7 @@
 #include "gp/GameplaySystem.hpp"
 #include "gp/ecs/component/Transform.hpp"
 #include "gp/ecs/component/Camera.hpp"
+#include <entt/entt.hpp>
 
 namespace tr::ctx {
 
@@ -39,7 +40,20 @@ namespace tr::ctx {
       void setCurrentCamera(gp::EntityType currentCamera);
 
       [[nodiscard]] std::vector<gp::EntityType>& getAllEntities();
-      gp::ecs::Transform& getEntityTransform(gp::EntityType entityId);
+
+      template <typename T>
+      std::optional<std::reference_wrapper<T>> getComponent(gp::EntityType entityId) {
+         if (gameplaySystem.registry->all_of<T>(entityId)) {
+            auto& v = gameplaySystem.registry->get<T>(entityId);
+            return std::optional<std::reference_wrapper<T>>{std::ref(v)};
+         } else {
+            return {};
+         }
+      }
+
+      std::optional<std::reference_wrapper<gp::ecs::Transform>> getEntityTransform(
+          gp::EntityType entityId);
+
       EditorInfoComponent& getEditorInfo(gp::EntityType entityId);
 
       std::optional<std::reference_wrapper<gp::ecs::Camera>> getCameraComponent(

@@ -8,6 +8,7 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 #include "ProjectFile.hpp"
+#include "gp/ecs/component/Transform.hpp"
 
 #ifdef _WIN32
 #define GLFW_EXPOSE_NATIVE_WIN32
@@ -206,7 +207,7 @@ namespace ed {
 
       if (ImGui::BeginMainMenuBar()) {
          if (ImGui::BeginMenu("File")) {
-            if (ImGui::MenuItem("Exit", "Ctrl+S")) {
+            if (ImGui::MenuItem("Save", "Ctrl+S")) {
                io::writeProjectFile(std::string_view{"some_file"}, context->getGameplayFacade());
             }
             if (ImGui::MenuItem("Exit", "Alt+F4")) {
@@ -254,14 +255,22 @@ namespace ed {
                        -ImGui::GetFrameHeightWithSpacing())); // Leave room for 1 line below us
 
             ImGui::Text("Entity ID: %d", selectedEntity);
-            ImGui::SeparatorText("Transform");
 
-            auto& transform = facade.getEntityTransform(static_cast<entt::entity>(selectedEntity));
-            ImGui::DragFloat3("Position", glm::value_ptr(transform.position), .1f);
-            ImGui::DragFloat3("Rotation", glm::value_ptr(transform.rotation), .1f, -180.f, 180.f);
-            ImGui::SeparatorText("Renderable");
+            const auto maybeTransform = facade.getComponent<tr::gp::ecs::Transform>(
+                static_cast<entt::entity>(selectedEntity));
+            if (maybeTransform.has_value()) {
+               auto transform = maybeTransform.value().get();
+               ImGui::SeparatorText("Transform");
+               ImGui::DragFloat3("Position", glm::value_ptr(transform.position), .1f);
+               ImGui::DragFloat3("Rotation",
+                                 glm::value_ptr(transform.rotation),
+                                 .1f,
+                                 -180.f,
+                                 180.f);
+               ImGui::SeparatorText("Renderable");
+               ImGui::EndChild();
+            }
 
-            ImGui::EndChild();
             if (ImGui::Button("New...")) {
                fileDialog.Open();
             }

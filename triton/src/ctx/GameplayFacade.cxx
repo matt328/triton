@@ -62,18 +62,21 @@ namespace tr::ctx {
       gameplaySystem.registry->ctx().emplace<gp::ecs::CurrentCamera>(currentCamera);
    }
 
-   // TODO: Get ALL of the entities not just non camera ones.
    std::vector<gp::EntityType>& GameplayFacade::getAllEntities() {
       allEntities.clear();
-      for (auto e : gameplaySystem.registry->view<gp::ecs::Renderable, gp::ecs::Transform>()) {
+      for (auto e : gameplaySystem.registry->view<entt::entity>()) {
          allEntities.push_back(e);
       }
       return allEntities;
    }
 
-   gp::ecs::Transform& GameplayFacade::getEntityTransform(gp::EntityType entityId) {
-      auto& v = gameplaySystem.registry->get<gp::ecs::Transform>(entityId);
-      return v;
+   std::optional<std::reference_wrapper<gp::ecs::Transform>> GameplayFacade::getEntityTransform(
+       gp::EntityType entityId) {
+      if (gameplaySystem.registry->all_of<gp::ecs::Transform>(entityId)) {
+         auto& v = gameplaySystem.registry->get<gp::ecs::Transform>(entityId);
+         return std::optional<std::reference_wrapper<gp::ecs::Transform>>{std::ref(v)};
+      }
+      return {};
    }
 
    EditorInfoComponent& GameplayFacade::getEditorInfo(gp::EntityType entityId) {

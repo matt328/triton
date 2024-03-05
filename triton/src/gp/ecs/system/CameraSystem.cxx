@@ -52,7 +52,7 @@ namespace tr::gp::ecs::CameraSystem {
 
    void fixedUpdate(entt::registry& registry) {
       const auto view = registry.view<Camera>();
-      // This doesn't exist
+
       const auto [width, height] = registry.ctx().get<const WindowDimensions>();
 
       for (auto [entity, cam] : view.each()) {
