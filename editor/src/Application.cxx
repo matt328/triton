@@ -207,8 +207,13 @@ namespace ed {
 
       if (ImGui::BeginMainMenuBar()) {
          if (ImGui::BeginMenu("File")) {
+            if (ImGui::MenuItem("Open", "Ctrl+O")) {
+               io::readProjectFile(std::string_view{"some_file.json"},
+                                   context->getGameplayFacade());
+            }
             if (ImGui::MenuItem("Save", "Ctrl+S")) {
-               io::writeProjectFile(std::string_view{"some_file"}, context->getGameplayFacade());
+               io::writeProjectFile(std::string_view{"some_file.json"},
+                                    context->getGameplayFacade());
             }
             if (ImGui::MenuItem("Exit", "Alt+F4")) {
                context->hostWindowClosed();
@@ -259,7 +264,7 @@ namespace ed {
             const auto maybeTransform = facade.getComponent<tr::gp::ecs::Transform>(
                 static_cast<entt::entity>(selectedEntity));
             if (maybeTransform.has_value()) {
-               auto transform = maybeTransform.value().get();
+               auto& transform = maybeTransform.value().get();
                ImGui::SeparatorText("Transform");
                ImGui::DragFloat3("Position", glm::value_ptr(transform.position), .1f);
                ImGui::DragFloat3("Rotation",

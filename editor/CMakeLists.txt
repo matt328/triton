@@ -28,7 +28,9 @@ target_precompile_headers(${PROJECT_NAME}
    PRIVATE
    <filesystem>
    <functional>
+   <nlohmann/json.hpp>
    <sstream>
+   <fstream>
    <stb_image.h>
    <glm/gtc/type_ptr.hpp>
    <glm/gtx/string_cast.hpp>
