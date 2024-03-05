@@ -35,23 +35,15 @@
                "name": "entity name"
             },
             {
-               "type": "transform",
+               "type": "camera",
+               "yaw": -90.0,
+               "pitch": 0.0,
+               "fov": 60.0,
                "position": {
                   "x": 0.0,
                   "y": 0.0,
                   "z": 0.0
-               },
-               "rotation": {
-                  "x": 0.0,
-                  "y": 0.0,
-                  "z": 0.0
                }
-            },
-            {
-               "type": "camera",
-               "yaw": -90.0,
-               "pitch": 0.0,
-               "fov": 60.0
             }
          ]
       }
