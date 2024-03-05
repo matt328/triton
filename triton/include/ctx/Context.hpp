@@ -16,7 +16,9 @@ namespace tr::ctx {
 
    class Context {
     public:
-      Context(void* nativeWindow, bool guiEnabled = false); // TODO: revisit this at some point
+      Context(void* nativeWindow,
+              bool guiEnabled = false,
+              bool debugEnabled = false); // TODO: revisit this at some point
       ~Context();
 
       Context(const Context&) = delete;

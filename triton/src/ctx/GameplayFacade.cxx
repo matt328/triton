@@ -4,13 +4,17 @@
 #include "gfx/Renderer.hpp"
 
 #include "gp/ecs/component/Renderable.hpp"
-#include "gp/ecs/Transform.hpp"
+#include "gp/ecs/component/Transform.hpp"
 #include "gp/ecs/component/Camera.hpp"
 #include "gp/ecs/component/Resources.hpp"
+#include <functional>
+#include <optional>
 
 namespace tr::ctx {
-   GameplayFacade::GameplayFacade(gp::GameplaySystem& gameplaySystem, gfx::Renderer& renderer)
-       : gameplaySystem{gameplaySystem}, renderer{renderer} {
+   GameplayFacade::GameplayFacade(gp::GameplaySystem& gameplaySystem,
+                                  gfx::Renderer& renderer,
+                                  bool debugEnabled)
+       : debugEnabled{debugEnabled}, gameplaySystem{gameplaySystem}, renderer{renderer} {
    }
 
    GameplayFacade::~GameplayFacade() {
@@ -26,8 +30,11 @@ namespace tr::ctx {
       gameplaySystem.registry->emplace<gp::ecs::Renderable>(e, meshId, textureId);
       gameplaySystem.registry->emplace<gp::ecs::Transform>(e);
 
-      if (name.has_value()) {
-         gameplaySystem.registry->emplace<NameComponent>(e, name.value());
+      if (debugEnabled && name.has_value()) {
+         gameplaySystem.registry->emplace<EditorInfoComponent>(e,
+                                                               name.value(),
+                                                               meshFile,
+                                                               textureFile);
       }
 
       return e;
@@ -45,8 +52,8 @@ namespace tr::ctx {
       gameplaySystem.registry
           ->emplace<gp::ecs::Camera>(camera, width, height, fov, zNear, zFar, position);
 
-      if (name.has_value()) {
-         gameplaySystem.registry->emplace<NameComponent>(camera, name.value());
+      if (debugEnabled && name.has_value()) {
+         gameplaySystem.registry->emplace<EditorInfoComponent>(camera, name.value());
       }
       return camera;
    }
@@ -55,6 +62,7 @@ namespace tr::ctx {
       gameplaySystem.registry->ctx().emplace<gp::ecs::CurrentCamera>(currentCamera);
    }
 
+   // TODO: Get ALL of the entities not just non camera ones.
    std::vector<gp::EntityType>& GameplayFacade::getAllEntities() {
       allEntities.clear();
       for (auto e : gameplaySystem.registry->view<gp::ecs::Renderable, gp::ecs::Transform>()) {
@@ -63,13 +71,22 @@ namespace tr::ctx {
       return allEntities;
    }
 
-   gp::ecs::Transform& GameplayFacade::getEntityPosition(gp::EntityType entityId) {
+   gp::ecs::Transform& GameplayFacade::getEntityTransform(gp::EntityType entityId) {
       auto& v = gameplaySystem.registry->get<gp::ecs::Transform>(entityId);
       return v;
    }
 
-   NameComponent& GameplayFacade::getEntityName(gp::EntityType entityId) {
-      auto& nameComponent = gameplaySystem.registry->get<NameComponent>(entityId);
+   EditorInfoComponent& GameplayFacade::getEditorInfo(gp::EntityType entityId) {
+      auto& nameComponent = gameplaySystem.registry->get<EditorInfoComponent>(entityId);
       return nameComponent;
+   }
+
+   std::optional<std::reference_wrapper<gp::ecs::Camera>> GameplayFacade::getCameraComponent(
+       const gp::EntityType entityId) {
+      if (gameplaySystem.registry->all_of<gp::ecs::Camera>(entityId)) {
+         auto& c = gameplaySystem.registry->get<gp::ecs::Camera>(entityId);
+         return std::optional<std::reference_wrapper<gp::ecs::Camera>>{std::ref(c)};
+      }
+      return {};
    }
 }

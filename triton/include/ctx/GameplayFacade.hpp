@@ -1,18 +1,22 @@
 #pragma once
 
 #include "gp/GameplaySystem.hpp"
-#include "gp/ecs/Transform.hpp"
-#include <optional>
+#include "gp/ecs/component/Transform.hpp"
+#include "gp/ecs/component/Camera.hpp"
 
 namespace tr::ctx {
 
-   struct NameComponent {
+   struct EditorInfoComponent {
       std::string name;
+      std::optional<std::string> sourceMesh;
+      std::optional<std::string> sourceTexture;
    };
 
    class GameplayFacade {
     public:
-      GameplayFacade(gp::GameplaySystem& gameplaySystem, gfx::Renderer& renderer);
+      GameplayFacade(gp::GameplaySystem& gameplaySystem,
+                     gfx::Renderer& renderer,
+                     bool debugEnabled = false);
       ~GameplayFacade();
 
       GameplayFacade(const GameplayFacade&) = delete;
@@ -31,13 +35,18 @@ namespace tr::ctx {
                                   float zFar,
                                   glm::vec3 position,
                                   std::optional<std::string> name = std::nullopt);
+
       void setCurrentCamera(gp::EntityType currentCamera);
 
       [[nodiscard]] std::vector<gp::EntityType>& getAllEntities();
-      gp::ecs::Transform& getEntityPosition(gp::EntityType entityId);
-      NameComponent& getEntityName(gp::EntityType entityId);
+      gp::ecs::Transform& getEntityTransform(gp::EntityType entityId);
+      EditorInfoComponent& getEditorInfo(gp::EntityType entityId);
+
+      std::optional<std::reference_wrapper<gp::ecs::Camera>> getCameraComponent(
+          const gp::EntityType entity);
 
     private:
+      bool debugEnabled{};
       gp::GameplaySystem& gameplaySystem;
       gfx::Renderer& renderer;
       std::vector<gp::EntityType> allEntities;

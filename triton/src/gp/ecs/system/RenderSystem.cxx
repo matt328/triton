@@ -3,7 +3,7 @@
 #include "gp/ecs/component/Camera.hpp"
 #include "gp/ecs/component/Renderable.hpp"
 #include "gp/ecs/component/Resources.hpp"
-#include "gp/ecs/Transform.hpp"
+#include "gp/ecs/component/Transform.hpp"
 #include "gfx/Renderer.hpp"
 #include "gfx/RenderObject.hpp"
 

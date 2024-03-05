@@ -8,7 +8,8 @@ namespace tr::ctx {
    static constexpr int TARGET_FPS = 60;
    static constexpr int MAX_UPDATES = 4;
 
-   Context::Context(void* nativeWindow, bool guiEnabled) : timer{TARGET_FPS, MAX_UPDATES} {
+   Context::Context(void* nativeWindow, bool guiEnabled, bool debugEnabled)
+       : timer{TARGET_FPS, MAX_UPDATES} {
       gameplaySystem = std::make_unique<gp::GameplaySystem>();
 
       renderer =
@@ -20,7 +21,7 @@ namespace tr::ctx {
 
       gameplaySystem->addCameraDataListener<&gfx::Renderer::setCurrentCameraData>(renderer.get());
 
-      gameplayFacade = std::make_unique<GameplayFacade>(*gameplaySystem, *renderer);
+      gameplayFacade = std::make_unique<GameplayFacade>(*gameplaySystem, *renderer, debugEnabled);
    }
 
    // Since a default destructor doesn't have access to the complete definition of the forward
