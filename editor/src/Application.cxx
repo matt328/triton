@@ -27,6 +27,7 @@ namespace ed {
    constexpr auto CamStart = glm::vec3{1.f, 1.f, 3.f};
 
    constexpr auto ImguiEnabled = true;
+   constexpr auto GameplayDebugEnabled = true;
 
    Application::Application(const int width, const int height, const std::string_view& windowTitle)
        : window(nullptr), context(nullptr), running(true) {
@@ -100,7 +101,8 @@ namespace ed {
       glfwSetMouseButtonCallback(window.get(), mouseButtonCallback);
       glfwSetWindowIconifyCallback(window.get(), windowIconifiedCallback);
 
-      context = std::make_unique<tr::ctx::Context>(window.get(), ImguiEnabled);
+      context =
+          std::make_unique<tr::ctx::Context>(window.get(), ImguiEnabled, GameplayDebugEnabled);
 
       ImGuiEx::setupImGuiStyle();
 
@@ -205,7 +207,7 @@ namespace ed {
       if (ImGui::BeginMainMenuBar()) {
          if (ImGui::BeginMenu("File")) {
             if (ImGui::MenuItem("Exit", "Ctrl+S")) {
-               io::writeProjectFile(std::string_view{"some_file"});
+               io::writeProjectFile(std::string_view{"some_file"}, context->getGameplayFacade());
             }
             if (ImGui::MenuItem("Exit", "Alt+F4")) {
                context->hostWindowClosed();
@@ -234,8 +236,8 @@ namespace ed {
                            ImVec2(150, 0),
                            ImGuiChildFlags_Border | ImGuiChildFlags_ResizeX);
          for (auto e : es) {
-            auto& nameComponent = facade.getEntityName(e);
-            if (ImGui::Selectable(nameComponent.name.c_str(),
+            auto& infoComponent = facade.getEditorInfo(e);
+            if (ImGui::Selectable(infoComponent.name.c_str(),
                                   selectedEntity == static_cast<uint32_t>(e))) {
                selectedEntity = static_cast<uint32_t>(e);
             }
@@ -254,7 +256,7 @@ namespace ed {
             ImGui::Text("Entity ID: %d", selectedEntity);
             ImGui::SeparatorText("Transform");
 
-            auto& transform = facade.getEntityPosition(static_cast<entt::entity>(selectedEntity));
+            auto& transform = facade.getEntityTransform(static_cast<entt::entity>(selectedEntity));
             ImGui::DragFloat3("Position", glm::value_ptr(transform.position), .1f);
             ImGui::DragFloat3("Rotation", glm::value_ptr(transform.rotation), .1f, -180.f, 180.f);
             ImGui::SeparatorText("Renderable");
