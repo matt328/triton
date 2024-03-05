@@ -1,0 +1,90 @@
+{
+   "activeCamera": "Camera #1",
+   "entities": [
+      {
+         "components": [
+            {
+               "position": {
+                  "x": 0.0,
+                  "y": 0.0,
+                  "z": 0.0
+               },
+               "rotation": {
+                  "x": 0.0,
+                  "y": 0.0,
+                  "z": 0.0
+               },
+               "type": "transform"
+            },
+            {
+               "name": "Grass Plane",
+               "type": "editor-info"
+            }
+         ]
+      },
+      {
+         "components": [
+            {
+               "position": {
+                  "x": 0.0,
+                  "y": 0.0,
+                  "z": 0.0
+               },
+               "rotation": {
+                  "x": 0.0,
+                  "y": 0.0,
+                  "z": 0.0
+               },
+               "type": "transform"
+            },
+            {
+               "name": "Viking Room #3",
+               "type": "editor-info"
+            }
+         ]
+      },
+      {
+         "components": [
+            {
+               "position": {
+                  "x": 0.0,
+                  "y": 0.0,
+                  "z": 0.0
+               },
+               "rotation": {
+                  "x": 0.0,
+                  "y": 0.0,
+                  "z": 0.0
+               },
+               "type": "transform"
+            },
+            {
+               "name": "Viking Room #2",
+               "type": "editor-info"
+            }
+         ]
+      },
+      {
+         "components": [
+            {
+               "position": {
+                  "x": 0.0,
+                  "y": 0.0,
+                  "z": 0.0
+               },
+               "rotation": {
+                  "x": 0.0,
+                  "y": 0.0,
+                  "z": 0.0
+               },
+               "type": "transform"
+            },
+            {
+               "name": "Viking Room #1",
+               "type": "editor-info"
+            }
+         ]
+      }
+   ],
+   "name": "project name"
+}
