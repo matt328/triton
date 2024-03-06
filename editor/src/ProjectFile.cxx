@@ -35,7 +35,7 @@ namespace ed::io {
          if (maybeEntityInfo.has_value()) {
             const auto entityInfo = maybeEntityInfo.value().get();
             ordered_json editorInfoJson{};
-            editorInfoJson["type"] = "editor-info";
+            editorInfoJson["type"] = EditorInfo;
             editorInfoJson["name"] = entityInfo.name;
 
             if (entityInfo.sourceMesh.has_value()) {
@@ -83,71 +83,55 @@ namespace ed::io {
       i >> rootJson;
 
       for (const auto& entityJson : rootJson["entities"]) {
-         auto entityName = std::optional<std::string>{};
-         auto sourceMesh = std::optional<std::string>{};
-         auto sourceTexture = std::optional<std::string>{};
+         auto editorInfoComponent = std::optional<tr::ctx::EditorInfoComponent>{};
          auto transformComponent = std::optional<tr::gp::ecs::Transform>{};
+         auto cameraComponent = std::optional<tr::gp::ecs::Camera>{};
 
          for (const auto& componentJson : entityJson["components"]) {
-            const auto cType = componentJson["type"];
-            const auto typeStr = cType.template get<std::string>();
+            const std::string typeStr = componentJson["type"];
 
-            if (typeStr == "editor-info") {
-               entityName = componentJson["name"].template get<std::string>();
-               sourceMesh = componentJson.contains("sourceMesh")
-                                ? componentJson["sourceMesh"].template get<std::string>()
-                                : std::optional<std::string>{};
-               sourceTexture = componentJson.contains("sourceTexture")
-                                   ? componentJson["sourceTexture"].template get<std::string>()
-                                   : std::optional<std::string>{};
+            if (typeStr == EditorInfo) {
+               parseEditorInfoComponent(componentJson, editorInfoComponent);
             }
 
             if (typeStr == "camera") {
-               float fov = componentJson["fov"];
-               float yaw = componentJson["yaw"];
-               float pitch = componentJson["pitch"];
-               auto posJson = componentJson["position"];
-
-               float x = posJson["x"];
-               float y = posJson["y"];
-               float z = posJson["z"];
-
-               auto position = glm::vec3{x, y, z};
-               // TODO: createCamera overload that takes yaw and pitch, and doesn't need width,
-               // height, near or far
-               uint32_t width = 1920;
-               uint32_t height = 1080;
-
-               auto cam =
-                   facade.createCamera(width, height, fov, 0.1f, 100.f, position, entityName);
-
-               std::string activeCameraStr = rootJson["activeCamera"];
-
-               if (activeCameraStr == entityName.value()) {
-                  facade.setCurrentCamera(cam);
-               }
+               parseCameraComponent(componentJson, cameraComponent);
             }
 
             if (typeStr == "transform") {
-               auto posJson = componentJson["position"];
-               float x = posJson["x"];
-               float y = posJson["y"];
-               float z = posJson["z"];
-               auto position = glm::vec3{x, y, z};
-
-               auto rotJson = componentJson["rotation"];
-               float xr = rotJson["x"];
-               float yr = rotJson["y"];
-               float zr = rotJson["z"];
-               auto rotation = glm::vec3{xr, yr, zr};
-
-               transformComponent.emplace(tr::gp::ecs::Transform{position, rotation});
+               parseTransformComponent(componentJson, transformComponent);
             }
          }
-         if (sourceMesh.has_value() && sourceTexture.has_value()) {
-            auto e = facade.createStaticMeshEntity(sourceMesh.value(),
-                                                   sourceTexture.value(),
-                                                   entityName);
+
+         // Camera Entity
+         if (cameraComponent.has_value()) {
+            const auto c = cameraComponent.value();
+            const auto name = editorInfoComponent.has_value()
+                                  ? std::optional<std::string>{editorInfoComponent.value().name}
+                                  : std::nullopt;
+            auto cam = facade.createCamera(c.width,
+                                           c.height,
+                                           c.fov,
+                                           c.nearClip,
+                                           c.farClip,
+                                           c.position,
+                                           name);
+
+            std::string activeCameraStr = rootJson["activeCamera"];
+
+            if (activeCameraStr == name.value()) {
+               facade.setCurrentCamera(cam);
+            }
+         }
+
+         // Static Mesh Entity
+         if (editorInfoComponent.has_value() &&
+             editorInfoComponent.value().sourceMesh.has_value() &&
+             editorInfoComponent.value().sourceTexture.has_value()) {
+            auto e =
+                facade.createStaticMeshEntity(editorInfoComponent.value().sourceMesh.value(),
+                                              editorInfoComponent.value().sourceTexture.value(),
+                                              editorInfoComponent.value().name);
             if (transformComponent.has_value()) {
                auto& newTransform = facade.getComponent<tr::gp::ecs::Transform>(e).value().get();
                newTransform.position = transformComponent.value().position;
@@ -157,5 +141,56 @@ namespace ed::io {
       }
 
       i.close();
+   }
+
+   void parseEditorInfoComponent(const nlohmann::basic_json<nlohmann::ordered_map>& componentJson,
+                                 std::optional<tr::ctx::EditorInfoComponent>& editorInfo) {
+      std::string name = componentJson["name"];
+      auto sourceMesh = componentJson.contains("sourceMesh")
+                            ? std::optional<std::string>{componentJson["sourceMesh"]}
+                            : std::nullopt;
+      auto sourceTexture = componentJson.contains("sourceTexture")
+                               ? std::optional<std::string>{componentJson["sourceTexture"]}
+                               : std::nullopt;
+      editorInfo.emplace(name, sourceMesh, sourceTexture);
+   }
+
+   void parseCameraComponent(const nlohmann::basic_json<nlohmann::ordered_map>& componentJson,
+                             std::optional<tr::gp::ecs::Camera>& cameraInfo) {
+      float fov = componentJson["fov"];
+      float yaw = componentJson["yaw"];
+      float pitch = componentJson["pitch"];
+      auto posJson = componentJson["position"];
+
+      float x = posJson["x"];
+      float y = posJson["y"];
+      float z = posJson["z"];
+
+      auto position = glm::vec3{x, y, z};
+      // TODO: createCamera overload that takes yaw and pitch, and doesn't need width,
+      // height, near or far, can get these values from the context
+      uint32_t width = 1920;
+      uint32_t height = 1080;
+      float nearClip = 0.1f;
+      float farClip = 1000.f;
+
+      cameraInfo.emplace(width, height, fov, nearClip, farClip, position);
+   }
+
+   void parseTransformComponent(const nlohmann::basic_json<nlohmann::ordered_map>& componentJson,
+                                std::optional<tr::gp::ecs::Transform>& transformInfo) {
+      auto posJson = componentJson["position"];
+      float x = posJson["x"];
+      float y = posJson["y"];
+      float z = posJson["z"];
+      auto position = glm::vec3{x, y, z};
+
+      auto rotJson = componentJson["rotation"];
+      float xr = rotJson["x"];
+      float yr = rotJson["y"];
+      float zr = rotJson["z"];
+      auto rotation = glm::vec3{xr, yr, zr};
+
+      transformInfo.emplace(tr::gp::ecs::Transform{position, rotation});
    }
 }
