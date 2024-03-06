@@ -116,8 +116,5 @@ Maybe have a EditorInfo component that only the editor uses to keep track of the
   - Maybe if there is a 'recent' file stored, just load that, and if not, load a default scene?
 - Think about 'camera' more. Maybe the editor should always just supply a camera and don't bother writing it to the file, only reset its position when you load a different project.
   - Probably don't do too much with this until there's a need for multiple cameras, as it will change then anyway.
-- Clean up that level loading algo it is pretty sloppy.
-  - Break out separate loaders for each component type.  Don't bother doing this dynamically as that's probably a black hole, and we'll never have that many component types.
-  - Parse a list of the component structs from the json, and at the end of each entity, figure out what facade methods to call with what data.
 - Would it be useful to view/edit an entity's json in the UI?
 - Handle errors instead of crashing.

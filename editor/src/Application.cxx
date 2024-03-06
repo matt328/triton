@@ -110,22 +110,6 @@ namespace ed {
       // Editor should provide a way to load these things from a file and call this api
       auto& facade = context->getGameplayFacade();
 
-      // facade.createStaticMeshEntity((tr::util::Paths::MODELS / "viking_room.gltf").string(),
-      //                               (tr::util::Paths::TEXTURES / "viking_room.png").string(),
-      //                               "Viking Room #1");
-
-      // facade.createStaticMeshEntity((tr::util::Paths::MODELS / "viking_room.gltf").string(),
-      //                               (tr::util::Paths::TEXTURES / "viking_room.png").string(),
-      //                               "Viking Room #2");
-
-      // facade.createStaticMeshEntity((tr::util::Paths::MODELS / "viking_room.gltf").string(),
-      //                               (tr::util::Paths::TEXTURES / "viking_room.png").string(),
-      //                               "Viking Room #3");
-
-      // facade.createStaticMeshEntity((tr::util::Paths::MODELS / "area.gltf").string(),
-      //                               (tr::util::Paths::TEXTURES / "grass.png").string(),
-      //                               "Grass Plane");
-
       auto camera =
           facade.createCamera(width, height, Fov, ZNear, ZFar, CamStart, "Default Camera");
       facade.setCurrentCamera(camera);
@@ -133,8 +117,8 @@ namespace ed {
       ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
       // (optional) set browser properties
-      fileDialog.SetTitle("title");
-      fileDialog.SetTypeFilters({".hpp", ".cxx"});
+      fileDialog.SetTitle("Load Project");
+      fileDialog.SetTypeFilters({".json"});
    }
 
    Application::~Application() {
@@ -297,7 +281,7 @@ namespace ed {
       fileDialog.Display();
 
       if (fileDialog.HasSelected()) {
-         Log::info << "Selected filename" << fileDialog.GetSelected().string() << std::endl;
+         Log::info << "Selected filename " << fileDialog.GetSelected().string() << std::endl;
          fileDialog.ClearSelected();
       }
    }
