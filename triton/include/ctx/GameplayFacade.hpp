@@ -61,6 +61,8 @@ namespace tr::ctx {
 
       std::string& getActiveCameraName();
 
+      void clear();
+
     private:
       bool debugEnabled{};
       gp::GameplaySystem& gameplaySystem;

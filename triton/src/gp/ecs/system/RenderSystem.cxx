@@ -12,6 +12,7 @@ namespace tr::gp::ecs::RenderSystem {
                entt::delegate<void(gfx::RenderObject)>& renderObjectProducer,
                entt::delegate<void(gfx::CameraData)>& cameraDataProducer) {
       const auto cameraEntity = registry.ctx().get<const CurrentCamera>();
+
       const auto cam = registry.get<Camera>(cameraEntity.currentCamera);
 
       cameraDataProducer(gfx::CameraData{cam.view, cam.projection, cam.view * cam.projection});

@@ -110,21 +110,21 @@ namespace ed {
       // Editor should provide a way to load these things from a file and call this api
       auto& facade = context->getGameplayFacade();
 
-      facade.createStaticMeshEntity((tr::util::Paths::MODELS / "viking_room.gltf").string(),
-                                    (tr::util::Paths::TEXTURES / "viking_room.png").string(),
-                                    "Viking Room #1");
+      // facade.createStaticMeshEntity((tr::util::Paths::MODELS / "viking_room.gltf").string(),
+      //                               (tr::util::Paths::TEXTURES / "viking_room.png").string(),
+      //                               "Viking Room #1");
 
-      facade.createStaticMeshEntity((tr::util::Paths::MODELS / "viking_room.gltf").string(),
-                                    (tr::util::Paths::TEXTURES / "viking_room.png").string(),
-                                    "Viking Room #2");
+      // facade.createStaticMeshEntity((tr::util::Paths::MODELS / "viking_room.gltf").string(),
+      //                               (tr::util::Paths::TEXTURES / "viking_room.png").string(),
+      //                               "Viking Room #2");
 
-      facade.createStaticMeshEntity((tr::util::Paths::MODELS / "viking_room.gltf").string(),
-                                    (tr::util::Paths::TEXTURES / "viking_room.png").string(),
-                                    "Viking Room #3");
+      // facade.createStaticMeshEntity((tr::util::Paths::MODELS / "viking_room.gltf").string(),
+      //                               (tr::util::Paths::TEXTURES / "viking_room.png").string(),
+      //                               "Viking Room #3");
 
-      facade.createStaticMeshEntity((tr::util::Paths::MODELS / "area.gltf").string(),
-                                    (tr::util::Paths::TEXTURES / "grass.png").string(),
-                                    "Grass Plane");
+      // facade.createStaticMeshEntity((tr::util::Paths::MODELS / "area.gltf").string(),
+      //                               (tr::util::Paths::TEXTURES / "grass.png").string(),
+      //                               "Grass Plane");
 
       auto camera =
           facade.createCamera(width, height, Fov, ZNear, ZFar, CamStart, "Default Camera");
@@ -208,6 +208,7 @@ namespace ed {
       if (ImGui::BeginMainMenuBar()) {
          if (ImGui::BeginMenu("File")) {
             if (ImGui::MenuItem("Open", "Ctrl+O")) {
+               context->getGameplayFacade().clear();
                io::readProjectFile(std::string_view{"some_file.json"},
                                    context->getGameplayFacade());
             }
@@ -244,7 +245,7 @@ namespace ed {
          for (auto e : es) {
             auto& infoComponent = facade.getEditorInfo(e);
             if (ImGui::Selectable(infoComponent.name.c_str(),
-                                  selectedEntity == static_cast<uint32_t>(e))) {
+                                  static_cast<uint32_t>(e) == selectedEntity)) {
                selectedEntity = static_cast<uint32_t>(e);
             }
          }
@@ -259,22 +260,28 @@ namespace ed {
                 ImVec2(0,
                        -ImGui::GetFrameHeightWithSpacing())); // Leave room for 1 line below us
 
-            ImGui::Text("Entity ID: %d", selectedEntity);
-
-            const auto maybeTransform = facade.getComponent<tr::gp::ecs::Transform>(
-                static_cast<entt::entity>(selectedEntity));
-            if (maybeTransform.has_value()) {
-               auto& transform = maybeTransform.value().get();
-               ImGui::SeparatorText("Transform");
-               ImGui::DragFloat3("Position", glm::value_ptr(transform.position), .1f);
-               ImGui::DragFloat3("Rotation",
-                                 glm::value_ptr(transform.rotation),
-                                 .1f,
-                                 -180.f,
-                                 180.f);
-               ImGui::SeparatorText("Renderable");
-               ImGui::EndChild();
+            if (selectedEntity.has_value()) {
+               ImGui::Text("Entity ID: %d", selectedEntity.value());
+            } else {
+               ImGui::Text("No Entity Selected");
             }
+
+            if (selectedEntity.has_value()) {
+               const auto maybeTransform = facade.getComponent<tr::gp::ecs::Transform>(
+                   static_cast<entt::entity>(selectedEntity.value()));
+               if (maybeTransform.has_value()) {
+                  auto& transform = maybeTransform.value().get();
+                  ImGui::SeparatorText("Transform");
+                  ImGui::DragFloat3("Position", glm::value_ptr(transform.position), .1f);
+                  ImGui::DragFloat3("Rotation",
+                                    glm::value_ptr(transform.rotation),
+                                    .1f,
+                                    -180.f,
+                                    180.f);
+                  ImGui::SeparatorText("Renderable");
+               }
+            }
+            ImGui::EndChild();
 
             if (ImGui::Button("New...")) {
                fileDialog.Open();

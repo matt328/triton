@@ -84,11 +84,11 @@ namespace ed::io {
 
       for (const auto& entityJson : rootJson["entities"]) {
          auto entityName = std::optional<std::string>{};
+         auto sourceMesh = std::optional<std::string>{};
+         auto sourceTexture = std::optional<std::string>{};
+         auto transformComponent = std::optional<tr::gp::ecs::Transform>{};
 
          for (const auto& componentJson : entityJson["components"]) {
-            auto sourceMesh = std::optional<std::string>{};
-            auto sourceTexture = std::optional<std::string>{};
-
             const auto cType = componentJson["type"];
             const auto typeStr = cType.template get<std::string>();
 
@@ -117,9 +117,13 @@ namespace ed::io {
                // height, near or far
                uint32_t width = 1920;
                uint32_t height = 1080;
+
                auto cam =
                    facade.createCamera(width, height, fov, 0.1f, 100.f, position, entityName);
-               if (rootJson["activeCamera"] == entityName.value()) {
+
+               std::string activeCameraStr = rootJson["activeCamera"];
+
+               if (activeCameraStr == entityName.value()) {
                   facade.setCurrentCamera(cam);
                }
             }
@@ -137,12 +141,17 @@ namespace ed::io {
                float zr = rotJson["z"];
                auto rotation = glm::vec3{xr, yr, zr};
 
-               auto e = facade.createStaticMeshEntity(sourceMesh.value(),
-                                                      sourceTexture.value(),
-                                                      entityName);
+               transformComponent.emplace(tr::gp::ecs::Transform{position, rotation});
+            }
+         }
+         if (sourceMesh.has_value() && sourceTexture.has_value()) {
+            auto e = facade.createStaticMeshEntity(sourceMesh.value(),
+                                                   sourceTexture.value(),
+                                                   entityName);
+            if (transformComponent.has_value()) {
                auto& newTransform = facade.getComponent<tr::gp::ecs::Transform>(e).value().get();
-               newTransform.position = position;
-               newTransform.position = rotation;
+               newTransform.position = transformComponent.value().position;
+               newTransform.position = transformComponent.value().rotation;
             }
          }
       }
