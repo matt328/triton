@@ -57,7 +57,12 @@ namespace tr::ctx {
    }
 
    void GameplayFacade::setCurrentCamera(gp::EntityType currentCamera) {
-      gameplaySystem.registry->ctx().emplace<gp::ecs::CurrentCamera>(currentCamera);
+      gameplaySystem.registry->ctx().insert_or_assign<gp::ecs::CurrentCamera>(
+          gp::ecs::CurrentCamera{currentCamera});
+   }
+
+   void GameplayFacade::clear() {
+      gameplaySystem.registry->clear();
    }
 
    std::string& GameplayFacade::getActiveCameraName() {

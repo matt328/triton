@@ -1,0 +1,117 @@
+{
+  "name": "project name",
+  "activeCamera": "Default Camera",
+  "entities": [
+    {
+      "components": [
+        {
+          "type": "editor-info",
+          "name": "Default Camera"
+        },
+        {
+          "type": "camera",
+          "yaw": -90.0,
+          "pitch": 0.0,
+          "fov": 60.0,
+          "position": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 3.0
+          }
+        }
+      ]
+    },
+    {
+      "components": [
+        {
+          "type": "transform",
+          "position": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          }
+        },
+        {
+          "type": "editor-info",
+          "name": "Grass Plane",
+          "sourceMesh": "C:\\Users\\Matt\\Projects\\triton\\assets\\models\\area.gltf",
+          "sourceTexture": "C:\\Users\\Matt\\Projects\\triton\\assets\\textures\\grass.png"
+        }
+      ]
+    },
+    {
+      "components": [
+        {
+          "type": "transform",
+          "position": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          }
+        },
+        {
+          "type": "editor-info",
+          "name": "Viking Room #3",
+          "sourceMesh": "C:\\Users\\Matt\\Projects\\triton\\assets\\models\\viking_room.gltf",
+          "sourceTexture": "C:\\Users\\Matt\\Projects\\triton\\assets\\textures\\viking_room.png"
+        }
+      ]
+    },
+    {
+      "components": [
+        {
+          "type": "transform",
+          "position": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          }
+        },
+        {
+          "type": "editor-info",
+          "name": "Viking Room #2",
+          "sourceMesh": "C:\\Users\\Matt\\Projects\\triton\\assets\\models\\viking_room.gltf",
+          "sourceTexture": "C:\\Users\\Matt\\Projects\\triton\\assets\\textures\\viking_room.png"
+        }
+      ]
+    },
+    {
+      "components": [
+        {
+          "type": "transform",
+          "position": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          }
+        },
+        {
+          "type": "editor-info",
+          "name": "Viking Room #1",
+          "sourceMesh": "C:\\Users\\Matt\\Projects\\triton\\assets\\models\\viking_room.gltf",
+          "sourceTexture": "C:\\Users\\Matt\\Projects\\triton\\assets\\textures\\viking_room.png"
+        }
+      ]
+    }
+  ]
+}
