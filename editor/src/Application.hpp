@@ -43,7 +43,7 @@ namespace ed {
       bool fullscreen{};
       int prevXPos{}, prevYPos{}, prevWidth{}, prevHeight{};
 
-      uint32_t selectedEntity{};
+      std::optional<uint32_t> selectedEntity{};
 
       ImGui::FileBrowser fileDialog;
 
