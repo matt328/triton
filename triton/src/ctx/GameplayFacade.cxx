@@ -63,6 +63,7 @@ namespace tr::ctx {
 
    void GameplayFacade::clear() {
       gameplaySystem.registry->clear();
+      gameplaySystem.registry->ctx().erase<gp::ecs::CurrentCamera>();
    }
 
    std::string& GameplayFacade::getActiveCameraName() {
