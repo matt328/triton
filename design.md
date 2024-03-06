@@ -106,4 +106,13 @@ File Format see `.\project.json`
 
 Right now, just a list of entities and their components.
 
-Maybe have a EditorInfo component that only the editor uses to keep track of the assets used to create a given Renderable.  Could make the existing NameComponent more general until there is a need for the editor to query on separate components.
+Maybe have a EditorInfo component that only the editor uses to keep track of the assets used to create a given Renderable.  Could make the existing NameComponent more general until there is a need for the editor to query on separate components. Edit: this worked out well.
+
+#### TODO
+
+- Set up a state with a level 'unloaded' that still renders the imgui, but either doesn't need a 'camera', or supplies a default one if one is needed to render the imgui data.
+- Option to load the last level on startup.
+- Think about 'camera' more. Maybe the editor should always just supply a camera and don't bother writing it to the file, only reset its position when you load a different project.
+- Clean up that level loading algo it is pretty sloppy.
+- Create an entity json viewer/editor in the UI.
+- Handle errors instead of crashing.
