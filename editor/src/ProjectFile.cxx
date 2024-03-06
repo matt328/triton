@@ -74,7 +74,6 @@ namespace ed::io {
 
          o.close();
       }
-      Log::info << rootJson.dump(2) << std::endl;
    }
 
    void readProjectFile(std::string_view filename, tr::ctx::GameplayFacade& facade) {
