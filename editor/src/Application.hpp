@@ -44,8 +44,11 @@ namespace ed {
       int prevXPos{}, prevYPos{}, prevWidth{}, prevHeight{};
 
       std::optional<uint32_t> selectedEntity{};
+      std::optional<std::filesystem::path> openFilePath{};
 
-      ImGui::FileBrowser fileDialog;
+      ImGui::FileBrowser openProjectFileDialog;
+      ImGui::FileBrowser saveProjectFileDialog{ImGuiFileBrowserFlags_EnterNewFilename |
+                                               ImGuiFileBrowserFlags_CreateNewDir};
 
       void renderEntityEditor(tr::ctx::GameplayFacade& facade);
       void renderDockSpace();

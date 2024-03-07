@@ -15,6 +15,7 @@ ENDIF()
 configure_file(src/config.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/config.h)
 
 find_package(nlohmann_json CONFIG REQUIRED)
+find_package(platform_folders CONFIG REQUIRED)
 
 target_compile_definitions(${PROJECT_NAME}
    PRIVATE
@@ -29,6 +30,7 @@ target_precompile_headers(${PROJECT_NAME}
    <filesystem>
    <functional>
    <nlohmann/json.hpp>
+   <sago/platform_folders.h>
    <sstream>
    <fstream>
    <stb_image.h>
@@ -49,6 +51,7 @@ target_link_libraries(${PROJECT_NAME}
    PRIVATE
    triton
    nlohmann_json::nlohmann_json
+   sago::platform_folders
 )
 
 target_include_directories(${PROJECT_NAME}

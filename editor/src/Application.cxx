@@ -5,10 +5,13 @@
 #include "ImGuiStyle.hpp"
 #include "ImFileBrowser.hpp"
 #include <GLFW/glfw3.h>
+#include <filesystem>
 #include <imgui.h>
 #include <imgui_internal.h>
 #include "ProjectFile.hpp"
 #include "gp/ecs/component/Transform.hpp"
+#include "Properties.hpp"
+#include "imgui_stdlib.h"
 
 #ifdef _WIN32
 #define GLFW_EXPOSE_NATIVE_WIN32
@@ -32,6 +35,10 @@ namespace ed {
 
    Application::Application(const int width, const int height, const std::string_view& windowTitle)
        : window(nullptr), context(nullptr), running(true) {
+
+      const auto configDir = std::filesystem::path(sago::getConfigHome()) / "editor";
+      pr::Properties::getInstance().load(configDir / "config.json");
+
       glfwInit();
       glfwSetErrorCallback(errorCallback);
       glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -117,8 +124,39 @@ namespace ed {
       ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
       // (optional) set browser properties
-      fileDialog.SetTitle("Load Project");
-      fileDialog.SetTypeFilters({".json"});
+      openProjectFileDialog.SetTitle("Load Project");
+      openProjectFileDialog.SetTypeFilters({".json"});
+
+      auto recentPath = pr::Properties::getInstance().getRecentFilePath();
+
+      if (recentPath.has_value()) {
+         openProjectFileDialog.SetPwd(recentPath.value().parent_path());
+         saveProjectFileDialog.SetPwd(recentPath.value().parent_path());
+      }
+
+      saveProjectFileDialog.SetTitle("Save Project");
+      saveProjectFileDialog.SetTypeFilters({".json"});
+
+      if (!std::filesystem::exists(configDir)) {
+         std::filesystem::create_directories(configDir);
+      }
+
+      if (!std::filesystem::exists(configDir / "config.json")) {
+         using nlohmann::ordered_json;
+         ordered_json rootJson{};
+         rootJson["version"] = "0.0.1";
+
+         std::ofstream o{configDir / "config.json"};
+         if (o.is_open()) {
+            o << std::setw(2) << rootJson << std::endl;
+            o.close();
+         } else {
+            Log::warn << "Could not open config file for writing: " << configDir / "config.json"
+                      << std::endl;
+         }
+      }
+
+      Log::info << "Config: " << configDir.string() << std::endl;
    }
 
    Application::~Application() {
@@ -191,14 +229,24 @@ namespace ed {
 
       if (ImGui::BeginMainMenuBar()) {
          if (ImGui::BeginMenu("File")) {
-            if (ImGui::MenuItem("Open", "Ctrl+O")) {
-               context->getGameplayFacade().clear();
-               io::readProjectFile(std::string_view{"some_file.json"},
-                                   context->getGameplayFacade());
+            if (ImGui::MenuItem("Open")) {
+               openProjectFileDialog.Open();
             }
+
+            if (ImGui::BeginMenu("Recent")) {
+               const auto recentFile = pr::Properties::getInstance().getRecentFilePath();
+               if (recentFile.has_value()) {
+                  const auto nameOnly = recentFile.value().string();
+                  if (ImGui::MenuItem(nameOnly.c_str())) {
+                     context->getGameplayFacade().clear();
+                     io::readProjectFile(recentFile.value().string(), context->getGameplayFacade());
+                  }
+               }
+               ImGui::EndMenu();
+            }
+
             if (ImGui::MenuItem("Save", "Ctrl+S")) {
-               io::writeProjectFile(std::string_view{"some_file.json"},
-                                    context->getGameplayFacade());
+               saveProjectFileDialog.Open();
             }
             if (ImGui::MenuItem("Exit", "Alt+F4")) {
                context->hostWindowClosed();
@@ -268,7 +316,7 @@ namespace ed {
             ImGui::EndChild();
 
             if (ImGui::Button("New...")) {
-               fileDialog.Open();
+               openProjectFileDialog.Open();
             }
             ImGui::SameLine();
             if (ImGui::Button("Save")) {}
@@ -278,11 +326,32 @@ namespace ed {
       }
       ImGui::End();
 
-      fileDialog.Display();
+      openProjectFileDialog.Display();
 
-      if (fileDialog.HasSelected()) {
-         Log::info << "Selected filename " << fileDialog.GetSelected().string() << std::endl;
-         fileDialog.ClearSelected();
+      if (openProjectFileDialog.HasSelected()) {
+         Log::info << "Selected filename " << openProjectFileDialog.GetSelected().string()
+                   << std::endl;
+
+         auto path = std::filesystem::path{openProjectFileDialog.GetSelected().string()};
+         openFilePath.emplace(path.parent_path());
+
+         context->getGameplayFacade().clear();
+         io::readProjectFile(openProjectFileDialog.GetSelected().string(),
+                             context->getGameplayFacade());
+
+         pr::Properties::getInstance().setRecentFilePath(path);
+
+         openProjectFileDialog.ClearSelected();
+      }
+
+      saveProjectFileDialog.Display();
+
+      if (saveProjectFileDialog.HasSelected()) {
+         Log::info << "Selected filename " << saveProjectFileDialog.GetSelected().string()
+                   << std::endl;
+         io::writeProjectFile(saveProjectFileDialog.GetSelected().string(),
+                              context->getGameplayFacade());
+         saveProjectFileDialog.ClearSelected();
       }
    }
 
