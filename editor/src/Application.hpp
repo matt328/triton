@@ -1,13 +1,15 @@
 #pragma once
 
-#include "ImFileBrowser.hpp"
-
 namespace tr::ctx {
    class Context;
    class GameplayFacade;
 }
 
 namespace ed {
+
+   namespace ui {
+      class Manager;
+   }
 
    class Application {
     public:
@@ -43,12 +45,13 @@ namespace ed {
       bool fullscreen{};
       int prevXPos{}, prevYPos{}, prevWidth{}, prevHeight{};
 
-      std::optional<uint32_t> selectedEntity{};
-
-      ImGui::FileBrowser fileDialog;
+      std::unique_ptr<ui::Manager> manager;
 
       void renderEntityEditor(tr::ctx::GameplayFacade& facade);
       void renderDockSpace();
+      void renderMenuBar();
+
+      static void toggleFullscreen(Application& app);
 
       static void errorCallback(int code, const char* description);
       static void windowIconifiedCallback(GLFWwindow* window, int iconified);
