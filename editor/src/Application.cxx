@@ -231,13 +231,43 @@ namespace ed {
       }
       ImGui::End(); // Dockspace
 
+      renderMenuBar();
+   }
+
+   void Application::confirm(std::function<void(void)> okFn) {
+      if (ImGui::BeginPopupModal("unsaved", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+         ImGui::Text("Unsaved changes will be lost. Are you sure?");
+         ImGui::Separator();
+
+         if (ImGui::Button("Ok", ImVec2(120, 0))) {
+            ImGui::CloseCurrentPopup();
+            okFn();
+         }
+         ImGui::SetItemDefaultFocus();
+         ImGui::SameLine();
+         if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+            ImGui::CloseCurrentPopup();
+         }
+         ImGui::EndPopup();
+      }
+      ImGui::OpenPopup("unsaved");
+   }
+
+   void Application::renderMenuBar() {
       if (ImGui::BeginMainMenuBar()) {
          if (ImGui::BeginMenu("File")) {
-            if (ImGui::MenuItem("Open")) {
+
+            if (ImGui::MenuItem("New Project...")) {
+               if (dirty) {
+                  confirm([]() { Log::info << "creating new project" << std::endl; });
+               }
+            }
+            ImGui::Separator();
+            if (ImGui::MenuItem("Open Project...")) {
                openProjectFileDialog.Open();
             }
 
-            if (ImGui::BeginMenu("Recent")) {
+            if (ImGui::BeginMenu("Open Recent")) {
                const auto recentFile = pr::Properties::getInstance().getRecentFilePath();
                if (recentFile.has_value()) {
                   const auto nameOnly = recentFile.value().string();
@@ -250,7 +280,8 @@ namespace ed {
                ImGui::EndMenu();
             }
 
-            if (ImGui::MenuItem("Save", nullptr, false, dirty)) {
+            ImGui::Separator();
+            if (ImGui::MenuItem("Save Project", nullptr, false, dirty)) {
                if (openFilePath.has_value()) {
                   io::writeProjectFile(openFilePath.value().string(), context->getGameplayFacade());
                   dirty = false;
@@ -259,11 +290,20 @@ namespace ed {
                }
             }
 
-            if (ImGui::MenuItem("Save As...", nullptr, false, dirty)) {
+            if (ImGui::MenuItem("Save Project As...", nullptr, false, dirty)) {
                saveProjectFileDialog.Open();
             }
+
+            ImGui::Separator();
+
             if (ImGui::MenuItem("Exit", "Alt+F4")) {
                context->hostWindowClosed();
+            }
+            ImGui::EndMenu();
+         }
+         if (ImGui::BeginMenu("View")) {
+            if (ImGui::MenuItem("Fullscreen", "Alt+Enter", this->fullscreen)) {
+               toggleFullscreen(*this);
             }
             ImGui::EndMenu();
          }
@@ -387,33 +427,38 @@ namespace ed {
       if (ImGui::GetIO().WantCaptureKeyboard || ImGui::GetIO().WantTextInput) {
          return;
       }
-      const auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
+      auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
       if (key == GLFW_KEY_ENTER && mods == GLFW_MOD_ALT && action == GLFW_RELEASE) {
-         if (app->fullscreen) {
-            glfwSetWindowMonitor(window,
-                                 nullptr,
-                                 app->prevXPos,
-                                 app->prevYPos,
-                                 app->prevWidth,
-                                 app->prevHeight,
-                                 0);
-            app->fullscreen = !app->fullscreen;
-         } else {
-            const auto currentMonitor = glfwGetPrimaryMonitor();
-            const auto mode = glfwGetVideoMode(currentMonitor);
-            glfwGetWindowPos(window, &app->prevXPos, &app->prevYPos);
-            glfwGetWindowSize(window, &app->prevWidth, &app->prevHeight);
-            glfwSetWindowMonitor(window,
-                                 currentMonitor,
-                                 0,
-                                 0,
-                                 mode->width,
-                                 mode->height,
-                                 mode->refreshRate);
-            app->fullscreen = !app->fullscreen;
-         }
+         toggleFullscreen(*app);
       } else {
          app->context->keyCallback(key, scancode, action, mods);
+      }
+   }
+
+   void Application::toggleFullscreen(Application& app) {
+      auto window = app.window.get();
+      if (app.fullscreen) {
+         glfwSetWindowMonitor(window,
+                              nullptr,
+                              app.prevXPos,
+                              app.prevYPos,
+                              app.prevWidth,
+                              app.prevHeight,
+                              0);
+         app.fullscreen = !app.fullscreen;
+      } else {
+         const auto currentMonitor = glfwGetPrimaryMonitor();
+         const auto mode = glfwGetVideoMode(currentMonitor);
+         glfwGetWindowPos(window, &app.prevXPos, &app.prevYPos);
+         glfwGetWindowSize(window, &app.prevWidth, &app.prevHeight);
+         glfwSetWindowMonitor(window,
+                              currentMonitor,
+                              0,
+                              0,
+                              mode->width,
+                              mode->height,
+                              mode->refreshRate);
+         app.fullscreen = !app.fullscreen;
       }
    }
 

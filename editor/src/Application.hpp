@@ -53,6 +53,11 @@ namespace ed {
 
       void renderEntityEditor(tr::ctx::GameplayFacade& facade);
       void renderDockSpace();
+      void renderMenuBar();
+
+      void confirm(std::function<void(void)> okFn);
+
+      static void toggleFullscreen(Application& app);
 
       static void errorCallback(int code, const char* description);
       static void windowIconifiedCallback(GLFWwindow* window, int iconified);
