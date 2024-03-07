@@ -9,11 +9,11 @@ namespace ImGuiEx {
       }
    };
 
-   void imgui_easy_theming(ImVec3 color_for_text,
-                           ImVec3 color_for_head,
-                           ImVec3 color_for_area,
-                           ImVec3 color_for_body,
-                           ImVec3 color_for_pops) {
+   inline static void imgui_easy_theming(ImVec3 color_for_text,
+                                         ImVec3 color_for_head,
+                                         ImVec3 color_for_area,
+                                         ImVec3 color_for_body,
+                                         ImVec3 color_for_pops) {
       ImGuiStyle& style = ImGui::GetStyle();
 
       style.WindowRounding = 3;
@@ -96,7 +96,7 @@ namespace ImGuiEx {
           ImVec4(color_for_pops.x, color_for_pops.y, color_for_pops.z, 0.92f);
    }
 
-   void setupImGuiStyle() {
+   inline static void setupImGuiStyle() {
       static ImVec3 color_for_text = ImVec3(236.f / 255.f, 240.f / 255.f, 241.f / 255.f);
       static ImVec3 color_for_head = ImVec3(38.f / 255.f, 118.f / 255.f, 166.f / 255.f);
       static ImVec3 color_for_area = ImVec3(57.f / 255.f, 79.f / 255.f, 105.f / 255.f);

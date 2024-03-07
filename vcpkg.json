@@ -8,6 +8,7 @@
       "glm",
       "glslang",
       "nlohmann-json",
+      "platform-folders",
       "spirv-cross",
       "stb",
       "tinygltf",

@@ -110,9 +110,9 @@ Maybe have a EditorInfo component that only the editor uses to keep track of the
 
 #### TODO
 
-- Figure out a file picker for Imgui
+- Figure out a file picker for Imgui - none are great, but ImGuiFileBrowser sucks least.
 - Think about what an 'unloaded' state looks like. Should it be blank with just Imgui rendered, or should it start with a hardcoded scene like blender.
-- Option to load the last level on startup.
+- Option to load the last project on startup.
   - Maybe if there is a 'recent' file stored, just load that, and if not, load a default scene?
 - Think about 'camera' more. Maybe the editor should always just supply a camera and don't bother writing it to the file, only reset its position when you load a different project.
   - Probably don't do too much with this until there's a need for multiple cameras, as it will change then anyway.

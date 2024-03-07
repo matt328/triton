@@ -4,6 +4,7 @@ set(editor_SRC
    "src/main.cxx"
    "src/Application.cxx"
    "src/ProjectFile.cxx"
+   "src/ui/Manager.cxx"
 )
 
 add_executable(${PROJECT_NAME} ${editor_SRC})
@@ -15,6 +16,7 @@ ENDIF()
 configure_file(src/config.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/config.h)
 
 find_package(nlohmann_json CONFIG REQUIRED)
+find_package(platform_folders CONFIG REQUIRED)
 
 target_compile_definitions(${PROJECT_NAME}
    PRIVATE
@@ -29,8 +31,13 @@ target_precompile_headers(${PROJECT_NAME}
    <filesystem>
    <functional>
    <nlohmann/json.hpp>
+   <sago/platform_folders.h>
    <sstream>
    <fstream>
+   <imgui.h>
+   <imgui_internal.h>
+   "src/ui/ImFileBrowser.hpp"
+   "src/ui/ImGuiStyle.hpp"
    <stb_image.h>
    <glm/gtc/type_ptr.hpp>
    <glm/gtx/string_cast.hpp>
@@ -49,11 +56,13 @@ target_link_libraries(${PROJECT_NAME}
    PRIVATE
    triton
    nlohmann_json::nlohmann_json
+   sago::platform_folders
 )
 
 target_include_directories(${PROJECT_NAME}
    PUBLIC
    .
+   src
 )
 
 add_dependencies(${PROJECT_NAME} assets)
