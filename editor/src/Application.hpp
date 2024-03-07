@@ -55,7 +55,7 @@ namespace ed {
       void renderDockSpace();
       void renderMenuBar();
 
-      void confirm(std::function<void(void)> okFn);
+      void renderConfirm(const char* name, const char* message, std::function<void(void)> okFn);
 
       static void toggleFullscreen(Application& app);
 

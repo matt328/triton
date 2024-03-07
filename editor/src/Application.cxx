@@ -234,9 +234,11 @@ namespace ed {
       renderMenuBar();
    }
 
-   void Application::confirm(std::function<void(void)> okFn) {
-      if (ImGui::BeginPopupModal("unsaved", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
-         ImGui::Text("Unsaved changes will be lost. Are you sure?");
+   void Application::renderConfirm(const char* name,
+                                   const char* message,
+                                   std::function<void(void)> okFn) {
+      if (ImGui::BeginPopupModal(name, nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+         ImGui::Text("%s", message);
          ImGui::Separator();
 
          if (ImGui::Button("Ok", ImVec2(120, 0))) {
@@ -250,16 +252,18 @@ namespace ed {
          }
          ImGui::EndPopup();
       }
-      ImGui::OpenPopup("unsaved");
    }
 
    void Application::renderMenuBar() {
+      renderConfirm("unsaved", "Are you sure?", []() {
+         Log::info << "creating new project" << std::endl;
+      });
       if (ImGui::BeginMainMenuBar()) {
          if (ImGui::BeginMenu("File")) {
 
             if (ImGui::MenuItem("New Project...")) {
                if (dirty) {
-                  confirm([]() { Log::info << "creating new project" << std::endl; });
+                  ImGui::OpenPopup("unsaved");
                }
             }
             ImGui::Separator();
