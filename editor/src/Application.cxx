@@ -177,6 +177,10 @@ namespace ed {
 
          renderEntityEditor(facade);
 
+         if (ImGui::IsItemDeactivated()) {
+            Log::info << "itemdeactivated" << std::endl;
+         }
+
          ImGui::Render();
       });
    }
@@ -240,26 +244,27 @@ namespace ed {
                   if (ImGui::MenuItem(nameOnly.c_str())) {
                      context->getGameplayFacade().clear();
                      io::readProjectFile(recentFile.value().string(), context->getGameplayFacade());
+                     openFilePath.emplace(recentFile.value());
                   }
                }
                ImGui::EndMenu();
             }
 
-            if (ImGui::MenuItem("Save", "Ctrl+S")) {
+            if (ImGui::MenuItem("Save", nullptr, false, dirty)) {
+               if (openFilePath.has_value()) {
+                  io::writeProjectFile(openFilePath.value().string(), context->getGameplayFacade());
+                  dirty = false;
+               } else {
+                  saveProjectFileDialog.Open();
+               }
+            }
+
+            if (ImGui::MenuItem("Save As...", nullptr, false, dirty)) {
                saveProjectFileDialog.Open();
             }
             if (ImGui::MenuItem("Exit", "Alt+F4")) {
                context->hostWindowClosed();
             }
-            ImGui::EndMenu();
-         }
-         if (ImGui::BeginMenu("Edit")) {
-            if (ImGui::MenuItem("Undo", "CTRL+Z")) {}
-            if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {} // Disabled item
-            ImGui::Separator();
-            if (ImGui::MenuItem("Cut", "CTRL+X")) {}
-            if (ImGui::MenuItem("Copy", "CTRL+C")) {}
-            if (ImGui::MenuItem("Paste", "CTRL+V")) {}
             ImGui::EndMenu();
          }
          ImGui::EndMainMenuBar();
@@ -269,7 +274,7 @@ namespace ed {
    void Application::renderEntityEditor(tr::ctx::GameplayFacade& facade) {
       auto& es = facade.getAllEntities();
 
-      if (ImGui::Begin("Entity Editor")) {
+      if (ImGui::Begin("Entity Editor", nullptr, dirty ? ImGuiWindowFlags_UnsavedDocument : 0)) {
          // Left
          ImGui::BeginChild("left pane",
                            ImVec2(150, 0),
@@ -324,6 +329,9 @@ namespace ed {
             ImGui::EndGroup();
          }
       }
+      if (ImGui::IsItemDeactivatedAfterEdit()) {
+         dirty = true;
+      }
       ImGui::End();
 
       openProjectFileDialog.Display();
@@ -351,6 +359,7 @@ namespace ed {
                    << std::endl;
          io::writeProjectFile(saveProjectFileDialog.GetSelected().string(),
                               context->getGameplayFacade());
+         dirty = false;
          saveProjectFileDialog.ClearSelected();
       }
    }

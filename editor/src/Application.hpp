@@ -45,6 +45,7 @@ namespace ed {
 
       std::optional<uint32_t> selectedEntity{};
       std::optional<std::filesystem::path> openFilePath{};
+      bool dirty = false;
 
       ImGui::FileBrowser openProjectFileDialog;
       ImGui::FileBrowser saveProjectFileDialog{ImGuiFileBrowserFlags_EnterNewFilename |
