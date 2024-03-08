@@ -1,7 +1,5 @@
 #pragma once
 
-#include "ImFileBrowser.hpp"
-
 namespace tr::ctx {
    class Context;
    class GameplayFacade;
@@ -54,8 +52,6 @@ namespace ed {
       void renderEntityEditor(tr::ctx::GameplayFacade& facade);
       void renderDockSpace();
       void renderMenuBar();
-
-      void renderConfirm(const char* name, const char* message, std::function<void(void)> okFn);
 
       static void toggleFullscreen(Application& app);
 

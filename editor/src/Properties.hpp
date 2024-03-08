@@ -1,5 +1,6 @@
 #pragma once
 
+#include <filesystem>
 namespace ed::pr {
    using nlohmann::ordered_json;
    using FsPath = std::filesystem::path;
@@ -30,6 +31,24 @@ namespace ed::pr {
 
       void load(const std::filesystem::path& filePath) {
          this->filePath = filePath;
+
+         if (!std::filesystem::exists(filePath.parent_path())) {
+            std::filesystem::create_directories(filePath.parent_path());
+         }
+
+         if (!std::filesystem::exists(filePath)) {
+            using nlohmann::ordered_json;
+            ordered_json rootJson{};
+            rootJson["version"] = "0.0.1";
+
+            std::ofstream o{filePath};
+            if (o.is_open()) {
+               o << std::setw(2) << rootJson << std::endl;
+               o.close();
+            } else {
+               Log::warn << "Could not open config file for writing: " << filePath << std::endl;
+            }
+         }
 
          std::ifstream i{filePath};
          if (i.is_open()) {

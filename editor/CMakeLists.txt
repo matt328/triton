@@ -33,6 +33,10 @@ target_precompile_headers(${PROJECT_NAME}
    <sago/platform_folders.h>
    <sstream>
    <fstream>
+   <imgui.h>
+   <imgui_internal.h>
+   "src/ui/ImFileBrowser.hpp"
+   "src/ui/ImGuiStyle.hpp"
    <stb_image.h>
    <glm/gtc/type_ptr.hpp>
    <glm/gtx/string_cast.hpp>

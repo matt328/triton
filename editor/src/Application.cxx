@@ -1,17 +1,11 @@
 #include "Application.hpp"
+#include "Properties.hpp"
+#include "ProjectFile.hpp"
+
 #include "ctx/Context.hpp"
 #include "ctx/GameplayFacade.hpp"
-#include "util/Paths.hpp"
-#include "ImGuiStyle.hpp"
-#include "ImFileBrowser.hpp"
-#include <GLFW/glfw3.h>
-#include <filesystem>
-#include <imgui.h>
-#include <imgui_internal.h>
-#include "ProjectFile.hpp"
 #include "gp/ecs/component/Transform.hpp"
-#include "Properties.hpp"
-#include "imgui_stdlib.h"
+#include "util/Paths.hpp"
 
 #ifdef _WIN32
 #define GLFW_EXPOSE_NATIVE_WIN32
@@ -136,27 +130,6 @@ namespace ed {
 
       saveProjectFileDialog.SetTitle("Save Project");
       saveProjectFileDialog.SetTypeFilters({".json"});
-
-      if (!std::filesystem::exists(configDir)) {
-         std::filesystem::create_directories(configDir);
-      }
-
-      if (!std::filesystem::exists(configDir / "config.json")) {
-         using nlohmann::ordered_json;
-         ordered_json rootJson{};
-         rootJson["version"] = "0.0.1";
-
-         std::ofstream o{configDir / "config.json"};
-         if (o.is_open()) {
-            o << std::setw(2) << rootJson << std::endl;
-            o.close();
-         } else {
-            Log::warn << "Could not open config file for writing: " << configDir / "config.json"
-                      << std::endl;
-         }
-      }
-
-      Log::info << "Config: " << configDir.string() << std::endl;
    }
 
    Application::~Application() {
@@ -174,12 +147,7 @@ namespace ed {
          auto& facade = context->getGameplayFacade();
 
          renderDockSpace();
-
          renderEntityEditor(facade);
-
-         if (ImGui::IsItemDeactivated()) {
-            Log::info << "itemdeactivated" << std::endl;
-         }
 
          ImGui::Render();
       });
@@ -234,36 +202,14 @@ namespace ed {
       renderMenuBar();
    }
 
-   void Application::renderConfirm(const char* name,
-                                   const char* message,
-                                   std::function<void(void)> okFn) {
-      if (ImGui::BeginPopupModal(name, nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
-         ImGui::Text("%s", message);
-         ImGui::Separator();
-
-         if (ImGui::Button("Ok", ImVec2(120, 0))) {
-            ImGui::CloseCurrentPopup();
-            okFn();
-         }
-         ImGui::SetItemDefaultFocus();
-         ImGui::SameLine();
-         if (ImGui::Button("Cancel", ImVec2(120, 0))) {
-            ImGui::CloseCurrentPopup();
-         }
-         ImGui::EndPopup();
-      }
-   }
-
    void Application::renderMenuBar() {
-      renderConfirm("unsaved", "Are you sure?", []() {
-         Log::info << "creating new project" << std::endl;
-      });
+      bool b = false;
       if (ImGui::BeginMainMenuBar()) {
          if (ImGui::BeginMenu("File")) {
 
             if (ImGui::MenuItem("New Project...")) {
                if (dirty) {
-                  ImGui::OpenPopup("unsaved");
+                  b = true;
                }
             }
             ImGui::Separator();
@@ -312,6 +258,25 @@ namespace ed {
             ImGui::EndMenu();
          }
          ImGui::EndMainMenuBar();
+      }
+      if (b) {
+         ImGui::OpenPopup("Unsaved");
+      }
+
+      if (ImGui::BeginPopupModal("Unsaved", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+         ImGui::Text("Unsaved changes will be lost. Are you sure?");
+         ImGui::Separator();
+
+         if (ImGui::Button("Ok", ImVec2(120, 0))) {
+            ImGui::CloseCurrentPopup();
+            Log::info << "ok" << std::endl;
+         }
+         ImGui::SetItemDefaultFocus();
+         ImGui::SameLine();
+         if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+            ImGui::CloseCurrentPopup();
+         }
+         ImGui::EndPopup();
       }
    }
 
