@@ -78,23 +78,30 @@ All data the editor will edit *should* be contained within the components of the
 
 Should the script interface be the GameplayFacade as well? Probably, I think I decided that earlier.  Just need to figure out converting glm to and from Lua. I don't know, maybe we shouldn't be doing vector operations in a scripting language, and favor doing them in C++ where they're fast.
 
-TODO:
+### Resource Updates
 
-1. Editor Load/Save Game Project
-   1. Update gltf loading to account for referenced image files
-   1. Load in new entities - pick a gltf file.
-   1. Save state of the 'game', basically entities and their transforms
-   1. load the state of the 'game'
-1. Scripting for entity behaviors
-   - Attach a script to an entity
-   - Edit scripts inside the UI
-   - Expose the script interface to a UI
-1. Renderer Improvements
-   - Lighting
-   - Draw Indiret
-   - GPU Culling
-1. Finish Out Gamepad Support
-1. Terrain Generating/Rendering
+- should be able to import a gltf file in the editor and have it bring along any referenced textures and be able to find and load them just by loading the gltf file
+- rework the way assets in general are handled, the cmake targets are starting to feel clunky
+- can be handled differently with the editor application as opposed to an exported game.
+- editor should just access and load them from an external private 'assets' repository
+- exported game should have them packaged up in some optimized format.
+- Fonts: look at how Walnut embeds the font data and do that with the editor
+- Models/Textures - see how gltf loading could automatically find and load textures referenced by gltf files.
+- Shaders - The game currently loads and compiles text files into shaders, this should be moved into the editor level, an exported game won't be doing that, and in that case, the editor can just treat them like any other asset that is needed to initialize itself, like the icon.
+
+1. Embed the font inside the code
+1. Make static mesh loading just take a gltf file name and that's it
+1. Move the shader compilation into the editor, and have the engine just take compiled spirv bytecode blobs.
+
+### Misc Stuff to research
+
+- ImGui logger output
+- ImGui entity json viewer/editor
+- ImGui Tests
+- Terrain Generation/Rendering
+- DrawIndirect
+- Lighting
+- Scripting
 
 ### Editor Save Data
 
