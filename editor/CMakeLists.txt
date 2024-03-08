@@ -4,6 +4,7 @@ set(editor_SRC
    "src/main.cxx"
    "src/Application.cxx"
    "src/ProjectFile.cxx"
+   "src/ui/Manager.cxx"
 )
 
 add_executable(${PROJECT_NAME} ${editor_SRC})
@@ -61,6 +62,7 @@ target_link_libraries(${PROJECT_NAME}
 target_include_directories(${PROJECT_NAME}
    PUBLIC
    .
+   src
 )
 
 add_dependencies(${PROJECT_NAME} assets)

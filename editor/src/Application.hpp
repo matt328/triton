@@ -7,6 +7,10 @@ namespace tr::ctx {
 
 namespace ed {
 
+   namespace ui {
+      class Manager;
+   }
+
    class Application {
     public:
       Application(const int width, const int height, const std::string_view& windowTitle);
@@ -41,13 +45,7 @@ namespace ed {
       bool fullscreen{};
       int prevXPos{}, prevYPos{}, prevWidth{}, prevHeight{};
 
-      std::optional<uint32_t> selectedEntity{};
-      std::optional<std::filesystem::path> openFilePath{};
-      bool dirty = false;
-
-      ImGui::FileBrowser openProjectFileDialog;
-      ImGui::FileBrowser saveProjectFileDialog{ImGuiFileBrowserFlags_EnterNewFilename |
-                                               ImGuiFileBrowserFlags_CreateNewDir};
+      std::unique_ptr<ui::Manager> manager;
 
       void renderEntityEditor(tr::ctx::GameplayFacade& facade);
       void renderDockSpace();
