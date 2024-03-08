@@ -1,7 +1,6 @@
 #include "ImguiHelper.hpp"
 
 #include "gfx/GraphicsDevice.hpp"
-#include "RobotoRegular.h"
 
 namespace tr::gfx::Gui {
    ImGuiHelper::ImGuiHelper(const GraphicsDevice& graphicsDevice, GLFWwindow* window) {
@@ -54,22 +53,6 @@ namespace tr::gfx::Gui {
       initInfo.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
 
       ImGui_ImplVulkan_Init(&initInfo, VK_NULL_HANDLE);
-
-      auto& io = ImGui::GetIO();
-      auto fontAtlas = io.Fonts;
-      const auto ranges = io.Fonts->GetGlyphRangesDefault();
-
-      auto config = ImFontConfig{};
-      config.FontDataOwnedByAtlas = false;
-      fontAtlas->AddFontFromMemoryTTF(Roboto_Regular_ttf,
-                                      Roboto_Regular_ttf_len,
-                                      18.f,
-                                      &config,
-                                      ranges);
-
-      ImGui_ImplVulkan_CreateFontsTexture();
-
-      ImGui_ImplVulkan_CreateFontsTexture();
    }
 
    ImGuiHelper::~ImGuiHelper() {
