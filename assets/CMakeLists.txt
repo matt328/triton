@@ -1,8 +1,7 @@
 add_subdirectory(models)
 add_subdirectory(shaders)
 add_subdirectory(textures)
-add_subdirectory(fonts)
 
 add_custom_target(assets
-    DEPENDS models;shaders;textures;fonts
+   DEPENDS models;shaders;textures
 )
