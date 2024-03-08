@@ -2,11 +2,26 @@
 #include "ctx/GameplayFacade.hpp"
 #include "Properties.hpp"
 #include "ProjectFile.hpp"
+#include "RobotoRegular.h"
 
 namespace ed::ui {
    Manager::Manager(tr::ctx::GameplayFacade& facade) : facade{facade} {
       ImGuiEx::setupImGuiStyle();
       ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
+      auto& io = ImGui::GetIO();
+      auto fontAtlas = io.Fonts;
+      const auto ranges = io.Fonts->GetGlyphRangesDefault();
+
+      auto config = ImFontConfig{};
+      config.FontDataOwnedByAtlas = false;
+      fontAtlas->AddFontFromMemoryTTF(Roboto_Regular_ttf,
+                                      Roboto_Regular_ttf_len,
+                                      18.f,
+                                      &config,
+                                      ranges);
+
+      ImGui_ImplVulkan_CreateFontsTexture();
 
       openProjectFileDialog.SetTitle("Load Project");
       openProjectFileDialog.SetTypeFilters({".json"});
