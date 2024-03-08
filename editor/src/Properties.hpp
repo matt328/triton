@@ -18,10 +18,13 @@ namespace ed::pr {
       Properties& operator=(const Properties&) = delete;
       Properties& operator=(Properties&&) = delete;
 
-      [[nodiscard]] std::optional<FsPath> getRecentFilePath() const {
-         return rootJson.contains("recentFile")
-                    ? std::optional<FsPath>{FsPath{rootJson["recentFile"]}}
-                    : std::nullopt;
+      [[nodiscard]] std::optional<std::filesystem::path> getRecentFilePath() const {
+         if (rootJson.contains("recentFile")) {
+            std::string recentFile = rootJson["recentFile"];
+            return std::optional<FsPath>{std::filesystem::path{recentFile}};
+         } else {
+            return std::nullopt;
+         }
       }
 
       void setRecentFilePath(FsPath fsPath) {

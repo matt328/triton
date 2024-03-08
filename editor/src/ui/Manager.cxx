@@ -26,7 +26,13 @@ namespace ed::ui {
    }
 
    void Manager::render() {
+      renderDockSpace();
+      renderMenuBar();
+      renderEntityEditor();
+      renderDialogs();
+   }
 
+   void Manager::renderDockSpace() {
       static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_PassthruCentralNode;
       ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
 
@@ -71,8 +77,10 @@ namespace ed::ui {
          }
       }
       ImGui::End(); // Dockspace
+   }
 
-      bool b = false;
+   void Manager::renderMenuBar() {
+      auto b = false;
       if (ImGui::BeginMainMenuBar()) {
          if (ImGui::BeginMenu("File")) {
 
@@ -148,7 +156,9 @@ namespace ed::ui {
          }
          ImGui::EndPopup();
       }
+   }
 
+   void Manager::renderEntityEditor() {
       // Entity Editor
       auto& es = facade.getAllEntities();
 
@@ -211,7 +221,9 @@ namespace ed::ui {
          dirty = true;
       }
       ImGui::End();
+   }
 
+   void Manager::renderDialogs() {
       openProjectFileDialog.Display();
 
       if (openProjectFileDialog.HasSelected()) {

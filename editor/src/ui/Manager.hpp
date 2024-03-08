@@ -50,5 +50,10 @@ namespace ed::ui {
       entt::delegate<void(void)> quitDelegate{};
 
       std::function<void(void)> toggleFullscreenFn;
+
+      void renderDockSpace();
+      void renderMenuBar();
+      void renderEntityEditor();
+      void renderDialogs();
    };
 }
