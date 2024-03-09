@@ -7,35 +7,17 @@ extends vulkan_hpp (which wraps the Vulkan Vulkan C api with object oriented C++
 use of RAII concepts, removing alot of the difficulty in preventing resource leaks and tearing everything down
 in the correct order.
 
-At present it only loads up a sample gltf file and renders it fully textured, and since accomplishing that milestone,
-I have been taking some time to refactor this brute force prototype code into a solid maintainable and extendable base.
-
-## Roadmap
-
-- [ ] stick to clean and orderly object oriented design principles
-- [ ] utilize as much modern C++ as possible
-- [ ] effectively use an ECS
-- [x] set up vulkan's debug layers with naming for all objects
-- [x] draw a triangle
-- [x] load models
-- [x] configurable input mapping system
-- [x] debug UI with ImGui
-- [ ] research Taskflow multithreading and framegraph concepts
-- [ ] split project into multiple modules, base library, editor, game
-- [ ] research using c++ for 'scripting' and being able to recompile parts of the game without having to stop the executable
-- [ ] draw a bunch of models effectively
-- [ ] implement deferred rendering
-- [ ] implement PBR materials
-- [ ] start building some kind of game
+More design details and planning stuff is in the [wiki](https://github.com/matt328/triton/wiki).
 
 ## Building/Running
 
-This has recently been migrated to using CMake, and I use vscode primarily for development. So far everything works well on Windows as well as OS X ~~and linux~~.
+This has recently been migrated to using CMake, and I use vscode primarily for development. So far everything works well on Windows as well as OS X ~~and Linux~~. Linux build is having some issues right now, and I don't have a Linux desktop environment configured at the moment but it'll be back someday.
 
-While my goal has been to leverage vcpkg and not have to struggle with dependencies, I'm still just installing the Vulkan SDK and setting the VULKAN_SDK env var and relying on CMake's `find_package()` to do the thing. This area admittedly needs a little more research and understanding to make locating the Vulkan headers and libraries a bit more consistent across machines and platforms.
+While my goal has been to leverage vcpkg and not have to struggle with dependencies, I'm still just installing the Vulkan SDK and setting the VULKAN_SDK env var and relying on CMake's `find_package()` to do the thing. This area admittedly needs a little more research and understanding to make locating the Vulkan headers and libraries a bit more consistent across machines and platforms as it can be a bit flaky at times.
 
+1. Install the [Vulkan SDK](https://vulkan.lunarg.com/) and make sure the env var `VULKAN_SDK` gets set appropriately on your system
 1. Clone the repo
-2. Init vcpkg:
+1. Init vcpkg:
 
    ```PowerShell
    git submodule init
@@ -43,13 +25,13 @@ While my goal has been to leverage vcpkg and not have to struggle with dependenc
    .\vcpkg\bootstrap-vcpkg.(bat|sh)
    ```
 
-3. `cmake -B build . -G "Ninja"`
-4. `cmake --build .\build --config Debug -j 18 --target triton`
-5. `./bin/triton[.exe]`
+1. `cmake -B build . -G "Ninja"`
+1. `cmake --build .\build --config Debug -j 18 --target editor`
+1. `./bin/editor[.exe]`
 
 ## C++ Compiler Notes
 
-Largely simplified thanks to using Ninja instead of make.  Ninja is cross platform, so no messing around with mingw32 builds, and seems to be a bit faster even with this tiny little project. Just install CMake, LLVM, and Ninja. These should be the same on all 3 platforms now.
+Largely simplified thanks to using Ninja instead of make.  Ninja is cross platform, so no messing around with mingw32 builds, and seems to be a bit faster even with this tiny little project. Just install CMake, LLVM, and Ninja. These should be the same on all 3 platforms now.  The `Visual Studio 17 2022` should generate a valid project, there is a small issue with the assets being located relative to the executable when debugging, but that is currently being worked on. That being said I mostly use ninja, clang, and VSCode for development.
 
 Install [CMake](https://cmake.org/download/).  Make sure `cmake` is on your path.
 
