@@ -11,6 +11,7 @@
       "platform-folders",
       "spirv-cross",
       "stb",
+      "taskflow",
       "tinygltf",
       "tracy",
       "vulkan-memory-allocator",
