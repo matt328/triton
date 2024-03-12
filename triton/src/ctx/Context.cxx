@@ -18,7 +18,6 @@ namespace tr::ctx {
       renderer->addResizeListener<&gp::GameplaySystem::resize>(gameplaySystem.get());
 
       gameplaySystem->addRenderObjectListener<&gfx::Renderer::enqueueRenderObject>(renderer.get());
-
       gameplaySystem->addCameraDataListener<&gfx::Renderer::setCurrentCameraData>(renderer.get());
 
       gameplayFacade = std::make_unique<GameplayFacade>(*gameplaySystem, *renderer, debugEnabled);
