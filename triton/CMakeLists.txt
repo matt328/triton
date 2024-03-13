@@ -3,6 +3,7 @@ project("triton")
 set(triton_SRC
    "src/ctx/Context.cxx"
    "src/ctx/GameplayFacade.cxx"
+   "src/ctx/ResourceLoader.cxx"
    "src/gfx/FrameData.cxx"
    "src/gfx/GraphicsDevice.cxx"
    "src/gfx/ImmediateContext.cxx"
@@ -41,6 +42,7 @@ IF(APPLE)
    )
 ENDIF(APPLE)
 
+find_package(fastgltf CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glslang CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
@@ -108,6 +110,7 @@ target_link_libraries(${PROJECT_NAME}
    glfw
    GPUOpen::VulkanMemoryAllocator
    PRIVATE
+   fastgltf::fastgltf
    glslang::glslang
    glslang::glslang-default-resource-limits
    glslang::SPIRV

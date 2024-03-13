@@ -32,8 +32,6 @@ namespace tr::ctx {
       tf::Executor executor{2};
       std::vector<RenderObjectData> renderObjectData;
 
-      gfx::RenderObjectHandle loadGltf(const std::filesystem::path& path) {
-         return 3;
-      }
+      static gfx::RenderObjectHandle loadGltfInt(const std::filesystem::path& path);
    };
 }
