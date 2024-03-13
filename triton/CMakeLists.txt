@@ -44,6 +44,7 @@ ENDIF(APPLE)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glslang CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
+find_package(Taskflow CONFIG REQUIRED)
 find_package(Tracy CONFIG REQUIRED)
 find_package(Stb REQUIRED)
 find_package(spirv_cross_core CONFIG REQUIRED)
@@ -76,12 +77,14 @@ target_precompile_headers(${PROJECT_NAME}
    <limits>
    <map>
    <optional>
+   <future>
    <ranges>
    <set>
    <stb_image.h>
    <string>
    <string_view>
    <sstream>
+   <taskflow/taskflow.hpp>
    PUBLIC
    "include/util/Logger.hpp"
    <GLFW/glfw3.h>
@@ -111,6 +114,7 @@ target_link_libraries(${PROJECT_NAME}
    imgui::imgui
    spirv-cross-core
    spirv-cross-cpp
+   Taskflow::Taskflow
    Tracy::TracyClient
    unofficial::VulkanMemoryAllocator-Hpp::VulkanMemoryAllocator-Hpp
    ${Vulkan_LIBRARIES}
