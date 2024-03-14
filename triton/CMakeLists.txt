@@ -73,6 +73,7 @@ target_precompile_headers(${PROJECT_NAME}
    PRIVATE
    <entt/entt.hpp>
    <fastgltf/core.hpp>
+   <fastgltf/glm_element_traits.hpp>
    <fastgltf/util.hpp>
    <fastgltf/tools.hpp>
    <filesystem>
