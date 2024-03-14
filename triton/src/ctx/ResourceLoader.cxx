@@ -4,10 +4,6 @@
 #include "gfx/Handles.hpp"
 #include "gfx/geometry/Vertex.hpp"
 
-#include <fastgltf/core.hpp>
-#include <fastgltf/util.hpp>
-#include <fastgltf/tools.hpp>
-
 namespace tr::ctx {
 
    using Vertex = gfx::Geometry::Vertex;

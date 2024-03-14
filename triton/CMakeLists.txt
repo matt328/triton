@@ -72,10 +72,14 @@ target_compile_definitions(${PROJECT_NAME}
 target_precompile_headers(${PROJECT_NAME}
    PRIVATE
    <entt/entt.hpp>
+   <fastgltf/core.hpp>
+   <fastgltf/util.hpp>
+   <fastgltf/tools.hpp>
    <filesystem>
    <fstream>
    <functional>
    <glslang/SPIRV/GlslangToSpv.h>
+   <ktx.h>
    <limits>
    <map>
    <optional>

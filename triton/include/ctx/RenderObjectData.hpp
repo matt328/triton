@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gfx/geometry/Vertex.hpp"
+#include "util/KtxImage.hpp"
 
 namespace tr::ctx {
 
@@ -11,7 +12,18 @@ namespace tr::ctx {
       std::vector<Vertex> vertices;
    };
 
-   struct Material {};
+   struct Material {
+      struct Constants {
+         glm::vec4 colorFactors;
+         glm::vec2 metalRoughFactors;
+      };
+      std::unique_ptr<util::KtxImage> albedoMap;
+      std::unique_ptr<util::KtxImage> roughnessMap;
+      std::unique_ptr<util::KtxImage> normalMap;
+      std::unique_ptr<util::KtxImage> aoMap;
+
+      Constants constants;
+   };
 
    class RenderObjectDataIterator {
     public:
