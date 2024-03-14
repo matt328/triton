@@ -42,6 +42,7 @@ namespace tr::ctx {
       std::vector<RenderObjectData> renderObjectData;
 
       for (auto& mesh : asset->meshes) {
+
          for (auto&& p : mesh.primitives) {
             auto primitive = Primitive{};
             // Parse Indices
