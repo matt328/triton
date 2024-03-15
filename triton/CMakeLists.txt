@@ -76,6 +76,7 @@ target_precompile_headers(${PROJECT_NAME}
    <fastgltf/glm_element_traits.hpp>
    <fastgltf/util.hpp>
    <fastgltf/tools.hpp>
+   <fastgltf/glm_element_traits.hpp>
    <filesystem>
    <fstream>
    <functional>
@@ -105,6 +106,7 @@ target_precompile_headers(${PROJECT_NAME}
    <imgui.h>
    <vulkan-memory-allocator-hpp/vk_mem_alloc.hpp>
    <vulkan/vulkan_raii.hpp>
+   <taskflow/taskflow.hpp>
    <tracy/Tracy.hpp>
    <tracy/TracyVulkan.hpp>
    <tracy/TracyC.h>

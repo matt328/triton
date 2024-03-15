@@ -9,6 +9,8 @@ namespace tr::ctx {
    template <typename T>
    using OptionalRef = std::optional<std::reference_wrapper<T>>;
 
+   class ResourceLoader;
+
    struct EditorInfoComponent {
       std::string name;
       std::optional<std::string> sourceMesh;
@@ -63,10 +65,15 @@ namespace tr::ctx {
 
       void clear();
 
+      [[nodiscard]] ResourceLoader& getResourceLoader() {
+         return *resourceLoader.get();
+      }
+
     private:
       bool debugEnabled{};
       gp::GameplaySystem& gameplaySystem;
       gfx::Renderer& renderer;
+      std::unique_ptr<ResourceLoader> resourceLoader;
       std::vector<gp::EntityType> allEntities;
    };
 

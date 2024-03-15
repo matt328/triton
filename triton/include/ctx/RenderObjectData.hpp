@@ -8,19 +8,20 @@ namespace tr::ctx {
    using Vertex = gfx::Geometry::Vertex;
 
    struct Primitive {
-      std::vector<uint32_t> indices;
-      std::vector<Vertex> vertices;
+      std::vector<uint16_t> indices{};
+      std::vector<Vertex> vertices{};
    };
 
    struct Material {
       struct Constants {
-         glm::vec4 colorFactors;
-         glm::vec2 metalRoughFactors;
+         glm::vec4 colorFactors{1};
+         glm::vec2 metalRoughFactors{1};
       };
-      std::unique_ptr<util::KtxImage> albedoMap;
-      std::unique_ptr<util::KtxImage> roughnessMap;
-      std::unique_ptr<util::KtxImage> normalMap;
-      std::unique_ptr<util::KtxImage> aoMap;
+
+      std::optional<std::unique_ptr<util::KtxImage>> albedoMap;
+      std::optional<std::unique_ptr<util::KtxImage>> roughnessMap;
+      std::optional<std::unique_ptr<util::KtxImage>> normalMap;
+      std::optional<std::unique_ptr<util::KtxImage>> aoMap;
 
       Constants constants;
    };
@@ -78,8 +79,8 @@ namespace tr::ctx {
    class RenderObjectData {
     public:
       using Iterator = RenderObjectDataIterator;
-      RenderObjectData();
-      ~RenderObjectData();
+      RenderObjectData(){};
+      ~RenderObjectData(){};
 
       RenderObjectData(const RenderObjectData&) = delete;
       RenderObjectData(RenderObjectData&&) = delete;

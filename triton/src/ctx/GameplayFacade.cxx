@@ -1,5 +1,7 @@
 #include "ctx/GameplayFacade.hpp"
 
+#include "ctx/ResourceLoader.hpp"
+
 #include "gp/GameplaySystem.hpp"
 #include "gfx/Renderer.hpp"
 
@@ -12,7 +14,10 @@ namespace tr::ctx {
    GameplayFacade::GameplayFacade(gp::GameplaySystem& gameplaySystem,
                                   gfx::Renderer& renderer,
                                   bool debugEnabled)
-       : debugEnabled{debugEnabled}, gameplaySystem{gameplaySystem}, renderer{renderer} {
+       : debugEnabled{debugEnabled},
+         gameplaySystem{gameplaySystem},
+         renderer{renderer},
+         resourceLoader(std::make_unique<ResourceLoader>(renderer)) {
    }
 
    GameplayFacade::~GameplayFacade() {

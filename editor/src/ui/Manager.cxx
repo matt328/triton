@@ -1,5 +1,6 @@
 #include "Manager.hpp"
 #include "ctx/GameplayFacade.hpp"
+#include "ctx/ResourceLoader.hpp"
 #include "Properties.hpp"
 #include "ProjectFile.hpp"
 #include "RobotoRegular.h"
@@ -227,7 +228,12 @@ namespace ed::ui {
                openProjectFileDialog.Open();
             }
             ImGui::SameLine();
-            if (ImGui::Button("Save")) {}
+            if (ImGui::Button("Test")) {
+               auto filename = std::filesystem::path{
+                   R"(C:\Users\Matt\Projects\triton-assets\models\quarter_2.gltf)"};
+               auto f = this->facade.getResourceLoader().loadGltf(filename);
+               f.wait();
+            }
 
             ImGui::EndGroup();
          }

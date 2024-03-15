@@ -27,7 +27,8 @@ namespace tr::ctx {
       fastgltf::GltfDataBuffer data;
       data.loadFromFile(path);
 
-      auto asset = parser.loadGltf(&data, path.parent_path());
+      auto asset =
+          parser.loadGltf(&data, path.parent_path(), fastgltf::Options::LoadExternalBuffers);
       if (auto error = asset.error(); error != fastgltf::Error::None) {
          std::stringstream ss{};
          ss << "Failed to load gltf file: " << path.string() << fastgltf::to_underlying(error)
@@ -37,6 +38,17 @@ namespace tr::ctx {
 
       std::vector<RenderObjectData> renderObjectData;
 
+      for (auto& mat : asset->materials) {
+         if (mat.pbrData.baseColorTexture.has_value()) {
+            Log::info << mat.pbrData.baseColorTexture.value().textureIndex << std::endl;
+         }
+      }
+      for (auto& tex : asset->textures) {
+         if (tex.imageIndex.has_value()) {
+            Log::info << tex.imageIndex.value() << std::endl;
+         }
+      }
+
       for (auto& mesh : asset->meshes) {
 
          for (auto&& p : mesh.primitives) {
@@ -44,8 +56,8 @@ namespace tr::ctx {
             // Parse Indices
             {
                auto& indexAccessor = asset->accessors[p.indicesAccessor.value()];
-               primitive.indices.reserve(indexAccessor.count);
-               fastgltf::copyFromAccessor<std::uint32_t>(asset.get(),
+               primitive.indices.resize(indexAccessor.count);
+               fastgltf::copyFromAccessor<std::uint16_t>(asset.get(),
                                                          indexAccessor,
                                                          primitive.indices.data());
             }
