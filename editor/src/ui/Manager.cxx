@@ -42,6 +42,18 @@ namespace ed::ui {
    }
 
    void Manager::render() {
+      ZoneNamedN(guiRender, "Gui Render", true);
+      for (auto it = modelFutures.begin(); it != modelFutures.end();) {
+         auto status = it->wait_for(std::chrono::seconds(0));
+         if (status == std::future_status::ready) {
+            ZoneNamedN(loadComplete, "Load Complete", true);
+            auto r = it->get();
+            Log::info << "result: " << r << std::endl;
+            it = modelFutures.erase(it);
+         } else {
+            ++it;
+         }
+      }
       renderDockSpace();
       renderMenuBar();
       renderEntityEditor();
@@ -231,8 +243,7 @@ namespace ed::ui {
             if (ImGui::Button("Test")) {
                auto filename = std::filesystem::path{
                    R"(C:\Users\Matt\Projects\triton-assets\models\quarter_2.gltf)"};
-               auto f = this->facade.getResourceLoader().loadGltf(filename);
-               f.wait();
+               modelFutures.push_back(this->facade.getResourceLoader().loadGltf(filename));
             }
 
             ImGui::EndGroup();

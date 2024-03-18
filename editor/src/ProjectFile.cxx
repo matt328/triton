@@ -159,8 +159,8 @@ namespace ed::io {
    void parseCameraComponent(const nlohmann::basic_json<nlohmann::ordered_map>& componentJson,
                              std::optional<tr::gp::ecs::Camera>& cameraInfo) {
       float fov = componentJson["fov"];
-      float yaw = componentJson["yaw"];
-      float pitch = componentJson["pitch"];
+      [[maybe_unused]] float yaw = componentJson["yaw"];
+      [[maybe_unused]] float pitch = componentJson["pitch"];
       auto posJson = componentJson["position"];
 
       float x = posJson["x"];

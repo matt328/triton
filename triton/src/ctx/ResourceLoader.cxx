@@ -1,12 +1,12 @@
 #include "ctx/ResourceLoader.hpp"
 
-#include "ctx/RenderObjectData.hpp"
+#include "ctx/ModelInfo.hpp"
+#include "ctx/KtxImage.hpp"
 #include "gfx/Handles.hpp"
-#include "gfx/geometry/Vertex.hpp"
 
 namespace tr::ctx {
 
-   using Vertex = gfx::Geometry::Vertex;
+   using gfx::ModelInfoHandle;
 
    ResourceLoader::ResourceLoader(gfx::Renderer& renderer) : renderer(renderer) {
    }
@@ -14,17 +14,34 @@ namespace tr::ctx {
    ResourceLoader::~ResourceLoader() {
    }
 
-   std::future<gfx::RenderObjectHandle> ResourceLoader::loadGltf(std::filesystem::path& path) {
-      return executor.async([&path]() { return ResourceLoader::loadGltfInt(path); });
+   std::future<ModelInfoHandle> ResourceLoader::loadGltf(std::filesystem::path& path) {
+      return executor.async("Load gltf", [path, this]() { return loadGltfInt(path); });
+   }
+
+   std::future<gfx::MeshMaterialHandle> ResourceLoader::loadGltfAndUpload(
+       std::filesystem::path& path) {
+      Log::info << "loadGltfAndUpload with path: " << path << std::endl;
+      return executor.async("Load and Upload gltf",
+                            [path, this]() { return uploadModelInfoInt(loadGltfInt(path)); });
    }
 
    std::future<gfx::MeshMaterialHandle> ResourceLoader::uploadRenderObjectData(
-       const gfx::RenderObjectHandle handle) {
+       const gfx::ModelInfoHandle handle) {
+      Log::info << "uploadRenderObjectData handle: " << handle << std::endl;
+      return std::async(std::launch::deferred,
+                        []() { return static_cast<gfx::MeshMaterialHandle>(3); });
    }
 
-   gfx::RenderObjectHandle ResourceLoader::loadGltfInt(const std::filesystem::path& path) {
-      fastgltf::Parser parser;
-      fastgltf::GltfDataBuffer data;
+   gfx::MeshMaterialHandle uploadModelInfoInt(const gfx::ModelInfoHandle modelHandle) {
+      Log::info << "uploadModelInfoInt handle: " << modelHandle << std::endl;
+      return static_cast<gfx::MeshMaterialHandle>(2);
+   }
+
+   ModelInfoHandle ResourceLoader::loadGltfInt(const std::filesystem::path& path) {
+      ZoneNamedN(loadGltf, "Loading Model", true);
+      fastgltf::Parser parser{};
+      fastgltf::GltfDataBuffer data{};
+
       data.loadFromFile(path);
 
       auto asset =
@@ -36,70 +53,10 @@ namespace tr::ctx {
          throw std::runtime_error(ss.str());
       }
 
-      std::vector<RenderObjectData> renderObjectData;
+      const auto position = modelInfoList.size();
 
-      for (auto& mat : asset->materials) {
-         if (mat.pbrData.baseColorTexture.has_value()) {
-            Log::info << mat.pbrData.baseColorTexture.value().textureIndex << std::endl;
-         }
-      }
-      for (auto& tex : asset->textures) {
-         if (tex.imageIndex.has_value()) {
-            Log::info << tex.imageIndex.value() << std::endl;
-         }
-      }
+      modelInfoList.emplace_back(std::move(asset.get()), path);
 
-      for (auto& mesh : asset->meshes) {
-
-         for (auto&& p : mesh.primitives) {
-            auto primitive = Primitive{};
-            // Parse Indices
-            {
-               auto& indexAccessor = asset->accessors[p.indicesAccessor.value()];
-               primitive.indices.resize(indexAccessor.count);
-               fastgltf::copyFromAccessor<std::uint16_t>(asset.get(),
-                                                         indexAccessor,
-                                                         primitive.indices.data());
-            }
-            // Parse Vertex Positions
-            {
-               auto& posAccessor = asset->accessors[p.findAttribute("POSITION")->second];
-               fastgltf::iterateAccessor<glm::vec3>(asset.get(), posAccessor, [&](glm::vec3 v) {
-                  Vertex vertex{};
-                  vertex.pos = v;
-                  primitive.vertices.push_back(vertex);
-               });
-            }
-
-            // Normals
-            auto normals = p.findAttribute("NORMAL");
-            if (normals != p.attributes.end()) {
-               fastgltf::iterateAccessorWithIndex<glm::vec3>(
-                   asset.get(),
-                   asset->accessors[(*normals).second],
-                   [&](glm::vec3 v, size_t index) { primitive.vertices[index].normal = v; });
-            }
-
-            // load UVs
-            auto uv = p.findAttribute("TEXCOORD_0");
-            if (uv != p.attributes.end()) {
-               fastgltf::iterateAccessorWithIndex<glm::vec2>(
-                   asset.get(),
-                   asset->accessors[(*uv).second],
-                   [&](glm::vec2 v, size_t index) { primitive.vertices[index].uv = v; });
-            }
-
-            // load vertex colors
-            auto colors = p.findAttribute("COLOR_0");
-            if (colors != p.attributes.end()) {
-               fastgltf::iterateAccessorWithIndex<glm::vec4>(
-                   asset.get(),
-                   asset->accessors[(*colors).second],
-                   [&](glm::vec4 v, size_t index) { primitive.vertices[index].color = v; });
-            }
-         }
-      }
-
-      return gfx::RenderObjectHandle{3};
+      return static_cast<ModelInfoHandle>(position);
    }
 }

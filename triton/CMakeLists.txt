@@ -4,6 +4,9 @@ set(triton_SRC
    "src/ctx/Context.cxx"
    "src/ctx/GameplayFacade.cxx"
    "src/ctx/ResourceLoader.cxx"
+   "src/ctx/KtxImage.cxx"
+   "src/ctx/GltfHelper.cxx"
+   "src/ctx/ModelInfo.cxx"
    "src/gfx/FrameData.cxx"
    "src/gfx/GraphicsDevice.cxx"
    "src/gfx/ImmediateContext.cxx"
@@ -46,6 +49,7 @@ find_package(fastgltf CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glslang CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
+find_package(Ktx CONFIG REQUIRED)
 find_package(Taskflow CONFIG REQUIRED)
 find_package(Tracy CONFIG REQUIRED)
 find_package(Stb REQUIRED)
@@ -122,6 +126,7 @@ target_link_libraries(${PROJECT_NAME}
    glslang::glslang-default-resource-limits
    glslang::SPIRV
    imgui::imgui
+   KTX::ktx
    spirv-cross-core
    spirv-cross-cpp
    Taskflow::Taskflow
