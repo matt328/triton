@@ -32,7 +32,8 @@ namespace tr::ctx {
                         []() { return static_cast<gfx::MeshMaterialHandle>(3); });
    }
 
-   gfx::MeshMaterialHandle uploadModelInfoInt(const gfx::ModelInfoHandle modelHandle) {
+   gfx::MeshMaterialHandle ResourceLoader::uploadModelInfoInt(
+       const gfx::ModelInfoHandle modelHandle) {
       Log::info << "uploadModelInfoInt handle: " << modelHandle << std::endl;
       return static_cast<gfx::MeshMaterialHandle>(2);
    }

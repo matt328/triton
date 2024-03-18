@@ -4,6 +4,7 @@
 #include "Properties.hpp"
 #include "ProjectFile.hpp"
 #include "RobotoRegular.h"
+#include "gfx/ResourceQueue.hpp"
 
 namespace ed::ui {
    Manager::Manager(tr::ctx::GameplayFacade& facade) : facade{facade} {
@@ -36,6 +37,8 @@ namespace ed::ui {
 
       saveProjectFileDialog.SetTitle("Save Project");
       saveProjectFileDialog.SetTypeFilters({".json"});
+
+      resourceQueue = std::make_unique<tr::gfx::ResourceQueue>();
    }
 
    Manager::~Manager() {
@@ -241,9 +244,16 @@ namespace ed::ui {
             }
             ImGui::SameLine();
             if (ImGui::Button("Test")) {
+
                auto filename = std::filesystem::path{
                    R"(C:\Users\Matt\Projects\triton-assets\models\quarter_2.gltf)"};
-               modelFutures.push_back(this->facade.getResourceLoader().loadGltf(filename));
+
+               auto f = resourceQueue->addGltf(filename);
+               auto d = f.get();
+
+               Log::info << "resourceQueue produced " << std::endl;
+
+               // modelFutures.push_back(this->facade.getResourceLoader().loadGltf(filename));
             }
 
             ImGui::EndGroup();

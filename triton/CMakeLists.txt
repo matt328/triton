@@ -11,6 +11,7 @@ set(triton_SRC
    "src/gfx/GraphicsDevice.cxx"
    "src/gfx/ImmediateContext.cxx"
    "src/gfx/Renderer.cxx"
+   "src/gfx/ResourceQueue.cxx"
    "src/gfx/vma_raii.cxx"
    "src/gfx/geometry/MeshFactory.cxx"
    "src/gfx/geometry/Vertex.cxx"

@@ -18,6 +18,10 @@ namespace tr::ctx {
    class GameplayFacade;
 }
 
+namespace tr::gfx {
+   class ResourceQueue;
+}
+
 namespace ed::ui {
    class Manager {
     public:
@@ -58,6 +62,8 @@ namespace ed::ui {
       entt::delegate<void(void)> quitDelegate{};
 
       std::function<void(void)> toggleFullscreenFn;
+
+      std::unique_ptr<tr::gfx::ResourceQueue> resourceQueue;
 
       void renderDockSpace();
       void renderMenuBar();
