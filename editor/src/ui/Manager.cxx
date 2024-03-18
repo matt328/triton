@@ -248,7 +248,10 @@ namespace ed::ui {
                auto filename = std::filesystem::path{
                    R"(C:\Users\Matt\Projects\triton-assets\models\quarter_2.gltf)"};
 
-               auto f = resourceQueue->addGltf(filename);
+               auto f = resourceQueue->enqueue([filename] {
+                  Log::info << "enqueued loading of " << filename << std::endl;
+                  return 5;
+               });
                auto d = f.get();
 
                Log::info << "resourceQueue produced " << std::endl;

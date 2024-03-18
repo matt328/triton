@@ -14,22 +14,6 @@ namespace tr::gfx {
       thread.join();
    }
 
-   std::future<gfx::MeshMaterialHandle> ResourceQueue::addGltf(const std::filesystem::path& path) {
-      auto task = std::packaged_task<gfx::MeshMaterialHandle()>(
-          [path, this]() { return this->loadGltf(path); });
-
-      auto f = task.get_future();
-
-      {
-         std::lock_guard<std::mutex> lock(mtx);
-         taskQueue.push(std::move(task));
-      }
-
-      cv.notify_one();
-
-      return f;
-   }
-
    gfx::MeshMaterialHandle ResourceQueue::loadGltf(const std::filesystem::path& path) {
       ZoneNamedN(var, "loadGltf", true);
       return static_cast<gfx::MeshMaterialHandle>(3);
