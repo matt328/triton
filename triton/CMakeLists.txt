@@ -10,6 +10,7 @@ set(triton_SRC
    "src/gfx/FrameData.cxx"
    "src/gfx/GraphicsDevice.cxx"
    "src/gfx/ImmediateContext.cxx"
+   "src/gfx/VkContext.cxx"
    "src/gfx/Renderer.cxx"
    "src/gfx/vma_raii.cxx"
    "src/gfx/geometry/MeshFactory.cxx"

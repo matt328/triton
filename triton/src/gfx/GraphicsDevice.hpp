@@ -10,6 +10,7 @@ struct GLFWwindow;
 namespace tr::gfx {
 
    class ImmediateContext;
+   class VkContext;
    class Allocator;
 
    namespace Textures {
@@ -111,6 +112,10 @@ namespace tr::gfx {
          return *transferImmediateContext;
       }
 
+      [[nodiscard]] const VkContext& getAsyncTransferContext() const {
+         return *asyncTransferContext;
+      }
+
       [[nodiscard]] const std::pair<uint32_t, uint32_t> getCurrentSize() const;
 
       void recreateSwapchain();
@@ -148,6 +153,7 @@ namespace tr::gfx {
       std::unique_ptr<vk::raii::DescriptorPool> descriptorPool;
       std::unique_ptr<ImmediateContext> transferImmediateContext;
       std::unique_ptr<ImmediateContext> graphicsImmediateContext;
+      std::unique_ptr<VkContext> asyncTransferContext;
 
       std::unique_ptr<vk::raii::DebugUtilsMessengerEXT> debugCallback;
       std::unique_ptr<vk::raii::DebugReportCallbackEXT> reportCallback;
