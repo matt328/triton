@@ -11,7 +11,6 @@ set(triton_SRC
    "src/gfx/GraphicsDevice.cxx"
    "src/gfx/ImmediateContext.cxx"
    "src/gfx/Renderer.cxx"
-   "src/gfx/ResourceQueue.cxx"
    "src/gfx/vma_raii.cxx"
    "src/gfx/geometry/MeshFactory.cxx"
    "src/gfx/geometry/Vertex.cxx"
@@ -76,6 +75,7 @@ target_compile_definitions(${PROJECT_NAME}
 
 target_precompile_headers(${PROJECT_NAME}
    PRIVATE
+   <condition_variable>
    <entt/entt.hpp>
    <fastgltf/core.hpp>
    <fastgltf/glm_element_traits.hpp>

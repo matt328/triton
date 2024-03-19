@@ -101,7 +101,7 @@ namespace tr::gfx::Textures {
       // TODO Change these utils so they can happen in one 'transaction' without flushing the
       // command buffer after each one.  Immediate context could for allow for begin, then add
       // function, then end maybe.
-      transitionImageLayout(graphicsContext,
+      transitionImageLayout(transferContext,
                             image->getImage(),
                             vk::ImageLayout::eUndefined,
                             vk::ImageLayout::eTransferDstOptimal,
@@ -114,7 +114,7 @@ namespace tr::gfx::Textures {
                         bufferCopyRegions);
 
       transitionImageLayout(
-          graphicsContext,
+          transferContext,
           image->getImage(),
           vk::ImageLayout::eTransferDstOptimal,
           vk::ImageLayout::eShaderReadOnlyOptimal, // TODO: pass this in to the function, but
