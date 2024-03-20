@@ -14,6 +14,10 @@
 #include "geometry/MeshFactory.hpp"
 #include "helpers/SpirvHelper.hpp"
 #include "util/Paths.hpp"
+#include "util/TaskQueue.hpp"
+#include <chrono>
+#include <optional>
+#include <tracy/Tracy.hpp>
 
 namespace tr::gfx {
 
@@ -72,6 +76,8 @@ namespace tr::gfx {
       if (guiEnabled) {
          imguiHelper = std::make_unique<Gui::ImGuiHelper>(*graphicsDevice, window);
       }
+
+      textureTaskQueue = std::make_unique<util::TaskQueue>();
    }
 
    Renderer::~Renderer() {
@@ -155,10 +161,57 @@ namespace tr::gfx {
       createSwapchainResources();
    }
 
+   std::future<uint32_t> Renderer::createTextureAsync(const std::string_view& filename) {
+      return textureTaskQueue->enqueue([this, filename]() { return createTextureInt(filename); });
+   }
+
+   uint32_t Renderer::createTextureInt(const std::string_view& filename) {
+      ZoneNamedN(a, "Create Texture Internal", true);
+
+      TracyMessageL("loading gltf");
+      std::this_thread::sleep_for(std::chrono::seconds(3));
+
+      TracyMessageL("loading textures");
+      std::this_thread::sleep_for(std::chrono::seconds(2));
+
+      TracyMessageL("uploading textures");
+      std::this_thread::sleep_for(std::chrono::seconds(2));
+
+      TracyMessageL("setting DS Update Info");
+      {
+         std::unique_lock<std::mutex> lock(descriptorSetUpdateMtx);
+         descriptorWriteInfo.emplace("some writes");
+         // This thread doesn't have to notify since the render thread will pretty much be
+         // constantly checking this lock and descriptorWriteInfo optional for work to do.
+      }
+
+      TracyMessageL("waiting for writes to be processed");
+      {
+         // wait for the cv to be notified and for descriptorWriteInfo to have been emptied
+         std::unique_lock<std::mutex> lock(descriptorSetUpdateMtx);
+         descriptorSetUpdateCv.wait(lock, [this] { return !descriptorWriteInfo.has_value(); });
+      }
+
+      TracyMessageL("ds has been updated");
+      return 3;
+   }
+
+   void Renderer::checkDescriptorWrites() {
+      if (descriptorSetUpdateMtx.try_lock()) {
+         TracyMessageL("acquired a lock on the mutex");
+         if (descriptorWriteInfo.has_value()) { // go time
+            TracyMessageL("updating descriptor set");
+            std::this_thread::sleep_for(std::chrono::milliseconds(3));
+            descriptorWriteInfo = std::nullopt;
+            descriptorSetUpdateCv.notify_one();
+         }
+         descriptorSetUpdateMtx.unlock();
+      } // else if we can't lock it this frame, forget about it we'll try again in 16ms.
+   }
+
    void Renderer::drawFrame() {
       ZoneNamedN(render, "Render", true);
       const auto& currentFrameData = frameData[currentFrame];
-
       // Wait for this frame's fence so we can be sure the gpu is finished with this frame's command
       // buffer.  Which it should be since it was submitted a frame or two ago.
       {
@@ -171,6 +224,8 @@ namespace tr::gfx {
             throw std::runtime_error("Error waiting for fences");
          }
       }
+
+      checkDescriptorWrites();
 
       // Ask the swapchain to move to the next image. This call is async, and will signal the given
       // semaphore when it's completed.

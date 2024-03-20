@@ -248,15 +248,17 @@ namespace ed::ui {
                auto filename = std::filesystem::path{
                    R"(C:\Users\Matt\Projects\triton-assets\models\quarter_2.gltf)"};
 
-               auto f = resourceQueue->enqueue(
-                   [](const std::filesystem::path& filename) {
-                      Log::info << "enqueued loading of " << filename << std::endl;
-                      return 5;
-                   },
-                   filename);
-               auto d = f.get();
+               // TODO: call renderer.loadTextureAsync here
 
-               Log::info << "resourceQueue produced " << d << std::endl;
+               // auto f = resourceQueue->enqueue(
+               //     [](const std::filesystem::path& filename) {
+               //        Log::info << "enqueued loading of " << filename << std::endl;
+               //        return 5;
+               //     },
+               //     filename);
+               // auto d = f.get();
+
+               // Log::info << "resourceQueue produced " << d << std::endl;
 
                // modelFutures.push_back(this->facade.getResourceLoader().loadGltf(filename));
             }

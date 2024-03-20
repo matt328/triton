@@ -2,6 +2,7 @@
 
 #include "gfx/ObjectData.hpp"
 #include "gfx/GraphicsDevice.hpp"
+#include "util/TaskQueue.hpp"
 
 #include <entt/signal/fwd.hpp>
 
@@ -49,6 +50,10 @@ namespace tr::gfx {
       MeshHandle createMesh(const std::string_view& filename);
       uint32_t createTexture(const std::string_view& filename);
 
+      std::future<uint32_t> createTextureAsync(const std::string_view& filename);
+
+      uint32_t createTextureInt(const std::string_view& filename);
+
       void enqueueRenderObject(RenderObject renderObject);
 
       void setCurrentCameraData(CameraData&& cameraData) {
@@ -90,6 +95,13 @@ namespace tr::gfx {
 
       std::unique_ptr<Gui::ImGuiHelper> imguiHelper;
 
+      std::unique_ptr<util::TaskQueue> textureTaskQueue;
+
+      std::condition_variable descriptorSetUpdateCv{};
+      std::mutex descriptorSetUpdateMtx{};
+      std::optional<std::string> descriptorWriteInfo{};
+      boolean canUpdateDS = false;
+
       std::vector<RenderObject> renderObjects{};
       std::vector<ObjectData> objectDataList{};
       CameraData cameraData{glm::identity<glm::mat4>(),
@@ -108,5 +120,7 @@ namespace tr::gfx {
       void drawFrame();
       void recordCommandBuffer(FrameData& frameData, unsigned imageIndex) const;
       void drawImgui(const vk::raii::CommandBuffer& cmd, const vk::raii::ImageView& image) const;
+
+      void checkDescriptorWrites();
    };
 }
