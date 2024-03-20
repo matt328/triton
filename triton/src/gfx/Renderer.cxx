@@ -195,6 +195,7 @@ namespace tr::gfx {
          if (!currentFrameData->getTexturesToBind().empty()) {
             auto writes = std::vector<vk::WriteDescriptorSet>{};
             writes.reserve(currentFrameData->getTexturesToBind().size());
+
             for (const auto t : currentFrameData->getTexturesToBind()) {
                const auto& texture = textureList[t];
                writes.push_back(vk::WriteDescriptorSet{
