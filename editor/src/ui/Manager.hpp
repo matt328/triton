@@ -40,7 +40,7 @@ namespace ed::ui {
 
     private:
       tr::ctx::GameplayFacade& facade;
-      std::vector<std::future<tr::gfx::ModelInfoHandle>> modelFutures{};
+      std::vector<std::future<uint32_t>> modelFutures{};
 
       // HACK: get this from the application somehow instead of tracking it in 2 places
       bool fullscreen{};
@@ -56,8 +56,6 @@ namespace ed::ui {
       entt::delegate<void(void)> quitDelegate{};
 
       std::function<void(void)> toggleFullscreenFn;
-
-      std::unique_ptr<tr::util::TaskQueue> resourceQueue;
 
       void renderDockSpace();
       void renderMenuBar();

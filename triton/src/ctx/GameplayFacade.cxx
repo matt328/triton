@@ -23,6 +23,10 @@ namespace tr::ctx {
    GameplayFacade::~GameplayFacade() {
    }
 
+   std::future<uint32_t> GameplayFacade::loadTextureAsync(const std::filesystem::path& path) {
+      return renderer.createTextureAsync(path.string());
+   }
+
    gp::EntityType GameplayFacade::createStaticMeshEntity(std::string meshFile,
                                                          std::string textureFile,
                                                          std::optional<std::string> name) {

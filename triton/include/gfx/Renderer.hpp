@@ -97,8 +97,8 @@ namespace tr::gfx {
 
       std::unique_ptr<util::TaskQueue> textureTaskQueue;
 
-      std::condition_variable descriptorSetUpdateCv{};
-      std::mutex descriptorSetUpdateMtx{};
+      std::condition_variable_any descriptorSetUpdateCv{};
+      TracyLockable(std::mutex, descriptorSetUpdateMtx);
       std::optional<std::string> descriptorWriteInfo{};
       boolean canUpdateDS = false;
 

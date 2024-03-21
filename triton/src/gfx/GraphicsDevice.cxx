@@ -116,7 +116,7 @@ namespace tr::gfx {
 
       for (auto queueFamily : uniqueQueueFamilies) {
          vk::DeviceQueueCreateInfo queueCreateInfo{.queueFamilyIndex = queueFamily,
-                                                   .queueCount = 1,
+                                                   .queueCount = 2,
                                                    .pQueuePriorities = &queuePriority};
          queueCreateInfos.push_back(queueCreateInfo);
       }

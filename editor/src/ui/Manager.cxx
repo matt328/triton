@@ -1,10 +1,8 @@
 #include "Manager.hpp"
 #include "ctx/GameplayFacade.hpp"
-#include "ctx/ResourceLoader.hpp"
 #include "Properties.hpp"
 #include "ProjectFile.hpp"
 #include "RobotoRegular.h"
-#include "util/TaskQueue.hpp"
 
 namespace ed::ui {
    Manager::Manager(tr::ctx::GameplayFacade& facade) : facade{facade} {
@@ -37,8 +35,6 @@ namespace ed::ui {
 
       saveProjectFileDialog.SetTitle("Save Project");
       saveProjectFileDialog.SetTypeFilters({".json"});
-
-      resourceQueue = std::make_unique<tr::util::TaskQueue>();
    }
 
    Manager::~Manager() {
@@ -248,6 +244,7 @@ namespace ed::ui {
                auto filename = std::filesystem::path{
                    R"(C:\Users\Matt\Projects\triton-assets\models\quarter_2.gltf)"};
 
+               modelFutures.push_back(facade.loadTextureAsync(filename));
                // TODO: call renderer.loadTextureAsync here
 
                // auto f = resourceQueue->enqueue(

@@ -16,6 +16,7 @@
 #include "util/Paths.hpp"
 #include "util/TaskQueue.hpp"
 #include <chrono>
+#include <mutex>
 #include <optional>
 #include <tracy/Tracy.hpp>
 
@@ -169,17 +170,19 @@ namespace tr::gfx {
       ZoneNamedN(a, "Create Texture Internal", true);
 
       TracyMessageL("loading gltf");
-      std::this_thread::sleep_for(std::chrono::seconds(3));
+      std::this_thread::sleep_for(std::chrono::milliseconds(300));
 
       TracyMessageL("loading textures");
-      std::this_thread::sleep_for(std::chrono::seconds(2));
+      std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
       TracyMessageL("uploading textures");
-      std::this_thread::sleep_for(std::chrono::seconds(2));
+      std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
       TracyMessageL("setting DS Update Info");
       {
-         std::unique_lock<std::mutex> lock(descriptorSetUpdateMtx);
+         std::unique_lock<LockableBase(std::mutex)> lock(descriptorSetUpdateMtx);
+         LockMark(descriptorSetUpdateMtx);
+         std::this_thread::sleep_for(std::chrono::milliseconds(400));
          descriptorWriteInfo.emplace("some writes");
          // This thread doesn't have to notify since the render thread will pretty much be
          // constantly checking this lock and descriptorWriteInfo optional for work to do.
@@ -188,7 +191,9 @@ namespace tr::gfx {
       TracyMessageL("waiting for writes to be processed");
       {
          // wait for the cv to be notified and for descriptorWriteInfo to have been emptied
-         std::unique_lock<std::mutex> lock(descriptorSetUpdateMtx);
+         std::unique_lock<LockableBase(std::mutex)> lock(descriptorSetUpdateMtx);
+         LockMark(descriptorSetUpdateMtx);
+         TracyMessageL("loading thread acquired lock");
          descriptorSetUpdateCv.wait(lock, [this] { return !descriptorWriteInfo.has_value(); });
       }
 
@@ -197,15 +202,22 @@ namespace tr::gfx {
    }
 
    void Renderer::checkDescriptorWrites() {
-      if (descriptorSetUpdateMtx.try_lock()) {
+      TracyMessageL("trying to lock");
+      std::unique_lock<LockableBase(std::mutex)> lock(descriptorSetUpdateMtx, std::try_to_lock);
+
+      if (lock.owns_lock()) {
+         LockMark(descriptorSetUpdateMtx);
          TracyMessageL("acquired a lock on the mutex");
          if (descriptorWriteInfo.has_value()) { // go time
             TracyMessageL("updating descriptor set");
             std::this_thread::sleep_for(std::chrono::milliseconds(3));
             descriptorWriteInfo = std::nullopt;
+            TracyMessageL("releasing mutex lock after updating");
+            lock.unlock();
             descriptorSetUpdateCv.notify_one();
          }
-         descriptorSetUpdateMtx.unlock();
+      } else {
+         TracyMessageL("Couldn't lock");
       } // else if we can't lock it this frame, forget about it we'll try again in 16ms.
    }
 

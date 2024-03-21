@@ -69,6 +69,8 @@ namespace tr::ctx {
          return *resourceLoader.get();
       }
 
+      std::future<uint32_t> loadTextureAsync(const std::filesystem::path& path);
+
     private:
       bool debugEnabled{};
       gp::GameplaySystem& gameplaySystem;

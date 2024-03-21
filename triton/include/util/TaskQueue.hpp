@@ -11,7 +11,7 @@ namespace tr::util {
       }
 
       ~TaskQueue() {
-         std::unique_lock<std::mutex> lock(mtx);
+         std::unique_lock<LockableBase(std::mutex)> lock(mtx);
          stopFlag = true;
          lock.unlock();
          cv.notify_all();
@@ -32,8 +32,8 @@ namespace tr::util {
 
          std::future<ReturnType> res = task->get_future();
 
-         std::unique_lock<std::mutex> lock(mtx);
-
+         std::unique_lock<LockableBase(std::mutex)> lock(mtx);
+         LockMark(mtx);
          if (taskQueue.size() >= maxQueueSize) {
             cv.wait(lock, [this] { return taskQueue.size() < maxQueueSize || stopFlag; });
          }
@@ -50,8 +50,8 @@ namespace tr::util {
 
     private:
       std::thread thread;
-      std::mutex mtx;
-      std::condition_variable cv;
+      TracyLockableN(std::mutex, mtx, "TaskQueueLock");
+      std::condition_variable_any cv;
       std::queue<std::function<void()>> taskQueue;
 
       bool stopFlag{};
@@ -60,7 +60,8 @@ namespace tr::util {
       void worker() {
          while (true) {
             ZoneNamedN(v2, "TaskQueue Worker", true);
-            std::unique_lock<std::mutex> lock(mtx);
+            std::unique_lock<LockableBase(std::mutex)> lock(mtx);
+            LockMark(mtx);
             cv.wait(lock, [this]() { return !taskQueue.empty() || stopFlag; });
 
             if (stopFlag && taskQueue.empty()) {
@@ -69,7 +70,6 @@ namespace tr::util {
 
             auto task = std::move(taskQueue.front());
             taskQueue.pop();
-
             lock.unlock();
 
             {
