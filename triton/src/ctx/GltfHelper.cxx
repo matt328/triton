@@ -13,7 +13,7 @@ namespace tr::ctx::gltf {
          std::visit(
              fastgltf::visitor{
                  []([[maybe_unused]] auto& arg) {},
-                 [&](fastgltf::sources::URI& filePath) {
+                 [&](fastgltf::sources::URI filePath) {
                     if (filePath.fileByteOffset != 0) {
                        throw std::runtime_error("Offset found in image. We don't do that here.");
                     }
@@ -26,23 +26,17 @@ namespace tr::ctx::gltf {
                        imageCreated = true;
                     } catch (const std::exception& ex) { Log::error << ex.what() << std::endl; }
                  },
-                 [&](fastgltf::sources::Vector& vector) {
+                 [&](fastgltf::sources::Array vector) {
                     try {
                        ktxImages.emplace_back(vector.bytes.data(), vector.bytes.size());
                        imageCreated = true;
                     } catch (const std::exception& ex) { Log::error << ex.what() << std::endl; }
                  },
-                 [&](fastgltf::sources::Array& vector) {
-                    try {
-                       ktxImages.emplace_back(vector.bytes.data(), vector.bytes.size());
-                       imageCreated = true;
-                    } catch (const std::exception& ex) { Log::error << ex.what() << std::endl; }
-                 },
-                 [&](fastgltf::sources::BufferView& view) {
+                 [&](fastgltf::sources::BufferView view) {
                     auto& bufferView = asset.bufferViews[view.bufferViewIndex];
                     auto& buffer = asset.buffers[bufferView.bufferIndex];
                     std::visit(fastgltf::visitor{[]([[maybe_unused]] auto& arg) {},
-                                                 [&](fastgltf::sources::Vector& vector) {
+                                                 [&](fastgltf::sources::Vector vector) {
                                                     try {
                                                        ktxImages.emplace_back(vector.bytes.data(),
                                                                               vector.bytes.size());

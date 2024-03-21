@@ -1,4 +1,5 @@
 #include "ctx/KtxImage.hpp"
+#include <ktx.h>
 
 namespace tr::util {
 
@@ -22,10 +23,8 @@ namespace tr::util {
    }
 
    KtxImage::KtxImage(const void* data, size_t size) {
-      if (ktxTexture_CreateFromMemory((ktx_uint8_t*)data,
-                                      size,
-                                      KTX_TEXTURE_CREATE_LOAD_IMAGE_DATA_BIT,
-                                      &texture) != KTX_SUCCESS) {
+      auto result = ktxTexture_CreateFromMemory((ktx_uint8_t*)data, size, 0, &texture);
+      if (result != KTX_SUCCESS) {
          throw std::runtime_error("Failed to load KTX File");
       }
    }
