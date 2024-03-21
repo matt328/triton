@@ -9,10 +9,6 @@ namespace tr::ctx::gltf {
       std::vector<util::KtxImage> ktxImages{};
 
       for (auto& image : asset.images) {
-         auto data = std::get<fastgltf::sources::URI>(image.data);
-         auto m = data.mimeType;
-         auto x = data.uri;
-         auto y = data.fileByteOffset;
          bool imageCreated{};
          std::visit(
              fastgltf::visitor{
@@ -36,6 +32,12 @@ namespace tr::ctx::gltf {
                        imageCreated = true;
                     } catch (const std::exception& ex) { Log::error << ex.what() << std::endl; }
                  },
+                 [&](fastgltf::sources::Array& vector) {
+                    try {
+                       ktxImages.emplace_back(vector.bytes.data(), vector.bytes.size());
+                       imageCreated = true;
+                    } catch (const std::exception& ex) { Log::error << ex.what() << std::endl; }
+                 },
                  [&](fastgltf::sources::BufferView& view) {
                     auto& bufferView = asset.bufferViews[view.bufferViewIndex];
                     auto& buffer = asset.buffers[bufferView.bufferIndex];
@@ -54,6 +56,7 @@ namespace tr::ctx::gltf {
              image.data);
          // If for whatever reason an image isn't created, add a white 1px image in its place
          if (!imageCreated) {
+            Log::warn << "gltf file at " << path << " missing a texture" << std::endl;
             ktxImages.emplace_back();
          }
       }

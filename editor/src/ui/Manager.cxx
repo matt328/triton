@@ -46,8 +46,12 @@ namespace ed::ui {
          auto status = it->wait_for(std::chrono::seconds(0));
          if (status == std::future_status::ready) {
             ZoneNamedN(loadComplete, "Load Complete", true);
-            auto r = it->get();
-            Log::info << "result: " << r << std::endl;
+            try {
+               auto r = it->get();
+               Log::info << "result: " << r << std::endl;
+            } catch (const std::exception& e) {
+               Log::error << "error loading model: " << e.what() << std::endl;
+            }
             it = modelFutures.erase(it);
          } else {
             ++it;
@@ -242,7 +246,7 @@ namespace ed::ui {
             if (ImGui::Button("Test")) {
 
                auto filename = std::filesystem::path{
-                   R"(C:\Users\Matt\Projects\triton-assets\models\quarter_2.gltf)"};
+                   R"(C:\Users\Matt\Projects\triton\assets\models\area.gltf)"};
 
                modelFutures.push_back(facade.loadTextureAsync(filename));
                // TODO: call renderer.loadTextureAsync here

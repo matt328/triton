@@ -171,37 +171,51 @@ namespace tr::gfx {
       ZoneNamedN(a, "Create Texture Internal", true);
 
       TracyMessageL("loading gltf");
-      fastgltf::Parser parser{};
-      fastgltf::GltfDataBuffer data{};
 
+      static constexpr auto supportedExtensions =
+          fastgltf::Extensions::KHR_mesh_quantization | fastgltf::Extensions::KHR_texture_transform;
+
+      fastgltf::Parser parser{supportedExtensions};
+
+      constexpr auto gltfOptions =
+          fastgltf::Options::DontRequireValidAssetMember | fastgltf::Options::AllowDouble |
+          fastgltf::Options::LoadGLBBuffers | fastgltf::Options::LoadExternalBuffers |
+          fastgltf::Options::LoadExternalImages | fastgltf::Options::GenerateMeshIndices;
+
+      fastgltf::GltfDataBuffer data{};
       data.loadFromFile(filename);
 
-      auto asset = parser.loadGltf(&data,
-                                   filename.parent_path(),
-                                   fastgltf::Options::LoadExternalBuffers |
-                                       fastgltf::Options::LoadExternalImages);
-      auto error = asset.error();
-      if (error != fastgltf::Error::None) {
-         std::stringstream ss{};
-         ss << "Failed to load gltf file: " << filename.string() << fastgltf::to_underlying(error)
-            << std::endl;
-         throw std::runtime_error(ss.str());
+      auto asset = parser.loadGltf(&data, filename.parent_path(), gltfOptions);
+      if (asset.error() != fastgltf::Error::None) {
+         Log::error << "Failed to load glTF: " << fastgltf::getErrorMessage(asset.error())
+                    << std::endl;
+         throw std::runtime_error("Failed to load glTF");
       }
-      throw std::runtime_error("Handle Me Somehow");
+
       Log::debug << "Loaded " << filename.string() << " found " << asset->images.size()
                  << " image(s)." << std::endl;
 
       TracyMessageL("uploading data");
+
+      auto samplercreateInfos = ctx::gltf::parseSamplers(asset.get());
+
+      auto images = ctx::gltf::parseImages(asset.get(), filename.parent_path());
+
+      // create sampler infos
+      // create images/imageviews
+      // Upload textures
+
       std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
       TracyMessageL("setting DS Update Info");
       {
          std::unique_lock<LockableBase(std::mutex)> lock(descriptorSetUpdateMtx);
          LockMark(descriptorSetUpdateMtx);
+
+         // Create DescriptorSetWrite for texture buffer
+
          std::this_thread::sleep_for(std::chrono::milliseconds(400));
          descriptorWriteInfo.emplace("some writes");
-         // This thread doesn't have to notify since the render thread will pretty much be
-         // constantly checking this lock and descriptorWriteInfo optional for work to do.
       }
 
       TracyMessageL("waiting for writes to be processed");
@@ -214,6 +228,7 @@ namespace tr::gfx {
       }
 
       TracyMessageL("ds has been updated");
+      // return the modelId and textureId both here
       return 3;
    }
 
