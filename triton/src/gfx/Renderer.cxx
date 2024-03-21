@@ -18,7 +18,8 @@
 #include <chrono>
 #include <mutex>
 #include <optional>
-#include <tracy/Tracy.hpp>
+#include "ctx/GltfHelper.hpp"
+#include "ctx/KtxImage.hpp"
 
 namespace tr::gfx {
 
@@ -162,20 +163,35 @@ namespace tr::gfx {
       createSwapchainResources();
    }
 
-   std::future<uint32_t> Renderer::createTextureAsync(const std::string_view& filename) {
+   std::future<uint32_t> Renderer::createTextureAsync(const std::filesystem::path& filename) {
       return textureTaskQueue->enqueue([this, filename]() { return createTextureInt(filename); });
    }
 
-   uint32_t Renderer::createTextureInt(const std::string_view& filename) {
+   uint32_t Renderer::createTextureInt(const std::filesystem::path& filename) {
       ZoneNamedN(a, "Create Texture Internal", true);
 
       TracyMessageL("loading gltf");
-      std::this_thread::sleep_for(std::chrono::milliseconds(300));
+      fastgltf::Parser parser{};
+      fastgltf::GltfDataBuffer data{};
 
-      TracyMessageL("loading textures");
-      std::this_thread::sleep_for(std::chrono::milliseconds(200));
+      data.loadFromFile(filename);
 
-      TracyMessageL("uploading textures");
+      auto asset = parser.loadGltf(&data,
+                                   filename.parent_path(),
+                                   fastgltf::Options::LoadExternalBuffers |
+                                       fastgltf::Options::LoadExternalImages);
+      auto error = asset.error();
+      if (error != fastgltf::Error::None) {
+         std::stringstream ss{};
+         ss << "Failed to load gltf file: " << filename.string() << fastgltf::to_underlying(error)
+            << std::endl;
+         throw std::runtime_error(ss.str());
+      }
+      throw std::runtime_error("Handle Me Somehow");
+      Log::debug << "Loaded " << filename.string() << " found " << asset->images.size()
+                 << " image(s)." << std::endl;
+
+      TracyMessageL("uploading data");
       std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
       TracyMessageL("setting DS Update Info");

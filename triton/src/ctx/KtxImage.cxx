@@ -3,7 +3,7 @@
 namespace tr::util {
 
    KtxImage::KtxImage() {
-      const auto whitePixel = std::array<uint8_t, 4>{255, 255, 255, 255};
+      const auto whitePixel = std::array<ktx_uint8_t, 4>{255, 255, 255, 255};
       if (ktxTexture_CreateFromMemory(
               whitePixel.data(),
               sizeof(whitePixel),

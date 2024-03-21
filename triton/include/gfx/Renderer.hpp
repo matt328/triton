@@ -50,9 +50,9 @@ namespace tr::gfx {
       MeshHandle createMesh(const std::string_view& filename);
       uint32_t createTexture(const std::string_view& filename);
 
-      std::future<uint32_t> createTextureAsync(const std::string_view& filename);
+      std::future<uint32_t> createTextureAsync(const std::filesystem::path& filename);
 
-      uint32_t createTextureInt(const std::string_view& filename);
+      uint32_t createTextureInt(const std::filesystem::path& filename);
 
       void enqueueRenderObject(RenderObject renderObject);
 

@@ -9,6 +9,10 @@ namespace tr::ctx::gltf {
       std::vector<util::KtxImage> ktxImages{};
 
       for (auto& image : asset.images) {
+         auto data = std::get<fastgltf::sources::URI>(image.data);
+         auto m = data.mimeType;
+         auto x = data.uri;
+         auto y = data.fileByteOffset;
          bool imageCreated{};
          std::visit(
              fastgltf::visitor{
@@ -48,7 +52,7 @@ namespace tr::ctx::gltf {
                                buffer.data);
                  }},
              image.data);
-         // If for whatever reason an image isn't created, add a white 1px image in its placce
+         // If for whatever reason an image isn't created, add a white 1px image in its place
          if (!imageCreated) {
             ktxImages.emplace_back();
          }
