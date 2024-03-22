@@ -9,7 +9,8 @@ namespace tr::gfx {
                         const uint32_t queueIndex,
                         const uint32_t queueFamily,
                         const std::string_view& name)
-       : device(device),
+       : device{device},
+         physicalDevice{physicalDevice},
          queue{std::make_unique<vk::raii::Queue>(device.getQueue(queueFamily, queueIndex))} {
 
       Helpers::setObjectName(**queue, device, (**queue).debugReportObjectType, name);

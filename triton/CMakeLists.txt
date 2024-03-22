@@ -112,6 +112,7 @@ target_precompile_headers(${PROJECT_NAME}
    <imgui.h>
    <vulkan-memory-allocator-hpp/vk_mem_alloc.hpp>
    <vulkan/vulkan_raii.hpp>
+   <ktxvulkan.h>
    <taskflow/taskflow.hpp>
    <tracy/Tracy.hpp>
    <tracy/TracyVulkan.hpp>

@@ -180,7 +180,10 @@ namespace tr::gfx {
       constexpr auto gltfOptions =
           fastgltf::Options::DontRequireValidAssetMember | fastgltf::Options::AllowDouble |
           fastgltf::Options::LoadGLBBuffers | fastgltf::Options::LoadExternalBuffers |
-          fastgltf::Options::LoadExternalImages | fastgltf::Options::GenerateMeshIndices;
+          fastgltf::Options::GenerateMeshIndices;
+
+      // LoadExternalImages would be nice, but it doesn't actually load the images, instead just
+      // fills the data with 'cd'
 
       fastgltf::GltfDataBuffer data{};
       data.loadFromFile(filename);
@@ -198,12 +201,10 @@ namespace tr::gfx {
       TracyMessageL("uploading data");
 
       auto samplercreateInfos = ctx::gltf::parseSamplers(asset.get());
-
       auto images = ctx::gltf::parseImages(asset.get(), filename.parent_path());
 
-      // create sampler infos
-      // create images/imageviews
       // Upload textures
+      for (const auto& image : images) {}
 
       std::this_thread::sleep_for(std::chrono::milliseconds(200));
 

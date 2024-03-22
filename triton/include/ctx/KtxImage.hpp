@@ -5,7 +5,7 @@ namespace tr::util {
     public:
       KtxImage();
       KtxImage(const std::filesystem::path& filename);
-      KtxImage(const void* data, size_t size);
+      KtxImage(const ktx_uint8_t* data, size_t size);
 
       ~KtxImage();
 
@@ -14,11 +14,11 @@ namespace tr::util {
       KtxImage& operator=(const KtxImage&) = delete;
       KtxImage& operator=(KtxImage&&) = default;
 
-      [[nodiscard]] ktxTexture* get() const {
+      [[nodiscard]] ktxTexture2* get() const {
          return texture;
       }
 
     private:
-      ktxTexture* texture{};
+      ktxTexture2* texture{};
    };
 }

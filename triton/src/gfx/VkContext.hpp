@@ -31,6 +31,7 @@ namespace tr::gfx {
 
     private:
       const vk::raii::Device& device; // NOLINT this is fine
+      const vk::raii::PhysicalDevice& physicalDevice;
       tracy::VkCtx* tracyContext;
       std::unique_ptr<vk::raii::Queue> queue = nullptr;
       std::unique_ptr<vk::raii::Fence> fence = nullptr;

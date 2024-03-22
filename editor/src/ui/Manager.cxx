@@ -246,7 +246,7 @@ namespace ed::ui {
             if (ImGui::Button("Test")) {
 
                auto filename = std::filesystem::path{
-                   R"(C:\Users\Matt\Projects\triton-assets\models\quarter_2.gltf)"};
+                   R"(C:\Users\Matt\Projects\game-assets\models\quarter_2.gltf)"};
 
                modelFutures.push_back(facade.loadTextureAsync(filename));
                // TODO: call renderer.loadTextureAsync here
