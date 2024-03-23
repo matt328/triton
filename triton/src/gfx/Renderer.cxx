@@ -16,10 +16,14 @@
 #include "util/Paths.hpp"
 #include "util/TaskQueue.hpp"
 #include <chrono>
+#include <ktx.h>
 #include <mutex>
 #include <optional>
+#include <vulkan/vulkan_structs.hpp>
 #include "ctx/GltfHelper.hpp"
 #include "ctx/KtxImage.hpp"
+#include "gfx/textures/TextureManager.hpp"
+#include "gfx/VkContext.hpp"
 
 namespace tr::gfx {
 
@@ -80,6 +84,10 @@ namespace tr::gfx {
       }
 
       textureTaskQueue = std::make_unique<util::TaskQueue>();
+
+      textureManager =
+          std::make_unique<tx::TextureManager>(graphicsDevice->getAsyncTransferContext(),
+                                               graphicsDevice->getAllocator());
    }
 
    Renderer::~Renderer() {
@@ -163,11 +171,11 @@ namespace tr::gfx {
       createSwapchainResources();
    }
 
-   std::future<uint32_t> Renderer::createTextureAsync(const std::filesystem::path& filename) {
-      return textureTaskQueue->enqueue([this, filename]() { return createTextureInt(filename); });
+   std::future<uint32_t> Renderer::loadModelAsync(const std::filesystem::path& filename) {
+      return textureTaskQueue->enqueue([this, filename]() { return loadModelInt(filename); });
    }
 
-   uint32_t Renderer::createTextureInt(const std::filesystem::path& filename) {
+   uint32_t Renderer::loadModelInt(const std::filesystem::path& filename) {
       ZoneNamedN(a, "Create Texture Internal", true);
 
       TracyMessageL("loading gltf");
@@ -201,10 +209,11 @@ namespace tr::gfx {
       TracyMessageL("uploading data");
 
       auto samplercreateInfos = ctx::gltf::parseSamplers(asset.get());
-      auto images = ctx::gltf::parseImages(asset.get(), filename.parent_path());
+      // TODO: create a generic Image class that doesn't care what kind of image it actually is
+      auto ktxImages = ctx::gltf::parseImages(asset.get(), filename.parent_path());
 
       // Upload textures
-      for (const auto& image : images) {}
+      const auto textureHandles = textureManager->uploadTextures(ktxImages);
 
       std::this_thread::sleep_for(std::chrono::milliseconds(200));
 

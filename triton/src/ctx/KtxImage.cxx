@@ -3,7 +3,7 @@
 
 namespace tr::util {
 
-   KtxImage::KtxImage() {
+   KtxImage::KtxImage() : name{"white"} {
       const auto whitePixel = std::array<ktx_uint8_t, 4>{255, 255, 255, 255};
       if (ktxTexture2_CreateFromMemory(whitePixel.data(),
                                        sizeof(whitePixel),
@@ -13,7 +13,7 @@ namespace tr::util {
       }
    }
 
-   KtxImage::KtxImage(const std::filesystem::path& filename) {
+   KtxImage::KtxImage(const std::filesystem::path& filename) : name{filename.filename().string()} {
       if (ktxTexture2_CreateFromNamedFile(
               filename.string().c_str(),
               ktxTextureCreateFlagBits::KTX_TEXTURE_CREATE_SKIP_KVDATA_BIT,
@@ -24,7 +24,7 @@ namespace tr::util {
 
    // For some reason when telling fastgltf to load images, it trashes them up
    // so just tell it not to and try to get the uri thing to work instead.
-   KtxImage::KtxImage(const ktx_uint8_t* data, size_t size) {
+   KtxImage::KtxImage(const ktx_uint8_t* data, size_t size) : name{"unnamed texture"} {
       auto filename =
           std::filesystem::path{R"(C:\Users\Matt\Projects\game-assets\models\quarter_alb.ktx)"};
       auto result = ktxTexture2_CreateFromNamedFile(
