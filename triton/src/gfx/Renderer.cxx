@@ -85,9 +85,7 @@ namespace tr::gfx {
 
       textureTaskQueue = std::make_unique<util::TaskQueue>();
 
-      textureManager =
-          std::make_unique<tx::TextureManager>(graphicsDevice->getAsyncTransferContext(),
-                                               graphicsDevice->getAllocator());
+      textureManager = std::make_unique<tx::TextureManager>(*graphicsDevice);
    }
 
    Renderer::~Renderer() {
@@ -180,18 +178,16 @@ namespace tr::gfx {
 
       TracyMessageL("loading gltf");
 
-      static constexpr auto supportedExtensions =
-          fastgltf::Extensions::KHR_mesh_quantization | fastgltf::Extensions::KHR_texture_transform;
+      static constexpr auto supportedExtensions = fastgltf::Extensions::KHR_mesh_quantization |
+                                                  fastgltf::Extensions::KHR_texture_basisu |
+                                                  fastgltf::Extensions::KHR_texture_transform;
 
       fastgltf::Parser parser{supportedExtensions};
 
       constexpr auto gltfOptions =
           fastgltf::Options::DontRequireValidAssetMember | fastgltf::Options::AllowDouble |
           fastgltf::Options::LoadGLBBuffers | fastgltf::Options::LoadExternalBuffers |
-          fastgltf::Options::GenerateMeshIndices;
-
-      // LoadExternalImages would be nice, but it doesn't actually load the images, instead just
-      // fills the data with 'cd'
+          fastgltf::Options::LoadExternalImages | fastgltf::Options::GenerateMeshIndices;
 
       fastgltf::GltfDataBuffer data{};
       data.loadFromFile(filename);
@@ -213,7 +209,7 @@ namespace tr::gfx {
       auto ktxImages = ctx::gltf::parseImages(asset.get(), filename.parent_path());
 
       // Upload textures
-      const auto textureHandles = textureManager->uploadTextures(ktxImages);
+      const auto textureHandles = textureManager->uploadTextures(ktxImages, samplercreateInfos);
 
       std::this_thread::sleep_for(std::chrono::milliseconds(200));
 

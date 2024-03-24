@@ -8,12 +8,6 @@
       "glfw3",
       "glm",
       "glslang",
-      {
-         "name": "ktx",
-         "features": [
-            "vulkan"
-         ]
-      },
       "nlohmann-json",
       "platform-folders",
       "spirv-cross",
@@ -36,10 +30,6 @@
       {
          "name": "glm",
          "version": "0.9.9.8"
-      },
-      {
-         "name": "ktx",
-         "version": "4.3.1"
       }
    ]
 }

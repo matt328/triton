@@ -10,11 +10,11 @@ namespace tr::util {
       ~KtxImage();
 
       KtxImage(const KtxImage&) = delete;
-      KtxImage(KtxImage&&) = delete;
+      KtxImage(KtxImage&&) = default;
       KtxImage& operator=(const KtxImage&) = delete;
-      KtxImage& operator=(KtxImage&&) = delete;
+      KtxImage& operator=(KtxImage&&) = default;
 
-      [[nodiscard]] ktxTexture2* getTexture() const {
+      [[nodiscard]] ktxTexture* getTexture() const {
          return texture;
       }
 
@@ -23,7 +23,7 @@ namespace tr::util {
       }
 
     private:
-      const std::string name;
-      ktxTexture2* texture{};
+      std::string name;
+      ktxTexture* texture = nullptr;
    };
 }

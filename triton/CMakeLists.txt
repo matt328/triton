@@ -19,6 +19,7 @@ set(triton_SRC
    "src/gfx/helpers/SpirvHelper.cxx"
    "src/gfx/textures/Texture.cxx"
    "src/gfx/textures/TextureFactory.cxx"
+   "src/gfx/textures/TextureManager.cxx"
    "src/gp/GameplaySystem.cxx"
    "src/gp/actions/ActionSystem.cxx"
    "src/gp/ecs/system/CameraSystem.cxx"
@@ -50,7 +51,6 @@ find_package(fastgltf CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glslang CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
-find_package(Ktx CONFIG REQUIRED)
 find_package(Taskflow CONFIG REQUIRED)
 find_package(Tracy CONFIG REQUIRED)
 find_package(Stb REQUIRED)
@@ -87,7 +87,6 @@ target_precompile_headers(${PROJECT_NAME}
    <fstream>
    <functional>
    <glslang/SPIRV/GlslangToSpv.h>
-   <ktx.h>
    <limits>
    <map>
    <optional>
@@ -112,7 +111,6 @@ target_precompile_headers(${PROJECT_NAME}
    <imgui.h>
    <vulkan-memory-allocator-hpp/vk_mem_alloc.hpp>
    <vulkan/vulkan_raii.hpp>
-   <ktxvulkan.h>
    <taskflow/taskflow.hpp>
    <tracy/Tracy.hpp>
    <tracy/TracyVulkan.hpp>
@@ -129,7 +127,6 @@ target_link_libraries(${PROJECT_NAME}
    glslang::glslang-default-resource-limits
    glslang::SPIRV
    imgui::imgui
-   KTX::ktx
    spirv-cross-core
    spirv-cross-cpp
    Taskflow::Taskflow

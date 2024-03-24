@@ -10,10 +10,14 @@ namespace tr::ctx::gltf {
 
       for (auto& image : asset.images) {
          bool imageCreated{};
+         const auto& x = std::get<fastgltf::sources::Array>(image.data);
+
+         auto y = x.bytes;
+
          std::visit(
              fastgltf::visitor{
                  []([[maybe_unused]] auto& arg) {},
-                 [&](fastgltf::sources::URI filePath) {
+                 [&](fastgltf::sources::URI& filePath) {
                     if (filePath.fileByteOffset != 0) {
                        throw std::runtime_error("Offset found in image. We don't do that here.");
                     }
@@ -26,7 +30,7 @@ namespace tr::ctx::gltf {
                        imageCreated = true;
                     } catch (const std::exception& ex) { Log::error << ex.what() << std::endl; }
                  },
-                 [&](fastgltf::sources::Array vector) {
+                 [&](const fastgltf::sources::Array& vector) {
                     try {
                        ktxImages.emplace_back(vector.bytes.data(), vector.bytes.size());
                        imageCreated = true;

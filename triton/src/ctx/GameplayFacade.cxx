@@ -24,7 +24,7 @@ namespace tr::ctx {
    }
 
    std::future<uint32_t> GameplayFacade::loadTextureAsync(const std::filesystem::path& path) {
-      return renderer.createTextureAsync(path.string());
+      return renderer.loadModelAsync(path.string());
    }
 
    gp::EntityType GameplayFacade::createStaticMeshEntity(std::string meshFile,
