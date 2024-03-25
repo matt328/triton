@@ -1,18 +1,18 @@
 {
    "folders": [
-	{
-		"path": "."
-	},
-	{
-		"path": "../../AppData/Roaming/editor"
-	},
-	{
-		"path": "../triton.wiki"
-	},
-	{
-		"path": "../game-assets"
-	}
-],
+      {
+         "path": "."
+      },
+      {
+         "path": "../../AppData/Roaming/editor"
+      },
+      {
+         "path": "../triton.wiki"
+      },
+      {
+         "path": "../game-assets"
+      }
+   ],
    "settings": {
       "files.associations": {
          "fstream": "cpp",
@@ -138,7 +138,8 @@
          "context",
          "editor",
          "docs",
-         "exp"
+         "exp",
+         "resources"
       ],
       "git.ignoreLimitWarning": true,
       "workbench.colorCustomizations": {

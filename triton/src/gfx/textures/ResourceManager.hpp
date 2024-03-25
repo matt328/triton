@@ -25,6 +25,23 @@ namespace tr::gfx::tx {
       vk::ImageLayout imageLayout;
    };
 
+   constexpr auto DefaultSamplerInfo =
+       vk::SamplerCreateInfo{.magFilter = vk::Filter::eLinear,
+                             .minFilter = vk::Filter::eLinear,
+                             .mipmapMode = vk::SamplerMipmapMode::eLinear,
+                             .addressModeU = vk::SamplerAddressMode::eRepeat,
+                             .addressModeV = vk::SamplerAddressMode::eRepeat,
+                             .addressModeW = vk::SamplerAddressMode::eRepeat,
+                             .mipLodBias = 0.f,
+                             .anisotropyEnable = VK_TRUE,
+                             .maxAnisotropy = 1, // TODO: look this up
+                             .compareEnable = VK_FALSE,
+                             .compareOp = vk::CompareOp::eAlways,
+                             .minLod = 0.f,
+                             .maxLod = 0.f,
+                             .borderColor = vk::BorderColor::eIntOpaqueBlack,
+                             .unnormalizedCoordinates = VK_FALSE};
+
    class ResourceManager {
     public:
       ResourceManager(const GraphicsDevice& graphicsDevice);
@@ -37,22 +54,15 @@ namespace tr::gfx::tx {
 
       ModelHandle loadModel(const std::filesystem::path& filename);
 
-      // std::vector<TextureHandle> uploadTextures(
-      //     const std::vector<util::KtxImage>& ktxImages,
-      //     const std::vector<vk::SamplerCreateInfo>& samplerInfo);
-
     private:
       const GraphicsDevice& graphicsDevice;
       std::unique_ptr<AllocatedBuffer> stagingBuffer;
       std::vector<TextureInfo> textureList;
 
-      std::vector<TextureHandle> uploadImages(const fastgltf::Asset& asset,
-                                              const std::filesystem::path& path);
-      std::vector<MeshHandle> uploadMeshes(const fastgltf::Asset& asset);
-
-      ModelHandle createModelHandles(const fastgltf::Asset& asset,
-                                     const std::vector<TextureHandle>& textureHandles,
-                                     const std::vector<MeshHandle>& meshHandles);
+      MeshHandle createMesh(const fastgltf::Asset& asset, const fastgltf::Primitive& primitive);
+      TextureHandle createTexture(const fastgltf::Asset& asset,
+                                  std::size_t textureIndex,
+                                  const std::filesystem::path& folder);
 
       const TransitionBarrierInfo createTransitionBarrier(
           const vk::Image& image,
