@@ -98,7 +98,21 @@ namespace tr::gfx::tx {
       return modelHandle;
    }
 
-   /// Could factor out the gltf specific pieces from the vulkan specific pieces.
+   /// Brute force this for now, create a single Mesh per Primitive in the file
+   MeshHandle ResourceManager::createMesh(const fastgltf::Asset& asset,
+                                          const fastgltf::Primitive& primitive) {
+      // Load Indices
+      std::vector<uint32_t> indices;
+      {
+         const auto& indexAccessor = asset.accessors[primitive.indicesAccessor.value()];
+         indices.reserve(indexAccessor.count);
+         fastgltf::iterateAccessor<std::uint32_t>(asset, indexAccessor, [&](std::uint32_t idx) {
+            indices.push_back(idx);
+         });
+      }
+      return static_cast<MeshHandle>(3);
+   }
+
    TextureHandle ResourceManager::createTexture(const fastgltf::Asset& asset,
                                                 std::size_t textureIndex,
                                                 const std::filesystem::path& folder) {
@@ -180,10 +194,5 @@ namespace tr::gfx::tx {
                                               graphicsDevice.getAsyncTransferContext()));
 
       return static_cast<TextureHandle>(pos);
-   }
-
-   MeshHandle ResourceManager::createMesh(const fastgltf::Asset& asset,
-                                          const fastgltf::Primitive& primitive) {
-      return static_cast<MeshHandle>(3);
    }
 }
