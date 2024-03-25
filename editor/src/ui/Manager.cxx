@@ -48,7 +48,8 @@ namespace ed::ui {
             ZoneNamedN(loadComplete, "Load Complete", true);
             try {
                auto r = it->get();
-               Log::info << "result: " << r << std::endl;
+               Log::info << "result: "
+                         << "result" << std::endl;
             } catch (const std::exception& e) {
                Log::error << "error loading model: " << e.what() << std::endl;
             }
@@ -246,7 +247,7 @@ namespace ed::ui {
             if (ImGui::Button("Test")) {
 
                auto filename = std::filesystem::path{
-                   R"(C:\Users\Matt\Projects\game-assets\models\quarter_2.gltf)"};
+                   R"(C:\Users\Matt\Projects\game-assets\models\Sponza\glTF\Sponza.gltf)"};
 
                modelFutures.push_back(facade.loadTextureAsync(filename));
                // TODO: call renderer.loadTextureAsync here

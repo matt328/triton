@@ -6,4 +6,5 @@ namespace tr::gfx {
    using MaterialHandle = uint32_t;
    using ModelInfoHandle = uint32_t;
    using MeshMaterialHandle = std::unordered_map<MaterialHandle, std::vector<MeshHandle>>;
+   using ModelHandle = std::unordered_map<MeshHandle, TextureHandle>;
 }

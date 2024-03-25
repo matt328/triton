@@ -1,7 +1,5 @@
 #include "ctx/GameplayFacade.hpp"
 
-#include "ctx/ResourceLoader.hpp"
-
 #include "gp/GameplaySystem.hpp"
 #include "gfx/Renderer.hpp"
 
@@ -14,16 +12,14 @@ namespace tr::ctx {
    GameplayFacade::GameplayFacade(gp::GameplaySystem& gameplaySystem,
                                   gfx::Renderer& renderer,
                                   bool debugEnabled)
-       : debugEnabled{debugEnabled},
-         gameplaySystem{gameplaySystem},
-         renderer{renderer},
-         resourceLoader(std::make_unique<ResourceLoader>(renderer)) {
+       : debugEnabled{debugEnabled}, gameplaySystem{gameplaySystem}, renderer{renderer} {
    }
 
    GameplayFacade::~GameplayFacade() {
    }
 
-   std::future<uint32_t> GameplayFacade::loadTextureAsync(const std::filesystem::path& path) {
+   std::future<gfx::ModelHandle> GameplayFacade::loadTextureAsync(
+       const std::filesystem::path& path) {
       return renderer.loadModelAsync(path.string());
    }
 

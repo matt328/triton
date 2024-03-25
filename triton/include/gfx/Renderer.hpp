@@ -22,7 +22,7 @@ namespace tr::gfx {
    }
 
    namespace tx {
-      class TextureManager;
+      class ResourceManager;
    }
 
    namespace Geometry {
@@ -54,7 +54,7 @@ namespace tr::gfx {
       MeshHandle createMesh(const std::string_view& filename);
       uint32_t createTexture(const std::string_view& filename);
 
-      std::future<uint32_t> loadModelAsync(const std::filesystem::path& filename);
+      std::future<ModelHandle> loadModelAsync(const std::filesystem::path& filename);
 
       void enqueueRenderObject(RenderObject renderObject);
 
@@ -99,7 +99,7 @@ namespace tr::gfx {
 
       std::unique_ptr<util::TaskQueue> textureTaskQueue;
 
-      std::unique_ptr<tx::TextureManager> textureManager;
+      std::unique_ptr<tx::ResourceManager> resourceManager;
 
       std::condition_variable_any descriptorSetUpdateCv{};
       TracyLockable(std::mutex, descriptorSetUpdateMtx);
@@ -125,7 +125,7 @@ namespace tr::gfx {
       void recordCommandBuffer(FrameData& frameData, unsigned imageIndex) const;
       void drawImgui(const vk::raii::CommandBuffer& cmd, const vk::raii::ImageView& image) const;
 
-      uint32_t loadModelInt(const std::filesystem::path& filename);
+      ModelHandle loadModelInt(const std::filesystem::path& filename);
       void checkDescriptorWrites();
    };
 }

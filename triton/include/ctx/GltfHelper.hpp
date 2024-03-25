@@ -5,8 +5,6 @@ namespace tr::util {
 }
 
 namespace tr::ctx::gltf {
-   std::vector<util::KtxImage> parseImages(const fastgltf::Asset& asset,
-                                           const std::filesystem::path& path);
 
    vk::Filter extractFilter(fastgltf::Filter filter);
 

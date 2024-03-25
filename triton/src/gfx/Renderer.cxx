@@ -16,13 +16,11 @@
 #include "util/Paths.hpp"
 #include "util/TaskQueue.hpp"
 #include <chrono>
-#include <ktx.h>
 #include <mutex>
 #include <optional>
 #include <vulkan/vulkan_structs.hpp>
 #include "ctx/GltfHelper.hpp"
-#include "ctx/KtxImage.hpp"
-#include "gfx/textures/TextureManager.hpp"
+#include "gfx/textures/ResourceManager.hpp"
 #include "gfx/VkContext.hpp"
 
 namespace tr::gfx {
@@ -85,7 +83,7 @@ namespace tr::gfx {
 
       textureTaskQueue = std::make_unique<util::TaskQueue>();
 
-      textureManager = std::make_unique<tx::TextureManager>(*graphicsDevice);
+      resourceManager = std::make_unique<tx::ResourceManager>(*graphicsDevice);
    }
 
    Renderer::~Renderer() {
@@ -169,47 +167,16 @@ namespace tr::gfx {
       createSwapchainResources();
    }
 
-   std::future<uint32_t> Renderer::loadModelAsync(const std::filesystem::path& filename) {
+   std::future<ModelHandle> Renderer::loadModelAsync(const std::filesystem::path& filename) {
       return textureTaskQueue->enqueue([this, filename]() { return loadModelInt(filename); });
    }
 
-   uint32_t Renderer::loadModelInt(const std::filesystem::path& filename) {
+   ModelHandle Renderer::loadModelInt(const std::filesystem::path& filename) {
       ZoneNamedN(a, "Create Texture Internal", true);
 
       TracyMessageL("loading gltf");
 
-      static constexpr auto supportedExtensions = fastgltf::Extensions::KHR_mesh_quantization |
-                                                  fastgltf::Extensions::KHR_texture_basisu |
-                                                  fastgltf::Extensions::KHR_texture_transform;
-
-      fastgltf::Parser parser{supportedExtensions};
-
-      constexpr auto gltfOptions =
-          fastgltf::Options::DontRequireValidAssetMember | fastgltf::Options::AllowDouble |
-          fastgltf::Options::LoadGLBBuffers | fastgltf::Options::LoadExternalBuffers |
-          fastgltf::Options::LoadExternalImages | fastgltf::Options::GenerateMeshIndices;
-
-      fastgltf::GltfDataBuffer data{};
-      data.loadFromFile(filename);
-
-      auto asset = parser.loadGltf(&data, filename.parent_path(), gltfOptions);
-      if (asset.error() != fastgltf::Error::None) {
-         Log::error << "Failed to load glTF: " << fastgltf::getErrorMessage(asset.error())
-                    << std::endl;
-         throw std::runtime_error("Failed to load glTF");
-      }
-
-      Log::debug << "Loaded " << filename.string() << " found " << asset->images.size()
-                 << " image(s)." << std::endl;
-
-      TracyMessageL("uploading data");
-
-      auto samplercreateInfos = ctx::gltf::parseSamplers(asset.get());
-      // TODO: create a generic Image class that doesn't care what kind of image it actually is
-      auto ktxImages = ctx::gltf::parseImages(asset.get(), filename.parent_path());
-
-      // Upload textures
-      const auto textureHandles = textureManager->uploadTextures(ktxImages, samplercreateInfos);
+      auto modelHandles = resourceManager->loadModel(filename);
 
       std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
@@ -235,7 +202,7 @@ namespace tr::gfx {
 
       TracyMessageL("ds has been updated");
       // return the modelId and textureId both here
-      return 3;
+      return modelHandles;
    }
 
    void Renderer::checkDescriptorWrites() {
