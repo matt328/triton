@@ -1,8 +1,12 @@
 #include "ResourceManager.hpp"
 
+#include "gfx/geometry/Mesh.hpp"
+#include "gfx/geometry/Vertex.hpp"
 #include "gfx/textures/Texture.hpp"
 #include "gfx/vma_raii.hpp"
 #include "gfx/GraphicsDevice.hpp"
+#include <fastgltf/tools.hpp>
+#include <glm/detail/qualifier.hpp>
 
 namespace tr::gfx::tx {
    ResourceManager::ResourceManager(const GraphicsDevice& graphicsDevice)
@@ -105,11 +109,43 @@ namespace tr::gfx::tx {
       std::vector<uint32_t> indices;
       {
          const auto& indexAccessor = asset.accessors[primitive.indicesAccessor.value()];
-         indices.reserve(indexAccessor.count);
-         fastgltf::iterateAccessor<std::uint32_t>(asset, indexAccessor, [&](std::uint32_t idx) {
-            indices.push_back(idx);
-         });
+         indices.resize(indexAccessor.count);
+         fastgltf::copyFromAccessor<std::uint32_t>(asset, indexAccessor, indices.data());
       }
+
+      std::vector<Geometry::Vertex> vertices;
+      {
+         const auto& accessor = asset.accessors[primitive.findAttribute("POSITION")->second];
+         vertices.resize(accessor.count);
+         fastgltf::iterateAccessor<glm::vec3>(asset, accessor, [&](glm::vec3 v) {
+            auto newVertex = Geometry::Vertex{};
+            newVertex.pos = v;
+            vertices.push_back(newVertex);
+         });
+
+         auto normals = primitive.findAttribute("NORMAL");
+         if (normals != primitive.attributes.end()) {
+            fastgltf::iterateAccessorWithIndex<glm::vec3>(
+                asset,
+                asset.accessors[(*normals).second],
+                [&](glm::vec3 v, size_t index) { vertices[index].normal = v; });
+         }
+
+         auto uv = primitive.findAttribute("TEXCOORD_O");
+         if (uv != primitive.attributes.end()) {
+            fastgltf::iterateAccessorWithIndex<glm::vec2>(
+                asset,
+                asset.accessors[(*uv).second],
+                [&](glm::vec2 v, size_t index) { vertices[index].uv = v; });
+         }
+      }
+
+      const auto mesh = std::make_unique<Geometry::Mesh<Geometry::Vertex, uint32_t>>(
+          graphicsDevice.getAllocator(),
+          vertices,
+          indices,
+          graphicsDevice.getAsyncTransferContext());
+
       return static_cast<MeshHandle>(3);
    }
 
