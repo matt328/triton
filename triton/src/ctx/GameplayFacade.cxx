@@ -18,6 +18,9 @@ namespace tr::ctx {
    GameplayFacade::~GameplayFacade() {
    }
 
+   gp::EntityType GameplayFacade::loadGltfFile(const std::string_view& filename) {
+   }
+
    std::future<gfx::ModelHandle> GameplayFacade::loadTextureAsync(
        const std::filesystem::path& path) {
       return renderer.loadModelAsync(path.string());

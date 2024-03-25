@@ -28,6 +28,8 @@ namespace tr::ctx {
       GameplayFacade& operator=(const GameplayFacade&) = delete;
       GameplayFacade& operator=(GameplayFacade&&) = delete;
 
+      gp::EntityType loadGltfFile(const std::string_view& filename);
+
       gp::EntityType createStaticMeshEntity(std::string meshFile,
                                             std::string textureFile,
                                             std::optional<std::string> name = std::nullopt);
