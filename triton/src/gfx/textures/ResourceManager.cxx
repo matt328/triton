@@ -54,9 +54,6 @@ namespace tr::gfx::tx {
       auto textures = std::set<size_t>{};
       auto samplers = std::set<size_t>{};
 
-      Log::info << "textures size: " << asset->textures.size() << std::endl;
-      Log::info << "materials size: " << asset->materials.size() << std::endl;
-
       auto loadedTextureIndices = std::unordered_map<std::size_t, TextureHandle>{};
 
       auto modelHandle = ModelHandle{};
@@ -67,9 +64,7 @@ namespace tr::gfx::tx {
             const auto& node = asset->nodes[nodeIndex];
             const auto& mesh = asset->meshes[node.meshIndex.value()];
 
-            int i = 0;
             for (const auto& primitive : mesh.primitives) {
-
                const auto meshHandle = createMesh(asset.get(), primitive);
                auto textureHandle = TextureHandle{}; // Init this to a debug texture
 
@@ -87,15 +82,14 @@ namespace tr::gfx::tx {
                         textureHandle = createTexture(asset.get(),
                                                       baseColorTexture.value().textureIndex,
                                                       filename.parent_path());
-                        Log::info << "created a texture. it's handle is " << textureHandle
-                                  << std::endl;
                         loadedTextureIndices.insert(
                             {baseColorTexture.value().textureIndex, textureHandle});
                      }
                   }
                }
-               modelHandle.insert({i, textureHandle});
-               i++;
+               Log::info << "inserting mesh " << meshHandle << " and texture " << textureHandle
+                         << std::endl;
+               modelHandle.insert({meshHandle, textureHandle});
             }
          }
       }
@@ -139,14 +133,14 @@ namespace tr::gfx::tx {
                 [&](glm::vec2 v, size_t index) { vertices[index].uv = v; });
          }
       }
-
-      const auto mesh = std::make_unique<Geometry::Mesh<Geometry::Vertex, uint32_t>>(
+      const auto pos = meshList.size();
+      meshList.push_back(std::make_unique<Geometry::Mesh<Geometry::Vertex, uint32_t>>(
           graphicsDevice.getAllocator(),
           vertices,
           indices,
-          graphicsDevice.getAsyncTransferContext());
+          graphicsDevice.getAsyncTransferContext()));
 
-      return static_cast<MeshHandle>(3);
+      return static_cast<MeshHandle>(pos);
    }
 
    TextureHandle ResourceManager::createTexture(const fastgltf::Asset& asset,

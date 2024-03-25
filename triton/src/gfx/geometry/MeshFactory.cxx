@@ -7,7 +7,7 @@
 
 namespace tr::gfx::Geometry {
 
-   MeshFactory::MeshFactory(Allocator* allocator, ImmediateContext* transferContext)
+   MeshFactory::MeshFactory(const Allocator& allocator, const VkContext& transferContext)
        : allocator(allocator), transferContext(transferContext) {
    }
 

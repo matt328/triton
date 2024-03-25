@@ -1,6 +1,8 @@
 #pragma once
 
 #include "gfx/Handles.hpp"
+#include "gfx/geometry/Mesh.hpp"
+#include "gfx/geometry/Vertex.hpp"
 #include "gfx/textures/Texture.hpp"
 
 namespace tr::gfx {
@@ -55,6 +57,7 @@ namespace tr::gfx::tx {
       const GraphicsDevice& graphicsDevice;
       std::unique_ptr<AllocatedBuffer> stagingBuffer;
       std::vector<std::unique_ptr<Textures::Texture>> textureList;
+      std::vector<std::unique_ptr<Geometry::Mesh<Geometry::Vertex, uint32_t>>> meshList;
 
       MeshHandle createMesh(const fastgltf::Asset& asset, const fastgltf::Primitive& primitive);
       TextureHandle createTexture(const fastgltf::Asset& asset,

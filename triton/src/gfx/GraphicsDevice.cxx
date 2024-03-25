@@ -259,8 +259,7 @@ namespace tr::gfx {
 
       raiillocator = std::make_unique<Allocator>(allocatorCreateInfo);
 
-      meshFactory = std::make_unique<Geometry::MeshFactory>(raiillocator.get(),
-                                                            transferImmediateContext.get());
+      meshFactory = std::make_unique<Geometry::MeshFactory>(*raiillocator, *asyncTransferContext);
    }
 
    GraphicsDevice::~GraphicsDevice() {
