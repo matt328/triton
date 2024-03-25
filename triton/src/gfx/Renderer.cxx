@@ -9,7 +9,6 @@
 #include "helpers/Rendering.hpp"
 
 #include "textures/Texture.hpp"
-#include "textures/TextureFactory.hpp"
 
 #include "geometry/MeshFactory.hpp"
 #include "helpers/SpirvHelper.hpp"
@@ -496,7 +495,12 @@ namespace tr::gfx {
 
    TextureHandle Renderer::createTexture(const std::string_view& filename) {
       auto handle = textureList.size();
-      textureList.push_back(graphicsDevice->getTextureFactory().createTexture2D(filename));
+
+      textureList.push_back(
+          std::make_unique<Textures::Texture>(filename,
+                                              graphicsDevice->getAllocator(),
+                                              graphicsDevice->getVulkanDevice(),
+                                              graphicsDevice->getAsyncTransferContext()));
       // I think we need to bind the texture once in each framedata
       for (auto& f : frameData) {
          f->getTexturesToBind().push_back(handle);

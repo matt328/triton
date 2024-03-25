@@ -15,7 +15,6 @@ set(triton_SRC
    "src/gfx/gui/ImguiHelper.cxx"
    "src/gfx/helpers/SpirvHelper.cxx"
    "src/gfx/textures/Texture.cxx"
-   "src/gfx/textures/TextureFactory.cxx"
    "src/gfx/textures/ResourceManager.cxx"
    "src/gp/GameplaySystem.cxx"
    "src/gp/actions/ActionSystem.cxx"
@@ -79,6 +78,7 @@ target_precompile_headers(${PROJECT_NAME}
    <fastgltf/glm_element_traits.hpp>
    <fastgltf/util.hpp>
    <fastgltf/tools.hpp>
+   <fastgltf/types.hpp>
    <fastgltf/glm_element_traits.hpp>
    <filesystem>
    <fstream>

@@ -104,10 +104,6 @@ namespace tr::gfx {
          return *meshFactory;
       }
 
-      [[nodiscard]] const Textures::TextureFactory& getTextureFactory() const {
-         return *textureFactory;
-      }
-
       [[nodiscard]] const ImmediateContext& getTransferContext() const {
          return *transferImmediateContext;
       }
@@ -163,7 +159,6 @@ namespace tr::gfx {
       std::shared_ptr<vk::raii::Queue> transferQueue;
       std::unique_ptr<vk::raii::Queue> computeQueue;
 
-      std::unique_ptr<Textures::TextureFactory> textureFactory;
       std::unique_ptr<Geometry::MeshFactory> meshFactory;
 
       std::unique_ptr<Allocator> raiillocator;

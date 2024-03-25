@@ -1,7 +1,7 @@
 #pragma once
 
 #include "gfx/Handles.hpp"
-#include <fastgltf/types.hpp>
+#include "gfx/textures/Texture.hpp"
 
 namespace tr::gfx {
    class VkContext;
@@ -12,9 +12,6 @@ namespace tr::gfx {
 }
 
 namespace tr::gfx::tx {
-
-   using TransitionBarrierInfo =
-       std::tuple<vk::ImageMemoryBarrier, vk::PipelineStageFlagBits, vk::PipelineStageFlagBits>;
 
    constexpr uint32_t MaxImageSize = 1024 * 1024 * 8;
 
@@ -57,17 +54,11 @@ namespace tr::gfx::tx {
     private:
       const GraphicsDevice& graphicsDevice;
       std::unique_ptr<AllocatedBuffer> stagingBuffer;
-      std::vector<TextureInfo> textureList;
+      std::vector<std::unique_ptr<Textures::Texture>> textureList;
 
       MeshHandle createMesh(const fastgltf::Asset& asset, const fastgltf::Primitive& primitive);
       TextureHandle createTexture(const fastgltf::Asset& asset,
                                   std::size_t textureIndex,
                                   const std::filesystem::path& folder);
-
-      const TransitionBarrierInfo createTransitionBarrier(
-          const vk::Image& image,
-          const vk::ImageLayout oldLayout,
-          const vk::ImageLayout newLayout,
-          const vk::ImageSubresourceRange subresourceRange);
    };
 }

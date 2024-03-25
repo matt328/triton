@@ -1,7 +1,6 @@
 #include "GraphicsDevice.hpp"
 #include "helpers/Vulkan.hpp"
 #include "ImmediateContext.hpp"
-#include "textures/TextureFactory.hpp"
 #include "geometry/MeshFactory.hpp"
 #include "vma_raii.hpp"
 #include "VkContext.hpp"
@@ -212,12 +211,11 @@ namespace tr::gfx {
 
       createSwapchain();
 
-      auto asyncTransferContext =
-          std::make_unique<VkContext>(*vulkanDevice.get(),
-                                      *physicalDevice,
-                                      1,
-                                      queueFamilyIndices.transferFamily.value(),
-                                      "Async Transfer Context");
+      asyncTransferContext = std::make_unique<VkContext>(*vulkanDevice.get(),
+                                                         *physicalDevice,
+                                                         1,
+                                                         queueFamilyIndices.transferFamily.value(),
+                                                         "Async Transfer Context");
 
       transferImmediateContext =
           std::make_unique<ImmediateContext>(*vulkanDevice.get(),
@@ -260,15 +258,6 @@ namespace tr::gfx {
                                                                 .instance = **instance};
 
       raiillocator = std::make_unique<Allocator>(allocatorCreateInfo);
-
-      // TODO: Maybe this doesn't own this, but it should produce it
-      // not sure what should own it yet.
-      // Whatever is going to own the resource handles should own the factories since
-      // the factories produce handles
-      textureFactory = std::make_unique<Textures::TextureFactory>(*raiillocator,
-                                                                  *vulkanDevice,
-                                                                  *graphicsImmediateContext,
-                                                                  *transferImmediateContext);
 
       meshFactory = std::make_unique<Geometry::MeshFactory>(raiillocator.get(),
                                                             transferImmediateContext.get());
