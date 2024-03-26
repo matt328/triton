@@ -105,7 +105,7 @@ namespace tr::gfx {
       std::condition_variable_any descriptorSetUpdateCv{};
       TracyLockable(std::mutex, descriptorSetUpdateMtx);
 
-      std::optional<std::vector<vk::DescriptorImageInfo*>> imageInfoList;
+      std::optional<std::vector<vk::DescriptorImageInfo>> imageInfoList;
 
       boolean canUpdateDS = false;
 

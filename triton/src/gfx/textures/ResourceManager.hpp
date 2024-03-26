@@ -62,6 +62,9 @@ namespace tr::gfx::tx {
       }
 
       // Get All Textures
+      [[nodiscard]] const std::vector<std::unique_ptr<Textures::Texture>>& getAllTextures() const {
+         return textureList;
+      }
 
     private:
       const GraphicsDevice& graphicsDevice;

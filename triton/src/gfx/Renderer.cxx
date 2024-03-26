@@ -181,14 +181,14 @@ namespace tr::gfx {
 
          // Don't use textureList here, use resourceManager->getAllTextures()
 
+         const auto& textures = resourceManager->getAllTextures();
+
          // Create DescriptorSetWrite for texture buffer
-         imageInfoList.emplace(std::vector<vk::DescriptorImageInfo*>{});
-         imageInfoList.value().reserve(textureList.size());
-         std::transform(
-             textureList.begin(),
-             textureList.end(),
-             std::back_inserter(imageInfoList.value()),
-             [](std::unique_ptr<Textures::Texture>& tex) { return &tex->getImageInfoRef(); });
+         imageInfoList.emplace(std::vector<vk::DescriptorImageInfo>{});
+         imageInfoList.value().reserve(textures.size());
+         for (const auto& texture : textures) {
+            imageInfoList.value().push_back(texture->getImageInfo());
+         }
       }
 
       TracyMessageL("waiting for writes to be processed");
@@ -201,7 +201,7 @@ namespace tr::gfx {
       }
 
       TracyMessageL("ds has been updated");
-      // return the modelId and textureId both here
+
       return modelHandles;
    }
 
@@ -215,19 +215,21 @@ namespace tr::gfx {
          if (imageInfoList.has_value()) { // go time
             TracyMessageL("updating descriptor set");
 
-            const auto& currentFrameData = frameData[currentFrame];
+            // Just do a dirty and write this to all frames in flight at once.
+            // TODO: fix up frames in flight
+            for (auto i = 0; i < FRAMES_IN_FLIGHT; i++) {
+               const auto& currentFrameData = frameData[i];
 
-            // This all is pretty sketchy i'm not sure if it's going to work or not
-            const auto write = vk::WriteDescriptorSet{
-                .dstSet = *currentFrameData->getBindlessDescriptorSet(),
-                .dstBinding = 3,
-                .dstArrayElement = 0,
-                .descriptorCount = static_cast<uint32_t>(imageInfoList.value().size()),
-                .descriptorType = vk::DescriptorType::eCombinedImageSampler,
-                .pImageInfo = *imageInfoList.value().data()};
+               const auto write = vk::WriteDescriptorSet{
+                   .dstSet = *currentFrameData->getBindlessDescriptorSet(),
+                   .dstBinding = 3,
+                   .dstArrayElement = 0,
+                   .descriptorCount = static_cast<uint32_t>(imageInfoList.value().size()),
+                   .descriptorType = vk::DescriptorType::eCombinedImageSampler,
+                   .pImageInfo = imageInfoList.value().data()};
 
-            graphicsDevice->getVulkanDevice().updateDescriptorSets(write, nullptr);
-
+               graphicsDevice->getVulkanDevice().updateDescriptorSets(write, nullptr);
+            }
             imageInfoList = std::nullopt;
             TracyMessageL("releasing mutex lock after updating");
             lock.unlock();
@@ -273,27 +275,27 @@ namespace tr::gfx {
       }
 
       // Check for, and add any new textures into the bindless texture descriptor
-      {
-         // TODO: Move this into another thread eventually
-         ZoneNamedN(updateTextures, "Update Textures", true);
-         if (!currentFrameData->getTexturesToBind().empty()) {
-            auto writes = std::vector<vk::WriteDescriptorSet>{};
-            writes.reserve(currentFrameData->getTexturesToBind().size());
+      // {
+      //    // TODO: Move this into another thread eventually
+      //    ZoneNamedN(updateTextures, "Update Textures", true);
+      //    if (!currentFrameData->getTexturesToBind().empty()) {
+      //       auto writes = std::vector<vk::WriteDescriptorSet>{};
+      //       writes.reserve(currentFrameData->getTexturesToBind().size());
 
-            for (const auto t : currentFrameData->getTexturesToBind()) {
-               const auto& texture = textureList[t];
-               writes.push_back(vk::WriteDescriptorSet{
-                   .dstSet = *currentFrameData->getBindlessDescriptorSet(),
-                   .dstBinding = 3,
-                   .dstArrayElement = t,
-                   .descriptorCount = 1,
-                   .descriptorType = vk::DescriptorType::eCombinedImageSampler,
-                   .pImageInfo = texture->getImageInfo()});
-            }
-            graphicsDevice->getVulkanDevice().updateDescriptorSets(writes, nullptr);
-            currentFrameData->getTexturesToBind().clear();
-         }
-      }
+      //       for (const auto t : currentFrameData->getTexturesToBind()) {
+      //          const auto& texture = textureList[t];
+      //          writes.push_back(vk::WriteDescriptorSet{
+      //              .dstSet = *currentFrameData->getBindlessDescriptorSet(),
+      //              .dstBinding = 3,
+      //              .dstArrayElement = t,
+      //              .descriptorCount = 1,
+      //              .descriptorType = vk::DescriptorType::eCombinedImageSampler,
+      //              .pImageInfo = texture->getImageInfo()});
+      //       }
+      //       graphicsDevice->getVulkanDevice().updateDescriptorSets(writes, nullptr);
+      //       currentFrameData->getTexturesToBind().clear();
+      //    }
+      // }
 
       // Update the once-per-frame data.
       {

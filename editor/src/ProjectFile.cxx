@@ -173,7 +173,7 @@ namespace ed::io {
       uint32_t width = 1920;
       uint32_t height = 1080;
       float nearClip = 0.1f;
-      float farClip = 1000.f;
+      float farClip = 100000.f;
 
       cameraInfo.emplace(width, height, fov, nearClip, farClip, position);
    }

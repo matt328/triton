@@ -31,8 +31,8 @@ namespace tr::gfx::Textures {
       Texture& operator=(const Texture&) = delete;
       Texture& operator=(Texture&&) = delete;
 
-      [[nodiscard]] const vk::DescriptorImageInfo* getImageInfo() const {
-         return &imageInfo;
+      [[nodiscard]] const vk::DescriptorImageInfo getImageInfo() const {
+         return imageInfo;
       }
 
       [[nodiscard]] vk::DescriptorImageInfo& getImageInfoRef() {
