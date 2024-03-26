@@ -61,6 +61,8 @@ namespace tr::gfx::tx {
          return textureList.at(textureHandle);
       }
 
+      // Get All Textures
+
     private:
       const GraphicsDevice& graphicsDevice;
       std::unique_ptr<AllocatedBuffer> stagingBuffer;

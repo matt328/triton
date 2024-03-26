@@ -2,6 +2,7 @@
 
 #include "../vma_raii.hpp"
 #include "gfx/VkContext.hpp"
+#include <vulkan/vulkan_structs.hpp>
 
 namespace tr::gfx::Textures {
 
@@ -30,8 +31,12 @@ namespace tr::gfx::Textures {
       Texture& operator=(const Texture&) = delete;
       Texture& operator=(Texture&&) = delete;
 
-      const vk::DescriptorImageInfo* getImageInfo() {
+      [[nodiscard]] const vk::DescriptorImageInfo* getImageInfo() const {
          return &imageInfo;
+      }
+
+      [[nodiscard]] vk::DescriptorImageInfo& getImageInfoRef() {
+         return imageInfo;
       }
 
     private:

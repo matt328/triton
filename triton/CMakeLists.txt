@@ -73,44 +73,46 @@ target_compile_definitions(${PROJECT_NAME}
 target_precompile_headers(${PROJECT_NAME}
    PRIVATE
    <condition_variable>
+   <chrono>
    <entt/entt.hpp>
    <fastgltf/core.hpp>
-   <fastgltf/util.hpp>
+   <fastgltf/glm_element_traits.hpp>
    <fastgltf/tools.hpp>
    <fastgltf/types.hpp>
-   <fastgltf/glm_element_traits.hpp>
+   <fastgltf/util.hpp>
    <filesystem>
    <fstream>
    <functional>
+   <future>
    <glslang/SPIRV/GlslangToSpv.h>
    <limits>
    <map>
+   <mutex>
    <optional>
-   <future>
    <ranges>
    <set>
+   <sstream>
    <stb_image.h>
    <string>
    <string_view>
-   <sstream>
    <taskflow/taskflow.hpp>
    PUBLIC
    "include/util/Logger.hpp"
    <GLFW/glfw3.h>
-   <imgui_impl_glfw.h>
-   <imgui_impl_vulkan.h>
    <glm/gtc/matrix_transform.hpp>
    <glm/gtc/type_ptr.hpp>
    <glm/gtx/matrix_decompose.hpp>
    <glm/gtx/quaternion.hpp>
    <glm/gtx/string_cast.hpp>
    <imgui.h>
-   <vulkan-memory-allocator-hpp/vk_mem_alloc.hpp>
-   <vulkan/vulkan_raii.hpp>
+   <imgui_impl_glfw.h>
+   <imgui_impl_vulkan.h>
    <taskflow/taskflow.hpp>
    <tracy/Tracy.hpp>
    <tracy/TracyVulkan.hpp>
    <tracy/TracyC.h>
+   <vulkan-memory-allocator-hpp/vk_mem_alloc.hpp>
+   <vulkan/vulkan_raii.hpp>
 )
 
 target_link_libraries(${PROJECT_NAME}

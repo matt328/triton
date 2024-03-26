@@ -5,6 +5,7 @@
 #include "util/TaskQueue.hpp"
 
 #include <entt/signal/fwd.hpp>
+#include <vulkan/vulkan_structs.hpp>
 
 namespace tr::gfx {
    struct RenderObject;
@@ -103,7 +104,9 @@ namespace tr::gfx {
 
       std::condition_variable_any descriptorSetUpdateCv{};
       TracyLockable(std::mutex, descriptorSetUpdateMtx);
-      std::optional<std::string> descriptorWriteInfo{};
+
+      std::optional<std::vector<vk::DescriptorImageInfo*>> imageInfoList;
+
       boolean canUpdateDS = false;
 
       std::vector<RenderObject> renderObjects{};

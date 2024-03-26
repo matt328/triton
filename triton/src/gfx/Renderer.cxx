@@ -14,13 +14,10 @@
 #include "helpers/SpirvHelper.hpp"
 #include "util/Paths.hpp"
 #include "util/TaskQueue.hpp"
-#include <chrono>
-#include <mutex>
-#include <optional>
-#include <vulkan/vulkan_structs.hpp>
-#include "ctx/GltfHelper.hpp"
 #include "gfx/textures/ResourceManager.hpp"
 #include "gfx/VkContext.hpp"
+#include <vulkan/vulkan_enums.hpp>
+#include <vulkan/vulkan_structs.hpp>
 
 namespace tr::gfx {
 
@@ -177,17 +174,21 @@ namespace tr::gfx {
 
       auto modelHandles = resourceManager->loadModel(filename);
 
-      std::this_thread::sleep_for(std::chrono::milliseconds(200));
-
       TracyMessageL("setting DS Update Info");
       {
          std::unique_lock<LockableBase(std::mutex)> lock(descriptorSetUpdateMtx);
          LockMark(descriptorSetUpdateMtx);
 
-         // Create DescriptorSetWrite for texture buffer
+         // Don't use textureList here, use resourceManager->getAllTextures()
 
-         std::this_thread::sleep_for(std::chrono::milliseconds(400));
-         descriptorWriteInfo.emplace("some writes");
+         // Create DescriptorSetWrite for texture buffer
+         imageInfoList.emplace(std::vector<vk::DescriptorImageInfo*>{});
+         imageInfoList.value().reserve(textureList.size());
+         std::transform(
+             textureList.begin(),
+             textureList.end(),
+             std::back_inserter(imageInfoList.value()),
+             [](std::unique_ptr<Textures::Texture>& tex) { return &tex->getImageInfoRef(); });
       }
 
       TracyMessageL("waiting for writes to be processed");
@@ -196,7 +197,7 @@ namespace tr::gfx {
          std::unique_lock<LockableBase(std::mutex)> lock(descriptorSetUpdateMtx);
          LockMark(descriptorSetUpdateMtx);
          TracyMessageL("loading thread acquired lock");
-         descriptorSetUpdateCv.wait(lock, [this] { return !descriptorWriteInfo.has_value(); });
+         descriptorSetUpdateCv.wait(lock, [this] { return !imageInfoList.has_value(); });
       }
 
       TracyMessageL("ds has been updated");
@@ -211,10 +212,23 @@ namespace tr::gfx {
       if (lock.owns_lock()) {
          LockMark(descriptorSetUpdateMtx);
          TracyMessageL("acquired a lock on the mutex");
-         if (descriptorWriteInfo.has_value()) { // go time
+         if (imageInfoList.has_value()) { // go time
             TracyMessageL("updating descriptor set");
-            std::this_thread::sleep_for(std::chrono::milliseconds(3));
-            descriptorWriteInfo = std::nullopt;
+
+            const auto& currentFrameData = frameData[currentFrame];
+
+            // This all is pretty sketchy i'm not sure if it's going to work or not
+            const auto write = vk::WriteDescriptorSet{
+                .dstSet = *currentFrameData->getBindlessDescriptorSet(),
+                .dstBinding = 3,
+                .dstArrayElement = 0,
+                .descriptorCount = static_cast<uint32_t>(imageInfoList.value().size()),
+                .descriptorType = vk::DescriptorType::eCombinedImageSampler,
+                .pImageInfo = *imageInfoList.value().data()};
+
+            graphicsDevice->getVulkanDevice().updateDescriptorSets(write, nullptr);
+
+            imageInfoList = std::nullopt;
             TracyMessageL("releasing mutex lock after updating");
             lock.unlock();
             descriptorSetUpdateCv.notify_one();
