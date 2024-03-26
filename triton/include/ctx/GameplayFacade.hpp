@@ -28,7 +28,8 @@ namespace tr::ctx {
       GameplayFacade& operator=(const GameplayFacade&) = delete;
       GameplayFacade& operator=(GameplayFacade&&) = delete;
 
-      gp::EntityType loadGltfFile(const std::string_view& filename);
+      gp::EntityType createStaticMeshEntity(gfx::MeshHandle modelHandle,
+                                            gfx::TextureHandle textureHandle);
 
       gp::EntityType createStaticMeshEntity(std::string meshFile,
                                             std::string textureFile,
@@ -66,7 +67,7 @@ namespace tr::ctx {
 
       void clear();
 
-      std::future<gfx::ModelHandle> loadTextureAsync(const std::filesystem::path& path);
+      std::future<gfx::ModelHandle> loadModelAsync(const std::filesystem::path& path);
 
     private:
       bool debugEnabled{};

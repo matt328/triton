@@ -53,6 +53,14 @@ namespace tr::gfx::tx {
 
       ModelHandle loadModel(const std::filesystem::path& filename);
 
+      std::unique_ptr<Geometry::Mesh<Geometry::Vertex, uint32_t>>& getMesh(MeshHandle meshHandle) {
+         return meshList.at(meshHandle);
+      }
+
+      std::unique_ptr<Textures::Texture>& getTexture(TextureHandle textureHandle) {
+         return textureList.at(textureHandle);
+      }
+
     private:
       const GraphicsDevice& graphicsDevice;
       std::unique_ptr<AllocatedBuffer> stagingBuffer;

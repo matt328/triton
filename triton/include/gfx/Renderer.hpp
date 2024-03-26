@@ -97,7 +97,7 @@ namespace tr::gfx {
 
       std::unique_ptr<Gui::ImGuiHelper> imguiHelper;
 
-      std::unique_ptr<util::TaskQueue> textureTaskQueue;
+      std::unique_ptr<util::TaskQueue> modelTaskQueue;
 
       std::unique_ptr<tx::ResourceManager> resourceManager;
 

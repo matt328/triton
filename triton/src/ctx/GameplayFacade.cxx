@@ -18,12 +18,21 @@ namespace tr::ctx {
    GameplayFacade::~GameplayFacade() {
    }
 
-   gp::EntityType GameplayFacade::loadGltfFile(const std::string_view& filename) {
+   std::future<gfx::ModelHandle> GameplayFacade::loadModelAsync(const std::filesystem::path& path) {
+      return renderer.loadModelAsync(path.string());
    }
 
-   std::future<gfx::ModelHandle> GameplayFacade::loadTextureAsync(
-       const std::filesystem::path& path) {
-      return renderer.loadModelAsync(path.string());
+   gp::EntityType GameplayFacade::createStaticMeshEntity(gfx::MeshHandle modelHandle,
+                                                         gfx::TextureHandle textureHandle) {
+      auto e = gameplaySystem.registry->create();
+      gameplaySystem.registry->emplace<gp::ecs::Renderable>(e, modelHandle, textureHandle);
+      gameplaySystem.registry->emplace<gp::ecs::Transform>(e);
+
+      if (debugEnabled) {
+         gameplaySystem.registry->emplace<EditorInfoComponent>(e, "gltf model");
+      }
+
+      return e;
    }
 
    gp::EntityType GameplayFacade::createStaticMeshEntity(std::string meshFile,

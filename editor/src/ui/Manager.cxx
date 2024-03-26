@@ -48,8 +48,11 @@ namespace ed::ui {
             ZoneNamedN(loadComplete, "Load Complete", true);
             try {
                auto r = it->get();
-               Log::info << "result: "
-                         << "result" << std::endl;
+               for (auto it = r.begin(); it != r.end(); ++it) {
+                  const auto meshHandle = it->first;
+                  const auto textureHandle = it->second;
+                  facade.createStaticMeshEntity(meshHandle, textureHandle);
+               }
             } catch (const std::exception& e) {
                Log::error << "error loading model: " << e.what() << std::endl;
             }
@@ -249,7 +252,7 @@ namespace ed::ui {
                auto filename = std::filesystem::path{
                    R"(C:\Users\Matt\Projects\game-assets\models\Sponza\glTF\Sponza.gltf)"};
 
-               modelFutures.push_back(facade.loadTextureAsync(filename));
+               modelFutures.push_back(facade.loadModelAsync(filename));
                // TODO: call renderer.loadTextureAsync here
 
                // auto f = resourceQueue->enqueue(

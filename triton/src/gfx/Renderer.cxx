@@ -80,7 +80,7 @@ namespace tr::gfx {
          imguiHelper = std::make_unique<Gui::ImGuiHelper>(*graphicsDevice, window);
       }
 
-      textureTaskQueue = std::make_unique<util::TaskQueue>();
+      modelTaskQueue = std::make_unique<util::TaskQueue>();
 
       resourceManager = std::make_unique<tx::ResourceManager>(*graphicsDevice);
    }
@@ -167,7 +167,7 @@ namespace tr::gfx {
    }
 
    std::future<ModelHandle> Renderer::loadModelAsync(const std::filesystem::path& filename) {
-      return textureTaskQueue->enqueue([this, filename]() { return loadModelInt(filename); });
+      return modelTaskQueue->enqueue([this, filename]() { return loadModelInt(filename); });
    }
 
    ModelHandle Renderer::loadModelInt(const std::filesystem::path& filename) {
@@ -393,7 +393,8 @@ namespace tr::gfx {
             // TODO: move the vertices and indices into a single giant buffer.
             // Then switch this call from drawIndexed to draw*Indirect
             for (uint32_t i = 0; const auto& renderObject : renderObjects) {
-               const auto& mesh = meshes.at(renderObject.meshId);
+
+               const auto& mesh = resourceManager->getMesh(renderObject.meshId);
 
                cmd.bindVertexBuffers(0, mesh->getVertexBuffer().getBuffer(), {0});
                cmd.bindIndexBuffer(mesh->getIndexBuffer().getBuffer(), 0, vk::IndexType::eUint32);
