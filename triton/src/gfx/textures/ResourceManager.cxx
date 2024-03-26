@@ -111,11 +111,13 @@ namespace tr::gfx::tx {
       {
          const auto& accessor = asset.accessors[primitive.findAttribute("POSITION")->second];
          vertices.resize(accessor.count);
-         fastgltf::iterateAccessor<glm::vec3>(asset, accessor, [&](glm::vec3 v) {
-            auto newVertex = Geometry::Vertex{};
-            newVertex.pos = v;
-            vertices.push_back(newVertex);
-         });
+         fastgltf::iterateAccessorWithIndex<glm::vec3>(asset,
+                                                       accessor,
+                                                       [&](glm::vec3 v, size_t index) {
+                                                          auto newVertex = Geometry::Vertex{};
+                                                          newVertex.pos = v;
+                                                          vertices[index] = newVertex;
+                                                       });
 
          auto normals = primitive.findAttribute("NORMAL");
          if (normals != primitive.attributes.end()) {
@@ -125,7 +127,7 @@ namespace tr::gfx::tx {
                 [&](glm::vec3 v, size_t index) { vertices[index].normal = v; });
          }
 
-         auto uv = primitive.findAttribute("TEXCOORD_O");
+         auto uv = primitive.findAttribute("TEXCOORD_0");
          if (uv != primitive.attributes.end()) {
             fastgltf::iterateAccessorWithIndex<glm::vec2>(
                 asset,

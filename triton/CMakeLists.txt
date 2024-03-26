@@ -75,7 +75,6 @@ target_precompile_headers(${PROJECT_NAME}
    <condition_variable>
    <entt/entt.hpp>
    <fastgltf/core.hpp>
-   <fastgltf/glm_element_traits.hpp>
    <fastgltf/util.hpp>
    <fastgltf/tools.hpp>
    <fastgltf/types.hpp>
