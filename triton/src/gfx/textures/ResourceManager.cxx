@@ -1,5 +1,11 @@
 #include "ResourceManager.hpp"
 
+#define TINYGLTF_IMPLEMENTATION
+#define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+// #define TINYGLTF_NOEXCEPTION // optional. disable exception handling.
+#include "tiny_gltf.h"
+
 #include "gfx/geometry/Mesh.hpp"
 #include "gfx/geometry/Vertex.hpp"
 #include "gfx/textures/Texture.hpp"
@@ -28,61 +34,60 @@ namespace tr::gfx::tx {
    // TODO: go back to tinygltf. fastgltf does weird crap corrupting memory profiling
    // and I can't have that.
    ModelHandle ResourceManager::loadModel(const std::filesystem::path& filename) {
-      static constexpr auto supportedExtensions = fastgltf::Extensions::KHR_mesh_quantization;
 
-      fastgltf::Parser parser{supportedExtensions};
+      using namespace tinygltf;
 
-      constexpr auto gltfOptions =
-          fastgltf::Options::DontRequireValidAssetMember | fastgltf::Options::AllowDouble |
-          fastgltf::Options::LoadGLBBuffers | fastgltf::Options::LoadExternalBuffers |
-          fastgltf::Options::LoadExternalImages | fastgltf::Options::GenerateMeshIndices;
+      Model model;
+      TinyGLTF loader;
+      std::string err;
+      std::string warn;
 
-      fastgltf::GltfDataBuffer data{};
-      data.loadFromFile(filename);
-
-      auto asset = parser.loadGltf(&data, filename.parent_path(), gltfOptions);
-      if (asset.error() != fastgltf::Error::None) {
-         Log::error << "Failed to load glTF: " << fastgltf::getErrorMessage(asset.error())
-                    << std::endl;
-         throw std::runtime_error("Failed to load glTF");
+      bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, filename.string());
+      if (!warn.empty()) {
+         // TODO: non-critical exceptions
+         throw std::runtime_error(warn);
       }
 
-      auto loadedTextureIndices = std::unordered_map<std::size_t, TextureHandle>{};
+      if (!err.empty()) {
+         throw std::runtime_error(err);
+      }
+
+      if (!ret) {
+         Log::error << "Failed to parse glTF file" << std::endl;
+         throw std::runtime_error("Failed to parse glTF file");
+      }
+
+      auto loadedTextureIndices = std::unordered_map<int, TextureHandle>{};
+
       auto modelHandle = ModelHandle{};
 
-      for (const auto& scene : asset->scenes) {
-         for (const auto& nodeIndex : scene.nodeIndices) {
+      const auto& scene = model.scenes[model.defaultScene];
+      for (const auto& nodeIndex : scene.nodes) {
+         const auto& node = model.nodes[nodeIndex];
+         const auto& mesh = model.meshes[node.mesh];
+         for (const auto& primitive : mesh.primitives) {
+            const auto meshHandle = createMesh(model, primitive);
 
-            const auto& node = asset->nodes[nodeIndex];
-            const auto& mesh = asset->meshes[node.meshIndex.value()];
+            auto textureHandle = TextureHandle{}; // TODO: init this to a debug texture handle
 
-            for (const auto& primitive : mesh.primitives) {
-               const auto meshHandle = createMesh(asset.get(), primitive);
-               auto textureHandle = TextureHandle{}; // Init this to a debug texture
+            const auto materialIndex = primitive.material;
+            const auto& material = model.materials[materialIndex];
 
-               const auto materialIndex = primitive.materialIndex;
+            const auto& baseColorTextureIndex =
+                material.pbrMetallicRoughness.baseColorTexture.index;
+            const auto& baseColorTexture = model.textures[baseColorTextureIndex];
 
-               if (materialIndex.has_value()) {
-                  const auto& material = asset->materials[materialIndex.value()];
-                  const auto& baseColorTexture = material.pbrData.baseColorTexture;
-
-                  if (baseColorTexture.has_value()) {
-                     auto it = loadedTextureIndices.find(baseColorTexture.value().textureIndex);
-                     if (it != loadedTextureIndices.end()) {
-                        textureHandle = it->second;
-                     } else {
-                        textureHandle = createTexture(asset.get(),
-                                                      baseColorTexture.value().textureIndex,
-                                                      filename.parent_path());
-                        loadedTextureIndices.insert(
-                            {baseColorTexture.value().textureIndex, textureHandle});
-                     }
-                  }
-               }
-               Log::info << "inserting mesh " << meshHandle << " and texture " << textureHandle
-                         << std::endl;
-               modelHandle.insert({meshHandle, textureHandle});
+            auto it = loadedTextureIndices.find(baseColorTextureIndex);
+            if (it != loadedTextureIndices.end()) {
+               textureHandle = it->second;
+            } else {
+               textureHandle = createTexture(model, baseColorTextureIndex, filename.parent_path());
+               loadedTextureIndices.insert({baseColorTextureIndex, textureHandle});
             }
+
+            Log::info << "inserting mesh " << meshHandle << " and texture " << textureHandle
+                      << std::endl;
+            modelHandle.insert({meshHandle, textureHandle});
          }
       }
       return modelHandle;
