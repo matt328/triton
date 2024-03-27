@@ -141,6 +141,18 @@ namespace tr::gfx::tx {
       {
          for (const auto& attribute : primitive.attributes) {
             const auto& accessor = model.accessors[attribute.second];
+            const auto& view = model.bufferViews[accessor.bufferView];
+            if (attribute.first.compare("POSITION") == 0) {
+               // NOLINTNEXTLINE
+               const auto& v = reinterpret_cast<const float*>(
+                   &model.buffers[view.buffer].data[accessor.byteOffset + view.byteOffset]);
+               const auto& vertexCount = accessor.count;
+               for (size_t i = 0; i < vertexCount; i++) {
+                  Geometry::Vertex vert{};
+                  vert.pos = glm::vec4(glm::make_vec3(&v[i * 3]), 1.f);
+                  vertices.push_back(vert);
+               }
+            }
          }
 
          return static_cast<MeshHandle>(3);
