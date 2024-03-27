@@ -5,8 +5,6 @@
 #include "gfx/textures/Texture.hpp"
 #include "gfx/vma_raii.hpp"
 #include "gfx/GraphicsDevice.hpp"
-#include <fastgltf/tools.hpp>
-#include <glm/detail/qualifier.hpp>
 
 namespace tr::gfx::tx {
    ResourceManager::ResourceManager(const GraphicsDevice& graphicsDevice)
@@ -27,6 +25,8 @@ namespace tr::gfx::tx {
    ResourceManager::~ResourceManager() {
    }
 
+   // TODO: go back to tinygltf. fastgltf does weird crap corrupting memory profiling
+   // and I can't have that.
    ModelHandle ResourceManager::loadModel(const std::filesystem::path& filename) {
       static constexpr auto supportedExtensions = fastgltf::Extensions::KHR_mesh_quantization;
 
@@ -47,15 +47,7 @@ namespace tr::gfx::tx {
          throw std::runtime_error("Failed to load glTF");
       }
 
-      const auto& a = asset.get().images[1];
-
-      Log::debug << a.name << std::endl;
-      auto materials = std::set<size_t>{};
-      auto textures = std::set<size_t>{};
-      auto samplers = std::set<size_t>{};
-
       auto loadedTextureIndices = std::unordered_map<std::size_t, TextureHandle>{};
-
       auto modelHandle = ModelHandle{};
 
       for (const auto& scene : asset->scenes) {

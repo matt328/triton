@@ -45,7 +45,7 @@ namespace ed::ui {
       for (auto it = modelFutures.begin(); it != modelFutures.end();) {
          auto status = it->wait_for(std::chrono::seconds(0));
          if (status == std::future_status::ready) {
-            ZoneNamedN(loadComplete, "Load Complete", true);
+            ZoneNamedN(loadComplete, "Creating Mesh Entities", true);
             try {
                auto r = it->get();
                for (auto it = r.begin(); it != r.end(); ++it) {

@@ -43,7 +43,7 @@ IF(APPLE)
    )
 ENDIF(APPLE)
 
-find_package(fastgltf CONFIG REQUIRED)
+find_package(fastgltf CONFIG REQUIRED FASTGLTF_DISABLE_CUSTOM_MEMORY_POOL FASTGLTF_COMPILE_AS_CPP20=YES)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glslang CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)

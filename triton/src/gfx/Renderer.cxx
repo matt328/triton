@@ -170,12 +170,15 @@ namespace tr::gfx {
    ModelHandle Renderer::loadModelInt(const std::filesystem::path& filename) {
       ZoneNamedN(a, "Create Texture Internal", true);
 
-      TracyMessageL("loading gltf");
+      auto modelHandles = ModelHandle{};
 
-      auto modelHandles = resourceManager->loadModel(filename);
-
-      TracyMessageL("setting DS Update Info");
       {
+         ZoneNamedN(b, "Loading glTF File", true);
+         modelHandles = resourceManager->loadModel(filename);
+      }
+
+      {
+         ZoneNamedN(c, "Preparing DS Write Info", true);
          std::unique_lock<LockableBase(std::mutex)> lock(descriptorSetUpdateMtx);
          LockMark(descriptorSetUpdateMtx);
 
@@ -191,16 +194,14 @@ namespace tr::gfx {
          }
       }
 
-      TracyMessageL("waiting for writes to be processed");
       {
+         ZoneNamedN(d, "waiting for writes to be processed", true);
          // wait for the cv to be notified and for descriptorWriteInfo to have been emptied
          std::unique_lock<LockableBase(std::mutex)> lock(descriptorSetUpdateMtx);
          LockMark(descriptorSetUpdateMtx);
-         TracyMessageL("loading thread acquired lock");
+         TracyMessageL("loading thread waiting");
          descriptorSetUpdateCv.wait(lock, [this] { return !imageInfoList.has_value(); });
       }
-
-      TracyMessageL("ds has been updated");
 
       return modelHandles;
    }
@@ -217,18 +218,21 @@ namespace tr::gfx {
 
             // Just do a dirty and write this to all frames in flight at once.
             // TODO: fix up frames in flight
-            for (auto i = 0; i < FRAMES_IN_FLIGHT; i++) {
-               const auto& currentFrameData = frameData[i];
+            {
+               ZoneNamedN(updateds, "Update DS", true);
+               for (auto i = 0; i < FRAMES_IN_FLIGHT; i++) {
+                  const auto& currentFrameData = frameData[i];
 
-               const auto write = vk::WriteDescriptorSet{
-                   .dstSet = *currentFrameData->getBindlessDescriptorSet(),
-                   .dstBinding = 3,
-                   .dstArrayElement = 0,
-                   .descriptorCount = static_cast<uint32_t>(imageInfoList.value().size()),
-                   .descriptorType = vk::DescriptorType::eCombinedImageSampler,
-                   .pImageInfo = imageInfoList.value().data()};
+                  const auto write = vk::WriteDescriptorSet{
+                      .dstSet = *currentFrameData->getBindlessDescriptorSet(),
+                      .dstBinding = 3,
+                      .dstArrayElement = 0,
+                      .descriptorCount = static_cast<uint32_t>(imageInfoList.value().size()),
+                      .descriptorType = vk::DescriptorType::eCombinedImageSampler,
+                      .pImageInfo = imageInfoList.value().data()};
 
-               graphicsDevice->getVulkanDevice().updateDescriptorSets(write, nullptr);
+                  graphicsDevice->getVulkanDevice().updateDescriptorSets(write, nullptr);
+               }
             }
             imageInfoList = std::nullopt;
             TracyMessageL("releasing mutex lock after updating");
