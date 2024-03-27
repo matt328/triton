@@ -1,5 +1,6 @@
 #pragma once
 
+#include "gfx/Handles.hpp"
 #include "gp/GameplaySystem.hpp"
 #include "gp/ecs/component/Transform.hpp"
 #include "gp/ecs/component/Camera.hpp"
@@ -8,8 +9,6 @@
 namespace tr::ctx {
    template <typename T>
    using OptionalRef = std::optional<std::reference_wrapper<T>>;
-
-   class ResourceLoader;
 
    struct EditorInfoComponent {
       std::string name;
@@ -28,6 +27,9 @@ namespace tr::ctx {
       GameplayFacade(GameplayFacade&&) = delete;
       GameplayFacade& operator=(const GameplayFacade&) = delete;
       GameplayFacade& operator=(GameplayFacade&&) = delete;
+
+      gp::EntityType createStaticMeshEntity(gfx::MeshHandle modelHandle,
+                                            gfx::TextureHandle textureHandle);
 
       gp::EntityType createStaticMeshEntity(std::string meshFile,
                                             std::string textureFile,
@@ -65,15 +67,12 @@ namespace tr::ctx {
 
       void clear();
 
-      [[nodiscard]] ResourceLoader& getResourceLoader() {
-         return *resourceLoader.get();
-      }
+      std::future<gfx::ModelHandle> loadModelAsync(const std::filesystem::path& path);
 
     private:
       bool debugEnabled{};
       gp::GameplaySystem& gameplaySystem;
       gfx::Renderer& renderer;
-      std::unique_ptr<ResourceLoader> resourceLoader;
       std::vector<gp::EntityType> allEntities;
    };
 

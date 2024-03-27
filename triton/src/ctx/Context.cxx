@@ -2,7 +2,6 @@
 #include "gp/GameplaySystem.hpp"
 #include "gfx/Renderer.hpp"
 #include "ctx/GameplayFacade.hpp"
-#include "ctx/ResourceLoader.hpp"
 
 namespace tr::ctx {
    constexpr auto SleepMillis = 100;

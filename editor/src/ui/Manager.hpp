@@ -1,21 +1,19 @@
 #pragma once
 
 #include "Application.hpp"
-
 #include "gfx/Handles.hpp"
-
 #include <entt/entt.hpp>
 
 namespace ed {
    class Application;
 }
 
-// TODO: the organization of these files is a mess.  Back up and restructure things.
-// the facade returning the ModelInfo by value is causing a bunch of headers to be needed by the
-// editor. Maybe this is necessary, maybe not, need to think through it a bit.
-
 namespace tr::ctx {
    class GameplayFacade;
+}
+
+namespace tr::util {
+   class TaskQueue;
 }
 
 namespace ed::ui {
@@ -42,7 +40,7 @@ namespace ed::ui {
 
     private:
       tr::ctx::GameplayFacade& facade;
-      std::vector<std::future<tr::gfx::ModelInfoHandle>> modelFutures{};
+      std::vector<std::future<tr::gfx::ModelHandle>> modelFutures{};
 
       // HACK: get this from the application somehow instead of tracking it in 2 places
       bool fullscreen{};

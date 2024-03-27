@@ -1,7 +1,5 @@
 #include "ctx/GameplayFacade.hpp"
 
-#include "ctx/ResourceLoader.hpp"
-
 #include "gp/GameplaySystem.hpp"
 #include "gfx/Renderer.hpp"
 
@@ -14,13 +12,27 @@ namespace tr::ctx {
    GameplayFacade::GameplayFacade(gp::GameplaySystem& gameplaySystem,
                                   gfx::Renderer& renderer,
                                   bool debugEnabled)
-       : debugEnabled{debugEnabled},
-         gameplaySystem{gameplaySystem},
-         renderer{renderer},
-         resourceLoader(std::make_unique<ResourceLoader>(renderer)) {
+       : debugEnabled{debugEnabled}, gameplaySystem{gameplaySystem}, renderer{renderer} {
    }
 
    GameplayFacade::~GameplayFacade() {
+   }
+
+   std::future<gfx::ModelHandle> GameplayFacade::loadModelAsync(const std::filesystem::path& path) {
+      return renderer.loadModelAsync(path.string());
+   }
+
+   gp::EntityType GameplayFacade::createStaticMeshEntity(gfx::MeshHandle modelHandle,
+                                                         gfx::TextureHandle textureHandle) {
+      auto e = gameplaySystem.registry->create();
+      gameplaySystem.registry->emplace<gp::ecs::Renderable>(e, modelHandle, textureHandle);
+      gameplaySystem.registry->emplace<gp::ecs::Transform>(e);
+
+      if (debugEnabled) {
+         gameplaySystem.registry->emplace<EditorInfoComponent>(e, "gltf model");
+      }
+
+      return e;
    }
 
    gp::EntityType GameplayFacade::createStaticMeshEntity(std::string meshFile,

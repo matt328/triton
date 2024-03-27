@@ -3,13 +3,11 @@ project("triton")
 set(triton_SRC
    "src/ctx/Context.cxx"
    "src/ctx/GameplayFacade.cxx"
-   "src/ctx/ResourceLoader.cxx"
-   "src/ctx/KtxImage.cxx"
    "src/ctx/GltfHelper.cxx"
-   "src/ctx/ModelInfo.cxx"
    "src/gfx/FrameData.cxx"
    "src/gfx/GraphicsDevice.cxx"
    "src/gfx/ImmediateContext.cxx"
+   "src/gfx/VkContext.cxx"
    "src/gfx/Renderer.cxx"
    "src/gfx/vma_raii.cxx"
    "src/gfx/geometry/MeshFactory.cxx"
@@ -17,7 +15,7 @@ set(triton_SRC
    "src/gfx/gui/ImguiHelper.cxx"
    "src/gfx/helpers/SpirvHelper.cxx"
    "src/gfx/textures/Texture.cxx"
-   "src/gfx/textures/TextureFactory.cxx"
+   "src/gfx/textures/ResourceManager.cxx"
    "src/gp/GameplaySystem.cxx"
    "src/gp/actions/ActionSystem.cxx"
    "src/gp/ecs/system/CameraSystem.cxx"
@@ -45,11 +43,10 @@ IF(APPLE)
    )
 ENDIF(APPLE)
 
-find_package(fastgltf CONFIG REQUIRED)
+find_package(fastgltf CONFIG REQUIRED FASTGLTF_DISABLE_CUSTOM_MEMORY_POOL FASTGLTF_COMPILE_AS_CPP20=YES)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glslang CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
-find_package(Ktx CONFIG REQUIRED)
 find_package(Taskflow CONFIG REQUIRED)
 find_package(Tracy CONFIG REQUIRED)
 find_package(Stb REQUIRED)
@@ -75,45 +72,47 @@ target_compile_definitions(${PROJECT_NAME}
 
 target_precompile_headers(${PROJECT_NAME}
    PRIVATE
+   <condition_variable>
+   <chrono>
    <entt/entt.hpp>
    <fastgltf/core.hpp>
    <fastgltf/glm_element_traits.hpp>
-   <fastgltf/util.hpp>
    <fastgltf/tools.hpp>
-   <fastgltf/glm_element_traits.hpp>
+   <fastgltf/types.hpp>
+   <fastgltf/util.hpp>
    <filesystem>
    <fstream>
    <functional>
+   <future>
    <glslang/SPIRV/GlslangToSpv.h>
-   <ktx.h>
    <limits>
    <map>
+   <mutex>
    <optional>
-   <future>
    <ranges>
    <set>
+   <sstream>
    <stb_image.h>
    <string>
    <string_view>
-   <sstream>
    <taskflow/taskflow.hpp>
    PUBLIC
    "include/util/Logger.hpp"
    <GLFW/glfw3.h>
-   <imgui_impl_glfw.h>
-   <imgui_impl_vulkan.h>
    <glm/gtc/matrix_transform.hpp>
    <glm/gtc/type_ptr.hpp>
    <glm/gtx/matrix_decompose.hpp>
    <glm/gtx/quaternion.hpp>
    <glm/gtx/string_cast.hpp>
    <imgui.h>
-   <vulkan-memory-allocator-hpp/vk_mem_alloc.hpp>
-   <vulkan/vulkan_raii.hpp>
+   <imgui_impl_glfw.h>
+   <imgui_impl_vulkan.h>
    <taskflow/taskflow.hpp>
    <tracy/Tracy.hpp>
    <tracy/TracyVulkan.hpp>
    <tracy/TracyC.h>
+   <vulkan-memory-allocator-hpp/vk_mem_alloc.hpp>
+   <vulkan/vulkan_raii.hpp>
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -126,7 +125,6 @@ target_link_libraries(${PROJECT_NAME}
    glslang::glslang-default-resource-limits
    glslang::SPIRV
    imgui::imgui
-   KTX::ktx
    spirv-cross-core
    spirv-cross-cpp
    Taskflow::Taskflow

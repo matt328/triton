@@ -1,6 +1,5 @@
 #include "Manager.hpp"
 #include "ctx/GameplayFacade.hpp"
-#include "ctx/ResourceLoader.hpp"
 #include "Properties.hpp"
 #include "ProjectFile.hpp"
 #include "RobotoRegular.h"
@@ -46,9 +45,17 @@ namespace ed::ui {
       for (auto it = modelFutures.begin(); it != modelFutures.end();) {
          auto status = it->wait_for(std::chrono::seconds(0));
          if (status == std::future_status::ready) {
-            ZoneNamedN(loadComplete, "Load Complete", true);
-            auto r = it->get();
-            Log::info << "result: " << r << std::endl;
+            ZoneNamedN(loadComplete, "Creating Mesh Entities", true);
+            try {
+               auto r = it->get();
+               for (auto it = r.begin(); it != r.end(); ++it) {
+                  const auto meshHandle = it->first;
+                  const auto textureHandle = it->second;
+                  facade.createStaticMeshEntity(meshHandle, textureHandle);
+               }
+            } catch (const std::exception& e) {
+               Log::error << "error loading model: " << e.what() << std::endl;
+            }
             it = modelFutures.erase(it);
          } else {
             ++it;
@@ -241,9 +248,24 @@ namespace ed::ui {
             }
             ImGui::SameLine();
             if (ImGui::Button("Test")) {
+
                auto filename = std::filesystem::path{
-                   R"(C:\Users\Matt\Projects\triton-assets\models\quarter_2.gltf)"};
-               modelFutures.push_back(this->facade.getResourceLoader().loadGltf(filename));
+                   R"(C:\Users\Matt\Projects\game-assets\models\Sponza\glTF\Sponza.gltf)"};
+
+               modelFutures.push_back(facade.loadModelAsync(filename));
+               // TODO: call renderer.loadTextureAsync here
+
+               // auto f = resourceQueue->enqueue(
+               //     [](const std::filesystem::path& filename) {
+               //        Log::info << "enqueued loading of " << filename << std::endl;
+               //        return 5;
+               //     },
+               //     filename);
+               // auto d = f.get();
+
+               // Log::info << "resourceQueue produced " << d << std::endl;
+
+               // modelFutures.push_back(this->facade.getResourceLoader().loadGltf(filename));
             }
 
             ImGui::EndGroup();
