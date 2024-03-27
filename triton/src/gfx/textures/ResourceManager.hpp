@@ -75,8 +75,6 @@ namespace tr::gfx::tx {
       std::vector<std::unique_ptr<Geometry::Mesh<Geometry::Vertex, uint32_t>>> meshList;
 
       MeshHandle createMesh(const tinygltf::Model&, const tinygltf::Primitive& primitive);
-      TextureHandle createTexture(const tinygltf::Model& model,
-                                  std::size_t textureIndex,
-                                  const std::filesystem::path& folder);
+      TextureHandle createTexture(const tinygltf::Model& model, std::size_t textureIndex);
    };
 }

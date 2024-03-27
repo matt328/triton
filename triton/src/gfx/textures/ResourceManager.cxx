@@ -42,60 +42,64 @@ namespace tr::gfx::tx {
       std::string err;
       std::string warn;
 
-      bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, filename.string());
-      if (!warn.empty()) {
-         // TODO: non-critical exceptions
-         throw std::runtime_error(warn);
-      }
+      {
+         ZoneNamedN(a, "Reading ASCII File", true);
+         bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, filename.string());
+         if (!warn.empty()) {
+            throw std::runtime_error(warn);
+         }
 
-      if (!err.empty()) {
-         throw std::runtime_error(err);
-      }
+         if (!err.empty()) {
+            throw std::runtime_error(err);
+         }
 
-      if (!ret) {
-         Log::error << "Failed to parse glTF file" << std::endl;
-         throw std::runtime_error("Failed to parse glTF file");
-      }
-
-      auto loadedTextureIndices = std::unordered_map<int, TextureHandle>{};
-
-      auto modelHandle = ModelHandle{};
-
-      const auto& scene = model.scenes[model.defaultScene];
-      for (const auto& nodeIndex : scene.nodes) {
-         const auto& node = model.nodes[nodeIndex];
-         const auto& mesh = model.meshes[node.mesh];
-         for (const auto& primitive : mesh.primitives) {
-            const auto meshHandle = createMesh(model, primitive);
-
-            auto textureHandle = TextureHandle{}; // TODO: init this to a debug texture handle
-
-            const auto materialIndex = primitive.material;
-            const auto& material = model.materials[materialIndex];
-
-            const auto& baseColorTextureIndex =
-                material.pbrMetallicRoughness.baseColorTexture.index;
-            const auto& baseColorTexture = model.textures[baseColorTextureIndex];
-
-            auto it = loadedTextureIndices.find(baseColorTextureIndex);
-            if (it != loadedTextureIndices.end()) {
-               textureHandle = it->second;
-            } else {
-               textureHandle = createTexture(model, baseColorTextureIndex, filename.parent_path());
-               loadedTextureIndices.insert({baseColorTextureIndex, textureHandle});
-            }
-
-            Log::info << "inserting mesh " << meshHandle << " and texture " << textureHandle
-                      << std::endl;
-            modelHandle.insert({meshHandle, textureHandle});
+         if (!ret) {
+            Log::error << "Failed to parse glTF file" << std::endl;
+            throw std::runtime_error("Failed to parse glTF file");
          }
       }
-      return modelHandle;
+      {
+         ZoneNamedN(b, "Parsing glTF", true);
+         auto loadedTextureIndices = std::unordered_map<int, TextureHandle>{};
+
+         auto modelHandle = ModelHandle{};
+
+         const auto& scene = model.scenes[model.defaultScene];
+         for (const auto& nodeIndex : scene.nodes) {
+            const auto& node = model.nodes[nodeIndex];
+            const auto& mesh = model.meshes[node.mesh];
+            for (const auto& primitive : mesh.primitives) {
+               const auto meshHandle = createMesh(model, primitive);
+
+               auto textureHandle = TextureHandle{}; // TODO: init this to a debug texture handle
+
+               const auto materialIndex = primitive.material;
+               const auto& material = model.materials[materialIndex];
+
+               const auto& baseColorTextureIndex =
+                   material.pbrMetallicRoughness.baseColorTexture.index;
+
+               auto it = loadedTextureIndices.find(baseColorTextureIndex);
+               if (it != loadedTextureIndices.end()) {
+                  textureHandle = it->second;
+               } else {
+                  textureHandle = createTexture(model, baseColorTextureIndex);
+                  loadedTextureIndices.insert({baseColorTextureIndex, textureHandle});
+               }
+
+               Log::info << "inserting mesh " << meshHandle << " and texture " << textureHandle
+                         << std::endl;
+               modelHandle.insert({meshHandle, textureHandle});
+            }
+         }
+         return modelHandle;
+      }
    }
 
    /// Brute force this for now, create a single Mesh per Primitive in the file
    MeshHandle ResourceManager::createMesh(const tinygltf::Model& model,
                                           const tinygltf::Primitive& primitive) {
+      ZoneNamedN(a, "createMesh", true);
       // Load Indices
       std::vector<uint32_t> indices;
       {
@@ -180,81 +184,17 @@ namespace tr::gfx::tx {
    }
 
    TextureHandle ResourceManager::createTexture(const tinygltf::Model& model,
-                                                std::size_t textureIndex,
-                                                const std::filesystem::path& folder) {
+                                                std::size_t textureIndex) {
+      ZoneNamedN(a, "createTexture", true);
       const auto& texture = model.textures[textureIndex];
-
-      if (!texture.imageIndex.has_value()) {
-         Log::info << "unsupported image type found for texture" << std::endl;
-         // Return default texture handle here
-         return 0;
-      }
-
-      const auto& image = asset.images[texture.imageIndex.value()];
-
-      unsigned char* data = nullptr;
-      int width{}, height{}, numChannels{};
-
-      const auto desiredChannels = STBI_rgb_alpha;
-
-      std::visit(fastgltf::visitor{
-                     []([[maybe_unused]] auto& arg) {},
-                     [&](fastgltf::sources::URI& filePath) {
-                        if (filePath.fileByteOffset != 0) {
-                           throw std::runtime_error(
-                               "Offset found in image. We don't do that here.");
-                        }
-                        if (!filePath.uri.isLocalPath()) {
-                           throw std::runtime_error("Nonlocal file. Einstien was wrong.");
-                        }
-                        const auto imagePath = folder / std::filesystem::path{filePath.uri.path()};
-                        data = stbi_load(imagePath.string().c_str(),
-                                         &width,
-                                         &height,
-                                         &numChannels,
-                                         STBI_rgb_alpha);
-                     },
-                     [&](const fastgltf::sources::Array& vector) {
-                        data = stbi_load_from_memory(vector.bytes.data(),
-                                                     static_cast<int>(vector.bytes.size()),
-                                                     &width,
-                                                     &height,
-                                                     &numChannels,
-                                                     STBI_rgb_alpha);
-                     },
-                     [&](fastgltf::sources::BufferView view) {
-                        auto& bufferView = asset.bufferViews[view.bufferViewIndex];
-                        auto& buffer = asset.buffers[bufferView.bufferIndex];
-                        std::visit(fastgltf::visitor{[]([[maybe_unused]] auto& arg) {},
-                                                     [&](fastgltf::sources::Vector vector) {
-                                                        data = stbi_load_from_memory(
-                                                            vector.bytes.data(),
-                                                            static_cast<int>(vector.bytes.size()),
-                                                            &width,
-                                                            &height,
-                                                            &numChannels,
-                                                            STBI_rgb_alpha);
-                                                     }},
-                                   buffer.data);
-                     }},
-                 image.data);
-      if (data == nullptr) {
-         Log::warn << "Couldn't find a texture in glft file" << std::endl;
-         // Skip loading and just return the handle of the default texture
-         data = new unsigned char[1];
-         data[0] = 255;
-         width = 1;
-         height = 1;
-         numChannels = 4;
-      }
-
+      const auto& image = model.images[texture.source];
       const auto pos = textureList.size();
 
       textureList.emplace_back(
-          std::make_unique<Textures::Texture>(data,
-                                              width,
-                                              height,
-                                              desiredChannels,
+          std::make_unique<Textures::Texture>((void*)image.image.data(),
+                                              image.width,
+                                              image.height,
+                                              image.component,
                                               graphicsDevice.getAllocator(),
                                               graphicsDevice.getVulkanDevice(),
                                               graphicsDevice.getAsyncTransferContext()));

@@ -61,8 +61,6 @@ namespace tr::gfx::Textures {
       memcpy(bufferData, data, textureSize);
       allocator.unmapMemory(*stagingBuffer);
 
-      stbi_image_free(data);
-
       // Setup buffer copy regions for each mip level
       std::vector<vk::BufferImageCopy> bufferCopyRegions;
 
