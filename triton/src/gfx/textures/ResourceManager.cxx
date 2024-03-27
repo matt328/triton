@@ -81,8 +81,7 @@ namespace tr::gfx::tx {
             if (it != loadedTextureIndices.end()) {
                textureHandle = it->second;
             } else {
-               textureHandle =
-                   3; // createTexture(model, baseColorTextureIndex, filename.parent_path());
+               textureHandle = createTexture(model, baseColorTextureIndex, filename.parent_path());
                loadedTextureIndices.insert({baseColorTextureIndex, textureHandle});
             }
 
@@ -141,28 +140,49 @@ namespace tr::gfx::tx {
       {
          for (const auto& attribute : primitive.attributes) {
             const auto& accessor = model.accessors[attribute.second];
+            const auto& vertexCount = accessor.count;
             const auto& view = model.bufferViews[accessor.bufferView];
+            const auto dataOffset = accessor.byteOffset + view.byteOffset;
+            const auto& buffer = model.buffers[view.buffer];
+
+            // NOLINTNEXTLINE
+            const auto& data = reinterpret_cast<const float*>(&buffer.data[dataOffset]);
+
+            vertices.resize(vertexCount);
+
             if (attribute.first.compare("POSITION") == 0) {
-               // NOLINTNEXTLINE
-               const auto& v = reinterpret_cast<const float*>(
-                   &model.buffers[view.buffer].data[accessor.byteOffset + view.byteOffset]);
-               const auto& vertexCount = accessor.count;
                for (size_t i = 0; i < vertexCount; i++) {
-                  Geometry::Vertex vert{};
-                  vert.pos = glm::vec4(glm::make_vec3(&v[i * 3]), 1.f);
-                  vertices.push_back(vert);
+                  vertices[i].pos = glm::vec4(glm::make_vec3(&data[i * 3]), 1.f);
+               }
+            }
+            if (attribute.first.compare("NORMAL") == 0) {
+               for (size_t i = 0; i < vertexCount; i++) {
+                  vertices[i].normal = glm::make_vec3(&data[i * 3]);
+               }
+            }
+            if (attribute.first.compare("TEXCOORD_0") == 0) {
+               for (size_t i = 0; i < vertexCount; i++) {
+                  vertices[i].uv = glm::make_vec2(&data[i * 2]);
                }
             }
          }
 
-         return static_cast<MeshHandle>(3);
+         const auto position = meshList.size();
+
+         meshList.emplace_back(std::make_unique<Geometry::Mesh<Geometry::Vertex, uint32_t>>(
+             graphicsDevice.getAllocator(),
+             vertices,
+             indices,
+             graphicsDevice.getAsyncTransferContext()));
+
+         return static_cast<MeshHandle>(position);
       }
    }
 
-   TextureHandle ResourceManager::createTexture(const fastgltf::Asset& asset,
+   TextureHandle ResourceManager::createTexture(const tinygltf::Model& model,
                                                 std::size_t textureIndex,
                                                 const std::filesystem::path& folder) {
-      const auto texture = asset.textures[textureIndex];
+      const auto& texture = model.textures[textureIndex];
 
       if (!texture.imageIndex.has_value()) {
          Log::info << "unsupported image type found for texture" << std::endl;
