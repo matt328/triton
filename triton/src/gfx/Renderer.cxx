@@ -510,7 +510,7 @@ namespace tr::gfx {
    // Buffer so we can leverage bindless design.
    MeshHandle Renderer::createMesh(const std::string_view& filename) {
       auto handle = meshes.size();
-      meshes.push_back(graphicsDevice->getMeshFactory().loadMeshFromGltf(filename.data()));
+      // meshes.push_back(graphicsDevice->getMeshFactory().loadMeshFromGltf(filename.data()));
       return handle;
    }
 

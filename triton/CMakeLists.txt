@@ -10,7 +10,6 @@ set(triton_SRC
    "src/gfx/VkContext.cxx"
    "src/gfx/Renderer.cxx"
    "src/gfx/vma_raii.cxx"
-   "src/gfx/geometry/MeshFactory.cxx"
    "src/gfx/geometry/Vertex.cxx"
    "src/gfx/gui/ImguiHelper.cxx"
    "src/gfx/helpers/SpirvHelper.cxx"
@@ -108,6 +107,7 @@ target_precompile_headers(${PROJECT_NAME}
    <imgui_impl_glfw.h>
    <imgui_impl_vulkan.h>
    <taskflow/taskflow.hpp>
+   <tiny_gltf.h>
    <tracy/Tracy.hpp>
    <tracy/TracyVulkan.hpp>
    <tracy/TracyC.h>

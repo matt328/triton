@@ -100,10 +100,6 @@ namespace tr::gfx {
          return *swapchain;
       }
 
-      [[nodiscard]] const Geometry::MeshFactory& getMeshFactory() const {
-         return *meshFactory;
-      }
-
       [[nodiscard]] const ImmediateContext& getTransferContext() const {
          return *transferImmediateContext;
       }
@@ -158,8 +154,6 @@ namespace tr::gfx {
       std::unique_ptr<vk::raii::Queue> presentQueue;
       std::shared_ptr<vk::raii::Queue> transferQueue;
       std::unique_ptr<vk::raii::Queue> computeQueue;
-
-      std::unique_ptr<Geometry::MeshFactory> meshFactory;
 
       std::unique_ptr<Allocator> raiillocator;
 

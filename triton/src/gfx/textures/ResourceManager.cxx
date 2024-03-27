@@ -81,7 +81,8 @@ namespace tr::gfx::tx {
             if (it != loadedTextureIndices.end()) {
                textureHandle = it->second;
             } else {
-               textureHandle = createTexture(model, baseColorTextureIndex, filename.parent_path());
+               textureHandle =
+                   3; // createTexture(model, baseColorTextureIndex, filename.parent_path());
                loadedTextureIndices.insert({baseColorTextureIndex, textureHandle});
             }
 
@@ -94,52 +95,56 @@ namespace tr::gfx::tx {
    }
 
    /// Brute force this for now, create a single Mesh per Primitive in the file
-   MeshHandle ResourceManager::createMesh(const fastgltf::Asset& asset,
-                                          const fastgltf::Primitive& primitive) {
+   MeshHandle ResourceManager::createMesh(const tinygltf::Model& model,
+                                          const tinygltf::Primitive& primitive) {
       // Load Indices
       std::vector<uint32_t> indices;
       {
-         const auto& indexAccessor = asset.accessors[primitive.indicesAccessor.value()];
-         indices.resize(indexAccessor.count);
-         fastgltf::copyFromAccessor<std::uint32_t>(asset, indexAccessor, indices.data());
+         const auto& accessor = model.accessors[primitive.indices];
+         const auto& bufferView = model.bufferViews[accessor.bufferView];
+         const auto& buffer = model.buffers[bufferView.buffer];
+
+         // glTF supports different component types of indices
+         switch (accessor.componentType) {
+            case TINYGLTF_PARAMETER_TYPE_UNSIGNED_INT: {
+               auto buf = reinterpret_cast<const uint32_t*>(
+                   &buffer.data[accessor.byteOffset + bufferView.byteOffset]);
+               for (size_t index = 0; index < accessor.count; index++) {
+                  indices.push_back(buf[index]);
+               }
+               break;
+            }
+            case TINYGLTF_PARAMETER_TYPE_UNSIGNED_SHORT: {
+               auto buf = reinterpret_cast<const uint16_t*>(
+                   &buffer.data[accessor.byteOffset + bufferView.byteOffset]);
+               for (size_t index = 0; index < accessor.count; index++) {
+                  indices.push_back(buf[index]);
+               }
+               break;
+            }
+            case TINYGLTF_PARAMETER_TYPE_UNSIGNED_BYTE: {
+               auto buf = reinterpret_cast<const uint8_t*>(
+                   &buffer.data[accessor.byteOffset + bufferView.byteOffset]);
+               for (size_t index = 0; index < accessor.count; index++) {
+                  indices.push_back(buf[index]);
+               }
+               break;
+            }
+            default:
+               std::stringstream err;
+               err << "Index component type " << accessor.componentType;
+               throw std::runtime_error(err.str());
+         }
       }
 
       std::vector<Geometry::Vertex> vertices;
       {
-         const auto& accessor = asset.accessors[primitive.findAttribute("POSITION")->second];
-         vertices.resize(accessor.count);
-         fastgltf::iterateAccessorWithIndex<glm::vec3>(asset,
-                                                       accessor,
-                                                       [&](glm::vec3 v, size_t index) {
-                                                          auto newVertex = Geometry::Vertex{};
-                                                          newVertex.pos = v;
-                                                          vertices[index] = newVertex;
-                                                       });
-
-         auto normals = primitive.findAttribute("NORMAL");
-         if (normals != primitive.attributes.end()) {
-            fastgltf::iterateAccessorWithIndex<glm::vec3>(
-                asset,
-                asset.accessors[(*normals).second],
-                [&](glm::vec3 v, size_t index) { vertices[index].normal = v; });
+         for (const auto& attribute : primitive.attributes) {
+            const auto& accessor = model.accessors[attribute.second];
          }
 
-         auto uv = primitive.findAttribute("TEXCOORD_0");
-         if (uv != primitive.attributes.end()) {
-            fastgltf::iterateAccessorWithIndex<glm::vec2>(
-                asset,
-                asset.accessors[(*uv).second],
-                [&](glm::vec2 v, size_t index) { vertices[index].uv = v; });
-         }
+         return static_cast<MeshHandle>(3);
       }
-      const auto pos = meshList.size();
-      meshList.push_back(std::make_unique<Geometry::Mesh<Geometry::Vertex, uint32_t>>(
-          graphicsDevice.getAllocator(),
-          vertices,
-          indices,
-          graphicsDevice.getAsyncTransferContext()));
-
-      return static_cast<MeshHandle>(pos);
    }
 
    TextureHandle ResourceManager::createTexture(const fastgltf::Asset& asset,

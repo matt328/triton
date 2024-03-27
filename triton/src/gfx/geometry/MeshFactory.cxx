@@ -1,7 +1,6 @@
 #include "MeshFactory.hpp"
 
 #define TINYGLTF_IMPLEMENTATION
-#define STB_IMAGE_IMPLEMENTATION
 #undef snprintf
 #include <tiny_gltf.h>
 

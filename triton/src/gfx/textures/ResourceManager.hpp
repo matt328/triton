@@ -5,6 +5,8 @@
 #include "gfx/geometry/Vertex.hpp"
 #include "gfx/textures/Texture.hpp"
 
+#include <tiny_gltf.h>
+
 namespace tr::gfx {
    class VkContext;
    class GraphicsDevice;
@@ -72,7 +74,7 @@ namespace tr::gfx::tx {
       std::vector<std::unique_ptr<Textures::Texture>> textureList;
       std::vector<std::unique_ptr<Geometry::Mesh<Geometry::Vertex, uint32_t>>> meshList;
 
-      MeshHandle createMesh(const fastgltf::Asset& asset, const fastgltf::Primitive& primitive);
+      MeshHandle createMesh(const tinygltf::Model&, const tinygltf::Primitive& primitive);
       TextureHandle createTexture(const fastgltf::Asset& asset,
                                   std::size_t textureIndex,
                                   const std::filesystem::path& folder);
