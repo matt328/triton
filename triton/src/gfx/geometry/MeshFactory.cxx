@@ -1,13 +1,12 @@
 #include "MeshFactory.hpp"
 
 #define TINYGLTF_IMPLEMENTATION
-#define STB_IMAGE_IMPLEMENTATION
 #undef snprintf
 #include <tiny_gltf.h>
 
 namespace tr::gfx::Geometry {
 
-   MeshFactory::MeshFactory(Allocator* allocator, ImmediateContext* transferContext)
+   MeshFactory::MeshFactory(const Allocator& allocator, const VkContext& transferContext)
        : allocator(allocator), transferContext(transferContext) {
    }
 

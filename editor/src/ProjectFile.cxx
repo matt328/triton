@@ -4,6 +4,7 @@
 #include "gp/ecs/component/Camera.hpp"
 #include "gp/ecs/component/Transform.hpp"
 #include <nlohmann/json_fwd.hpp>
+#include "gfx/Handles.hpp"
 
 namespace ed::io {
 
@@ -129,15 +130,21 @@ namespace ed::io {
          if (editorInfoComponent.has_value() &&
              editorInfoComponent.value().sourceMesh.has_value() &&
              editorInfoComponent.value().sourceTexture.has_value()) {
-            auto e =
-                facade.createStaticMeshEntity(editorInfoComponent.value().sourceMesh.value(),
-                                              editorInfoComponent.value().sourceTexture.value(),
-                                              editorInfoComponent.value().name);
-            if (transformComponent.has_value()) {
-               auto& newTransform = facade.getComponent<tr::gp::ecs::Transform>(e).value().get();
-               newTransform.position = transformComponent.value().position;
-               newTransform.position = transformComponent.value().rotation;
-            }
+
+            //
+
+            // const auto meshHandle =
+            //     static_cast<tr::gfx::MeshHandle>(editorInfoComponent.value().sourceMesh.value());
+
+            // auto map = std::unordered_map<tr::gfx::MeshHandle, tr::gfx::TextureHandle>{
+            //     {editorInfoComponent.value().sourceMesh.value(),
+            //      editorInfoComponent.value().sourceTexture.value()}};
+            // auto e = facade.createStaticMeshEntity(map);
+            // if (transformComponent.has_value()) {
+            //    auto& newTransform = facade.getComponent<tr::gp::ecs::Transform>(e).value().get();
+            //    newTransform.position = transformComponent.value().position;
+            //    newTransform.position = transformComponent.value().rotation;
+            // }
          }
       }
 
@@ -159,8 +166,8 @@ namespace ed::io {
    void parseCameraComponent(const nlohmann::basic_json<nlohmann::ordered_map>& componentJson,
                              std::optional<tr::gp::ecs::Camera>& cameraInfo) {
       float fov = componentJson["fov"];
-      float yaw = componentJson["yaw"];
-      float pitch = componentJson["pitch"];
+      [[maybe_unused]] float yaw = componentJson["yaw"];
+      [[maybe_unused]] float pitch = componentJson["pitch"];
       auto posJson = componentJson["position"];
 
       float x = posJson["x"];
@@ -173,7 +180,7 @@ namespace ed::io {
       uint32_t width = 1920;
       uint32_t height = 1080;
       float nearClip = 0.1f;
-      float farClip = 1000.f;
+      float farClip = 100000.f;
 
       cameraInfo.emplace(width, height, fov, nearClip, farClip, position);
    }

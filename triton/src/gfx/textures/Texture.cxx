@@ -1,17 +1,16 @@
 #include "Texture.hpp"
+#include "gfx/VkContext.hpp"
 
 namespace tr::gfx::Textures {
 
    Texture::Texture(const std::string_view& filename,
-                    const Allocator& raiillocator,
+                    const Allocator& allocator,
                     const vk::raii::Device& device,
-                    const ImmediateContext& graphicsContext,
-                    const ImmediateContext& transferContext)
-       : device(device) {
+                    const VkContext& transferContext)
+       : imageLayout{vk::ImageLayout::eShaderReadOnlyOptimal} {
       Log::debug << "Creating Texture from file: " << filename.data() << std::endl;
 
       int width = 0, height = 0, channels = 0;
-      const auto format = vk::Format::eR8G8B8A8Srgb;
 
       stbi_uc* pixels = stbi_load(filename.data(), &width, &height, &channels, STBI_rgb_alpha);
 
@@ -19,8 +18,30 @@ namespace tr::gfx::Textures {
          throw std::runtime_error("Failed to load texture");
       }
 
-      vk::DeviceSize textureSize = width * height * 4;
-      void* pixelPtr = pixels;
+      initialize(pixels, width, height, STBI_rgb_alpha, allocator, device, transferContext);
+   }
+
+   Texture::Texture(void* data,
+                    uint32_t width,
+                    uint32_t height,
+                    uint32_t channels,
+                    const Allocator& allocator,
+                    const vk::raii::Device& device,
+                    const VkContext& transferContext)
+       : imageLayout{vk::ImageLayout::eShaderReadOnlyOptimal} {
+      initialize(data, width, height, channels, allocator, device, transferContext);
+   }
+
+   void Texture::initialize(void* data,
+                            uint32_t width,
+                            uint32_t height,
+                            uint32_t channels,
+                            const Allocator& allocator,
+                            const vk::raii::Device& device,
+                            const VkContext& transferContext,
+                            const std::string_view& textureName) {
+
+      vk::DeviceSize textureSize = width * height * channels;
 
       // Create a Staging Buffer
       const auto bufferCreateInfo =
@@ -32,17 +53,13 @@ namespace tr::gfx::Textures {
                                     .requiredFlags = vk::MemoryPropertyFlagBits::eHostVisible |
                                                      vk::MemoryPropertyFlagBits::eHostCoherent};
 
-      const auto textureFilename = std::filesystem::path(filename).filename().string();
-      const auto textureName = "staging buffer - " + textureFilename;
       const auto stagingBuffer =
-          raiillocator.createBuffer(&bufferCreateInfo, &allocationCreateInfo, textureName);
+          allocator.createBuffer(&bufferCreateInfo, &allocationCreateInfo, textureName);
 
       // Copy the texture data into the staging buffer
-      const auto data = raiillocator.mapMemory(*stagingBuffer);
-      memcpy(data, pixelPtr, textureSize);
-      raiillocator.unmapMemory(*stagingBuffer);
-
-      stbi_image_free(pixels);
+      const auto bufferData = allocator.mapMemory(*stagingBuffer);
+      memcpy(bufferData, data, textureSize);
+      allocator.unmapMemory(*stagingBuffer);
 
       // Setup buffer copy regions for each mip level
       std::vector<vk::BufferImageCopy> bufferCopyRegions;
@@ -69,7 +86,7 @@ namespace tr::gfx::Textures {
                                                              .depth = 1}};
          bufferCopyRegions.push_back(bufferCopyRegion);
       }
-
+      const auto format = vk::Format::eR8G8B8A8Srgb;
       auto imageCreateInfo = vk::ImageCreateInfo{
           .imageType = vk::ImageType::e2D,
           .format = format,
@@ -90,38 +107,48 @@ namespace tr::gfx::Textures {
           vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eGpuOnly,
                                     .requiredFlags = vk::MemoryPropertyFlagBits::eDeviceLocal};
 
-      const auto imageName = "image - " + textureFilename;
-      image = raiillocator.createImage(imageCreateInfo, imageAllocateCreateInfo, imageName);
+      image = allocator.createImage(imageCreateInfo, imageAllocateCreateInfo, textureName);
 
       const auto subresourceRange =
           vk::ImageSubresourceRange{.aspectMask = vk::ImageAspectFlagBits::eColor,
                                     .baseMipLevel = 0,
                                     .levelCount = mipLevels,
                                     .layerCount = 1};
-      // TODO Change these utils so they can happen in one 'transaction' without flushing the
-      // command buffer after each one.  Immediate context could for allow for begin, then add
-      // function, then end maybe.
-      transitionImageLayout(graphicsContext,
-                            image->getImage(),
-                            vk::ImageLayout::eUndefined,
-                            vk::ImageLayout::eTransferDstOptimal,
-                            subresourceRange);
 
-      copyBufferToImage(transferContext,
-                        stagingBuffer->getBuffer(),
-                        image->getImage(),
-                        vk::ImageLayout::eTransferDstOptimal,
-                        bufferCopyRegions);
-
-      transitionImageLayout(
-          graphicsContext,
-          image->getImage(),
-          vk::ImageLayout::eTransferDstOptimal,
-          vk::ImageLayout::eShaderReadOnlyOptimal, // TODO: pass this in to the function, but
-                                                   // default it to this.
-          subresourceRange);
-
-      imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+      // Upload Image
+      transferContext.submit([this, &stagingBuffer, &bufferCopyRegions, &subresourceRange](
+                                 const vk::raii::CommandBuffer& cmd) {
+         {
+            const auto [dstBarrier, sourceStage, dstStage] =
+                createTransitionBarrier(image->getImage(),
+                                        vk::ImageLayout::eUndefined,
+                                        vk::ImageLayout::eTransferDstOptimal,
+                                        subresourceRange);
+            cmd.pipelineBarrier(sourceStage,
+                                dstStage,
+                                vk::DependencyFlagBits::eByRegion,
+                                {},
+                                {},
+                                dstBarrier);
+         }
+         cmd.copyBufferToImage(stagingBuffer->getBuffer(),
+                               image->getImage(),
+                               vk::ImageLayout::eTransferDstOptimal,
+                               bufferCopyRegions);
+         {
+            const auto [dstBarrier, sourceStage, dstStage] =
+                createTransitionBarrier(image->getImage(),
+                                        vk::ImageLayout::eTransferDstOptimal,
+                                        vk::ImageLayout::eShaderReadOnlyOptimal,
+                                        subresourceRange);
+            cmd.pipelineBarrier(sourceStage,
+                                dstStage,
+                                vk::DependencyFlagBits::eByRegion,
+                                {},
+                                {},
+                                dstBarrier);
+         }
+      });
 
       constexpr auto samplerInfo =
           vk::SamplerCreateInfo{.magFilter = vk::Filter::eLinear,
@@ -163,81 +190,40 @@ namespace tr::gfx::Textures {
       };
    }
 
-   void Texture::updateDescriptorSet(const vk::raii::DescriptorSet& descriptorSet) const {
-      const auto imageInfo = vk::DescriptorImageInfo{
-          .sampler = **sampler,
-          .imageView = **view,
-          .imageLayout = imageLayout,
-      };
-      const auto textureWrite = std::array{vk::WriteDescriptorSet{
-          .dstSet = *descriptorSet,
-          .dstBinding = 1,
-          .dstArrayElement = 0,
-          .descriptorCount = 1,
-          .descriptorType = vk::DescriptorType::eCombinedImageSampler,
-          .pImageInfo = &imageInfo,
-      }};
-      const auto writes = std::array{textureWrite};
-      device.updateDescriptorSets(writes, nullptr);
-   }
-
-   void Texture::transitionImageLayout(const ImmediateContext& context,
-                                       const vk::Image& image,
-                                       const vk::ImageLayout oldLayout,
-                                       const vk::ImageLayout newLayout,
-                                       const vk::ImageSubresourceRange subresourceRange) {
-      const auto transitionImageLayoutFn = [&](const vk::raii::CommandBuffer& cmd) {
-         vk::ImageMemoryBarrier barrier{
-             .srcAccessMask = vk::AccessFlagBits::eNone,
-             .dstAccessMask = vk::AccessFlagBits::eNone,
-             .oldLayout = oldLayout,
-             .newLayout = newLayout,
-             .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-             .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-             .image = image,
-             .subresourceRange = subresourceRange,
-         };
-
-         auto sourceStage = vk::PipelineStageFlagBits::eNone;
-         auto destinationStage = vk::PipelineStageFlagBits::eNone;
-
-         if (oldLayout == vk::ImageLayout::eUndefined &&
-             newLayout == vk::ImageLayout::eTransferDstOptimal) {
-            barrier.srcAccessMask = vk::AccessFlagBits::eNone;
-            barrier.dstAccessMask = vk::AccessFlagBits::eTransferWrite;
-            sourceStage = vk::PipelineStageFlagBits::eTopOfPipe;
-            destinationStage = vk::PipelineStageFlagBits::eTransfer;
-         } else if (oldLayout == vk::ImageLayout::eTransferDstOptimal &&
-                    newLayout == vk::ImageLayout::eShaderReadOnlyOptimal) {
-            barrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
-            barrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
-            sourceStage = vk::PipelineStageFlagBits::eTransfer;
-            destinationStage = vk::PipelineStageFlagBits::eFragmentShader;
-         } else {
-            throw std::invalid_argument("Unsupported layout transition");
-         }
-
-         cmd.pipelineBarrier(sourceStage,
-                             destinationStage,
-                             vk::DependencyFlagBits::eByRegion,
-                             {},
-                             {},
-                             barrier);
+   TransitionBarrierInfo Texture::createTransitionBarrier(
+       const vk::Image& image,
+       const vk::ImageLayout oldLayout,
+       const vk::ImageLayout newLayout,
+       const vk::ImageSubresourceRange subresourceRange) {
+      vk::ImageMemoryBarrier barrier{
+          .srcAccessMask = vk::AccessFlagBits::eNone,
+          .dstAccessMask = vk::AccessFlagBits::eNone,
+          .oldLayout = oldLayout,
+          .newLayout = newLayout,
+          .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+          .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+          .image = image,
+          .subresourceRange = subresourceRange,
       };
 
-      context.submit(transitionImageLayoutFn);
-   }
+      auto sourceStage = vk::PipelineStageFlagBits::eNone;
+      auto destinationStage = vk::PipelineStageFlagBits::eNone;
 
-   void Texture::copyBufferToImage(const ImmediateContext& context,
-                                   const vk::Buffer& buffer,
-                                   const vk::Image& image,
-                                   const vk::ImageLayout imageLayout,
-                                   const std::vector<vk::BufferImageCopy>& regions) {
-
-      const auto copyBufferToImageFn = [&](const vk::raii::CommandBuffer& cmd) {
-         cmd.copyBufferToImage(buffer, image, imageLayout, regions);
-      };
-
-      context.submit(copyBufferToImageFn);
+      if (oldLayout == vk::ImageLayout::eUndefined &&
+          newLayout == vk::ImageLayout::eTransferDstOptimal) {
+         barrier.srcAccessMask = vk::AccessFlagBits::eNone;
+         barrier.dstAccessMask = vk::AccessFlagBits::eTransferWrite;
+         sourceStage = vk::PipelineStageFlagBits::eTopOfPipe;
+         destinationStage = vk::PipelineStageFlagBits::eTransfer;
+      } else if (oldLayout == vk::ImageLayout::eTransferDstOptimal &&
+                 newLayout == vk::ImageLayout::eShaderReadOnlyOptimal) {
+         barrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
+         barrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
+         sourceStage = vk::PipelineStageFlagBits::eTransfer;
+         destinationStage = vk::PipelineStageFlagBits::eFragmentShader;
+      } else {
+         throw std::invalid_argument("Unsupported layout transition");
+      }
+      return {barrier, sourceStage, destinationStage};
    }
 }

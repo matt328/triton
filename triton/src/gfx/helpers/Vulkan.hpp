@@ -5,9 +5,13 @@ namespace tr::gfx::Helpers {
    // Structs
    struct QueueFamilyIndices {
       std::optional<uint32_t> graphicsFamily;
+      std::optional<uint32_t> graphicsFamilyCount;
       std::optional<uint32_t> presentFamily;
+      std::optional<uint32_t> presentFamilyCount;
       std::optional<uint32_t> transferFamily;
+      std::optional<uint32_t> transferFamilyCount;
       std::optional<uint32_t> computeFamily;
+      std::optional<uint32_t> computeFamilyCount;
 
       [[nodiscard]] bool isComplete() const {
          return graphicsFamily.has_value() && presentFamily.has_value() &&
@@ -71,18 +75,22 @@ namespace tr::gfx::Helpers {
       for (int i = 0; const auto& queueFamily : queueFamilies) {
          if (queueFamily.queueFlags & vk::QueueFlagBits::eGraphics) {
             queueFamilyIndices.graphicsFamily = i;
+            queueFamilyIndices.graphicsFamilyCount = queueFamily.queueCount;
          }
 
          if (possibleDevice.getSurfaceSupportKHR(i, *surface)) {
             queueFamilyIndices.presentFamily = i;
+            queueFamilyIndices.presentFamilyCount = queueFamily.queueCount;
          }
 
          if (queueFamily.queueFlags & vk::QueueFlagBits::eTransfer) {
             queueFamilyIndices.transferFamily = i;
+            queueFamilyIndices.transferFamilyCount = queueFamily.queueCount;
          }
 
          if ((queueFamily.queueFlags & vk::QueueFlagBits::eCompute)) {
             queueFamilyIndices.computeFamily = i;
+            queueFamilyIndices.computeFamilyCount = queueFamily.queueCount;
          }
 
          if (queueFamilyIndices.isComplete()) {

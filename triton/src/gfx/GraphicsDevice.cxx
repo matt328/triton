@@ -1,9 +1,9 @@
 #include "GraphicsDevice.hpp"
 #include "helpers/Vulkan.hpp"
 #include "ImmediateContext.hpp"
-#include "textures/TextureFactory.hpp"
 #include "geometry/MeshFactory.hpp"
 #include "vma_raii.hpp"
+#include "VkContext.hpp"
 
 namespace tr::gfx {
 
@@ -105,17 +105,17 @@ namespace tr::gfx {
                 << std::endl;
 
       // Select and identify queues Queues
-      auto [graphicsFamily, presentFamily, transferFamily, computeFamily] =
-          Helpers::findQueueFamilies(*physicalDevice, *surface);
+      auto queueFamilyIndices = Helpers::findQueueFamilies(*physicalDevice, *surface);
 
       std::vector<vk::DeviceQueueCreateInfo> queueCreateInfos;
-      std::set uniqueQueueFamilies = {graphicsFamily.value(), presentFamily.value()};
+      std::set uniqueQueueFamilies = {queueFamilyIndices.graphicsFamily.value(),
+                                      queueFamilyIndices.presentFamily.value()};
 
       float queuePriority = 1.f;
 
       for (auto queueFamily : uniqueQueueFamilies) {
          vk::DeviceQueueCreateInfo queueCreateInfo{.queueFamilyIndex = queueFamily,
-                                                   .queueCount = 1,
+                                                   .queueCount = 2,
                                                    .pQueuePriorities = &queuePriority};
          queueCreateInfos.push_back(queueCreateInfo);
       }
@@ -177,32 +177,32 @@ namespace tr::gfx {
 
       Log::trace << "Created Logical Device" << std::endl;
 
-      graphicsQueue =
-          std::make_unique<vk::raii::Queue>(vulkanDevice->getQueue(graphicsFamily.value(), 0));
+      graphicsQueue = std::make_unique<vk::raii::Queue>(
+          vulkanDevice->getQueue(queueFamilyIndices.graphicsFamily.value(), 0));
       Helpers::setObjectName(**graphicsQueue,
                              *vulkanDevice.get(),
                              (**graphicsQueue).debugReportObjectType,
                              "Graphics Queue");
       Log::trace << "Created Graphics Queue" << std::endl;
 
-      presentQueue =
-          std::make_unique<vk::raii::Queue>(vulkanDevice->getQueue(presentFamily.value(), 0));
+      presentQueue = std::make_unique<vk::raii::Queue>(
+          vulkanDevice->getQueue(queueFamilyIndices.presentFamily.value(), 0));
       Helpers::setObjectName(**presentQueue,
                              *vulkanDevice.get(),
                              (**presentQueue).debugReportObjectType,
                              "Present Queue");
       Log::trace << "Created Present Queue" << std::endl;
 
-      transferQueue =
-          std::make_shared<vk::raii::Queue>(vulkanDevice->getQueue(transferFamily.value(), 0));
+      transferQueue = std::make_shared<vk::raii::Queue>(
+          vulkanDevice->getQueue(queueFamilyIndices.transferFamily.value(), 0));
       Helpers::setObjectName(**transferQueue,
                              *vulkanDevice.get(),
                              (**transferQueue).debugReportObjectType,
                              "Transfer Queue");
       Log::trace << "Created Transfer Queue" << std::endl;
 
-      computeQueue =
-          std::make_unique<vk::raii::Queue>(vulkanDevice->getQueue(computeFamily.value(), 0));
+      computeQueue = std::make_unique<vk::raii::Queue>(
+          vulkanDevice->getQueue(queueFamilyIndices.computeFamily.value(), 0));
       Helpers::setObjectName(**computeQueue,
                              *vulkanDevice.get(),
                              (**computeQueue).debugReportObjectType,
@@ -211,17 +211,25 @@ namespace tr::gfx {
 
       createSwapchain();
 
-      transferImmediateContext = std::make_unique<ImmediateContext>(*vulkanDevice.get(),
-                                                                    *physicalDevice,
-                                                                    *transferQueue,
-                                                                    transferFamily.value(),
-                                                                    "Transfer Immediate Context");
+      asyncTransferContext = std::make_unique<VkContext>(*vulkanDevice.get(),
+                                                         *physicalDevice,
+                                                         1,
+                                                         queueFamilyIndices.transferFamily.value(),
+                                                         "Async Transfer Context");
 
-      graphicsImmediateContext = std::make_unique<ImmediateContext>(*vulkanDevice.get(),
-                                                                    *physicalDevice,
-                                                                    *graphicsQueue,
-                                                                    graphicsFamily.value(),
-                                                                    "Graphics Immediate Context");
+      transferImmediateContext =
+          std::make_unique<ImmediateContext>(*vulkanDevice.get(),
+                                             *physicalDevice,
+                                             *transferQueue,
+                                             queueFamilyIndices.transferFamily.value(),
+                                             "Transfer Immediate Context");
+
+      graphicsImmediateContext =
+          std::make_unique<ImmediateContext>(*vulkanDevice.get(),
+                                             *physicalDevice,
+                                             *graphicsQueue,
+                                             queueFamilyIndices.graphicsFamily.value(),
+                                             "Graphics Immediate Context");
 
       // Create Descriptor Pools
       const auto poolSize = std::array{
@@ -250,18 +258,6 @@ namespace tr::gfx {
                                                                 .instance = **instance};
 
       raiillocator = std::make_unique<Allocator>(allocatorCreateInfo);
-
-      // TODO: Maybe this doesn't own this, but it should produce it
-      // not sure what should own it yet.
-      // Whatever is going to own the resource handles should own the factories since
-      // the factories produce handles
-      textureFactory = std::make_unique<Textures::TextureFactory>(*raiillocator,
-                                                                  *vulkanDevice,
-                                                                  *graphicsImmediateContext,
-                                                                  *transferImmediateContext);
-
-      meshFactory = std::make_unique<Geometry::MeshFactory>(raiillocator.get(),
-                                                            transferImmediateContext.get());
    }
 
    GraphicsDevice::~GraphicsDevice() {
@@ -281,8 +277,7 @@ namespace tr::gfx {
          swapchainImageViews.clear();
       }
       // Create Swapchain
-      auto [graphicsFamily, presentFamily, transferFamily, computeFamily] =
-          Helpers::findQueueFamilies(*physicalDevice, *surface);
+      auto queueFamilyIndicesInfo = Helpers::findQueueFamilies(*physicalDevice, *surface);
 
       auto [capabilities, formats, presentModes] =
           Helpers::querySwapchainSupport(*physicalDevice, *surface);
@@ -317,9 +312,10 @@ namespace tr::gfx {
       }
 
       const auto queueFamilyIndices =
-          std::array<uint32_t, 2>{graphicsFamily.value(), presentFamily.value()};
+          std::array<uint32_t, 2>{queueFamilyIndicesInfo.graphicsFamily.value(),
+                                  queueFamilyIndicesInfo.presentFamily.value()};
 
-      if (graphicsFamily != presentFamily) {
+      if (queueFamilyIndicesInfo.graphicsFamily != queueFamilyIndicesInfo.presentFamily) {
          swapchainCreateInfo.imageSharingMode = vk::SharingMode::eConcurrent;
          swapchainCreateInfo.queueFamilyIndexCount = 2;
          swapchainCreateInfo.pQueueFamilyIndices = queueFamilyIndices.data();
@@ -361,9 +357,9 @@ namespace tr::gfx {
                 << std::endl;
 
       // Create Command Pools
-      auto commandPoolCreateInfo =
-          vk::CommandPoolCreateInfo{.flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
-                                    .queueFamilyIndex = graphicsFamily.value()};
+      auto commandPoolCreateInfo = vk::CommandPoolCreateInfo{
+          .flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
+          .queueFamilyIndex = queueFamilyIndicesInfo.graphicsFamily.value()};
 
       commandPool = std::make_unique<vk::raii::CommandPool>(
           vulkanDevice->createCommandPool(commandPoolCreateInfo));

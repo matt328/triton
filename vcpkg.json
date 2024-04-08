@@ -1,9 +1,10 @@
 {
    "name": "triton",
    "version-string": "0.1.0",
-   "builtin-baseline": "37c3e63a1306562f7f59c4c3c8892ddd50fdf992",
+   "builtin-baseline": "936588e23157b56507069ad664b020881c119e54",
    "dependencies": [
       "entt",
+      "fastgltf",
       "glfw3",
       "glm",
       "glslang",

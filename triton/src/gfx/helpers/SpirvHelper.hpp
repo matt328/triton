@@ -1,5 +1,7 @@
 #pragma once
 
+#include <glslang/Public/ShaderLang.h>
+
 namespace tr::gfx::Helpers {
 
    class SpirvHelper {

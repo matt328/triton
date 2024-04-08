@@ -34,7 +34,7 @@ namespace tr::gfx::Helpers {
       const auto textureBinding = vk::DescriptorSetLayoutBinding{
           .binding = 3,
           .descriptorType = vk::DescriptorType::eCombinedImageSampler,
-          .descriptorCount = 16,
+          .descriptorCount = 128,
           .stageFlags = vk::ShaderStageFlagBits::eAll,
           .pImmutableSamplers = nullptr};
 

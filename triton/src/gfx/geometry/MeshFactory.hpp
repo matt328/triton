@@ -13,7 +13,7 @@ namespace tr::gfx::Geometry {
 
    class MeshFactory {
     public:
-      MeshFactory(Allocator* allocator, ImmediateContext* transferContext);
+      MeshFactory(const Allocator& allocator, const VkContext& transferContext);
       ~MeshFactory() = default;
       MeshFactory(const MeshFactory&) = default;
       MeshFactory(MeshFactory&&) = delete;
@@ -24,7 +24,7 @@ namespace tr::gfx::Geometry {
           const std::string_view& filename) const;
 
     private:
-      Allocator* allocator;
-      ImmediateContext* transferContext;
+      const Allocator& allocator;
+      const VkContext& transferContext;
    };
 }

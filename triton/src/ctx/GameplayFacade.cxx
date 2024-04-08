@@ -18,21 +18,18 @@ namespace tr::ctx {
    GameplayFacade::~GameplayFacade() {
    }
 
-   gp::EntityType GameplayFacade::createStaticMeshEntity(std::string meshFile,
-                                                         std::string textureFile,
-                                                         std::optional<std::string> name) {
-      const auto meshId = renderer.createMesh(meshFile);
-      const auto textureId = renderer.createTexture(textureFile);
+   std::future<gfx::ModelHandle> GameplayFacade::loadModelAsync(const std::filesystem::path& path) {
+      return renderer.loadModelAsync(path.string());
+   }
 
+   gp::EntityType GameplayFacade::createStaticMultiMeshEntity(
+       const std::unordered_map<gfx::MeshHandle, gfx::TextureHandle> meshes) {
       auto e = gameplaySystem.registry->create();
-      gameplaySystem.registry->emplace<gp::ecs::Renderable>(e, meshId, textureId);
+      gameplaySystem.registry->emplace<gp::ecs::Renderable>(e, meshes);
       gameplaySystem.registry->emplace<gp::ecs::Transform>(e);
 
-      if (debugEnabled && name.has_value()) {
-         gameplaySystem.registry->emplace<EditorInfoComponent>(e,
-                                                               name.value(),
-                                                               meshFile,
-                                                               textureFile);
+      if (debugEnabled) {
+         gameplaySystem.registry->emplace<EditorInfoComponent>(e, "gltf model");
       }
 
       return e;

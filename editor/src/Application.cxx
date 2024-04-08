@@ -20,7 +20,7 @@ namespace ed {
    constexpr auto MinHeight = 300;
    constexpr auto MinWidth = 200;
    constexpr auto ZNear = 0.1f;
-   constexpr auto ZFar = 1000.f;
+   constexpr auto ZFar = 10000.f;
    constexpr auto Fov = 60.f;
    constexpr auto CamStart = glm::vec3{1.f, 1.f, 3.f};
 
