@@ -1,5 +1,6 @@
 #pragma once
 
+#include "gfx/Handles.hpp"
 #include "gp/GameplaySystem.hpp"
 #include "gp/ecs/component/Transform.hpp"
 #include "gp/ecs/component/Camera.hpp"
@@ -27,9 +28,8 @@ namespace tr::ctx {
       GameplayFacade& operator=(const GameplayFacade&) = delete;
       GameplayFacade& operator=(GameplayFacade&&) = delete;
 
-      gp::EntityType createStaticMeshEntity(std::string meshFile,
-                                            std::string textureFile,
-                                            std::optional<std::string> name = std::nullopt);
+      gp::EntityType createStaticMultiMeshEntity(
+          const std::unordered_map<gfx::MeshHandle, gfx::TextureHandle> meshes);
 
       gp::EntityType createCamera(uint32_t width,
                                   uint32_t height,
@@ -62,6 +62,8 @@ namespace tr::ctx {
       std::string& getActiveCameraName();
 
       void clear();
+
+      std::future<gfx::ModelHandle> loadModelAsync(const std::filesystem::path& path);
 
     private:
       bool debugEnabled{};

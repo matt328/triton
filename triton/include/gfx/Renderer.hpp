@@ -2,8 +2,10 @@
 
 #include "gfx/ObjectData.hpp"
 #include "gfx/GraphicsDevice.hpp"
+#include "util/TaskQueue.hpp"
 
 #include <entt/signal/fwd.hpp>
+#include <vulkan/vulkan_structs.hpp>
 
 namespace tr::gfx {
    struct RenderObject;
@@ -18,6 +20,10 @@ namespace tr::gfx {
    namespace Textures {
       class Texture;
       class TextureFactory;
+   }
+
+   namespace tx {
+      class ResourceManager;
    }
 
    namespace Geometry {
@@ -48,6 +54,8 @@ namespace tr::gfx {
 
       MeshHandle createMesh(const std::string_view& filename);
       uint32_t createTexture(const std::string_view& filename);
+
+      std::future<ModelHandle> loadModelAsync(const std::filesystem::path& filename);
 
       void enqueueRenderObject(RenderObject renderObject);
 
@@ -90,6 +98,17 @@ namespace tr::gfx {
 
       std::unique_ptr<Gui::ImGuiHelper> imguiHelper;
 
+      std::unique_ptr<util::TaskQueue> modelTaskQueue;
+
+      std::unique_ptr<tx::ResourceManager> resourceManager;
+
+      std::condition_variable_any descriptorSetUpdateCv{};
+      TracyLockable(std::mutex, descriptorSetUpdateMtx);
+
+      std::optional<std::vector<vk::DescriptorImageInfo>> imageInfoList;
+
+      boolean canUpdateDS = false;
+
       std::vector<RenderObject> renderObjects{};
       std::vector<ObjectData> objectDataList{};
       CameraData cameraData{glm::identity<glm::mat4>(),
@@ -108,5 +127,8 @@ namespace tr::gfx {
       void drawFrame();
       void recordCommandBuffer(FrameData& frameData, unsigned imageIndex) const;
       void drawImgui(const vk::raii::CommandBuffer& cmd, const vk::raii::ImageView& image) const;
+
+      ModelHandle loadModelInt(const std::filesystem::path& filename);
+      void checkDescriptorWrites();
    };
 }

@@ -1,19 +1,29 @@
 #pragma once
 
-#include "../ImmediateContext.hpp"
 #include "../vma_raii.hpp"
-#include <vulkan/vulkan_raii.hpp>
+#include "gfx/VkContext.hpp"
 #include <vulkan/vulkan_structs.hpp>
 
 namespace tr::gfx::Textures {
+
+   using TransitionBarrierInfo =
+       std::tuple<vk::ImageMemoryBarrier, vk::PipelineStageFlagBits, vk::PipelineStageFlagBits>;
 
    class Texture final {
     public:
       explicit Texture(const std::string_view& filename,
                        const Allocator& raiillocator,
                        const vk::raii::Device& device,
-                       const ImmediateContext& graphicsContext,
-                       const ImmediateContext& transferContext);
+                       const VkContext& transferContext);
+
+      explicit Texture(void* data,
+                       uint32_t width,
+                       uint32_t height,
+                       uint32_t channels,
+                       const Allocator& raiillocator,
+                       const vk::raii::Device& device,
+                       const VkContext& transferContext);
+
       ~Texture() = default;
 
       Texture(const Texture&) = delete;
@@ -21,32 +31,35 @@ namespace tr::gfx::Textures {
       Texture& operator=(const Texture&) = delete;
       Texture& operator=(Texture&&) = delete;
 
-      void updateDescriptorSet(const vk::raii::DescriptorSet& descriptorSet) const;
+      [[nodiscard]] const vk::DescriptorImageInfo getImageInfo() const {
+         return imageInfo;
+      }
 
-      const vk::DescriptorImageInfo* getImageInfo() {
-         return &imageInfo;
+      [[nodiscard]] vk::DescriptorImageInfo& getImageInfoRef() {
+         return imageInfo;
       }
 
     private:
-      const vk::raii::Device& device;
       std::unique_ptr<AllocatedImage> image;
       std::unique_ptr<vk::raii::ImageView> view;
+      std::unique_ptr<vk::raii::Sampler> sampler;
 
       vk::ImageLayout imageLayout;
-
-      std::unique_ptr<vk::raii::Sampler> sampler;
       vk::DescriptorImageInfo imageInfo;
 
-      static void transitionImageLayout(const ImmediateContext& context,
-                                        const vk::Image& image,
-                                        vk::ImageLayout oldLayout,
-                                        vk::ImageLayout newLayout,
-                                        vk::ImageSubresourceRange subresourceRange);
+      void initialize(void* data,
+                      uint32_t width,
+                      uint32_t height,
+                      uint32_t channels,
+                      const Allocator& raiillocator,
+                      const vk::raii::Device& device,
+                      const VkContext& transferContext,
+                      const std::string_view& textureName = "unnamed texture");
 
-      static void copyBufferToImage(const ImmediateContext& context,
-                                    const vk::Buffer& buffer,
-                                    const vk::Image& image,
-                                    vk::ImageLayout imageLayout,
-                                    const std::vector<vk::BufferImageCopy>& regions);
+      static TransitionBarrierInfo createTransitionBarrier(
+          const vk::Image& image,
+          const vk::ImageLayout oldLayout,
+          const vk::ImageLayout newLayout,
+          const vk::ImageSubresourceRange subresourceRange);
    };
 }
