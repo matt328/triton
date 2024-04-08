@@ -41,6 +41,22 @@ namespace ed::ui {
    }
 
    void Manager::render() {
+      ZoneNamedN(guiRender, "Gui Render", true);
+      for (auto it = modelFutures.begin(); it != modelFutures.end();) {
+         auto status = it->wait_for(std::chrono::seconds(0));
+         if (status == std::future_status::ready) {
+            ZoneNamedN(loadComplete, "Creating Mesh Entities", true);
+            try {
+               auto r = it->get();
+               facade.createStaticMultiMeshEntity(r);
+            } catch (const std::exception& e) {
+               Log::error << "error loading model: " << e.what() << std::endl;
+            }
+            it = modelFutures.erase(it);
+         } else {
+            ++it;
+         }
+      }
       renderDockSpace();
       renderMenuBar();
       renderEntityEditor();
@@ -227,7 +243,13 @@ namespace ed::ui {
                openProjectFileDialog.Open();
             }
             ImGui::SameLine();
-            if (ImGui::Button("Save")) {}
+            if (ImGui::Button("Test")) {
+
+               auto filename = std::filesystem::path{
+                   R"(C:\Users\Matt\Projects\game-assets\models\Sponza\glTF\Sponza.gltf)"};
+
+               modelFutures.push_back(facade.loadModelAsync(filename));
+            }
 
             ImGui::EndGroup();
          }

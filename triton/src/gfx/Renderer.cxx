@@ -9,11 +9,12 @@
 #include "helpers/Rendering.hpp"
 
 #include "textures/Texture.hpp"
-#include "textures/TextureFactory.hpp"
 
-#include "geometry/MeshFactory.hpp"
 #include "helpers/SpirvHelper.hpp"
 #include "util/Paths.hpp"
+#include "util/TaskQueue.hpp"
+#include "gfx/textures/ResourceManager.hpp"
+#include "gfx/VkContext.hpp"
 
 namespace tr::gfx {
 
@@ -72,6 +73,10 @@ namespace tr::gfx {
       if (guiEnabled) {
          imguiHelper = std::make_unique<Gui::ImGuiHelper>(*graphicsDevice, window);
       }
+
+      modelTaskQueue = std::make_unique<util::TaskQueue>();
+
+      resourceManager = std::make_unique<tx::ResourceManager>(*graphicsDevice);
    }
 
    Renderer::~Renderer() {
@@ -155,10 +160,88 @@ namespace tr::gfx {
       createSwapchainResources();
    }
 
+   std::future<ModelHandle> Renderer::loadModelAsync(const std::filesystem::path& filename) {
+      return modelTaskQueue->enqueue([this, filename]() { return loadModelInt(filename); });
+   }
+
+   ModelHandle Renderer::loadModelInt(const std::filesystem::path& filename) {
+      ZoneNamedN(a, "Load Model Internal", true);
+
+      auto modelHandles = ModelHandle{};
+
+      {
+         ZoneNamedN(b, "Loading glTF File", true);
+         modelHandles = resourceManager->loadModel(filename);
+      }
+
+      {
+         ZoneNamedN(c, "Preparing DS Write Info", true);
+         std::unique_lock<LockableBase(std::mutex)> lock(descriptorSetUpdateMtx);
+         LockMark(descriptorSetUpdateMtx);
+
+         const auto& textures = resourceManager->getAllTextures();
+
+         // Create DescriptorSetWrite for texture buffer
+         imageInfoList.emplace(std::vector<vk::DescriptorImageInfo>{});
+         imageInfoList.value().reserve(textures.size());
+         for (const auto& texture : textures) {
+            imageInfoList.value().push_back(texture->getImageInfo());
+         }
+      }
+
+      {
+         ZoneNamedN(d, "waiting for writes to be processed", true);
+         // wait for the cv to be notified and for descriptorWriteInfo to have been emptied
+         std::unique_lock<LockableBase(std::mutex)> lock(descriptorSetUpdateMtx);
+         LockMark(descriptorSetUpdateMtx);
+         TracyMessageL("loading thread waiting");
+         descriptorSetUpdateCv.wait(lock, [this] { return !imageInfoList.has_value(); });
+      }
+
+      return modelHandles;
+   }
+
+   void Renderer::checkDescriptorWrites() {
+      TracyMessageL("trying to lock");
+      std::unique_lock<LockableBase(std::mutex)> lock(descriptorSetUpdateMtx, std::try_to_lock);
+
+      if (lock.owns_lock()) {
+         LockMark(descriptorSetUpdateMtx);
+         TracyMessageL("acquired a lock on the mutex");
+         if (imageInfoList.has_value()) { // go time
+            TracyMessageL("updating descriptor set");
+
+            // Just do a dirty and write this to all frames in flight at once.
+            // TODO: fix up frames in flight
+            {
+               ZoneNamedN(updateds, "Update DS", true);
+               for (auto i = 0; i < FRAMES_IN_FLIGHT; i++) {
+                  const auto& currentFrameData = frameData[i];
+
+                  const auto write = vk::WriteDescriptorSet{
+                      .dstSet = *currentFrameData->getBindlessDescriptorSet(),
+                      .dstBinding = 3,
+                      .dstArrayElement = 0,
+                      .descriptorCount = static_cast<uint32_t>(imageInfoList.value().size()),
+                      .descriptorType = vk::DescriptorType::eCombinedImageSampler,
+                      .pImageInfo = imageInfoList.value().data()};
+
+                  graphicsDevice->getVulkanDevice().updateDescriptorSets(write, nullptr);
+               }
+            }
+            imageInfoList = std::nullopt;
+            TracyMessageL("releasing mutex lock after updating");
+            lock.unlock();
+            descriptorSetUpdateCv.notify_one();
+         }
+      } else {
+         TracyMessageL("Couldn't lock");
+      } // else if we can't lock it this frame, forget about it we'll try again in 16ms.
+   }
+
    void Renderer::drawFrame() {
       ZoneNamedN(render, "Render", true);
       const auto& currentFrameData = frameData[currentFrame];
-
       // Wait for this frame's fence so we can be sure the gpu is finished with this frame's command
       // buffer.  Which it should be since it was submitted a frame or two ago.
       {
@@ -171,6 +254,8 @@ namespace tr::gfx {
             throw std::runtime_error("Error waiting for fences");
          }
       }
+
+      checkDescriptorWrites();
 
       // Ask the swapchain to move to the next image. This call is async, and will signal the given
       // semaphore when it's completed.
@@ -189,26 +274,27 @@ namespace tr::gfx {
       }
 
       // Check for, and add any new textures into the bindless texture descriptor
-      {
-         // TODO: Move this into another thread eventually
-         ZoneNamedN(updateTextures, "Update Textures", true);
-         if (!currentFrameData->getTexturesToBind().empty()) {
-            auto writes = std::vector<vk::WriteDescriptorSet>{};
-            writes.reserve(currentFrameData->getTexturesToBind().size());
-            for (const auto t : currentFrameData->getTexturesToBind()) {
-               const auto& texture = textureList[t];
-               writes.push_back(vk::WriteDescriptorSet{
-                   .dstSet = *currentFrameData->getBindlessDescriptorSet(),
-                   .dstBinding = 3,
-                   .dstArrayElement = t,
-                   .descriptorCount = 1,
-                   .descriptorType = vk::DescriptorType::eCombinedImageSampler,
-                   .pImageInfo = texture->getImageInfo()});
-            }
-            graphicsDevice->getVulkanDevice().updateDescriptorSets(writes, nullptr);
-            currentFrameData->getTexturesToBind().clear();
-         }
-      }
+      // {
+      //    // TODO: Move this into another thread eventually
+      //    ZoneNamedN(updateTextures, "Update Textures", true);
+      //    if (!currentFrameData->getTexturesToBind().empty()) {
+      //       auto writes = std::vector<vk::WriteDescriptorSet>{};
+      //       writes.reserve(currentFrameData->getTexturesToBind().size());
+
+      //       for (const auto t : currentFrameData->getTexturesToBind()) {
+      //          const auto& texture = textureList[t];
+      //          writes.push_back(vk::WriteDescriptorSet{
+      //              .dstSet = *currentFrameData->getBindlessDescriptorSet(),
+      //              .dstBinding = 3,
+      //              .dstArrayElement = t,
+      //              .descriptorCount = 1,
+      //              .descriptorType = vk::DescriptorType::eCombinedImageSampler,
+      //              .pImageInfo = texture->getImageInfo()});
+      //       }
+      //       graphicsDevice->getVulkanDevice().updateDescriptorSets(writes, nullptr);
+      //       currentFrameData->getTexturesToBind().clear();
+      //    }
+      // }
 
       // Update the once-per-frame data.
       {
@@ -322,7 +408,8 @@ namespace tr::gfx {
             // TODO: move the vertices and indices into a single giant buffer.
             // Then switch this call from drawIndexed to draw*Indirect
             for (uint32_t i = 0; const auto& renderObject : renderObjects) {
-               const auto& mesh = meshes.at(renderObject.meshId);
+
+               const auto& mesh = resourceManager->getMesh(renderObject.meshId);
 
                cmd.bindVertexBuffers(0, mesh->getVertexBuffer().getBuffer(), {0});
                cmd.bindIndexBuffer(mesh->getIndexBuffer().getBuffer(), 0, vk::IndexType::eUint32);
@@ -418,13 +505,18 @@ namespace tr::gfx {
    // Buffer so we can leverage bindless design.
    MeshHandle Renderer::createMesh(const std::string_view& filename) {
       auto handle = meshes.size();
-      meshes.push_back(graphicsDevice->getMeshFactory().loadMeshFromGltf(filename.data()));
+      // meshes.push_back(graphicsDevice->getMeshFactory().loadMeshFromGltf(filename.data()));
       return handle;
    }
 
    TextureHandle Renderer::createTexture(const std::string_view& filename) {
       auto handle = textureList.size();
-      textureList.push_back(graphicsDevice->getTextureFactory().createTexture2D(filename));
+
+      textureList.push_back(
+          std::make_unique<Textures::Texture>(filename,
+                                              graphicsDevice->getAllocator(),
+                                              graphicsDevice->getVulkanDevice(),
+                                              graphicsDevice->getAsyncTransferContext()));
       // I think we need to bind the texture once in each framedata
       for (auto& f : frameData) {
          f->getTexturesToBind().push_back(handle);

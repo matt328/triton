@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Application.hpp"
+#include "gfx/Handles.hpp"
 #include <entt/entt.hpp>
 
 namespace ed {
@@ -9,6 +10,10 @@ namespace ed {
 
 namespace tr::ctx {
    class GameplayFacade;
+}
+
+namespace tr::util {
+   class TaskQueue;
 }
 
 namespace ed::ui {
@@ -35,6 +40,7 @@ namespace ed::ui {
 
     private:
       tr::ctx::GameplayFacade& facade;
+      std::vector<std::future<tr::gfx::ModelHandle>> modelFutures{};
 
       // HACK: get this from the application somehow instead of tracking it in 2 places
       bool fullscreen{};

@@ -12,6 +12,7 @@
          "problemMatcher": [],
          "detail": "CMake template build task",
          "presentation": {
+            "clear": true,
             "echo": true,
             "reveal": "always",
             "focus": false,

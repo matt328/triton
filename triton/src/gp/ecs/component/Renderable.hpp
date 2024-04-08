@@ -4,7 +4,6 @@
 
 namespace tr::gp::ecs {
    struct Renderable {
-      gfx::MeshHandle meshId;
-      gfx::TextureHandle textureId;
+      std::unordered_map<gfx::MeshHandle, gfx::TextureHandle> meshes;
    };
 }

@@ -35,9 +35,10 @@ namespace tr::gp::ecs::RenderSystem {
 
          auto transformMatrix = translationMatrix * rotationMatrix;
 
-         auto renderObject =
-             gfx::RenderObject{renderable.meshId, renderable.textureId, transformMatrix};
-         renderObjectProducer(std::move(renderObject));
+         for (auto it = renderable.meshes.begin(); it != renderable.meshes.end(); ++it) {
+            auto renderObject = gfx::RenderObject{it->first, it->second, transformMatrix};
+            renderObjectProducer(std::move(renderObject));
+         }
       }
    }
 }

@@ -10,6 +10,7 @@ struct GLFWwindow;
 namespace tr::gfx {
 
    class ImmediateContext;
+   class VkContext;
    class Allocator;
 
    namespace Textures {
@@ -99,16 +100,12 @@ namespace tr::gfx {
          return *swapchain;
       }
 
-      [[nodiscard]] const Geometry::MeshFactory& getMeshFactory() const {
-         return *meshFactory;
-      }
-
-      [[nodiscard]] const Textures::TextureFactory& getTextureFactory() const {
-         return *textureFactory;
-      }
-
       [[nodiscard]] const ImmediateContext& getTransferContext() const {
          return *transferImmediateContext;
+      }
+
+      [[nodiscard]] const VkContext& getAsyncTransferContext() const {
+         return *asyncTransferContext;
       }
 
       [[nodiscard]] const std::pair<uint32_t, uint32_t> getCurrentSize() const;
@@ -148,6 +145,7 @@ namespace tr::gfx {
       std::unique_ptr<vk::raii::DescriptorPool> descriptorPool;
       std::unique_ptr<ImmediateContext> transferImmediateContext;
       std::unique_ptr<ImmediateContext> graphicsImmediateContext;
+      std::unique_ptr<VkContext> asyncTransferContext;
 
       std::unique_ptr<vk::raii::DebugUtilsMessengerEXT> debugCallback;
       std::unique_ptr<vk::raii::DebugReportCallbackEXT> reportCallback;
@@ -156,9 +154,6 @@ namespace tr::gfx {
       std::unique_ptr<vk::raii::Queue> presentQueue;
       std::shared_ptr<vk::raii::Queue> transferQueue;
       std::unique_ptr<vk::raii::Queue> computeQueue;
-
-      std::unique_ptr<Textures::TextureFactory> textureFactory;
-      std::unique_ptr<Geometry::MeshFactory> meshFactory;
 
       std::unique_ptr<Allocator> raiillocator;
 
