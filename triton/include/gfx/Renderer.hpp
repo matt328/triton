@@ -104,7 +104,7 @@ namespace tr::gfx {
 
       std::optional<std::vector<vk::DescriptorImageInfo>> imageInfoList;
 
-      boolean canUpdateDS = false;
+      bool canUpdateDS = false;
 
       std::vector<RenderObject> renderObjects{};
       std::vector<ObjectData> objectDataList{};
