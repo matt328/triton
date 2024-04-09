@@ -1,8 +1,6 @@
 #include "Pipeline.hpp"
 #include "helpers/SpirvHelper.hpp"
 #include "GraphicsDevice.hpp"
-#include <vulkan/vulkan.hpp>
-#include <vulkan/vulkan_enums.hpp>
 
 namespace tr::gfx {
    Pipeline::Pipeline(const GraphicsDevice& graphicsDevice,
