@@ -407,6 +407,15 @@ namespace tr::gfx {
             // the object.
             // TODO: move the vertices and indices into a single giant buffer.
             // Then switch this call from drawIndexed to draw*Indirect
+
+            /*
+            cmd.setScissor();
+            cmd.setViewport();
+            Set these both here since so far all pipelines will just draw to the
+            entire screen area.  Also we shouldn't need to recreate the pipeline on resize.
+            We could put the viewport struct in the Pipeline object though and that class can set
+            the viewport and scissor in its bind method
+            */
             for (uint32_t i = 0; const auto& renderObject : renderObjects) {
 
                const auto& mesh = resourceManager->getMesh(renderObject.meshId);
