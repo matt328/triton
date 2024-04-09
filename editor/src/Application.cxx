@@ -58,36 +58,36 @@ namespace ed {
       glfwSetWindowIcon(window.get(), 1, &icon);
 
 #ifdef _WIN32
-      auto hWnd = glfwGetWin32Window(window.get());
-      // Paints the background of the window black
-      PAINTSTRUCT ps;
-      RECT rc;
-      HDC hdc = BeginPaint(hWnd, &ps);
-      GetClientRect(hWnd, &rc);
-      SetBkColor(hdc, RGB(0, 0, 0));
-      ExtTextOut(hdc, 0, 0, ETO_OPAQUE, &rc, nullptr, 0, nullptr);
-      EndPaint(hWnd, &ps);
-      BOOL value = TRUE;
-      ::DwmSetWindowAttribute(hWnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &value, sizeof(value));
-      RECT rcClient{};
-      GetWindowRect(hWnd, &rcClient);
-      // I feel like trash for this but i can't figure out how to make it repaint enough of the
-      // window to actually update it and glfw doesn't want to support dark mode yet.
-      // TODO: roll my own cross platform windowing library.
-      SetWindowPos(hWnd,
-                   nullptr,
-                   rcClient.left,
-                   rcClient.top,
-                   rcClient.right - rcClient.left - 1,
-                   rcClient.bottom - rcClient.top - 1,
-                   SWP_FRAMECHANGED);
-      SetWindowPos(hWnd,
-                   nullptr,
-                   rcClient.left,
-                   rcClient.top,
-                   rcClient.right - rcClient.left,
-                   rcClient.bottom - rcClient.top,
-                   SWP_FRAMECHANGED);
+      // auto hWnd = glfwGetWin32Window(window.get());
+      // // Paints the background of the window black
+      // PAINTSTRUCT ps;
+      // RECT rc;
+      // HDC hdc = BeginPaint(hWnd, &ps);
+      // GetClientRect(hWnd, &rc);
+      // SetBkColor(hdc, RGB(0, 0, 0));
+      // ExtTextOut(hdc, 0, 0, ETO_OPAQUE, &rc, nullptr, 0, nullptr);
+      // EndPaint(hWnd, &ps);
+      // BOOL value = TRUE;
+      // ::DwmSetWindowAttribute(hWnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &value, sizeof(value));
+      // RECT rcClient{};
+      // GetWindowRect(hWnd, &rcClient);
+      // // I feel like trash for this but i can't figure out how to make it repaint enough of the
+      // // window to actually update it and glfw doesn't want to support dark mode yet.
+      // // TODO: roll my own cross platform windowing library.
+      // SetWindowPos(hWnd,
+      //              nullptr,
+      //              rcClient.left,
+      //              rcClient.top,
+      //              rcClient.right - rcClient.left - 1,
+      //              rcClient.bottom - rcClient.top - 1,
+      //              SWP_FRAMECHANGED);
+      // SetWindowPos(hWnd,
+      //              nullptr,
+      //              rcClient.left,
+      //              rcClient.top,
+      //              rcClient.right - rcClient.left,
+      //              rcClient.bottom - rcClient.top,
+      //              SWP_FRAMECHANGED);
 #endif
 
       glfwSetWindowSizeLimits(window.get(), MinHeight, MinWidth, GLFW_DONT_CARE, GLFW_DONT_CARE);
