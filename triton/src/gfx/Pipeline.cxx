@@ -12,7 +12,10 @@ namespace tr::gfx {
                       const std::filesystem::path& vertexShaderName,
                       const std::filesystem::path& fragmentShaderName) {
 
-      const auto viewportSize = graphicsDevice.DrawImageExtent2D;
+      const auto viewportSize = graphicsDevice.getSwapchainExtent();
+
+      Log::info << "Creating Pipeline: " << viewportSize.width << ", " << viewportSize.height
+                << std::endl;
 
       viewport = vk::Viewport{.x = 0.f,
                               .y = 0.f,
@@ -109,18 +112,12 @@ namespace tr::gfx {
       vk::PipelineDynamicStateCreateInfo dsci{.dynamicStateCount = dynamicStates.size(),
                                               .pDynamicStates = dynamicStates.data()};
 
-      auto viewportInfo = vk::PipelineViewportStateCreateInfo{
-          .pViewports = nullptr,
-          .pScissors = nullptr,
-      };
-
       auto pipelineCreateInfo =
           vk::GraphicsPipelineCreateInfo{.pNext = &renderingCreateInfo,
                                          .stageCount = static_cast<uint32_t>(shaderStages.size()),
                                          .pStages = shaderStages.data(),
                                          .pVertexInputState = &vertexInputStateCreateInfo,
                                          .pInputAssemblyState = &inputAssembly,
-                                         .pViewportState = &viewportInfo,
                                          .pRasterizationState = &rasterizer,
                                          .pMultisampleState = &multisampling,
                                          .pDepthStencilState = &depthStencil,

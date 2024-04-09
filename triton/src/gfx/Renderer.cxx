@@ -140,17 +140,7 @@ namespace tr::gfx {
    }
 
    void Renderer::recreateSwapchain() {
-      const auto size = graphicsDevice->getCurrentSize();
-
-      if (size.first == 0 || size.second == 0) {
-         return;
-      }
-
-      mainPipeline->resize({size.first, size.second});
-
       waitIdle();
-      resizeDelegate(graphicsDevice->getCurrentSize());
-
       for (const auto& fd : frameData) {
          fd->destroySwapchainResources();
       }
@@ -158,6 +148,16 @@ namespace tr::gfx {
       destroySwapchainResources();
 
       graphicsDevice->recreateSwapchain();
+
+      const auto size = graphicsDevice->DrawImageExtent2D;
+
+      if (size.width == 0 || size.height == 0) {
+         return;
+      }
+
+      mainPipeline->resize({size.width, size.height});
+
+      resizeDelegate(graphicsDevice->getCurrentSize());
 
       for (const auto& fd : frameData) {
          fd->createSwapchainResources(*graphicsDevice);
@@ -278,29 +278,6 @@ namespace tr::gfx {
          recreateSwapchain();
          return;
       }
-
-      // Check for, and add any new textures into the bindless texture descriptor
-      // {
-      //    // TODO: Move this into another thread eventually
-      //    ZoneNamedN(updateTextures, "Update Textures", true);
-      //    if (!currentFrameData->getTexturesToBind().empty()) {
-      //       auto writes = std::vector<vk::WriteDescriptorSet>{};
-      //       writes.reserve(currentFrameData->getTexturesToBind().size());
-
-      //       for (const auto t : currentFrameData->getTexturesToBind()) {
-      //          const auto& texture = textureList[t];
-      //          writes.push_back(vk::WriteDescriptorSet{
-      //              .dstSet = *currentFrameData->getBindlessDescriptorSet(),
-      //              .dstBinding = 3,
-      //              .dstArrayElement = t,
-      //              .descriptorCount = 1,
-      //              .descriptorType = vk::DescriptorType::eCombinedImageSampler,
-      //              .pImageInfo = texture->getImageInfo()});
-      //       }
-      //       graphicsDevice->getVulkanDevice().updateDescriptorSets(writes, nullptr);
-      //       currentFrameData->getTexturesToBind().clear();
-      //    }
-      // }
 
       // Update the once-per-frame data.
       {
