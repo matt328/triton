@@ -15,6 +15,8 @@
 #include "util/TaskQueue.hpp"
 #include "gfx/textures/ResourceManager.hpp"
 #include "gfx/VkContext.hpp"
+#include "gfx/Pipeline.hpp"
+#include <vulkan/vulkan_structs.hpp>
 
 namespace tr::gfx {
 
@@ -39,34 +41,44 @@ namespace tr::gfx {
                                                          name.str()));
       }
 
-      auto helper = std::make_unique<Helpers::SpirvHelper>();
+      // Create Main Pipeline Object
+      {
+         const auto setLayouts = std::array{**bindlessDescriptorSetLayout,
+                                            **objectDescriptorSetLayout,
+                                            **perFrameDescriptorSetLayout};
 
-      const auto vertexFilename = (util::Paths::SHADERS / "shader.vert").string();
-      const auto fragmentFilename = (util::Paths::SHADERS / "shader.frag").string();
+         vk::PipelineLayoutCreateInfo pipelineLayoutCreateInfo{.setLayoutCount = setLayouts.size(),
+                                                               .pSetLayouts = setLayouts.data()};
 
-      auto vertexShaderCode = Helpers::readShaderFile(vertexFilename);
-      auto fragmentShaderCode = Helpers::readShaderFile(fragmentFilename);
+         // Configure Vertex Attributes
+         const auto bindingDescription = Geometry::Vertex::inputBindingDescription(0);
+         const auto attributeDescriptions =
+             Geometry::Vertex::inputAttributeDescriptions(0,
+                                                          {Geometry::VertexComponent::Position,
+                                                           Geometry::VertexComponent::Color,
+                                                           Geometry::VertexComponent::UV});
 
-      const auto vertexSpirv =
-          helper->compileShader(vk::ShaderStageFlagBits::eVertex, vertexShaderCode.data());
-      Log::debug << "Compiled shader " << vertexFilename << std::endl;
+         const auto vertexInputStateCreateInfo = vk::PipelineVertexInputStateCreateInfo{
+             .vertexBindingDescriptionCount = 1,
+             .pVertexBindingDescriptions = &bindingDescription,
+             .vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size()),
+             .pVertexAttributeDescriptions = attributeDescriptions.data()};
 
-      const auto fragmentSpirv =
-          helper->compileShader(vk::ShaderStageFlagBits::eFragment, fragmentShaderCode.data());
-      Log::debug << "Compiled shader " << fragmentFilename << std::endl;
+         const auto colorFormat = vk::Format::eR16G16B16A16Sfloat;
+         const auto depthFormat = Helpers::findDepthFormat(graphicsDevice->getPhysicalDevice());
 
-      auto vertexShaderCreateInfo = vk::ShaderModuleCreateInfo{.codeSize = 4 * vertexSpirv.size(),
-                                                               .pCode = vertexSpirv.data()};
+         const auto renderingCreateInfo =
+             vk::PipelineRenderingCreateInfo{.colorAttachmentCount = 1,
+                                             .pColorAttachmentFormats = &colorFormat,
+                                             .depthAttachmentFormat = depthFormat};
 
-      vertexShaderModule = std::make_unique<vk::raii::ShaderModule>(
-          graphicsDevice->getVulkanDevice().createShaderModule(vertexShaderCreateInfo));
-
-      auto fragmentShaderCreateInfo =
-          vk::ShaderModuleCreateInfo{.codeSize = 4 * fragmentSpirv.size(),
-                                     .pCode = fragmentSpirv.data()};
-
-      fragmentShaderModule = std::make_unique<vk::raii::ShaderModule>(
-          graphicsDevice->getVulkanDevice().createShaderModule(fragmentShaderCreateInfo));
+         mainPipeline = std::make_unique<Pipeline>(*graphicsDevice,
+                                                   pipelineLayoutCreateInfo,
+                                                   vertexInputStateCreateInfo,
+                                                   renderingCreateInfo,
+                                                   util::Paths::SHADERS / "shader.vert",
+                                                   util::Paths::SHADERS / "shader.frag");
+      }
 
       createSwapchainResources();
 
@@ -88,19 +100,9 @@ namespace tr::gfx {
    void Renderer::destroySwapchainResources() {
       depthImage.reset();
       depthImageView.reset();
-      pipeline.reset();
-      pipelineLayout.reset();
    }
 
    void Renderer::createSwapchainResources() {
-
-      std::tie(pipeline, pipelineLayout) =
-          Helpers::createBasicPipeline(*graphicsDevice,
-                                       *bindlessDescriptorSetLayout,
-                                       *objectDescriptorSetLayout,
-                                       *perFrameDescriptorSetLayout,
-                                       *vertexShaderModule,
-                                       *fragmentShaderModule);
 
       const auto depthFormat = Helpers::findDepthFormat(graphicsDevice->getPhysicalDevice());
 
@@ -139,9 +141,13 @@ namespace tr::gfx {
 
    void Renderer::recreateSwapchain() {
       const auto size = graphicsDevice->getCurrentSize();
+
       if (size.first == 0 || size.second == 0) {
          return;
       }
+
+      mainPipeline->resize({size.first, size.second});
+
       waitIdle();
       resizeDelegate(graphicsDevice->getCurrentSize());
 
@@ -373,7 +379,6 @@ namespace tr::gfx {
                                   vk::ImageLayout::eUndefined,
                                   vk::ImageLayout::eColorAttachmentOptimal);
 
-         // TODO: specify framedata.drawImageView as the color attachment here?
          const auto colorAttachmentInfo = vk::RenderingAttachmentInfo{
              .imageView = frameData.getDrawImageView(),
              .imageLayout = vk::ImageLayout::eColorAttachmentOptimal,
@@ -402,20 +407,15 @@ namespace tr::gfx {
 
          cmd.beginRendering(renderingInfo);
          {
-            cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, **pipeline);
-            // For each object, bind the vertex and index buffers, descriptor sets, and finally draw
-            // the object.
-            // TODO: move the vertices and indices into a single giant buffer.
-            // Then switch this call from drawIndexed to draw*Indirect
+            mainPipeline->bind(cmd);
 
-            /*
-            cmd.setScissor();
-            cmd.setViewport();
-            Set these both here since so far all pipelines will just draw to the
-            entire screen area.  Also we shouldn't need to recreate the pipeline on resize.
-            We could put the viewport struct in the Pipeline object though and that class can set
-            the viewport and scissor in its bind method
-            */
+            cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
+                                   mainPipeline->getPipelineLayout(),
+                                   0,
+                                   {*frameData.getBindlessDescriptorSet(),
+                                    *frameData.getObjectDescriptorSet(),
+                                    *frameData.getPerFrameDescriptorSet()},
+                                   nullptr);
             for (uint32_t i = 0; const auto& renderObject : renderObjects) {
 
                const auto& mesh = resourceManager->getMesh(renderObject.meshId);
@@ -423,13 +423,6 @@ namespace tr::gfx {
                cmd.bindVertexBuffers(0, mesh->getVertexBuffer().getBuffer(), {0});
                cmd.bindIndexBuffer(mesh->getIndexBuffer().getBuffer(), 0, vk::IndexType::eUint32);
 
-               cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
-                                      **pipelineLayout,
-                                      0,
-                                      {*frameData.getBindlessDescriptorSet(),
-                                       *frameData.getObjectDescriptorSet(),
-                                       *frameData.getPerFrameDescriptorSet()},
-                                      nullptr);
                // This is real greasy but it'll do for now
                // Change this to draw*Indirect
                cmd.drawIndexed(mesh->getIndicesCount(), 1, 0, 0, i);

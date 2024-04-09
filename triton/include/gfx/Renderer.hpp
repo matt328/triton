@@ -5,7 +5,6 @@
 #include "util/TaskQueue.hpp"
 
 #include <entt/signal/fwd.hpp>
-#include <vulkan/vulkan_structs.hpp>
 
 namespace tr::gfx {
    struct RenderObject;
@@ -16,6 +15,7 @@ namespace tr::gfx {
    class RendererBase;
    class Allocator;
    class AllocatedImage;
+   class Pipeline;
 
    namespace Textures {
       class Texture;
@@ -83,10 +83,7 @@ namespace tr::gfx {
       std::unique_ptr<vk::raii::DescriptorSetLayout> objectDescriptorSetLayout;
       std::unique_ptr<vk::raii::DescriptorSetLayout> perFrameDescriptorSetLayout;
 
-      std::unique_ptr<vk::raii::ShaderModule> vertexShaderModule;
-      std::unique_ptr<vk::raii::ShaderModule> fragmentShaderModule;
-      std::unique_ptr<vk::raii::Pipeline> pipeline;
-      std::unique_ptr<vk::raii::PipelineLayout> pipelineLayout;
+      std::unique_ptr<Pipeline> mainPipeline;
 
       std::unique_ptr<AllocatedImage> depthImage;
       std::unique_ptr<vk::raii::ImageView> depthImageView;

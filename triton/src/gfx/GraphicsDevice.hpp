@@ -125,7 +125,8 @@ namespace tr::gfx {
           VK_KHR_COPY_COMMANDS_2_EXTENSION_NAME,
 #endif
           VK_KHR_CREATE_RENDERPASS_2_EXTENSION_NAME,
-          VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME};
+          VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME,
+          VK_EXT_EXTENDED_DYNAMIC_STATE_3_EXTENSION_NAME};
       std::vector<const char*> desiredValidationLayers = {"VK_LAYER_KHRONOS_validation"};
 
       std::unique_ptr<vk::raii::Context> context;
