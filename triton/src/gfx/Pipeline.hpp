@@ -1,6 +1,5 @@
 #pragma once
 
-#include "gfx/GraphicsDevice.hpp"
 namespace tr::gfx {
 
    class GraphicsDevice;
@@ -9,9 +8,10 @@ namespace tr::gfx {
     public:
       Pipeline(const GraphicsDevice& graphicsDevice,
                const vk::PipelineLayoutCreateInfo& pipelineLayoutCreateInfo,
-               const vk::PipelineVertexInputStateCreateInfo,
-               const std::string_view& vertexShaderName,
-               const std::string_view& fragmentShaderName);
+               const vk::PipelineVertexInputStateCreateInfo vertexInputStateCreateInfo,
+               const vk::PipelineRenderingCreateInfo& renderingCreateInfo,
+               const std::filesystem::path& vertexShaderName,
+               const std::filesystem::path& fragmentShaderName);
       ~Pipeline();
 
       Pipeline(const Pipeline&) = delete;
@@ -19,14 +19,22 @@ namespace tr::gfx {
       Pipeline& operator=(const Pipeline&) = delete;
       Pipeline& operator=(Pipeline&&) = delete;
 
-      void recreatePipeline(const GraphicsDevice& graphicsDevice);
+      void resize(const vk::Extent2D newSize);
 
       void bind(const vk::raii::CommandBuffer& cmd);
 
+      [[nodiscard]] vk::PipelineLayout getPipelineLayout() const {
+         return **pipelineLayout;
+      }
+
     private:
+      vk::Rect2D scissor;
+      vk::Viewport viewport;
       std::unique_ptr<vk::raii::Pipeline> pipeline;
       std::unique_ptr<vk::raii::PipelineLayout> pipelineLayout;
       std::unique_ptr<vk::raii::ShaderModule> vertexShaderModule;
       std::unique_ptr<vk::raii::ShaderModule> fragmentShaderModule;
+
+      std::string readShaderFile(const std::filesystem::path& filepath);
    };
 }
