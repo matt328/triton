@@ -42,8 +42,12 @@ namespace tr::gfx {
 
       AllocatedBuffer(const vma::Allocator& newAllocator,
                       const vk::Buffer newBuffer,
+                      const vk::DeviceSize range,
                       const vma::Allocation newAllocation)
-          : buffer(newBuffer), allocation(newAllocation), allocator(newAllocator) {
+          : buffer(newBuffer),
+            bufferInfo{vk::DescriptorBufferInfo{.buffer = newBuffer, .offset = 0, .range = range}},
+            allocation(newAllocation),
+            allocator(newAllocator) {
       }
 
       ~AllocatedBuffer() {
@@ -64,8 +68,13 @@ namespace tr::gfx {
          return allocation;
       }
 
+      [[nodiscard]] vk::DescriptorBufferInfo* getBufferInfo() {
+         return &bufferInfo;
+      }
+
     private:
       vk::Buffer buffer;
+      vk::DescriptorBufferInfo bufferInfo;
       vma::Allocation allocation;
       vma::Allocator allocator;
    };

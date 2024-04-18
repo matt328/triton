@@ -11,7 +11,7 @@ namespace tr::util {
 }
 
 namespace tr::gfx {
-   class Renderer;
+   class RenderContext;
 }
 
 namespace tr::gp {

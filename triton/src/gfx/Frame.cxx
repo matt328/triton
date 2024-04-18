@@ -1,16 +1,23 @@
-#include "FrameData.hpp"
+#include "Frame.hpp"
 #include "gfx/ObjectData.hpp"
 #include "GraphicsDevice.hpp"
+#include "gfx/ds/LayoutFactory.hpp"
+#include "gfx/helpers/Rendering.hpp"
 #include "helpers/Vulkan.hpp"
 #include "vma_raii.hpp"
 
 namespace tr::gfx {
 
-   FrameData::FrameData(const GraphicsDevice& graphicsDevice,
-                        const vk::raii::DescriptorSetLayout& bindlessDescriptorSetLayout,
-                        const vk::raii::DescriptorSetLayout& objectDescriptorSetLayout,
-                        const vk::raii::DescriptorSetLayout& perFrameDescriptorSetLayout,
-                        const std::string_view name) {
+   // TODO: figure out a better way to handle the depth image.
+   // which pipeline should own it, or should it be shared among them?
+   Frame::Frame(const GraphicsDevice& graphicsDevice,
+                std::shared_ptr<vk::raii::ImageView> depthImageView,
+                ds::LayoutFactory& layoutFactory,
+                const std::string_view name)
+       : graphicsDevice{graphicsDevice.getVulkanDevice()},
+         depthImageView{depthImageView},
+         layoutFactory{layoutFactory},
+         drawExtent{graphicsDevice.DrawImageExtent2D} {
 
       createSwapchainResources(graphicsDevice);
 
@@ -59,77 +66,6 @@ namespace tr::gfx {
                                                                     &cameraDataAllocationCreateInfo,
                                                                     "Camera Data Buffer");
 
-      const auto objectDSAllocateInfo =
-          vk::DescriptorSetAllocateInfo{.descriptorPool = *graphicsDevice.getDescriptorPool(),
-                                        .descriptorSetCount = 1,
-                                        .pSetLayouts = &(*objectDescriptorSetLayout)};
-
-      objectDescriptorSet = std::make_unique<vk::raii::DescriptorSet>(std::move(
-          graphicsDevice.getVulkanDevice().allocateDescriptorSets(objectDSAllocateInfo).front()));
-      Helpers::setObjectName(**objectDescriptorSet,
-                             graphicsDevice.getVulkanDevice(),
-                             vk::raii::DescriptorSet::debugReportObjectType,
-                             "Object Descriptor Set");
-
-      // Create the cameradata descriptor set
-      const auto cameraDSAllocateInfo =
-          vk::DescriptorSetAllocateInfo{.descriptorPool = *graphicsDevice.getDescriptorPool(),
-                                        .descriptorSetCount = 1,
-                                        .pSetLayouts = &(*perFrameDescriptorSetLayout)};
-      perFrameDescriptorSet = std::make_unique<vk::raii::DescriptorSet>(std::move(
-          graphicsDevice.getVulkanDevice().allocateDescriptorSets(cameraDSAllocateInfo).front()));
-      Helpers::setObjectName(**perFrameDescriptorSet,
-                             graphicsDevice.getVulkanDevice(),
-                             vk::raii::DescriptorSet::debugReportObjectType,
-                             "Per Frame Descriptor Set");
-
-      // Create the bindless descriptor set
-      const auto bindlessDescriptorSetAllocateInfo =
-          vk::DescriptorSetAllocateInfo{.descriptorPool = *graphicsDevice.getDescriptorPool(),
-                                        .descriptorSetCount = 1,
-                                        .pSetLayouts = &(*bindlessDescriptorSetLayout)};
-
-      bindlessDescriptorSet = std::make_unique<vk::raii::DescriptorSet>(
-          std::move(graphicsDevice.getVulkanDevice()
-                        .allocateDescriptorSets(bindlessDescriptorSetAllocateInfo)
-                        .front()));
-
-      Helpers::setObjectName(**bindlessDescriptorSet,
-                             graphicsDevice.getVulkanDevice(),
-                             vk::raii::DescriptorSet::debugReportObjectType,
-                             "Bindless Descriptor Set");
-
-      // create a write for the objectData descriptor
-      const auto objectDataBufferInfo =
-          vk::DescriptorBufferInfo{.buffer = objectDataBuffer->getBuffer(),
-                                   .offset = 0,
-                                   .range = sizeof(ObjectData) * MAX_OBJECTS};
-
-      const auto objectDataDescriptorWrite =
-          vk::WriteDescriptorSet{.dstSet = **objectDescriptorSet,
-                                 .dstBinding = 0,
-                                 .dstArrayElement = 0,
-                                 .descriptorCount = 1,
-                                 .descriptorType = vk::DescriptorType::eStorageBuffer,
-                                 .pBufferInfo = &objectDataBufferInfo};
-
-      // create a write for the cameradata descriptor
-      const auto perFrameDataBufferInfo =
-          vk::DescriptorBufferInfo{.buffer = cameraDataBuffer->getBuffer(),
-                                   .offset = 0,
-                                   .range = sizeof(CameraData)};
-      const auto perFrameDataDescriptorWrite =
-          vk::WriteDescriptorSet{.dstSet = **perFrameDescriptorSet,
-                                 .dstBinding = 0,
-                                 .dstArrayElement = 0,
-                                 .descriptorCount = 1,
-                                 .descriptorType = vk::DescriptorType::eUniformBuffer,
-                                 .pBufferInfo = &perFrameDataBufferInfo};
-
-      const auto writes = std::array{objectDataDescriptorWrite, perFrameDataDescriptorWrite};
-
-      graphicsDevice.getVulkanDevice().updateDescriptorSets(writes, nullptr);
-
       const auto drawImageFormat = vk::Format::eR16G16B16A16Sfloat;
       const auto drawImageExtent = graphicsDevice.DrawImageExtent2D;
 
@@ -166,19 +102,111 @@ namespace tr::gfx {
           graphicsDevice.getVulkanDevice().createImageView(imageViewCreateInfo));
    }
 
-   const vk::Image& FrameData::getDrawImage() const {
+   void Frame::prepareFrame() {
+      TracyVkZone(tracyContext, **commandBuffer, "render room");
+
+      Helpers::transitionImage(*commandBuffer,
+                               drawImage->getImage(),
+                               vk::ImageLayout::eUndefined,
+                               vk::ImageLayout::eColorAttachmentOptimal);
+
+      const auto colorAttachmentInfo = vk::RenderingAttachmentInfo{
+          .imageView = **drawImageView,
+          .imageLayout = vk::ImageLayout::eColorAttachmentOptimal,
+          .loadOp = vk::AttachmentLoadOp::eClear,
+          .storeOp = vk::AttachmentStoreOp::eStore,
+          .clearValue = vk::ClearValue{.color = vk::ClearColorValue{std::array<float, 4>(
+                                           {{0.39f, 0.58f, 0.93f, 1.f}})}},
+      };
+
+      const auto depthAttachmentInfo = vk::RenderingAttachmentInfo{
+          .imageView = **depthImageView,
+          .imageLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal,
+          .loadOp = vk::AttachmentLoadOp::eClear,
+          .storeOp = vk::AttachmentStoreOp::eStore,
+          .clearValue = vk::ClearValue{.depthStencil =
+                                           vk::ClearDepthStencilValue{.depth = 1.f, .stencil = 0}},
+      };
+
+      const auto renderingInfo =
+          vk::RenderingInfo{.renderArea = vk::Rect2D{.offset = {0, 0}, .extent = drawExtent},
+                            .layerCount = 1,
+                            .colorAttachmentCount = 1,
+                            .pColorAttachments = &colorAttachmentInfo,
+                            .pDepthAttachment = &depthAttachmentInfo};
+
+      commandBuffer->beginRendering(renderingInfo);
+   }
+
+   void Frame::end3D(const vk::Image& swapchainImage, const vk::Extent2D& swapchainExtent) {
+      commandBuffer->endRendering();
+
+      Helpers::transitionImage(*commandBuffer,
+                               drawImage->getImage(),
+                               vk::ImageLayout::eColorAttachmentOptimal,
+                               vk::ImageLayout::eTransferSrcOptimal);
+      Helpers::transitionImage(*commandBuffer,
+                               swapchainImage,
+                               vk::ImageLayout::eUndefined,
+                               vk::ImageLayout::eTransferDstOptimal);
+
+      Helpers::copyImageToImage(*commandBuffer,
+                                drawImage->getImage(),
+                                swapchainImage,
+                                drawExtent,
+                                swapchainExtent);
+
+      Helpers::transitionImage(*commandBuffer,
+                               swapchainImage,
+                               vk::ImageLayout::eTransferDstOptimal,
+                               vk::ImageLayout::eColorAttachmentOptimal);
+   }
+
+   void Frame::renderOverlay(const vk::raii::ImageView& swapchainImageView,
+                             const vk::Extent2D& swapchainExtent) {
+      const auto colorAttachment = vk::RenderingAttachmentInfo{
+          .imageView = *swapchainImageView,
+          .imageLayout = vk::ImageLayout::eColorAttachmentOptimal,
+          .loadOp = vk::AttachmentLoadOp::eLoad,
+          .storeOp = vk::AttachmentStoreOp::eStore,
+      };
+
+      const auto renderInfo = vk::RenderingInfo{
+          .renderArea = vk::Rect2D{.offset = {0, 0}, .extent = swapchainExtent},
+          .layerCount = 1,
+          .colorAttachmentCount = 1,
+          .pColorAttachments = &colorAttachment,
+      };
+
+      commandBuffer->beginRendering(renderInfo);
+
+      ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), **commandBuffer);
+
+      commandBuffer->endRendering();
+   }
+
+   void Frame::endFrame(const vk::Image& swapchainImage) {
+      Helpers::transitionImage(*commandBuffer,
+                               swapchainImage,
+                               vk::ImageLayout::eColorAttachmentOptimal,
+                               vk::ImageLayout::ePresentSrcKHR);
+
+      TracyVkCollect(tracyContext, **commandBuffer);
+   }
+
+   const vk::Image& Frame::getDrawImage() const {
       return drawImage->getImage();
    }
 
-   void FrameData::updateObjectDataBuffer(const ObjectData* data, const size_t size) {
+   void Frame::updateObjectDataBuffer(const ObjectData* data, const size_t size) {
       this->objectDataBuffer->updateBufferValue(data, size);
    }
 
-   void FrameData::destroySwapchainResources() {
+   void Frame::destroySwapchainResources() {
       commandBuffer.reset();
    }
 
-   void FrameData::createSwapchainResources(const GraphicsDevice& graphicsDevice) {
+   void Frame::createSwapchainResources(const GraphicsDevice& graphicsDevice) {
       const auto allocInfo =
           vk::CommandBufferAllocateInfo{.commandPool = *graphicsDevice.getCommandPool(),
                                         .level = vk::CommandBufferLevel::ePrimary,
@@ -187,7 +215,7 @@ namespace tr::gfx {
       commandBuffer = std::make_unique<vk::raii::CommandBuffer>(std::move(commandBuffers[0]));
    }
 
-   FrameData::~FrameData() {
+   Frame::~Frame() {
       TracyVkDestroy(tracyContext);
    }
 }

@@ -4,7 +4,7 @@
 #include "gp/ecs/component/Renderable.hpp"
 #include "gp/ecs/component/Resources.hpp"
 #include "gp/ecs/component/Transform.hpp"
-#include "gfx/Renderer.hpp"
+#include "gfx/RenderContext.hpp"
 #include "gfx/RenderObject.hpp"
 
 namespace tr::gp::ecs::RenderSystem {
@@ -15,6 +15,22 @@ namespace tr::gp::ecs::RenderSystem {
 
       const auto cam = registry.get<Camera>(cameraEntity.currentCamera);
 
+      /*
+         This RenderSystem should probably be transformed into a MovementSystem or something that
+         only operates on Transforms, and updates the transformMatrix based on rotation and
+         position. This one should run last since other Systems, AI, Scripting, etc may move
+         Transform components by changing their position and rotation.  Probably want to do the same
+         as with camera and have components store velocity values, as well as last transformation
+         matrix, and have the TransformSystem update transformMatrix by applying the velocities to
+         the previous transform matrix.
+
+         The render system won't need to 'send' data to the renderer anymore, as this data will just
+         be collected by the GameplaySystem after all the ECS Systems have run and set their state
+         in all the components.
+
+         The Gameplay system will then std::move the required data into the ResourceManager where
+         the renderer can pick it up when it needs to render.
+       */
       cameraDataProducer(gfx::CameraData{cam.view, cam.projection, cam.view * cam.projection});
 
       const auto view = registry.view<Renderable, Transform>();
