@@ -7,7 +7,7 @@ namespace tr::gp {
 }
 
 namespace tr::gfx {
-   class Renderer;
+   class RenderContext;
 }
 
 namespace tr::ctx {
@@ -46,6 +46,6 @@ namespace tr::ctx {
       std::unique_ptr<GameplayFacade> gameplayFacade;
 
       std::unique_ptr<tr::gp::GameplaySystem> gameplaySystem;
-      std::unique_ptr<tr::gfx::Renderer> renderer;
+      std::unique_ptr<tr::gfx::RenderContext> renderContext;
    };
 }

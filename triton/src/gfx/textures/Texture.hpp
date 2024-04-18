@@ -2,7 +2,6 @@
 
 #include "../vma_raii.hpp"
 #include "gfx/VkContext.hpp"
-#include <vulkan/vulkan_structs.hpp>
 
 namespace tr::gfx::Textures {
 

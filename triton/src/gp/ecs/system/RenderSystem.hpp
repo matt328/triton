@@ -3,7 +3,7 @@
 namespace tr::gfx {
    struct RenderObject;
    struct CameraData;
-   class Renderer;
+   class RenderContext;
 }
 
 namespace tr::gp::ecs::RenderSystem {

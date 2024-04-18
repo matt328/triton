@@ -1,7 +1,7 @@
 #include "ctx/GameplayFacade.hpp"
 
 #include "gp/GameplaySystem.hpp"
-#include "gfx/Renderer.hpp"
+#include "gfx/RenderContext.hpp"
 
 #include "gp/ecs/component/Renderable.hpp"
 #include "gp/ecs/component/Transform.hpp"
@@ -10,7 +10,7 @@
 
 namespace tr::ctx {
    GameplayFacade::GameplayFacade(gp::GameplaySystem& gameplaySystem,
-                                  gfx::Renderer& renderer,
+                                  gfx::RenderContext& renderer,
                                   bool debugEnabled)
        : debugEnabled{debugEnabled}, gameplaySystem{gameplaySystem}, renderer{renderer} {
    }
@@ -19,7 +19,7 @@ namespace tr::ctx {
    }
 
    std::future<gfx::ModelHandle> GameplayFacade::loadModelAsync(const std::filesystem::path& path) {
-      return renderer.loadModelAsync(path.string());
+      return renderer.getResourceManager().loadModelAsync(path.string());
    }
 
    gp::EntityType GameplayFacade::createStaticMultiMeshEntity(

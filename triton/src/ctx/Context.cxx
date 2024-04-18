@@ -1,6 +1,6 @@
 #include "ctx/Context.hpp"
 #include "gp/GameplaySystem.hpp"
-#include "gfx/Renderer.hpp"
+#include "gfx/RenderContext.hpp"
 #include "ctx/GameplayFacade.hpp"
 
 namespace tr::ctx {
@@ -12,15 +12,19 @@ namespace tr::ctx {
        : timer{TARGET_FPS, MAX_UPDATES} {
       gameplaySystem = std::make_unique<gp::GameplaySystem>();
 
-      renderer =
-          std::make_unique<gfx::Renderer>(static_cast<GLFWwindow*>(nativeWindow), guiEnabled);
+      renderContext =
+          std::make_unique<gfx::RenderContext>(static_cast<GLFWwindow*>(nativeWindow), guiEnabled);
 
-      renderer->addResizeListener<&gp::GameplaySystem::resize>(gameplaySystem.get());
+      renderContext->addResizeListener<&gp::GameplaySystem::resize>(gameplaySystem.get());
 
-      gameplaySystem->addRenderObjectListener<&gfx::Renderer::enqueueRenderObject>(renderer.get());
-      gameplaySystem->addCameraDataListener<&gfx::Renderer::setCurrentCameraData>(renderer.get());
+      gameplaySystem->addRenderObjectListener<&gfx::RenderContext::enqueueRenderObject>(
+          renderContext.get());
 
-      gameplayFacade = std::make_unique<GameplayFacade>(*gameplaySystem, *renderer, debugEnabled);
+      gameplaySystem->addCameraDataListener<&gfx::RenderContext::setCurrentCameraData>(
+          renderContext.get());
+
+      gameplayFacade =
+          std::make_unique<GameplayFacade>(*gameplaySystem, *renderContext, debugEnabled);
    }
 
    // Since a default destructor doesn't have access to the complete definition of the forward
@@ -40,10 +44,10 @@ namespace tr::ctx {
          timer.tick([&]() { gameplaySystem->fixedUpdate(timer); });
          gameplaySystem->update();
 
-         renderer->render();
+         renderContext->render();
          FrameMark;
       }
-      renderer->waitIdle();
+      renderContext->waitIdle();
    }
 
    void Context::pause(bool paused) {

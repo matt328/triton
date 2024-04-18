@@ -19,7 +19,7 @@ namespace tr::ctx {
    class GameplayFacade {
     public:
       GameplayFacade(gp::GameplaySystem& gameplaySystem,
-                     gfx::Renderer& renderer,
+                     gfx::RenderContext& renderer,
                      bool debugEnabled = false);
       ~GameplayFacade();
 
@@ -68,7 +68,7 @@ namespace tr::ctx {
     private:
       bool debugEnabled{};
       gp::GameplaySystem& gameplaySystem;
-      gfx::Renderer& renderer;
+      gfx::RenderContext& renderer;
       std::vector<gp::EntityType> allEntities;
    };
 

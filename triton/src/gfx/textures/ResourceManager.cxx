@@ -16,6 +16,8 @@ namespace tr::gfx::tx {
    ResourceManager::ResourceManager(const GraphicsDevice& graphicsDevice)
        : graphicsDevice{graphicsDevice} {
 
+      taskQueue = std::make_unique<util::TaskQueue>();
+
       const auto bci = vk::BufferCreateInfo{.size = MaxImageSize,
                                             .usage = vk::BufferUsageFlagBits::eTransferSrc,
                                             .sharingMode = vk::SharingMode::eExclusive};
@@ -31,67 +33,78 @@ namespace tr::gfx::tx {
    ResourceManager::~ResourceManager() {
    }
 
-   ModelHandle ResourceManager::loadModel(const std::filesystem::path& filename) {
+   std::future<ModelHandle> ResourceManager::loadModelAsync(const std::filesystem::path& filename) {
+      return taskQueue->enqueue([this, filename]() { return loadModelInt(filename); });
+   }
 
-      using namespace tinygltf;
+   ModelHandle ResourceManager::loadModelInt(const std::filesystem::path& filename) {
+      ZoneNamedN(a, "Load Model Internal", true);
 
-      Model model;
-      TinyGLTF loader;
-      std::string err;
-      std::string warn;
+      auto modelHandles = ModelHandle{};
 
       {
-         ZoneNamedN(a, "Reading ASCII File", true);
-         bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, filename.string());
-         if (!warn.empty()) {
-            throw std::runtime_error(warn);
-         }
+         ZoneNamedN(b, "Loading glTF File", true);
 
-         if (!err.empty()) {
-            throw std::runtime_error(err);
-         }
+         using namespace tinygltf;
 
-         if (!ret) {
-            Log::error << "Failed to parse glTF file" << std::endl;
-            throw std::runtime_error("Failed to parse glTF file");
-         }
-      }
-      {
-         ZoneNamedN(b, "Parsing glTF", true);
-         auto loadedTextureIndices = std::unordered_map<int, TextureHandle>{};
+         Model model;
+         TinyGLTF loader;
+         std::string err;
+         std::string warn;
 
-         auto modelHandle = ModelHandle{};
+         {
+            ZoneNamedN(a, "Reading ASCII File", true);
+            bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, filename.string());
+            if (!warn.empty()) {
+               throw std::runtime_error(warn);
+            }
 
-         const auto& scene = model.scenes[model.defaultScene];
-         for (const auto& nodeIndex : scene.nodes) {
-            const auto& node = model.nodes[nodeIndex];
-            const auto& mesh = model.meshes[node.mesh];
-            for (const auto& primitive : mesh.primitives) {
-               const auto meshHandle = createMesh(model, primitive);
+            if (!err.empty()) {
+               throw std::runtime_error(err);
+            }
 
-               auto textureHandle = TextureHandle{}; // TODO: init this to a debug texture handle
-
-               const auto materialIndex = primitive.material;
-               const auto& material = model.materials[materialIndex];
-
-               const auto& baseColorTextureIndex =
-                   material.pbrMetallicRoughness.baseColorTexture.index;
-
-               auto it = loadedTextureIndices.find(baseColorTextureIndex);
-               if (it != loadedTextureIndices.end()) {
-                  textureHandle = it->second;
-               } else {
-                  textureHandle = createTexture(model, baseColorTextureIndex);
-                  loadedTextureIndices.insert({baseColorTextureIndex, textureHandle});
-               }
-
-               Log::info << "inserting mesh " << meshHandle << " and texture " << textureHandle
-                         << std::endl;
-               modelHandle.insert({meshHandle, textureHandle});
+            if (!ret) {
+               Log::error << "Failed to parse glTF file" << std::endl;
+               throw std::runtime_error("Failed to parse glTF file");
             }
          }
-         return modelHandle;
+         {
+            ZoneNamedN(b, "Parsing glTF", true);
+            auto loadedTextureIndices = std::unordered_map<int, TextureHandle>{};
+
+            auto modelHandle = ModelHandle{};
+
+            const auto& scene = model.scenes[model.defaultScene];
+            for (const auto& nodeIndex : scene.nodes) {
+               const auto& node = model.nodes[nodeIndex];
+               const auto& mesh = model.meshes[node.mesh];
+               for (const auto& primitive : mesh.primitives) {
+                  const auto meshHandle = createMesh(model, primitive);
+
+                  auto textureHandle = TextureHandle{}; // TODO: init this to a debug texture handle
+
+                  const auto materialIndex = primitive.material;
+                  const auto& material = model.materials[materialIndex];
+
+                  const auto& baseColorTextureIndex =
+                      material.pbrMetallicRoughness.baseColorTexture.index;
+
+                  auto it = loadedTextureIndices.find(baseColorTextureIndex);
+                  if (it != loadedTextureIndices.end()) {
+                     textureHandle = it->second;
+                  } else {
+                     textureHandle = createTexture(model, baseColorTextureIndex);
+                     loadedTextureIndices.insert({baseColorTextureIndex, textureHandle});
+                  }
+
+                  modelHandle.insert({meshHandle, textureHandle});
+               }
+            }
+            return modelHandle;
+         }
       }
+
+      return modelHandles;
    }
 
    /// Brute force this for now, create a single Mesh per Primitive in the file
@@ -181,22 +194,42 @@ namespace tr::gfx::tx {
       }
    }
 
+   void ResourceManager::accessTextures(
+       std::function<void(const std::vector<vk::DescriptorImageInfo>&)> fn) const {
+      if (textureInfoList.empty()) {
+         return;
+      }
+      std::lock_guard<LockableBase(std::mutex)> lock(textureListMutex);
+      LockableName(textureListMutex, "Access", 6);
+      LockMark(textureListMutex);
+      fn(textureInfoList);
+   }
+
    TextureHandle ResourceManager::createTexture(const tinygltf::Model& model,
                                                 std::size_t textureIndex) {
       ZoneNamedN(a, "createTexture", true);
       const auto& texture = model.textures[textureIndex];
       const auto& image = model.images[texture.source];
+
       const auto pos = textureList.size();
-
-      textureList.emplace_back(
-          std::make_unique<Textures::Texture>((void*)image.image.data(),
-                                              image.width,
-                                              image.height,
-                                              image.component,
-                                              graphicsDevice.getAllocator(),
-                                              graphicsDevice.getVulkanDevice(),
-                                              graphicsDevice.getAsyncTransferContext()));
-
-      return static_cast<TextureHandle>(pos);
+      {
+         ZoneNamedN(b, "UploadTexture", true);
+         textureList.emplace_back(
+             std::make_unique<Textures::Texture>((void*)image.image.data(),
+                                                 image.width,
+                                                 image.height,
+                                                 image.component,
+                                                 graphicsDevice.getAllocator(),
+                                                 graphicsDevice.getVulkanDevice(),
+                                                 graphicsDevice.getAsyncTransferContext()));
+      }
+      { // Only need to guard access to the textureInfoList
+         ZoneNamedN(c, "Update TextureInfoList", true);
+         std::lock_guard<LockableBase(std::mutex)> lock(textureListMutex);
+         LockMark(textureListMutex);
+         LockableName(textureListMutex, "Mutate", 6);
+         textureInfoList.emplace_back(textureList[pos]->getImageInfo());
+         return static_cast<TextureHandle>(pos);
+      }
    }
 }
