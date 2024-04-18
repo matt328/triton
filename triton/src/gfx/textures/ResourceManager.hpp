@@ -1,7 +1,7 @@
 #pragma once
 
 #include "gfx/Handles.hpp"
-#include "gfx/ObjectData.hpp"
+#include "gfx/RenderData.hpp"
 #include "gfx/geometry/Mesh.hpp"
 #include "gfx/geometry/Vertex.hpp"
 #include "gfx/textures/Texture.hpp"
@@ -44,12 +44,6 @@ namespace tr::gfx::tx {
                              .borderColor = vk::BorderColor::eIntOpaqueBlack,
                              .unnormalizedCoordinates = VK_FALSE};
 
-   struct RenderData {
-      CameraData cameraData;
-      std::vector<ObjectData> objectData;
-      std::vector<MeshHandle> meshHandles;
-   };
-
    /*
       ResourceManager provides the sync point between game world and renderer.
       2 types of things need synced, Descriptor Set bindings, and buffer contents.
@@ -90,6 +84,9 @@ namespace tr::gfx::tx {
       void accessTextures(
           std::function<void(const std::vector<vk::DescriptorImageInfo>&)> fn) const;
 
+      void setRenderData(RenderData&& newRenderData);
+      void accessRenderData(std::function<void(RenderData&)> fn);
+
     private:
       const GraphicsDevice& graphicsDevice;
       std::unique_ptr<util::TaskQueue> taskQueue;
@@ -100,6 +97,9 @@ namespace tr::gfx::tx {
       mutable TracyLockable(std::mutex, textureListMutex);
       std::vector<vk::DescriptorImageInfo> textureInfoList;
       std::vector<std::unique_ptr<Textures::Texture>> textureList;
+
+      mutable TracyLockable(std::mutex, renderDataMutex);
+      RenderData renderData;
 
       MeshHandle createMesh(const tinygltf::Model&, const tinygltf::Primitive& primitive);
       TextureHandle createTexture(const tinygltf::Model& model, std::size_t textureIndex);

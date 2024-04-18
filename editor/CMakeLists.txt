@@ -29,6 +29,7 @@ target_compile_definitions(${PROJECT_NAME}
 target_precompile_headers(${PROJECT_NAME}
    PRIVATE
    <filesystem>
+   <future>
    <functional>
    <nlohmann/json.hpp>
    <sago/platform_folders.h>

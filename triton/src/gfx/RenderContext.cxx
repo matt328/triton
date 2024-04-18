@@ -1,6 +1,7 @@
 #include "gfx/RenderContext.hpp"
 #include "Frame.hpp"
 #include "GraphicsDevice.hpp"
+#include "gfx/Handles.hpp"
 #include "gfx/RenderObject.hpp"
 
 #include "gfx/ObjectData.hpp"
@@ -239,7 +240,7 @@ namespace tr::gfx {
       currentFrame = (currentFrame + 1) % FRAMES_IN_FLIGHT;
    }
 
-   void RenderContext::recordCommandBuffer(Frame& frame, unsigned imageIndex) const {
+   void RenderContext::recordCommandBuffer(Frame& frame, unsigned imageIndex) {
       auto& cmd = frame.getCommandBuffer();
 
       /*
@@ -264,10 +265,16 @@ namespace tr::gfx {
          one frame.  Meanwhile in the render thread, also lock on reading the data, write it into
          the current frame's buffers, then release the lock.
       */
-      frame.updateObjectDataBuffer(objectDataList.data(),
-                                   sizeof(ObjectData) * objectDataList.size());
-
-      frame.getCameraBuffer().updateBufferValue(&cameraData, sizeof(CameraData));
+      meshHandlesBuffer.clear();
+      resourceManager->accessRenderData([&frame, this](RenderData& renderData) {
+         frame.updateObjectDataBuffer(renderData.objectData.data(),
+                                      sizeof(ObjectData) * renderData.objectData.size());
+         frame.getCameraBuffer().updateBufferValue(&renderData.cameraData, sizeof(CameraData));
+         meshHandlesBuffer.reserve(renderData.meshHandles.size());
+         std::copy(renderData.meshHandles.begin(),
+                   renderData.meshHandles.end(),
+                   std::back_inserter(meshHandlesBuffer));
+      });
 
       auto& objectDataSet = dsFactory->getDescriptorSet(ds::SetHandle::ObjectData, currentFrame);
       auto& perFrameSet = dsFactory->getDescriptorSet(ds::SetHandle::PerFrame, currentFrame);
@@ -306,11 +313,6 @@ namespace tr::gfx {
                                                     objectDataSet.getVkDescriptorSet(),
                                                     perFrameSet.getVkDescriptorSet()};
 
-         // cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
-         //                        staticModelPipeline->getPipelineLayout(),
-         //                        0,
-         //                        ds,
-         //                        nullptr);
          cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
                                 staticModelPipeline->getPipelineLayout(),
                                 0,
@@ -321,9 +323,9 @@ namespace tr::gfx {
          {
             staticModelPipeline->bind(cmd);
             {
-               for (uint32_t i = 0; const auto& renderObject : renderObjects) {
-
-                  const auto& mesh = resourceManager->getMesh(renderObject.meshId);
+               uint32_t i = 0;
+               for (const auto& meshHandle : meshHandlesBuffer) {
+                  const auto& mesh = resourceManager->getMesh(meshHandle);
 
                   cmd.bindVertexBuffers(0, mesh->getVertexBuffer().getBuffer(), {0});
                   cmd.bindIndexBuffer(mesh->getIndexBuffer().getBuffer(),
