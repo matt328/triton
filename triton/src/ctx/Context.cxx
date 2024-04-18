@@ -10,18 +10,17 @@ namespace tr::ctx {
 
    Context::Context(void* nativeWindow, bool guiEnabled, bool debugEnabled)
        : timer{TARGET_FPS, MAX_UPDATES} {
-      gameplaySystem = std::make_unique<gp::GameplaySystem>();
 
       renderContext =
           std::make_unique<gfx::RenderContext>(static_cast<GLFWwindow*>(nativeWindow), guiEnabled);
 
+      gameplaySystem = std::make_unique<gp::GameplaySystem>();
+
       renderContext->addResizeListener<&gp::GameplaySystem::resize>(gameplaySystem.get());
 
-      gameplaySystem->addRenderObjectListener<&gfx::RenderContext::enqueueRenderObject>(
-          renderContext.get());
-
-      gameplaySystem->addCameraDataListener<&gfx::RenderContext::setCurrentCameraData>(
-          renderContext.get());
+      // Have this take in a reference to the resource manager
+      gameplaySystem->addRenderDataListener<&gfx::tx::ResourceManager::setRenderData>(
+          &renderContext->getResourceManager());
 
       gameplayFacade =
           std::make_unique<GameplayFacade>(*gameplaySystem, *renderContext, debugEnabled);

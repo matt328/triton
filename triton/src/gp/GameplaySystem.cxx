@@ -8,7 +8,9 @@
 
 #include "gp/ecs/component/Resources.hpp"
 #include "gp/ecs/system/CameraSystem.hpp"
-#include "gp/ecs/system/RenderSystem.hpp"
+#include "gp/ecs/system/RenderDataSystem.hpp"
+#include "gp/ecs/system/TransformSystem.hpp"
+#include "gp/ecs/component/Resources.hpp"
 
 namespace tr::gp {
 
@@ -57,6 +59,9 @@ namespace tr::gp {
       actionSystem->mapSource(Source{MouseInput::MOVE_Y, SourceType::Float},
                               StateType::Range,
                               ActionType::LookVertical);
+
+      renderData.objectData.reserve(1000);
+      renderData.meshHandles.reserve(1000);
    }
 
    GameplaySystem::~GameplaySystem() {
@@ -66,12 +71,22 @@ namespace tr::gp {
    void GameplaySystem::fixedUpdate([[maybe_unused]] const util::Timer& timer) {
       TracyMessageL("fixedUpdate");
       ZoneNamedN(upd, "FixedUpdate", true);
+
       ecs::CameraSystem::fixedUpdate(*registry);
+      ecs::TransformSystem::update(*registry);
+
+      // This represents the sync point, and always has to run after all the other systems are
+      // finished for this tick
+      renderData.objectData.clear();
+      renderData.meshHandles.clear();
+      ecs::RenderDataSystem::update(*registry, renderData);
+
+      renderDataProducer(std::move(renderData));
    }
 
    void GameplaySystem::update() {
       ZoneNamedN(upd, "Update", true);
-      ecs::RenderSystem::update(*registry, renderObjectProducer, cameraDataProducer);
+      // ecs::RenderSystem::update(*registry, renderObjectProducer, cameraDataProducer);
    }
 
    void GameplaySystem::resize(const std::pair<uint32_t, uint32_t> size) {

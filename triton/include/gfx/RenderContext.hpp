@@ -95,11 +95,13 @@ namespace tr::gfx {
 
       ResizeDelegateType resizeDelegate{};
 
+      std::vector<MeshHandle> meshHandlesBuffer;
+
       void initDepthResources();
 
       void recreateSwapchain();
       void drawFrame();
-      void recordCommandBuffer(Frame& frame, unsigned imageIndex) const;
+      void recordCommandBuffer(Frame& frame, unsigned imageIndex);
       void drawImgui(const vk::raii::CommandBuffer& cmd, const vk::raii::ImageView& image) const;
    };
 }

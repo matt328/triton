@@ -3,6 +3,7 @@ project("triton")
 set(triton_SRC
    "src/ctx/Context.cxx"
    "src/ctx/GameplayFacade.cxx"
+
    "src/gfx/Frame.cxx"
    "src/gfx/GraphicsDevice.cxx"
    "src/gfx/ImmediateContext.cxx"
@@ -15,10 +16,13 @@ set(triton_SRC
    "src/gfx/helpers/SpirvHelper.cxx"
    "src/gfx/textures/Texture.cxx"
    "src/gfx/textures/ResourceManager.cxx"
+
    "src/gp/GameplaySystem.cxx"
    "src/gp/actions/ActionSystem.cxx"
    "src/gp/ecs/system/CameraSystem.cxx"
-   "src/gp/ecs/system/RenderSystem.cxx"
+   "src/gp/ecs/system/RenderDataSystem.cxx"
+   "src/gp/ecs/system/TransformSystem.cxx"
+
    "src/gfx/ds/LayoutFactory.cxx"
    "src/gfx/ds/Layout.cxx"
    "src/gfx/ds/DescriptorSet.cxx"
@@ -50,7 +54,6 @@ find_package(fastgltf CONFIG REQUIRED FASTGLTF_DISABLE_CUSTOM_MEMORY_POOL FASTGL
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glslang CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
-find_package(Taskflow CONFIG REQUIRED)
 find_package(Tracy CONFIG REQUIRED)
 find_package(Stb REQUIRED)
 find_package(spirv_cross_core CONFIG REQUIRED)
@@ -98,7 +101,6 @@ target_precompile_headers(${PROJECT_NAME}
    <stb_image.h>
    <string>
    <string_view>
-   <taskflow/taskflow.hpp>
    PUBLIC
    "include/util/Logger.hpp"
    <GLFW/glfw3.h>
@@ -110,7 +112,7 @@ target_precompile_headers(${PROJECT_NAME}
    <imgui.h>
    <imgui_impl_glfw.h>
    <imgui_impl_vulkan.h>
-   <taskflow/taskflow.hpp>
+   <queue>
    <tiny_gltf.h>
    <tracy/Tracy.hpp>
    <tracy/TracyVulkan.hpp>
@@ -131,7 +133,6 @@ target_link_libraries(${PROJECT_NAME}
    imgui::imgui
    spirv-cross-core
    spirv-cross-cpp
-   Taskflow::Taskflow
    Tracy::TracyClient
    unofficial::VulkanMemoryAllocator-Hpp::VulkanMemoryAllocator-Hpp
    ${Vulkan_LIBRARIES}

@@ -1,4 +1,5 @@
-#include "ResourceManager.hpp"
+#include "gfx/textures/ResourceManager.hpp"
+#include "gfx/RenderData.hpp"
 
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
@@ -31,6 +32,20 @@ namespace tr::gfx::tx {
    }
 
    ResourceManager::~ResourceManager() {
+   }
+
+   void ResourceManager::setRenderData(RenderData&& newRenderData) {
+      std::lock_guard<LockableBase(std::mutex)> lock(renderDataMutex);
+      LockableName(renderDataMutex, "SetRenderData", 13);
+      LockMark(renderDataMutex);
+      renderData = std::move(newRenderData);
+   }
+
+   void ResourceManager::accessRenderData(std::function<void(RenderData&)> fn) {
+      std::lock_guard<LockableBase(std::mutex)> lock(renderDataMutex);
+      LockableName(renderDataMutex, "AccessRenderData", 16);
+      LockMark(renderDataMutex);
+      fn(renderData);
    }
 
    std::future<ModelHandle> ResourceManager::loadModelAsync(const std::filesystem::path& filename) {
