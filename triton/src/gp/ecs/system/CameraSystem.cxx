@@ -11,6 +11,21 @@ namespace tr::gp::ecs::CameraSystem {
    const auto MouseSensitivity = 0.025f;
    const auto PitchExtent = 89.f;
 
+   /*
+      TODO: this function shouldn't be like this. The system needs to be able to poll for actions
+      rather than being told what actions happen, since in a multithreaded env, handleAction
+      could get called at the same time as fixedUpdate. So I guess we'd queue up actions in a
+      list and fixedUpdate would process them in order before continuing on with the rest of the
+      update logic for that specific entity.
+
+      This will affect the action system in general, the system itself should support queueing up
+      a list of actions to be dealt with by a separate action system?
+      An action system would need to know whether an entity should react to an action or not
+
+      In general, some of these systems won't be able to be multithreaded and will have to know
+      that others have run to completion before they do. Ex the action system has to have a chance
+      to set an entity's velocity before the TransformSystem calculates its position.
+   */
    void handleAction(entt::registry& registry, const Action& action) {
 
       const auto view = registry.view<Camera>();

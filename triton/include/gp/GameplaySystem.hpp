@@ -3,8 +3,7 @@
 #include <entt/fwd.hpp>
 #include <entt/signal/delegate.hpp>
 
-#include "gfx/RenderObject.hpp"
-#include "gfx/ObjectData.hpp"
+#include "gfx/RenderData.hpp"
 
 namespace tr::util {
    class Timer;
@@ -12,6 +11,10 @@ namespace tr::util {
 
 namespace tr::gfx {
    class RenderContext;
+}
+
+namespace tr::gfx::tx {
+   class ResourceManager;
 }
 
 namespace tr::gp {
@@ -24,9 +27,7 @@ namespace tr::ctx {
 
 namespace tr::gp {
    using EntityType = entt::entity;
-
-   using RenderObjectProducer = entt::delegate<void(gfx::RenderObject)>;
-   using CameraDataProducer = entt::delegate<void(gfx::CameraData)>;
+   using RenderDataProducer = entt::delegate<void(gfx::RenderData)>;
 
    class GameplaySystem {
     public:
@@ -49,22 +50,21 @@ namespace tr::gp {
       void setMouseState(bool captured);
 
       template <auto Candidate, typename Type>
-      void addRenderObjectListener(Type* valueOrInstance) noexcept {
-         renderObjectProducer.connect<Candidate>(valueOrInstance);
-      }
-
-      template <auto Candidate, typename Type>
-      void addCameraDataListener(Type* valueOrInstance) noexcept {
-         cameraDataProducer.connect<Candidate>(valueOrInstance);
+      void addRenderDataListener(Type* valueOrInstance) noexcept {
+         renderDataProducer.connect<Candidate>(valueOrInstance);
       }
 
     private:
       friend class ctx::GameplayFacade;
 
       std::unique_ptr<entt::registry> registry;
+
       std::unique_ptr<ActionSystem> actionSystem;
 
-      RenderObjectProducer renderObjectProducer{};
-      CameraDataProducer cameraDataProducer{};
+      gfx::RenderData renderData{};
+
+      // This delegate seems overengineered, but keeps the Application from having to #include
+      // half the engine
+      RenderDataProducer renderDataProducer{};
    };
 }
