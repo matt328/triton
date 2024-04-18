@@ -22,7 +22,7 @@ namespace tr::gfx {
       auto [buffer, allocation] = allocator.createBuffer(*bci, *aci);
       allocator.setAllocationName(allocation, name.data());
 
-      return std::make_unique<AllocatedBuffer>(allocator, buffer, allocation);
+      return std::make_unique<AllocatedBuffer>(allocator, buffer, bci->size, allocation);
    }
 
    std::unique_ptr<AllocatedBuffer> Allocator::createStagingBuffer(

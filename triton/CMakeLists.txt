@@ -3,13 +3,12 @@ project("triton")
 set(triton_SRC
    "src/ctx/Context.cxx"
    "src/ctx/GameplayFacade.cxx"
-   "src/ctx/GltfHelper.cxx"
-   "src/gfx/FrameData.cxx"
+   "src/gfx/Frame.cxx"
    "src/gfx/GraphicsDevice.cxx"
    "src/gfx/ImmediateContext.cxx"
    "src/gfx/Pipeline.cxx"
    "src/gfx/VkContext.cxx"
-   "src/gfx/Renderer.cxx"
+   "src/gfx/RenderContext.cxx"
    "src/gfx/vma_raii.cxx"
    "src/gfx/geometry/Vertex.cxx"
    "src/gfx/gui/ImguiHelper.cxx"
@@ -20,6 +19,10 @@ set(triton_SRC
    "src/gp/actions/ActionSystem.cxx"
    "src/gp/ecs/system/CameraSystem.cxx"
    "src/gp/ecs/system/RenderSystem.cxx"
+   "src/gfx/ds/LayoutFactory.cxx"
+   "src/gfx/ds/Layout.cxx"
+   "src/gfx/ds/DescriptorSet.cxx"
+   "src/gfx/ds/DescriptorSetFactory.cxx"
 )
 
 add_library(${PROJECT_NAME} STATIC ${triton_SRC})

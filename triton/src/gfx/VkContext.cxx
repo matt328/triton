@@ -52,9 +52,9 @@ namespace tr::gfx {
 
       commandBuffer->begin(cmdBeginInfo);
       {
-         TracyVkZone(tracyContext, *(*commandBuffer), "immediate submit");
+         TracyVkZone(tracyContext, **commandBuffer, "immediate submit");
          fn(*commandBuffer);
-         TracyVkCollect(tracyContext, *(*commandBuffer));
+         TracyVkCollect(tracyContext, **commandBuffer);
       }
       commandBuffer->end();
 
