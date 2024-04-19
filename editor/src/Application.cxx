@@ -40,6 +40,8 @@ namespace ed {
 
       window.reset(glfwCreateWindow(width, height, windowTitle.data(), nullptr, nullptr));
 
+#ifdef _WIN32
+
       int imageWidth{}, imageHeight{}, channels{};
       unsigned char* iconData = stbi_load((tr::util::Paths::TEXTURES / "icon.png").string().c_str(),
                                           &imageWidth,
@@ -57,7 +59,6 @@ namespace ed {
       icon.pixels = iconData;
       glfwSetWindowIcon(window.get(), 1, &icon);
 
-#ifdef _WIN32
       auto hWnd = glfwGetWin32Window(window.get());
       // Paints the background of the window black
       PAINTSTRUCT ps;
