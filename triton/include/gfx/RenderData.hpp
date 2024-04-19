@@ -18,4 +18,5 @@ namespace tr::gfx {
       std::vector<ObjectData> objectData;
       std::vector<MeshHandle> meshHandles;
    };
+
 }
