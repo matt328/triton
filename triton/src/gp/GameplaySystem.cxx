@@ -59,9 +59,6 @@ namespace tr::gp {
       actionSystem->mapSource(Source{MouseInput::MOVE_Y, SourceType::Float},
                               StateType::Range,
                               ActionType::LookVertical);
-
-      renderData.objectData.reserve(1000);
-      renderData.meshHandles.reserve(1000);
    }
 
    GameplaySystem::~GameplaySystem() {
@@ -81,7 +78,7 @@ namespace tr::gp {
       renderData.meshHandles.clear();
       ecs::RenderDataSystem::update(*registry, renderData);
 
-      renderDataProducer(std::move(renderData));
+      renderDataProducer(renderData);
    }
 
    void GameplaySystem::update() {
