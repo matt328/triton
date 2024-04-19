@@ -270,6 +270,7 @@ namespace tr::gfx {
          frame.updateObjectDataBuffer(renderData.objectData.data(),
                                       sizeof(ObjectData) * renderData.objectData.size());
          frame.getCameraBuffer().updateBufferValue(&renderData.cameraData, sizeof(CameraData));
+
          meshHandlesBuffer.reserve(renderData.meshHandles.size());
          std::copy(renderData.meshHandles.begin(),
                    renderData.meshHandles.end(),
