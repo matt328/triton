@@ -40,7 +40,7 @@ namespace tr::gp {
       GameplaySystem& operator=(GameplaySystem&&) = delete;
 
       void fixedUpdate(const util::Timer& timer);
-      void update();
+      void update(const double blendingFactor);
       void resize(const std::pair<uint32_t, uint32_t>);
 
       // Input Handlers
@@ -61,6 +61,8 @@ namespace tr::gp {
 
       std::unique_ptr<ActionSystem> actionSystem;
 
+      /// This is a preallocated RenderData that the ECS collects all of he GameWorld data into
+      /// before the Renderer takes a copy of it
       gfx::RenderData renderData{};
 
       // This delegate seems overengineered, but keeps the Application from having to #include

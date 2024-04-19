@@ -8,6 +8,8 @@
 #include "gp/ecs/component/Transform.hpp"
 
 namespace tr::gp::ecs::RenderDataSystem {
+
+   /// Only loops through the registry and fills in the given RenderData struct
    void update(entt::registry& registry, gfx::RenderData& renderData) {
 
       const auto cameraEntity = registry.ctx().get<const CurrentCamera>();
