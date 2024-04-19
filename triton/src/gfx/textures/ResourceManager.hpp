@@ -84,7 +84,7 @@ namespace tr::gfx::tx {
       void accessTextures(
           std::function<void(const std::vector<vk::DescriptorImageInfo>&)> fn) const;
 
-      void setRenderData(RenderData&& newRenderData);
+      void setRenderData(RenderData& newRenderData);
       void accessRenderData(std::function<void(RenderData&)> fn);
 
     private:

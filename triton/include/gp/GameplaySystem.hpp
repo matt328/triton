@@ -27,7 +27,7 @@ namespace tr::ctx {
 
 namespace tr::gp {
    using EntityType = entt::entity;
-   using RenderDataProducer = entt::delegate<void(gfx::RenderData)>;
+   using RenderDataProducer = entt::delegate<void(gfx::RenderData&)>;
 
    class GameplaySystem {
     public:

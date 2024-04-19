@@ -8,14 +8,10 @@ namespace tr::gfx {
       RenderData() = default;
       ~RenderData() = default;
 
-      RenderData(const RenderData&) = delete;
-      RenderData& operator=(const RenderData&) = delete;
+      RenderData(const RenderData&) = default;
+      RenderData& operator=(const RenderData&) = default;
 
-      RenderData(RenderData&& other) noexcept
-          : cameraData{std::move(other.cameraData)},
-            objectData{std::move(other.objectData)},
-            meshHandles{std::move(other.meshHandles)} {
-      }
+      RenderData(RenderData&& other) = default;
       RenderData& operator=(RenderData&&) = default;
 
       CameraData cameraData;
