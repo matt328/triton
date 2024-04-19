@@ -34,11 +34,11 @@ namespace tr::gfx::tx {
    ResourceManager::~ResourceManager() {
    }
 
-   void ResourceManager::setRenderData(RenderData&& newRenderData) {
+   void ResourceManager::setRenderData(RenderData& newRenderData) {
       std::lock_guard<LockableBase(std::mutex)> lock(renderDataMutex);
       LockableName(renderDataMutex, "SetRenderData", 13);
       LockMark(renderDataMutex);
-      renderData = std::move(newRenderData);
+      renderData = newRenderData;
    }
 
    void ResourceManager::accessRenderData(std::function<void(RenderData&)> fn) {

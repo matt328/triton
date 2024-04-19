@@ -12,6 +12,7 @@ namespace tr::gfx {
       TextureHandle textureId;
    };
 
+   /// This struct is copyable so make sure you know what you're doing.
    struct CameraData {
       CameraData(glm::mat4 view, glm::mat4 proj, glm::mat4 viewProj)
           : view(view), proj(proj), viewProj(viewProj) {
@@ -24,8 +25,8 @@ namespace tr::gfx {
       CameraData(CameraData&& other) noexcept = default;
       CameraData& operator=(CameraData&&) = default;
 
-      CameraData(const CameraData&) = delete;
-      CameraData& operator=(const CameraData&) = delete;
+      CameraData(const CameraData&) = default;
+      CameraData& operator=(const CameraData&) = default;
 
       glm::mat4 view{};
       glm::mat4 proj{};
