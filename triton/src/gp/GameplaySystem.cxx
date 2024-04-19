@@ -11,6 +11,8 @@
 #include "gp/ecs/system/RenderDataSystem.hpp"
 #include "gp/ecs/system/TransformSystem.hpp"
 #include "gp/ecs/component/Resources.hpp"
+#include <sstream>
+#include <tracy/Tracy.hpp>
 
 namespace tr::gp {
 
@@ -66,24 +68,19 @@ namespace tr::gp {
    };
 
    void GameplaySystem::fixedUpdate([[maybe_unused]] const util::Timer& timer) {
-      TracyMessageL("fixedUpdate");
       ZoneNamedN(upd, "FixedUpdate", true);
 
       ecs::CameraSystem::fixedUpdate(*registry);
       ecs::TransformSystem::update(*registry);
+   }
 
-      // This represents the sync point, and always has to run after all the other systems are
-      // finished for this tick
+   void GameplaySystem::update(const double blendingFactor) {
+      TracyPlot("Physics Blend Factor", blendingFactor);
+      ZoneNamedN(upd, "Update", true);
       renderData.objectData.clear();
       renderData.meshHandles.clear();
       ecs::RenderDataSystem::update(*registry, renderData);
-
       renderDataProducer(renderData);
-   }
-
-   void GameplaySystem::update() {
-      ZoneNamedN(upd, "Update", true);
-      // ecs::RenderSystem::update(*registry, renderObjectProducer, cameraDataProducer);
    }
 
    void GameplaySystem::resize(const std::pair<uint32_t, uint32_t> size) {

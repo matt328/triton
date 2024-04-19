@@ -41,7 +41,7 @@ namespace tr::ctx {
             continue;
          }
          timer.tick([&]() { gameplaySystem->fixedUpdate(timer); });
-         gameplaySystem->update();
+         gameplaySystem->update(timer.getBlendingFactor());
 
          renderContext->render();
          FrameMark;
