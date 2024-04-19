@@ -11,8 +11,6 @@
 #include "gp/ecs/system/RenderDataSystem.hpp"
 #include "gp/ecs/system/TransformSystem.hpp"
 #include "gp/ecs/component/Resources.hpp"
-#include <sstream>
-#include <tracy/Tracy.hpp>
 
 namespace tr::gp {
 
@@ -77,9 +75,12 @@ namespace tr::gp {
    void GameplaySystem::update(const double blendingFactor) {
       TracyPlot("Physics Blend Factor", blendingFactor);
       ZoneNamedN(upd, "Update", true);
+
       renderData.objectData.clear();
       renderData.meshHandles.clear();
+
       ecs::RenderDataSystem::update(*registry, renderData);
+
       renderDataProducer(renderData);
    }
 
