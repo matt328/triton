@@ -78,9 +78,10 @@ namespace tr::gp {
 
       // TODO: implement some logic to move things around
       // and if it looks unsmooth or sus or whatever, then add interpolation based on blending
-      // factor
+      // factor. This probably won't factor in until we have physics and skeletal animation
       renderData.objectData.clear();
-      renderData.meshHandles.clear();
+      renderData.staticMeshData.clear();
+      renderData.terrainMeshData.clear();
 
       ecs::RenderDataSystem::update(*registry, renderData);
 

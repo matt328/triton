@@ -32,6 +32,10 @@ namespace tr::ctx {
    Context::~Context() {
    }
 
+   void Context::setWireframe(bool wireframeEnabled) {
+      renderContext->setDebugRendering(wireframeEnabled);
+   }
+
    void Context::start(std::function<void()> pollFn) {
       running = true;
       while (running) {

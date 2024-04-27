@@ -3,8 +3,8 @@
 #include "gfx/Handles.hpp"
 #include "gfx/RenderData.hpp"
 #include "gfx/geometry/Mesh.hpp"
-#include "gfx/geometry/Vertex.hpp"
 #include "gfx/textures/Texture.hpp"
+#include "gfx/geometry/GeometryHandles.hpp"
 
 #include "util/TaskQueue.hpp"
 
@@ -14,6 +14,11 @@ namespace tr::gfx {
    class Allocator;
    class AllocatedBuffer;
    class AllocatedImage;
+}
+
+namespace tr::gfx::geo {
+   class GeometryData;
+   class GeometryFactory;
 }
 
 namespace tr::gfx::tx {
@@ -44,26 +49,6 @@ namespace tr::gfx::tx {
                              .borderColor = vk::BorderColor::eIntOpaqueBlack,
                              .unnormalizedCoordinates = VK_FALSE};
 
-   /*
-      ResourceManager provides the sync point between game world and renderer.
-      2 types of things need synced, Descriptor Set bindings, and buffer contents.
-      DS Bindings - texture DS will have texture image infos added/removed
-         - this will eventually need kept insync with the material buffer but for now textures are
-      referenced from the ObjectData buffer
-      Buffers - right now PerFrame and ObjectData
-         - PerFrame is only current camera data - calculated by the CameraSystem
-         - ObjectData is every object that needs rendered, and contains mesh handle, texture handle,
-      and transformation matrix and is calculated by the RenderSystem
-
-      I think this data will need to be ~copied~ std::moved into synchronized structures so that the
-      renderer can lock and read a coherent copy of it while the GameWorld system might tick again
-      and produce a new copy of the data during a read. So we need a copy and not a reference to the
-      data or else the data could get changed while the renderer is working with it.
-
-      Data can actually be std::move()'d into the synced render data struct. This will trash the
-      existing temporaries from the systems, so we'll just have to reinit structs and vectors but
-      that's actually what I want to happen.
-   */
    class ResourceManager {
     public:
       ResourceManager(const GraphicsDevice& graphicsDevice);
@@ -74,10 +59,15 @@ namespace tr::gfx::tx {
       ResourceManager& operator=(const ResourceManager&) = delete;
       ResourceManager& operator=(ResourceManager&&) = delete;
 
+      auto createTerrain() -> std::future<ModelHandle>;
+      auto createTerrainInt() -> ModelHandle;
+
       std::future<ModelHandle> loadModelAsync(const std::filesystem::path& filename);
       ModelHandle loadModelInt(const std::filesystem::path& filename);
 
-      std::unique_ptr<Geometry::Mesh<Geometry::Vertex, uint32_t>>& getMesh(MeshHandle meshHandle) {
+      auto createStaticMesh(const geo::GeometryData& geometry) -> MeshHandle;
+
+      auto& getMesh(MeshHandle meshHandle) {
          return meshList.at(meshHandle);
       }
 
@@ -89,10 +79,10 @@ namespace tr::gfx::tx {
 
     private:
       const GraphicsDevice& graphicsDevice;
-      std::unique_ptr<util::TaskQueue> taskQueue;
-      std::unique_ptr<AllocatedBuffer> stagingBuffer;
 
-      std::vector<std::unique_ptr<Geometry::Mesh<Geometry::Vertex, uint32_t>>> meshList;
+      std::unique_ptr<geo::GeometryFactory> geometryFactory;
+      std::unique_ptr<util::TaskQueue> taskQueue;
+      std::vector<geo::Mesh> meshList;
 
       mutable TracyLockable(std::mutex, textureListMutex);
       std::vector<vk::DescriptorImageInfo> textureInfoList;
@@ -100,6 +90,8 @@ namespace tr::gfx::tx {
 
       mutable TracyLockable(std::mutex, renderDataMutex);
       RenderData renderData;
+
+      auto uploadGeometry(const geo::TexturedGeometryHandle& handles) -> ModelHandle;
 
       MeshHandle createMesh(const tinygltf::Model&, const tinygltf::Primitive& primitive);
       TextureHandle createTexture(const tinygltf::Model& model, std::size_t textureIndex);

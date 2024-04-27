@@ -2,12 +2,44 @@
 
 namespace tr::gfx::Helpers {
 
-   SpirvHelper::SpirvHelper() {
+   SpirvHelper::SpirvHelper(const vk::raii::Device& device) : device{device} {
       glslang::InitializeProcess();
    }
 
    SpirvHelper::~SpirvHelper() {
       glslang::FinalizeProcess();
+   }
+
+   auto SpirvHelper::createShaderModule(vk::ShaderStageFlagBits shaderType,
+                                        const std::filesystem::path& filename)
+       -> vk::raii::ShaderModule {
+
+      const auto vertexSpirv = compileShader(shaderType, readShaderFile(filename).data());
+
+      auto vertexShaderCreateInfo = vk::ShaderModuleCreateInfo{.codeSize = 4 * vertexSpirv.size(),
+                                                               .pCode = vertexSpirv.data()};
+
+      return device.createShaderModule(vertexShaderCreateInfo);
+   }
+
+   auto SpirvHelper::readShaderFile(const std::filesystem::path& filename) -> std::string {
+      if (std::ifstream file(filename.string().data(), std::ios::binary); file.is_open()) {
+         file.seekg(0, std::ios::end);
+
+         const std::streampos fileSize = file.tellg();
+
+         file.seekg(0, std::ios::beg);
+
+         std::string shaderCode;
+         shaderCode.resize(fileSize);
+         file.read(shaderCode.data(), fileSize);
+
+         file.close();
+         return shaderCode;
+      }
+      std::stringstream ss;
+      ss << "Failed to read shader from file " << filename.string().data();
+      throw std::runtime_error(ss.str());
    }
 
    std::vector<uint32_t> SpirvHelper::compileShader(const vk::ShaderStageFlagBits shaderType,

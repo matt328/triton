@@ -7,7 +7,7 @@
 
 namespace tr::gp::ecs::CameraSystem {
 
-   const auto CameraSpeed = 0.5f;
+   const auto CameraSpeed = 2.f;
    const auto MouseSensitivity = 0.025f;
    const auto PitchExtent = 89.f;
 

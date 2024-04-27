@@ -10,6 +10,8 @@ namespace tr::ctx {
    template <typename T>
    using OptionalRef = std::optional<std::reference_wrapper<T>>;
 
+   using MeshHandles = std::unordered_map<gfx::MeshHandle, gfx::TextureHandle>;
+
    struct EditorInfoComponent {
       std::string name;
       std::optional<std::string> sourceMesh;
@@ -28,23 +30,26 @@ namespace tr::ctx {
       GameplayFacade& operator=(const GameplayFacade&) = delete;
       GameplayFacade& operator=(GameplayFacade&&) = delete;
 
-      gp::EntityType createStaticMultiMeshEntity(
-          const std::unordered_map<gfx::MeshHandle, gfx::TextureHandle> meshes);
+      auto createStaticMultiMeshEntity(const MeshHandles meshes) -> gp::EntityType;
 
-      gp::EntityType createCamera(uint32_t width,
-                                  uint32_t height,
-                                  float fov,
-                                  float zNear,
-                                  float zFar,
-                                  glm::vec3 position,
-                                  std::optional<std::string> name = std::nullopt);
+      auto createTerrainEntity(const MeshHandles meshes) -> gp::EntityType;
 
-      void setCurrentCamera(gp::EntityType currentCamera);
+      auto createTerrainMesh(const uint32_t size) -> std::future<gfx::ModelHandle>;
 
-      [[nodiscard]] std::vector<gp::EntityType>& getAllEntities();
+      auto createCamera(uint32_t width,
+                        uint32_t height,
+                        float fov,
+                        float zNear,
+                        float zFar,
+                        glm::vec3 position,
+                        std::optional<std::string> name = std::nullopt) -> gp::EntityType;
+
+      auto setCurrentCamera(gp::EntityType currentCamera) -> void;
+
+      [[nodiscard]] auto getAllEntities() -> std::vector<gp::EntityType>&;
 
       template <typename T>
-      OptionalRef<T> getComponent(gp::EntityType entityId) {
+      auto getComponent(gp::EntityType entityId) -> OptionalRef<T> {
          if (gameplaySystem.registry->all_of<T>(entityId)) {
             auto& v = gameplaySystem.registry->get<T>(entityId);
             return OptionalRef<T>{std::ref(v)};
@@ -53,17 +58,17 @@ namespace tr::ctx {
          }
       }
 
-      OptionalRef<gp::ecs::Transform> getEntityTransform(gp::EntityType entityId);
+      auto getEntityTransform(gp::EntityType entityId) -> OptionalRef<gp::ecs::Transform>;
 
-      EditorInfoComponent& getEditorInfo(gp::EntityType entityId);
+      auto getEditorInfo(gp::EntityType entityId) -> EditorInfoComponent&;
 
-      OptionalRef<gp::ecs::Camera> getCameraComponent(const gp::EntityType entity);
+      auto getCameraComponent(const gp::EntityType entity) -> OptionalRef<gp::ecs::Camera>;
 
-      std::string& getActiveCameraName();
+      auto getActiveCameraName() -> std::string&;
 
-      void clear();
+      auto clear() -> void;
 
-      std::future<gfx::ModelHandle> loadModelAsync(const std::filesystem::path& path);
+      auto loadModelAsync(const std::filesystem::path& path) -> std::future<gfx::ModelHandle>;
 
     private:
       bool debugEnabled{};

@@ -39,6 +39,8 @@ namespace tr::ctx {
          return *gameplayFacade;
       }
 
+      void setWireframe(bool wireframeEnabled);
+
     private:
       bool running{}, paused{};
       tr::util::Timer timer;

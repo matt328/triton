@@ -38,9 +38,15 @@ namespace ed::ui {
          this->toggleFullscreenFn = fn;
       }
 
+      void setWireframeFn(std::function<void(bool)> fn) {
+         this->wireframeCallback = fn;
+      }
+
     private:
       tr::ctx::GameplayFacade& facade;
       std::vector<std::future<tr::gfx::ModelHandle>> modelFutures{};
+
+      std::vector<std::future<tr::gfx::ModelHandle>> terrainFutures{};
 
       // HACK: get this from the application somehow instead of tracking it in 2 places
       bool fullscreen{};
@@ -56,10 +62,17 @@ namespace ed::ui {
       entt::delegate<void(void)> quitDelegate{};
 
       std::function<void(void)> toggleFullscreenFn;
+      std::function<void(bool)> wireframeCallback;
+      bool enableWireframe{false};
+
+      void handleModelFutures();
+      void handleTerrainFutures();
 
       void renderDockSpace();
       void renderMenuBar();
       void renderEntityEditor();
       void renderDialogs();
+
+      void renderDebugWindow();
    };
 }
