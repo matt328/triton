@@ -1,3 +1,6 @@
 [submodule "vcpkg"]
 	path = vcpkg
 	url = https://github.com/Microsoft/vcpkg.git
+[submodule "vendor/ozz-animation"]
+	path = vendor/ozz-animation
+	url = git@github.com:guillaumeblanc/ozz-animation.git
