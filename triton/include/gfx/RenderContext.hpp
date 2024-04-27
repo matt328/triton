@@ -2,10 +2,12 @@
 
 #include "gfx/ObjectData.hpp"
 #include "gfx/GraphicsDevice.hpp"
+#include "gfx/PipelineBuilder.hpp"
 #include "gfx/ds/DescriptorSetFactory.hpp"
 #include "gfx/textures/ResourceManager.hpp"
 
 #include <entt/signal/fwd.hpp>
+#include <vulkan/vulkan_raii.hpp>
 
 namespace tr::gfx {
    struct RenderObject;
@@ -17,6 +19,7 @@ namespace tr::gfx {
    class Allocator;
    class AllocatedImage;
    class Pipeline;
+   class PipelineBuilder;
 
    namespace tx {
       class ResourceManager;
@@ -63,14 +66,31 @@ namespace tr::gfx {
          resizeDelegate(graphicsDevice->getCurrentSize());
       }
 
+      void setDebugRendering(bool wireframeEnabled) {
+         debugRendering = wireframeEnabled;
+      }
+
     private:
       static constexpr int FRAMES_IN_FLIGHT = 2;
 
       bool guiEnabled{};
+      bool debugRendering{false};
 
       std::unique_ptr<GraphicsDevice> graphicsDevice;
 
-      std::unique_ptr<Pipeline> staticModelPipeline;
+      std::unique_ptr<PipelineBuilder> pb;
+
+      vk::Viewport mainViewport;
+      vk::Rect2D mainScissor;
+
+      std::unique_ptr<vk::raii::Pipeline> staticModelPipeline;
+      std::unique_ptr<vk::raii::PipelineLayout> staticModelPipelineLayout;
+
+      std::unique_ptr<vk::raii::Pipeline> terrainPipeline;
+      std::unique_ptr<vk::raii::PipelineLayout> terrainPipelineLayout;
+
+      std::unique_ptr<vk::raii::Pipeline> debugPipeline;
+      std::unique_ptr<vk::raii::PipelineLayout> debugPipelineLayout;
 
       std::unique_ptr<AllocatedImage> depthImage;
       std::shared_ptr<vk::raii::ImageView> depthImageView;
@@ -95,7 +115,9 @@ namespace tr::gfx {
 
       ResizeDelegateType resizeDelegate{};
 
-      std::vector<MeshHandle> meshHandlesBuffer;
+      std::vector<MeshData> staticMeshDataList;
+      std::vector<MeshData> terrainDataList;
+      PushConstants pushConstants;
 
       void initDepthResources();
 

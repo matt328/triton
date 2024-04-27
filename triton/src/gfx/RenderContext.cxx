@@ -1,7 +1,6 @@
 #include "gfx/RenderContext.hpp"
 #include "Frame.hpp"
 #include "GraphicsDevice.hpp"
-#include "gfx/Handles.hpp"
 #include "gfx/RenderObject.hpp"
 
 #include "gfx/ObjectData.hpp"
@@ -10,13 +9,15 @@
 #include "gfx/gui/ImguiHelper.hpp"
 
 #include "helpers/Vulkan.hpp"
+#include "helpers/SpirvHelper.hpp"
 #include "util/Paths.hpp"
 #include "gfx/textures/ResourceManager.hpp"
 #include "gfx/VkContext.hpp"
-#include "gfx/Pipeline.hpp"
 #include "gfx/ds/LayoutFactory.hpp"
 #include "gfx/ds/DescriptorSetFactory.hpp"
 #include "gfx/ds/DescriptorSet.hpp"
+#include "gfx/PipelineBuilder.hpp"
+#include <vulkan/vulkan_enums.hpp>
 
 namespace tr::gfx {
 
@@ -29,52 +30,67 @@ namespace tr::gfx {
                                                              *layoutFactory,
                                                              FRAMES_IN_FLIGHT);
 
-      // Create Static Model Pipeline Object
-      {
-         // How much of this will be the same for all this engine's pipelines?
-         // Probably alot of it, and the RenderContext's job is to know about all the different
-         // pipelines and descriptors and vertex formats
-         /*
-            Make all this as expressive as possible. The pipeline should take in only a list of
-            Layouts for now.
-         */
-         const auto setLayouts =
-             std::array{layoutFactory->getVkLayout(ds::LayoutHandle::Bindless),
-                        layoutFactory->getVkLayout(ds::LayoutHandle::ObjectData),
-                        layoutFactory->getVkLayout(ds::LayoutHandle::PerFrame)};
+      const auto viewportSize = graphicsDevice->getSwapchainExtent();
+      mainViewport = vk::Viewport{.x = 0.f,
+                                  .y = 0.f,
+                                  .width = static_cast<float>(viewportSize.width),
+                                  .height = static_cast<float>(viewportSize.height),
+                                  .minDepth = 0.f,
+                                  .maxDepth = 1.f};
+      mainScissor = vk::Rect2D{.offset = {0, 0}, .extent = viewportSize};
 
-         vk::PipelineLayoutCreateInfo pipelineLayoutCreateInfo{.setLayoutCount = setLayouts.size(),
-                                                               .pSetLayouts = setLayouts.data()};
+      auto helper = std::make_unique<Helpers::SpirvHelper>(graphicsDevice->getVulkanDevice());
 
-         // Configure Vertex Attributes
-         const auto bindingDescription = Geometry::Vertex::inputBindingDescription(0);
-         const auto attributeDescriptions =
-             Geometry::Vertex::inputAttributeDescriptions(0,
-                                                          {Geometry::VertexComponent::Position,
-                                                           Geometry::VertexComponent::Color,
-                                                           Geometry::VertexComponent::UV});
+      auto vsm = helper->createShaderModule(vk::ShaderStageFlagBits::eVertex,
+                                            util::Paths::SHADERS / "shader.vert");
+      auto fsm = helper->createShaderModule(vk::ShaderStageFlagBits::eFragment,
+                                            util::Paths::SHADERS / "shader.frag");
 
-         const auto vertexInputStateCreateInfo = vk::PipelineVertexInputStateCreateInfo{
-             .vertexBindingDescriptionCount = 1,
-             .pVertexBindingDescriptions = &bindingDescription,
-             .vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size()),
-             .pVertexAttributeDescriptions = attributeDescriptions.data()};
+      auto setLayouts = std::array{layoutFactory->getVkLayout(ds::LayoutHandle::Bindless),
+                                   layoutFactory->getVkLayout(ds::LayoutHandle::ObjectData),
+                                   layoutFactory->getVkLayout(ds::LayoutHandle::PerFrame)};
 
-         const auto colorFormat = vk::Format::eR16G16B16A16Sfloat;
-         const auto depthFormat = Helpers::findDepthFormat(graphicsDevice->getPhysicalDevice());
+      pb = std::make_unique<PipelineBuilder>(graphicsDevice->getVulkanDevice());
 
-         const auto renderingCreateInfo =
-             vk::PipelineRenderingCreateInfo{.colorAttachmentCount = 1,
-                                             .pColorAttachmentFormats = &colorFormat,
-                                             .depthAttachmentFormat = depthFormat};
+      pb->setVertexShaderStage(vsm);
+      pb->setFragmentShaderStage(fsm);
+      pb->setInputTopology(vk::PrimitiveTopology::eTriangleList);
+      pb->setPolygonMode(vk::PolygonMode::eFill);
+      pb->setCullMode(vk::CullModeFlagBits::eBack, vk::FrontFace::eCounterClockwise);
+      pb->setMultisamplingNone();
+      pb->disableBlending();
+      pb->setColorAttachmentFormat(vk::Format::eR16G16B16A16Sfloat);
+      pb->setDepthFormat(Helpers::findDepthFormat(graphicsDevice->getPhysicalDevice()));
+      pb->setDefaultDepthStencil();
 
-         staticModelPipeline = std::make_unique<Pipeline>(*graphicsDevice,
-                                                          pipelineLayoutCreateInfo,
-                                                          vertexInputStateCreateInfo,
-                                                          renderingCreateInfo,
-                                                          util::Paths::SHADERS / "shader.vert",
-                                                          util::Paths::SHADERS / "shader.frag");
-      }
+      staticModelPipelineLayout = pb->buildPipelineLayout(setLayouts);
+      staticModelPipeline = pb->buildPipeline(*staticModelPipelineLayout);
+
+      auto terrainVertex = helper->createShaderModule(vk::ShaderStageFlagBits::eVertex,
+                                                      util::Paths::SHADERS / "terrain.vert");
+      auto terrainFragment = helper->createShaderModule(vk::ShaderStageFlagBits::eFragment,
+                                                        util::Paths::SHADERS / "terrain.frag");
+
+      pb->clearShaderStages();
+      pb->setVertexShaderStage(terrainVertex);
+      pb->setFragmentShaderStage(terrainFragment);
+      pb->setPolygonMode(vk::PolygonMode::eFill);
+
+      terrainPipelineLayout = pb->buildPipelineLayout(setLayouts);
+      terrainPipeline = pb->buildPipeline(*terrainPipelineLayout);
+
+      auto debugVertex = helper->createShaderModule(vk::ShaderStageFlagBits::eVertex,
+                                                    util::Paths::SHADERS / "debug.vert");
+      auto debugFragment = helper->createShaderModule(vk::ShaderStageFlagBits::eFragment,
+                                                      util::Paths::SHADERS / "debug.frag");
+
+      pb->clearShaderStages();
+      pb->setVertexShaderStage(debugVertex);
+      pb->setFragmentShaderStage(debugFragment);
+      pb->setPolygonMode(vk::PolygonMode::eLine);
+
+      debugPipelineLayout = pb->buildPipelineLayout(setLayouts);
+      debugPipeline = pb->buildPipeline(*debugPipelineLayout);
 
       initDepthResources();
 
@@ -148,7 +164,17 @@ namespace tr::gfx {
          return;
       }
 
-      staticModelPipeline->resize({size.width, size.height});
+      // resize Viewport and Scissor Rect
+      mainViewport = vk::Viewport{.x = 0.f,
+                                  .y = 0.f,
+                                  .width = static_cast<float>(size.width),
+                                  .height = static_cast<float>(size.height),
+                                  .minDepth = 0.f,
+                                  .maxDepth = 1.f};
+
+      mainScissor = vk::Rect2D{.offset = {0, 0}, .extent = size};
+
+      // staticModelPipeline->resize({size.width, size.height});
 
       resizeDelegate(graphicsDevice->getCurrentSize());
 
@@ -265,31 +291,30 @@ namespace tr::gfx {
          one frame.  Meanwhile in the render thread, also lock on reading the data, write it into
          the current frame's buffers, then release the lock.
       */
-      meshHandlesBuffer.clear();
+      staticMeshDataList.clear();
+      terrainDataList.clear();
+
       resourceManager->accessRenderData([&frame, this](RenderData& renderData) {
          frame.updateObjectDataBuffer(renderData.objectData.data(),
                                       sizeof(ObjectData) * renderData.objectData.size());
          frame.getCameraBuffer().updateBufferValue(&renderData.cameraData, sizeof(CameraData));
 
-         meshHandlesBuffer.reserve(renderData.meshHandles.size());
-         std::copy(renderData.meshHandles.begin(),
-                   renderData.meshHandles.end(),
-                   std::back_inserter(meshHandlesBuffer));
+         staticMeshDataList.reserve(renderData.staticMeshData.size());
+         std::copy(renderData.staticMeshData.begin(),
+                   renderData.staticMeshData.end(),
+                   std::back_inserter(staticMeshDataList));
+
+         terrainDataList.reserve(renderData.terrainMeshData.size());
+         std::copy(renderData.terrainMeshData.begin(),
+                   renderData.terrainMeshData.end(),
+                   std::back_inserter(terrainDataList));
+
+         pushConstants = renderData.pushConstants;
       });
 
       auto& objectDataSet = dsFactory->getDescriptorSet(ds::SetHandle::ObjectData, currentFrame);
       auto& perFrameSet = dsFactory->getDescriptorSet(ds::SetHandle::PerFrame, currentFrame);
       auto& textureSet = dsFactory->getDescriptorSet(ds::SetHandle::Bindless, currentFrame);
-
-      /* Instead of doing this every frame, maybe be able to create DescriptorSets with buffers
-       permanently attached, associated with them at creation time, and the writes updated once on
-       init.
-       Eventually the Vertex and Index data will go into buffers/descriptors similar to the
-       textures, and potentially need to be updated once per frame.
-
-       The PerFrame data won't ever be as dynamic, and can stay in a uniform buffer, ie. compute
-       pipeline won't be writing to it like the object buffer (currently a storage buffer) will be
-      */
 
       objectDataSet.writeBuffer(frame.getObjectDataBuffer(), sizeof(ObjectData) * 128);
       perFrameSet.writeBuffer(frame.getCameraBuffer(), sizeof(CameraData));
@@ -310,31 +335,75 @@ namespace tr::gfx {
       cmd.begin(
           vk::CommandBufferBeginInfo{.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse});
       {
-         auto ds = std::array<vk::DescriptorSet, 3>{textureSet.getVkDescriptorSet(),
-                                                    objectDataSet.getVkDescriptorSet(),
-                                                    perFrameSet.getVkDescriptorSet()};
+         auto ds = std::array{textureSet.getVkDescriptorSet(),
+                              objectDataSet.getVkDescriptorSet(),
+                              perFrameSet.getVkDescriptorSet()};
 
          cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
-                                staticModelPipeline->getPipelineLayout(),
+                                **staticModelPipelineLayout,
                                 0,
                                 ds,
                                 nullptr);
 
          frame.prepareFrame();
+
+         // Static Models
+         cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, **staticModelPipeline);
+         cmd.setViewportWithCount(mainViewport);
+         cmd.setScissorWithCount(mainScissor);
          {
-            staticModelPipeline->bind(cmd);
+            for (const auto& meshData : staticMeshDataList) {
+               const auto& mesh = resourceManager->getMesh(meshData.handle);
+
+               cmd.bindVertexBuffers(0, mesh.vertexBuffer->getBuffer(), {0});
+               cmd.bindIndexBuffer(mesh.indexBuffer->getBuffer(), 0, vk::IndexType::eUint32);
+
+               // instanceId becomes gl_BaseInstance in the shader
+               cmd.drawIndexed(mesh.indicesCount, 1, 0, 0, meshData.objectDataId);
+            }
+         }
+
+         // Terrain
+         cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, **terrainPipeline);
+         {
+            cmd.pushConstants<PushConstants>(**terrainPipelineLayout,
+                                             vk::ShaderStageFlagBits::eVertex |
+                                                 vk::ShaderStageFlagBits::eFragment,
+                                             0,
+                                             pushConstants);
+            for (const auto& meshData : terrainDataList) {
+               const auto& mesh = resourceManager->getMesh(meshData.handle);
+
+               cmd.bindVertexBuffers(0, mesh.vertexBuffer->getBuffer(), {0});
+               cmd.bindIndexBuffer(mesh.indexBuffer->getBuffer(), 0, vk::IndexType::eUint32);
+
+               // instanceId becomes gl_BaseInstance in the shader
+               cmd.drawIndexed(mesh.indicesCount, 1, 0, 0, meshData.objectDataId);
+            }
+         }
+
+         // Wireframe
+         if (debugRendering) {
+            cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, **debugPipeline);
             {
-               uint32_t i = 0;
-               for (const auto& meshHandle : meshHandlesBuffer) {
-                  const auto& mesh = resourceManager->getMesh(meshHandle);
+               for (const auto& meshData : terrainDataList) {
+                  const auto& mesh = resourceManager->getMesh(meshData.handle);
 
-                  cmd.bindVertexBuffers(0, mesh->getVertexBuffer().getBuffer(), {0});
-                  cmd.bindIndexBuffer(mesh->getIndexBuffer().getBuffer(),
-                                      0,
-                                      vk::IndexType::eUint32);
+                  cmd.bindVertexBuffers(0, mesh.vertexBuffer->getBuffer(), {0});
+                  cmd.bindIndexBuffer(mesh.indexBuffer->getBuffer(), 0, vk::IndexType::eUint32);
 
-                  cmd.drawIndexed(mesh->getIndicesCount(), 1, 0, 0, i);
-                  i++;
+                  // instanceId becomes gl_BaseInstance in the shader
+                  cmd.drawIndexed(mesh.indicesCount, 1, 0, 0, meshData.objectDataId);
+               }
+
+               for (const auto& meshData : staticMeshDataList) {
+                  const auto& mesh = resourceManager->getMesh(meshData.handle);
+
+                  cmd.bindVertexBuffers(0, mesh.vertexBuffer->getBuffer(), {0});
+                  cmd.bindIndexBuffer(mesh.indexBuffer->getBuffer(), 0, vk::IndexType::eUint32);
+
+                  // instanceId becomes gl_BaseInstance in the shader
+                  cmd.drawIndexed(mesh.indicesCount, 1, 0, 0, meshData.objectDataId);
                }
             }
          }

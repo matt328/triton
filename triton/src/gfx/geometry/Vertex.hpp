@@ -1,6 +1,6 @@
 #pragma once
 
-namespace tr::gfx::Geometry {
+namespace tr::gfx::geo {
    enum class VertexComponent {
       Position,
       Normal,

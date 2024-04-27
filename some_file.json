@@ -5,111 +5,82 @@
     {
       "components": [
         {
+          "type": "transform",
+          "position": {
+            "x": 0.0,
+            "y": -702.0,
+            "z": 0.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          }
+        },
+        {
+          "type": "editor-info",
+          "name": "gltf model"
+        }
+      ]
+    },
+    {
+      "components": [
+        {
+          "type": "transform",
+          "position": {
+            "x": 200.0,
+            "y": 1000.0,
+            "z": 200.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          }
+        },
+        {
+          "type": "editor-info",
+          "name": "PushConstants"
+        }
+      ]
+    },
+    {
+      "components": [
+        {
+          "type": "transform",
+          "position": {
+            "x": -550.0,
+            "y": -1000.0,
+            "z": -5700.0
+          },
+          "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          }
+        },
+        {
+          "type": "editor-info",
+          "name": "Terrain"
+        }
+      ]
+    },
+    {
+      "components": [
+        {
           "type": "editor-info",
           "name": "Default Camera"
         },
         {
           "type": "camera",
-          "yaw": -90.0,
-          "pitch": 0.0,
+          "yaw": -399.8995666503906,
+          "pitch": -12.8250093460083,
           "fov": 60.0,
           "position": {
-            "x": 1.0,
-            "y": 1.0,
-            "z": 3.0
+            "x": -244.88914489746094,
+            "y": -546.6640014648438,
+            "z": 168.05703735351563
           }
-        }
-      ]
-    },
-    {
-      "components": [
-        {
-          "type": "transform",
-          "position": {
-            "x": 0.0,
-            "y": 0.20000000298023224,
-            "z": 0.0
-          },
-          "rotation": {
-            "x": 0.0,
-            "y": 0.0,
-            "z": 0.0
-          }
-        },
-        {
-          "type": "editor-info",
-          "name": "Grass Plane",
-          "sourceMesh": "C:\\Users\\Matt\\Projects\\triton\\assets\\models\\area.gltf",
-          "sourceTexture": "C:\\Users\\Matt\\Projects\\triton\\assets\\textures\\grass.png"
-        }
-      ]
-    },
-    {
-      "components": [
-        {
-          "type": "transform",
-          "position": {
-            "x": 0.0,
-            "y": 0.6000000238418579,
-            "z": 0.0
-          },
-          "rotation": {
-            "x": 0.0,
-            "y": 0.0,
-            "z": 0.0
-          }
-        },
-        {
-          "type": "editor-info",
-          "name": "Viking Room #3",
-          "sourceMesh": "C:\\Users\\Matt\\Projects\\triton\\assets\\models\\viking_room.gltf",
-          "sourceTexture": "C:\\Users\\Matt\\Projects\\triton\\assets\\textures\\viking_room.png"
-        }
-      ]
-    },
-    {
-      "components": [
-        {
-          "type": "transform",
-          "position": {
-            "x": 0.0,
-            "y": 0.0,
-            "z": -2.700000047683716
-          },
-          "rotation": {
-            "x": 0.0,
-            "y": 0.0,
-            "z": 0.0
-          }
-        },
-        {
-          "type": "editor-info",
-          "name": "Viking Room #2",
-          "sourceMesh": "C:\\Users\\Matt\\Projects\\triton\\assets\\models\\viking_room.gltf",
-          "sourceTexture": "C:\\Users\\Matt\\Projects\\triton\\assets\\textures\\viking_room.png"
-        }
-      ]
-    },
-    {
-      "components": [
-        {
-          "type": "transform",
-          "position": {
-            "x": 1.7999999523162842,
-            "y": 0.0,
-            "z": 0.0
-          },
-          "rotation": {
-            "x": 0.0,
-            "y": 0.0,
-            "z": 0.0
-          }
-        },
-        {
-          "type": "editor-info",
-          "name": "Viking Room #1",
-          "sourceMesh": "C:\\Users\\Matt\\Projects\\triton\\assets\\models\\viking_room.gltf",
-          "sourceTexture": "C:\\Users\\Matt\\Projects\\triton\\assets\\textures\\viking_room.png"
         }
       ]
     }

@@ -7,7 +7,7 @@ set(triton_SRC
    "src/gfx/Frame.cxx"
    "src/gfx/GraphicsDevice.cxx"
    "src/gfx/ImmediateContext.cxx"
-   "src/gfx/Pipeline.cxx"
+   "src/gfx/PipelineBuilder.cxx"
    "src/gfx/VkContext.cxx"
    "src/gfx/RenderContext.cxx"
    "src/gfx/vma_raii.cxx"
@@ -27,6 +27,9 @@ set(triton_SRC
    "src/gfx/ds/Layout.cxx"
    "src/gfx/ds/DescriptorSet.cxx"
    "src/gfx/ds/DescriptorSetFactory.cxx"
+
+   "src/ct/Heightfield.cxx"
+   "src/gfx/geometry/GeometryFactory.cxx"
 )
 
 add_library(${PROJECT_NAME} STATIC ${triton_SRC})
@@ -61,6 +64,8 @@ find_package(spirv_cross_glsl CONFIG REQUIRED)
 find_package(spirv_cross_cpp CONFIG REQUIRED)
 find_package(VulkanMemoryAllocator CONFIG REQUIRED)
 find_package(unofficial-vulkan-memory-allocator-hpp CONFIG REQUIRED)
+find_package(unofficial-noise CONFIG REQUIRED)
+find_package(unofficial-noiseutils CONFIG REQUIRED)
 find_package(Vulkan REQUIRED)
 
 target_compile_definitions(${PROJECT_NAME}
@@ -95,6 +100,7 @@ target_precompile_headers(${PROJECT_NAME}
    <map>
    <mutex>
    <optional>
+   <random>
    <ranges>
    <set>
    <sstream>
@@ -134,6 +140,8 @@ target_link_libraries(${PROJECT_NAME}
    spirv-cross-core
    spirv-cross-cpp
    Tracy::TracyClient
+   unofficial::noise::noise
+   unofficial::noiseutils::noiseutils
    unofficial::VulkanMemoryAllocator-Hpp::VulkanMemoryAllocator-Hpp
    ${Vulkan_LIBRARIES}
 )

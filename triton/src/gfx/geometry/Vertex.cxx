@@ -1,6 +1,6 @@
 #include "Vertex.hpp"
 
-namespace tr::gfx::Geometry {
+namespace tr::gfx::geo {
    vk::VertexInputBindingDescription Vertex::vertexInputBindingDescription;
    std::vector<vk::VertexInputAttributeDescription> Vertex::vertexInputAttributeDescriptions;
    vk::PipelineVertexInputStateCreateInfo Vertex::pipelineVertexInputStateCreateInfo;

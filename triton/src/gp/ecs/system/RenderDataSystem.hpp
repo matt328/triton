@@ -7,5 +7,5 @@ namespace tr::gfx {
 }
 
 namespace tr::gp::ecs::RenderDataSystem {
-   void update(entt::registry& registry, gfx::RenderData& renderData);
+   void update(const entt::registry& registry, gfx::RenderData& renderData);
 }
