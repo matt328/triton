@@ -20,7 +20,7 @@ namespace ed {
    constexpr auto MinHeight = 300;
    constexpr auto MinWidth = 200;
    constexpr auto ZNear = 0.1f;
-   constexpr auto ZFar = 10000.f;
+   constexpr auto ZFar = 1000000.f;
    constexpr auto Fov = 60.f;
    constexpr auto CamStart = glm::vec3{1.f, 1.f, 3.f};
 
@@ -111,6 +111,7 @@ namespace ed {
 
       manager->addQuitListener<&tr::ctx::Context::hostWindowClosed>(context.get());
       manager->setFullscreenFn([this]() { toggleFullscreen(*this); });
+      manager->setWireframeFn([this](bool b) { context->setWireframe(b); });
 
       auto& facade = context->getGameplayFacade();
 
@@ -129,7 +130,6 @@ namespace ed {
          ImGui_ImplVulkan_NewFrame();
          ImGui_ImplGlfw_NewFrame();
          ImGui::NewFrame();
-         ImGui::ShowDemoWindow();
 
          manager->render();
 

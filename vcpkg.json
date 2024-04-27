@@ -8,6 +8,7 @@
       "glfw3",
       "glm",
       "glslang",
+      "libnoise",
       "nlohmann-json",
       "platform-folders",
       "spirv-cross",

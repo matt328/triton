@@ -1,7 +1,6 @@
 #include "GraphicsDevice.hpp"
 #include "helpers/Vulkan.hpp"
 #include "ImmediateContext.hpp"
-#include "geometry/MeshFactory.hpp"
 #include "vma_raii.hpp"
 #include "VkContext.hpp"
 

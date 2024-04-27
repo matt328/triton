@@ -1,12 +1,16 @@
 #include "ctx/GameplayFacade.hpp"
 
+#include "gfx/Handles.hpp"
 #include "gp/GameplaySystem.hpp"
 #include "gfx/RenderContext.hpp"
 
+#include "gp/ecs/component/DebugConstants.hpp"
 #include "gp/ecs/component/Renderable.hpp"
+#include "gp/ecs/component/Terrain.hpp"
 #include "gp/ecs/component/Transform.hpp"
 #include "gp/ecs/component/Camera.hpp"
 #include "gp/ecs/component/Resources.hpp"
+#include "gp/ecs/component/DebugConstants.hpp"
 
 namespace tr::ctx {
    GameplayFacade::GameplayFacade(gp::GameplaySystem& gameplaySystem,
@@ -18,12 +22,39 @@ namespace tr::ctx {
    GameplayFacade::~GameplayFacade() {
    }
 
+   auto GameplayFacade::createTerrainEntity(const MeshHandles handles) -> gp::EntityType {
+      auto e = gameplaySystem.registry->create();
+
+      gameplaySystem.registry->emplace<gp::ecs::Renderable>(e, handles);
+      gameplaySystem.registry->emplace<gp::ecs::TerrainMarker>(e);
+      gameplaySystem.registry->emplace<gp::ecs::Transform>(e,
+                                                           glm::zero<glm::vec3>(),
+                                                           glm::vec3(-550.f, -1000.f, -5700.f));
+
+      if (debugEnabled) {
+         gameplaySystem.registry->emplace<EditorInfoComponent>(e, "Terrain");
+      }
+
+      auto debugConstants = gameplaySystem.registry->create();
+      gameplaySystem.registry->emplace<gp::ecs::Transform>(debugConstants,
+                                                           glm::zero<glm::vec3>(),
+                                                           glm::vec3(200.f, 1000.f, 200.f));
+      gameplaySystem.registry->emplace<gp::ecs::DebugConstants>(debugConstants, 16.f);
+      if (debugEnabled) {
+         gameplaySystem.registry->emplace<EditorInfoComponent>(debugConstants, "PushConstants");
+      }
+      return e;
+   }
+
+   auto GameplayFacade::createTerrainMesh(const uint32_t size) -> std::future<gfx::ModelHandle> {
+      return renderer.getResourceManager().createTerrain();
+   }
+
    std::future<gfx::ModelHandle> GameplayFacade::loadModelAsync(const std::filesystem::path& path) {
       return renderer.getResourceManager().loadModelAsync(path.string());
    }
 
-   gp::EntityType GameplayFacade::createStaticMultiMeshEntity(
-       const std::unordered_map<gfx::MeshHandle, gfx::TextureHandle> meshes) {
+   gp::EntityType GameplayFacade::createStaticMultiMeshEntity(MeshHandles meshes) {
       auto e = gameplaySystem.registry->create();
       gameplaySystem.registry->emplace<gp::ecs::Renderable>(e, meshes);
       gameplaySystem.registry->emplace<gp::ecs::Transform>(e);

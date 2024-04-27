@@ -3,6 +3,7 @@
 #include "Properties.hpp"
 #include "ProjectFile.hpp"
 #include "RobotoRegular.h"
+#include "gp/ecs/component/DebugConstants.hpp"
 
 namespace ed::ui {
    Manager::Manager(tr::ctx::GameplayFacade& facade) : facade{facade} {
@@ -42,6 +43,39 @@ namespace ed::ui {
 
    void Manager::render() {
       ZoneNamedN(guiRender, "Gui Render", true);
+      handleTerrainFutures();
+      handleModelFutures();
+
+      if (wireframeCallback) {
+         wireframeCallback(enableWireframe);
+      }
+
+      renderDockSpace();
+      renderMenuBar();
+      renderEntityEditor();
+      renderDialogs();
+      renderDebugWindow();
+   }
+
+   void Manager::handleTerrainFutures() {
+      for (auto it = terrainFutures.begin(); it != terrainFutures.end();) {
+         auto status = it->wait_for(std::chrono::seconds(0));
+         if (status == std::future_status::ready) {
+            ZoneNamedN(loadComplete, "Creating Terrain Entities", true);
+            try {
+               auto r = it->get();
+               facade.createTerrainEntity(r);
+            } catch (const std::exception& e) {
+               Log::error << "error loading model: " << e.what() << std::endl;
+            }
+            it = terrainFutures.erase(it);
+         } else {
+            ++it;
+         }
+      }
+   }
+
+   void Manager::handleModelFutures() {
       for (auto it = modelFutures.begin(); it != modelFutures.end();) {
          auto status = it->wait_for(std::chrono::seconds(0));
          if (status == std::future_status::ready) {
@@ -57,10 +91,6 @@ namespace ed::ui {
             ++it;
          }
       }
-      renderDockSpace();
-      renderMenuBar();
-      renderEntityEditor();
-      renderDialogs();
    }
 
    void Manager::renderDockSpace() {
@@ -225,32 +255,37 @@ namespace ed::ui {
             if (selectedEntity.has_value()) {
                const auto maybeTransform = facade.getComponent<tr::gp::ecs::Transform>(
                    static_cast<entt::entity>(selectedEntity.value()));
+               const auto maybeDebug = facade.getComponent<tr::gp::ecs::DebugConstants>(
+                   static_cast<entt::entity>(selectedEntity.value()));
                if (maybeTransform.has_value()) {
                   auto& transform = maybeTransform.value().get();
                   ImGui::SeparatorText("Transform");
-                  ImGui::DragFloat3("Position", glm::value_ptr(transform.position), .1f);
+                  ImGui::DragFloat3("Position", glm::value_ptr(transform.position), 1.f);
                   ImGui::DragFloat3("Rotation",
                                     glm::value_ptr(transform.rotation),
                                     .1f,
                                     -180.f,
                                     180.f);
-                  ImGui::SeparatorText("Renderable");
+               }
+               if (maybeDebug.has_value()) {
+                  auto& d = maybeDebug.value().get();
+                  ImGui::SeparatorText("DebugConstants");
+                  ImGui::DragFloat("Specular Power", &d.specularPower, 0.5f);
                }
             }
             ImGui::EndChild();
 
-            if (ImGui::Button("New...")) {
-               openProjectFileDialog.Open();
+            if (ImGui::Button("Load Terrain")) {
+               terrainFutures.push_back(facade.createTerrainMesh(512));
             }
             ImGui::SameLine();
-            if (ImGui::Button("Test")) {
+            if (ImGui::Button("Load Model")) {
 
                auto filename = std::filesystem::path{
-                   R"(C:\Users\Matt\Projects\game-assets\models\Sponza\glTF\Sponza.gltf)"};
+                   R"(C:\Users\Matt\Projects\game-assets\models\character\reference.gltf)"};
 
                modelFutures.push_back(facade.loadModelAsync(filename));
             }
-
             ImGui::EndGroup();
          }
       }
@@ -287,5 +322,13 @@ namespace ed::ui {
          dirty = false;
          saveProjectFileDialog.ClearSelected();
       }
+   }
+
+   void Manager::renderDebugWindow() {
+      ImGui::Begin("Debug Window");
+
+      ImGui::Checkbox("Wireframe", &enableWireframe);
+
+      ImGui::End();
    }
 }

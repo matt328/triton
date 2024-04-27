@@ -3,20 +3,18 @@
 #include "ObjectData.hpp"
 
 namespace tr::gfx {
+
+   struct MeshData {
+      MeshHandle handle;
+      size_t objectDataId;
+   };
+
    struct RenderData {
-    public:
-      RenderData() = default;
-      ~RenderData() = default;
-
-      RenderData(const RenderData&) = default;
-      RenderData& operator=(const RenderData&) = default;
-
-      RenderData(RenderData&& other) = default;
-      RenderData& operator=(RenderData&&) = default;
-
+      PushConstants pushConstants;
       CameraData cameraData;
       std::vector<ObjectData> objectData;
-      std::vector<MeshHandle> meshHandles;
+      std::vector<MeshData> staticMeshData;
+      std::vector<MeshData> terrainMeshData;
    };
 
 }
