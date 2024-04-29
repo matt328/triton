@@ -6,6 +6,7 @@ namespace tr::gfx::ds {
       initBindlessLayout(device);
       initPerFrameLayout(device);
       initObjectDataLayout(device);
+      initAnimationDataLayout(device);
    }
 
    LayoutFactory::~LayoutFactory() {
@@ -60,6 +61,17 @@ namespace tr::gfx::ds {
       const auto createInfo =
           vk::DescriptorSetLayoutCreateInfo{.bindingCount = 1, .pBindings = &binding};
 
+      layoutCache[LayoutHandle::ObjectData] = std::make_unique<Layout>(device, createInfo);
+   }
+
+   void LayoutFactory::initAnimationDataLayout(const vk::raii::Device& device) {
+      const auto binding =
+          vk::DescriptorSetLayoutBinding{.binding = 0,
+                                         .descriptorType = vk::DescriptorType::eStorageBuffer,
+                                         .descriptorCount = 1,
+                                         .stageFlags = vk::ShaderStageFlagBits::eVertex};
+      const auto createInfo =
+          vk::DescriptorSetLayoutCreateInfo{.bindingCount = 1, .pBindings = &binding};
       layoutCache[LayoutHandle::ObjectData] = std::make_unique<Layout>(device, createInfo);
    }
 

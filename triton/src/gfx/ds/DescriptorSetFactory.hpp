@@ -10,6 +10,7 @@ namespace tr::gfx::ds {
       PerFrame = 1,
       Bindless = 2,
       ObjectData = 3,
+      AnimationData = 3,
    };
 
    class DescriptorSetFactory {
@@ -42,6 +43,10 @@ namespace tr::gfx::ds {
       void initObjectDataDescriptorSet(const vk::raii::Device& device,
                                        const LayoutFactory& layoutFactory,
                                        const size_t descriptorCount);
+
+      void initAnimationDescriptorSet(const vk::raii::Device& device,
+                                      const LayoutFactory& layoutFactory,
+                                      const size_t descriptorCount);
 
       std::unique_ptr<vk::raii::DescriptorPool> permanentPool;
 

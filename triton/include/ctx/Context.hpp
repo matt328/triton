@@ -1,5 +1,6 @@
 #pragma once
 
+#include "gp/ska/Animations.hpp"
 #include "util/Timer.hpp"
 
 namespace tr::gp {
@@ -49,5 +50,7 @@ namespace tr::ctx {
 
       std::unique_ptr<tr::gp::GameplaySystem> gameplaySystem;
       std::unique_ptr<tr::gfx::RenderContext> renderContext;
+
+      std::unique_ptr<gp::ska::Animations> animations;
    };
 }
