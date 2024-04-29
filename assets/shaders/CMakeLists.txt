@@ -5,6 +5,8 @@ set(Shaders
    terrain.frag
    debug.vert
    debug.frag
+   skinned.vert
+   skinned.frag
 )
 
 get_property(GENERATOR_IS_MULTI_CONFIG GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)

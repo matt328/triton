@@ -3,6 +3,8 @@
 #include "gfx/RenderContext.hpp"
 #include "ctx/GameplayFacade.hpp"
 
+#include "gp/ska/Animations.hpp"
+
 namespace tr::ctx {
    constexpr auto SleepMillis = 100;
    static constexpr int TARGET_FPS = 60;
@@ -10,6 +12,8 @@ namespace tr::ctx {
 
    Context::Context(void* nativeWindow, bool guiEnabled, bool debugEnabled)
        : timer{TARGET_FPS, MAX_UPDATES} {
+
+      animations = std::make_unique<gp::ska::Animations>();
 
       renderContext =
           std::make_unique<gfx::RenderContext>(static_cast<GLFWwindow*>(nativeWindow), guiEnabled);
@@ -46,6 +50,8 @@ namespace tr::ctx {
          }
          timer.tick([&]() { gameplaySystem->fixedUpdate(timer); });
          gameplaySystem->update(timer.getBlendingFactor());
+
+         animations->update(.016f);
 
          renderContext->render();
          FrameMark;

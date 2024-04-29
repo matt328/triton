@@ -1,11 +1,16 @@
 #pragma once
 
+#include "geometry/Vertex.hpp"
+
 namespace tr::gfx {
    class PipelineBuilder {
     public:
       PipelineBuilder(const vk::raii::Device& device);
 
       void clear();
+
+      void setDefaultVertexAttributeDescriptions();
+      void setVertexAttributeDescriptions(std::span<geo::VertexComponent> components);
 
       void clearShaderStages();
       void setVertexShaderStage(const vk::raii::ShaderModule& vertexShaderModule);
@@ -38,6 +43,7 @@ namespace tr::gfx {
       vk::PipelineDynamicStateCreateInfo dsci{.dynamicStateCount = 2,
                                               .pDynamicStates = dynamicStates.data()};
 
+      std::vector<vk::VertexInputAttributeDescription> vertexAttributeDescriptions;
       std::vector<vk::PipelineShaderStageCreateInfo> shaderStages;
       vk::PipelineInputAssemblyStateCreateInfo inputAssembly;
       vk::PipelineRasterizationStateCreateInfo rasterizer;

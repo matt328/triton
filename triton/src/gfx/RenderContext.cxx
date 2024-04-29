@@ -6,6 +6,7 @@
 #include "gfx/ObjectData.hpp"
 #include "gfx/ds/DescriptorSetFactory.hpp"
 #include "gfx/ds/LayoutFactory.hpp"
+#include "gfx/geometry/Vertex.hpp"
 #include "gfx/gui/ImguiHelper.hpp"
 
 #include "helpers/Vulkan.hpp"
@@ -52,6 +53,7 @@ namespace tr::gfx {
 
       pb = std::make_unique<PipelineBuilder>(graphicsDevice->getVulkanDevice());
 
+      pb->setDefaultVertexAttributeDescriptions();
       pb->setVertexShaderStage(vsm);
       pb->setFragmentShaderStage(fsm);
       pb->setInputTopology(vk::PrimitiveTopology::eTriangleList);
@@ -91,6 +93,27 @@ namespace tr::gfx {
 
       debugPipelineLayout = pb->buildPipelineLayout(setLayouts);
       debugPipeline = pb->buildPipeline(*debugPipelineLayout);
+
+      auto skinnedVertex = helper->createShaderModule(vk::ShaderStageFlagBits::eVertex,
+                                                      util::Paths::SHADERS / "skinned.vert");
+      auto skinnedFragment = helper->createShaderModule(vk::ShaderStageFlagBits::eFragment,
+                                                        util::Paths::SHADERS / "skinned.frag");
+
+      auto vec = std::vector{geo::VertexComponent::Position,
+                             geo::VertexComponent::Color,
+                             geo::VertexComponent::UV,
+                             geo::VertexComponent::Normal,
+                             geo::VertexComponent::Joint0,
+                             geo::VertexComponent::Weight0};
+
+      pb->clearShaderStages();
+      pb->setVertexShaderStage(skinnedVertex);
+      pb->setFragmentShaderStage(skinnedFragment);
+      pb->setPolygonMode(vk::PolygonMode::eFill);
+      pb->setVertexAttributeDescriptions(std::span(vec.begin(), vec.end()));
+
+      skinnedModelPipelineLayout = pb->buildPipelineLayout(setLayouts);
+      skinnedModelPipeline = pb->buildPipeline(*skinnedModelPipelineLayout);
 
       initDepthResources();
 

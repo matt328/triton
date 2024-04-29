@@ -57,7 +57,7 @@ namespace tr::gfx::geo {
 
    std::vector<vk::VertexInputAttributeDescription> Vertex::inputAttributeDescriptions(
        const uint32_t binding,
-       const std::vector<VertexComponent> components) {
+       const std::span<VertexComponent> components) {
       std::vector<vk::VertexInputAttributeDescription> result;
       uint32_t location = 0;
       for (const auto component : components) {
@@ -70,7 +70,7 @@ namespace tr::gfx::geo {
    /** @brief Returns the default pipeline vertex input state create info structure for the
     * requested vertex components */
    vk::PipelineVertexInputStateCreateInfo* Vertex::getPipelineVertexInputState(
-       const std::vector<VertexComponent> components) {
+       const std::span<VertexComponent> components) {
       vertexInputBindingDescription = Vertex::inputBindingDescription(0);
       Vertex::vertexInputAttributeDescriptions = Vertex::inputAttributeDescriptions(0, components);
       pipelineVertexInputStateCreateInfo.vertexBindingDescriptionCount = 1;

@@ -10,6 +10,7 @@ namespace tr::gfx::ds {
       initBindlessDescriptorSet(device, layoutFactory, static_cast<size_t>(framesInFlightCount));
       initPerFrameDescriptorSet(device, layoutFactory, static_cast<size_t>(framesInFlightCount));
       initObjectDataDescriptorSet(device, layoutFactory, static_cast<size_t>(framesInFlightCount));
+      initAnimationDescriptorSet(device, layoutFactory, static_cast<size_t>(framesInFlightCount));
    }
 
    DescriptorSetFactory::~DescriptorSetFactory() {
@@ -84,5 +85,19 @@ namespace tr::gfx::ds {
                                              vk::DescriptorType::eStorageBuffer));
       }
       descriptorSetCache.emplace(SetHandle::ObjectData, std::move(sets));
+   }
+
+   void DescriptorSetFactory::initAnimationDescriptorSet(const vk::raii::Device& device,
+                                                         const LayoutFactory& layoutFactory,
+                                                         const size_t descriptorCount) {
+      auto sets = std::vector<std::unique_ptr<DescriptorSet>>{};
+      for (size_t i = 0; i < descriptorCount; i++) {
+         sets.emplace_back(
+             std::make_unique<DescriptorSet>(device,
+                                             layoutFactory.getVkLayout(LayoutHandle::AnimationData),
+                                             **permanentPool,
+                                             vk::DescriptorType::eStorageBuffer));
+      }
+      descriptorSetCache.emplace(SetHandle::AnimationData, std::move(sets));
    }
 }
