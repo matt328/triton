@@ -320,7 +320,19 @@ namespace tr::gfx {
       resourceManager->accessRenderData([&frame, this](RenderData& renderData) {
          frame.updateObjectDataBuffer(renderData.objectData.data(),
                                       sizeof(ObjectData) * renderData.objectData.size());
+
          frame.getCameraBuffer().updateBufferValue(&renderData.cameraData, sizeof(CameraData));
+
+         /*
+            TODO:
+            - Create animation data buffer
+            - Add AnimationData[] to renderData
+            - AnimationSystem update animations
+            - RenderDataSystem copies animation data into RenderData
+
+         */
+         frame.updateAnimationDataBuffer(renderData.animationData.data(),
+                                         sizeof(AnimationData) * renderData.animationData.size());
 
          staticMeshDataList.reserve(renderData.staticMeshData.size());
          std::copy(renderData.staticMeshData.begin(),
@@ -338,6 +350,8 @@ namespace tr::gfx {
       auto& objectDataSet = dsFactory->getDescriptorSet(ds::SetHandle::ObjectData, currentFrame);
       auto& perFrameSet = dsFactory->getDescriptorSet(ds::SetHandle::PerFrame, currentFrame);
       auto& textureSet = dsFactory->getDescriptorSet(ds::SetHandle::Bindless, currentFrame);
+      auto& animationDataSet =
+          dsFactory->getDescriptorSet(ds::SetHandle::AnimationData, currentFrame);
 
       objectDataSet.writeBuffer(frame.getObjectDataBuffer(), sizeof(ObjectData) * 128);
       perFrameSet.writeBuffer(frame.getCameraBuffer(), sizeof(CameraData));

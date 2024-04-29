@@ -72,7 +72,7 @@ namespace tr::gfx::ds {
                                          .stageFlags = vk::ShaderStageFlagBits::eVertex};
       const auto createInfo =
           vk::DescriptorSetLayoutCreateInfo{.bindingCount = 1, .pBindings = &binding};
-      layoutCache[LayoutHandle::ObjectData] = std::make_unique<Layout>(device, createInfo);
+      layoutCache[LayoutHandle::AnimationData] = std::make_unique<Layout>(device, createInfo);
    }
 
 }

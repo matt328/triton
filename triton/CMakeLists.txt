@@ -6,7 +6,6 @@ set(triton_SRC
 
    "src/gfx/Frame.cxx"
    "src/gfx/GraphicsDevice.cxx"
-   "src/gfx/ImmediateContext.cxx"
    "src/gfx/PipelineBuilder.cxx"
    "src/gfx/VkContext.cxx"
    "src/gfx/RenderContext.cxx"
