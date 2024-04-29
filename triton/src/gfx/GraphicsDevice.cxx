@@ -1,6 +1,5 @@
 #include "GraphicsDevice.hpp"
 #include "helpers/Vulkan.hpp"
-#include "ImmediateContext.hpp"
 #include "vma_raii.hpp"
 #include "VkContext.hpp"
 
@@ -215,42 +214,6 @@ namespace tr::gfx {
                                                          1,
                                                          queueFamilyIndices.transferFamily.value(),
                                                          "Async Transfer Context");
-
-      transferImmediateContext =
-          std::make_unique<ImmediateContext>(*vulkanDevice.get(),
-                                             *physicalDevice,
-                                             *transferQueue,
-                                             queueFamilyIndices.transferFamily.value(),
-                                             "Transfer Immediate Context");
-
-      graphicsImmediateContext =
-          std::make_unique<ImmediateContext>(*vulkanDevice.get(),
-                                             *physicalDevice,
-                                             *graphicsQueue,
-                                             queueFamilyIndices.graphicsFamily.value(),
-                                             "Graphics Immediate Context");
-
-      // Create Descriptor Pools
-      const auto poolSize = std::array{
-          vk::DescriptorPoolSize{.type = vk::DescriptorType::eUniformBuffer,
-                                 .descriptorCount = FRAMES_IN_FLIGHT * 10},
-          vk::DescriptorPoolSize{.type = vk::DescriptorType::eCombinedImageSampler,
-                                 .descriptorCount = FRAMES_IN_FLIGHT * 100},
-          vk::DescriptorPoolSize{.type = vk::DescriptorType::eStorageImage,
-                                 .descriptorCount = FRAMES_IN_FLIGHT * 10},
-          vk::DescriptorPoolSize{.type = vk::DescriptorType::eStorageBuffer,
-                                 .descriptorCount = FRAMES_IN_FLIGHT * 10},
-      };
-
-      const vk::DescriptorPoolCreateInfo poolInfo{
-          .flags = vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet |
-                   vk::DescriptorPoolCreateFlagBits::eUpdateAfterBindEXT,
-          .maxSets = FRAMES_IN_FLIGHT * 10 * poolSize.size(),
-          .poolSizeCount = poolSize.size(),
-          .pPoolSizes = poolSize.data()};
-
-      descriptorPool = std::make_unique<vk::raii::DescriptorPool>(
-          vulkanDevice->createDescriptorPool(poolInfo, nullptr));
 
       const auto allocatorCreateInfo = vma::AllocatorCreateInfo{.physicalDevice = **physicalDevice,
                                                                 .device = **vulkanDevice,
