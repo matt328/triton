@@ -9,6 +9,7 @@ namespace tr::gfx::ds {
       PerFrame = 1,
       Bindless = 2,
       ObjectData = 3,
+      AnimationData = 4,
    };
 
    class LayoutFactory {
@@ -32,6 +33,7 @@ namespace tr::gfx::ds {
       void initBindlessLayout(const vk::raii::Device& device);
       void initPerFrameLayout(const vk::raii::Device& device);
       void initObjectDataLayout(const vk::raii::Device& device);
+      void initAnimationDataLayout(const vk::raii::Device& device);
 
       std::unordered_map<LayoutHandle, std::unique_ptr<Layout>> layoutCache;
    };

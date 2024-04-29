@@ -92,6 +92,9 @@ namespace tr::gfx {
       std::unique_ptr<vk::raii::Pipeline> debugPipeline;
       std::unique_ptr<vk::raii::PipelineLayout> debugPipelineLayout;
 
+      std::unique_ptr<vk::raii::Pipeline> skinnedModelPipeline;
+      std::unique_ptr<vk::raii::PipelineLayout> skinnedModelPipelineLayout;
+
       std::unique_ptr<AllocatedImage> depthImage;
       std::shared_ptr<vk::raii::ImageView> depthImageView;
 

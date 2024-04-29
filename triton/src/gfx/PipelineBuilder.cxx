@@ -1,9 +1,6 @@
 #include "PipelineBuilder.hpp"
 #include "gfx/ObjectData.hpp"
 #include "gfx/geometry/Vertex.hpp"
-#include <vulkan/vulkan_enums.hpp>
-#include <vulkan/vulkan_raii.hpp>
-#include <vulkan/vulkan_structs.hpp>
 
 namespace tr::gfx {
    PipelineBuilder::PipelineBuilder(const vk::raii::Device& device)
@@ -15,6 +12,20 @@ namespace tr::gfx {
          depthStencil{},
          renderInfo{},
          colorAttachmentformat{vk::Format::eB8G8R8A8Srgb} {
+   }
+
+   void PipelineBuilder::setDefaultVertexAttributeDescriptions() {
+      auto vec = std::vector{geo::VertexComponent::Position,
+                             geo::VertexComponent::Color,
+                             geo::VertexComponent::UV,
+                             geo::VertexComponent::Normal};
+      vertexAttributeDescriptions =
+          geo::Vertex::inputAttributeDescriptions(0, std::span(vec.begin(), vec.end()));
+   }
+
+   void PipelineBuilder::setVertexAttributeDescriptions(
+       std::span<geo::VertexComponent> components) {
+      vertexAttributeDescriptions = geo::Vertex::inputAttributeDescriptions(0, components);
    }
 
    auto PipelineBuilder::buildPipelineLayout(const std::span<vk::DescriptorSetLayout>& layouts)
@@ -44,18 +55,13 @@ namespace tr::gfx {
                                                 .pAttachments = &colorBlendAttachment};
 
       const auto bindingDescription = geo::Vertex::inputBindingDescription(0);
-      const auto attributeDescriptions =
-          geo::Vertex::inputAttributeDescriptions(0,
-                                                  {geo::VertexComponent::Position,
-                                                   geo::VertexComponent::Color,
-                                                   geo::VertexComponent::UV,
-                                                   geo::VertexComponent::Normal});
 
       const auto vertexInputStateCreateInfo = vk::PipelineVertexInputStateCreateInfo{
           .vertexBindingDescriptionCount = 1,
           .pVertexBindingDescriptions = &bindingDescription,
-          .vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size()),
-          .pVertexAttributeDescriptions = attributeDescriptions.data()};
+          .vertexAttributeDescriptionCount =
+              static_cast<uint32_t>(vertexAttributeDescriptions.size()),
+          .pVertexAttributeDescriptions = vertexAttributeDescriptions.data()};
 
       auto pipelineCreateInfo =
           vk::GraphicsPipelineCreateInfo{.pNext = &renderInfo,

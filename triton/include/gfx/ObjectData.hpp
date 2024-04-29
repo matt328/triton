@@ -23,4 +23,8 @@ namespace tr::gfx {
       glm::vec4 lightPosition;
       glm::vec4 params;
    };
+
+   struct AnimationData {
+      glm::mat4 jointMatrices;
+   };
 }
