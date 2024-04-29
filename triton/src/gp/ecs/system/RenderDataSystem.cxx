@@ -11,11 +11,6 @@
 
 namespace tr::gp::ecs::RenderDataSystem {
 
-   /*
-      TODO: Make renderer set the push constants before rendering the terrain
-      Add push constants into the terrain shaders
-   */
-
    /// Loops through the registry and fills in the given RenderData struct
    void update(const entt::registry& registry, gfx::RenderData& renderData) {
 

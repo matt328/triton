@@ -79,10 +79,6 @@ namespace tr::gfx {
          return *commandPool;
       }
 
-      [[nodiscard]] const vk::raii::DescriptorPool& getDescriptorPool() const {
-         return *descriptorPool;
-      }
-
       [[nodiscard]] const vk::raii::Queue& getGraphicsQueue() const {
          return *graphicsQueue;
       }
@@ -97,10 +93,6 @@ namespace tr::gfx {
 
       [[nodiscard]] const vk::raii::SwapchainKHR& getSwapchain() const {
          return *swapchain;
-      }
-
-      [[nodiscard]] const ImmediateContext& getTransferContext() const {
-         return *transferImmediateContext;
       }
 
       [[nodiscard]] const VkContext& getAsyncTransferContext() const {
@@ -142,9 +134,6 @@ namespace tr::gfx {
       vk::Extent2D swapchainExtent;
 
       std::unique_ptr<vk::raii::CommandPool> commandPool;
-      std::unique_ptr<vk::raii::DescriptorPool> descriptorPool;
-      std::unique_ptr<ImmediateContext> transferImmediateContext;
-      std::unique_ptr<ImmediateContext> graphicsImmediateContext;
       std::unique_ptr<VkContext> asyncTransferContext;
 
       std::unique_ptr<vk::raii::DebugUtilsMessengerEXT> debugCallback;
