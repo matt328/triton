@@ -3,7 +3,6 @@
 #include "GraphicsDevice.hpp"
 #include "gfx/ds/LayoutFactory.hpp"
 #include "gfx/helpers/Rendering.hpp"
-#include "helpers/Vulkan.hpp"
 #include "vma_raii.hpp"
 
 namespace tr::gfx {
