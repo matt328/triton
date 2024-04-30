@@ -21,6 +21,7 @@ set(triton_SRC
    "src/gp/ecs/system/CameraSystem.cxx"
    "src/gp/ecs/system/RenderDataSystem.cxx"
    "src/gp/ecs/system/TransformSystem.cxx"
+   "src/gp/ecs/system/AnimationSystem.cxx"
 
    "src/gfx/ds/LayoutFactory.cxx"
    "src/gfx/ds/Layout.cxx"
@@ -117,6 +118,17 @@ target_precompile_headers(${PROJECT_NAME}
    <imgui.h>
    <imgui_impl_glfw.h>
    <imgui_impl_vulkan.h>
+   <ozz/animation/runtime/animation.h>
+   <ozz/animation/runtime/local_to_model_job.h>
+   <ozz/animation/runtime/sampling_job.h>
+   <ozz/animation/runtime/skeleton.h>
+   <ozz/base/maths/soa_transform.h>
+   <ozz/base/maths/simd_math.h>
+   <ozz/base/maths/soa_transform.h>
+   <ozz/base/containers/vector.h>
+   <ozz/base/span.h>
+   <ozz/base/io/archive.h>
+   <ozz/base/io/stream.h>
    <queue>
    <tiny_gltf.h>
    <tracy/Tracy.hpp>

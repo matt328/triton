@@ -44,8 +44,7 @@ namespace tr::gfx {
                       const vk::Buffer newBuffer,
                       const vk::DeviceSize range,
                       const vma::Allocation newAllocation)
-          : mappedMemory{nullptr},
-            buffer(newBuffer),
+          : buffer(newBuffer),
             bufferInfo{vk::DescriptorBufferInfo{.buffer = newBuffer, .offset = 0, .range = range}},
             allocation(newAllocation),
             allocator(newAllocator) {
@@ -100,7 +99,7 @@ namespace tr::gfx {
       }
 
     private:
-      void* mappedMemory;
+      void* mappedMemory{};
       bool isMapped{};
       vk::Buffer buffer;
       vk::DescriptorBufferInfo bufferInfo;
