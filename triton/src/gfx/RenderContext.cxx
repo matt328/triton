@@ -329,10 +329,10 @@ namespace tr::gfx {
             - Add AnimationData[] to renderData
             - AnimationSystem update animations
             - RenderDataSystem copies animation data into RenderData
-
          */
-         frame.updateAnimationDataBuffer(renderData.animationData.data(),
-                                         sizeof(AnimationData) * renderData.animationData.size());
+         // frame.updateAnimationDataBuffer(renderData.animationData.data(),
+         //                                 sizeof(AnimationData) *
+         //                                 renderData.animationData.size());
 
          staticMeshDataList.reserve(renderData.staticMeshData.size());
          std::copy(renderData.staticMeshData.begin(),

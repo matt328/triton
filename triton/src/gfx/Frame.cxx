@@ -53,6 +53,8 @@ namespace tr::gfx {
                                                                     &objectDataAllocationCreateInfo,
                                                                     "Object Data Buffer");
 
+      objectDataBuffer->mapBuffer();
+
       // create cameradata buffer
       constexpr auto cameraDataBufferCreateInfo =
           vk::BufferCreateInfo{.size = sizeof(CameraData),
@@ -199,7 +201,7 @@ namespace tr::gfx {
    }
 
    void Frame::updateObjectDataBuffer(const ObjectData* data, const size_t size) {
-      this->objectDataBuffer->updateBufferValue(data, size);
+      this->objectDataBuffer->updateMappedBufferValue(data, size);
    }
 
    void Frame::destroySwapchainResources() {
@@ -216,6 +218,7 @@ namespace tr::gfx {
    }
 
    Frame::~Frame() {
+      objectDataBuffer->unmapBuffer();
       TracyVkDestroy(tracyContext);
    }
 }
