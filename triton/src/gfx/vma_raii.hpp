@@ -44,16 +44,43 @@ namespace tr::gfx {
                       const vk::Buffer newBuffer,
                       const vk::DeviceSize range,
                       const vma::Allocation newAllocation)
-          : buffer(newBuffer),
+          : mappedMemory{nullptr},
+            buffer(newBuffer),
             bufferInfo{vk::DescriptorBufferInfo{.buffer = newBuffer, .offset = 0, .range = range}},
             allocation(newAllocation),
             allocator(newAllocator) {
       }
 
       ~AllocatedBuffer() {
+         if (isMapped) {
+            unmapBuffer();
+         }
          allocator.destroyBuffer(buffer, allocation);
       }
 
+      /// Permanently maps the buffer, until either unmapBuffer() is called, or the object is
+      /// destroyed.  Meant to be paired with updateMappedBufferValue()
+      void mapBuffer() {
+         mappedMemory = allocator.mapMemory(allocation);
+         isMapped = true;
+      }
+
+      /// Copy some data into this buffer. Don't forget to mapBuffer() first. Leaves the buffer
+      /// mapped. Either call unmapBuffer() or let the object go out of scope.
+      void updateMappedBufferValue(const void* data, const size_t dataSize) const {
+         assert(isMapped);
+         memcpy(mappedMemory, data, dataSize);
+      }
+
+      // Unmap this buffer. Only call this after you've called mapBuffer() and when you're done
+      // copying data into it for awhile.
+      void unmapBuffer() {
+         assert(isMapped);
+         allocator.unmapMemory(allocation);
+         isMapped = false;
+      }
+
+      /// Maps, memcpy's and then unmaps the buffer
       void updateBufferValue(const void* data, const size_t dataSize) const {
          auto dst = allocator.mapMemory(allocation);
          memcpy(dst, data, dataSize);
@@ -73,6 +100,8 @@ namespace tr::gfx {
       }
 
     private:
+      void* mappedMemory;
+      bool isMapped{};
       vk::Buffer buffer;
       vk::DescriptorBufferInfo bufferInfo;
       vma::Allocation allocation;
