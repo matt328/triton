@@ -122,6 +122,14 @@ namespace tr::gfx {
          desiredDeviceExtensions.push_back(VK_EXT_DEBUG_MARKER_EXTENSION_NAME);
       }
 
+      auto deviceProperties =
+          physicalDevice->getProperties2KHR<vk::PhysicalDeviceProperties2KHR,
+                                            vk::PhysicalDeviceDescriptorBufferPropertiesEXT>();
+
+      auto descriptorBufferProperties =
+          deviceProperties.get<vk::PhysicalDeviceDescriptorBufferPropertiesEXT>();
+      descriptorBufferOffsetAlignment = descriptorBufferProperties.descriptorBufferOffsetAlignment;
+
       auto drfs = vk::PhysicalDeviceDynamicRenderingFeaturesKHR{
           .dynamicRendering = VK_TRUE,
       };
@@ -158,12 +166,16 @@ namespace tr::gfx {
          createInfo.ppEnabledLayerNames = desiredValidationLayers.data();
       }
 
+      const auto dbFeatures =
+          vk::PhysicalDeviceDescriptorBufferFeaturesEXT{.descriptorBuffer = true};
+
       const vk::StructureChain<vk::DeviceCreateInfo,
                                vk::PhysicalDeviceFeatures2,
                                vk::PhysicalDeviceShaderDrawParametersFeatures,
                                vk::PhysicalDeviceDescriptorIndexingFeatures,
-                               vk::PhysicalDeviceDynamicRenderingFeaturesKHR>
-          c{createInfo, physicalFeatures2, drawParamsFeatures, indexingFeatures, drfs};
+                               vk::PhysicalDeviceDynamicRenderingFeaturesKHR,
+                               vk::PhysicalDeviceDescriptorBufferFeaturesEXT>
+          c{createInfo, physicalFeatures2, drawParamsFeatures, indexingFeatures, drfs, dbFeatures};
 
       vulkanDevice =
           std::make_unique<vk::raii::Device>(physicalDevice->createDevice(c.get(), nullptr));
@@ -367,6 +379,8 @@ namespace tr::gfx {
 
       // NOLINTNEXTLINE This is ok because glfw's C api sucks.
       std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
+
+      extensions.push_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
 
       if (validationEnabled) {
          extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
