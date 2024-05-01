@@ -1,5 +1,8 @@
 #include "LayoutFactory.hpp"
 #include "Layout.hpp"
+#include <vulkan/vulkan_core.h>
+#include <vulkan/vulkan_enums.hpp>
+#include <vulkan/vulkan_raii.hpp>
 
 namespace tr::gfx::ds {
    LayoutFactory::LayoutFactory(const vk::raii::Device& device) {
@@ -46,8 +49,10 @@ namespace tr::gfx::ds {
                                          .descriptorType = vk::DescriptorType::eUniformBuffer,
                                          .descriptorCount = 1,
                                          .stageFlags = vk::ShaderStageFlagBits::eVertex};
-      const auto createInfo =
-          vk::DescriptorSetLayoutCreateInfo{.bindingCount = 1, .pBindings = &binding};
+      const auto createInfo = vk::DescriptorSetLayoutCreateInfo{
+          .flags = vk::DescriptorSetLayoutCreateFlagBits::eDescriptorBufferEXT,
+          .bindingCount = 1,
+          .pBindings = &binding};
 
       layoutCache[LayoutHandle::PerFrame] = std::make_unique<Layout>(device, createInfo);
    }

@@ -18,7 +18,7 @@
 #include "gfx/ds/DescriptorSetFactory.hpp"
 #include "gfx/ds/DescriptorSet.hpp"
 #include "gfx/PipelineBuilder.hpp"
-#include <vulkan/vulkan_enums.hpp>
+#include "gfx/ds/Layout.hpp"
 
 namespace tr::gfx {
 
@@ -26,6 +26,10 @@ namespace tr::gfx {
       graphicsDevice = std::make_unique<GraphicsDevice>(window, true);
 
       layoutFactory = std::make_unique<ds::LayoutFactory>(graphicsDevice->getVulkanDevice());
+
+      auto& l = layoutFactory->getLayout(ds::LayoutHandle::PerFrame);
+      auto offset = l.getBindingOffset(0);
+      auto layoutSize = l.getLayoutSize();
 
       dsFactory = std::make_unique<ds::DescriptorSetFactory>(graphicsDevice->getVulkanDevice(),
                                                              *layoutFactory,

@@ -16,6 +16,19 @@ namespace tr::gfx::ds {
          return **vkLayout;
       }
 
+      [[nodiscard]] auto getLayoutSize() const {
+         return vkLayout->getSizeEXT();
+      }
+
+      [[nodiscard]] auto getAlignedSize(VkDeviceSize alignment) const {
+         const auto value = getLayoutSize();
+         return (value + alignment - 1) & ~(alignment - 1);
+      }
+
+      [[nodiscard]] auto getBindingOffset(const uint32_t binding) const {
+         return vkLayout->getBindingOffsetEXT(binding);
+      }
+
     private:
       std::unique_ptr<vk::raii::DescriptorSetLayout> vkLayout;
    };

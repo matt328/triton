@@ -6,7 +6,7 @@
 
 namespace tr::gfx {
 
-   Allocator::Allocator(const vma::AllocatorCreateInfo& createInfo) {
+   Allocator::Allocator(const vma::AllocatorCreateInfo& createInfo) : device{createInfo.device} {
       allocator = createAllocator(createInfo);
    }
 
@@ -22,7 +22,7 @@ namespace tr::gfx {
       auto [buffer, allocation] = allocator.createBuffer(*bci, *aci);
       allocator.setAllocationName(allocation, name.data());
 
-      return std::make_unique<AllocatedBuffer>(allocator, buffer, bci->size, allocation);
+      return std::make_unique<AllocatedBuffer>(allocator, buffer, bci->size, allocation, device);
    }
 
    std::unique_ptr<AllocatedBuffer> Allocator::createStagingBuffer(

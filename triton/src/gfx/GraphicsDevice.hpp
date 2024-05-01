@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vulkan/vulkan_hpp_macros.hpp>
+
 #include <vulkan/vulkan_core.h>
 #define VK_NO_PROTOTYPES
 #include <vulkan/vulkan_raii.hpp>
@@ -117,7 +119,8 @@ namespace tr::gfx {
 #endif
           VK_KHR_CREATE_RENDERPASS_2_EXTENSION_NAME,
           VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME,
-          VK_EXT_EXTENDED_DYNAMIC_STATE_3_EXTENSION_NAME};
+          VK_EXT_EXTENDED_DYNAMIC_STATE_3_EXTENSION_NAME,
+          VK_EXT_DESCRIPTOR_BUFFER_EXTENSION_NAME};
       std::vector<const char*> desiredValidationLayers = {"VK_LAYER_KHRONOS_validation"};
 
       std::unique_ptr<vk::raii::Context> context;
@@ -125,6 +128,8 @@ namespace tr::gfx {
       std::unique_ptr<vk::raii::SurfaceKHR> surface;
       std::unique_ptr<vk::raii::PhysicalDevice> physicalDevice;
       std::unique_ptr<vk::raii::Device> vulkanDevice;
+
+      vk::DeviceSize descriptorBufferOffsetAlignment;
 
       std::unique_ptr<vk::raii::SwapchainKHR> oldSwapchain;
       std::unique_ptr<vk::raii::SwapchainKHR> swapchain;
