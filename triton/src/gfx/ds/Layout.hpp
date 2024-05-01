@@ -3,6 +3,10 @@
 namespace tr::gfx::ds {
    class Layout {
     public:
+      /*
+         TODO: Change this to GraphicsDevice so we can get the descriptor buffer offset
+         alignment later
+      */
       Layout(const vk::raii::Device& device, const vk::DescriptorSetLayoutCreateInfo& info);
       ~Layout();
 

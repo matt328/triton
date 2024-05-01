@@ -29,7 +29,7 @@ namespace tr::gfx {
 
       auto& l = layoutFactory->getLayout(ds::LayoutHandle::PerFrame);
       auto offset = l.getBindingOffset(0);
-      auto layoutSize = l.getLayoutSize();
+      auto layoutSize = l.getAlignedSize();
 
       dsFactory = std::make_unique<ds::DescriptorSetFactory>(graphicsDevice->getVulkanDevice(),
                                                              *layoutFactory,
