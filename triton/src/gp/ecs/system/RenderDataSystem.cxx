@@ -37,7 +37,7 @@ namespace tr::gp::ecs::RenderDataSystem {
       }
 
       const auto animationsView = registry.view<Animation>();
-      for (auto [error, entity, animationData] : animationsView.each()) {
+      for (auto [entity, animationData] : animationsView.each()) {
          /*
             - Add joint matrices to an array in RenderData.
             - Also need to add a dynamicMeshData that includes a MeshHandle, TextureHandle, and a

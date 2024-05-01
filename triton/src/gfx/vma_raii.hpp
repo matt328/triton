@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vulkan/vulkan_handles.hpp>
 namespace tr::gfx {
 
    class AllocatedImage {
@@ -35,16 +36,13 @@ namespace tr::gfx {
 
    class AllocatedBuffer {
     public:
-      AllocatedBuffer(const AllocatedBuffer&) = default;
-      AllocatedBuffer(AllocatedBuffer&&) = delete;
-      AllocatedBuffer& operator=(const AllocatedBuffer&) = default;
-      AllocatedBuffer& operator=(AllocatedBuffer&&) = delete;
-
       AllocatedBuffer(const vma::Allocator& newAllocator,
                       const vk::Buffer newBuffer,
                       const vk::DeviceSize range,
-                      const vma::Allocation newAllocation)
-          : buffer(newBuffer),
+                      const vma::Allocation newAllocation,
+                      const vk::Device& device)
+          : device{device},
+            buffer(newBuffer),
             bufferInfo{vk::DescriptorBufferInfo{.buffer = newBuffer, .offset = 0, .range = range}},
             allocation(newAllocation),
             allocator(newAllocator) {
@@ -56,6 +54,12 @@ namespace tr::gfx {
          }
          allocator.destroyBuffer(buffer, allocation);
       }
+
+      AllocatedBuffer(const AllocatedBuffer&) = delete;
+      AllocatedBuffer& operator=(const AllocatedBuffer&) = delete;
+
+      AllocatedBuffer(AllocatedBuffer&&) = delete;
+      AllocatedBuffer& operator=(AllocatedBuffer&&) = delete;
 
       /// Permanently maps the buffer, until either unmapBuffer() is called, or the object is
       /// destroyed.  Meant to be paired with updateMappedBufferValue()
@@ -98,7 +102,13 @@ namespace tr::gfx {
          return &bufferInfo;
       }
 
+      [[nodiscard]] uint64_t getDeviceAddress() const {
+         const auto bdai = vk::BufferDeviceAddressInfoKHR{.buffer = buffer};
+         return device.getBufferAddressEXT(bdai);
+      }
+
     private:
+      const vk::Device& device;
       void* mappedMemory{};
       bool isMapped{};
       vk::Buffer buffer;
@@ -110,12 +120,13 @@ namespace tr::gfx {
    class Allocator {
     public:
       explicit Allocator(const vma::AllocatorCreateInfo& createInfo);
-
-      Allocator(const Allocator&) = default;
-      Allocator(Allocator&&) = delete;
-      Allocator& operator=(const Allocator&) = default;
-      Allocator& operator=(Allocator&&) = delete;
       ~Allocator();
+
+      Allocator(const Allocator&) = delete;
+      Allocator& operator=(const Allocator&) = delete;
+
+      Allocator(Allocator&&) = delete;
+      Allocator& operator=(Allocator&&) = delete;
 
       std::unique_ptr<AllocatedBuffer> createBuffer(
           const vk::BufferCreateInfo* bci,
@@ -146,6 +157,7 @@ namespace tr::gfx {
       void unmapMemory(const AllocatedImage& allocatedImage) const;
 
     private:
+      const vk::Device& device;
       vma::Allocator allocator;
    };
 }
