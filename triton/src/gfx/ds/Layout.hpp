@@ -1,13 +1,10 @@
 #pragma once
+#include "gfx/GraphicsDevice.hpp"
 
 namespace tr::gfx::ds {
    class Layout {
     public:
-      /*
-         TODO: Change this to GraphicsDevice so we can get the descriptor buffer offset
-         alignment later
-      */
-      Layout(const vk::raii::Device& device, const vk::DescriptorSetLayoutCreateInfo& info);
+      Layout(const GraphicsDevice& device, const vk::DescriptorSetLayoutCreateInfo& info);
       ~Layout();
 
       Layout(const Layout&) = delete;
@@ -24,7 +21,8 @@ namespace tr::gfx::ds {
          return vkLayout->getSizeEXT();
       }
 
-      [[nodiscard]] auto getAlignedSize(VkDeviceSize alignment) const {
+      [[nodiscard]] auto getAlignedSize() const {
+         const auto alignment = graphicsDevice.getDescriptorBufferOffsetAlignment();
          const auto value = getLayoutSize();
          return (value + alignment - 1) & ~(alignment - 1);
       }
@@ -35,5 +33,6 @@ namespace tr::gfx::ds {
 
     private:
       std::unique_ptr<vk::raii::DescriptorSetLayout> vkLayout;
+      const GraphicsDevice& graphicsDevice;
    };
 }

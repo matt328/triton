@@ -101,6 +101,10 @@ namespace tr::gfx {
          return *asyncTransferContext;
       }
 
+      [[nodiscard]] auto getDescriptorBufferOffsetAlignment() const {
+         return descriptorBufferOffsetAlignment;
+      }
+
       [[nodiscard]] const std::pair<uint32_t, uint32_t> getCurrentSize() const;
 
       void recreateSwapchain();

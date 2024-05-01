@@ -1,5 +1,9 @@
 #pragma once
 
+namespace tr::gfx {
+   class GraphicsDevice;
+}
+
 namespace tr::gfx::ds {
 
    class Layout;
@@ -14,7 +18,7 @@ namespace tr::gfx::ds {
 
    class LayoutFactory {
     public:
-      LayoutFactory(const vk::raii::Device& device);
+      LayoutFactory(const GraphicsDevice& device);
       ~LayoutFactory();
 
       LayoutFactory(const LayoutFactory&) = delete;
@@ -30,10 +34,10 @@ namespace tr::gfx::ds {
       [[nodiscard]] const vk::DescriptorSetLayout& getVkLayout(LayoutHandle handle) const;
 
     private:
-      void initBindlessLayout(const vk::raii::Device& device);
-      void initPerFrameLayout(const vk::raii::Device& device);
-      void initObjectDataLayout(const vk::raii::Device& device);
-      void initAnimationDataLayout(const vk::raii::Device& device);
+      void initBindlessLayout(const GraphicsDevice& device);
+      void initPerFrameLayout(const GraphicsDevice& device);
+      void initObjectDataLayout(const GraphicsDevice& device);
+      void initAnimationDataLayout(const GraphicsDevice& device);
 
       std::unordered_map<LayoutHandle, std::unique_ptr<Layout>> layoutCache;
    };

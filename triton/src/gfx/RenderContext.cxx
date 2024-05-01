@@ -25,7 +25,7 @@ namespace tr::gfx {
    RenderContext::RenderContext(GLFWwindow* window, bool guiEnabled) : guiEnabled{guiEnabled} {
       graphicsDevice = std::make_unique<GraphicsDevice>(window, true);
 
-      layoutFactory = std::make_unique<ds::LayoutFactory>(graphicsDevice->getVulkanDevice());
+      layoutFactory = std::make_unique<ds::LayoutFactory>(*graphicsDevice);
 
       auto& l = layoutFactory->getLayout(ds::LayoutHandle::PerFrame);
       auto offset = l.getBindingOffset(0);
