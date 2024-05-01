@@ -1,11 +1,12 @@
 #include "LayoutFactory.hpp"
 #include "Layout.hpp"
+#include "gfx/GraphicsDevice.hpp"
 #include <vulkan/vulkan_core.h>
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_raii.hpp>
 
 namespace tr::gfx::ds {
-   LayoutFactory::LayoutFactory(const vk::raii::Device& device) {
+   LayoutFactory::LayoutFactory(const GraphicsDevice& device) {
       initBindlessLayout(device);
       initPerFrameLayout(device);
       initObjectDataLayout(device);
@@ -20,7 +21,7 @@ namespace tr::gfx::ds {
       return layoutCache.at(handle)->getVkLayout();
    }
 
-   void LayoutFactory::initBindlessLayout(const vk::raii::Device& device) {
+   void LayoutFactory::initBindlessLayout(const GraphicsDevice& device) {
       const auto binding = vk::DescriptorSetLayoutBinding{
           .binding = 3,
           .descriptorType = vk::DescriptorType::eCombinedImageSampler,
@@ -43,7 +44,7 @@ namespace tr::gfx::ds {
       layoutCache[LayoutHandle::Bindless] = std::make_unique<Layout>(device, dslCreateInfo);
    }
 
-   void LayoutFactory::initPerFrameLayout(const vk::raii::Device& device) {
+   void LayoutFactory::initPerFrameLayout(const GraphicsDevice& device) {
       const auto binding =
           vk::DescriptorSetLayoutBinding{.binding = 0,
                                          .descriptorType = vk::DescriptorType::eUniformBuffer,
@@ -57,7 +58,7 @@ namespace tr::gfx::ds {
       layoutCache[LayoutHandle::PerFrame] = std::make_unique<Layout>(device, createInfo);
    }
 
-   void LayoutFactory::initObjectDataLayout(const vk::raii::Device& device) {
+   void LayoutFactory::initObjectDataLayout(const GraphicsDevice& device) {
       const auto binding =
           vk::DescriptorSetLayoutBinding{.binding = 0,
                                          .descriptorType = vk::DescriptorType::eStorageBuffer,
@@ -69,7 +70,7 @@ namespace tr::gfx::ds {
       layoutCache[LayoutHandle::ObjectData] = std::make_unique<Layout>(device, createInfo);
    }
 
-   void LayoutFactory::initAnimationDataLayout(const vk::raii::Device& device) {
+   void LayoutFactory::initAnimationDataLayout(const GraphicsDevice& device) {
       const auto binding =
           vk::DescriptorSetLayoutBinding{.binding = 0,
                                          .descriptorType = vk::DescriptorType::eStorageBuffer,
