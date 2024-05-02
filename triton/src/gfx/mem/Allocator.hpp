@@ -20,6 +20,10 @@ namespace tr::gfx::mem {
                                            const vma::AllocationCreateInfo* aci,
                                            const std::string_view& name = "unnamed buffer") const;
 
+      [[nodiscard]] std::unique_ptr<Buffer> createDescriptorBuffer(
+          size_t size,
+          const std::string_view& name = "unnamed descriptor buffer") const;
+
       [[nodiscard]] std::unique_ptr<Buffer> createStagingBuffer(
           size_t size,
           const std::string_view& name = "unnamed buffer") const;

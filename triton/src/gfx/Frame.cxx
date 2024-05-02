@@ -1,11 +1,14 @@
 #include "Frame.hpp"
 #include "gfx/ObjectData.hpp"
 #include "GraphicsDevice.hpp"
+#include "gfx/ds/Layout.hpp"
 #include "gfx/ds/LayoutFactory.hpp"
 #include "gfx/helpers/Rendering.hpp"
 #include "gfx/mem/Buffer.hpp"
 #include "gfx/mem/Image.hpp"
 #include "gfx/mem/Allocator.hpp"
+#include <vulkan/vulkan_enums.hpp>
+#include <vulkan/vulkan_structs.hpp>
 
 namespace tr::gfx {
 
@@ -41,6 +44,12 @@ namespace tr::gfx {
       inFlightFence =
           std::make_unique<vk::raii::Fence>(graphicsDevice.getVulkanDevice(), fenceCreateInfo);
 
+      // Create Descriptor Buffer(s)
+      const auto& perFrameLayout = layoutFactory.getLayout(ds::LayoutHandle::PerFrame);
+      const auto size = perFrameLayout.getAlignedSize();
+
+      perFrameDescriptorBuffer = graphicsDevice.getAllocator().createDescriptorBuffer(size);
+
       // Create an ObjectData buffer
       constexpr auto objectDataBufferCreateInfo =
           vk::BufferCreateInfo{.size = sizeof(ObjectData) * MAX_OBJECTS,
@@ -53,8 +62,19 @@ namespace tr::gfx {
       objectDataBuffer = graphicsDevice.getAllocator().createBuffer(&objectDataBufferCreateInfo,
                                                                     &objectDataAllocationCreateInfo,
                                                                     "Object Data Buffer");
-
       objectDataBuffer->mapBuffer();
+
+      // Put buffer device addresses into the descriptor buffer
+      const auto ai =
+          vk::DescriptorAddressInfoEXT{.address = objectDataBuffer->getDeviceAddress(),
+                                       .range = objectDataBuffer->getBufferInfo()->range,
+                                       .format = vk::Format::eUndefined};
+      const auto bdi = vk::DescriptorGetInfoEXT{
+          .type = vk::DescriptorType::eUniformBuffer,
+          .data = {.pUniformBuffer = &ai},
+      };
+
+      // todo: figure out getDescriptorEXT()
 
       // create cameradata buffer
       constexpr auto cameraDataBufferCreateInfo =

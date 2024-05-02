@@ -91,6 +91,8 @@ namespace tr::gfx {
 
       ds::LayoutFactory& layoutFactory;
 
+      std::unique_ptr<mem::Buffer> perFrameDescriptorBuffer;
+
       std::unique_ptr<mem::Buffer> objectDataBuffer;
       std::unique_ptr<mem::Buffer> cameraDataBuffer;
 
