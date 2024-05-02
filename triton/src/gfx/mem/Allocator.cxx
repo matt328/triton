@@ -1,6 +1,10 @@
 #include "Allocator.hpp"
 #include "Buffer.hpp"
 #include "Image.hpp"
+#include <vulkan-memory-allocator-hpp/vk_mem_alloc_enums.hpp>
+#include <vulkan-memory-allocator-hpp/vk_mem_alloc_structs.hpp>
+#include <vulkan/vulkan_enums.hpp>
+#include <vulkan/vulkan_structs.hpp>
 
 #define VMA_IMPLEMENTATION
 #include <vk_mem_alloc.h>
@@ -26,6 +30,19 @@ namespace tr::gfx::mem {
       allocator.setAllocationName(allocation, name.data());
 
       return std::make_unique<Buffer>(allocator, buffer, bci->size, allocation, device);
+   }
+
+   std::unique_ptr<Buffer> Allocator::createDescriptorBuffer(size_t size,
+                                                             const std::string_view& name) const {
+      const auto bci =
+          vk::BufferCreateInfo{.size = size,
+                               .usage = vk::BufferUsageFlagBits::eResourceDescriptorBufferEXT |
+                                        vk::BufferUsageFlagBits::eShaderDeviceAddress};
+
+      const auto aci =
+          vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eCpuToGpu,
+                                    .requiredFlags = vk::MemoryPropertyFlagBits::eHostCoherent};
+      return createBuffer(&bci, &aci, name);
    }
 
    std::unique_ptr<Buffer> Allocator::createStagingBuffer(const size_t size,
