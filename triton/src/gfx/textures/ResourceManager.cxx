@@ -16,7 +16,7 @@
 #include "gfx/geometry/Mesh.hpp"
 
 #include "gfx/mem/Allocator.hpp"
-#include "gfx/mem/AllocatedBuffer.hpp"
+#include "gfx/mem/Buffer.hpp"
 
 namespace tr::gfx::tx {
    ResourceManager::ResourceManager(const GraphicsDevice& graphicsDevice)

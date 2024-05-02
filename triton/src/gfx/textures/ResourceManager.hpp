@@ -10,8 +10,8 @@
 
 namespace tr::gfx::mem {
    class Allocator;
-   class AllocatedBuffer;
-   class AllocatedImage;
+   class Buffer;
+   class Image;
 }
 
 namespace tr::gfx {
@@ -29,7 +29,7 @@ namespace tr::gfx::tx {
    constexpr uint32_t MaxImageSize = 1024 * 1024 * 8;
 
    struct TextureInfo {
-      std::unique_ptr<mem::AllocatedImage> image;
+      std::unique_ptr<mem::Image> image;
       std::unique_ptr<vk::raii::ImageView> imageView;
       std::unique_ptr<vk::raii::Sampler> sampler;
       vk::ImageLayout imageLayout;

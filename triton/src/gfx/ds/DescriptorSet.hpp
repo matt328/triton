@@ -1,7 +1,7 @@
 #pragma once
 
 namespace tr::gfx::mem {
-   class AllocatedBuffer;
+   class Buffer;
 }
 
 namespace tr::gfx::ds {
@@ -20,7 +20,7 @@ namespace tr::gfx::ds {
       DescriptorSet(DescriptorSet&&) = delete;
       DescriptorSet& operator=(DescriptorSet&&) = delete;
 
-      void writeBuffer(const mem::AllocatedBuffer& buffer, size_t bufferSize);
+      void writeBuffer(const mem::Buffer& buffer, size_t bufferSize);
 
       [[nodiscard]] const vk::DescriptorSet& getVkDescriptorSet() const;
 

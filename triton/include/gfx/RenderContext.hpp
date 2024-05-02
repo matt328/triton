@@ -34,7 +34,7 @@ namespace tr::gfx {
 
    namespace mem {
       class Allocator;
-      class AllocatedImage;
+      class Image;
    }
 
    using ResizeDelegateType = entt::delegate<void(std::pair<uint32_t, uint32_t>)>;
@@ -98,7 +98,7 @@ namespace tr::gfx {
       std::unique_ptr<vk::raii::Pipeline> skinnedModelPipeline;
       std::unique_ptr<vk::raii::PipelineLayout> skinnedModelPipelineLayout;
 
-      std::unique_ptr<mem::AllocatedImage> depthImage;
+      std::unique_ptr<mem::Image> depthImage;
       std::shared_ptr<vk::raii::ImageView> depthImageView;
 
       std::vector<std::unique_ptr<Frame>> frames;
