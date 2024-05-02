@@ -9,6 +9,8 @@
 #include "gfx/geometry/Vertex.hpp"
 #include "gfx/gui/ImguiHelper.hpp"
 
+#include "gfx/mem/AllocatedBuffer.hpp"
+#include "gfx/mem/AllocatedImage.hpp"
 #include "helpers/Vulkan.hpp"
 #include "helpers/SpirvHelper.hpp"
 #include "util/Paths.hpp"
@@ -19,6 +21,7 @@
 #include "gfx/ds/DescriptorSet.hpp"
 #include "gfx/PipelineBuilder.hpp"
 #include "gfx/ds/Layout.hpp"
+#include "gfx/mem/Allocator.hpp"
 
 namespace tr::gfx {
 
