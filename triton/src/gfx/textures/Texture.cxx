@@ -1,10 +1,14 @@
 #include "Texture.hpp"
+
 #include "gfx/VkContext.hpp"
+#include "gfx/mem/AllocatedBuffer.hpp"
+#include "gfx/mem/AllocatedImage.hpp"
+#include "gfx/mem/Allocator.hpp"
 
 namespace tr::gfx::Textures {
 
    Texture::Texture(const std::string_view& filename,
-                    const Allocator& allocator,
+                    const mem::Allocator& allocator,
                     const vk::raii::Device& device,
                     const VkContext& transferContext)
        : imageLayout{vk::ImageLayout::eShaderReadOnlyOptimal} {
@@ -25,18 +29,21 @@ namespace tr::gfx::Textures {
                     uint32_t width,
                     uint32_t height,
                     uint32_t channels,
-                    const Allocator& allocator,
+                    const mem::Allocator& allocator,
                     const vk::raii::Device& device,
                     const VkContext& transferContext)
        : imageLayout{vk::ImageLayout::eShaderReadOnlyOptimal} {
       initialize(data, width, height, channels, allocator, device, transferContext);
    }
 
+   Texture::~Texture() {
+   }
+
    void Texture::initialize(void* data,
                             uint32_t width,
                             uint32_t height,
                             uint32_t channels,
-                            const Allocator& allocator,
+                            const mem::Allocator& allocator,
                             const vk::raii::Device& device,
                             const VkContext& transferContext,
                             const std::string_view& textureName) {

@@ -3,7 +3,9 @@
 #include "GraphicsDevice.hpp"
 #include "gfx/ds/LayoutFactory.hpp"
 #include "gfx/helpers/Rendering.hpp"
-#include "vma_raii.hpp"
+#include "gfx/mem/AllocatedBuffer.hpp"
+#include "gfx/mem/AllocatedImage.hpp"
+#include "gfx/mem/Allocator.hpp"
 
 namespace tr::gfx {
 

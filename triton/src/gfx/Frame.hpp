@@ -13,11 +13,14 @@ namespace vk::raii {
    class CommandBuffer;
 }
 
+namespace tr::gfx::mem {
+   class AllocatedImage;
+   class AllocatedBuffer;
+}
+
 namespace tr::gfx {
 
    class GraphicsDevice;
-   class AllocatedImage;
-   class AllocatedBuffer;
    struct ObjectData;
 
    class Frame {
@@ -53,11 +56,11 @@ namespace tr::gfx {
          return tracyContext;
       }
 
-      [[nodiscard]] const AllocatedBuffer& getCameraBuffer() const {
+      [[nodiscard]] const mem::AllocatedBuffer& getCameraBuffer() const {
          return *cameraDataBuffer;
       }
 
-      [[nodiscard]] const AllocatedBuffer& getObjectDataBuffer() const {
+      [[nodiscard]] const mem::AllocatedBuffer& getObjectDataBuffer() const {
          return *objectDataBuffer;
       }
 
@@ -88,12 +91,12 @@ namespace tr::gfx {
 
       ds::LayoutFactory& layoutFactory;
 
-      std::unique_ptr<AllocatedBuffer> objectDataBuffer;
-      std::unique_ptr<AllocatedBuffer> cameraDataBuffer;
+      std::unique_ptr<mem::AllocatedBuffer> objectDataBuffer;
+      std::unique_ptr<mem::AllocatedBuffer> cameraDataBuffer;
 
       tracy::VkCtx* tracyContext;
 
-      std::unique_ptr<AllocatedImage> drawImage;
+      std::unique_ptr<mem::AllocatedImage> drawImage;
       std::unique_ptr<vk::raii::ImageView> drawImageView;
       vk::Extent2D drawExtent;
    };

@@ -8,12 +8,15 @@
 
 #include "util/TaskQueue.hpp"
 
-namespace tr::gfx {
-   class VkContext;
-   class GraphicsDevice;
+namespace tr::gfx::mem {
    class Allocator;
    class AllocatedBuffer;
    class AllocatedImage;
+}
+
+namespace tr::gfx {
+   class VkContext;
+   class GraphicsDevice;
 }
 
 namespace tr::gfx::geo {
@@ -26,7 +29,7 @@ namespace tr::gfx::tx {
    constexpr uint32_t MaxImageSize = 1024 * 1024 * 8;
 
    struct TextureInfo {
-      std::unique_ptr<AllocatedImage> image;
+      std::unique_ptr<mem::AllocatedImage> image;
       std::unique_ptr<vk::raii::ImageView> imageView;
       std::unique_ptr<vk::raii::Sampler> sampler;
       vk::ImageLayout imageLayout;

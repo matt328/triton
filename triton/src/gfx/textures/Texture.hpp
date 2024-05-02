@@ -1,7 +1,12 @@
 #pragma once
 
-#include "../vma_raii.hpp"
-#include "gfx/VkContext.hpp"
+namespace tr::gfx {
+   class VkContext;
+   namespace mem {
+      class Allocator;
+      class AllocatedImage;
+   }
+}
 
 namespace tr::gfx::Textures {
 
@@ -11,7 +16,7 @@ namespace tr::gfx::Textures {
    class Texture final {
     public:
       explicit Texture(const std::string_view& filename,
-                       const Allocator& raiillocator,
+                       const mem::Allocator& raiillocator,
                        const vk::raii::Device& device,
                        const VkContext& transferContext);
 
@@ -19,11 +24,11 @@ namespace tr::gfx::Textures {
                        uint32_t width,
                        uint32_t height,
                        uint32_t channels,
-                       const Allocator& raiillocator,
+                       const mem::Allocator& raiillocator,
                        const vk::raii::Device& device,
                        const VkContext& transferContext);
 
-      ~Texture() = default;
+      ~Texture();
 
       Texture(const Texture&) = delete;
       Texture(Texture&&) = delete;
@@ -39,7 +44,7 @@ namespace tr::gfx::Textures {
       }
 
     private:
-      std::unique_ptr<AllocatedImage> image;
+      std::unique_ptr<mem::AllocatedImage> image;
       std::unique_ptr<vk::raii::ImageView> view;
       std::unique_ptr<vk::raii::Sampler> sampler;
 
@@ -50,7 +55,7 @@ namespace tr::gfx::Textures {
                       uint32_t width,
                       uint32_t height,
                       uint32_t channels,
-                      const Allocator& raiillocator,
+                      const mem::Allocator& raiillocator,
                       const vk::raii::Device& device,
                       const VkContext& transferContext,
                       const std::string_view& textureName = "unnamed texture");

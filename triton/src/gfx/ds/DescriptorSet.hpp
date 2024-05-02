@@ -1,7 +1,6 @@
 #pragma once
 
-#include <vulkan/vulkan_enums.hpp>
-namespace tr::gfx {
+namespace tr::gfx::mem {
    class AllocatedBuffer;
 }
 
@@ -21,7 +20,7 @@ namespace tr::gfx::ds {
       DescriptorSet(DescriptorSet&&) = delete;
       DescriptorSet& operator=(DescriptorSet&&) = delete;
 
-      void writeBuffer(const AllocatedBuffer& buffer, size_t bufferSize);
+      void writeBuffer(const mem::AllocatedBuffer& buffer, size_t bufferSize);
 
       [[nodiscard]] const vk::DescriptorSet& getVkDescriptorSet() const;
 

@@ -2,7 +2,6 @@
 #include "ct/HeightField.hpp"
 #include "gfx/RenderData.hpp"
 #include "gfx/geometry/GeometryFactory.hpp"
-#include "gfx/geometry/Vertex.hpp"
 
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
@@ -10,11 +9,14 @@
 // #define TINYGLTF_NOEXCEPTION // optional. disable exception handling.
 #include "tiny_gltf.h"
 
-#include "gfx/vma_raii.hpp"
 #include "gfx/GraphicsDevice.hpp"
+#include "gfx/VkContext.hpp"
 
 #include "gfx/geometry/GeometryData.hpp"
 #include "gfx/geometry/Mesh.hpp"
+
+#include "gfx/mem/Allocator.hpp"
+#include "gfx/mem/AllocatedBuffer.hpp"
 
 namespace tr::gfx::tx {
    ResourceManager::ResourceManager(const GraphicsDevice& graphicsDevice)
