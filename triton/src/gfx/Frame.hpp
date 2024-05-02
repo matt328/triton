@@ -14,8 +14,8 @@ namespace vk::raii {
 }
 
 namespace tr::gfx::mem {
-   class AllocatedImage;
-   class AllocatedBuffer;
+   class Image;
+   class Buffer;
 }
 
 namespace tr::gfx {
@@ -56,11 +56,11 @@ namespace tr::gfx {
          return tracyContext;
       }
 
-      [[nodiscard]] const mem::AllocatedBuffer& getCameraBuffer() const {
+      [[nodiscard]] const mem::Buffer& getCameraBuffer() const {
          return *cameraDataBuffer;
       }
 
-      [[nodiscard]] const mem::AllocatedBuffer& getObjectDataBuffer() const {
+      [[nodiscard]] const mem::Buffer& getObjectDataBuffer() const {
          return *objectDataBuffer;
       }
 
@@ -91,12 +91,12 @@ namespace tr::gfx {
 
       ds::LayoutFactory& layoutFactory;
 
-      std::unique_ptr<mem::AllocatedBuffer> objectDataBuffer;
-      std::unique_ptr<mem::AllocatedBuffer> cameraDataBuffer;
+      std::unique_ptr<mem::Buffer> objectDataBuffer;
+      std::unique_ptr<mem::Buffer> cameraDataBuffer;
 
       tracy::VkCtx* tracyContext;
 
-      std::unique_ptr<mem::AllocatedImage> drawImage;
+      std::unique_ptr<mem::Image> drawImage;
       std::unique_ptr<vk::raii::ImageView> drawImageView;
       vk::Extent2D drawExtent;
    };

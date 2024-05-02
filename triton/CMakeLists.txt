@@ -14,8 +14,8 @@ set(triton_SRC
    "src/gfx/helpers/SpirvHelper.cxx"
    "src/gfx/textures/Texture.cxx"
    "src/gfx/textures/ResourceManager.cxx"
-   "src/gfx/mem/AllocatedImage.cxx"
-   "src/gfx/mem/AllocatedBuffer.cxx"
+   "src/gfx/mem/Image.cxx"
+   "src/gfx/mem/Buffer.cxx"
    "src/gfx/mem/Allocator.cxx"
 
    "src/gp/GameplaySystem.cxx"

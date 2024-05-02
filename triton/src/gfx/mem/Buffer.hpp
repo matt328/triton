@@ -1,21 +1,21 @@
 #pragma once
 
 namespace tr::gfx::mem {
-   class AllocatedBuffer {
+   class Buffer {
     public:
-      AllocatedBuffer(const vma::Allocator& newAllocator,
-                      const vk::Buffer newBuffer,
-                      const vk::DeviceSize range,
-                      const vma::Allocation newAllocation,
-                      const vk::Device& device);
+      Buffer(const vma::Allocator& newAllocator,
+             const vk::Buffer newBuffer,
+             const vk::DeviceSize range,
+             const vma::Allocation newAllocation,
+             const vk::Device& device);
 
-      ~AllocatedBuffer();
+      ~Buffer();
 
-      AllocatedBuffer(const AllocatedBuffer&) = delete;
-      AllocatedBuffer& operator=(const AllocatedBuffer&) = delete;
+      Buffer(const Buffer&) = delete;
+      Buffer& operator=(const Buffer&) = delete;
 
-      AllocatedBuffer(AllocatedBuffer&&) = delete;
-      AllocatedBuffer& operator=(AllocatedBuffer&&) = delete;
+      Buffer(Buffer&&) = delete;
+      Buffer& operator=(Buffer&&) = delete;
 
       /// Permanently maps the buffer, until either unmapBuffer() is called, or the object is
       /// destroyed.  Meant to be paired with updateMappedBufferValue()

@@ -1,8 +1,8 @@
 #include "Texture.hpp"
 
 #include "gfx/VkContext.hpp"
-#include "gfx/mem/AllocatedBuffer.hpp"
-#include "gfx/mem/AllocatedImage.hpp"
+#include "gfx/mem/Buffer.hpp"
+#include "gfx/mem/Image.hpp"
 #include "gfx/mem/Allocator.hpp"
 
 namespace tr::gfx::Textures {

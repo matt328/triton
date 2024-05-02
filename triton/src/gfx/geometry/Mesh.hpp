@@ -10,7 +10,7 @@
 */
 
 namespace tr::gfx::mem {
-   class AllocatedBuffer;
+   class Buffer;
 }
 
 namespace tr::gfx::geo {
@@ -18,8 +18,8 @@ namespace tr::gfx::geo {
    /// Aggregate struct that ties together an index buffer and a vertex buffer, and provides a
    /// convenience count of the number of indices contained within the buffer.
    struct Mesh {
-      std::unique_ptr<mem::AllocatedBuffer> vertexBuffer;
-      std::unique_ptr<mem::AllocatedBuffer> indexBuffer;
+      std::unique_ptr<mem::Buffer> vertexBuffer;
+      std::unique_ptr<mem::Buffer> indexBuffer;
       uint32_t indicesCount;
    };
 }

@@ -9,8 +9,8 @@
 #include "gfx/geometry/Vertex.hpp"
 #include "gfx/gui/ImguiHelper.hpp"
 
-#include "gfx/mem/AllocatedBuffer.hpp"
-#include "gfx/mem/AllocatedImage.hpp"
+#include "gfx/mem/Buffer.hpp"
+#include "gfx/mem/Image.hpp"
 #include "helpers/Vulkan.hpp"
 #include "helpers/SpirvHelper.hpp"
 #include "util/Paths.hpp"

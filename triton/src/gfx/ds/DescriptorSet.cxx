@@ -1,6 +1,6 @@
 #include "DescriptorSet.hpp"
 
-#include "gfx/mem/AllocatedBuffer.hpp"
+#include "gfx/mem/Buffer.hpp"
 
 namespace tr::gfx::ds {
    DescriptorSet::DescriptorSet(const vk::raii::Device& device,
@@ -24,7 +24,7 @@ namespace tr::gfx::ds {
    DescriptorSet::~DescriptorSet() {
    }
 
-   void DescriptorSet::writeBuffer(const mem::AllocatedBuffer& buffer, size_t bufferSize) {
+   void DescriptorSet::writeBuffer(const mem::Buffer& buffer, size_t bufferSize) {
       const auto bufferInfo =
           vk::DescriptorBufferInfo{.buffer = buffer.getBuffer(), .offset = 0, .range = bufferSize};
 
