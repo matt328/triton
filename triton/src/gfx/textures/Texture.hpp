@@ -4,7 +4,7 @@ namespace tr::gfx {
    class VkContext;
    namespace mem {
       class Allocator;
-      class AllocatedImage;
+      class Image;
    }
 }
 
@@ -44,7 +44,7 @@ namespace tr::gfx::Textures {
       }
 
     private:
-      std::unique_ptr<mem::AllocatedImage> image;
+      std::unique_ptr<mem::Image> image;
       std::unique_ptr<vk::raii::ImageView> view;
       std::unique_ptr<vk::raii::Sampler> sampler;
 

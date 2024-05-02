@@ -3,8 +3,8 @@
 #include "GraphicsDevice.hpp"
 #include "gfx/ds/LayoutFactory.hpp"
 #include "gfx/helpers/Rendering.hpp"
-#include "gfx/mem/AllocatedBuffer.hpp"
-#include "gfx/mem/AllocatedImage.hpp"
+#include "gfx/mem/Buffer.hpp"
+#include "gfx/mem/Image.hpp"
 #include "gfx/mem/Allocator.hpp"
 
 namespace tr::gfx {

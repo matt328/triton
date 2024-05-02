@@ -2,8 +2,8 @@
 
 namespace tr::gfx::mem {
 
-   class AllocatedBuffer;
-   class AllocatedImage;
+   class Buffer;
+   class Image;
 
    class Allocator {
     public:
@@ -16,33 +16,32 @@ namespace tr::gfx::mem {
       Allocator(Allocator&&) = delete;
       Allocator& operator=(Allocator&&) = delete;
 
-      std::unique_ptr<AllocatedBuffer> createBuffer(
-          const vk::BufferCreateInfo* bci,
-          const vma::AllocationCreateInfo* aci,
-          const std::string_view& name = "unnamed buffer") const;
+      std::unique_ptr<Buffer> createBuffer(const vk::BufferCreateInfo* bci,
+                                           const vma::AllocationCreateInfo* aci,
+                                           const std::string_view& name = "unnamed buffer") const;
 
-      [[nodiscard]] std::unique_ptr<AllocatedBuffer> createStagingBuffer(
+      [[nodiscard]] std::unique_ptr<Buffer> createStagingBuffer(
           size_t size,
           const std::string_view& name = "unnamed buffer") const;
 
-      [[nodiscard]] std::unique_ptr<AllocatedBuffer> createGpuVertexBuffer(
+      [[nodiscard]] std::unique_ptr<Buffer> createGpuVertexBuffer(
           size_t size,
           const std::string_view& name = "unnamed buffer") const;
 
-      [[nodiscard]] std::unique_ptr<AllocatedImage> createImage(
+      [[nodiscard]] std::unique_ptr<Image> createImage(
           const vk::ImageCreateInfo& imageCreateInfo,
           const vma::AllocationCreateInfo& allocationCreateInfo,
           const std::string_view& newName = "unnamed image") const;
 
-      [[nodiscard]] std::unique_ptr<AllocatedBuffer> createGpuIndexBuffer(
+      [[nodiscard]] std::unique_ptr<Buffer> createGpuIndexBuffer(
           size_t size,
           const std::string_view& name) const;
 
-      [[nodiscard]] void* mapMemory(const AllocatedBuffer& allocatedBuffer) const;
-      void unmapMemory(const AllocatedBuffer& allocatedBuffer) const;
+      [[nodiscard]] void* mapMemory(const Buffer& Buffer) const;
+      void unmapMemory(const Buffer& Buffer) const;
 
-      [[nodiscard]] void* mapMemory(const AllocatedImage& allocatedImage) const;
-      void unmapMemory(const AllocatedImage& allocatedImage) const;
+      [[nodiscard]] void* mapMemory(const Image& Image) const;
+      void unmapMemory(const Image& Image) const;
 
     private:
       const vk::Device& device;

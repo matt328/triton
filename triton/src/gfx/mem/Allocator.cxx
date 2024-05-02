@@ -1,6 +1,6 @@
 #include "Allocator.hpp"
-#include "AllocatedBuffer.hpp"
-#include "AllocatedImage.hpp"
+#include "Buffer.hpp"
+#include "Image.hpp"
 
 #define VMA_IMPLEMENTATION
 #include <vk_mem_alloc.h>
@@ -18,19 +18,18 @@ namespace tr::gfx::mem {
       allocator.destroy();
    }
 
-   std::unique_ptr<AllocatedBuffer> Allocator::createBuffer(const vk::BufferCreateInfo* bci,
-                                                            const vma::AllocationCreateInfo* aci,
-                                                            const std::string_view& name) const {
+   std::unique_ptr<Buffer> Allocator::createBuffer(const vk::BufferCreateInfo* bci,
+                                                   const vma::AllocationCreateInfo* aci,
+                                                   const std::string_view& name) const {
 
       auto [buffer, allocation] = allocator.createBuffer(*bci, *aci);
       allocator.setAllocationName(allocation, name.data());
 
-      return std::make_unique<AllocatedBuffer>(allocator, buffer, bci->size, allocation, device);
+      return std::make_unique<Buffer>(allocator, buffer, bci->size, allocation, device);
    }
 
-   std::unique_ptr<AllocatedBuffer> Allocator::createStagingBuffer(
-       const size_t size,
-       const std::string_view& name) const {
+   std::unique_ptr<Buffer> Allocator::createStagingBuffer(const size_t size,
+                                                          const std::string_view& name) const {
 
       const auto bufferCreateInfo =
           vk::BufferCreateInfo{.size = size,
@@ -44,9 +43,8 @@ namespace tr::gfx::mem {
       return createBuffer(&bufferCreateInfo, &allocationCreateInfo, name);
    }
 
-   std::unique_ptr<AllocatedBuffer> Allocator::createGpuVertexBuffer(
-       const size_t size,
-       const std::string_view& name) const {
+   std::unique_ptr<Buffer> Allocator::createGpuVertexBuffer(const size_t size,
+                                                            const std::string_view& name) const {
 
       const auto bufferCreateInfo = vk::BufferCreateInfo{
           .size = size,
@@ -58,19 +56,18 @@ namespace tr::gfx::mem {
       return createBuffer(&bufferCreateInfo, &allocationCreateInfo, name);
    }
 
-   std::unique_ptr<AllocatedImage> Allocator::createImage(
+   std::unique_ptr<Image> Allocator::createImage(
        const vk::ImageCreateInfo& imageCreateInfo,
        const vma::AllocationCreateInfo& allocationCreateInfo,
        const std::string_view& newName) const {
 
       auto [image, allocation] = allocator.createImage(imageCreateInfo, allocationCreateInfo);
       allocator.setAllocationName(allocation, newName.data());
-      return std::make_unique<AllocatedImage>(allocator, std::move(image), std::move(allocation));
+      return std::make_unique<Image>(allocator, std::move(image), std::move(allocation));
    }
 
-   std::unique_ptr<AllocatedBuffer> Allocator::createGpuIndexBuffer(
-       const size_t size,
-       const std::string_view& name) const {
+   std::unique_ptr<Buffer> Allocator::createGpuIndexBuffer(const size_t size,
+                                                           const std::string_view& name) const {
       const auto bufferCreateInfo = vk::BufferCreateInfo{
           .size = size,
           .usage = vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst,
@@ -81,19 +78,19 @@ namespace tr::gfx::mem {
       return createBuffer(&bufferCreateInfo, &allocationCreateInfo, name);
    }
 
-   void* Allocator::mapMemory(const AllocatedBuffer& allocatedBuffer) const {
-      return allocator.mapMemory(allocatedBuffer.getAllocation());
+   void* Allocator::mapMemory(const Buffer& Buffer) const {
+      return allocator.mapMemory(Buffer.getAllocation());
    }
 
-   void Allocator::unmapMemory(const AllocatedBuffer& allocatedBuffer) const {
-      return allocator.unmapMemory(allocatedBuffer.getAllocation());
+   void Allocator::unmapMemory(const Buffer& Buffer) const {
+      return allocator.unmapMemory(Buffer.getAllocation());
    }
 
-   void* Allocator::mapMemory(const AllocatedImage& allocatedImage) const {
-      return allocator.mapMemory(allocatedImage.getAllocation());
+   void* Allocator::mapMemory(const Image& Image) const {
+      return allocator.mapMemory(Image.getAllocation());
    }
 
-   void Allocator::unmapMemory(const AllocatedImage& allocatedImage) const {
-      allocator.unmapMemory(allocatedImage.getAllocation());
+   void Allocator::unmapMemory(const Image& Image) const {
+      allocator.unmapMemory(Image.getAllocation());
    }
 }
