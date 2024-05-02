@@ -1,7 +1,7 @@
 #include "GraphicsDevice.hpp"
 #include "helpers/Vulkan.hpp"
-#include "vma_raii.hpp"
 #include "VkContext.hpp"
+#include "gfx/mem/Allocator.hpp"
 
 namespace tr::gfx {
 
@@ -231,7 +231,7 @@ namespace tr::gfx {
                                                                 .device = **vulkanDevice,
                                                                 .instance = **instance};
 
-      raiillocator = std::make_unique<Allocator>(allocatorCreateInfo);
+      raiillocator = std::make_unique<mem::Allocator>(allocatorCreateInfo);
    }
 
    GraphicsDevice::~GraphicsDevice() {

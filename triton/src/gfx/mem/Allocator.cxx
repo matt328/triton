@@ -1,11 +1,14 @@
-#include "vma_raii.hpp"
+#include "Allocator.hpp"
+#include "AllocatedBuffer.hpp"
+#include "AllocatedImage.hpp"
 
 #define VMA_IMPLEMENTATION
 #include <vk_mem_alloc.h>
 #include <vulkan-memory-allocator-hpp/vk_mem_alloc.hpp>
 
-namespace tr::gfx {
+VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 
+namespace tr::gfx::mem {
    Allocator::Allocator(const vma::AllocatorCreateInfo& createInfo) : device{createInfo.device} {
       allocator = createAllocator(createInfo);
    }

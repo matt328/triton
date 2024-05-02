@@ -12,7 +12,10 @@ namespace tr::gfx {
 
    class ImmediateContext;
    class VkContext;
-   class Allocator;
+
+   namespace mem {
+      class Allocator;
+   }
 
    namespace Textures {
       class TextureFactory;
@@ -65,7 +68,7 @@ namespace tr::gfx {
          return *physicalDevice;
       }
 
-      [[nodiscard]] const Allocator& getAllocator() const {
+      [[nodiscard]] const mem::Allocator& getAllocator() const {
          return *raiillocator;
       }
 
@@ -153,7 +156,7 @@ namespace tr::gfx {
       std::shared_ptr<vk::raii::Queue> transferQueue;
       std::unique_ptr<vk::raii::Queue> computeQueue;
 
-      std::unique_ptr<Allocator> raiillocator;
+      std::unique_ptr<mem::Allocator> raiillocator;
 
       void createSwapchain();
 
