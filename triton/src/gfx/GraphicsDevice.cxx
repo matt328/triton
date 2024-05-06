@@ -2,6 +2,8 @@
 #include "helpers/Vulkan.hpp"
 #include "VkContext.hpp"
 #include "gfx/mem/Allocator.hpp"
+#include <vulkan-memory-allocator-hpp/vk_mem_alloc_structs.hpp>
+#include <vulkan/vulkan_core.h>
 
 namespace tr::gfx {
 
@@ -126,9 +128,8 @@ namespace tr::gfx {
           physicalDevice->getProperties2KHR<vk::PhysicalDeviceProperties2KHR,
                                             vk::PhysicalDeviceDescriptorBufferPropertiesEXT>();
 
-      auto descriptorBufferProperties =
+      descriptorBufferProperties =
           deviceProperties.get<vk::PhysicalDeviceDescriptorBufferPropertiesEXT>();
-      descriptorBufferOffsetAlignment = descriptorBufferProperties.descriptorBufferOffsetAlignment;
 
       auto drfs = vk::PhysicalDeviceDynamicRenderingFeaturesKHR{
           .dynamicRendering = VK_TRUE,
@@ -169,13 +170,23 @@ namespace tr::gfx {
       const auto dbFeatures =
           vk::PhysicalDeviceDescriptorBufferFeaturesEXT{.descriptorBuffer = true};
 
+      const auto bdaFeatures =
+          vk::PhysicalDeviceBufferDeviceAddressFeaturesKHR{.bufferDeviceAddress = true};
+
       const vk::StructureChain<vk::DeviceCreateInfo,
                                vk::PhysicalDeviceFeatures2,
                                vk::PhysicalDeviceShaderDrawParametersFeatures,
                                vk::PhysicalDeviceDescriptorIndexingFeatures,
                                vk::PhysicalDeviceDynamicRenderingFeaturesKHR,
-                               vk::PhysicalDeviceDescriptorBufferFeaturesEXT>
-          c{createInfo, physicalFeatures2, drawParamsFeatures, indexingFeatures, drfs, dbFeatures};
+                               vk::PhysicalDeviceDescriptorBufferFeaturesEXT,
+                               vk::PhysicalDeviceBufferDeviceAddressFeaturesKHR>
+          c{createInfo,
+            physicalFeatures2,
+            drawParamsFeatures,
+            indexingFeatures,
+            drfs,
+            dbFeatures,
+            bdaFeatures};
 
       vulkanDevice =
           std::make_unique<vk::raii::Device>(physicalDevice->createDevice(c.get(), nullptr));
@@ -227,11 +238,20 @@ namespace tr::gfx {
                                                          queueFamilyIndices.transferFamily.value(),
                                                          "Async Transfer Context");
 
-      const auto allocatorCreateInfo = vma::AllocatorCreateInfo{.physicalDevice = **physicalDevice,
-                                                                .device = **vulkanDevice,
-                                                                .instance = **instance};
+      const auto vulkanFunctions = vma::VulkanFunctions{
+          .vkGetInstanceProcAddr = vkGetInstanceProcAddr,
+          .vkGetDeviceProcAddr = vkGetDeviceProcAddr,
+      };
 
-      raiillocator = std::make_unique<mem::Allocator>(allocatorCreateInfo);
+      const auto allocatorCreateInfo = vma::AllocatorCreateInfo{
+          .flags = vma::AllocatorCreateFlagBits::eBufferDeviceAddress,
+          .physicalDevice = **physicalDevice,
+          .device = **vulkanDevice,
+          .pVulkanFunctions = &vulkanFunctions,
+          .instance = **instance,
+      };
+
+      raiillocator = std::make_unique<mem::Allocator>(allocatorCreateInfo, *vulkanDevice);
    }
 
    GraphicsDevice::~GraphicsDevice() {
@@ -394,6 +414,8 @@ namespace tr::gfx {
       for (auto& ext : exts) {
          extNames.push_back(ext.extensionName);
       }
+
+      extNames.emplace_back(VK_KHR_DEVICE_GROUP_CREATION_EXTENSION_NAME);
 
       auto portabilityPresent = false;
 

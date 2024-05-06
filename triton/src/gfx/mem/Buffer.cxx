@@ -5,12 +5,14 @@ namespace tr::gfx::mem {
                   const vk::Buffer newBuffer,
                   const vk::DeviceSize range,
                   const vma::Allocation newAllocation,
-                  const vk::Device& device)
+                  const vk::Device& device,
+                  const vma::AllocationInfo allocationInfo)
        : device{device},
          buffer(newBuffer),
          bufferInfo{vk::DescriptorBufferInfo{.buffer = newBuffer, .offset = 0, .range = range}},
          allocation(newAllocation),
-         allocator(newAllocator) {
+         allocator(newAllocator),
+         allocationInfo{allocationInfo} {
    }
 
    Buffer::~Buffer() {
@@ -44,6 +46,6 @@ namespace tr::gfx::mem {
 
    [[nodiscard]] uint64_t Buffer::getDeviceAddress() const {
       const auto bdai = vk::BufferDeviceAddressInfoKHR{.buffer = buffer};
-      return device.getBufferAddressEXT(bdai);
+      return device.getBufferAddress(bdai);
    }
 }
