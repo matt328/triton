@@ -7,7 +7,8 @@ namespace tr::gfx::mem {
              const vk::Buffer newBuffer,
              const vk::DeviceSize range,
              const vma::Allocation newAllocation,
-             const vk::Device& device);
+             const vk::Device& device,
+             const vma::AllocationInfo allocationInfo);
 
       ~Buffer();
 
@@ -44,6 +45,10 @@ namespace tr::gfx::mem {
          return &bufferInfo;
       }
 
+      [[nodiscard]] auto getData() const {
+         return allocationInfo.pMappedData;
+      }
+
       [[nodiscard]] uint64_t getDeviceAddress() const;
 
     private:
@@ -54,5 +59,6 @@ namespace tr::gfx::mem {
       vk::DescriptorBufferInfo bufferInfo;
       vma::Allocation allocation;
       vma::Allocator allocator;
+      vma::AllocationInfo allocationInfo;
    };
 }

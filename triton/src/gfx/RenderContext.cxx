@@ -22,6 +22,8 @@
 #include "gfx/PipelineBuilder.hpp"
 #include "gfx/ds/Layout.hpp"
 #include "gfx/mem/Allocator.hpp"
+#include <vulkan/vulkan_enums.hpp>
+#include <vulkan/vulkan_structs.hpp>
 
 namespace tr::gfx {
 
@@ -31,12 +33,12 @@ namespace tr::gfx {
       layoutFactory = std::make_unique<ds::LayoutFactory>(*graphicsDevice);
 
       auto& l = layoutFactory->getLayout(ds::LayoutHandle::PerFrame);
-      auto offset = l.getBindingOffset(0);
-      auto layoutSize = l.getAlignedSize();
+      [[maybe_unused]] auto offset = l.getBindingOffset(0);
+      [[maybe_unused]] auto layoutSize = l.getAlignedSize();
 
-      dsFactory = std::make_unique<ds::DescriptorSetFactory>(graphicsDevice->getVulkanDevice(),
-                                                             *layoutFactory,
-                                                             FRAMES_IN_FLIGHT);
+      // dsFactory = std::make_unique<ds::DescriptorSetFactory>(graphicsDevice->getVulkanDevice(),
+      //                                                        *layoutFactory,
+      //                                                        FRAMES_IN_FLIGHT);
 
       const auto viewportSize = graphicsDevice->getSwapchainExtent();
       mainViewport = vk::Viewport{.x = 0.f,
@@ -354,42 +356,41 @@ namespace tr::gfx {
          pushConstants = renderData.pushConstants;
       });
 
-      auto& objectDataSet = dsFactory->getDescriptorSet(ds::SetHandle::ObjectData, currentFrame);
-      auto& perFrameSet = dsFactory->getDescriptorSet(ds::SetHandle::PerFrame, currentFrame);
-      auto& textureSet = dsFactory->getDescriptorSet(ds::SetHandle::Bindless, currentFrame);
-      auto& animationDataSet =
-          dsFactory->getDescriptorSet(ds::SetHandle::AnimationData, currentFrame);
-
-      objectDataSet.writeBuffer(frame.getObjectDataBuffer(), sizeof(ObjectData) * 128);
-      perFrameSet.writeBuffer(frame.getCameraBuffer(), sizeof(CameraData));
+      // TODO: switch all of these to descriptor buffers
 
       resourceManager->accessTextures(
-          [&textureSet, this](const std::vector<vk::DescriptorImageInfo>& imageInfoList) {
-             ZoneNamedN(a, "Updating Texture DS", true);
-             const auto write = vk::WriteDescriptorSet{
-                 .dstSet = textureSet.getVkDescriptorSet(),
-                 .dstBinding = 3,
-                 .dstArrayElement = 0,
-                 .descriptorCount = static_cast<uint32_t>(imageInfoList.size()),
-                 .descriptorType = vk::DescriptorType::eCombinedImageSampler,
-                 .pImageInfo = imageInfoList.data()};
-             graphicsDevice->getVulkanDevice().updateDescriptorSets(write, nullptr);
+          [&frame](const std::vector<vk::DescriptorImageInfo>& imageInfoList) {
+             ZoneNamedN(a, "Updating Texture DB", true);
+             frame.updateTextures(imageInfoList);
           });
 
       cmd.begin(
           vk::CommandBufferBeginInfo{.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse});
       {
-         auto ds = std::array{textureSet.getVkDescriptorSet(),
-                              objectDataSet.getVkDescriptorSet(),
-                              perFrameSet.getVkDescriptorSet()};
-
-         cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
-                                **staticModelPipelineLayout,
-                                0,
-                                ds,
-                                nullptr);
-
          frame.prepareFrame();
+
+         const auto perFrameBuffer = vk::DescriptorBufferBindingInfoEXT{
+             .address = frame.getPerFrameDescriptorBuffer().getDeviceAddress(),
+             .usage = vk::BufferUsageFlagBits::eResourceDescriptorBufferEXT};
+
+         const auto objectDataBufferInfo = vk::DescriptorBufferBindingInfoEXT{
+             .address = frame.getObjectDataDescriptorBuffer().getDeviceAddress(),
+             .usage = vk::BufferUsageFlagBits::eResourceDescriptorBufferEXT};
+
+         const auto textureBuffer = vk::DescriptorBufferBindingInfoEXT{
+             .address = frame.getTextureDescriptorBuffer().getDeviceAddress(),
+             .usage = vk::BufferUsageFlagBits::eResourceDescriptorBufferEXT};
+
+         cmd.bindDescriptorBuffersEXT({perFrameBuffer, objectDataBufferInfo, textureBuffer});
+
+         // Do we need to do this if they're all 0 for now?
+         uint32_t perFrameBufferIndex = 0;
+         vk::DeviceSize bufferOffset = 0;
+         cmd.setDescriptorBufferOffsetsEXT(vk::PipelineBindPoint::eGraphics,
+                                           **staticModelPipelineLayout,
+                                           0,
+                                           perFrameBufferIndex,
+                                           bufferOffset);
 
          // Static Models
          cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, **staticModelPipeline);

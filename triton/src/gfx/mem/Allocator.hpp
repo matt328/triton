@@ -1,5 +1,9 @@
 #pragma once
 
+namespace tr::gfx {
+   class GraphicsDevice;
+}
+
 namespace tr::gfx::mem {
 
    class Buffer;
@@ -7,7 +11,8 @@ namespace tr::gfx::mem {
 
    class Allocator {
     public:
-      explicit Allocator(const vma::AllocatorCreateInfo& createInfo);
+      explicit Allocator(const vma::AllocatorCreateInfo& createInfo,
+                         const vk::raii::Device& device);
       ~Allocator();
 
       Allocator(const Allocator&) = delete;
@@ -48,7 +53,7 @@ namespace tr::gfx::mem {
       void unmapMemory(const Image& Image) const;
 
     private:
-      const vk::Device& device;
+      const vk::raii::Device& device;
       vma::Allocator allocator;
    };
 }

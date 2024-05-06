@@ -28,8 +28,8 @@ namespace tr::gfx::ds {
           .descriptorCount = 128,
           .stageFlags = vk::ShaderStageFlagBits::eAll};
 
-      const auto bindlessFlags = vk::DescriptorBindingFlagBits::ePartiallyBound |
-                                 vk::DescriptorBindingFlagBits::eUpdateAfterBind;
+      const vk::DescriptorBindingFlags bindlessFlags =
+          vk::DescriptorBindingFlagBits::ePartiallyBound;
 
       const auto extendedInfo =
           vk::DescriptorSetLayoutBindingFlagsCreateInfoEXT{.bindingCount = 1,
@@ -37,7 +37,7 @@ namespace tr::gfx::ds {
 
       const auto dslCreateInfo = vk::DescriptorSetLayoutCreateInfo{
           .pNext = &extendedInfo,
-          .flags = vk::DescriptorSetLayoutCreateFlagBits::eUpdateAfterBindPool,
+          .flags = vk::DescriptorSetLayoutCreateFlagBits::eDescriptorBufferEXT,
           .bindingCount = 1,
           .pBindings = &binding};
 
@@ -50,6 +50,7 @@ namespace tr::gfx::ds {
                                          .descriptorType = vk::DescriptorType::eUniformBuffer,
                                          .descriptorCount = 1,
                                          .stageFlags = vk::ShaderStageFlagBits::eVertex};
+
       const auto createInfo = vk::DescriptorSetLayoutCreateInfo{
           .flags = vk::DescriptorSetLayoutCreateFlagBits::eDescriptorBufferEXT,
           .bindingCount = 1,
@@ -64,8 +65,10 @@ namespace tr::gfx::ds {
                                          .descriptorType = vk::DescriptorType::eStorageBuffer,
                                          .descriptorCount = 1,
                                          .stageFlags = vk::ShaderStageFlagBits::eVertex};
-      const auto createInfo =
-          vk::DescriptorSetLayoutCreateInfo{.bindingCount = 1, .pBindings = &binding};
+      const auto createInfo = vk::DescriptorSetLayoutCreateInfo{
+          .flags = vk::DescriptorSetLayoutCreateFlagBits::eDescriptorBufferEXT,
+          .bindingCount = 1,
+          .pBindings = &binding};
 
       layoutCache[LayoutHandle::ObjectData] = std::make_unique<Layout>(device, createInfo);
    }
@@ -76,8 +79,10 @@ namespace tr::gfx::ds {
                                          .descriptorType = vk::DescriptorType::eStorageBuffer,
                                          .descriptorCount = 1,
                                          .stageFlags = vk::ShaderStageFlagBits::eVertex};
-      const auto createInfo =
-          vk::DescriptorSetLayoutCreateInfo{.bindingCount = 1, .pBindings = &binding};
+      const auto createInfo = vk::DescriptorSetLayoutCreateInfo{
+          .flags = vk::DescriptorSetLayoutCreateFlagBits::eDescriptorBufferEXT,
+          .bindingCount = 1,
+          .pBindings = &binding};
       layoutCache[LayoutHandle::AnimationData] = std::make_unique<Layout>(device, createInfo);
    }
 
