@@ -104,8 +104,8 @@ namespace tr::gfx {
          return *asyncTransferContext;
       }
 
-      [[nodiscard]] auto getDescriptorBufferOffsetAlignment() const {
-         return descriptorBufferOffsetAlignment;
+      [[nodiscard]] auto getDescriptorBufferProperties() const {
+         return descriptorBufferProperties;
       }
 
       [[nodiscard]] const std::pair<uint32_t, uint32_t> getCurrentSize() const;
@@ -127,7 +127,9 @@ namespace tr::gfx {
           VK_KHR_CREATE_RENDERPASS_2_EXTENSION_NAME,
           VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME,
           VK_EXT_EXTENDED_DYNAMIC_STATE_3_EXTENSION_NAME,
-          VK_EXT_DESCRIPTOR_BUFFER_EXTENSION_NAME};
+          VK_EXT_DESCRIPTOR_BUFFER_EXTENSION_NAME,
+          VK_KHR_DEVICE_GROUP_EXTENSION_NAME,
+          VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME};
       std::vector<const char*> desiredValidationLayers = {"VK_LAYER_KHRONOS_validation"};
 
       std::unique_ptr<vk::raii::Context> context;
@@ -136,7 +138,7 @@ namespace tr::gfx {
       std::unique_ptr<vk::raii::PhysicalDevice> physicalDevice;
       std::unique_ptr<vk::raii::Device> vulkanDevice;
 
-      vk::DeviceSize descriptorBufferOffsetAlignment;
+      vk::PhysicalDeviceDescriptorBufferPropertiesEXT descriptorBufferProperties;
 
       std::unique_ptr<vk::raii::SwapchainKHR> oldSwapchain;
       std::unique_ptr<vk::raii::SwapchainKHR> swapchain;

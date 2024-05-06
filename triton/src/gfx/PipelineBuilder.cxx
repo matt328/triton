@@ -63,8 +63,10 @@ namespace tr::gfx {
               static_cast<uint32_t>(vertexAttributeDescriptions.size()),
           .pVertexAttributeDescriptions = vertexAttributeDescriptions.data()};
 
+      // Switch pNext here to a chained structure
       auto pipelineCreateInfo =
           vk::GraphicsPipelineCreateInfo{.pNext = &renderInfo,
+                                         .flags = vk::PipelineCreateFlagBits::eDescriptorBufferEXT,
                                          .stageCount = static_cast<uint32_t>(shaderStages.size()),
                                          .pStages = shaderStages.data(),
                                          .pVertexInputState = &vertexInputStateCreateInfo,

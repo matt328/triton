@@ -22,7 +22,8 @@ namespace tr::gfx::ds {
       }
 
       [[nodiscard]] auto getAlignedSize() const {
-         const auto alignment = graphicsDevice.getDescriptorBufferOffsetAlignment();
+         const auto alignment =
+             graphicsDevice.getDescriptorBufferProperties().descriptorBufferOffsetAlignment;
          const auto value = getLayoutSize();
          return (value + alignment - 1) & ~(alignment - 1);
       }

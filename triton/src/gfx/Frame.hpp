@@ -70,9 +70,23 @@ namespace tr::gfx {
          return **drawImageView;
       }
 
+      [[nodiscard]] const mem::Buffer& getPerFrameDescriptorBuffer() const {
+         return *perFrameDescriptorBuffer;
+      }
+
+      [[nodiscard]] const mem::Buffer& getTextureDescriptorBuffer() const {
+         return *textureDescriptorBuffer;
+      }
+
+      [[nodiscard]] const mem::Buffer& getObjectDataDescriptorBuffer() const {
+         return *objectDataDescriptorBuffer;
+      }
+
       void updateObjectDataBuffer(const ObjectData* data, const size_t size);
       void destroySwapchainResources();
       void createSwapchainResources(const GraphicsDevice& graphicsDevice);
+
+      void updateTextures(const std::vector<vk::DescriptorImageInfo>& imageInfos);
 
       /// Sets up the attachments for renderingInfo and calls cmd.beginRendering()
       void prepareFrame();
@@ -83,6 +97,7 @@ namespace tr::gfx {
 
     private:
       const vk::raii::Device& graphicsDevice;
+      size_t combinedImageSamplerDescriptorSize{};
       std::shared_ptr<vk::raii::ImageView> depthImageView;
       std::unique_ptr<vk::raii::CommandBuffer> commandBuffer;
       std::unique_ptr<vk::raii::Semaphore> imageAvailableSemaphore;
@@ -92,6 +107,8 @@ namespace tr::gfx {
       ds::LayoutFactory& layoutFactory;
 
       std::unique_ptr<mem::Buffer> perFrameDescriptorBuffer;
+      std::unique_ptr<mem::Buffer> objectDataDescriptorBuffer;
+      std::unique_ptr<mem::Buffer> textureDescriptorBuffer;
 
       std::unique_ptr<mem::Buffer> objectDataBuffer;
       std::unique_ptr<mem::Buffer> cameraDataBuffer;

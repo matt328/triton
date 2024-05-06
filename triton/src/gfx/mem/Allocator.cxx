@@ -1,19 +1,17 @@
 #include "Allocator.hpp"
 #include "Buffer.hpp"
 #include "Image.hpp"
+
+#include "gfx/GraphicsDevice.hpp"
 #include <vulkan-memory-allocator-hpp/vk_mem_alloc_enums.hpp>
-#include <vulkan-memory-allocator-hpp/vk_mem_alloc_structs.hpp>
-#include <vulkan/vulkan_enums.hpp>
-#include <vulkan/vulkan_structs.hpp>
 
 #define VMA_IMPLEMENTATION
 #include <vk_mem_alloc.h>
 #include <vulkan-memory-allocator-hpp/vk_mem_alloc.hpp>
 
-VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
-
 namespace tr::gfx::mem {
-   Allocator::Allocator(const vma::AllocatorCreateInfo& createInfo) : device{createInfo.device} {
+   Allocator::Allocator(const vma::AllocatorCreateInfo& createInfo, const vk::raii::Device& device)
+       : device{device} {
       allocator = createAllocator(createInfo);
    }
 
@@ -26,10 +24,11 @@ namespace tr::gfx::mem {
                                                    const vma::AllocationCreateInfo* aci,
                                                    const std::string_view& name) const {
 
-      auto [buffer, allocation] = allocator.createBuffer(*bci, *aci);
+      vma::AllocationInfo info{};
+      auto [buffer, allocation] = allocator.createBuffer(*bci, *aci, info);
       allocator.setAllocationName(allocation, name.data());
 
-      return std::make_unique<Buffer>(allocator, buffer, bci->size, allocation, device);
+      return std::make_unique<Buffer>(allocator, buffer, bci->size, allocation, *device, info);
    }
 
    std::unique_ptr<Buffer> Allocator::createDescriptorBuffer(size_t size,
@@ -40,7 +39,9 @@ namespace tr::gfx::mem {
                                         vk::BufferUsageFlagBits::eShaderDeviceAddress};
 
       const auto aci =
-          vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eCpuToGpu,
+          vma::AllocationCreateInfo{.flags = vma::AllocationCreateFlagBits::eMapped |
+                                             vma::AllocationCreateFlagBits::eHostAccessRandom,
+                                    .usage = vma::MemoryUsage::eCpuToGpu,
                                     .requiredFlags = vk::MemoryPropertyFlagBits::eHostCoherent};
       return createBuffer(&bci, &aci, name);
    }
