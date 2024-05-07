@@ -17,6 +17,8 @@ set(triton_SRC
    "src/gfx/mem/Image.cxx"
    "src/gfx/mem/Buffer.cxx"
    "src/gfx/mem/Allocator.cxx"
+   "src/gfx/sb/DSShaderBinding.cxx"
+   "src/gfx/sb/ShaderBindingFactory.cxx"
 
    "src/gp/GameplaySystem.cxx"
    "src/gp/actions/ActionSystem.cxx"
