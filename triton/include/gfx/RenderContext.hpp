@@ -4,6 +4,7 @@
 #include "gfx/GraphicsDevice.hpp"
 #include "gfx/PipelineBuilder.hpp"
 #include "gfx/ds/DescriptorSetFactory.hpp"
+#include "gfx/sb/ShaderBindingFactory.hpp"
 #include "gfx/textures/ResourceManager.hpp"
 
 #include <entt/signal/fwd.hpp>
@@ -124,6 +125,8 @@ namespace tr::gfx {
       std::vector<MeshData> staticMeshDataList;
       std::vector<MeshData> terrainDataList;
       PushConstants pushConstants;
+
+      std::unique_ptr<sb::ShaderBindingFactory> sbFactory;
 
       void initDepthResources();
 

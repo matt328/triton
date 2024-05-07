@@ -11,6 +11,7 @@
 
 #include "gfx/mem/Buffer.hpp"
 #include "gfx/mem/Image.hpp"
+#include "gfx/sb/ShaderBindingFactory.hpp"
 #include "helpers/Vulkan.hpp"
 #include "helpers/SpirvHelper.hpp"
 #include "util/Paths.hpp"
@@ -22,8 +23,7 @@
 #include "gfx/PipelineBuilder.hpp"
 #include "gfx/ds/Layout.hpp"
 #include "gfx/mem/Allocator.hpp"
-#include <vulkan/vulkan_enums.hpp>
-#include <vulkan/vulkan_structs.hpp>
+#include "gfx/sb/ShaderBinding.hpp"
 
 namespace tr::gfx {
 
@@ -35,6 +35,10 @@ namespace tr::gfx {
       auto& l = layoutFactory->getLayout(ds::LayoutHandle::PerFrame);
       [[maybe_unused]] auto offset = l.getBindingOffset(0);
       [[maybe_unused]] auto layoutSize = l.getAlignedSize();
+
+      sbFactory = std::make_unique<sb::ShaderBindingFactory>(*graphicsDevice, *layoutFactory);
+
+      const auto sb = sbFactory->createShaderBinding(sb::ShaderBindingHandle::PerFrame);
 
       // dsFactory = std::make_unique<ds::DescriptorSetFactory>(graphicsDevice->getVulkanDevice(),
       //                                                        *layoutFactory,
