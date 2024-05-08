@@ -35,6 +35,10 @@ namespace tr::gfx::sb {
       /// Allocates a new ShaderBinding
       auto createShaderBinding(ShaderBindingHandle handle) -> std::unique_ptr<ShaderBinding>;
 
+      [[nodiscard]] auto& getLayoutFactory() {
+         return layoutFactory;
+      }
+
     private:
       const GraphicsDevice& graphicsDevice;
       const ds::LayoutFactory& layoutFactory;

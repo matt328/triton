@@ -15,6 +15,7 @@ namespace tr::gfx::sb {
       ShaderBinding& operator=(ShaderBinding&&) = default;
       virtual ~ShaderBinding() = default;
 
-      virtual void bindBuffer(const mem::Buffer& buffer, int binding) = 0;
+      virtual void bindBuffer(const int binding, const mem::Buffer& buffer, const size_t size) = 0;
+      virtual void update() = 0;
    };
 }
