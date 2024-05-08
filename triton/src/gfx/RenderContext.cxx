@@ -38,11 +38,8 @@ namespace tr::gfx {
 
       sbFactory = std::make_unique<sb::ShaderBindingFactory>(*graphicsDevice, *layoutFactory);
 
-      const auto sb = sbFactory->createShaderBinding(sb::ShaderBindingHandle::PerFrame);
-
-      // dsFactory = std::make_unique<ds::DescriptorSetFactory>(graphicsDevice->getVulkanDevice(),
-      //                                                        *layoutFactory,
-      //                                                        FRAMES_IN_FLIGHT);
+      const auto perFrameShaderBinding =
+          sbFactory->createShaderBinding(sb::ShaderBindingHandle::PerFrame);
 
       const auto viewportSize = graphicsDevice->getSwapchainExtent();
       mainViewport = vk::Viewport{.x = 0.f,
@@ -135,7 +132,7 @@ namespace tr::gfx {
          auto name = std::stringstream{};
          name << "Frame " << i;
          frames.push_back(
-             std::make_unique<Frame>(*graphicsDevice, depthImageView, *layoutFactory, name.str()));
+             std::make_unique<Frame>(*graphicsDevice, depthImageView, *sbFactory, name.str()));
       }
 
       if (guiEnabled) {

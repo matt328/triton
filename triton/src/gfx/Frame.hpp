@@ -1,6 +1,8 @@
 #pragma once
 
+#include "gfx/ObjectData.hpp"
 #include "gfx/ds/LayoutFactory.hpp"
+#include "gfx/sb/ShaderBindingFactory.hpp"
 
 namespace vk::raii {
    class DescriptorPool;
@@ -11,6 +13,11 @@ namespace vk::raii {
    class Fence;
    class Semaphore;
    class CommandBuffer;
+}
+
+namespace tr::gfx::sb {
+   class ShaderBindingFactory;
+   class ShaderBinding;
 }
 
 namespace tr::gfx::mem {
@@ -27,7 +34,7 @@ namespace tr::gfx {
     public:
       Frame(const GraphicsDevice& graphicsDevice,
             std::shared_ptr<vk::raii::ImageView> depthImageView,
-            ds::LayoutFactory& layoutFactory,
+            sb::ShaderBindingFactory& shaderBindingFactory,
             const std::string_view name);
       ~Frame();
 
@@ -83,6 +90,8 @@ namespace tr::gfx {
       }
 
       void updateObjectDataBuffer(const ObjectData* data, const size_t size);
+      void updatePerFrameDataBuffer(const CameraData* data, const size_t size);
+
       void destroySwapchainResources();
       void createSwapchainResources(const GraphicsDevice& graphicsDevice);
 
@@ -104,7 +113,9 @@ namespace tr::gfx {
       std::unique_ptr<vk::raii::Semaphore> renderFinishedSemaphore;
       std::unique_ptr<vk::raii::Fence> inFlightFence;
 
-      ds::LayoutFactory& layoutFactory;
+      sb::ShaderBindingFactory& shaderBindingFactory;
+
+      std::unique_ptr<sb::ShaderBinding> perFrameShaderBinding;
 
       std::unique_ptr<mem::Buffer> perFrameDescriptorBuffer;
       std::unique_ptr<mem::Buffer> objectDataDescriptorBuffer;

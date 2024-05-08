@@ -7,7 +7,8 @@ namespace tr::gfx::sb {
    class DSShaderBinding : public ShaderBinding {
     public:
       DSShaderBinding(const vk::raii::Device& device, vk::DescriptorType descriptorType);
-      void bindBuffer(const mem::Buffer& buffer, int binding) override;
+      void bindBuffer(const int binding, const mem::Buffer& buffer, const size_t size) override;
+      void update() override;
 
     private:
       const vk::raii::Device& device;

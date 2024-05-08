@@ -6,7 +6,7 @@
          "label": "CMake: build",
          "command": "build",
          "targets": [
-            "all"
+            "editor"
          ],
          "group": "build",
          "problemMatcher": [],
