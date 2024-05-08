@@ -1,14 +1,14 @@
 #include "Frame.hpp"
 #include "gfx/ObjectData.hpp"
 #include "GraphicsDevice.hpp"
-#include "gfx/ds/Layout.hpp"
 #include "gfx/ds/LayoutFactory.hpp"
 #include "gfx/helpers/Rendering.hpp"
 #include "gfx/mem/Buffer.hpp"
 #include "gfx/mem/Image.hpp"
 #include "gfx/mem/Allocator.hpp"
-#include <vulkan/vulkan_enums.hpp>
-#include <vulkan/vulkan_structs.hpp>
+#include "gfx/sb/ShaderBindingFactory.hpp"
+#include "gfx/sb/ShaderBinding.hpp"
+#include "gfx/ds/Layout.hpp"
 
 namespace tr::gfx {
 
@@ -16,13 +16,13 @@ namespace tr::gfx {
    // which pipeline should own it, or should it be shared among them?
    Frame::Frame(const GraphicsDevice& graphicsDevice,
                 std::shared_ptr<vk::raii::ImageView> depthImageView,
-                ds::LayoutFactory& layoutFactory,
+                sb::ShaderBindingFactory& shaderBindingFactory,
                 const std::string_view name)
        : graphicsDevice{graphicsDevice.getVulkanDevice()},
          combinedImageSamplerDescriptorSize{
              graphicsDevice.getDescriptorBufferProperties().combinedImageSamplerDescriptorSize},
          depthImageView{depthImageView},
-         layoutFactory{layoutFactory},
+         shaderBindingFactory{shaderBindingFactory},
          drawExtent{graphicsDevice.DrawImageExtent2D} {
 
       createSwapchainResources(graphicsDevice);
@@ -75,29 +75,14 @@ namespace tr::gfx {
                                                                     &cameraDataAllocationCreateInfo,
                                                                     "Camera Data Buffer");
 
-      // Create Per Frame Descriptor Buffer
-      const auto& perFrameLayout = layoutFactory.getLayout(ds::LayoutHandle::PerFrame);
-      const auto size = perFrameLayout.getAlignedSize();
-      perFrameDescriptorBuffer = graphicsDevice.getAllocator().createDescriptorBuffer(size);
-
-      // Set CameraDataBuffer's Address in perFrameDescriptorBuffer
-      const auto ai =
-          vk::DescriptorAddressInfoEXT{.address = cameraDataBuffer->getDeviceAddress(),
-                                       .range = cameraDataBuffer->getBufferInfo()->range};
-      const auto bdi = vk::DescriptorGetInfoEXT{
-          .type = vk::DescriptorType::eUniformBuffer,
-          .data = {.pUniformBuffer = &ai},
-      };
-
-      const auto uniformBufferSize =
-          graphicsDevice.getDescriptorBufferProperties().uniformBufferDescriptorSize;
-
-      graphicsDevice.getVulkanDevice().getDescriptorEXT(bdi,
-                                                        uniformBufferSize,
-                                                        perFrameDescriptorBuffer->getData());
+      // Create PerFrame ShaderBinding
+      const auto perFrameShaderBinding =
+          shaderBindingFactory.createShaderBinding(sb::ShaderBindingHandle::PerFrame);
+      perFrameShaderBinding->bindBuffer(*cameraDataBuffer, 0);
 
       // Create Object Data Descriptor Buffer
-      const auto& objectDataLayout = layoutFactory.getLayout(ds::LayoutHandle::ObjectData);
+      const auto& objectDataLayout =
+          shaderBindingFactory.getLayoutFactory().getLayout(ds::LayoutHandle::ObjectData);
       const auto objectDataSize = objectDataLayout.getAlignedSize();
       objectDataDescriptorBuffer =
           graphicsDevice.getAllocator().createDescriptorBuffer(objectDataSize);
@@ -295,6 +280,11 @@ namespace tr::gfx {
 
    void Frame::updateObjectDataBuffer(const ObjectData* data, const size_t size) {
       this->objectDataBuffer->updateMappedBufferValue(data, size);
+   }
+
+   void Frame::updatePerFrameDataBuffer(const CameraData* data, const size_t size) {
+      this->cameraDataBuffer->updateMappedBufferValue(data, size);
+      this->perFrameShaderBinding->update();
    }
 
    void Frame::destroySwapchainResources() {
