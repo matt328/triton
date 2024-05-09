@@ -3,7 +3,6 @@
 
 #include "gfx/GraphicsDevice.hpp"
 #include "gfx/sb/ShaderBinding.hpp"
-#include <vulkan/vulkan_enums.hpp>
 
 namespace tr::gfx::sb {
    ShaderBindingFactory::ShaderBindingFactory(const GraphicsDevice& graphicsDevice,
@@ -12,6 +11,28 @@ namespace tr::gfx::sb {
        : graphicsDevice{graphicsDevice},
          layoutFactory{layoutFactory},
          useDescriptorBuffers{useDescriptorBuffers} {
+      if (!useDescriptorBuffers) {
+         const auto poolSize = std::array{
+             vk::DescriptorPoolSize{.type = vk::DescriptorType::eUniformBuffer,
+                                    .descriptorCount = 3 * 10},
+             vk::DescriptorPoolSize{.type = vk::DescriptorType::eCombinedImageSampler,
+                                    .descriptorCount = 3 * 100},
+             vk::DescriptorPoolSize{.type = vk::DescriptorType::eStorageImage,
+                                    .descriptorCount = 3 * 10},
+             vk::DescriptorPoolSize{.type = vk::DescriptorType::eStorageBuffer,
+                                    .descriptorCount = 3 * 10},
+         };
+
+         const vk::DescriptorPoolCreateInfo poolInfo{
+             .flags = vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet |
+                      vk::DescriptorPoolCreateFlagBits::eUpdateAfterBindEXT,
+             .maxSets = 3 * 10 * static_cast<uint32_t>(poolSize.size()),
+             .poolSizeCount = poolSize.size(),
+             .pPoolSizes = poolSize.data()};
+
+         permanentPool = std::make_unique<vk::raii::DescriptorPool>(
+             graphicsDevice.getVulkanDevice().createDescriptorPool(poolInfo, nullptr));
+      }
    }
 
    ShaderBindingFactory::~ShaderBindingFactory() {

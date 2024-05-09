@@ -1,6 +1,5 @@
 #pragma once
 
-#include <vulkan/vulkan_structs.hpp>
 namespace tr::gfx::mem {
    class Buffer;
 }
@@ -22,5 +21,9 @@ namespace tr::gfx::sb {
 
       virtual void bindImageSamplers(const uint32_t binding,
                                      const std::vector<vk::DescriptorImageInfo>& imageInfo) = 0;
+
+      virtual void bindToPipeline(const vk::raii::CommandBuffer& cmd,
+                                  const vk::PipelineBindPoint bindPoint,
+                                  const vk::PipelineLayout& layout) const = 0;
    };
 }
