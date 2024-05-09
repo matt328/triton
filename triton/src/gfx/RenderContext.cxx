@@ -331,7 +331,7 @@ namespace tr::gfx {
          frame.updateObjectDataBuffer(renderData.objectData.data(),
                                       sizeof(ObjectData) * renderData.objectData.size());
 
-         frame.getCameraBuffer().updateBufferValue(&renderData.cameraData, sizeof(CameraData));
+         frame.updatePerFrameDataBuffer(&renderData.cameraData, sizeof(CameraData));
 
          /*
             TODO:

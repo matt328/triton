@@ -3,6 +3,7 @@
 
 #include "gfx/GraphicsDevice.hpp"
 #include "gfx/sb/ShaderBinding.hpp"
+#include <vulkan/vulkan_enums.hpp>
 
 namespace tr::gfx::sb {
    ShaderBindingFactory::ShaderBindingFactory(const GraphicsDevice& graphicsDevice,
@@ -22,6 +23,11 @@ namespace tr::gfx::sb {
       if (handle == ShaderBindingHandle::PerFrame) {
          return std::make_unique<DSShaderBinding>(graphicsDevice.getVulkanDevice(),
                                                   vk::DescriptorType::eUniformBuffer);
+      }
+
+      if (handle == ShaderBindingHandle::ObjectData) {
+         return std::make_unique<DSShaderBinding>(graphicsDevice.getVulkanDevice(),
+                                                  vk::DescriptorType::eStorageBuffer);
       }
 
       Log::error << "unhandled, uh, handle when creating shaderbinding: " << std::endl;

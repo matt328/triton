@@ -116,6 +116,8 @@ namespace tr::gfx {
       sb::ShaderBindingFactory& shaderBindingFactory;
 
       std::unique_ptr<sb::ShaderBinding> perFrameShaderBinding;
+      std::unique_ptr<sb::ShaderBinding> objectDataShaderBinding;
+      std::unique_ptr<sb::ShaderBinding> textureShaderBinding;
 
       std::unique_ptr<mem::Buffer> perFrameDescriptorBuffer;
       std::unique_ptr<mem::Buffer> objectDataDescriptorBuffer;

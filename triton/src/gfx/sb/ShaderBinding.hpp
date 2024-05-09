@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vulkan/vulkan_structs.hpp>
 namespace tr::gfx::mem {
    class Buffer;
 }
@@ -15,7 +16,11 @@ namespace tr::gfx::sb {
       ShaderBinding& operator=(ShaderBinding&&) = default;
       virtual ~ShaderBinding() = default;
 
-      virtual void bindBuffer(const int binding, const mem::Buffer& buffer, const size_t size) = 0;
-      virtual void update() = 0;
+      virtual void bindBuffer(const uint32_t binding,
+                              const mem::Buffer& buffer,
+                              const size_t size) = 0;
+
+      virtual void bindImageSamplers(const uint32_t binding,
+                                     const std::vector<vk::DescriptorImageInfo>& imageInfo) = 0;
    };
 }

@@ -5,7 +5,7 @@
 namespace tr::gfx {
 
    // Maximum size of the ObjectData buffer array
-   constexpr auto MAX_OBJECTS = 1000;
+   constexpr auto MAX_OBJECTS = 128;
 
    struct alignas(16) ObjectData {
       glm::mat4 model;

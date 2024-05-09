@@ -76,52 +76,16 @@ namespace tr::gfx {
                                                                     "Camera Data Buffer");
 
       // Create PerFrame ShaderBinding
-      const auto perFrameShaderBinding =
+      perFrameShaderBinding =
           shaderBindingFactory.createShaderBinding(sb::ShaderBindingHandle::PerFrame);
-      perFrameShaderBinding->bindBuffer(*cameraDataBuffer, 0);
+      perFrameShaderBinding->bindBuffer(0, *cameraDataBuffer, sizeof(CameraData));
 
-      // Create Object Data Descriptor Buffer
-      const auto& objectDataLayout =
-          shaderBindingFactory.getLayoutFactory().getLayout(ds::LayoutHandle::ObjectData);
-      const auto objectDataSize = objectDataLayout.getAlignedSize();
-      objectDataDescriptorBuffer =
-          graphicsDevice.getAllocator().createDescriptorBuffer(objectDataSize);
+      objectDataShaderBinding =
+          shaderBindingFactory.createShaderBinding(sb::ShaderBindingHandle::ObjectData);
+      objectDataShaderBinding->bindBuffer(0, *objectDataBuffer, sizeof(ObjectData) * MAX_OBJECTS);
 
-      // Set ObjectDataBuffer's address in descriptor buffer
-      // I think this can be done once since the descriptor itself doesn't change, only the contents
-      // of the buffer bound to it
-      const auto addressInfo =
-          vk::DescriptorAddressInfoEXT{.address = objectDataBuffer->getDeviceAddress(),
-                                       .range = objectDataBuffer->getBufferInfo()->range};
-      const auto descriptorGetInfo =
-          vk::DescriptorGetInfoEXT{.type = vk::DescriptorType::eStorageBuffer,
-                                   .data = {.pStorageBuffer = &addressInfo}};
-      const auto storageBufferSize =
-          graphicsDevice.getDescriptorBufferProperties().storageBufferDescriptorSize;
-
-      graphicsDevice.getVulkanDevice().getDescriptorEXT(descriptorGetInfo,
-                                                        storageBufferSize,
-                                                        objectDataDescriptorBuffer->getData());
-
-      // Create Texture Descriptor Buffer
-      /*
-         A Descriptor can be thought of as a definition of a slot that the shaders can specify as
-         their input params.
-
-         With a 'bindless' DescriptorSet containing multiple descriptors, getAlignedSize takes this
-         into account and we allocate a single buffer holding all the descriptors, one for each
-         texture.
-
-         We don't need to keep setting the offset into the descriptor buffer on the CPU side since
-         we index into the buffer on the GPU side with the ObjectData handles. Setting offsets per
-         draw call seems to be an escape hatch to support non-bindless (bindful?) rendering.
-         For now, we'll pass in an integer offset into that list as part of the
-         ObjectData. Eventually we should replace ObjectData's handles with BufferDeviceAddresses.
-      */
-      const auto& textureLayout = layoutFactory.getLayout(ds::LayoutHandle::Bindless);
-      const auto textureLayoutSize = textureLayout.getAlignedSize();
-      textureDescriptorBuffer =
-          graphicsDevice.getAllocator().createDescriptorBuffer(textureLayoutSize);
+      textureShaderBinding =
+          shaderBindingFactory.createShaderBinding(sb::ShaderBindingHandle::Bindless);
 
       const auto drawImageFormat = vk::Format::eR16G16B16A16Sfloat;
       const auto drawImageExtent = graphicsDevice.DrawImageExtent2D;
@@ -160,26 +124,7 @@ namespace tr::gfx {
    }
 
    void Frame::updateTextures(const std::vector<vk::DescriptorImageInfo>& imageInfos) {
-      const auto& textureLayout = layoutFactory.getLayout(ds::LayoutHandle::Bindless);
-      const auto textureLayoutSize = textureLayout.getAlignedSize();
-
-      auto dataPtr = static_cast<char*>(textureDescriptorBuffer->getData());
-      auto i = 0;
-      for (const auto imageInfo : imageInfos) {
-         const auto offset = (i * textureLayoutSize) + textureLayout.getBindingOffset(0);
-         const auto imageDescriptorInfo =
-             vk::DescriptorGetInfoEXT{.type = vk::DescriptorType::eCombinedImageSampler,
-                                      .data = {.pCombinedImageSampler = &imageInfo}};
-         // This function's name is odd, I think it gets a descriptor representing the
-         // imageDescriptorInfo.data, then writes it to the memory address given by the last
-         // parameter?
-         // Also there is almost certainly something wrong with this pointer arithmetic I really
-         // doubt  would have yolo'd that on the first try
-         graphicsDevice.getDescriptorEXT(imageDescriptorInfo,
-                                         combinedImageSamplerDescriptorSize,
-                                         dataPtr + offset);
-         i++;
-      }
+      textureShaderBinding->bindImageSamplers(3, imageInfos);
    }
 
    void Frame::prepareFrame() {
@@ -284,7 +229,6 @@ namespace tr::gfx {
 
    void Frame::updatePerFrameDataBuffer(const CameraData* data, const size_t size) {
       this->cameraDataBuffer->updateMappedBufferValue(data, size);
-      this->perFrameShaderBinding->update();
    }
 
    void Frame::destroySwapchainResources() {
