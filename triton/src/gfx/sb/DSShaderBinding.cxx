@@ -36,4 +36,10 @@ namespace tr::gfx::sb {
       device.updateDescriptorSets(write, nullptr);
    }
 
+   void DSShaderBinding::bindToPipeline(const vk::raii::CommandBuffer& cmd,
+                                        const vk::PipelineBindPoint bindPoint,
+                                        const vk::PipelineLayout& layout) const {
+      cmd.bindDescriptorSets(bindPoint, layout, 0, **vkDescriptorSet, nullptr);
+   }
+
 }

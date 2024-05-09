@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ShaderBinding.hpp"
-#include <vulkan/vulkan_raii.hpp>
 
 namespace tr::gfx::sb {
    class DSShaderBinding : public ShaderBinding {
@@ -13,6 +12,10 @@ namespace tr::gfx::sb {
 
       void bindImageSamplers(const uint32_t binding,
                              const std::vector<vk::DescriptorImageInfo>& imageInfo) override;
+
+      void bindToPipeline(const vk::raii::CommandBuffer& cmd,
+                          const vk::PipelineBindPoint bindPoint,
+                          const vk::PipelineLayout& layout) const override;
 
     private:
       const vk::raii::Device& device;

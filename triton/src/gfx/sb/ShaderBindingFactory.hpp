@@ -26,7 +26,7 @@ namespace tr::gfx::sb {
                            const bool useDescriptorBuffers = false);
       ~ShaderBindingFactory();
 
-      ShaderBindingFactory(const ShaderBindingFactory&) = default;
+      ShaderBindingFactory(const ShaderBindingFactory&) = delete;
       ShaderBindingFactory& operator=(const ShaderBindingFactory&) = delete;
 
       ShaderBindingFactory(ShaderBindingFactory&&) = delete;
@@ -43,5 +43,7 @@ namespace tr::gfx::sb {
       const GraphicsDevice& graphicsDevice;
       const ds::LayoutFactory& layoutFactory;
       bool useDescriptorBuffers{};
+
+      std::unique_ptr<vk::raii::DescriptorPool> permanentPool;
    };
 }

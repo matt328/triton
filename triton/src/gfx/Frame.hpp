@@ -77,16 +77,16 @@ namespace tr::gfx {
          return **drawImageView;
       }
 
-      [[nodiscard]] const mem::Buffer& getPerFrameDescriptorBuffer() const {
-         return *perFrameDescriptorBuffer;
+      [[nodiscard]] const sb::ShaderBinding& getPerFrameShaderBinding() const {
+         return *perFrameShaderBinding;
       }
 
-      [[nodiscard]] const mem::Buffer& getTextureDescriptorBuffer() const {
-         return *textureDescriptorBuffer;
+      [[nodiscard]] const sb::ShaderBinding& getObjectDataShaderBinding() const {
+         return *objectDataShaderBinding;
       }
 
-      [[nodiscard]] const mem::Buffer& getObjectDataDescriptorBuffer() const {
-         return *objectDataDescriptorBuffer;
+      [[nodiscard]] const sb::ShaderBinding& getTextureShaderBinding() const {
+         return *textureShaderBinding;
       }
 
       void updateObjectDataBuffer(const ObjectData* data, const size_t size);
@@ -99,6 +99,7 @@ namespace tr::gfx {
 
       /// Sets up the attachments for renderingInfo and calls cmd.beginRendering()
       void prepareFrame();
+
       void end3D(const vk::Image& swapchainImage, const vk::Extent2D& swapchainExtent);
       void renderOverlay(const vk::raii::ImageView& swapchainImage,
                          const vk::Extent2D& swapchainExtent);
@@ -118,10 +119,6 @@ namespace tr::gfx {
       std::unique_ptr<sb::ShaderBinding> perFrameShaderBinding;
       std::unique_ptr<sb::ShaderBinding> objectDataShaderBinding;
       std::unique_ptr<sb::ShaderBinding> textureShaderBinding;
-
-      std::unique_ptr<mem::Buffer> perFrameDescriptorBuffer;
-      std::unique_ptr<mem::Buffer> objectDataDescriptorBuffer;
-      std::unique_ptr<mem::Buffer> textureDescriptorBuffer;
 
       std::unique_ptr<mem::Buffer> objectDataBuffer;
       std::unique_ptr<mem::Buffer> cameraDataBuffer;
