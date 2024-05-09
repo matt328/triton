@@ -357,8 +357,6 @@ namespace tr::gfx {
          pushConstants = renderData.pushConstants;
       });
 
-      // TODO: switch all of these to descriptor buffers
-
       resourceManager->accessTextures(
           [&frame](const std::vector<vk::DescriptorImageInfo>& imageInfoList) {
              ZoneNamedN(a, "Updating Texture DB", true);
@@ -370,28 +368,16 @@ namespace tr::gfx {
       {
          frame.prepareFrame();
 
-         const auto perFrameBuffer = vk::DescriptorBufferBindingInfoEXT{
-             .address = frame.getPerFrameDescriptorBuffer().getDeviceAddress(),
-             .usage = vk::BufferUsageFlagBits::eResourceDescriptorBufferEXT};
-
-         const auto objectDataBufferInfo = vk::DescriptorBufferBindingInfoEXT{
-             .address = frame.getObjectDataDescriptorBuffer().getDeviceAddress(),
-             .usage = vk::BufferUsageFlagBits::eResourceDescriptorBufferEXT};
-
-         const auto textureBuffer = vk::DescriptorBufferBindingInfoEXT{
-             .address = frame.getTextureDescriptorBuffer().getDeviceAddress(),
-             .usage = vk::BufferUsageFlagBits::eResourceDescriptorBufferEXT};
-
-         cmd.bindDescriptorBuffersEXT({perFrameBuffer, objectDataBufferInfo, textureBuffer});
-
-         // Do we need to do this if they're all 0 for now?
-         uint32_t perFrameBufferIndex = 0;
-         vk::DeviceSize bufferOffset = 0;
-         cmd.setDescriptorBufferOffsetsEXT(vk::PipelineBindPoint::eGraphics,
-                                           **staticModelPipelineLayout,
-                                           0,
-                                           perFrameBufferIndex,
-                                           bufferOffset);
+         // Bind ShaderBindings to Pipeline
+         frame.getPerFrameShaderBinding().bindToPipeline(cmd,
+                                                         vk::PipelineBindPoint::eGraphics,
+                                                         **staticModelPipelineLayout);
+         frame.getTextureShaderBinding().bindToPipeline(cmd,
+                                                        vk::PipelineBindPoint::eGraphics,
+                                                        **staticModelPipelineLayout);
+         frame.getObjectDataShaderBinding().bindToPipeline(cmd,
+                                                           vk::PipelineBindPoint::eGraphics,
+                                                           **staticModelPipelineLayout);
 
          // Static Models
          cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, **staticModelPipeline);
