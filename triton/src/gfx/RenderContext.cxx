@@ -67,8 +67,9 @@ namespace tr::gfx {
       pb->setDepthFormat(Helpers::findDepthFormat(graphicsDevice->getPhysicalDevice()));
       pb->setDefaultDepthStencil();
 
-      staticModelPipelineLayout = pb->buildPipelineLayout(setLayouts);
-      staticModelPipeline = pb->buildPipeline(*staticModelPipelineLayout);
+      staticModelPipelineLayout =
+          pb->buildPipelineLayout(setLayouts, "Static Model Pipeline Layout");
+      staticModelPipeline = pb->buildPipeline(*staticModelPipelineLayout, "Static Model Pipeline");
 
       auto terrainVertex = helper->createShaderModule(vk::ShaderStageFlagBits::eVertex,
                                                       util::Paths::SHADERS / "terrain.vert");
@@ -80,8 +81,8 @@ namespace tr::gfx {
       pb->setFragmentShaderStage(terrainFragment);
       pb->setPolygonMode(vk::PolygonMode::eFill);
 
-      terrainPipelineLayout = pb->buildPipelineLayout(setLayouts);
-      terrainPipeline = pb->buildPipeline(*terrainPipelineLayout);
+      terrainPipelineLayout = pb->buildPipelineLayout(setLayouts, "Terrain Pipeline Layout");
+      terrainPipeline = pb->buildPipeline(*terrainPipelineLayout, "Terrain Pipeline");
 
       auto debugVertex = helper->createShaderModule(vk::ShaderStageFlagBits::eVertex,
                                                     util::Paths::SHADERS / "debug.vert");
@@ -93,8 +94,8 @@ namespace tr::gfx {
       pb->setFragmentShaderStage(debugFragment);
       pb->setPolygonMode(vk::PolygonMode::eLine);
 
-      debugPipelineLayout = pb->buildPipelineLayout(setLayouts);
-      debugPipeline = pb->buildPipeline(*debugPipelineLayout);
+      debugPipelineLayout = pb->buildPipelineLayout(setLayouts, "Debug Pipeline Layout");
+      debugPipeline = pb->buildPipeline(*debugPipelineLayout, "Debug Pipeline");
 
       auto skinnedVertex = helper->createShaderModule(vk::ShaderStageFlagBits::eVertex,
                                                       util::Paths::SHADERS / "skinned.vert");
@@ -114,8 +115,10 @@ namespace tr::gfx {
       pb->setPolygonMode(vk::PolygonMode::eFill);
       pb->setVertexAttributeDescriptions(std::span(vec.begin(), vec.end()));
 
-      skinnedModelPipelineLayout = pb->buildPipelineLayout(setLayouts);
-      skinnedModelPipeline = pb->buildPipeline(*skinnedModelPipelineLayout);
+      skinnedModelPipelineLayout =
+          pb->buildPipelineLayout(setLayouts, "Skinned Model Pipeline Layout");
+      skinnedModelPipeline =
+          pb->buildPipeline(*skinnedModelPipelineLayout, "Skinned Model Pipeline");
 
       initDepthResources();
 

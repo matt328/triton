@@ -13,7 +13,7 @@ namespace tr::gfx {
          physicalDevice{physicalDevice},
          queue{std::make_unique<vk::raii::Queue>(device.getQueue(queueFamily, queueIndex))} {
 
-      Helpers::setObjectName(**queue, device, (**queue).debugReportObjectType, name);
+      Helpers::setObjectName(**queue, device, name);
       Log::trace << "Created Transfer Queue" << std::endl;
 
       // Create Command Pool

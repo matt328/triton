@@ -87,7 +87,8 @@ namespace tr::gfx::tx {
 
          // Prepare Vertex Buffer
          const auto vbSize = geometryData.vertexDataSize();
-         const auto vbStagingBuffer = allocator.createStagingBuffer(vbSize);
+         const auto vbStagingBuffer =
+             allocator.createStagingBuffer(vbSize, "Vertex Staging Buffer");
 
          void* vbData = allocator.mapMemory(*vbStagingBuffer);
          memcpy(vbData, geometryData.vertices.data(), static_cast<size_t>(vbSize));
@@ -97,7 +98,7 @@ namespace tr::gfx::tx {
 
          // Prepare Index Buffer
          const auto ibSize = geometryData.indexDataSize();
-         const auto ibStagingBuffer = allocator.createStagingBuffer(ibSize);
+         const auto ibStagingBuffer = allocator.createStagingBuffer(ibSize, "Index Staging Buffer");
 
          auto data = allocator.mapMemory(*ibStagingBuffer);
          memcpy(data, geometryData.indices.data(), static_cast<size_t>(ibSize));

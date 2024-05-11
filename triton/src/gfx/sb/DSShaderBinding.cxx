@@ -1,4 +1,5 @@
 #include "DSShaderBinding.hpp"
+#include "gfx/helpers/Vulkan.hpp"
 #include "gfx/mem/Buffer.hpp"
 
 namespace tr::gfx::sb {
@@ -6,7 +7,8 @@ namespace tr::gfx::sb {
    DSShaderBinding::DSShaderBinding(const vk::raii::Device& device,
                                     const vk::DescriptorPool& pool,
                                     vk::DescriptorType descriptorType,
-                                    vk::DescriptorSetLayout layout)
+                                    vk::DescriptorSetLayout layout,
+                                    std::string_view name)
        : ShaderBinding{}, device{device}, descriptorType{descriptorType} {
 
       const auto allocInfo = vk::DescriptorSetAllocateInfo{.descriptorPool = pool,
@@ -19,6 +21,7 @@ namespace tr::gfx::sb {
       } catch (const vk::SystemError& e) {
          Log::warn << "Descriptor Pool is full: " << e.what() << std::endl;
       }
+      Helpers::setObjectName(**vkDescriptorSet, device, name);
    }
 
    void DSShaderBinding::bindBuffer(const uint32_t binding,

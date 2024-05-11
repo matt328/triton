@@ -4,7 +4,9 @@
 namespace tr::gfx::ds {
    class Layout {
     public:
-      Layout(const GraphicsDevice& device, const vk::DescriptorSetLayoutCreateInfo& info);
+      Layout(const GraphicsDevice& device,
+             const vk::DescriptorSetLayoutCreateInfo& info,
+             std::string_view name = "Unnamed Layout");
       ~Layout();
 
       Layout(const Layout&) = delete;
