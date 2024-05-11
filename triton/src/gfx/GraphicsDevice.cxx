@@ -167,8 +167,8 @@ namespace tr::gfx {
          createInfo.ppEnabledLayerNames = desiredValidationLayers.data();
       }
 
-      const auto dbFeatures =
-          vk::PhysicalDeviceDescriptorBufferFeaturesEXT{.descriptorBuffer = true};
+      // const auto dbFeatures =
+      // vk::PhysicalDeviceDescriptorBufferFeaturesEXT{.descriptorBuffer = true};
 
       const auto bdaFeatures =
           vk::PhysicalDeviceBufferDeviceAddressFeaturesKHR{.bufferDeviceAddress = true};
@@ -178,56 +178,45 @@ namespace tr::gfx {
                                vk::PhysicalDeviceShaderDrawParametersFeatures,
                                vk::PhysicalDeviceDescriptorIndexingFeatures,
                                vk::PhysicalDeviceDynamicRenderingFeaturesKHR,
-                               vk::PhysicalDeviceDescriptorBufferFeaturesEXT,
+                               //  vk::PhysicalDeviceDescriptorBufferFeaturesEXT,
                                vk::PhysicalDeviceBufferDeviceAddressFeaturesKHR>
           c{createInfo,
             physicalFeatures2,
             drawParamsFeatures,
             indexingFeatures,
             drfs,
-            dbFeatures,
+            // dbFeatures,
             bdaFeatures};
 
       vulkanDevice =
           std::make_unique<vk::raii::Device>(physicalDevice->createDevice(c.get(), nullptr));
 
-      Helpers::setObjectName(**vulkanDevice,
-                             *vulkanDevice.get(),
-                             vk::raii::Device::debugReportObjectType,
-                             "Primary Device");
+      // Just don't name this because a bug in vulkan keeps complaining it doesn't match but it does
+      // Helpers::setObjectName(**vulkanDevice,
+      //                        *vulkanDevice.get(),
+      //                        (**vulkanDevice).debugReportObjectType,
+      //                        "Primary Device");
 
       Log::trace << "Created Logical Device" << std::endl;
 
       graphicsQueue = std::make_unique<vk::raii::Queue>(
           vulkanDevice->getQueue(queueFamilyIndices.graphicsFamily.value(), 0));
-      Helpers::setObjectName(**graphicsQueue,
-                             *vulkanDevice.get(),
-                             (**graphicsQueue).debugReportObjectType,
-                             "Graphics Queue");
+      Helpers::setObjectName(**graphicsQueue, *vulkanDevice.get(), "Graphics Queue");
       Log::trace << "Created Graphics Queue" << std::endl;
 
       presentQueue = std::make_unique<vk::raii::Queue>(
           vulkanDevice->getQueue(queueFamilyIndices.presentFamily.value(), 0));
-      Helpers::setObjectName(**presentQueue,
-                             *vulkanDevice.get(),
-                             (**presentQueue).debugReportObjectType,
-                             "Present Queue");
+      Helpers::setObjectName(**presentQueue, *vulkanDevice.get(), "Present Queue");
       Log::trace << "Created Present Queue" << std::endl;
 
       transferQueue = std::make_shared<vk::raii::Queue>(
           vulkanDevice->getQueue(queueFamilyIndices.transferFamily.value(), 0));
-      Helpers::setObjectName(**transferQueue,
-                             *vulkanDevice.get(),
-                             (**transferQueue).debugReportObjectType,
-                             "Transfer Queue");
+      Helpers::setObjectName(**transferQueue, *vulkanDevice.get(), "Transfer Queue");
       Log::trace << "Created Transfer Queue" << std::endl;
 
       computeQueue = std::make_unique<vk::raii::Queue>(
           vulkanDevice->getQueue(queueFamilyIndices.computeFamily.value(), 0));
-      Helpers::setObjectName(**computeQueue,
-                             *vulkanDevice.get(),
-                             (**computeQueue).debugReportObjectType,
-                             "Compute Queue");
+      Helpers::setObjectName(**computeQueue, *vulkanDevice.get(), "Compute Queue");
       Log::trace << "Created Compute Queue" << std::endl;
 
       createSwapchain();
@@ -357,10 +346,7 @@ namespace tr::gfx {
 
       commandPool = std::make_unique<vk::raii::CommandPool>(
           vulkanDevice->createCommandPool(commandPoolCreateInfo));
-      Helpers::setObjectName(**commandPool,
-                             *vulkanDevice.get(),
-                             (*commandPool).debugReportObjectType,
-                             "Graphics Command Pool");
+      Helpers::setObjectName(**commandPool, *vulkanDevice.get(), "Graphics Command Pool");
    }
 
    void GraphicsDevice::recreateSwapchain() {

@@ -27,9 +27,11 @@ namespace tr::gfx {
       void setDefaultDepthStencil();
       void setSetLayouts(const std::span<vk::DescriptorSetLayout>& layouts);
 
-      auto buildPipelineLayout(const std::span<vk::DescriptorSetLayout>& layouts)
+      auto buildPipelineLayout(const std::span<vk::DescriptorSetLayout>& layouts,
+                               std::string_view name = "Unnamed Pipeline Layout")
           -> std::unique_ptr<vk::raii::PipelineLayout>;
-      auto buildPipeline(const vk::raii::PipelineLayout& pipelineLayout)
+      auto buildPipeline(const vk::raii::PipelineLayout& pipelineLayout,
+                         std::string_view name = "Unnamed Pipeline")
           -> std::unique_ptr<vk::raii::Pipeline>;
 
     private:

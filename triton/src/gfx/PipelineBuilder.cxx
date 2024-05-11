@@ -1,6 +1,7 @@
 #include "PipelineBuilder.hpp"
 #include "gfx/ObjectData.hpp"
 #include "gfx/geometry/Vertex.hpp"
+#include "gfx/helpers/Vulkan.hpp"
 
 namespace tr::gfx {
    PipelineBuilder::PipelineBuilder(const vk::raii::Device& device)
@@ -28,7 +29,8 @@ namespace tr::gfx {
       vertexAttributeDescriptions = geo::Vertex::inputAttributeDescriptions(0, components);
    }
 
-   auto PipelineBuilder::buildPipelineLayout(const std::span<vk::DescriptorSetLayout>& layouts)
+   auto PipelineBuilder::buildPipelineLayout(const std::span<vk::DescriptorSetLayout>& layouts,
+                                             std::string_view name)
        -> std::unique_ptr<vk::raii::PipelineLayout> {
 
       auto pcr = vk::PushConstantRange{.stageFlags = vk::ShaderStageFlagBits::eVertex |
@@ -42,11 +44,16 @@ namespace tr::gfx {
           .pushConstantRangeCount = 1,
           .pPushConstantRanges = &pcr};
 
-      return std::make_unique<vk::raii::PipelineLayout>(
+      auto pl = std::make_unique<vk::raii::PipelineLayout>(
           device.createPipelineLayout(pipelineLayoutCreateInfo));
+
+      Helpers::setObjectName(**pl, device, name);
+
+      return pl;
    }
 
-   auto PipelineBuilder::buildPipeline(const vk::raii::PipelineLayout& pipelineLayout)
+   auto PipelineBuilder::buildPipeline(const vk::raii::PipelineLayout& pipelineLayout,
+                                       std::string_view name)
        -> std::unique_ptr<vk::raii::Pipeline> {
       const auto colorBlending =
           vk::PipelineColorBlendStateCreateInfo{.logicOpEnable = VK_FALSE,
@@ -80,8 +87,12 @@ namespace tr::gfx {
                                          .basePipelineHandle = VK_NULL_HANDLE,
                                          .basePipelineIndex = -1};
       // Finally this is that it's all about
-      return std::make_unique<vk::raii::Pipeline>(
+      auto ppl = std::make_unique<vk::raii::Pipeline>(
           device.createGraphicsPipeline(VK_NULL_HANDLE, pipelineCreateInfo));
+
+      Helpers::setObjectName(**ppl, device, name);
+
+      return ppl;
    }
 
    void PipelineBuilder::clearShaderStages() {

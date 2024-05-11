@@ -43,7 +43,8 @@ namespace tr::gfx::ds {
                                                                    .bindingCount = 1,
                                                                    .pBindings = &binding};
 
-      layoutCache[LayoutHandle::Bindless] = std::make_unique<Layout>(device, dslCreateInfo);
+      layoutCache[LayoutHandle::Bindless] =
+          std::make_unique<Layout>(device, dslCreateInfo, "Bindless DS Layout");
    }
 
    void LayoutFactory::initPerFrameLayout(const GraphicsDevice& device) {
@@ -62,7 +63,8 @@ namespace tr::gfx::ds {
                                                                 .bindingCount = 1,
                                                                 .pBindings = &binding};
 
-      layoutCache[LayoutHandle::PerFrame] = std::make_unique<Layout>(device, createInfo);
+      layoutCache[LayoutHandle::PerFrame] =
+          std::make_unique<Layout>(device, createInfo, "Per Frame DS Layout");
    }
 
    void LayoutFactory::initObjectDataLayout(const GraphicsDevice& device) {
@@ -81,7 +83,8 @@ namespace tr::gfx::ds {
                                                                 .bindingCount = 1,
                                                                 .pBindings = &binding};
 
-      layoutCache[LayoutHandle::ObjectData] = std::make_unique<Layout>(device, createInfo);
+      layoutCache[LayoutHandle::ObjectData] =
+          std::make_unique<Layout>(device, createInfo, "Object Data DS Layout");
    }
 
    void LayoutFactory::initAnimationDataLayout(const GraphicsDevice& device) {
@@ -99,7 +102,8 @@ namespace tr::gfx::ds {
       const auto createInfo = vk::DescriptorSetLayoutCreateInfo{.flags = flags,
                                                                 .bindingCount = 1,
                                                                 .pBindings = &binding};
-      layoutCache[LayoutHandle::AnimationData] = std::make_unique<Layout>(device, createInfo);
+      layoutCache[LayoutHandle::AnimationData] =
+          std::make_unique<Layout>(device, createInfo, "Animation Data DS Layout");
    }
 
 }
