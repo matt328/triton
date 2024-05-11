@@ -3,6 +3,8 @@
 
 #include "gfx/GraphicsDevice.hpp"
 #include "gfx/sb/ShaderBinding.hpp"
+#include "gfx/sb/LayoutFactory.hpp"
+#include "gfx/sb/Layout.hpp"
 
 namespace tr::gfx::sb {
    ShaderBindingFactory::ShaderBindingFactory(const GraphicsDevice& graphicsDevice,
@@ -42,13 +44,35 @@ namespace tr::gfx::sb {
        -> std::unique_ptr<ShaderBinding> {
 
       if (handle == ShaderBindingHandle::PerFrame) {
-         return std::make_unique<DSShaderBinding>(graphicsDevice.getVulkanDevice(),
-                                                  vk::DescriptorType::eUniformBuffer);
+         return std::make_unique<DSShaderBinding>(
+             graphicsDevice.getVulkanDevice(),
+             **permanentPool,
+             vk::DescriptorType::eUniformBuffer,
+             layoutFactory.getLayout(ds::LayoutHandle::PerFrame).getVkLayout());
       }
 
       if (handle == ShaderBindingHandle::ObjectData) {
-         return std::make_unique<DSShaderBinding>(graphicsDevice.getVulkanDevice(),
-                                                  vk::DescriptorType::eStorageBuffer);
+         return std::make_unique<DSShaderBinding>(
+             graphicsDevice.getVulkanDevice(),
+             **permanentPool,
+             vk::DescriptorType::eStorageBuffer,
+             layoutFactory.getLayout(ds::LayoutHandle::ObjectData).getVkLayout());
+      }
+
+      if (handle == ShaderBindingHandle::Bindless) {
+         return std::make_unique<DSShaderBinding>(
+             graphicsDevice.getVulkanDevice(),
+             **permanentPool,
+             vk::DescriptorType::eCombinedImageSampler,
+             layoutFactory.getLayout(ds::LayoutHandle::Bindless).getVkLayout());
+      }
+
+      if (handle == ShaderBindingHandle::AnimationData) {
+         return std::make_unique<DSShaderBinding>(
+             graphicsDevice.getVulkanDevice(),
+             **permanentPool,
+             vk::DescriptorType::eStorageBuffer,
+             layoutFactory.getLayout(ds::LayoutHandle::AnimationData).getVkLayout());
       }
 
       Log::error << "unhandled, uh, handle when creating shaderbinding: " << std::endl;

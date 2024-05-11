@@ -1,12 +1,10 @@
 #include "LayoutFactory.hpp"
 #include "Layout.hpp"
 #include "gfx/GraphicsDevice.hpp"
-#include <vulkan/vulkan_core.h>
-#include <vulkan/vulkan_enums.hpp>
-#include <vulkan/vulkan_raii.hpp>
 
 namespace tr::gfx::ds {
-   LayoutFactory::LayoutFactory(const GraphicsDevice& device) {
+   LayoutFactory::LayoutFactory(const GraphicsDevice& device, const bool useDescriptorBuffers)
+       : useDescriptorBuffers{useDescriptorBuffers} {
       initBindlessLayout(device);
       initPerFrameLayout(device);
       initObjectDataLayout(device);
@@ -35,11 +33,15 @@ namespace tr::gfx::ds {
           vk::DescriptorSetLayoutBindingFlagsCreateInfoEXT{.bindingCount = 1,
                                                            .pBindingFlags = &bindlessFlags};
 
-      const auto dslCreateInfo = vk::DescriptorSetLayoutCreateInfo{
-          .pNext = &extendedInfo,
-          .flags = vk::DescriptorSetLayoutCreateFlagBits::eDescriptorBufferEXT,
-          .bindingCount = 1,
-          .pBindings = &binding};
+      vk::DescriptorSetLayoutCreateFlags flags{};
+      if (useDescriptorBuffers) {
+         flags |= vk::DescriptorSetLayoutCreateFlagBits::eDescriptorBufferEXT;
+      }
+
+      const auto dslCreateInfo = vk::DescriptorSetLayoutCreateInfo{.pNext = &extendedInfo,
+                                                                   .flags = flags,
+                                                                   .bindingCount = 1,
+                                                                   .pBindings = &binding};
 
       layoutCache[LayoutHandle::Bindless] = std::make_unique<Layout>(device, dslCreateInfo);
    }
@@ -51,10 +53,14 @@ namespace tr::gfx::ds {
                                          .descriptorCount = 1,
                                          .stageFlags = vk::ShaderStageFlagBits::eVertex};
 
-      const auto createInfo = vk::DescriptorSetLayoutCreateInfo{
-          .flags = vk::DescriptorSetLayoutCreateFlagBits::eDescriptorBufferEXT,
-          .bindingCount = 1,
-          .pBindings = &binding};
+      vk::DescriptorSetLayoutCreateFlags flags{};
+      if (useDescriptorBuffers) {
+         flags |= vk::DescriptorSetLayoutCreateFlagBits::eDescriptorBufferEXT;
+      }
+
+      const auto createInfo = vk::DescriptorSetLayoutCreateInfo{.flags = flags,
+                                                                .bindingCount = 1,
+                                                                .pBindings = &binding};
 
       layoutCache[LayoutHandle::PerFrame] = std::make_unique<Layout>(device, createInfo);
    }
@@ -65,10 +71,15 @@ namespace tr::gfx::ds {
                                          .descriptorType = vk::DescriptorType::eStorageBuffer,
                                          .descriptorCount = 1,
                                          .stageFlags = vk::ShaderStageFlagBits::eVertex};
-      const auto createInfo = vk::DescriptorSetLayoutCreateInfo{
-          .flags = vk::DescriptorSetLayoutCreateFlagBits::eDescriptorBufferEXT,
-          .bindingCount = 1,
-          .pBindings = &binding};
+
+      vk::DescriptorSetLayoutCreateFlags flags{};
+      if (useDescriptorBuffers) {
+         flags |= vk::DescriptorSetLayoutCreateFlagBits::eDescriptorBufferEXT;
+      }
+
+      const auto createInfo = vk::DescriptorSetLayoutCreateInfo{.flags = flags,
+                                                                .bindingCount = 1,
+                                                                .pBindings = &binding};
 
       layoutCache[LayoutHandle::ObjectData] = std::make_unique<Layout>(device, createInfo);
    }
@@ -79,10 +90,15 @@ namespace tr::gfx::ds {
                                          .descriptorType = vk::DescriptorType::eStorageBuffer,
                                          .descriptorCount = 1,
                                          .stageFlags = vk::ShaderStageFlagBits::eVertex};
-      const auto createInfo = vk::DescriptorSetLayoutCreateInfo{
-          .flags = vk::DescriptorSetLayoutCreateFlagBits::eDescriptorBufferEXT,
-          .bindingCount = 1,
-          .pBindings = &binding};
+
+      vk::DescriptorSetLayoutCreateFlags flags{};
+      if (useDescriptorBuffers) {
+         flags |= vk::DescriptorSetLayoutCreateFlagBits::eDescriptorBufferEXT;
+      }
+
+      const auto createInfo = vk::DescriptorSetLayoutCreateInfo{.flags = flags,
+                                                                .bindingCount = 1,
+                                                                .pBindings = &binding};
       layoutCache[LayoutHandle::AnimationData] = std::make_unique<Layout>(device, createInfo);
    }
 

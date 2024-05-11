@@ -3,12 +3,10 @@
 #include "gfx/ObjectData.hpp"
 #include "gfx/GraphicsDevice.hpp"
 #include "gfx/PipelineBuilder.hpp"
-#include "gfx/ds/DescriptorSetFactory.hpp"
 #include "gfx/sb/ShaderBindingFactory.hpp"
 #include "gfx/textures/ResourceManager.hpp"
 
 #include <entt/signal/fwd.hpp>
-#include <vulkan/vulkan_raii.hpp>
 
 namespace tr::gfx {
    struct RenderObject;
@@ -102,10 +100,10 @@ namespace tr::gfx {
       std::unique_ptr<mem::Image> depthImage;
       std::shared_ptr<vk::raii::ImageView> depthImageView;
 
-      std::vector<std::unique_ptr<Frame>> frames;
-
       std::unique_ptr<ds::LayoutFactory> layoutFactory;
-      std::unique_ptr<ds::DescriptorSetFactory> dsFactory;
+      std::unique_ptr<sb::ShaderBindingFactory> sbFactory;
+
+      std::vector<std::unique_ptr<Frame>> frames;
 
       std::unique_ptr<Gui::ImGuiHelper> imguiHelper;
 
@@ -125,8 +123,6 @@ namespace tr::gfx {
       std::vector<MeshData> staticMeshDataList;
       std::vector<MeshData> terrainDataList;
       PushConstants pushConstants;
-
-      std::unique_ptr<sb::ShaderBindingFactory> sbFactory;
 
       void initDepthResources();
 

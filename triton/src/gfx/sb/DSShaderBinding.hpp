@@ -5,7 +5,11 @@
 namespace tr::gfx::sb {
    class DSShaderBinding : public ShaderBinding {
     public:
-      DSShaderBinding(const vk::raii::Device& device, vk::DescriptorType descriptorType);
+      DSShaderBinding(const vk::raii::Device& device,
+                      const vk::DescriptorPool& pool,
+                      vk::DescriptorType descriptorType,
+                      vk::DescriptorSetLayout layout);
+
       void bindBuffer(const uint32_t binding,
                       const mem::Buffer& buffer,
                       const size_t size) override;
@@ -15,6 +19,7 @@ namespace tr::gfx::sb {
 
       void bindToPipeline(const vk::raii::CommandBuffer& cmd,
                           const vk::PipelineBindPoint bindPoint,
+                          const uint32_t setNumber,
                           const vk::PipelineLayout& layout) const override;
 
     private:
