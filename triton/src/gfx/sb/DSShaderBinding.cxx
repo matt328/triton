@@ -50,9 +50,9 @@ namespace tr::gfx::sb {
 
    void DSShaderBinding::bindToPipeline(const vk::raii::CommandBuffer& cmd,
                                         const vk::PipelineBindPoint bindPoint,
-                                        const uint32_t setNumber,
+                                        const uint32_t setIndex,
                                         const vk::PipelineLayout& layout) const {
-      cmd.bindDescriptorSets(bindPoint, layout, setNumber, **vkDescriptorSet, nullptr);
+      cmd.bindDescriptorSets(bindPoint, layout, setIndex, **vkDescriptorSet, nullptr);
    }
 
 }
