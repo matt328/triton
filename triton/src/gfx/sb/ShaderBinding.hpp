@@ -24,6 +24,7 @@ namespace tr::gfx::sb {
 
       virtual void bindToPipeline(const vk::raii::CommandBuffer& cmd,
                                   const vk::PipelineBindPoint bindPoint,
+                                  const uint32_t setNumber,
                                   const vk::PipelineLayout& layout) const = 0;
    };
 }

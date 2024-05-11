@@ -1,7 +1,7 @@
 #pragma once
 
 #include "gfx/ObjectData.hpp"
-#include "gfx/ds/LayoutFactory.hpp"
+#include "gfx/sb/LayoutFactory.hpp"
 #include "gfx/sb/ShaderBindingFactory.hpp"
 
 namespace vk::raii {

@@ -1,14 +1,14 @@
 #include "Frame.hpp"
 #include "gfx/ObjectData.hpp"
 #include "GraphicsDevice.hpp"
-#include "gfx/ds/LayoutFactory.hpp"
+#include "gfx/sb/LayoutFactory.hpp"
 #include "gfx/helpers/Rendering.hpp"
 #include "gfx/mem/Buffer.hpp"
 #include "gfx/mem/Image.hpp"
 #include "gfx/mem/Allocator.hpp"
 #include "gfx/sb/ShaderBindingFactory.hpp"
 #include "gfx/sb/ShaderBinding.hpp"
-#include "gfx/ds/Layout.hpp"
+#include "gfx/sb/Layout.hpp"
 
 namespace tr::gfx {
 
@@ -74,6 +74,7 @@ namespace tr::gfx {
       cameraDataBuffer = graphicsDevice.getAllocator().createBuffer(&cameraDataBufferCreateInfo,
                                                                     &cameraDataAllocationCreateInfo,
                                                                     "Camera Data Buffer");
+      cameraDataBuffer->mapBuffer();
 
       // Create PerFrame ShaderBinding
       perFrameShaderBinding =

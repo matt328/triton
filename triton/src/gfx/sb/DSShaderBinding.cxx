@@ -4,9 +4,21 @@
 namespace tr::gfx::sb {
 
    DSShaderBinding::DSShaderBinding(const vk::raii::Device& device,
-                                    vk::DescriptorType descriptorType)
+                                    const vk::DescriptorPool& pool,
+                                    vk::DescriptorType descriptorType,
+                                    vk::DescriptorSetLayout layout)
        : ShaderBinding{}, device{device}, descriptorType{descriptorType} {
-      // TODO actually create the vkDescriptorSet
+
+      const auto allocInfo = vk::DescriptorSetAllocateInfo{.descriptorPool = pool,
+                                                           .descriptorSetCount = 1,
+                                                           .pSetLayouts = &layout};
+
+      try {
+         vkDescriptorSet = std::make_unique<vk::raii::DescriptorSet>(
+             std::move(device.allocateDescriptorSets(allocInfo).front()));
+      } catch (const vk::SystemError& e) {
+         Log::warn << "Descriptor Pool is full: " << e.what() << std::endl;
+      }
    }
 
    void DSShaderBinding::bindBuffer(const uint32_t binding,
@@ -38,8 +50,9 @@ namespace tr::gfx::sb {
 
    void DSShaderBinding::bindToPipeline(const vk::raii::CommandBuffer& cmd,
                                         const vk::PipelineBindPoint bindPoint,
+                                        const uint32_t setNumber,
                                         const vk::PipelineLayout& layout) const {
-      cmd.bindDescriptorSets(bindPoint, layout, 0, **vkDescriptorSet, nullptr);
+      cmd.bindDescriptorSets(bindPoint, layout, setNumber, **vkDescriptorSet, nullptr);
    }
 
 }

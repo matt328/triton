@@ -18,7 +18,7 @@ namespace tr::gfx::ds {
 
    class LayoutFactory {
     public:
-      LayoutFactory(const GraphicsDevice& device);
+      LayoutFactory(const GraphicsDevice& device, const bool useDescriptorBuffers = false);
       ~LayoutFactory();
 
       LayoutFactory(const LayoutFactory&) = delete;
@@ -39,6 +39,7 @@ namespace tr::gfx::ds {
       void initObjectDataLayout(const GraphicsDevice& device);
       void initAnimationDataLayout(const GraphicsDevice& device);
 
+      const bool useDescriptorBuffers{};
       std::unordered_map<LayoutHandle, std::unique_ptr<Layout>> layoutCache;
    };
 }

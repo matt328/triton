@@ -27,10 +27,8 @@ set(triton_SRC
    "src/gp/ecs/system/TransformSystem.cxx"
    "src/gp/ecs/system/AnimationSystem.cxx"
 
-   "src/gfx/ds/LayoutFactory.cxx"
-   "src/gfx/ds/Layout.cxx"
-   "src/gfx/ds/DescriptorSet.cxx"
-   "src/gfx/ds/DescriptorSetFactory.cxx"
+   "src/gfx/sb/LayoutFactory.cxx"
+   "src/gfx/sb/Layout.cxx"
 
    "src/ct/Heightfield.cxx"
    "src/gfx/geometry/GeometryFactory.cxx"
