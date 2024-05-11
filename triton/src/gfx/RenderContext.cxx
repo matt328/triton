@@ -4,8 +4,7 @@
 #include "gfx/RenderObject.hpp"
 
 #include "gfx/ObjectData.hpp"
-#include "gfx/ds/DescriptorSetFactory.hpp"
-#include "gfx/ds/LayoutFactory.hpp"
+#include "gfx/sb/LayoutFactory.hpp"
 #include "gfx/geometry/Vertex.hpp"
 #include "gfx/gui/ImguiHelper.hpp"
 
@@ -17,11 +16,8 @@
 #include "util/Paths.hpp"
 #include "gfx/textures/ResourceManager.hpp"
 #include "gfx/VkContext.hpp"
-#include "gfx/ds/LayoutFactory.hpp"
-#include "gfx/ds/DescriptorSetFactory.hpp"
-#include "gfx/ds/DescriptorSet.hpp"
+#include "gfx/sb/LayoutFactory.hpp"
 #include "gfx/PipelineBuilder.hpp"
-#include "gfx/ds/Layout.hpp"
 #include "gfx/mem/Allocator.hpp"
 #include "gfx/sb/ShaderBinding.hpp"
 
@@ -31,10 +27,6 @@ namespace tr::gfx {
       graphicsDevice = std::make_unique<GraphicsDevice>(window, true);
 
       layoutFactory = std::make_unique<ds::LayoutFactory>(*graphicsDevice);
-
-      auto& l = layoutFactory->getLayout(ds::LayoutHandle::PerFrame);
-      [[maybe_unused]] auto offset = l.getBindingOffset(0);
-      [[maybe_unused]] auto layoutSize = l.getAlignedSize();
 
       sbFactory = std::make_unique<sb::ShaderBindingFactory>(*graphicsDevice, *layoutFactory);
 
@@ -368,19 +360,23 @@ namespace tr::gfx {
       {
          frame.prepareFrame();
 
+         // Static Models
+         cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, **staticModelPipeline);
+
          // Bind ShaderBindings to Pipeline
-         frame.getPerFrameShaderBinding().bindToPipeline(cmd,
-                                                         vk::PipelineBindPoint::eGraphics,
-                                                         **staticModelPipelineLayout);
          frame.getTextureShaderBinding().bindToPipeline(cmd,
                                                         vk::PipelineBindPoint::eGraphics,
+                                                        0,
                                                         **staticModelPipelineLayout);
          frame.getObjectDataShaderBinding().bindToPipeline(cmd,
                                                            vk::PipelineBindPoint::eGraphics,
+                                                           1,
                                                            **staticModelPipelineLayout);
+         frame.getPerFrameShaderBinding().bindToPipeline(cmd,
+                                                         vk::PipelineBindPoint::eGraphics,
+                                                         2,
+                                                         **staticModelPipelineLayout);
 
-         // Static Models
-         cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, **staticModelPipeline);
          cmd.setViewportWithCount(mainViewport);
          cmd.setScissorWithCount(mainScissor);
          {
