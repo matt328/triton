@@ -48,7 +48,8 @@ namespace tr::gfx::sb {
              graphicsDevice.getVulkanDevice(),
              **permanentPool,
              vk::DescriptorType::eUniformBuffer,
-             layoutFactory.getLayout(ds::LayoutHandle::PerFrame).getVkLayout());
+             layoutFactory.getLayout(ds::LayoutHandle::PerFrame).getVkLayout(),
+             "Per Frame DS");
       }
 
       if (handle == ShaderBindingHandle::ObjectData) {
@@ -56,7 +57,8 @@ namespace tr::gfx::sb {
              graphicsDevice.getVulkanDevice(),
              **permanentPool,
              vk::DescriptorType::eStorageBuffer,
-             layoutFactory.getLayout(ds::LayoutHandle::ObjectData).getVkLayout());
+             layoutFactory.getLayout(ds::LayoutHandle::ObjectData).getVkLayout(),
+             "Object Data DS");
       }
 
       if (handle == ShaderBindingHandle::Bindless) {
@@ -64,7 +66,8 @@ namespace tr::gfx::sb {
              graphicsDevice.getVulkanDevice(),
              **permanentPool,
              vk::DescriptorType::eCombinedImageSampler,
-             layoutFactory.getLayout(ds::LayoutHandle::Bindless).getVkLayout());
+             layoutFactory.getLayout(ds::LayoutHandle::Bindless).getVkLayout(),
+             "Bindless DS");
       }
 
       if (handle == ShaderBindingHandle::AnimationData) {
@@ -72,7 +75,8 @@ namespace tr::gfx::sb {
              graphicsDevice.getVulkanDevice(),
              **permanentPool,
              vk::DescriptorType::eStorageBuffer,
-             layoutFactory.getLayout(ds::LayoutHandle::AnimationData).getVkLayout());
+             layoutFactory.getLayout(ds::LayoutHandle::AnimationData).getVkLayout(),
+             "Animation Data DS");
       }
 
       Log::error << "unhandled, uh, handle when creating shaderbinding: " << std::endl;

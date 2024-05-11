@@ -8,7 +8,8 @@ namespace tr::gfx::sb {
       DSShaderBinding(const vk::raii::Device& device,
                       const vk::DescriptorPool& pool,
                       vk::DescriptorType descriptorType,
-                      vk::DescriptorSetLayout layout);
+                      vk::DescriptorSetLayout layout,
+                      std::string_view name = "Unnamed DescriptorSet");
 
       void bindBuffer(const uint32_t binding,
                       const mem::Buffer& buffer,

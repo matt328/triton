@@ -152,13 +152,12 @@ namespace tr::gfx::Helpers {
    template <typename T>
    inline void setObjectName(T const& handle,
                              [[maybe_unused]] const vk::raii::Device& device,
-                             const vk::DebugReportObjectTypeEXT objectType,
                              const std::string_view name) {
       // NOLINTNEXTLINE this is just debug anyway
       const auto debugHandle = reinterpret_cast<uint64_t>(static_cast<typename T::CType>(handle));
 
       [[maybe_unused]] const auto debugNameInfo =
-          vk::DebugMarkerObjectNameInfoEXT{.objectType = objectType,
+          vk::DebugMarkerObjectNameInfoEXT{.objectType = handle.debugReportObjectType,
                                            .object = debugHandle,
                                            .pObjectName = name.data()};
       device.debugMarkerSetObjectNameEXT(debugNameInfo);
