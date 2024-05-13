@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ozz/base/maths/soa_transform.h"
 namespace tr::gp::ska {
 
    struct Animations {
@@ -48,10 +49,10 @@ namespace tr::gp::ska {
 
          // Allocate runtime buffers up front
          const auto numSoaJoints = skeleton.num_soa_joints();
-         locals.resize(numSoaJoints);
+         locals.resize(numSoaJoints, ozz::math::SoaTransform::identity());
 
          const auto numJoints = skeleton.num_joints();
-         models.resize(numJoints);
+         models.resize(numJoints, ozz::math::Float4x4::identity());
 
          context.Resize(numJoints);
       }

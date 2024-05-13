@@ -54,6 +54,15 @@ namespace tr::ctx {
       return renderer.getResourceManager().loadModelAsync(path.string());
    }
 
+   auto GameplayFacade::loadSkinnedModelAsync(const std::filesystem::path& modelPath,
+                                              const std::filesystem::path& skeletonPath,
+                                              const std::filesystem::path& animationPath)
+       -> std::future<gfx::SkinnedModelHandle> {
+      return renderer.getResourceManager().loadSkinnedModelAsync(modelPath.string(),
+                                                                 skeletonPath.string(),
+                                                                 animationPath.string());
+   }
+
    gp::EntityType GameplayFacade::createStaticMultiMeshEntity(MeshHandles meshes) {
       auto e = gameplaySystem.registry->create();
       gameplaySystem.registry->emplace<gp::ecs::Renderable>(e, meshes);
@@ -61,6 +70,19 @@ namespace tr::ctx {
 
       if (debugEnabled) {
          gameplaySystem.registry->emplace<EditorInfoComponent>(e, "gltf model");
+      }
+
+      return e;
+   }
+
+   auto GameplayFacade::createSkinnedModelEntity(const gfx::SkinnedModelHandle model)
+       -> gp::EntityType {
+      auto e = gameplaySystem.registry->create();
+      // TODO: Add skin/animation component
+      gameplaySystem.registry->emplace<gp::ecs::Transform>(e);
+
+      if (debugEnabled) {
+         gameplaySystem.registry->emplace<EditorInfoComponent>(e, "skinned model");
       }
 
       return e;
