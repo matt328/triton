@@ -120,7 +120,10 @@ namespace tr::gfx::geo {
       const auto meshHandle = modelHandle.begin()->first;
       const auto imageHandle = modelHandle.begin()->second;
 
-      ozz::animation::Skeleton skeleton;
+      auto sgd = SkinnedGeometryData{};
+      sgd.geometryHandle = meshHandle;
+      sgd.imageHandle = imageHandle;
+
       {
          const auto filename = skeletonPath.string();
          ozz::io::File file(filename.c_str(), "rb");
@@ -134,10 +137,9 @@ namespace tr::gfx::geo {
             Log::error << "Failed to load skeleton instance from file " << filename << "."
                        << std::endl;
          }
-         archive >> skeleton;
+         archive >> sgd.skeleton;
       }
 
-      ozz::animation::Animation animation;
       { // Load Animation
          const auto filename = animationPath.string();
          ozz::io::File file(filename.c_str(), "rb");
@@ -150,22 +152,15 @@ namespace tr::gfx::geo {
                        << std::endl;
          }
 
-         archive >> animation;
+         archive >> sgd.animation;
       }
 
       // Sanity Check
-      if (skeleton.num_joints() != animation.num_tracks()) {
+      if (sgd.skeleton.num_joints() != sgd.animation.num_tracks()) {
          Log::warn << "Joints in skeleton have to match tracks in animation" << std::endl;
       }
 
-      /*
-         Loading these is split into two phases, load into memory, then upload resources to GPU
-         TODO: make loading skinned models the same way.
-      */
-      const auto sgd = SkinnedGeometryData{.geometryHandle = meshHandle,
-                                           .imageHandle = imageHandle,
-                                           .skeleton = skeleton,
-                                           .animation = animation};
+      return sgd;
    }
 
    /// Creates Vertex, Index and Image data
