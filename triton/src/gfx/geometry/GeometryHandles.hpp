@@ -9,8 +9,8 @@ namespace tr::gfx::geo {
    struct SkinnedGeometryData {
       GeometryHandle geometryHandle;
       ImageHandle imageHandle;
-      ozz::animation::Skeleton skeleton;
-      ozz::animation::Animation animation;
+      ozz::animation::Skeleton skeleton{};
+      ozz::animation::Animation animation{};
    };
 
 }
