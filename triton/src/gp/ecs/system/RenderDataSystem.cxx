@@ -40,6 +40,9 @@ namespace tr::gp::ecs::RenderDataSystem {
       for (auto [entity, animationData] : animationsView.each()) {
          /*
             - Add joint matrices to an array in RenderData.
+            - There will be a single buffer of animation data for all active animated models, and a
+            JointMatrixHandle will index into this the same way the TextureHandle indexes into the
+            texture buffer
             - Also need to add a dynamicMeshData that includes a MeshHandle, TextureHandle, and a
             JoinMatrixHandle
             - JointMatrixHandle will need an offset into jointMatrices array and maybe also a size?

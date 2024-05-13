@@ -102,6 +102,8 @@ target_precompile_headers(${PROJECT_NAME}
    <map>
    <mutex>
    <optional>
+   <ozz/animation/runtime/animation.h>
+   <ozz/animation/runtime/skeleton.h>
    <random>
    <ranges>
    <set>

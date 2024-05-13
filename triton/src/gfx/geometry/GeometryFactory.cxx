@@ -3,6 +3,8 @@
 #include "GeometryData.hpp"
 #include "Vertex.hpp"
 #include "ct/HeightField.hpp"
+#include "gfx/Handles.hpp"
+#include "gfx/geometry/GeometryHandles.hpp"
 
 namespace tr::gfx::geo {
 
@@ -98,12 +100,78 @@ namespace tr::gfx::geo {
       return glm::normalize(glm::vec3(-dx, 2.f, dy));
    }
 
+   /*
+      TODO: LoadSkinnedModel(model, skeleton, animation)
+      This will return the model as handles, but the skeleton and animation data will still be CPU
+      side, so return them by value so they can be added to the entity's Animation component.
+      This maybe should also add the joint matrices in a cpu to gpu buffer that gets mapped into
+      the animation data descriptor set. and also put a JointMatrices handle in what this returns.
+      I think the handle will need the size of the JointMatrices area of the buffer somehow.
+   */
+
+   auto GeometryFactory::loadSkinnedModel(const std::filesystem::path& modelPath,
+                                          const std::filesystem::path& skeletonPath,
+                                          const std::filesystem::path& animationPath)
+       -> SkinnedGeometryData {
+      const auto modelHandle = loadGeometryFromGltf(modelPath);
+
+      assert(modelHandle.size() == 1); // Currently only support files with a single mesh
+
+      const auto meshHandle = modelHandle.begin()->first;
+      const auto imageHandle = modelHandle.begin()->second;
+
+      ozz::animation::Skeleton skeleton;
+      {
+         const auto filename = skeletonPath.string();
+         ozz::io::File file(filename.c_str(), "rb");
+
+         if (!file.opened()) {
+            Log::error << "Failed to open skeleton file " << filename << "." << std::endl;
+         }
+
+         ozz::io::IArchive archive(&file);
+         if (!archive.TestTag<ozz::animation::Skeleton>()) {
+            Log::error << "Failed to load skeleton instance from file " << filename << "."
+                       << std::endl;
+         }
+         archive >> skeleton;
+      }
+
+      ozz::animation::Animation animation;
+      { // Load Animation
+         const auto filename = animationPath.string();
+         ozz::io::File file(filename.c_str(), "rb");
+         if (!file.opened()) {
+            Log::error << "Failed to open animation file " << filename << "." << std::endl;
+         }
+         ozz::io::IArchive archive(&file);
+         if (!archive.TestTag<ozz::animation::Animation>()) {
+            Log::error << "Failed to load animation instance from file " << filename << "."
+                       << std::endl;
+         }
+
+         archive >> animation;
+      }
+
+      // Sanity Check
+      if (skeleton.num_joints() != animation.num_tracks()) {
+         Log::warn << "Joints in skeleton have to match tracks in animation" << std::endl;
+      }
+
+      /*
+         Loading these is split into two phases, load into memory, then upload resources to GPU
+         TODO: make loading skinned models the same way.
+      */
+      const auto sgd = SkinnedGeometryData{.geometryHandle = meshHandle,
+                                           .imageHandle = imageHandle,
+                                           .skeleton = skeleton,
+                                           .animation = animation};
+   }
+
    /// Creates Vertex, Index and Image data
    auto GeometryFactory::loadGeometryFromGltf(const std::filesystem::path& filename)
        -> TexturedGeometryHandle {
       ZoneNamedN(a, "Load Model Internal", true);
-      auto handles = TexturedGeometryHandle{};
-
       {
          ZoneNamedN(b, "Loading glTF File", true);
 

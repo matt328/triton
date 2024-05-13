@@ -8,7 +8,6 @@
 #include "gfx/mem/Allocator.hpp"
 #include "gfx/sb/ShaderBindingFactory.hpp"
 #include "gfx/sb/ShaderBinding.hpp"
-#include "gfx/sb/Layout.hpp"
 
 namespace tr::gfx {
 
