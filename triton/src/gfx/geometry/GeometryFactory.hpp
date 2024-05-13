@@ -2,6 +2,8 @@
 
 #include "GeometryHandles.hpp"
 #include "ct/HeightField.hpp"
+#include "gfx/Handles.hpp"
+#include "gfx/geometry/SkinnedModel.hpp"
 #include <random>
 
 namespace tr::ct {
@@ -27,6 +29,10 @@ namespace tr::gfx::geo {
       auto createGeometryFromHeightfield(const ct::HeightField& heightfield)
           -> TexturedGeometryHandle;
       auto loadGeometryFromGltf(const std::filesystem::path& filename) -> TexturedGeometryHandle;
+
+      auto loadSkinnedModel(const std::filesystem::path& modelPath,
+                            const std::filesystem::path& skeletonPath,
+                            const std::filesystem::path& animationPath) -> SkinnedGeometryData;
 
       void unload(const TexturedGeometryHandle& handle);
 

@@ -93,6 +93,24 @@ namespace ed::ui {
       }
    }
 
+   void Manager::handleSkinnedModelFutures() {
+      for (auto it = skinnedModelFutures.begin(); it != skinnedModelFutures.end();) {
+         auto status = it->wait_for(std::chrono::seconds(0));
+         if (status == std::future_status::ready) {
+            ZoneNamedN(loadComplete, "Creating Mesh Entities", true);
+            try {
+               auto r = it->get();
+               facade.createSkinnedModelEntity(r);
+            } catch (const std::exception& e) {
+               Log::error << "error loading model: " << e.what() << std::endl;
+            }
+            it = skinnedModelFutures.erase(it);
+         } else {
+            ++it;
+         }
+      }
+   }
+
    void Manager::renderDockSpace() {
       static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_PassthruCentralNode;
       ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
@@ -281,10 +299,17 @@ namespace ed::ui {
             ImGui::SameLine();
             if (ImGui::Button("Load Model")) {
 
-               auto filename = std::filesystem::path{
+               const auto modelName = std::filesystem::path{
                    R"(C:\Users\Matt\Projects\game-assets\models\character\reference.gltf)"};
+               const auto skeletonPath = std::filesystem::path{
+                   "C:/Users/Matt/Projects/game-assets/animations/skeleton.ozz"};
+               const auto animationPath = std::filesystem::path{
+                   "C:/Users/Matt/Projects/game-assets/animations/idleAnimation.ozz"};
 
-               modelFutures.push_back(facade.loadModelAsync(filename));
+               modelFutures.push_back(facade.loadModelAsync(modelName));
+
+               // skinnedModelFutures.push_back(
+               //     facade.loadSkinnedModelAsync(modelName, skeletonPath, animationPath));
             }
             ImGui::EndGroup();
          }

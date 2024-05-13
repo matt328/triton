@@ -68,6 +68,13 @@ namespace tr::gfx::tx {
       std::future<ModelHandle> loadModelAsync(const std::filesystem::path& filename);
       ModelHandle loadModelInt(const std::filesystem::path& filename);
 
+      std::future<SkinnedModelHandle> loadSkinnedModelAsync(const std::string_view modelPath,
+                                                            const std::string_view skeletonPath,
+                                                            const std::string_view animationPath);
+      SkinnedModelHandle loadSkinnedModelInt(const std::string_view modelPath,
+                                             const std::string_view skeletonPath,
+                                             const std::string_view animationPath);
+
       auto createStaticMesh(const geo::GeometryData& geometry) -> MeshHandle;
 
       auto& getMesh(MeshHandle meshHandle) {

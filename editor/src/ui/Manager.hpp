@@ -44,9 +44,10 @@ namespace ed::ui {
 
     private:
       tr::ctx::GameplayFacade& facade;
-      std::vector<std::future<tr::gfx::ModelHandle>> modelFutures{};
 
+      std::vector<std::future<tr::gfx::ModelHandle>> modelFutures{};
       std::vector<std::future<tr::gfx::ModelHandle>> terrainFutures{};
+      std::vector<std::future<tr::gfx::SkinnedModelHandle>> skinnedModelFutures{};
 
       // HACK: get this from the application somehow instead of tracking it in 2 places
       bool fullscreen{};
@@ -67,6 +68,7 @@ namespace ed::ui {
 
       void handleModelFutures();
       void handleTerrainFutures();
+      void handleSkinnedModelFutures();
 
       void renderDockSpace();
       void renderMenuBar();

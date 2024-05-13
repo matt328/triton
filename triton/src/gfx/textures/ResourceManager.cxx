@@ -63,6 +63,20 @@ namespace tr::gfx::tx {
       return uploadGeometry(texturedGeometryHandle);
    }
 
+   std::future<SkinnedModelHandle> ResourceManager::loadSkinnedModelAsync(
+       const std::string_view modelPath,
+       const std::string_view skeletonPath,
+       const std::string_view animationPath) {
+      return taskQueue->enqueue([this, modelPath, skeletonPath, animationPath]() {
+         return loadSkinnedModelInt(modelPath, skeletonPath, animationPath);
+      });
+   }
+
+   SkinnedModelHandle ResourceManager::loadSkinnedModelInt(const std::string_view modelPath,
+                                                           const std::string_view skeletonPath,
+                                                           const std::string_view animationPath) {
+   }
+
    /*
       TODO: Consider making ResourceManager's data either aggregate types that the ResourceManager
       is responsible for knowing how to construct, or make them classes that know how to construct
