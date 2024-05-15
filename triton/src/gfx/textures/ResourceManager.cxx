@@ -1,7 +1,9 @@
 #include "gfx/textures/ResourceManager.hpp"
 #include "ct/HeightField.hpp"
+#include "gfx/Handles.hpp"
 #include "gfx/RenderData.hpp"
 #include "gfx/geometry/GeometryFactory.hpp"
+#include "gfx/geometry/GeometryHandles.hpp"
 
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
@@ -75,6 +77,42 @@ namespace tr::gfx::tx {
    SkinnedModelHandle ResourceManager::loadSkinnedModelInt(const std::string_view modelPath,
                                                            const std::string_view skeletonPath,
                                                            const std::string_view animationPath) {
+      const auto sgd = geometryFactory->loadSkinnedModel(modelPath, skeletonPath, animationPath);
+      return uploadSkinnedGeometry(sgd);
+   }
+
+   /// Uploads the Geometry and Texture data and creates space in a buffer for the skeleton's
+   /// joint matrix data
+   auto ResourceManager::uploadSkinnedGeometry(const geo::SkinnedGeometryData& sgd)
+       -> SkinnedModelHandle {
+      const auto tgh = geo::TexturedGeometryHandle{{sgd.geometryHandle, sgd.imageHandle}};
+      const auto modelHandle = uploadGeometry(tgh);
+
+      /*
+         JoinMatrices are a new type of data since they get written into a shared buffer, and also
+         get updated each frame.
+
+         - The skeleton and animation data structures are used by the ECS on
+         the CPU side to produce a set of JointMatrices for each skinned model.
+         - Each JointMatrices set needs added to a list in RenderData, along with adding the
+         indexing information to the SkinnedModelHandles in RenderData
+         - At the sync point, Renderer will lock the RenderData structure and copy indexing strucure
+         list and upload JointMatrices to a cpu->gpu buffer (host visible, host coherent)
+         - This method should return the mesh and texture handles along with the Skeleton and
+         Animation data.
+         - The mesh and texture handles can be put in a Renderable component, and the Skeleton and
+         Animation put into an animation Component.
+         - During AnimationSystem update, joint matrices will be calculated and stored in the
+         component.
+         - During RenderDataSystem update, if the entity has an Animation component, add it's
+         jointmatrices to the renderdata list, and calculate its indexing structure and add it to
+         renderdata.skinnedMeshData
+      */
+      const auto smh = SkinnedModelHandle{
+
+      };
+
+      return smh;
    }
 
    /*
