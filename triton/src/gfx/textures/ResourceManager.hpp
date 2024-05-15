@@ -102,6 +102,7 @@ namespace tr::gfx::tx {
       RenderData renderData;
 
       auto uploadGeometry(const geo::TexturedGeometryHandle& handles) -> ModelHandle;
+      auto uploadSkinnedGeometry(const geo::SkinnedGeometryData& sgd) -> SkinnedModelHandle;
 
       MeshHandle createMesh(const tinygltf::Model&, const tinygltf::Primitive& primitive);
       TextureHandle createTexture(const tinygltf::Model& model, std::size_t textureIndex);
