@@ -2,6 +2,7 @@
 #include "ct/HeightField.hpp"
 #include "gfx/Handles.hpp"
 #include "gfx/RenderData.hpp"
+#include "gfx/geometry/AnimationFactory.hpp"
 #include "gfx/geometry/GeometryFactory.hpp"
 #include "gfx/geometry/GeometryHandles.hpp"
 
@@ -24,7 +25,8 @@ namespace tr::gfx::tx {
    ResourceManager::ResourceManager(const GraphicsDevice& graphicsDevice)
        : graphicsDevice{graphicsDevice} {
       taskQueue = std::make_unique<util::TaskQueue>();
-      geometryFactory = std::make_unique<geo::GeometryFactory>();
+      animationFactory = std::make_unique<geo::AnimationFactory>();
+      geometryFactory = std::make_unique<geo::GeometryFactory>(*animationFactory);
    }
 
    ResourceManager::~ResourceManager() {
@@ -65,18 +67,19 @@ namespace tr::gfx::tx {
       return uploadGeometry(texturedGeometryHandle);
    }
 
-   std::future<SkinnedModelHandle> ResourceManager::loadSkinnedModelAsync(
-       const std::string_view modelPath,
-       const std::string_view skeletonPath,
-       const std::string_view animationPath) {
+   std::future<LoadedSkinnedModelData> ResourceManager::loadSkinnedModelAsync(
+       const std::filesystem::path& modelPath,
+       const std::filesystem::path& skeletonPath,
+       const std::filesystem::path& animationPath) {
       return taskQueue->enqueue([this, modelPath, skeletonPath, animationPath]() {
          return loadSkinnedModelInt(modelPath, skeletonPath, animationPath);
       });
    }
 
-   SkinnedModelHandle ResourceManager::loadSkinnedModelInt(const std::string_view modelPath,
-                                                           const std::string_view skeletonPath,
-                                                           const std::string_view animationPath) {
+   LoadedSkinnedModelData ResourceManager::loadSkinnedModelInt(
+       const std::filesystem::path& modelPath,
+       const std::filesystem::path& skeletonPath,
+       const std::filesystem::path& animationPath) {
       const auto sgd = geometryFactory->loadSkinnedModel(modelPath, skeletonPath, animationPath);
       return uploadSkinnedGeometry(sgd);
    }
@@ -84,10 +87,11 @@ namespace tr::gfx::tx {
    /// Uploads the Geometry and Texture data and creates space in a buffer for the skeleton's
    /// joint matrix data
    auto ResourceManager::uploadSkinnedGeometry(const geo::SkinnedGeometryData& sgd)
-       -> SkinnedModelHandle {
+       -> LoadedSkinnedModelData {
       const auto tgh = geo::TexturedGeometryHandle{{sgd.geometryHandle, sgd.imageHandle}};
       const auto modelHandle = uploadGeometry(tgh);
-
+      const auto meshHandle = modelHandle.begin()->first;
+      const auto textureHandle = modelHandle.begin()->second;
       /*
          JoinMatrices are a new type of data since they get written into a shared buffer, and also
          get updated each frame.
@@ -108,21 +112,22 @@ namespace tr::gfx::tx {
          jointmatrices to the renderdata list, and calculate its indexing structure and add it to
          renderdata.skinnedMeshData
       */
-      const auto smh = SkinnedModelHandle{
-
-      };
+      const auto smh = LoadedSkinnedModelData{.meshHandle = meshHandle,
+                                              .textureHandle = textureHandle,
+                                              .skeletonHandle = sgd.skeletonHandle,
+                                              .animationHandle = sgd.animationHandle};
 
       return smh;
    }
 
    /*
-      TODO: Consider making ResourceManager's data either aggregate types that the ResourceManager
-      is responsible for knowing how to construct, or make them classes that know how to construct
-      themselves. Aggregate types moves a lot of logic into the ResourceManager, but classes need
-      alot of dependencies passed into their constructors.  Probably factories that produce
-      aggregate types might be a good compromise, that way the factories could encapsulate the logic
-      instead of ResourceManager. Factories can use RVO to return aggregate types by value and avoid
-      a copy.
+      TODO: Consider making ResourceManager's data either aggregate types that the
+      ResourceManager is responsible for knowing how to construct, or make them classes that know
+      how to construct themselves. Aggregate types moves a lot of logic into the ResourceManager,
+      but classes need alot of dependencies passed into their constructors.  Probably factories
+      that produce aggregate types might be a good compromise, that way the factories could
+      encapsulate the logic instead of ResourceManager. Factories can use RVO to return aggregate
+      types by value and avoid a copy.
    */
    auto ResourceManager::uploadGeometry(const geo::TexturedGeometryHandle& handles) -> ModelHandle {
       auto modelHandles = ModelHandle{};

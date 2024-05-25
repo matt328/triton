@@ -122,6 +122,7 @@ namespace tr::gfx {
 
       std::vector<MeshData> staticMeshDataList;
       std::vector<MeshData> terrainDataList;
+      std::vector<MeshData> skinnedModelList;
       PushConstants pushConstants;
 
       void initDepthResources();

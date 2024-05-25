@@ -12,6 +12,20 @@
 
 namespace tr::gp::ecs::RenderDataSystem {
 
+   glm::mat4 convertOzzToGlm(const ozz::math::Float4x4& ozzMatrix) {
+      glm::mat4 glmMatrix{};
+
+      alignas(16) float temp[4];
+
+      for (int i = 0; i < 4; ++i) {
+         ozz::math::StorePtrU(ozzMatrix.cols[i], temp);
+         for (int j = 0; j < 4; ++j) {
+            glmMatrix[i][j] = temp[j];
+         }
+      }
+      return glmMatrix;
+   }
+
    /// Loops through the registry and fills in the given RenderData struct
    void update(const entt::registry& registry, gfx::RenderData& renderData) {
 
@@ -20,10 +34,16 @@ namespace tr::gp::ecs::RenderDataSystem {
 
       renderData.cameraData = gfx::CameraData{cam.view, cam.projection, cam.view * cam.projection};
 
-      const auto view = registry.view<Renderable, Transform>();
+      const auto view = registry.view<Renderable, Transform>(entt::exclude<Animation>);
       for (auto [entity, renderable, transform] : view.each()) {
 
          const auto isTerrainEntity = registry.any_of<TerrainMarker>(entity);
+
+         /*
+            TODO: Make RenderData be more concrete classes so they're easier to reason about than
+            a bunch of maps of long long
+            Sizes are known up front so RenderData could be modeled as a SoA
+         */
 
          for (auto& it : renderable.meshes) {
             const auto pos = renderData.objectData.size();
@@ -36,23 +56,26 @@ namespace tr::gp::ecs::RenderDataSystem {
          }
       }
 
-      const auto animationsView = registry.view<Animation>();
-      for (auto [entity, animationData] : animationsView.each()) {
-         /*
-            - Add joint matrices to an array in RenderData.
-            - There will be a single buffer of animation data for all active animated models, and a
-            JointMatrixHandle will index into this the same way the TextureHandle indexes into the
-            texture buffer
-            - Also need to add a dynamicMeshData that includes a MeshHandle, TextureHandle, and a
-            JoinMatrixHandle
-            - JointMatrixHandle will need an offset into jointMatrices array and maybe also a size?
-            - When rendering, this JointMatrixHandle will need to be part of ObjectData
-            - extend ObjectData to have a uint jointMatrixOffset, in the shader, use that to look up
-            the model's first joint matrix from the buffer
-            - Still need to understand if that's all that needs done is multiplying each vertex's
-            transformation by the weighted joint matrix in the shader, and if the animation library
-            takes care of everything else
-         */
+      const auto animationsView = registry.view<Animation, Renderable, Transform>();
+      uint32_t jointMatricesIndex = 0;
+      for (auto [entity, animationData, renderable, transform] : animationsView.each()) {
+         auto jointMatrices = std::vector<glm::mat4>{};
+         for (const auto& m : animationData.models) {
+            jointMatrices.push_back(convertOzzToGlm(m));
+         }
+
+         renderData.animationData.insert(renderData.animationData.begin(),
+                                         jointMatrices.begin(),
+                                         jointMatrices.end());
+
+         for (auto& it : renderable.meshes) {
+            const auto pos = renderData.objectData.size();
+            renderData.skinnedMeshData.emplace_back(it.first, pos);
+            renderData.objectData.emplace_back(transform.transformation,
+                                               it.second,
+                                               jointMatricesIndex);
+         }
+         jointMatricesIndex += jointMatrices.size();
       }
 
       const auto debugView = registry.view<Transform, DebugConstants>();

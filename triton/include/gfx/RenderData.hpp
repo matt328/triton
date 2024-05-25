@@ -15,6 +15,8 @@ namespace tr::gfx {
       std::vector<ObjectData> objectData;
       std::vector<MeshData> staticMeshData;
       std::vector<MeshData> terrainMeshData;
+      std::vector<MeshData> skinnedMeshData;
+      std::vector<AnimationData> animationData;
    };
 
 }

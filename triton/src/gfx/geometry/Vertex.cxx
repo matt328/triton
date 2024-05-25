@@ -28,7 +28,7 @@ namespace tr::gfx::geo {
          case VertexComponent::UV:
             return {.location = location,
                     .binding = binding,
-                    .format = vk::Format::eR32G32B32Sfloat,
+                    .format = vk::Format::eR32G32Sfloat,
                     .offset = offsetof(Vertex, uv)};
          case VertexComponent::Color:
             return {.location = location,
@@ -43,12 +43,12 @@ namespace tr::gfx::geo {
          case VertexComponent::Joint0:
             return {.location = location,
                     .binding = binding,
-                    .format = vk::Format::eR32G32B32Sfloat,
+                    .format = vk::Format::eR8G8B8A8Uint,
                     .offset = offsetof(Vertex, joint0)};
          case VertexComponent::Weight0:
             return {.location = location,
                     .binding = binding,
-                    .format = vk::Format::eR32G32B32Sfloat,
+                    .format = vk::Format::eR32G32B32A32Sfloat,
                     .offset = offsetof(Vertex, weight0)};
          default:
             return {};

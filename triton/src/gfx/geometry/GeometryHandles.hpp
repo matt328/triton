@@ -1,5 +1,6 @@
 #pragma once
 
+#include "gfx/geometry/AnimationFactory.hpp"
 namespace tr::gfx::geo {
 
    using GeometryHandle = size_t;
@@ -9,8 +10,8 @@ namespace tr::gfx::geo {
    struct SkinnedGeometryData {
       GeometryHandle geometryHandle;
       ImageHandle imageHandle;
-      ozz::animation::Skeleton skeleton{};
-      ozz::animation::Animation animation{};
+      SkeletonHandle skeletonHandle;
+      AnimationHandle animationHandle;
    };
 
 }

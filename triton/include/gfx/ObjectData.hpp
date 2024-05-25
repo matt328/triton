@@ -10,6 +10,7 @@ namespace tr::gfx {
    struct alignas(16) ObjectData {
       glm::mat4 model;
       TextureHandle textureId;
+      uint32_t animationDataIndex;
    };
 
    struct CameraData {
