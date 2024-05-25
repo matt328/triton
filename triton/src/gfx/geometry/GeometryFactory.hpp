@@ -3,8 +3,8 @@
 #include "GeometryHandles.hpp"
 #include "ct/HeightField.hpp"
 #include "gfx/Handles.hpp"
-#include "gfx/geometry/SkinnedModel.hpp"
-#include <random>
+#include "gfx/geometry/AnimationFactory.hpp"
+#include "gfx/helpers/Rando.hpp"
 
 namespace tr::ct {
    class HeightField;
@@ -15,9 +15,15 @@ namespace tr::gfx::geo {
    class GeometryData;
    class ImageData;
 
+   struct GltfNode {
+      int index;
+      int number;
+      std::string name;
+   };
+
    class GeometryFactory {
     public:
-      GeometryFactory();
+      GeometryFactory(AnimationFactory& animationFactory);
       ~GeometryFactory();
 
       GeometryFactory(const GeometryFactory&) = delete;
@@ -41,16 +47,13 @@ namespace tr::gfx::geo {
       [[nodiscard]] auto getImageData(const ImageHandle& handle) -> ImageData&;
 
     private:
-      std::random_device imageRandomDevice;
-      std::mt19937 imageGen;
-      std::uniform_int_distribution<std::size_t> imageDistribution;
-
-      std::random_device geometryRandomDevice;
-      std::mt19937 geometryGen;
-      std::uniform_int_distribution<std::size_t> geometryDistribution;
+      rng::MapKey geometryKey{};
+      rng::MapKey imageKey{};
 
       std::unordered_map<GeometryHandle, GeometryData> geometryDataMap;
       std::unordered_map<ImageHandle, ImageData> imageDataMap;
+
+      AnimationFactory& animationFactory;
 
       auto createGeometry(const tinygltf::Model& model, const tinygltf::Primitive& primitive)
           -> GeometryHandle;
@@ -60,6 +63,8 @@ namespace tr::gfx::geo {
       auto parseNode(const tinygltf::Model& model,
                      const tinygltf::Node& node,
                      std::unordered_map<int, ImageHandle>& loadedTextureIndices,
-                     TexturedGeometryHandle& handle) -> void;
+                     TexturedGeometryHandle& handle,
+                     std::vector<GltfNode>& nodes,
+                     const int nodeIndex) -> void;
    };
 }

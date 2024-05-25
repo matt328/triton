@@ -8,12 +8,16 @@ namespace tr::gfx {
    using JointMatricesHandle = uint32_t;
    using MeshMaterialHandle = std::unordered_map<MaterialHandle, std::vector<MeshHandle>>;
 
+   using SkeletonHandle = uint64_t;
+   using AnimationHandle = uint64_t;
+
    /// unordered_map<MeshHandle, TextureHandle>
    using ModelHandle = std::unordered_map<MeshHandle, TextureHandle>;
 
-   struct SkinnedModelHandle {
+   struct LoadedSkinnedModelData {
       MeshHandle meshHandle;
       TextureHandle textureHandle;
-      JointMatricesHandle jointMatrixHandle;
+      SkeletonHandle skeletonHandle;
+      AnimationHandle animationHandle;
    };
 }

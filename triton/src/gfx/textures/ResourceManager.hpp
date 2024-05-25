@@ -2,6 +2,7 @@
 
 #include "gfx/Handles.hpp"
 #include "gfx/RenderData.hpp"
+#include "gfx/geometry/AnimationFactory.hpp"
 #include "gfx/geometry/Mesh.hpp"
 #include "gfx/textures/Texture.hpp"
 #include "gfx/geometry/GeometryHandles.hpp"
@@ -68,17 +69,22 @@ namespace tr::gfx::tx {
       std::future<ModelHandle> loadModelAsync(const std::filesystem::path& filename);
       ModelHandle loadModelInt(const std::filesystem::path& filename);
 
-      std::future<SkinnedModelHandle> loadSkinnedModelAsync(const std::string_view modelPath,
-                                                            const std::string_view skeletonPath,
-                                                            const std::string_view animationPath);
-      SkinnedModelHandle loadSkinnedModelInt(const std::string_view modelPath,
-                                             const std::string_view skeletonPath,
-                                             const std::string_view animationPath);
+      std::future<LoadedSkinnedModelData> loadSkinnedModelAsync(
+          const std::filesystem::path& modelPath,
+          const std::filesystem::path& skeletonPath,
+          const std::filesystem::path& animationPath);
+      LoadedSkinnedModelData loadSkinnedModelInt(const std::filesystem::path& modelPath,
+                                                 const std::filesystem::path& skeletonPath,
+                                                 const std::filesystem::path& animationPath);
 
       auto createStaticMesh(const geo::GeometryData& geometry) -> MeshHandle;
 
       auto& getMesh(MeshHandle meshHandle) {
          return meshList.at(meshHandle);
+      }
+
+      [[nodiscard]] auto& getAnimationFactory() {
+         return *animationFactory;
       }
 
       void accessTextures(
@@ -94,6 +100,8 @@ namespace tr::gfx::tx {
       std::unique_ptr<util::TaskQueue> taskQueue;
       std::vector<geo::Mesh> meshList;
 
+      std::unique_ptr<geo::AnimationFactory> animationFactory;
+
       mutable TracyLockable(std::mutex, textureListMutex);
       std::vector<vk::DescriptorImageInfo> textureInfoList;
       std::vector<std::unique_ptr<Textures::Texture>> textureList;
@@ -102,7 +110,7 @@ namespace tr::gfx::tx {
       RenderData renderData;
 
       auto uploadGeometry(const geo::TexturedGeometryHandle& handles) -> ModelHandle;
-      auto uploadSkinnedGeometry(const geo::SkinnedGeometryData& sgd) -> SkinnedModelHandle;
+      auto uploadSkinnedGeometry(const geo::SkinnedGeometryData& sgd) -> LoadedSkinnedModelData;
 
       MeshHandle createMesh(const tinygltf::Model&, const tinygltf::Primitive& primitive);
       TextureHandle createTexture(const tinygltf::Model& model, std::size_t textureIndex);

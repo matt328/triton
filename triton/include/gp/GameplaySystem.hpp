@@ -13,6 +13,10 @@ namespace tr::gfx {
    class RenderContext;
 }
 
+namespace tr::gfx::geo {
+   class AnimationFactory;
+}
+
 namespace tr::gfx::tx {
    class ResourceManager;
 }
@@ -31,7 +35,7 @@ namespace tr::gp {
 
    class GameplaySystem {
     public:
-      GameplaySystem();
+      GameplaySystem(gfx::geo::AnimationFactory& animationFactory);
       ~GameplaySystem();
 
       GameplaySystem(const GameplaySystem&) = delete;
@@ -68,5 +72,7 @@ namespace tr::gp {
       // This delegate seems overengineered, but keeps the Application from having to #include
       // half the engine
       RenderDataProducer renderDataProducer{};
+
+      gfx::geo::AnimationFactory& animationFactory;
    };
 }

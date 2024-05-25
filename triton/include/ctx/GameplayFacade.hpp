@@ -30,7 +30,7 @@ namespace tr::ctx {
       GameplayFacade& operator=(const GameplayFacade&) = delete;
       GameplayFacade& operator=(GameplayFacade&&) = delete;
 
-      auto createSkinnedModelEntity(const gfx::SkinnedModelHandle model) -> gp::EntityType;
+      auto createSkinnedModelEntity(const gfx::LoadedSkinnedModelData model) -> gp::EntityType;
 
       auto createStaticMultiMeshEntity(const MeshHandles meshes) -> gp::EntityType;
 
@@ -75,7 +75,7 @@ namespace tr::ctx {
       auto loadSkinnedModelAsync(const std::filesystem::path& modelPath,
                                  const std::filesystem::path& skeletonPath,
                                  const std::filesystem::path& animationPath)
-          -> std::future<gfx::SkinnedModelHandle>;
+          -> std::future<gfx::LoadedSkinnedModelData>;
 
     private:
       bool debugEnabled{};
