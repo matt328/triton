@@ -4,7 +4,7 @@
 
 namespace tr::gfx::geo {
    struct SkinnedModel {
-      SkinnedModelHandle modelHandle;
+      LoadedSkinnedModelData modelHandle;
       ozz::animation::Skeleton skeleton;
       ozz::animation::Animation animation;
    };

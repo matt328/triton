@@ -16,7 +16,7 @@ namespace tr::gfx::geo {
       glm::vec3 normal;
       glm::vec2 uv;
       glm::vec4 color;
-      glm::vec4 joint0;
+      glm::u8vec4 joint0;
       glm::vec4 weight0;
       glm::vec4 tangent;
       static vk::VertexInputBindingDescription vertexInputBindingDescription;

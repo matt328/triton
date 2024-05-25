@@ -16,7 +16,7 @@ namespace tr::gfx::sb {
       PerFrame = 1,
       Bindless = 2,
       ObjectData = 3,
-      AnimationData = 3,
+      AnimationData = 4,
    };
 
    class ShaderBindingFactory {

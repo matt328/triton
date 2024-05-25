@@ -32,6 +32,7 @@ set(triton_SRC
 
    "src/ct/Heightfield.cxx"
    "src/gfx/geometry/GeometryFactory.cxx"
+   "src/gfx/geometry/AnimationFactory.cxx"
 )
 
 add_library(${PROJECT_NAME} STATIC ${triton_SRC})

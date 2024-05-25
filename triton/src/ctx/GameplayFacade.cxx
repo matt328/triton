@@ -4,6 +4,7 @@
 #include "gp/GameplaySystem.hpp"
 #include "gfx/RenderContext.hpp"
 
+#include "gp/ecs/component/Animation.hpp"
 #include "gp/ecs/component/DebugConstants.hpp"
 #include "gp/ecs/component/Renderable.hpp"
 #include "gp/ecs/component/Terrain.hpp"
@@ -46,7 +47,8 @@ namespace tr::ctx {
       return e;
    }
 
-   auto GameplayFacade::createTerrainMesh(const uint32_t size) -> std::future<gfx::ModelHandle> {
+   auto GameplayFacade::createTerrainMesh([[maybe_unused]] const uint32_t size)
+       -> std::future<gfx::ModelHandle> {
       return renderer.getResourceManager().createTerrain();
    }
 
@@ -57,10 +59,10 @@ namespace tr::ctx {
    auto GameplayFacade::loadSkinnedModelAsync(const std::filesystem::path& modelPath,
                                               const std::filesystem::path& skeletonPath,
                                               const std::filesystem::path& animationPath)
-       -> std::future<gfx::SkinnedModelHandle> {
-      return renderer.getResourceManager().loadSkinnedModelAsync(modelPath.string(),
-                                                                 skeletonPath.string(),
-                                                                 animationPath.string());
+       -> std::future<gfx::LoadedSkinnedModelData> {
+      return renderer.getResourceManager().loadSkinnedModelAsync(modelPath,
+                                                                 skeletonPath,
+                                                                 animationPath);
    }
 
    gp::EntityType GameplayFacade::createStaticMultiMeshEntity(MeshHandles meshes) {
@@ -75,11 +77,34 @@ namespace tr::ctx {
       return e;
    }
 
-   auto GameplayFacade::createSkinnedModelEntity(const gfx::SkinnedModelHandle model)
-       -> gp::EntityType {
+   auto GameplayFacade::createSkinnedModelEntity(
+       [[maybe_unused]] const gfx::LoadedSkinnedModelData model) -> gp::EntityType {
       auto e = gameplaySystem.registry->create();
-      // TODO: Add skin/animation component
+
+      auto numJoints = this->renderer.getResourceManager()
+                           .getAnimationFactory()
+                           .getSkeleton(model.skeletonHandle)
+                           .num_joints();
+      auto numSoaJoints = this->renderer.getResourceManager()
+                              .getAnimationFactory()
+                              .getSkeleton(model.skeletonHandle)
+                              .num_soa_joints();
+
+      Log::debug << "numJoints: " << numJoints << std::endl;
+
+      Log::debug << "numSoaJoints: " << numSoaJoints << std::endl;
+
+      gameplaySystem.registry->emplace<gp::ecs::Animation>(e,
+                                                           model.animationHandle,
+                                                           model.skeletonHandle,
+                                                           numJoints,
+                                                           numSoaJoints);
       gameplaySystem.registry->emplace<gp::ecs::Transform>(e);
+
+      const auto meshes = std::unordered_map<gfx::MeshHandle, gfx::TextureHandle>{
+          {model.meshHandle, model.textureHandle}};
+
+      gameplaySystem.registry->emplace<gp::ecs::Renderable>(e, meshes);
 
       if (debugEnabled) {
          gameplaySystem.registry->emplace<EditorInfoComponent>(e, "skinned model");

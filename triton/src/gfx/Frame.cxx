@@ -8,6 +8,7 @@
 #include "gfx/mem/Allocator.hpp"
 #include "gfx/sb/ShaderBindingFactory.hpp"
 #include "gfx/sb/ShaderBinding.hpp"
+#include <vulkan/vulkan_enums.hpp>
 
 namespace tr::gfx {
 
@@ -75,6 +76,23 @@ namespace tr::gfx {
                                                                     "Camera Data Buffer");
       cameraDataBuffer->mapBuffer();
 
+      // Create AnimationDataBuffer
+      constexpr auto animationDataBufferCreateInfo =
+          vk::BufferCreateInfo{.size = sizeof(AnimationData) * MAX_OBJECTS,
+                               .usage = vk::BufferUsageFlagBits::eStorageBuffer |
+                                        vk::BufferUsageFlagBits::eShaderDeviceAddress};
+
+      constexpr auto animationDataAllocationCreateInfo =
+          vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eCpuToGpu,
+                                    .requiredFlags = vk::MemoryPropertyFlagBits::eHostCoherent};
+
+      animationDataBuffer =
+          graphicsDevice.getAllocator().createBuffer(&animationDataBufferCreateInfo,
+                                                     &animationDataAllocationCreateInfo,
+                                                     "Animation Data Buffer");
+      // TODO: abstraction over buffers that supports creating them mapped
+      animationDataBuffer->mapBuffer();
+
       // Create PerFrame ShaderBinding
       perFrameShaderBinding =
           shaderBindingFactory.createShaderBinding(sb::ShaderBindingHandle::PerFrame);
@@ -86,6 +104,12 @@ namespace tr::gfx {
 
       textureShaderBinding =
           shaderBindingFactory.createShaderBinding(sb::ShaderBindingHandle::Bindless);
+
+      animationDataShaderBinding =
+          shaderBindingFactory.createShaderBinding(sb::ShaderBindingHandle::AnimationData);
+      animationDataShaderBinding->bindBuffer(0,
+                                             *animationDataBuffer,
+                                             sizeof(AnimationData) * MAX_OBJECTS);
 
       const auto drawImageFormat = vk::Format::eR16G16B16A16Sfloat;
       const auto drawImageExtent = graphicsDevice.DrawImageExtent2D;
@@ -229,6 +253,10 @@ namespace tr::gfx {
 
    void Frame::updatePerFrameDataBuffer(const CameraData* data, const size_t size) {
       this->cameraDataBuffer->updateMappedBufferValue(data, size);
+   }
+
+   void Frame::updateAnimationDataBuffer(const AnimationData* data, const size_t size) {
+      this->animationDataBuffer->updateMappedBufferValue(data, size);
    }
 
    void Frame::destroySwapchainResources() {

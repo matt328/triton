@@ -47,7 +47,7 @@ namespace ed::ui {
 
       std::vector<std::future<tr::gfx::ModelHandle>> modelFutures{};
       std::vector<std::future<tr::gfx::ModelHandle>> terrainFutures{};
-      std::vector<std::future<tr::gfx::SkinnedModelHandle>> skinnedModelFutures{};
+      std::vector<std::future<tr::gfx::LoadedSkinnedModelData>> skinnedModelFutures{};
 
       // HACK: get this from the application somehow instead of tracking it in 2 places
       bool fullscreen{};

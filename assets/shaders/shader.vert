@@ -3,6 +3,7 @@
 struct ObjectData {
    mat4 model;
    uint textureId;
+   uint jointMId;
 };
 
 layout(std140, set = 1, binding = 0) readonly buffer ObjectBuffer {

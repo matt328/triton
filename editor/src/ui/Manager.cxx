@@ -45,6 +45,7 @@ namespace ed::ui {
       ZoneNamedN(guiRender, "Gui Render", true);
       handleTerrainFutures();
       handleModelFutures();
+      handleSkinnedModelFutures();
 
       if (wireframeCallback) {
          wireframeCallback(enableWireframe);
@@ -299,17 +300,21 @@ namespace ed::ui {
             ImGui::SameLine();
             if (ImGui::Button("Load Model")) {
 
+               // const auto modelName = std::filesystem::path{
+               //     R"(C:\Users\Matt\Projects\game-assets\models\animated\idleAnimation.gltf)"};
                const auto modelName = std::filesystem::path{
-                   R"(C:\Users\Matt\Projects\game-assets\models\character\reference.gltf)"};
+                   R"(C:\Users\Matt\Projects\game-assets\models\peasant\peasant.gltf)"};
+               // const auto modelName = std::filesystem::path{
+               //     R"(C:\Users\Matt\Projects\game-assets\models\character\reference.gltf)"};
                const auto skeletonPath = std::filesystem::path{
-                   "C:/Users/Matt/Projects/game-assets/animations/skeleton.ozz"};
+                   R"(C:\Users\Matt\Projects\game-assets\models\peasant\skeleton.ozz)"};
                const auto animationPath = std::filesystem::path{
-                   "C:/Users/Matt/Projects/game-assets/animations/idleAnimation.ozz"};
+                   R"(C:\Users\Matt\Projects\game-assets\models\peasant\Armature_mixamo.com_Layer0.ozz)"};
 
-               modelFutures.push_back(facade.loadModelAsync(modelName));
+               // modelFutures.push_back(facade.loadModelAsync(modelName));
 
-               // skinnedModelFutures.push_back(
-               //     facade.loadSkinnedModelAsync(modelName, skeletonPath, animationPath));
+               skinnedModelFutures.push_back(
+                   facade.loadSkinnedModelAsync(modelName, skeletonPath, animationPath));
             }
             ImGui::EndGroup();
          }

@@ -4,15 +4,16 @@
 #include "Vertex.hpp"
 #include "ct/HeightField.hpp"
 #include "gfx/Handles.hpp"
+#include "gfx/geometry/AnimationFactory.hpp"
 #include "gfx/geometry/GeometryHandles.hpp"
 
 namespace tr::gfx::geo {
 
-   GeometryFactory::GeometryFactory()
-       : imageGen{imageRandomDevice()},
-         imageDistribution(1, 10000),
-         geometryGen{geometryRandomDevice()},
-         geometryDistribution(1, 10000) {
+   GeometryFactory::GeometryFactory(AnimationFactory& animationFactory)
+       : animationFactory{animationFactory} {
+      const auto imageHandle = 0;
+      const auto data = std::vector<unsigned char>(4, 255);
+      imageDataMap.emplace(imageHandle, ImageData{data, 1, 1, 4});
    }
 
    GeometryFactory::~GeometryFactory() {
@@ -77,11 +78,11 @@ namespace tr::gfx::geo {
          vertex.normal = glm::normalize(vertex.normal);
       }
 
-      const auto imageHandle = imageDistribution(imageGen);
+      const auto imageHandle = imageKey.getKey();
       const auto data = std::vector<unsigned char>(4, 255);
       imageDataMap.emplace(imageHandle, ImageData{data, 1, 1, 4});
 
-      const auto geometryHandle = geometryDistribution(geometryGen);
+      const auto geometryHandle = geometryKey.getKey();
       geometryDataMap.emplace(geometryHandle, GeometryData{vertices, indices});
 
       return {{geometryHandle, imageHandle}};
@@ -113,54 +114,25 @@ namespace tr::gfx::geo {
                                           const std::filesystem::path& skeletonPath,
                                           const std::filesystem::path& animationPath)
        -> SkinnedGeometryData {
-      const auto modelHandle = loadGeometryFromGltf(modelPath);
+      try {
+         const auto modelHandle = loadGeometryFromGltf(modelPath);
 
-      assert(modelHandle.size() == 1); // Currently only support files with a single mesh
+         assert(modelHandle.size() == 1); // Currently only support files with a single mesh
 
-      const auto meshHandle = modelHandle.begin()->first;
-      const auto imageHandle = modelHandle.begin()->second;
+         const auto meshHandle = modelHandle.begin()->first;
+         const auto imageHandle = modelHandle.begin()->second;
 
-      auto sgd = SkinnedGeometryData{};
-      sgd.geometryHandle = meshHandle;
-      sgd.imageHandle = imageHandle;
+         auto sgd = SkinnedGeometryData{};
+         sgd.geometryHandle = meshHandle;
+         sgd.imageHandle = imageHandle;
 
-      {
-         const auto filename = skeletonPath.string();
-         ozz::io::File file(filename.c_str(), "rb");
+         sgd.skeletonHandle = animationFactory.loadSkeleton(skeletonPath);
+         sgd.animationHandle = animationFactory.loadAnimation(animationPath);
 
-         if (!file.opened()) {
-            Log::error << "Failed to open skeleton file " << filename << "." << std::endl;
-         }
-
-         ozz::io::IArchive archive(&file);
-         if (!archive.TestTag<ozz::animation::Skeleton>()) {
-            Log::error << "Failed to load skeleton instance from file " << filename << "."
-                       << std::endl;
-         }
-         archive >> sgd.skeleton;
+         return sgd;
+      } catch (const std::exception& ex) {
+         Log::error << "Error during loadGeometryFromGltf: " << ex.what() << std::endl;
       }
-
-      { // Load Animation
-         const auto filename = animationPath.string();
-         ozz::io::File file(filename.c_str(), "rb");
-         if (!file.opened()) {
-            Log::error << "Failed to open animation file " << filename << "." << std::endl;
-         }
-         ozz::io::IArchive archive(&file);
-         if (!archive.TestTag<ozz::animation::Animation>()) {
-            Log::error << "Failed to load animation instance from file " << filename << "."
-                       << std::endl;
-         }
-
-         archive >> sgd.animation;
-      }
-
-      // Sanity Check
-      if (sgd.skeleton.num_joints() != sgd.animation.num_tracks()) {
-         Log::warn << "Joints in skeleton have to match tracks in animation" << std::endl;
-      }
-
-      return sgd;
    }
 
    /// Creates Vertex, Index and Image data
@@ -200,12 +172,25 @@ namespace tr::gfx::geo {
             auto texturedGeometryHandle = TexturedGeometryHandle{};
 
             const auto& scene = model.scenes[model.defaultScene];
+            auto nodeList = std::vector<GltfNode>{};
             for (const auto& nodeIndex : scene.nodes) {
                parseNode(model,
                          model.nodes[nodeIndex],
                          loadedTextureIndices,
-                         texturedGeometryHandle);
+                         texturedGeometryHandle,
+                         nodeList,
+                         nodeIndex);
             }
+
+            std::sort(nodeList.begin(), nodeList.end(), [](const GltfNode& a, const GltfNode& b) {
+               return a.index < b.index;
+            });
+
+            for (const auto& node : nodeList) {
+               Log::debug << "Number: " << node.number << " Index: " << node.index
+                          << " Name: " << node.name << std::endl;
+            }
+
             return texturedGeometryHandle;
          }
       }
@@ -214,7 +199,13 @@ namespace tr::gfx::geo {
    auto GeometryFactory::parseNode(const tinygltf::Model& model,
                                    const tinygltf::Node& node,
                                    std::unordered_map<int, ImageHandle>& loadedTextureIndices,
-                                   TexturedGeometryHandle& handle) -> void {
+                                   TexturedGeometryHandle& handle,
+                                   std::vector<GltfNode>& nodes,
+                                   const int nodeIndex) -> void {
+
+      auto gltfNode =
+          GltfNode{.index = nodeIndex, .number = static_cast<int>(nodes.size()), .name = node.name};
+      nodes.push_back(gltfNode);
       if (node.mesh != -1) {
          const auto& mesh = model.meshes[node.mesh];
          for (const auto& primitive : mesh.primitives) {
@@ -227,22 +218,22 @@ namespace tr::gfx::geo {
 
             const auto& baseColorTextureIndex =
                 material.pbrMetallicRoughness.baseColorTexture.index;
-
-            auto it = loadedTextureIndices.find(baseColorTextureIndex);
-            if (it != loadedTextureIndices.end()) {
-               imageHandle = it->second;
-            } else {
-               imageHandle = createTexture(model, baseColorTextureIndex);
-               loadedTextureIndices.insert({baseColorTextureIndex, imageHandle});
+            if (baseColorTextureIndex != -1) {
+               auto it = loadedTextureIndices.find(baseColorTextureIndex);
+               if (it != loadedTextureIndices.end()) {
+                  imageHandle = it->second;
+               } else {
+                  imageHandle = createTexture(model, baseColorTextureIndex);
+                  loadedTextureIndices.insert({baseColorTextureIndex, imageHandle});
+               }
             }
-
             handle.insert({geometryHandle, imageHandle});
          }
       }
       // Exit Criteria is node.children is empty
       for (auto& child : node.children) {
          auto& node = model.nodes[child];
-         parseNode(model, node, loadedTextureIndices, handle);
+         parseNode(model, node, loadedTextureIndices, handle, nodes, child);
       }
    }
 
@@ -293,6 +284,7 @@ namespace tr::gfx::geo {
       {
          for (const auto& attribute : primitive.attributes) {
             const auto& accessor = model.accessors[attribute.second];
+
             const auto& vertexCount = accessor.count;
             const auto& view = model.bufferViews[accessor.bufferView];
             const auto dataOffset = accessor.byteOffset + view.byteOffset;
@@ -318,9 +310,23 @@ namespace tr::gfx::geo {
                   vertices[i].uv = glm::make_vec2(&data[i * 2]);
                }
             }
+            if (attribute.first.compare("JOINTS_0") == 0) {
+               Log::debug << "Contains Joints" << std::endl;
+               for (size_t i = 0; i < vertexCount; i++) {
+                  const auto& jointData =
+                      reinterpret_cast<const uint8_t*>(&buffer.data[dataOffset]);
+                  vertices[i].joint0 = glm::make_vec4(&jointData[i * 4]);
+               }
+            }
+            if (attribute.first.compare("WEIGHTS_0") == 0) {
+               Log::debug << "Contains Weights" << std::endl;
+               for (size_t i = 0; i < vertexCount; i++) {
+                  vertices[i].weight0 = glm::make_vec4(&data[i * 4]);
+               }
+            }
          }
 
-         const auto geometryHandle = geometryDistribution(geometryGen);
+         const auto geometryHandle = geometryKey.getKey();
          geometryDataMap.emplace(geometryHandle, GeometryData{vertices, indices});
 
          return geometryHandle;
@@ -333,7 +339,7 @@ namespace tr::gfx::geo {
       const auto& texture = model.textures[textureIndex];
       const auto& image = model.images[texture.source];
 
-      const auto imageHandle = imageDistribution(imageGen);
+      const auto imageHandle = imageKey.getKey();
       imageDataMap.emplace(imageHandle,
                            ImageData{image.image, image.width, image.height, image.component});
 

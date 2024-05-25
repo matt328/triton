@@ -10,13 +10,21 @@
 #include "gp/ecs/system/CameraSystem.hpp"
 #include "gp/ecs/system/RenderDataSystem.hpp"
 #include "gp/ecs/system/TransformSystem.hpp"
+#include "gp/ecs/system/AnimationSystem.hpp"
 #include "gp/ecs/component/Resources.hpp"
 
 namespace tr::gp {
 
+   /*
+      TODO: Either make AnimationSystem a class with a reference to the AnimationFactory
+      or make this class hold a reference to the AnimationFactory and pass it into
+      AnimationSystem::update()
+   */
+
    using namespace tr::gp;
 
-   GameplaySystem::GameplaySystem() : registry{std::make_unique<entt::registry>()} {
+   GameplaySystem::GameplaySystem(gfx::geo::AnimationFactory& animationFactory)
+       : registry{std::make_unique<entt::registry>()}, animationFactory{animationFactory} {
       actionSystem = std::make_unique<ActionSystem>();
 
       auto& reg = *registry;
@@ -70,6 +78,7 @@ namespace tr::gp {
 
       ecs::CameraSystem::fixedUpdate(*registry);
       ecs::TransformSystem::update(*registry);
+      ecs::AnimationSystem::update(*registry, animationFactory);
    }
 
    void GameplaySystem::update(const double blendingFactor) {
@@ -82,6 +91,8 @@ namespace tr::gp {
       renderData.objectData.clear();
       renderData.staticMeshData.clear();
       renderData.terrainMeshData.clear();
+      renderData.skinnedMeshData.clear();
+      renderData.animationData.clear();
 
       ecs::RenderDataSystem::update(*registry, renderData);
 

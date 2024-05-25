@@ -30,9 +30,6 @@ namespace tr::gfx {
 
       sbFactory = std::make_unique<sb::ShaderBindingFactory>(*graphicsDevice, *layoutFactory);
 
-      const auto perFrameShaderBinding =
-          sbFactory->createShaderBinding(sb::ShaderBindingHandle::PerFrame);
-
       const auto viewportSize = graphicsDevice->getSwapchainExtent();
       mainViewport = vk::Viewport{.x = 0.f,
                                   .y = 0.f,
@@ -115,8 +112,14 @@ namespace tr::gfx {
       pb->setPolygonMode(vk::PolygonMode::eFill);
       pb->setVertexAttributeDescriptions(std::span(vec.begin(), vec.end()));
 
+      auto skinnedSetLayouts =
+          std::array{layoutFactory->getVkLayout(ds::LayoutHandle::Bindless),
+                     layoutFactory->getVkLayout(ds::LayoutHandle::ObjectData),
+                     layoutFactory->getVkLayout(ds::LayoutHandle::PerFrame),
+                     layoutFactory->getVkLayout(ds::LayoutHandle::AnimationData)};
+
       skinnedModelPipelineLayout =
-          pb->buildPipelineLayout(setLayouts, "Skinned Model Pipeline Layout");
+          pb->buildPipelineLayout(skinnedSetLayouts, "Skinned Model Pipeline Layout");
       skinnedModelPipeline =
           pb->buildPipeline(*skinnedModelPipelineLayout, "Skinned Model Pipeline");
 
@@ -321,6 +324,7 @@ namespace tr::gfx {
       */
       staticMeshDataList.clear();
       terrainDataList.clear();
+      skinnedModelList.clear();
 
       resourceManager->accessRenderData([&frame, this](RenderData& renderData) {
          frame.updateObjectDataBuffer(renderData.objectData.data(),
@@ -328,16 +332,8 @@ namespace tr::gfx {
 
          frame.updatePerFrameDataBuffer(&renderData.cameraData, sizeof(CameraData));
 
-         /*
-            TODO:
-            - Create animation data buffer
-            - Add AnimationData[] to renderData
-            - AnimationSystem update animations
-            - RenderDataSystem copies animation data into RenderData
-         */
-         // frame.updateAnimationDataBuffer(renderData.animationData.data(),
-         //                                 sizeof(AnimationData) *
-         //                                 renderData.animationData.size());
+         frame.updateAnimationDataBuffer(renderData.animationData.data(),
+                                         sizeof(AnimationData) * renderData.animationData.size());
 
          staticMeshDataList.reserve(renderData.staticMeshData.size());
          std::copy(renderData.staticMeshData.begin(),
@@ -348,6 +344,11 @@ namespace tr::gfx {
          std::copy(renderData.terrainMeshData.begin(),
                    renderData.terrainMeshData.end(),
                    std::back_inserter(terrainDataList));
+
+         skinnedModelList.reserve(renderData.skinnedMeshData.size());
+         std::copy(renderData.skinnedMeshData.begin(),
+                   renderData.skinnedMeshData.end(),
+                   std::back_inserter(skinnedModelList));
 
          pushConstants = renderData.pushConstants;
       });
@@ -384,6 +385,7 @@ namespace tr::gfx {
          cmd.setScissorWithCount(mainScissor);
          {
             for (const auto& meshData : staticMeshDataList) {
+               Log::debug << "Rendering Static Mesh" << std::endl;
                const auto& mesh = resourceManager->getMesh(meshData.handle);
 
                cmd.bindVertexBuffers(0, mesh.vertexBuffer->getBuffer(), {0});
@@ -403,6 +405,23 @@ namespace tr::gfx {
                                              0,
                                              pushConstants);
             for (const auto& meshData : terrainDataList) {
+               const auto& mesh = resourceManager->getMesh(meshData.handle);
+
+               cmd.bindVertexBuffers(0, mesh.vertexBuffer->getBuffer(), {0});
+               cmd.bindIndexBuffer(mesh.indexBuffer->getBuffer(), 0, vk::IndexType::eUint32);
+
+               // instanceId becomes gl_BaseInstance in the shader
+               cmd.drawIndexed(mesh.indicesCount, 1, 0, 0, meshData.objectDataId);
+            }
+         }
+
+         cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, **skinnedModelPipeline);
+         {
+            frame.getAnimationShaderBinding().bindToPipeline(cmd,
+                                                             vk::PipelineBindPoint::eGraphics,
+                                                             3,
+                                                             **skinnedModelPipelineLayout);
+            for (const auto& meshData : skinnedModelList) {
                const auto& mesh = resourceManager->getMesh(meshData.handle);
 
                cmd.bindVertexBuffers(0, mesh.vertexBuffer->getBuffer(), {0});

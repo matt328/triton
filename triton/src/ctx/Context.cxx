@@ -18,7 +18,9 @@ namespace tr::ctx {
       renderContext =
           std::make_unique<gfx::RenderContext>(static_cast<GLFWwindow*>(nativeWindow), guiEnabled);
 
-      gameplaySystem = std::make_unique<gp::GameplaySystem>();
+      auto& animationFactory = renderContext->getResourceManager().getAnimationFactory();
+
+      gameplaySystem = std::make_unique<gp::GameplaySystem>(animationFactory);
 
       renderContext->addResizeListener<&gp::GameplaySystem::resize>(gameplaySystem.get());
 

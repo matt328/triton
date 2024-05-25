@@ -71,6 +71,10 @@ namespace tr::gfx {
          return *objectDataBuffer;
       }
 
+      [[nodiscard]] const mem::Buffer& getAnimationDataBuffer() const {
+         return *animationDataBuffer;
+      }
+
       [[nodiscard]] const vk::Image& getDrawImage() const;
 
       [[nodiscard]] const vk::ImageView& getDrawImageView() const {
@@ -89,8 +93,13 @@ namespace tr::gfx {
          return *textureShaderBinding;
       }
 
+      [[nodiscard]] const sb::ShaderBinding& getAnimationShaderBinding() const {
+         return *animationDataShaderBinding;
+      }
+
       void updateObjectDataBuffer(const ObjectData* data, const size_t size);
       void updatePerFrameDataBuffer(const CameraData* data, const size_t size);
+      void updateAnimationDataBuffer(const AnimationData* data, const size_t size);
 
       void destroySwapchainResources();
       void createSwapchainResources(const GraphicsDevice& graphicsDevice);
@@ -119,9 +128,11 @@ namespace tr::gfx {
       std::unique_ptr<sb::ShaderBinding> perFrameShaderBinding;
       std::unique_ptr<sb::ShaderBinding> objectDataShaderBinding;
       std::unique_ptr<sb::ShaderBinding> textureShaderBinding;
+      std::unique_ptr<sb::ShaderBinding> animationDataShaderBinding;
 
       std::unique_ptr<mem::Buffer> objectDataBuffer;
       std::unique_ptr<mem::Buffer> cameraDataBuffer;
+      std::unique_ptr<mem::Buffer> animationDataBuffer;
 
       tracy::VkCtx* tracyContext;
 
