@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Application.hpp"
+#include "gp/ecs/component/Animation.hpp"
 #include "gfx/Handles.hpp"
 #include <entt/entt.hpp>
 
@@ -74,6 +75,8 @@ namespace ed::ui {
       void renderMenuBar();
       void renderEntityEditor();
       void renderDialogs();
+      void showMatrix4x4(const glm::mat4& matrix, const char* label);
+      void renderAnimationArea(tr::gp::ecs::Animation& animationComponent);
 
       void renderDebugWindow();
    };

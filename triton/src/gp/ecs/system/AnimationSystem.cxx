@@ -57,20 +57,6 @@ namespace tr::gp::ecs::AnimationSystem {
             Log::warn << "Ltm Job Fail" << std::endl;
          }
 
-         /* TODO: The order of these matrices is not matching the order of the joints in the gltf
-          file? Either switch to fbx or implement gltf animation myself so I fully understand what
-          is happening.
-          I'm not seeing how the order of the joints matters since they aren't a thing when
-          loading the gltf's mesh, i'm ignoring them.
-          The joints in the gltf file contain just a transformation, and these JointIds exist in the
-          vertex data, so the order of the matrices here has to match the order of how the joints
-          are defined in the gltf file. When loading the gltf file, we need to map the index number
-          of the joint to the joint name then consult that map to order the model matrices
-
-          When loading the gltf, log each joint name
-          When
-          */
-
          animationData.timeRatio = newTime;
       }
    }
