@@ -18,6 +18,10 @@ namespace tr::gp::ecs {
       gfx::AnimationHandle animationHandle;
       gfx::SkeletonHandle skeletonHandle;
 
+      bool renderBindPose{};
+      bool playing{};
+      std::string currentAnimationName;
+
       float timeRatio{};
       ozz::animation::SamplingJob::Context context{};
       ozz::vector<ozz::math::SoaTransform> locals{};
