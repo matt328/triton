@@ -325,6 +325,76 @@ namespace ed::ui {
       ImGui::End();
    }
 
+   void Manager::renderAnimationArea(tr::gp::ecs::Animation& animationComponent) {
+      ImGui::SeparatorText("Animation");
+      static size_t itemCurrentIndex{};
+      static bool playing{};
+      static bool bindPose{};
+
+      std::vector<const char*> items;
+      items.push_back("Animation");
+
+      if (ImGui::BeginCombo("Animation Name", items[itemCurrentIndex])) {
+         for (size_t n = 0; n < items.size(); ++n) {
+            const bool isSelected = (itemCurrentIndex == n);
+            if (ImGui::Selectable(items[n], isSelected)) {
+               itemCurrentIndex = n;
+               animationComponent.currentAnimationName = std::string{items[itemCurrentIndex]};
+            }
+            if (isSelected) {
+               ImGui::SetItemDefaultFocus();
+            }
+         }
+         ImGui::EndCombo();
+      }
+
+      bool previousBindPose = bindPose;
+
+      if (ImGui::Checkbox("Bind Pose", &bindPose)) {
+         if (bindPose != previousBindPose) {
+            animationComponent.renderBindPose = bindPose;
+         }
+      }
+
+      bool previousPlaying = playing;
+
+      ImGui::BeginDisabled(bindPose);
+
+      if (ImGui::Checkbox("Play", &playing)) {
+         if (playing != previousPlaying) {
+            animationComponent.playing = playing;
+         }
+      }
+
+      const auto [min_v, max_v] = facade.getAnimationTimeRange(animationComponent.animationHandle);
+
+      static float timeValue = min_v;
+      if (ImGui::SliderFloat("Time", &timeValue, min_v, max_v, "%.2f")) {
+         Log::debug << "time: " << timeValue << std::endl;
+         animationComponent.timeRatio = timeValue;
+      }
+
+      ImGui::EndDisabled();
+
+      ImGui::SeparatorText("Joint Matrices");
+
+      for (const auto& matrix : animationComponent.models) {
+         const auto glmMatrix = ozzToGlm(matrix);
+         showMatrix4x4(glmMatrix, "Matrix");
+      }
+   }
+
+   void Manager::showMatrix4x4(const glm::mat4& matrix, const char* label) {
+      ImGui::Text("%s", label);
+      for (int col = 0; col < 4; ++col) {
+         ImGui::Text("%7.3f %7.3f %7.3f %7.3f",
+                     matrix[0][col],
+                     matrix[1][col],
+                     matrix[2][col],
+                     matrix[3][col]);
+      }
+   }
+
    void Manager::renderDialogs() {
       openProjectFileDialog.Display();
 

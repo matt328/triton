@@ -175,4 +175,11 @@ namespace tr::ctx {
       }
       return {};
    }
+
+   auto GameplayFacade::getAnimationTimeRange(const gfx::AnimationHandle handle)
+       -> std::tuple<float, float> {
+      const auto& animation = gameplaySystem.getAnimationFactory().getAnimation(handle);
+
+      return std::make_tuple(0.f, animation.duration());
+   }
 }

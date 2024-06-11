@@ -68,6 +68,8 @@ namespace tr::ctx {
 
       auto getActiveCameraName() -> std::string&;
 
+      auto getAnimationTimeRange(const gfx::AnimationHandle handle) -> std::tuple<float, float>;
+
       auto clear() -> void;
 
       auto loadModelAsync(const std::filesystem::path& path) -> std::future<gfx::ModelHandle>;

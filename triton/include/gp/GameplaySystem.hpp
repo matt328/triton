@@ -58,6 +58,10 @@ namespace tr::gp {
          renderDataProducer.connect<Candidate>(valueOrInstance);
       }
 
+      [[nodiscard]] auto& getAnimationFactory() {
+         return animationFactory;
+      }
+
     private:
       friend class ctx::GameplayFacade;
 
