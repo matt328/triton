@@ -5,10 +5,15 @@
    "version": "0.2.0",
    "configurations": [
       {
-         "type": "lldb",
-         "request": "attach",
-         "name": "Attach",
-         "program": "${workspaceFolder}/bin/driver",
+         "type": "cppdbg",
+         "request": "launch",
+         "name": "Launch(NatVis)",
+         "cwd": "${workspaceFolder}/bin",
+         "program": "${command:cmake.launchTargetPath}",
+         "showDisplayString": true,
+         "visualizerFile": "${workspaceFolder}/.vscode/ufbx.natvis2",
+         "miDebuggerPath": "C:/Program Files/LLVM/bin/lldb.exe",
+         "MIMode": "lldb"
       }
    ]
 }

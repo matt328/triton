@@ -6,6 +6,7 @@
 #include "gfx/Handles.hpp"
 #include "gfx/geometry/AnimationFactory.hpp"
 #include "gfx/geometry/GeometryHandles.hpp"
+#include "gfx/geometry/OzzMesh.hpp"
 
 namespace tr::gfx::geo {
 
@@ -101,21 +102,12 @@ namespace tr::gfx::geo {
       return glm::normalize(glm::vec3(-dx, 2.f, dy));
    }
 
-   /*
-      TODO: LoadSkinnedModel(model, skeleton, animation)
-      This will return the model as handles, but the skeleton and animation data will still be CPU
-      side, so return them by value so they can be added to the entity's Animation component.
-      This maybe should also add the joint matrices in a cpu to gpu buffer that gets mapped into
-      the animation data descriptor set. and also put a JointMatrices handle in what this returns.
-      I think the handle will need the size of the JointMatrices area of the buffer somehow.
-   */
-
    auto GeometryFactory::loadSkinnedModel(const std::filesystem::path& modelPath,
                                           const std::filesystem::path& skeletonPath,
                                           const std::filesystem::path& animationPath)
        -> SkinnedGeometryData {
       try {
-         const auto modelHandle = loadGeometryFromGltf(modelPath);
+         const auto modelHandle = loadOzzMesh(modelPath);
 
          assert(modelHandle.size() == 1); // Currently only support files with a single mesh
 
@@ -133,6 +125,40 @@ namespace tr::gfx::geo {
       } catch (const std::exception& ex) {
          Log::error << "Error during loadGeometryFromGltf: " << ex.what() << std::endl;
       }
+   }
+
+   /*
+      This ozz mesh format is probably not useful since it's highly optimized for CPU side skinning.
+      - First load fbx files using ufbx
+      - Build this alongside of the loadOzzMesh function so we can compare the loaded data to make
+      sure things like the joint_map are working correctly. once that's working, create a tool to
+      convert an fbx into a textured mesh
+
+      eventually build a single tool using the ozz_animation_offline libs that will take an fbx and
+      produce a textured mesh file, a skeleton, and a set of animation files
+   */
+
+   auto GeometryFactory::loadOzzMesh(const std::filesystem::path& filename)
+       -> TexturedGeometryHandle {
+      ozz::io::File file(filename.string().c_str(), "rb");
+
+      if (!file.opened()) {
+         std::stringstream ss{};
+         ss << "Failed to open mesh file " << filename.string() << std::endl;
+         throw std::runtime_error(ss.str());
+      }
+
+      auto meshes = std::vector<ozz::sample::Mesh>{};
+      ozz::io::IArchive archive(&file);
+
+      while (archive.TestTag<ozz::sample::Mesh>()) {
+         meshes.resize(meshes.size() + 1);
+         archive >> meshes.back();
+      }
+
+      Log::debug << "loaded " << meshes.size() << "meshes from " << filename << std::endl;
+
+      return {};
    }
 
    /// Creates Vertex, Index and Image data
