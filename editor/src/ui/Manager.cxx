@@ -4,6 +4,7 @@
 #include "ProjectFile.hpp"
 #include "RobotoRegular.h"
 #include "gp/ecs/component/DebugConstants.hpp"
+#include "util/MathUtils.hpp"
 
 namespace ed::ui {
    Manager::Manager(tr::ctx::GameplayFacade& facade) : facade{facade} {
@@ -276,6 +277,8 @@ namespace ed::ui {
                    static_cast<entt::entity>(selectedEntity.value()));
                const auto maybeDebug = facade.getComponent<tr::gp::ecs::DebugConstants>(
                    static_cast<entt::entity>(selectedEntity.value()));
+               const auto maybeAnimated = facade.getComponent<tr::gp::ecs::Animation>(
+                   static_cast<entt::entity>(selectedEntity.value()));
                if (maybeTransform.has_value()) {
                   auto& transform = maybeTransform.value().get();
                   ImGui::SeparatorText("Transform");
@@ -291,6 +294,11 @@ namespace ed::ui {
                   ImGui::SeparatorText("DebugConstants");
                   ImGui::DragFloat("Specular Power", &d.specularPower, 0.5f);
                }
+
+               if (maybeAnimated.has_value()) {
+                  auto& animationComponent = maybeAnimated.value().get();
+                  renderAnimationArea(animationComponent);
+               }
             }
             ImGui::EndChild();
 
@@ -299,20 +307,12 @@ namespace ed::ui {
             }
             ImGui::SameLine();
             if (ImGui::Button("Load Model")) {
-
-               // const auto modelName = std::filesystem::path{
-               //     R"(C:\Users\Matt\Projects\game-assets\models\animated\idleAnimation.gltf)"};
                const auto modelName = std::filesystem::path{
-                   R"(C:\Users\Matt\Projects\game-assets\models\peasant\peasant.gltf)"};
-               // const auto modelName = std::filesystem::path{
-               //     R"(C:\Users\Matt\Projects\game-assets\models\character\reference.gltf)"};
+                   R"(C:\Users\Matt\Projects\game-assets\models\working\mesh.ozz)"};
                const auto skeletonPath = std::filesystem::path{
-                   R"(C:\Users\Matt\Projects\game-assets\models\peasant\skeleton.ozz)"};
+                   R"(C:\Users\Matt\Projects\game-assets\models\working\skeleton.ozz)"};
                const auto animationPath = std::filesystem::path{
-                   R"(C:\Users\Matt\Projects\game-assets\models\peasant\Armature_mixamo.com_Layer0.ozz)"};
-
-               // modelFutures.push_back(facade.loadModelAsync(modelName));
-
+                   R"(C:\Users\Matt\Projects\game-assets\models\working\mixamo.com.ozz)"};
                skinnedModelFutures.push_back(
                    facade.loadSkinnedModelAsync(modelName, skeletonPath, animationPath));
             }
@@ -379,7 +379,7 @@ namespace ed::ui {
       ImGui::SeparatorText("Joint Matrices");
 
       for (const auto& matrix : animationComponent.models) {
-         const auto glmMatrix = ozzToGlm(matrix);
+         const auto glmMatrix = tr::util::ozzToGlm(matrix);
          showMatrix4x4(glmMatrix, "Matrix");
       }
    }
