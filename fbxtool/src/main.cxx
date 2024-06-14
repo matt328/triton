@@ -58,6 +58,13 @@ int main() {
                weights.push_back((float)skinWeight.weight);
                totalWeight += (float(skinWeight.weight));
             }
+            while (joints.size() < MAX_WEIGHTS) {
+               joints.push_back(0.f);
+            }
+
+            while (weights.size() < MAX_WEIGHTS) {
+               weights.push_back(0.f);
+            }
 
             for (size_t i = 0; i < numWeights; i++) {
                weights[i] /= totalWeight;
