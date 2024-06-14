@@ -2,7 +2,6 @@ project("fbxtool" VERSION "0.0.1" LANGUAGES CXX)
 
 set(fbxtool_SRC
    "src/main.cxx"
-   "src/ufbx.c"
 )
 
 add_executable(${PROJECT_NAME} ${fbxtool_SRC})
@@ -21,6 +20,8 @@ target_precompile_headers(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
    PRIVATE
+   triton
+   ufbx
 )
 
 target_include_directories(${PROJECT_NAME}
