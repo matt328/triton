@@ -1,5 +1,14 @@
 #include "ufbx.h"
+#include <glm/fwd.hpp>
 #include <vector>
+
+struct Vertex {
+   glm::vec3 position;
+   glm::vec3 normal;
+   glm::vec2 uv;
+   glm::uvec4 joints;
+   glm::vec4 weights;
+};
 
 int main() {
 
@@ -17,13 +26,11 @@ int main() {
       return 1;
    }
 
-   for (size_t i = 0; i < scene->nodes.count; i++) {
-      ufbx_node* node = scene->nodes.data[i];
-   }
-
    auto& skin = scene->meshes[0]->skin_deformers[0];
 
    constexpr size_t MAX_WEIGHTS = 4;
+
+   auto vertices = std::vector<Vertex>{};
 
    for (const auto& mesh : scene->meshes) {
       for (const auto& face : mesh->faces) {
@@ -55,6 +62,13 @@ int main() {
             for (size_t i = 0; i < numWeights; i++) {
                weights[i] /= totalWeight;
             }
+
+            vertices.push_back(
+                Vertex{.position = glm::vec3(position.x, position.y, position.z),
+                       .normal = glm::vec3(normal.x, normal.y, normal.z),
+                       .uv = glm::vec2(uv.x, uv.y),
+                       .joints = glm::uvec4(joints[0], joints[1], joints[2], joints[3]),
+                       .weights = glm::vec4(weights[0], weights[1], weights[2], weights[3])});
          }
       }
    }
