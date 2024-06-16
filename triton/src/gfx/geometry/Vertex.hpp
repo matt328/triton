@@ -19,6 +19,18 @@ namespace tr::gfx::geo {
       glm::u8vec4 joint0;
       glm::vec4 weight0;
       glm::vec4 tangent;
+
+      bool operator==(const Vertex& other) const {
+         return pos == other.pos && normal == other.normal && uv == other.uv &&
+                color == other.color && joint0 == other.joint0 && weight0 == other.weight0 &&
+                tangent == other.tangent;
+      }
+
+      template <class Archive>
+      void serialize(Archive& archive) {
+         archive(pos, normal, uv, color, joint0, weight0, tangent);
+      }
+
       static vk::VertexInputBindingDescription vertexInputBindingDescription;
       static std::vector<vk::VertexInputAttributeDescription> vertexInputAttributeDescriptions;
       static vk::PipelineVertexInputStateCreateInfo pipelineVertexInputStateCreateInfo;
