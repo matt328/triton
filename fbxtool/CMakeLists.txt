@@ -6,6 +6,8 @@ set(fbxtool_SRC
 
 add_executable(${PROJECT_NAME} ${fbxtool_SRC})
 
+find_package(glm CONFIG REQUIRED)
+
 IF(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
    target_compile_options(${PROJECT_NAME} PRIVATE ${TRITON_COMPILE_OPTIONS})
 ENDIF()

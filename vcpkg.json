@@ -3,6 +3,7 @@
    "version-string": "0.1.0",
    "builtin-baseline": "936588e23157b56507069ad664b020881c119e54",
    "dependencies": [
+      "cereal",
       "entt",
       "fastgltf",
       "glfw3",
