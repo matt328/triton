@@ -1,13 +1,5 @@
 #include "ufbx.h"
-#include <cstdint>
-#include <glm/fwd.hpp>
-#include <vector>
-#include <filesystem>
-#include <unordered_map>
 #include "Model.hpp"
-#include <cereal/archives/json.hpp>
-#include <cereal/archives/binary.hpp>
-#include <fstream>
 
 namespace std {
    template <>

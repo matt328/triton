@@ -114,7 +114,6 @@ target_precompile_headers(${PROJECT_NAME}
    <string>
    <string_view>
    PUBLIC
-   "include/util/Logger.hpp"
    <GLFW/glfw3.h>
    <glm/gtc/matrix_transform.hpp>
    <glm/gtc/type_ptr.hpp>
@@ -150,6 +149,7 @@ target_link_libraries(${PROJECT_NAME}
    GPUOpen::VulkanMemoryAllocator
    ozz_animation
    PRIVATE
+   utils-lib
    fastgltf::fastgltf
    glslang::glslang
    glslang::glslang-default-resource-limits

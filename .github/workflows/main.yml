@@ -6,25 +6,6 @@ env:
   BUILD_CONFIGURATION: Debug
 
 jobs:
-  build-mac-os:
-    runs-on: sh-macos-14
-    env:
-      CC: /usr/local/opt/llvm/bin/clang
-      CXX: /usr/local/opt/llvm/bin/clang++
-
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-      with:
-        submodules: "recursive"
-        fetch-depth: 0
-
-    - name: CMake Generate
-      run: cmake -B build -S . -G "Ninja"
-
-    - name: Build
-      working-directory: ${{github.workspace}}
-      run: cmake --build build --target=editor -j 18
 
   build-windows:
     runs-on: windows-latest
