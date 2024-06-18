@@ -15,6 +15,7 @@ target_compile_definitions(${PROJECT_NAME}
 
 target_precompile_headers(${PROJECT_NAME}
    PRIVATE
+   <filesystem>
    <unordered_map>
    <vector>
    PUBLIC
@@ -24,6 +25,9 @@ target_precompile_headers(${PROJECT_NAME}
    <glm/gtx/quaternion.hpp>
    <glm/gtx/string_cast.hpp>
    <cereal/types/vector.hpp>
+   <ozz/animation/runtime/animation.h>
+   <ozz/animation/runtime/skeleton.h>
+   <ufbx.h>
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -31,6 +35,8 @@ target_link_libraries(${PROJECT_NAME}
    cereal::cereal
    PRIVATE
    glm
+   ozz_animation
+   ufbx
 )
 
 target_include_directories(${PROJECT_NAME}

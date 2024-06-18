@@ -80,7 +80,20 @@ Should the script interface be the GameplayFacade as well? Probably, I think I d
 
 ### Resource Updates
 
-- should be able to import a gltf file in the editor and have it bring along any referenced textures and be able to find and load them just by loading the gltf file
+#### Models
+
+- Offline process models from fbx into a model, animation, and skeleton
+  - use the offline libs from ozz-animation to do this all in one step.
+
+- Skeletons are what binds an animation to a model. Can have multiple animations per skeleton, and a skeleton can work for multiple models.
+- The editor should have a frontend for the model tool, browse to a model file, and it runs the conversion and outputs the results into a working dir.
+- For now, develop an executable tool that takes in an fbx file and produces a model, skeleton, and animation.
+- The editor will just load in all 3 of these at once until the animation system is actually working
+- The model file should just contain vertices and indices, and a map of vertex joint indices to skeleton joint indices so that the skeleton joints can be reordered into what the vertex data has.
+- Milestone 1 is to be able to load a triplet of model, skeleton, animation, and have the debug UI able to test out the animation.
+- Milestone 2 is to be able to associate multiple animations with a single model
+- Milestone 3 is to be able to blend between animations eg: idle->walking->running-sprinting.
+
 - rework the way assets in general are handled, the cmake targets are starting to feel clunky
 - can be handled differently with the editor application as opposed to an exported game.
 - editor should just access and load them from an external private 'assets' repository
