@@ -11,7 +11,6 @@
          "cwd": "${workspaceFolder}/bin",
          "program": "${command:cmake.launchTargetPath}",
          "showDisplayString": true,
-         "visualizerFile": "${workspaceFolder}/.vscode/ufbx.natvis2",
          "miDebuggerPath": "C:/Program Files/LLVM/bin/lldb.exe",
          "MIMode": "lldb"
       }

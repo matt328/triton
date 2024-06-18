@@ -12,7 +12,6 @@
       "libnoise",
       "nlohmann-json",
       "platform-folders",
-      "spirv-cross",
       "stb",
       "tinygltf",
       "tracy",
