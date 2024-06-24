@@ -195,6 +195,8 @@ namespace tr::gfx::geo {
 
             auto texturedGeometryHandle = TexturedGeometryHandle{};
 
+            const auto parentMap = buildParentMap(model);
+
             const auto& scene = model.scenes[model.defaultScene];
             auto nodeList = std::vector<GltfNode>{};
             for (const auto& nodeIndex : scene.nodes) {
@@ -203,7 +205,8 @@ namespace tr::gfx::geo {
                          loadedTextureIndices,
                          texturedGeometryHandle,
                          nodeList,
-                         nodeIndex);
+                         nodeIndex,
+                         parentMap);
             }
 
             std::sort(nodeList.begin(), nodeList.end(), [](const GltfNode& a, const GltfNode& b) {
@@ -241,32 +244,46 @@ namespace tr::gfx::geo {
       }
    }
 
+   auto GeometryFactory::parseNodeTransform(const tinygltf::Node& node) -> glm::mat4 {
+      if (node.matrix.size() == 16) {
+         auto floatVec = std::vector<float>{node.matrix.begin(), node.matrix.end()};
+         Log::debug << "node " << node.name << " has a transform matrix" << std::endl;
+         return glm::make_mat4(floatVec.data());
+      } else {
+         return glm::identity<glm::mat4>();
+      }
+   }
+
    auto GeometryFactory::parseNode(const tinygltf::Model& model,
                                    const tinygltf::Node& node,
                                    std::unordered_map<int, ImageHandle>& loadedTextureIndices,
                                    TexturedGeometryHandle& handle,
                                    std::vector<GltfNode>& nodes,
-                                   const int nodeIndex) -> void {
+                                   const int nodeIndex,
+                                   const std::unordered_map<int, int>& parentMap) -> void {
+
+      auto matrix = parseNodeTransform(node);
+      {
+         auto currentNodeIndex = nodeIndex;
+         while (parentMap.find(currentNodeIndex) != parentMap.end()) {
+            const auto& currentNode = model.nodes[currentNodeIndex];
+            matrix *= parseNodeTransform(currentNode);
+            currentNodeIndex = parentMap.at(currentNodeIndex);
+         }
+      }
 
       auto gltfNode =
           GltfNode{.index = nodeIndex, .number = static_cast<int>(nodes.size()), .name = node.name};
       nodes.push_back(gltfNode);
+
       if (node.mesh != -1) {
-         if (node.translation.size() == 3) {
-            Log::debug << node.name << " has translation" << std::endl;
-         }
-         if (node.rotation.size() == 4) {
-            Log::debug << node.name << " has rotation" << std::endl;
-         }
-         if (node.scale.size() == 3) {
-            Log::debug << node.name << " has scale" << std::endl;
-         }
-         if (node.matrix.size() == 16) {
-            Log::debug << node.name << " has matrix" << std::endl;
-         }
          const auto& mesh = model.meshes[node.mesh];
          for (const auto& primitive : mesh.primitives) {
-            const auto geometryHandle = createGeometry(model, primitive);
+
+            auto mat = glm::identity<glm::mat4>();
+            mat = glm::scale(mat, glm::vec3(1.f, -1.f, 1.f));
+
+            const auto geometryHandle = createGeometry(model, primitive, matrix);
 
             auto imageHandle = ImageHandle{};
 
@@ -290,12 +307,36 @@ namespace tr::gfx::geo {
       // Exit Criteria is node.children is empty
       for (auto& child : node.children) {
          auto& node = model.nodes[child];
-         parseNode(model, node, loadedTextureIndices, handle, nodes, child);
+         parseNode(model, node, loadedTextureIndices, handle, nodes, child, parentMap);
       }
    }
 
+   auto GeometryFactory::buildParentMap(const tinygltf::Model& model)
+       -> std::unordered_map<int, int> {
+      auto parentMap = std::unordered_map<int, int>{};
+
+      for (const auto& scene : model.scenes) {
+         for (const auto& nodeIndex : scene.nodes) {
+            auto stack = std::vector{nodeIndex};
+            while (!stack.empty()) {
+               int currentIndex = stack.back();
+               stack.pop_back();
+
+               const auto& node = model.nodes[currentIndex];
+               for (const auto childIndex : node.children) {
+                  parentMap[childIndex] = currentIndex;
+                  stack.push_back(childIndex);
+               }
+            }
+         }
+      }
+
+      return parentMap;
+   }
+
    auto GeometryFactory::createGeometry(const tinygltf::Model& model,
-                                        const tinygltf::Primitive& primitive) -> GeometryHandle {
+                                        const tinygltf::Primitive& primitive,
+                                        const glm::mat4& transform) -> GeometryHandle {
       ZoneNamedN(a, "Create Geometry", true);
       // Load Indices
       std::vector<uint32_t> indices;
@@ -354,7 +395,9 @@ namespace tr::gfx::geo {
 
             if (attribute.first.compare("POSITION") == 0) {
                for (size_t i = 0; i < vertexCount; i++) {
-                  vertices[i].pos = glm::make_vec3(&data[i * 3]);
+                  auto vertexPosition = glm::make_vec3(&data[i * 3]);
+                  auto tempVec = transform * glm::vec4(vertexPosition, 1.f);
+                  vertices[i].pos = glm::vec3(tempVec);
                }
             }
             if (attribute.first.compare("NORMAL") == 0) {

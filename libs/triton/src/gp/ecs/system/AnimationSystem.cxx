@@ -17,6 +17,18 @@ namespace tr::gp::ecs::AnimationSystem {
             Log::warn << "Sampling job fail" << std::endl;
          }
 
+         auto mat = glm::identity<glm::mat4>();
+         mat = glm::scale(mat, glm::vec3(1.f, -1.f, 1.f));
+
+         ozz::math::Float4x4 ozzMatrix;
+
+         // Copy each element from glmMatrix to ozzMatrix
+         for (int col = 0; col < 4; ++col) {
+            for (int row = 0; row < 4; ++row) {
+               ozzMatrix.cols[col][row] = mat[col][row];
+            }
+         }
+
          const auto& skeleton = animationFactory.getSkeleton(animationData.skeletonHandle);
          auto ltmJob = ozz::animation::LocalToModelJob{};
          ltmJob.skeleton = &skeleton;
