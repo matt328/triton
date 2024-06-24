@@ -58,16 +58,22 @@ namespace tr::gfx::geo {
 
       AnimationFactory& animationFactory;
 
-      auto createGeometry(const tinygltf::Model& model, const tinygltf::Primitive& primitive)
-          -> GeometryHandle;
+      auto createGeometry(const tinygltf::Model& model,
+                          const tinygltf::Primitive& primitive,
+                          const glm::mat4& transform) -> GeometryHandle;
       auto generateNormal(int x, int y, const ct::HeightField& heightField) -> glm::vec3;
       auto createTexture(const tinygltf::Model& model, std::size_t textureIndex) -> ImageHandle;
+
+      auto buildParentMap(const tinygltf::Model& model) -> std::unordered_map<int, int>;
+
+      auto parseNodeTransform(const tinygltf::Node& node) -> glm::mat4;
 
       auto parseNode(const tinygltf::Model& model,
                      const tinygltf::Node& node,
                      std::unordered_map<int, ImageHandle>& loadedTextureIndices,
                      TexturedGeometryHandle& handle,
                      std::vector<GltfNode>& nodes,
-                     const int nodeIndex) -> void;
+                     const int nodeIndex,
+                     const std::unordered_map<int, int>& parentMap) -> void;
    };
 }
