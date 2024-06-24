@@ -12,6 +12,8 @@ namespace tr::gfx::geo {
       ImageHandle imageHandle;
       SkeletonHandle skeletonHandle;
       AnimationHandle animationHandle;
+      std::unordered_map<uint32_t, uint32_t> jointMap;
+      std::vector<glm::mat4> inverseBindMatrices;
    };
 
 }
