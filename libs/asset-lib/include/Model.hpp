@@ -6,8 +6,10 @@ struct Vertex {
    glm::vec3 position;
    glm::vec3 normal;
    glm::vec2 uv;
-   glm::uvec4 joints;
+   glm::vec4 color;
+   glm::u8vec4 joints;
    glm::vec4 weights;
+   glm::vec4 tangent;
 
    bool operator==(const Vertex& other) const {
       return position == other.position && normal == other.normal && uv == other.uv &&
@@ -16,24 +18,30 @@ struct Vertex {
 
    template <class Archive>
    void serialize(Archive& archive) {
-      archive(position, normal, uv, joints, weights);
+      archive(position, normal, uv, color, joints, weights, tangent);
    }
 };
 
 struct Model {
    std::vector<Vertex> vertices;
    std::vector<uint32_t> indices;
-   /// This maps the heirarchical order of joints back to the order the joints vertex attribute
-   /// matches. First is the hierarchical order, second is the vertex attribute order.
-   /*
-      Note: given a list of matrices from the sampling job, for each one in order, get its index,
-      then get the matching vertex attribute order number from the map, and place the matrix in a
-      vector at that position to be passed to the shader
-   */
-   std::unordered_map<uint32_t, uint32_t> jointMap;
+   std::unordered_map<int, int> jointRemaps;
+   std::vector<glm::mat4> inverseBindPoses;
+
+   [[nodiscard]] auto skinned() const {
+      return !inverseBindPoses.empty();
+   }
+
+   [[nodiscard]] auto numJoints() const {
+      return static_cast<int>(inverseBindPoses.size());
+   }
+
+   [[nodiscard]] auto highestJointIndex() const {
+      return 0; // TODO
+   }
 
    template <class Archive>
    void serialize(Archive& archive) {
-      archive(vertices, indices);
+      // archive(vertices, indices);
    }
 };

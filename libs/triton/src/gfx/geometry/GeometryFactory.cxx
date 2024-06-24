@@ -7,6 +7,7 @@
 #include "gfx/geometry/AnimationFactory.hpp"
 #include "gfx/geometry/GeometryHandles.hpp"
 #include "gfx/geometry/OzzMesh.hpp"
+#include <ozz/animation/runtime/skeleton_utils.h>
 
 namespace tr::gfx::geo {
 
@@ -106,37 +107,34 @@ namespace tr::gfx::geo {
                                           const std::filesystem::path& skeletonPath,
                                           const std::filesystem::path& animationPath)
        -> SkinnedGeometryData {
+      auto sgd = SkinnedGeometryData{};
       try {
-         const auto modelHandle = loadOzzMesh(modelPath);
+
+         sgd.skeletonHandle = animationFactory.loadSkeleton(skeletonPath);
+         sgd.animationHandle = animationFactory.loadAnimation(animationPath);
+
+         const auto& skeleton = animationFactory.getSkeleton(sgd.skeletonHandle);
+
+         ozz::animation::IterateJointsDF(skeleton, [](int current, int parent) {
+            Log::debug << "skeleton order: " << current << std::endl;
+         });
+
+         const auto modelHandle = loadGeometryFromGltf(modelPath);
 
          assert(modelHandle.size() == 1); // Currently only support files with a single mesh
 
          const auto meshHandle = modelHandle.begin()->first;
          const auto imageHandle = modelHandle.begin()->second;
 
-         auto sgd = SkinnedGeometryData{};
          sgd.geometryHandle = meshHandle;
          sgd.imageHandle = imageHandle;
-
-         sgd.skeletonHandle = animationFactory.loadSkeleton(skeletonPath);
-         sgd.animationHandle = animationFactory.loadAnimation(animationPath);
 
          return sgd;
       } catch (const std::exception& ex) {
          Log::error << "Error during loadGeometryFromGltf: " << ex.what() << std::endl;
       }
+      return sgd;
    }
-
-   /*
-      This ozz mesh format is probably not useful since it's highly optimized for CPU side skinning.
-      - First load fbx files using ufbx
-      - Build this alongside of the loadOzzMesh function so we can compare the loaded data to make
-      sure things like the joint_map are working correctly. once that's working, create a tool to
-      convert an fbx into a textured mesh
-
-      eventually build a single tool using the ozz_animation_offline libs that will take an fbx and
-      produce a textured mesh file, a skeleton, and a set of animation files
-   */
 
    auto GeometryFactory::loadOzzMesh(const std::filesystem::path& filename)
        -> TexturedGeometryHandle {
@@ -209,12 +207,33 @@ namespace tr::gfx::geo {
             }
 
             std::sort(nodeList.begin(), nodeList.end(), [](const GltfNode& a, const GltfNode& b) {
-               return a.index < b.index;
+               return a.number < b.number;
             });
 
-            for (const auto& node : nodeList) {
-               Log::debug << "Number: " << node.number << " Index: " << node.index
-                          << " Name: " << node.name << std::endl;
+            const auto& skin = model.skins[0];
+            auto accessorIndex = skin.inverseBindMatrices;
+
+            if (accessorIndex < 0 || accessorIndex >= model.accessors.size()) {
+               throw std::runtime_error("Invalid accessor index for inverse bind matrices");
+            }
+
+            const auto& accessor = model.accessors[accessorIndex];
+            const auto& bufferView = model.bufferViews[accessor.bufferView];
+            const auto& buffer = model.buffers[bufferView.buffer];
+
+            if (accessor.type != TINYGLTF_TYPE_MAT4 || accessor.count == 0) {
+               throw std::runtime_error("Invalid inverse bind matrices accessor");
+            }
+
+            const auto data = reinterpret_cast<const float*>(
+                buffer.data.data() + bufferView.byteOffset + accessor.byteOffset);
+
+            auto inverseBindMatrices = std::vector<glm::mat4>{};
+            inverseBindMatrices.reserve(accessor.count);
+
+            for (size_t i = 0; i < accessor.count; ++i) {
+               glm::mat4 mat = glm::make_mat4(data + i * 16);
+               inverseBindMatrices.push_back(mat);
             }
 
             return texturedGeometryHandle;
@@ -233,6 +252,18 @@ namespace tr::gfx::geo {
           GltfNode{.index = nodeIndex, .number = static_cast<int>(nodes.size()), .name = node.name};
       nodes.push_back(gltfNode);
       if (node.mesh != -1) {
+         if (node.translation.size() == 3) {
+            Log::debug << node.name << " has translation" << std::endl;
+         }
+         if (node.rotation.size() == 4) {
+            Log::debug << node.name << " has rotation" << std::endl;
+         }
+         if (node.scale.size() == 3) {
+            Log::debug << node.name << " has scale" << std::endl;
+         }
+         if (node.matrix.size() == 16) {
+            Log::debug << node.name << " has matrix" << std::endl;
+         }
          const auto& mesh = model.meshes[node.mesh];
          for (const auto& primitive : mesh.primitives) {
             const auto geometryHandle = createGeometry(model, primitive);
@@ -323,7 +354,7 @@ namespace tr::gfx::geo {
 
             if (attribute.first.compare("POSITION") == 0) {
                for (size_t i = 0; i < vertexCount; i++) {
-                  vertices[i].pos = glm::vec4(glm::make_vec3(&data[i * 3]), 1.f);
+                  vertices[i].pos = glm::make_vec3(&data[i * 3]);
                }
             }
             if (attribute.first.compare("NORMAL") == 0) {

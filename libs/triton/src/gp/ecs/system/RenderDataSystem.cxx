@@ -23,6 +23,7 @@ namespace tr::gp::ecs::RenderDataSystem {
             glmMatrix[i][j] = temp[j];
          }
       }
+      glmMatrix = glm::scale(glmMatrix, glm::vec3(1.f, 1.f, 1.f));
       return glmMatrix;
    }
 
@@ -39,12 +40,6 @@ namespace tr::gp::ecs::RenderDataSystem {
 
          const auto isTerrainEntity = registry.any_of<TerrainMarker>(entity);
 
-         /*
-            TODO: Make RenderData be more concrete classes so they're easier to reason about than
-            a bunch of maps of long long
-            Sizes are known up front so RenderData could be modeled as a SoA
-         */
-
          for (auto& it : renderable.meshes) {
             const auto pos = renderData.objectData.size();
             if (isTerrainEntity) {
@@ -60,9 +55,25 @@ namespace tr::gp::ecs::RenderDataSystem {
       uint32_t jointMatricesIndex = 0;
       for (auto [entity, animationData, renderable, transform] : animationsView.each()) {
          auto jointMatrices = std::vector<glm::mat4>{};
-         for (const auto& m : animationData.models) {
-            jointMatrices.push_back(convertOzzToGlm(m));
+
+         // TODO: pack this into the renderable
+         // TODO: pack inverseBindMatrices into the renderable as well
+         const auto jointMap = std::unordered_map<int, int>{{1, 3}, {0, 4}};
+
+         const auto mat1 = glm::mat4(1, -0, 0, -0, -0, 1, -0, 0, 0, -0, 1, -0, -0, 0, -0, 1);
+         const auto mat2 = glm::mat4(1, -0, 0, -0, -0, 1, -0, 0, 0, -0, 1, -0, -0, -2.5414, -0, 1);
+         auto mats = std::vector<glm::mat4>{mat1, mat2};
+
+         jointMatrices.resize(jointMap.size());
+         int i = 0;
+         for (const auto [position, jointId] : jointMap) {
+            jointMatrices[position] = convertOzzToGlm(animationData.models[jointId]) * mats[i];
+            ++i;
          }
+
+         /*
+            this appears to be working except the model is flipped upside down
+         */
 
          renderData.animationData.insert(renderData.animationData.begin(),
                                          jointMatrices.begin(),

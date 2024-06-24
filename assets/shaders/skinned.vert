@@ -43,7 +43,7 @@ void main() {
                   inWeights.z * jointMatrices.jointMatrices[thisObject.jointMId + int(inJoints.z)] +
                   inWeights.w * jointMatrices.jointMatrices[thisObject.jointMId + int(inJoints.w)];
 
-   gl_Position = camData.proj * camData.view * thisObject.model * skinMat * vec4(inPosition, 1.0);
+   gl_Position = camData.proj * camData.view * thisObject.model * vec4(inPosition, 1.0);
    fragColor = inColor;
    fragTexCoord = inTexCoord;
    textureId = thisObject.textureId;

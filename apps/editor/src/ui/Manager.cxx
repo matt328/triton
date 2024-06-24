@@ -264,7 +264,7 @@ namespace ed::ui {
             ImGui::BeginChild(
                 "item view",
                 ImVec2(0,
-                       -ImGui::GetFrameHeightWithSpacing())); // Leave room for 1 line below us
+                       -ImGui::GetFrameHeightWithSpacing() * 2)); // Leave room for 1 line below us
 
             if (selectedEntity.has_value()) {
                ImGui::Text("Entity ID: %d", selectedEntity.value());
@@ -306,16 +306,27 @@ namespace ed::ui {
                terrainFutures.push_back(facade.createTerrainMesh(512));
             }
             ImGui::SameLine();
-            if (ImGui::Button("Load Model")) {
+            if (ImGui::Button("Load Cube")) {
                const auto modelName = std::filesystem::path{
-                   R"(C:\Users\Matt\Projects\game-assets\models\working\mesh.ozz)"};
+                   R"(C:\Users\Matt\Projects\game-assets\models\cube\cube2.gltf)"};
                const auto skeletonPath = std::filesystem::path{
-                   R"(C:\Users\Matt\Projects\game-assets\models\working\skeleton.ozz)"};
+                   R"(C:\Users\Matt\Projects\game-assets\models\cube\skeleton.ozz)"};
                const auto animationPath = std::filesystem::path{
-                   R"(C:\Users\Matt\Projects\game-assets\models\working\mixamo.com.ozz)"};
+                   R"(C:\Users\Matt\Projects\game-assets\models\cube\animation.ozz)"};
                skinnedModelFutures.push_back(
                    facade.loadSkinnedModelAsync(modelName, skeletonPath, animationPath));
             }
+            if (ImGui::Button("Load Cesium")) {
+               const auto modelName = std::filesystem::path{
+                   R"(C:\Users\Matt\Projects\game-assets\models\cesiumman\CesiumMan.gltf)"};
+               const auto skeletonPath = std::filesystem::path{
+                   R"(C:\Users\Matt\Projects\game-assets\models\cesiumman\skeleton.ozz)"};
+               const auto animationPath = std::filesystem::path{
+                   R"(C:\Users\Matt\Projects\game-assets\models\cesiumman\animation.ozz)"};
+               skinnedModelFutures.push_back(
+                   facade.loadSkinnedModelAsync(modelName, skeletonPath, animationPath));
+            }
+
             ImGui::EndGroup();
          }
       }
@@ -370,7 +381,6 @@ namespace ed::ui {
 
       static float timeValue = min_v;
       if (ImGui::SliderFloat("Time", &timeValue, min_v, max_v, "%.2f")) {
-         Log::debug << "time: " << timeValue << std::endl;
          animationComponent.timeRatio = timeValue;
       }
 

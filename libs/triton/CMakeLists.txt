@@ -152,8 +152,6 @@ target_link_libraries(${PROJECT_NAME}
    glslang::glslang-default-resource-limits
    glslang::SPIRV
    imgui::imgui
-   spirv-cross-core
-   spirv-cross-cpp
    Tracy::TracyClient
    unofficial::noise::noise
    unofficial::noiseutils::noiseutils
