@@ -244,13 +244,41 @@ namespace tr::gfx::geo {
       }
    }
 
+   /*
+      I cannot figure out why this model is rotated -180 degrees about the z-axis.
+      Is it some bs between vulkan and glm being opposite coordinate systems?
+   */
+
    auto GeometryFactory::parseNodeTransform(const tinygltf::Node& node) -> glm::mat4 {
+      // If glft file has a matrix, we should prefer that
       if (node.matrix.size() == 16) {
          auto floatVec = std::vector<float>{node.matrix.begin(), node.matrix.end()};
          Log::debug << "node " << node.name << " has a transform matrix" << std::endl;
          return glm::make_mat4(floatVec.data());
       } else {
-         return glm::identity<glm::mat4>();
+         // If none of these exist, it will end up with an identity matrix
+         auto translation = glm::vec3{0.f, 0.f, 0.f};
+         auto rotation = glm::identity<glm::quat>();
+         auto scale = glm::vec3(1.f, 1.f, 1.f);
+
+         if (node.translation.size() == 3) {
+            translation = glm::vec3(node.translation[0], node.translation[1], node.translation[2]);
+         }
+
+         if (node.rotation.size() == 4) {
+            rotation =
+                glm::quat(node.rotation[3], node.rotation[0], node.rotation[1], node.rotation[2]);
+         }
+
+         if (node.scale.size() == 3) {
+            scale = glm::vec3(node.scale[0], node.scale[1], node.scale[2]);
+         }
+
+         auto translationMatrix = glm::translate(glm::mat4(1.f), translation);
+         auto rotationMatrix = glm::mat4_cast(rotation);
+         auto scaleMatrix = glm::scale(glm::mat4(1.f), scale);
+
+         return translationMatrix * rotationMatrix * scaleMatrix;
       }
    }
 
@@ -279,9 +307,6 @@ namespace tr::gfx::geo {
       if (node.mesh != -1) {
          const auto& mesh = model.meshes[node.mesh];
          for (const auto& primitive : mesh.primitives) {
-
-            auto mat = glm::identity<glm::mat4>();
-            mat = glm::scale(mat, glm::vec3(1.f, -1.f, 1.f));
 
             const auto geometryHandle = createGeometry(model, primitive, matrix);
 
