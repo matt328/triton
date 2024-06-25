@@ -56,24 +56,36 @@ namespace tr::gp::ecs::RenderDataSystem {
       for (auto [entity, animationData, renderable, transform] : animationsView.each()) {
          auto jointMatrices = std::vector<glm::mat4>{};
 
+         /*
+            - When a vertex has a joint attribute of 0 for instance, it means get the node whose
+            index in the file is given by the value at position 0 in the joints array in the gltf
+            skin property
+            - The animation lib will give you a list of matrices for all of the nodes in the gltf
+            file, sorted in hierarchical order.
+            - That sort is what the mapping needs to account for.
+            - We need a joint mapping that says when given a value from the vertex attributes, here
+            is the node index at that position in the joints array.
+
+            - Figure out an algorithm that creates this mapping. Probably have to iterate the sorted
+            nodes and match up the indices by joint names.
+
+         */
+
          // TODO: pack this into the renderable
          // TODO: pack inverseBindMatrices into the renderable as well
          const auto jointMap = std::unordered_map<int, int>{{1, 3}, {0, 4}};
 
          const auto mat1 = glm::mat4(1, -0, 0, -0, -0, 1, -0, 0, 0, -0, 1, -0, -0, 0, -0, 1);
          const auto mat2 = glm::mat4(1, -0, 0, -0, -0, 1, -0, 0, 0, -0, 1, -0, -0, -2.5414, -0, 1);
-         auto mats = std::vector<glm::mat4>{mat1, mat2};
+         auto inverseBindMatrices = std::vector<glm::mat4>{mat1, mat2};
 
          jointMatrices.resize(jointMap.size());
          int i = 0;
          for (const auto [position, jointId] : jointMap) {
-            jointMatrices[position] = convertOzzToGlm(animationData.models[jointId]) * mats[i];
+            jointMatrices[position] =
+                convertOzzToGlm(animationData.models[jointId]) * inverseBindMatrices[i];
             ++i;
          }
-
-         /*
-            this appears to be working except the model is flipped upside down
-         */
 
          renderData.animationData.insert(renderData.animationData.begin(),
                                          jointMatrices.begin(),
