@@ -8,8 +8,13 @@ namespace tr::gp::ecs {
       Animation(gfx::AnimationHandle animationHandle,
                 gfx::SkeletonHandle skeletonHandle,
                 const int numJoints,
-                const int numSoaJoints)
-          : animationHandle{animationHandle}, skeletonHandle{skeletonHandle} {
+                const int numSoaJoints,
+                std::unordered_map<int, int> jointMap,
+                std::vector<glm::mat4> inverseBindMatrices)
+          : animationHandle{animationHandle},
+            skeletonHandle{skeletonHandle},
+            jointMap{jointMap},
+            inverseBindMatrices{inverseBindMatrices} {
          context.Resize(numJoints);
          locals.resize(numSoaJoints, ozz::math::SoaTransform::identity());
          models.resize(numJoints, ozz::math::Float4x4::identity());
@@ -21,6 +26,9 @@ namespace tr::gp::ecs {
       bool renderBindPose{};
       bool playing{};
       std::string currentAnimationName;
+
+      std::unordered_map<int, int> jointMap;
+      std::vector<glm::mat4> inverseBindMatrices;
 
       float timeRatio{};
       ozz::animation::SamplingJob::Context context{};

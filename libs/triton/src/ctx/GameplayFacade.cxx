@@ -98,7 +98,9 @@ namespace tr::ctx {
                                                            model.animationHandle,
                                                            model.skeletonHandle,
                                                            numJoints,
-                                                           numSoaJoints);
+                                                           numSoaJoints,
+                                                           model.jointMap,
+                                                           model.inverseBindMatrices);
       gameplaySystem.registry->emplace<gp::ecs::Transform>(e);
 
       const auto meshes = std::unordered_map<gfx::MeshHandle, gfx::TextureHandle>{

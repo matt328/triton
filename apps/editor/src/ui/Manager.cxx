@@ -264,7 +264,7 @@ namespace ed::ui {
             ImGui::BeginChild(
                 "item view",
                 ImVec2(0,
-                       -ImGui::GetFrameHeightWithSpacing() * 2)); // Leave room for 1 line below us
+                       -ImGui::GetFrameHeightWithSpacing() * 3)); // Leave room for 1 line below us
 
             if (selectedEntity.has_value()) {
                ImGui::Text("Entity ID: %d", selectedEntity.value());
@@ -323,6 +323,16 @@ namespace ed::ui {
                    R"(C:\Users\Matt\Projects\game-assets\models\cesiumman\skeleton.ozz)"};
                const auto animationPath = std::filesystem::path{
                    R"(C:\Users\Matt\Projects\game-assets\models\cesiumman\animation.ozz)"};
+               skinnedModelFutures.push_back(
+                   facade.loadSkinnedModelAsync(modelName, skeletonPath, animationPath));
+            }
+            if (ImGui::Button("Load Peasant")) {
+               const auto modelName = std::filesystem::path{
+                   R"(C:\Users\Matt\Projects\game-assets\models\gltf-working\walking.gltf)"};
+               const auto skeletonPath = std::filesystem::path{
+                   R"(C:\Users\Matt\Projects\game-assets\models\gltf-working\skeleton.ozz)"};
+               const auto animationPath = std::filesystem::path{
+                   R"(C:\Users\Matt\Projects\game-assets\models\gltf-working\animation.ozz)"};
                skinnedModelFutures.push_back(
                    facade.loadSkinnedModelAsync(modelName, skeletonPath, animationPath));
             }

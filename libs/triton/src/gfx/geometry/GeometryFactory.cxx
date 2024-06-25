@@ -111,25 +111,18 @@ namespace tr::gfx::geo {
       auto sgd = SkinnedGeometryData{};
       try {
 
-         sgd.skeletonHandle = animationFactory.loadSkeleton(skeletonPath);
-         sgd.animationHandle = animationFactory.loadAnimation(animationPath);
+         const auto skeletonHandle = animationFactory.loadSkeleton(skeletonPath);
+         const auto animationHandle = animationFactory.loadAnimation(animationPath);
 
-         const auto& skeleton = animationFactory.getSkeleton(sgd.skeletonHandle);
+         const auto& skeleton = animationFactory.getSkeleton(skeletonHandle);
 
          ozz::animation::IterateJointsDF(skeleton, [](int current, int parent) {
             Log::debug << "skeleton order: " << current << std::endl;
          });
 
-         const auto modelHandle =
-             loadGeometryFromGltf(modelPath, std::make_optional(sgd.skeletonHandle));
+         auto sgd = loadAnimatedGeometryFromGltf(modelPath, skeletonHandle);
 
-         assert(modelHandle.size() == 1); // Currently only support files with a single mesh
-
-         const auto meshHandle = modelHandle.begin()->first;
-         const auto imageHandle = modelHandle.begin()->second;
-
-         sgd.geometryHandle = meshHandle;
-         sgd.imageHandle = imageHandle;
+         sgd.animationHandle = animationHandle;
 
          return sgd;
       } catch (const std::exception& ex) {
@@ -159,6 +152,126 @@ namespace tr::gfx::geo {
       Log::debug << "loaded " << meshes.size() << "meshes from " << filename << std::endl;
 
       return {};
+   }
+
+   auto GeometryFactory::loadAnimatedGeometryFromGltf(const std::filesystem::path& filename,
+                                                      const SkeletonHandle& skeletonHandle)
+       -> SkinnedGeometryData {
+      ZoneNamedN(a, "Load Model Internal", true);
+      {
+         ZoneNamedN(b, "Loading glTF File", true);
+
+         using namespace tinygltf;
+
+         Model model;
+         TinyGLTF loader;
+         std::string err;
+         std::string warn;
+
+         {
+            ZoneNamedN(a, "Reading ASCII File", true);
+            bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, filename.string());
+            if (!warn.empty()) {
+               throw std::runtime_error(warn);
+            }
+
+            if (!err.empty()) {
+               throw std::runtime_error(err);
+            }
+
+            if (!ret) {
+               Log::error << "Failed to parse glTF file" << std::endl;
+               throw std::runtime_error("Failed to parse glTF file");
+            }
+         }
+         {
+            ZoneNamedN(b, "Parsing glTF", true);
+            auto loadedTextureIndices = std::unordered_map<int, ImageHandle>{};
+
+            auto texturedGeometryHandle = TexturedGeometryHandle{};
+
+            const auto parentMap = buildParentMap(model);
+
+            const auto& scene = model.scenes[model.defaultScene];
+            auto nodeList = std::vector<GltfNode>{};
+            for (const auto& nodeIndex : scene.nodes) {
+               parseNode(model,
+                         model.nodes[nodeIndex],
+                         loadedTextureIndices,
+                         texturedGeometryHandle,
+                         nodeList,
+                         nodeIndex,
+                         parentMap);
+            }
+
+            std::sort(nodeList.begin(), nodeList.end(), [](const GltfNode& a, const GltfNode& b) {
+               return a.number < b.number;
+            });
+
+            const auto& skin = model.skins[0];
+            auto accessorIndex = skin.inverseBindMatrices;
+
+            if (accessorIndex < 0 || accessorIndex >= model.accessors.size()) {
+               throw std::runtime_error("Invalid accessor index for inverse bind matrices");
+            }
+
+            const auto& accessor = model.accessors[accessorIndex];
+            const auto& bufferView = model.bufferViews[accessor.bufferView];
+            const auto& buffer = model.buffers[bufferView.buffer];
+
+            if (accessor.type != TINYGLTF_TYPE_MAT4 || accessor.count == 0) {
+               throw std::runtime_error("Invalid inverse bind matrices accessor");
+            }
+
+            const auto data = reinterpret_cast<const float*>(
+                buffer.data.data() + bufferView.byteOffset + accessor.byteOffset);
+
+            auto inverseBindMatrices = std::vector<glm::mat4>{};
+            inverseBindMatrices.reserve(accessor.count);
+
+            for (size_t i = 0; i < accessor.count; ++i) {
+               glm::mat4 mat = glm::make_mat4(data + i * 16);
+               inverseBindMatrices.push_back(mat);
+            }
+
+            auto jointMap = std::unordered_map<int, int>{};
+
+            const auto& skeleton = animationFactory.getSkeleton(skeletonHandle);
+
+            auto names = std::vector<std::string>{skeleton.joint_names().begin(),
+                                                  skeleton.joint_names().end()};
+
+            int position = 0;
+            for (const auto& jointIndex : skin.joints) {
+               const auto& jointNode = model.nodes[jointIndex];
+
+               const auto& jointNodeName = jointNode.name;
+
+               int sortedIndex = -1;
+
+               auto it = std::find(skeleton.joint_names().begin(),
+                                   skeleton.joint_names().end(),
+                                   jointNodeName);
+               if (it != skeleton.joint_names().end()) {
+                  sortedIndex = std::distance(skeleton.joint_names().begin(), it);
+               }
+
+               jointMap.insert({position, sortedIndex});
+
+               Log::debug << "skin joint index: " << position << ": " << jointNode.name
+                          << " sortedIndex: " << sortedIndex << std::endl;
+               ++position;
+            }
+
+            auto sgd = SkinnedGeometryData{.geometryHandle = texturedGeometryHandle.begin()->first,
+                                           .imageHandle = texturedGeometryHandle.begin()->second,
+                                           .skeletonHandle = skeletonHandle,
+                                           .animationHandle = static_cast<AnimationHandle>(-1),
+                                           .jointMap = jointMap,
+                                           .inverseBindMatrices = inverseBindMatrices};
+            return sgd;
+         }
+      }
    }
 
    /// Creates Vertex, Index and Image data
@@ -279,12 +392,8 @@ namespace tr::gfx::geo {
       }
    }
 
-   /*
-      I cannot figure out why this model is rotated -180 degrees about the z-axis.
-      Is it some bs between vulkan and glm being opposite coordinate systems?
-   */
-
    auto GeometryFactory::parseNodeTransform(const tinygltf::Node& node) -> glm::mat4 {
+      Log::debug << "parsing node transform for node: " << node.name << std::endl;
       // If glft file has a matrix, we should prefer that
       if (node.matrix.size() == 16) {
          auto floatVec = std::vector<float>{node.matrix.begin(), node.matrix.end()};
@@ -325,25 +434,36 @@ namespace tr::gfx::geo {
                                    const int nodeIndex,
                                    const std::unordered_map<int, int>& parentMap) -> void {
 
-      auto matrix = parseNodeTransform(node);
-      {
-         auto currentNodeIndex = nodeIndex;
-         while (parentMap.find(currentNodeIndex) != parentMap.end()) {
-            const auto& currentNode = model.nodes[currentNodeIndex];
-            matrix *= parseNodeTransform(currentNode);
-            currentNodeIndex = parentMap.at(currentNodeIndex);
-         }
-      }
-
       auto gltfNode =
           GltfNode{.index = nodeIndex, .number = static_cast<int>(nodes.size()), .name = node.name};
       nodes.push_back(gltfNode);
 
       if (node.mesh != -1) {
+
+         auto matrixPath = std::vector<glm::mat4>{};
+         matrixPath.push_back(parseNodeTransform(node));
+         {
+            auto currentNodeIndex = nodeIndex;
+            while (parentMap.find(currentNodeIndex) != parentMap.end()) {
+               const auto& currentNode = model.nodes[currentNodeIndex];
+               matrixPath.push_back(parseNodeTransform(currentNode));
+               currentNodeIndex = parentMap.at(currentNodeIndex);
+               // TODO: Fix this off by one
+            }
+         }
+
+         // push back the root since it has no parent
+         // matrixPath.push_back(parseNodeTransform(model.nodes[0]));
+
+         auto wholeMatrix = glm::mat4(1.f);
+         for (auto it = matrixPath.rbegin(); it < matrixPath.rend(); ++it) {
+            wholeMatrix *= (*it);
+         }
+
          const auto& mesh = model.meshes[node.mesh];
          for (const auto& primitive : mesh.primitives) {
 
-            const auto geometryHandle = createGeometry(model, primitive, matrix);
+            const auto geometryHandle = createGeometry(model, primitive, wholeMatrix);
 
             auto imageHandle = ImageHandle{};
 

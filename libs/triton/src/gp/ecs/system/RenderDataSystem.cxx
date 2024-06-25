@@ -79,11 +79,11 @@ namespace tr::gp::ecs::RenderDataSystem {
          const auto mat2 = glm::mat4(1, -0, 0, -0, -0, 1, -0, 0, 0, -0, 1, -0, -0, -2.5414, -0, 1);
          auto inverseBindMatrices = std::vector<glm::mat4>{mat1, mat2};
 
-         jointMatrices.resize(jointMap.size());
+         jointMatrices.resize(animationData.jointMap.size());
          int i = 0;
-         for (const auto [position, jointId] : jointMap) {
-            jointMatrices[position] =
-                convertOzzToGlm(animationData.models[jointId]) * inverseBindMatrices[i];
+         for (const auto [position, jointId] : animationData.jointMap) {
+            jointMatrices[position] = convertOzzToGlm(animationData.models[jointId]) *
+                                      animationData.inverseBindMatrices[i];
             ++i;
          }
 

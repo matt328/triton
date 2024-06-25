@@ -81,7 +81,11 @@ namespace tr::gfx::tx {
        const std::filesystem::path& skeletonPath,
        const std::filesystem::path& animationPath) {
       const auto sgd = geometryFactory->loadSkinnedModel(modelPath, skeletonPath, animationPath);
-      return uploadSkinnedGeometry(sgd);
+      auto lsmd = uploadSkinnedGeometry(sgd);
+      lsmd.jointMap = sgd.jointMap;
+      lsmd.inverseBindMatrices = sgd.inverseBindMatrices;
+
+      return lsmd;
    }
 
    /// Uploads the Geometry and Texture data and creates space in a buffer for the skeleton's
