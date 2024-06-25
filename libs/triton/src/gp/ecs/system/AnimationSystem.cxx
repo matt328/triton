@@ -32,6 +32,7 @@ namespace tr::gp::ecs::AnimationSystem {
             }
          }
 
+         // try adding the transformation matrix of cesium man's Z_UP node here
          const auto& skeleton = animationFactory.getSkeleton(animationData.skeletonHandle);
          auto ltmJob = ozz::animation::LocalToModelJob{};
          ltmJob.skeleton = &skeleton;
