@@ -18,7 +18,10 @@ namespace tr::gp::ecs::AnimationSystem {
          }
 
          auto mat = glm::identity<glm::mat4>();
-         mat = glm::scale(mat, glm::vec3(1.f, -1.f, 1.f));
+         mat = glm::scale(mat, glm::vec3(1.f, 1.f, -1.f));
+         auto angle = glm::radians(180.f);
+         auto yaxis = glm::vec3(0.f, 1.f, 0.f);
+         mat = glm::rotate(mat, angle, yaxis);
 
          ozz::math::Float4x4 ozzMatrix;
 
