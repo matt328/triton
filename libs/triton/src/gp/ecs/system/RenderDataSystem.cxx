@@ -73,7 +73,7 @@ namespace tr::gp::ecs::RenderDataSystem {
 
          // TODO: pack this into the renderable
          // TODO: pack inverseBindMatrices into the renderable as well
-         const auto jointMap = std::unordered_map<int, int>{{1, 3}, {0, 4}};
+         const auto jointMap = std::unordered_map<int, int>{{0, 3}, {1, 4}};
 
          const auto mat1 = glm::mat4(1, -0, 0, -0, -0, 1, -0, 0, 0, -0, 1, -0, -0, 0, -0, 1);
          const auto mat2 = glm::mat4(1, -0, 0, -0, -0, 1, -0, 0, 0, -0, 1, -0, -0, -2.5414, -0, 1);

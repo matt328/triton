@@ -7,6 +7,7 @@
 #include "gfx/geometry/AnimationFactory.hpp"
 #include "gfx/geometry/GeometryHandles.hpp"
 #include "gfx/geometry/OzzMesh.hpp"
+#include <optional>
 #include <ozz/animation/runtime/skeleton_utils.h>
 
 namespace tr::gfx::geo {
@@ -119,7 +120,8 @@ namespace tr::gfx::geo {
             Log::debug << "skeleton order: " << current << std::endl;
          });
 
-         const auto modelHandle = loadGeometryFromGltf(modelPath);
+         const auto modelHandle =
+             loadGeometryFromGltf(modelPath, std::make_optional(sgd.skeletonHandle));
 
          assert(modelHandle.size() == 1); // Currently only support files with a single mesh
 
@@ -160,7 +162,8 @@ namespace tr::gfx::geo {
    }
 
    /// Creates Vertex, Index and Image data
-   auto GeometryFactory::loadGeometryFromGltf(const std::filesystem::path& filename)
+   auto GeometryFactory::loadGeometryFromGltf(const std::filesystem::path& filename,
+                                              const std::optional<SkeletonHandle>& skeletonHandle)
        -> TexturedGeometryHandle {
       ZoneNamedN(a, "Load Model Internal", true);
       {
@@ -213,6 +216,12 @@ namespace tr::gfx::geo {
                return a.number < b.number;
             });
 
+            if (!skeletonHandle.has_value()) {
+               Log::debug << "not passed a skeleton handle, not parsing skinning info for "
+                          << filename.string() << std::endl;
+               return texturedGeometryHandle;
+            }
+
             const auto& skin = model.skins[0];
             auto accessorIndex = skin.inverseBindMatrices;
 
@@ -237,6 +246,32 @@ namespace tr::gfx::geo {
             for (size_t i = 0; i < accessor.count; ++i) {
                glm::mat4 mat = glm::make_mat4(data + i * 16);
                inverseBindMatrices.push_back(mat);
+            }
+
+            auto jointMap = std::unordered_map<int, int>{};
+
+            const auto& skeleton = animationFactory.getSkeleton(skeletonHandle.value());
+
+            int position = 0;
+            for (const auto& jointIndex : skin.joints) {
+               const auto& jointNode = model.nodes[jointIndex];
+
+               const auto& jointNodeName = jointNode.name;
+
+               int sortedIndex = -1;
+
+               auto it = std::find(skeleton.joint_names().begin(),
+                                   skeleton.joint_names().end(),
+                                   jointNodeName);
+               if (it != skeleton.joint_names().end()) {
+                  sortedIndex = std::distance(skeleton.joint_names().begin(), it);
+               }
+
+               jointMap.insert({position, sortedIndex});
+
+               Log::debug << "skin joint index: " << position << ": " << jointNode.name
+                          << " sortedIndex: " << sortedIndex << std::endl;
+               ++position;
             }
 
             return texturedGeometryHandle;
