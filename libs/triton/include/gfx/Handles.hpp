@@ -19,5 +19,7 @@ namespace tr::gfx {
       TextureHandle textureHandle;
       SkeletonHandle skeletonHandle;
       AnimationHandle animationHandle;
+      std::unordered_map<int, int> jointMap;
+      std::vector<glm::mat4> inverseBindMatrices;
    };
 }

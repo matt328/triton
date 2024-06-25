@@ -39,6 +39,10 @@ namespace tr::gfx::geo {
                                 const std::optional<SkeletonHandle>& skeletonHandle = std::nullopt)
           -> TexturedGeometryHandle;
 
+      auto loadAnimatedGeometryFromGltf(const std::filesystem::path& filename,
+                                        const SkeletonHandle& skeletonHandle)
+          -> SkinnedGeometryData;
+
       auto loadOzzMesh(const std::filesystem::path& filename) -> TexturedGeometryHandle;
 
       auto loadSkinnedModel(const std::filesystem::path& modelPath,
