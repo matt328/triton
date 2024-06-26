@@ -17,18 +17,30 @@ namespace tr::gp::ecs::AnimationSystem {
             Log::warn << "Sampling job fail" << std::endl;
          }
 
-         auto mat = glm::identity<glm::mat4>();
-         mat = glm::scale(mat, glm::vec3(1.f, 1.f, -1.f));
-         auto angle = glm::radians(180.f);
-         auto yaxis = glm::vec3(0.f, 1.f, 0.f);
-         mat = glm::rotate(mat, angle, yaxis);
+         glm::mat4 matrix(-4.37114e-08,
+                          0.0f,
+                          1.0f,
+                          0.0f, // First column
+                          1.0f,
+                          0.0f,
+                          4.37114e-08,
+                          0.0f, // Second column
+                          0.0f,
+                          1.0f,
+                          0.0f,
+                          0.0f, // Third column
+                          0.0f,
+                          0.0f,
+                          0.0f,
+                          1.0f // Fourth column
+         );
 
          ozz::math::Float4x4 ozzMatrix;
 
          // Copy each element from glmMatrix to ozzMatrix
          for (int col = 0; col < 4; ++col) {
             for (int row = 0; row < 4; ++row) {
-               ozzMatrix.cols[col][row] = mat[col][row];
+               ozzMatrix.cols[col][row] = matrix[col][row];
             }
          }
 
