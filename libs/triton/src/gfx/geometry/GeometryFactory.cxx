@@ -457,21 +457,14 @@ namespace tr::gfx::geo {
             auto currentNodeIndex = nodeIndex;
             while (parentMap.find(currentNodeIndex) != parentMap.end()) {
                const auto& currentNode = model.nodes[currentNodeIndex];
-               Log::debug << "pushing back transform for " << currentNode.name << std::endl;
-               matrixPath.push_back(parseNodeTransform(currentNode));
+               // TODO: what is the Armature node and why don't we want it?
+               if (currentNode.name != "Armature") {
+                  Log::debug << "pushing back transform for " << currentNode.name << std::endl;
+                  matrixPath.push_back(parseNodeTransform(currentNode));
+               }
                currentNodeIndex = parentMap.at(currentNodeIndex);
-               // TODO: Fix this off by one
             }
          }
-
-         // Still need to figure out what is the difference bt cesium guy and my test models
-
-         // push back the root since it has no parent
-         // This is only needed for the cesium guy, my test models work just fine bc their root
-         // transforms are identity
-         // uncomment this to get the cesium guy to be oriented correctly.
-         Log::debug << "pushing back transform for " << model.nodes[0].name << std::endl;
-         matrixPath.push_back(parseNodeTransform(model.nodes[0]));
 
          auto wholeMatrix = glm::mat4(1.f);
          for (auto it = matrixPath.rbegin(); it < matrixPath.rend(); ++it) {
