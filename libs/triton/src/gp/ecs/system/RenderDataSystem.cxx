@@ -23,7 +23,6 @@ namespace tr::gp::ecs::RenderDataSystem {
             glmMatrix[i][j] = temp[j];
          }
       }
-      glmMatrix = glm::scale(glmMatrix, glm::vec3(1.f, 1.f, 1.f));
       return glmMatrix;
    }
 
@@ -55,21 +54,6 @@ namespace tr::gp::ecs::RenderDataSystem {
       uint32_t jointMatricesIndex = 0;
       for (auto [entity, animationData, renderable, transform] : animationsView.each()) {
          auto jointMatrices = std::vector<glm::mat4>{};
-
-         /*
-            - When a vertex has a joint attribute of 0 for instance, it means get the node whose
-            index in the file is given by the value at position 0 in the joints array in the gltf
-            skin property
-            - The animation lib will give you a list of matrices for all of the nodes in the gltf
-            file, sorted in hierarchical order.
-            - That sort is what the mapping needs to account for.
-            - We need a joint mapping that says when given a value from the vertex attributes, here
-            is the node index at that position in the joints array.
-
-            - Figure out an algorithm that creates this mapping. Probably have to iterate the sorted
-            nodes and match up the indices by joint names.
-
-         */
 
          jointMatrices.resize(animationData.jointMap.size());
          int i = 0;

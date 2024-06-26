@@ -2,7 +2,6 @@
 
 #include "GeometryHandles.hpp"
 #include "ct/HeightField.hpp"
-#include "gfx/Handles.hpp"
 #include "gfx/geometry/AnimationFactory.hpp"
 #include "gfx/helpers/Rando.hpp"
 
@@ -35,15 +34,11 @@ namespace tr::gfx::geo {
       auto createGeometryFromHeightfield(const ct::HeightField& heightfield)
           -> TexturedGeometryHandle;
 
-      auto loadGeometryFromGltf(const std::filesystem::path& filename,
-                                const std::optional<SkeletonHandle>& skeletonHandle = std::nullopt)
-          -> TexturedGeometryHandle;
+      auto loadGeometryFromGltf(const std::filesystem::path& filename) -> TexturedGeometryHandle;
 
       auto loadAnimatedGeometryFromGltf(const std::filesystem::path& filename,
                                         const SkeletonHandle& skeletonHandle)
           -> SkinnedGeometryData;
-
-      auto loadOzzMesh(const std::filesystem::path& filename) -> TexturedGeometryHandle;
 
       auto loadSkinnedModel(const std::filesystem::path& modelPath,
                             const std::filesystem::path& skeletonPath,
@@ -70,16 +65,11 @@ namespace tr::gfx::geo {
       auto generateNormal(int x, int y, const ct::HeightField& heightField) -> glm::vec3;
       auto createTexture(const tinygltf::Model& model, std::size_t textureIndex) -> ImageHandle;
 
-      auto buildParentMap(const tinygltf::Model& model) -> std::unordered_map<int, int>;
-
       auto parseNodeTransform(const tinygltf::Node& node) -> glm::mat4;
 
       auto parseNode(const tinygltf::Model& model,
                      const tinygltf::Node& node,
                      std::unordered_map<int, ImageHandle>& loadedTextureIndices,
-                     TexturedGeometryHandle& handle,
-                     std::vector<GltfNode>& nodes,
-                     const int nodeIndex,
-                     const std::unordered_map<int, int>& parentMap) -> void;
+                     TexturedGeometryHandle& handle) -> void;
    };
 }
