@@ -1,0 +1,57 @@
+skeleton order: 0 name: Armature
+skeleton order: 1 name: Character
+skeleton order: 2 name: mixamorig:Hips
+skeleton order: 3 name: mixamorig:Spine
+skeleton order: 4 name: mixamorig:Spine1
+skeleton order: 5 name: mixamorig:Spine2
+skeleton order: 6 name: mixamorig:Neck
+skeleton order: 7 name: mixamorig:Head
+skeleton order: 8 name: mixamorig:HeadTop_End
+skeleton order: 9 name: mixamorig:LeftShoulder
+skeleton order: 10 name: mixamorig:LeftArm
+skeleton order: 11 name: mixamorig:LeftForeArm
+skeleton order: 12 name: mixamorig:LeftHand
+skeleton order: 13 name: mixamorig:RightShoulder
+skeleton order: 14 name: mixamorig:RightArm
+skeleton order: 15 name: mixamorig:RightForeArm
+skeleton order: 16 name: mixamorig:RightHand
+skeleton order: 17 name: mixamorig:LeftUpLeg
+skeleton order: 18 name: mixamorig:LeftLeg
+skeleton order: 19 name: mixamorig:LeftFoot
+skeleton order: 20 name: mixamorig:LeftToeBase
+skeleton order: 21 name: mixamorig:LeftToe_End
+skeleton order: 22 name: mixamorig:RightUpLeg
+skeleton order: 23 name: mixamorig:RightLeg
+skeleton order: 24 name: mixamorig:RightFoot
+skeleton order: 25 name: mixamorig:RightToeBase
+skeleton order: 26 name: mixamorig:RightToe_End
+pushing back transform for Character
+Contains Joints
+Contains Weights
+skin joint index: 0: mixamorig:Hips sortedIndex: 2
+skin joint index: 1: mixamorig:Spine sortedIndex: 3
+skin joint index: 2: mixamorig:Spine1 sortedIndex: 4
+skin joint index: 3: mixamorig:Spine2 sortedIndex: 5
+skin joint index: 4: mixamorig:Neck sortedIndex: 6
+skin joint index: 5: mixamorig:Head sortedIndex: 7
+skin joint index: 6: mixamorig:HeadTop_End sortedIndex: 8
+skin joint index: 7: mixamorig:LeftShoulder sortedIndex: 9
+skin joint index: 8: mixamorig:LeftArm sortedIndex: 10
+skin joint index: 9: mixamorig:LeftForeArm sortedIndex: 11
+skin joint index: 10: mixamorig:LeftHand sortedIndex: 12
+skin joint index: 11: mixamorig:RightShoulder sortedIndex: 13
+skin joint index: 12: mixamorig:RightArm sortedIndex: 14
+skin joint index: 13: mixamorig:RightForeArm sortedIndex: 15
+skin joint index: 14: mixamorig:RightHand sortedIndex: 16
+skin joint index: 15: mixamorig:LeftUpLeg sortedIndex: 17
+skin joint index: 16: mixamorig:LeftLeg sortedIndex: 18
+skin joint index: 17: mixamorig:LeftFoot sortedIndex: 19
+skin joint index: 18: mixamorig:LeftToeBase sortedIndex: 20
+skin joint index: 19: mixamorig:LeftToe_End sortedIndex: 21
+skin joint index: 20: mixamorig:RightUpLeg sortedIndex: 22
+skin joint index: 21: mixamorig:RightLeg sortedIndex: 23
+skin joint index: 22: mixamorig:RightFoot sortedIndex: 24
+skin joint index: 23: mixamorig:RightToeBase sortedIndex: 25
+skin joint index: 24: mixamorig:RightToe_End sortedIndex: 26
+numJoints: 27
+numSoaJoints: 7

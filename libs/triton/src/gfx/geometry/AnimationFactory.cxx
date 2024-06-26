@@ -24,12 +24,6 @@ namespace tr::gfx::geo {
       auto skeleton = ozz::animation::Skeleton{};
       archive >> skeleton;
 
-      int i = 0;
-      for (const auto& name : skeleton.joint_names()) {
-         Log::debug << "skeleton joint name: " << i << " " << name << std::endl;
-         ++i;
-      }
-
       const auto key = skeletonMapKey.getKey();
 
       skeletons.emplace(key, std::move(skeleton));

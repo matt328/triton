@@ -116,8 +116,12 @@ namespace tr::gfx::geo {
 
          const auto& skeleton = animationFactory.getSkeleton(skeletonHandle);
 
-         ozz::animation::IterateJointsDF(skeleton, [](int current, int parent) {
-            Log::debug << "skeleton order: " << current << std::endl;
+         const auto jointNames =
+             std::vector<std::string>{skeleton.joint_names().begin(), skeleton.joint_names().end()};
+
+         ozz::animation::IterateJointsDF(skeleton, [&jointNames](int current, int parent) {
+            Log::debug << "skeleton order: " << current << " name: " << jointNames[current]
+                       << std::endl;
          });
 
          auto sgd = loadAnimatedGeometryFromGltf(modelPath, skeletonHandle);
@@ -263,6 +267,16 @@ namespace tr::gfx::geo {
                ++position;
             }
 
+            /*
+               I think something may still be off with the joint map here.
+               skeleton has a joint at postion 21, but in the gltf file node #21 is z_up
+            */
+
+            for (const auto& [position, sortedIndex] : jointMap) {
+               Log::debug << "position: " << position << ", sortedIndex: " << sortedIndex
+                          << std::endl;
+            }
+
             auto sgd = SkinnedGeometryData{.geometryHandle = texturedGeometryHandle.begin()->first,
                                            .imageHandle = texturedGeometryHandle.begin()->second,
                                            .skeletonHandle = skeletonHandle,
@@ -393,11 +407,9 @@ namespace tr::gfx::geo {
    }
 
    auto GeometryFactory::parseNodeTransform(const tinygltf::Node& node) -> glm::mat4 {
-      Log::debug << "parsing node transform for node: " << node.name << std::endl;
       // If glft file has a matrix, we should prefer that
       if (node.matrix.size() == 16) {
          auto floatVec = std::vector<float>{node.matrix.begin(), node.matrix.end()};
-         Log::debug << "node " << node.name << " has a transform matrix" << std::endl;
          return glm::make_mat4(floatVec.data());
       } else {
          // If none of these exist, it will end up with an identity matrix
@@ -441,19 +453,25 @@ namespace tr::gfx::geo {
       if (node.mesh != -1) {
 
          auto matrixPath = std::vector<glm::mat4>{};
-         matrixPath.push_back(parseNodeTransform(node));
          {
             auto currentNodeIndex = nodeIndex;
             while (parentMap.find(currentNodeIndex) != parentMap.end()) {
                const auto& currentNode = model.nodes[currentNodeIndex];
+               Log::debug << "pushing back transform for " << currentNode.name << std::endl;
                matrixPath.push_back(parseNodeTransform(currentNode));
                currentNodeIndex = parentMap.at(currentNodeIndex);
                // TODO: Fix this off by one
             }
          }
 
+         // Still need to figure out what is the difference bt cesium guy and my test models
+
          // push back the root since it has no parent
-         // matrixPath.push_back(parseNodeTransform(model.nodes[0]));
+         // This is only needed for the cesium guy, my test models work just fine bc their root
+         // transforms are identity
+         // uncomment this to get the cesium guy to be oriented correctly.
+         Log::debug << "pushing back transform for " << model.nodes[0].name << std::endl;
+         matrixPath.push_back(parseNodeTransform(model.nodes[0]));
 
          auto wholeMatrix = glm::mat4(1.f);
          for (auto it = matrixPath.rbegin(); it < matrixPath.rend(); ++it) {
