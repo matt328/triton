@@ -264,7 +264,7 @@ namespace ed::ui {
             ImGui::BeginChild(
                 "item view",
                 ImVec2(0,
-                       -ImGui::GetFrameHeightWithSpacing() * 3)); // Leave room for 1 line below us
+                       -ImGui::GetFrameHeightWithSpacing() * 4)); // Leave room for 1 line below us
 
             if (selectedEntity.has_value()) {
                ImGui::Text("Entity ID: %d", selectedEntity.value());
@@ -326,6 +326,18 @@ namespace ed::ui {
                skinnedModelFutures.push_back(
                    facade.loadSkinnedModelAsync(modelName, skeletonPath, animationPath));
             }
+
+            if (ImGui::Button("Load Cesium Reexport")) {
+               const auto modelName = std::filesystem::path{
+                   R"(C:\Users\Matt\Projects\game-assets\models\cesiumman\reexport\CesiumManReexported.gltf)"};
+               const auto skeletonPath = std::filesystem::path{
+                   R"(C:\Users\Matt\Projects\game-assets\models\cesiumman\reexport\skeleton.ozz)"};
+               const auto animationPath = std::filesystem::path{
+                   R"(C:\Users\Matt\Projects\game-assets\models\cesiumman\reexport\animation.ozz)"};
+               skinnedModelFutures.push_back(
+                   facade.loadSkinnedModelAsync(modelName, skeletonPath, animationPath));
+            }
+
             if (ImGui::Button("Load Peasant")) {
                const auto modelName = std::filesystem::path{
                    R"(C:\Users\Matt\Projects\game-assets\models\gltf-working\walking.gltf)"};

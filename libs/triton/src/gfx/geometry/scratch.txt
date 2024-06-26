@@ -1,0 +1,48 @@
+skeleton order: 0 name: Z_UP
+skeleton order: 1 name: Armature
+skeleton order: 2 name: Skeleton_torso_joint_1
+skeleton order: 3 name: Skeleton_torso_joint_2
+skeleton order: 4 name: torso_joint_3
+skeleton order: 5 name: Skeleton_neck_joint_1
+skeleton order: 6 name: Skeleton_neck_joint_2
+skeleton order: 7 name: Skeleton_arm_joint_L__4_
+skeleton order: 8 name: Skeleton_arm_joint_L__3_
+skeleton order: 9 name: Skeleton_arm_joint_L__2_
+skeleton order: 10 name: Skeleton_arm_joint_R
+skeleton order: 11 name: Skeleton_arm_joint_R__2_
+skeleton order: 12 name: Skeleton_arm_joint_R__3_
+skeleton order: 13 name: leg_joint_L_1
+skeleton order: 14 name: leg_joint_L_2
+skeleton order: 15 name: leg_joint_L_3
+skeleton order: 16 name: leg_joint_L_5
+skeleton order: 17 name: leg_joint_R_1
+skeleton order: 18 name: leg_joint_R_2
+skeleton order: 19 name: leg_joint_R_3
+skeleton order: 20 name: leg_joint_R_5
+skeleton order: 21 name: Cesium_Man
+pushing back transform for Cesium_Man
+pushing back transform for Armature
+pushing back transform for Z_UP
+Contains Joints
+Contains Weights
+skin joint index: 0: Skeleton_torso_joint_1 sortedIndex: 2
+skin joint index: 1: Skeleton_torso_joint_2 sortedIndex: 3
+skin joint index: 2: torso_joint_3 sortedIndex: 4
+skin joint index: 3: Skeleton_neck_joint_1 sortedIndex: 5
+skin joint index: 4: Skeleton_neck_joint_2 sortedIndex: 6
+skin joint index: 5: Skeleton_arm_joint_L__4_ sortedIndex: 7
+skin joint index: 6: Skeleton_arm_joint_R sortedIndex: 10
+skin joint index: 7: Skeleton_arm_joint_L__3_ sortedIndex: 8
+skin joint index: 8: Skeleton_arm_joint_R__2_ sortedIndex: 11
+skin joint index: 9: Skeleton_arm_joint_L__2_ sortedIndex: 9
+skin joint index: 10: Skeleton_arm_joint_R__3_ sortedIndex: 12
+skin joint index: 11: leg_joint_L_1 sortedIndex: 13
+skin joint index: 12: leg_joint_R_1 sortedIndex: 17
+skin joint index: 13: leg_joint_L_2 sortedIndex: 14
+skin joint index: 14: leg_joint_R_2 sortedIndex: 18
+skin joint index: 15: leg_joint_L_3 sortedIndex: 15
+skin joint index: 16: leg_joint_R_3 sortedIndex: 19
+skin joint index: 17: leg_joint_L_5 sortedIndex: 16
+skin joint index: 18: leg_joint_R_5 sortedIndex: 20
+numJoints: 22
+numSoaJoints: 6
