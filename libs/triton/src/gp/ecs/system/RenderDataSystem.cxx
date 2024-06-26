@@ -58,8 +58,12 @@ namespace tr::gp::ecs::RenderDataSystem {
          jointMatrices.resize(animationData.jointMap.size());
          int i = 0;
          for (const auto [position, jointId] : animationData.jointMap) {
-            jointMatrices[position] = convertOzzToGlm(animationData.models[jointId]) *
-                                      animationData.inverseBindMatrices[i];
+            auto inverseBindMatrix = animationData.inverseBindMatrices[i];
+            if (animationData.renderBindPose) {
+               inverseBindMatrix = glm::identity<glm::mat4>();
+            }
+            jointMatrices[position] =
+                convertOzzToGlm(animationData.models[jointId]) * inverseBindMatrix;
             ++i;
          }
 

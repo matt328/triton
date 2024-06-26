@@ -6,6 +6,21 @@ namespace tr::gp::ecs::AnimationSystem {
       const auto view = registry.view<Animation>();
 
       for (auto [entity, animationData] : view.each()) {
+
+         if (animationData.renderBindPose) {
+            for (auto& model : animationData.models) {
+               model = ozz::math::Float4x4::identity();
+            }
+            continue;
+         }
+
+         if (animationData.playing) {
+            animationData.timeRatio += 0.005f;
+            if (animationData.timeRatio >= 1.f) {
+               animationData.timeRatio = 0.f;
+            }
+         }
+
          const auto& animation = animationFactory.getAnimation(animationData.animationHandle);
 
          auto samplingJob = ozz::animation::SamplingJob{};
