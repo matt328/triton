@@ -424,7 +424,6 @@ namespace tr::gfx::geo {
                }
             }
             if (attribute.first.compare("JOINTS_0") == 0) {
-               Log::debug << "Contains Joints" << std::endl;
                for (size_t i = 0; i < vertexCount; i++) {
                   const auto& jointData =
                       reinterpret_cast<const uint8_t*>(&buffer.data[dataOffset]);
@@ -432,7 +431,6 @@ namespace tr::gfx::geo {
                }
             }
             if (attribute.first.compare("WEIGHTS_0") == 0) {
-               Log::debug << "Contains Weights" << std::endl;
                for (size_t i = 0; i < vertexCount; i++) {
                   vertices[i].weight0 = glm::make_vec4(&data[i * 4]);
                }

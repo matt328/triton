@@ -5,6 +5,7 @@
 #include "RobotoRegular.h"
 #include "gp/ecs/component/DebugConstants.hpp"
 #include "util/MathUtils.hpp"
+#include <imgui.h>
 
 namespace ed::ui {
    Manager::Manager(tr::ctx::GameplayFacade& facade) : facade{facade} {
@@ -383,11 +384,13 @@ namespace ed::ui {
 
       bool previousBindPose = bindPose;
 
+      ImGui::BeginDisabled(playing);
       if (ImGui::Checkbox("Bind Pose", &bindPose)) {
          if (bindPose != previousBindPose) {
             animationComponent.renderBindPose = bindPose;
          }
       }
+      ImGui::EndDisabled();
 
       bool previousPlaying = playing;
 
@@ -399,21 +402,16 @@ namespace ed::ui {
          }
       }
 
+      ImGui::BeginDisabled(playing);
       const auto [min_v, max_v] = facade.getAnimationTimeRange(animationComponent.animationHandle);
 
       static float timeValue = min_v;
       if (ImGui::SliderFloat("Time", &timeValue, min_v, max_v, "%.2f")) {
-         animationComponent.timeRatio = timeValue;
+         const auto value = (timeValue - min_v) / (max_v - min_v);
+         animationComponent.timeRatio = value;
       }
-
       ImGui::EndDisabled();
-
-      ImGui::SeparatorText("Joint Matrices");
-
-      for (const auto& matrix : animationComponent.models) {
-         const auto glmMatrix = tr::util::ozzToGlm(matrix);
-         showMatrix4x4(glmMatrix, "Matrix");
-      }
+      ImGui::EndDisabled();
    }
 
    void Manager::showMatrix4x4(const glm::mat4& matrix, const char* label) {

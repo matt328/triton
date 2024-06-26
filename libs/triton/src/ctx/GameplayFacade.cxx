@@ -90,10 +90,6 @@ namespace tr::ctx {
                               .getSkeleton(model.skeletonHandle)
                               .num_soa_joints();
 
-      Log::debug << "numJoints: " << numJoints << std::endl;
-
-      Log::debug << "numSoaJoints: " << numSoaJoints << std::endl;
-
       gameplaySystem.registry->emplace<gp::ecs::Animation>(e,
                                                            model.animationHandle,
                                                            model.skeletonHandle,
