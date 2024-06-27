@@ -7,6 +7,8 @@ namespace al::gltf {
       GltfImporter();
 
     private:
+      static constexpr auto DefaultSamplingRate = 30.f;
+
       tinygltf::TinyGLTF m_loader;
       tinygltf::Model m_model;
 
