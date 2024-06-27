@@ -14,8 +14,6 @@ namespace al::gltf {
       Converter(Converter&&) = delete;
       Converter& operator=(Converter&&) = delete;
 
-      auto convert(const std::filesystem::path& gltf,
-                   const std::filesystem::path& skeleton,
-                   const std::filesystem::path& animation) -> ModelData;
+      auto convert(const std::filesystem::path& gltf) -> ModelData;
    };
 }
