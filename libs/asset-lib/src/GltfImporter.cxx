@@ -171,7 +171,7 @@ namespace al::gltf {
                              float samplingRate,
                              ozz::animation::offline::RawAnimation* animation) {
       if (samplingRate == 0.0f) {
-         samplingRate = 30.0f;
+         samplingRate = DefaultSamplingRate;
 
          static bool samplingRateWarn = false;
          if (!samplingRateWarn) {
@@ -387,10 +387,42 @@ namespace al::gltf {
    }
 
    [[nodiscard]] ozz::vector<tinygltf::Skin> GltfImporter::GetSkinsForScene(
-       const tinygltf::Scene& _scene) const {
+       const tinygltf::Scene& scene) const {
+      ozz::set<int> open;
+      ozz::set<int> found;
+
+      for (int nodeIndex : scene.nodes) {
+         open.insert(nodeIndex);
+      }
+
+      while (!open.empty()) {
+         int nodeIndex = *open.begin();
+         found.insert(nodeIndex);
+         open.erase(nodeIndex);
+
+         auto& node = m_model.nodes[nodeIndex];
+         for (int childIndex : node.children) {
+            open.insert(childIndex);
+         }
+      }
+
+      ozz::vector<tinygltf::Skin> skins;
+      for (const tinygltf::Skin& skin : m_model.skins) {
+         if (!skin.joints.empty() && found.find(skin.joints[0]) != found.end()) {
+            skins.push_back(skin);
+         }
+      }
+
+      return skins;
    }
 
-   [[nodiscard]] const tinygltf::Node* GltfImporter::FindNodeByName(
-       const std::string& _name) const {
+   [[nodiscard]] const tinygltf::Node* GltfImporter::FindNodeByName(const std::string& name) const {
+      for (const tinygltf::Node& node : m_model.nodes) {
+         if (node.name == name) {
+            return &node;
+         }
+      }
+
+      return nullptr;
    }
 }
