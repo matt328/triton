@@ -1,7 +1,7 @@
 {
    "name": "triton",
    "version-string": "0.1.0",
-   "builtin-baseline": "936588e23157b56507069ad664b020881c119e54",
+   "builtin-baseline": "67a300519ea09dbf02b4d06982e781a01b617b93",
    "dependencies": [
       "cereal",
       "entt",
@@ -10,6 +10,7 @@
       "glm",
       "glslang",
       "libnoise",
+      "nativefiledialog-extended",
       "nlohmann-json",
       "platform-folders",
       "stb",

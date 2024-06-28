@@ -8,6 +8,7 @@ add_executable(${PROJECT_NAME} ${assettool_SRC})
 
 find_package(cereal CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
+find_package(nfd CONFIG REQUIRED)
 
 IF(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
    target_compile_options(${PROJECT_NAME} PRIVATE ${TRITON_COMPILE_OPTIONS})
@@ -45,6 +46,7 @@ target_link_libraries(${PROJECT_NAME}
    ozz_animation
    utils-lib
    asset-lib
+   nfd::nfd
 )
 
 target_include_directories(${PROJECT_NAME}

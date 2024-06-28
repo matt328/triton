@@ -96,26 +96,6 @@ namespace tr::gfx::tx {
       const auto modelHandle = uploadGeometry(tgh);
       const auto meshHandle = modelHandle.begin()->first;
       const auto textureHandle = modelHandle.begin()->second;
-      /*
-         JoinMatrices are a new type of data since they get written into a shared buffer, and also
-         get updated each frame.
-
-         - The skeleton and animation data structures are used by the ECS on
-         the CPU side to produce a set of JointMatrices for each skinned model.
-         - Each JointMatrices set needs added to a list in RenderData, along with adding the
-         indexing information to the SkinnedModelHandles in RenderData
-         - At the sync point, Renderer will lock the RenderData structure and copy indexing strucure
-         list and upload JointMatrices to a cpu->gpu buffer (host visible, host coherent)
-         - This method should return the mesh and texture handles along with the Skeleton and
-         Animation data.
-         - The mesh and texture handles can be put in a Renderable component, and the Skeleton and
-         Animation put into an animation Component.
-         - During AnimationSystem update, joint matrices will be calculated and stored in the
-         component.
-         - During RenderDataSystem update, if the entity has an Animation component, add it's
-         jointmatrices to the renderdata list, and calculate its indexing structure and add it to
-         renderdata.skinnedMeshData
-      */
       const auto smh = LoadedSkinnedModelData{.meshHandle = meshHandle,
                                               .textureHandle = textureHandle,
                                               .skeletonHandle = sgd.skeletonHandle,
