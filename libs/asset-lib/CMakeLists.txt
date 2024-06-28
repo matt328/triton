@@ -8,6 +8,7 @@ add_library(${PROJECT_NAME} STATIC ${assetlib_SRC})
 
 find_package(cereal CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
+find_path(TINYGLTF_INCLUDE_DIRS "tiny_gltf.h")
 
 target_compile_definitions(${PROJECT_NAME}
    PRIVATE
@@ -28,7 +29,6 @@ target_precompile_headers(${PROJECT_NAME}
    <cereal/types/vector.hpp>
    <ozz/animation/runtime/skeleton.h>
    <ozz/base/io/archive.h>
-   <tiny_gltf.h>
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -45,4 +45,5 @@ target_include_directories(${PROJECT_NAME}
    include
    PRIVATE
    src
+   ${TINYGLTF_INCLUDE_DIRS}
 )

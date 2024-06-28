@@ -8,7 +8,6 @@ add_executable(${PROJECT_NAME} ${assettool_SRC})
 
 find_package(cereal CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
-find_package(docopt CONFIG REQUIRED)
 
 IF(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
    target_compile_options(${PROJECT_NAME} PRIVATE ${TRITON_COMPILE_OPTIONS})
@@ -38,11 +37,11 @@ target_precompile_headers(${PROJECT_NAME}
    <vector>
    <filesystem>
    <unordered_map>
+   <tiny_gltf.h>
 )
 
 target_link_libraries(${PROJECT_NAME}
    PRIVATE
-   docopt
    ozz_animation
    utils-lib
    asset-lib
