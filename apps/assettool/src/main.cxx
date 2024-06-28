@@ -1,36 +1,68 @@
-#include "docopt.h"
 #include "GltfConverter.hpp"
+#include "GlmCereal.hpp"
+#include <filesystem>
 
-static const auto USAGE =
-    R"(Asset Tool.
+auto parseCommandLine(int argc, char* argv[]) {
+   std::unordered_map<std::string, std::string> options;
 
-    Usage:
-      assettool gltf --file <gltf>... --skeleton <skeleton>...
+   options["mode"] = argv[1];
 
-    Options:
-      -h --help                             Show this screen.
-      -v, --version                         Show version.
-      -f <name>, --file <name>              A file
-      -s <skeleton>, --skeleton <skeleton>  A skeleton
-)";
+   for (int i = 2; i < argc; ++i) {
+      std::string arg = argv[i];
+      if (arg.starts_with('-')) {
+         auto delimiter_pos = arg.find('=');
+         if (delimiter_pos != std::string::npos) {
+            std::string key = arg.substr(1, delimiter_pos - 1); // Skip the leading '-'
+            std::string value = arg.substr(delimiter_pos + 1);
+            options[key] = value;
+         }
+      }
+   }
 
-int main(int argc, const char** argv) {
+   return options;
+}
+
+int main(int argc, char* argv[]) {
+   namespace fs = std::filesystem;
    Log::LogManager::getInstance().setMinLevel(Log::Level::Trace);
 
-   auto args = docopt::docopt(USAGE, {argv + 1, argv + argc}, true, "Asset Tool 0.0.1");
+   auto options = parseCommandLine(argc, argv);
 
-   if (args.find("gltf") != args.end() && args["gltf"].asBool() == true) {
-      const auto gltfFile =
-          std::filesystem::absolute(std::filesystem::path{args["--file"].asStringList()[0]});
-      const auto skeletonFile =
-          std::filesystem::absolute(std::filesystem::path{args["--skeleton"].asStringList()[0]});
+   if (options["mode"] == "gltf") {
+      const auto gltfFileStr = options["f"];
+      auto gltfFile = fs::path{gltfFileStr};
 
-      Log::info << "gltf branch, gltf file: " << gltfFile.string()
+      if (gltfFile.is_relative()) {
+         gltfFile = fs::absolute(gltfFile);
+      }
+
+      auto skeletonFile = fs::path{options["s"]};
+      if (skeletonFile.is_relative()) {
+         skeletonFile = fs::absolute(skeletonFile);
+      }
+
+      auto outputFile = fs::path{options["o"]};
+      if (outputFile.is_relative()) {
+         outputFile = fs::absolute(outputFile);
+      }
+
+      Log::info << "Converting Gltf file, input: " << gltfFile.string()
                 << ", skeletonFile: " << skeletonFile.string() << std::endl;
 
       auto converter = al::gltf::Converter{};
 
-      auto result = converter.convert(gltfFile, skeletonFile);
+      try {
+         auto tritonModel = converter.convert(gltfFile, skeletonFile);
+         {
+            auto os = std::ofstream(outputFile, std::ios::binary);
+            cereal::BinaryOutputArchive output(os);
+            output(tritonModel);
+         }
+         Log::info << "Wrote binary output file to " << outputFile.string() << std::endl;
+      } catch (const std::exception& ex) { Log::error << ex.what() << std::endl; }
+   } else {
+      Log::error << "First arg must be 'gltf' for now" << std::endl;
+      return -1;
    }
 
    return 0;

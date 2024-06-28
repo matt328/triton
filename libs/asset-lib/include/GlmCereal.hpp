@@ -39,6 +39,10 @@ namespace glm {
       archive(v.x, v.y, v.z, v.w);
    }
    template <class Archive>
+   void serialize(Archive& archive, glm::u8vec4& v) {
+      archive(v.x, v.y, v.z, v.w);
+   }
+   template <class Archive>
    void serialize(Archive& archive, glm::dvec2& v) {
       archive(v.x, v.y);
    }

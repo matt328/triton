@@ -48,6 +48,6 @@ struct Model {
 
    template <class Archive>
    void serialize(Archive& archive) {
-      // archive(vertices, indices);
+      archive(vertices, indices);
    }
 };
