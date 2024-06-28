@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ModelData.hpp"
+#include "Model.hpp"
 
 namespace al::gltf {
    class Converter {
@@ -14,6 +14,10 @@ namespace al::gltf {
       Converter(Converter&&) = delete;
       Converter& operator=(Converter&&) = delete;
 
-      auto convert(const std::filesystem::path& gltf) -> ModelData;
+      /// Reads a gltf file and a skeleton in order to build the runtime structure representing an
+      /// animated model.  The skeleton is only referenced in order to map the joints in the model
+      /// to those in the skeleton.
+      auto convert(const std::filesystem::path& gltf, const std::filesystem::path& skeleton)
+          -> Model;
    };
 }
