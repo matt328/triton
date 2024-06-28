@@ -68,6 +68,7 @@ find_package(unofficial-vulkan-memory-allocator-hpp CONFIG REQUIRED)
 find_package(unofficial-noise CONFIG REQUIRED)
 find_package(unofficial-noiseutils CONFIG REQUIRED)
 find_package(Vulkan REQUIRED)
+find_package(nfd CONFIG REQUIRED)
 
 target_compile_definitions(${PROJECT_NAME}
    PRIVATE
@@ -120,6 +121,7 @@ target_precompile_headers(${PROJECT_NAME}
    <imgui.h>
    <imgui_impl_glfw.h>
    <imgui_impl_vulkan.h>
+   <nfd.hpp>
    <ozz/animation/runtime/animation.h>
    <ozz/animation/runtime/local_to_model_job.h>
    <ozz/animation/runtime/sampling_job.h>
@@ -140,6 +142,8 @@ target_precompile_headers(${PROJECT_NAME}
    <vulkan/vulkan_raii.hpp>
 )
 
+variable_watch(Vulkan_INCLUDE_DIRS)
+
 target_link_libraries(${PROJECT_NAME}
    PUBLIC
    glfw
@@ -152,6 +156,7 @@ target_link_libraries(${PROJECT_NAME}
    glslang::glslang-default-resource-limits
    glslang::SPIRV
    imgui::imgui
+   nfd::nfd
    Tracy::TracyClient
    unofficial::noise::noise
    unofficial::noiseutils::noiseutils

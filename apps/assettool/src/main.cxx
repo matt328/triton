@@ -2,8 +2,28 @@
 #include "GlmCereal.hpp"
 #include <filesystem>
 
+#include <nfd.hpp>
+
 auto parseCommandLine(int argc, char* argv[]) {
-   std::unordered_map<std::string, std::string> options;
+   auto options = std::unordered_map<std::string, std::string>{};
+
+   NFD::Guard nfdGuard;
+
+   auto outPath = NFD::UniquePath{};
+
+   auto filterItems = std::array<nfdfilteritem_t, 2>{nfdfilteritem_t{"Source code", "c,cpp,cc"},
+                                                     nfdfilteritem_t{"Headers", "h,hpp"}};
+
+   // show the dialog
+   const auto result = NFD::OpenDialog(outPath, filterItems.data(), filterItems.size());
+
+   if (result == NFD_OKAY) {
+      Log::info << "Success: " << outPath.get() << std::endl;
+   } else if (result == NFD_CANCEL) {
+      Log::info << "User pressed cancel." << std::endl;
+   } else {
+      Log::error << "Error: " << NFD::GetError() << std::endl;
+   }
 
    options["mode"] = argv[1];
 
