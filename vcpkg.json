@@ -5,6 +5,7 @@
    "dependencies": [
       "cereal",
       "entt",
+      "docopt",
       "fastgltf",
       "glfw3",
       "glm",

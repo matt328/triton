@@ -1,13 +1,14 @@
-project("fbxtool" VERSION "0.0.1" LANGUAGES CXX)
+project("assettool" VERSION "0.0.1" LANGUAGES CXX)
 
-set(fbxtool_SRC
+set(assettool_SRC
    "src/main.cxx"
 )
 
-add_executable(${PROJECT_NAME} ${fbxtool_SRC})
+add_executable(${PROJECT_NAME} ${assettool_SRC})
 
 find_package(cereal CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
+find_package(docopt CONFIG REQUIRED)
 
 IF(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
    target_compile_options(${PROJECT_NAME} PRIVATE ${TRITON_COMPILE_OPTIONS})
@@ -41,8 +42,8 @@ target_precompile_headers(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
    PRIVATE
+   docopt
    ozz_animation
-   ufbx
    utils-lib
    asset-lib
 )

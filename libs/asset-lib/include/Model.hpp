@@ -1,7 +1,8 @@
 #pragma once
 
-#include "GlmCereal.hpp"
+#include "GlmCereal.hpp" // This is used during cerealization
 
+/// Eventually make this the source of truth for vertex data in triton
 struct Vertex {
    glm::vec3 position;
    glm::vec3 normal;
@@ -22,11 +23,20 @@ struct Vertex {
    }
 };
 
+class ImageData {
+ public:
+   std::vector<unsigned char> data{};
+   int width{};
+   int height{};
+   int component{};
+};
+
 struct Model {
-   std::vector<Vertex> vertices;
-   std::vector<uint32_t> indices;
-   std::unordered_map<int, int> jointRemaps;
-   std::vector<glm::mat4> inverseBindPoses;
+   std::vector<Vertex> vertices{};
+   std::vector<uint32_t> indices{};
+   std::unordered_map<int, int> jointRemaps{};
+   std::vector<glm::mat4> inverseBindPoses{};
+   ImageData imageData{};
 
    [[nodiscard]] auto skinned() const {
       return !inverseBindPoses.empty();
@@ -34,10 +44,6 @@ struct Model {
 
    [[nodiscard]] auto numJoints() const {
       return static_cast<int>(inverseBindPoses.size());
-   }
-
-   [[nodiscard]] auto highestJointIndex() const {
-      return 0; // TODO
    }
 
    template <class Archive>
