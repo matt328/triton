@@ -142,8 +142,6 @@ target_precompile_headers(${PROJECT_NAME}
    <vulkan/vulkan_raii.hpp>
 )
 
-variable_watch(Vulkan_INCLUDE_DIRS)
-
 target_link_libraries(${PROJECT_NAME}
    PUBLIC
    glfw
