@@ -11,7 +11,7 @@ auto parseCommandLine(int argc, char* argv[]) {
 
    auto outPath = NFD::UniquePath{};
 
-   auto filterItems = std::array<nfdfilteritem_t, 2>{nfdfilteritem_t{"Source code", "c,cpp,cc"},
+   auto filterItems = std::array<nfdfilteritem_t, 2>{nfdfilteritem_t{"Source code", "c,cpp,cc,cxx"},
                                                      nfdfilteritem_t{"Headers", "h,hpp"}};
 
    // show the dialog
