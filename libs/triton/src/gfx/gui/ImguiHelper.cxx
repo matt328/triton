@@ -1,6 +1,7 @@
 #include "ImguiHelper.hpp"
 
 #include "gfx/GraphicsDevice.hpp"
+#include <vulkan/vulkan_structs.hpp>
 
 namespace tr::gfx::Gui {
    ImGuiHelper::ImGuiHelper(const GraphicsDevice& graphicsDevice, GLFWwindow* window) {
@@ -49,10 +50,17 @@ namespace tr::gfx::Gui {
       initInfo.MinImageCount = 3;
       initInfo.ImageCount = 3;
       initInfo.UseDynamicRendering = true;
-      initInfo.ColorAttachmentFormat = static_cast<VkFormat>(graphicsDevice.getSwapchainFormat());
       initInfo.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
 
-      ImGui_ImplVulkan_Init(&initInfo, VK_NULL_HANDLE);
+      auto createInfo = vk::PipelineRenderingCreateInfo{};
+      createInfo.colorAttachmentCount = 1;
+      const auto format = graphicsDevice.getSwapchainFormat();
+      createInfo.pColorAttachmentFormats = &format;
+
+      initInfo.UseDynamicRendering = true;
+      initInfo.PipelineRenderingCreateInfo = createInfo;
+
+      ImGui_ImplVulkan_Init(&initInfo);
    }
 
    ImGuiHelper::~ImGuiHelper() {
