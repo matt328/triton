@@ -97,9 +97,19 @@ namespace ed::ui::helpers {
       Creating an entity should only allow to choose from loaded assets.
    */
    void renderAssetTree(data::DataFacade& dataFacade) {
-      if (ImGui::Begin("Asset Tree",
-                       nullptr,
-                       dataFacade.isUnsaved() ? ImGuiWindowFlags_UnsavedDocument : 0)) {
+      const auto unsaved = dataFacade.isUnsaved() ? ImGuiWindowFlags_UnsavedDocument : 0;
+      if (ImGui::Begin("Asset Tree", nullptr, ImGuiWindowFlags_MenuBar | unsaved)) {
+
+         if (ImGui::BeginMenuBar()) {
+            if (ImGui::BeginMenu("Import")) {
+               if (ImGui::MenuItem("Skeleton")) {}
+               if (ImGui::MenuItem("Animation")) {}
+               if (ImGui::MenuItem("Model")) {}
+               ImGui::EndMenu();
+            }
+            ImGui::EndMenuBar();
+         }
+
          ImGui::SetNextItemOpen(true);
          if (ImGui::CollapsingHeader("Scripts", ImGuiTreeNodeFlags_None)) {
             ImGui::Selectable("MainCharacter");
