@@ -5,6 +5,7 @@
 #include "data/DataFacade.hpp"
 #include "gp/ecs/component/DebugConstants.hpp"
 #include "ImGuiHelpers.hpp"
+#include <imgui.h>
 
 /*
    TODO: view showing skeletons, animations, models in the current project.
@@ -50,7 +51,17 @@ namespace ed::ui {
       renderMenuBar();
       renderEntityEditor();
       renderDebugWindow();
-      helpers::renderAssetTree(dataFacade);
+
+      helpers::renderImportSkeletonModal(dataFacade);
+      helpers::renderImportAnimationModal(dataFacade);
+
+      bool openSkeleton{};
+
+      helpers::renderAssetTree(dataFacade, openSkeleton);
+
+      if (openSkeleton) {
+         ImGui::OpenPopup("Import Skeleton");
+      }
    }
 
    void Manager::handleTerrainFutures() {
@@ -256,9 +267,6 @@ namespace ed::ui {
       if (showAnimation) {
          ImGui::OpenPopup("Import Animation");
       }
-
-      helpers::renderImportSkeletonModal(dataFacade);
-      helpers::renderImportAnimationModal(dataFacade);
 
       if (b) {
          ImGui::OpenPopup("Unsaved");
