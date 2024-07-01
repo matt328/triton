@@ -5,6 +5,7 @@ set(editor_SRC
    "src/Application.cxx"
    "src/ProjectFile.cxx"
    "src/ui/Manager.cxx"
+   "src/data/DataFacade.cxx"
 )
 
 add_executable(${PROJECT_NAME} ${editor_SRC})
@@ -15,6 +16,8 @@ ENDIF()
 
 configure_file(src/config.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/config.h)
 
+find_package(cereal CONFIG REQUIRED)
+find_package(nfd CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(platform_folders CONFIG REQUIRED)
 
@@ -28,9 +31,16 @@ target_compile_definitions(${PROJECT_NAME}
 
 target_precompile_headers(${PROJECT_NAME}
    PRIVATE
+   <cereal/archives/binary.hpp>
+   <cereal/types/unordered_map.hpp>
+   <cereal/types/map.hpp>
+   <cereal/types/vector.hpp>
+   <cereal/types/string.hpp>
+   <cereal/types/complex.hpp>
    <filesystem>
    <future>
    <functional>
+   <nfd.hpp>
    <nlohmann/json.hpp>
    <sago/platform_folders.h>
    <sstream>
@@ -55,6 +65,7 @@ endif()
 
 target_link_libraries(${PROJECT_NAME}
    PRIVATE
+   cereal::cereal
    utils-lib
    triton
    nlohmann_json::nlohmann_json

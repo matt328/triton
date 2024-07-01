@@ -1,5 +1,6 @@
 #pragma once
 
+#include "data/DataFacade.hpp"
 namespace tr::ctx {
    class Context;
    class GameplayFacade;
@@ -9,6 +10,10 @@ namespace ed {
 
    namespace ui {
       class Manager;
+   }
+
+   namespace data {
+      class DataFacade;
    }
 
    class Application {
@@ -44,6 +49,8 @@ namespace ed {
       bool mouseCaptured{};
       bool fullscreen{};
       int prevXPos{}, prevYPos{}, prevWidth{}, prevHeight{};
+
+      std::unique_ptr<data::DataFacade> dataFacade;
 
       std::unique_ptr<ui::Manager> manager;
 

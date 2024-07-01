@@ -6,6 +6,8 @@
 #include "util/Paths.hpp"
 
 #include "ui/Manager.hpp"
+#include "data/DataFacade.hpp"
+#include <memory>
 
 #ifdef _WIN32
 #define GLFW_EXPOSE_NATIVE_WIN32
@@ -107,7 +109,9 @@ namespace ed {
       context =
           std::make_unique<tr::ctx::Context>(window.get(), ImguiEnabled, GameplayDebugEnabled);
 
-      manager = std::make_unique<ui::Manager>(context->getGameplayFacade());
+      dataFacade = std::make_unique<data::DataFacade>();
+
+      manager = std::make_unique<ui::Manager>(context->getGameplayFacade(), *dataFacade);
 
       manager->addQuitListener<&tr::ctx::Context::hostWindowClosed>(context.get());
       manager->setFullscreenFn([this]() { toggleFullscreen(*this); });
