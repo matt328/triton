@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Application.hpp"
+#include "data/DataFacade.hpp"
 #include "gp/ecs/component/Animation.hpp"
 #include "gfx/Handles.hpp"
 #include <entt/entt.hpp>
@@ -20,7 +21,7 @@ namespace tr::util {
 namespace ed::ui {
    class Manager {
     public:
-      Manager(tr::ctx::GameplayFacade& facade);
+      Manager(tr::ctx::GameplayFacade& facade, data::DataFacade& dataFacade);
       ~Manager();
 
       Manager(const Manager&) = delete;
@@ -44,7 +45,11 @@ namespace ed::ui {
       }
 
     private:
+      static constexpr auto ProjectFileFilters =
+          std::array<nfdfilteritem_t, 1>{nfdfilteritem_t{"Triton Project", "trp"}};
+
       tr::ctx::GameplayFacade& facade;
+      data::DataFacade& dataFacade;
 
       std::vector<std::future<tr::gfx::ModelHandle>> modelFutures{};
       std::vector<std::future<tr::gfx::ModelHandle>> terrainFutures{};
@@ -55,17 +60,14 @@ namespace ed::ui {
 
       std::optional<uint32_t> selectedEntity{};
       std::optional<std::filesystem::path> openFilePath{};
-      bool dirty = false;
-
-      ImGui::FileBrowser openProjectFileDialog;
-      ImGui::FileBrowser saveProjectFileDialog{ImGuiFileBrowserFlags_EnterNewFilename |
-                                               ImGuiFileBrowserFlags_CreateNewDir};
 
       entt::delegate<void(void)> quitDelegate{};
 
       std::function<void(void)> toggleFullscreenFn;
       std::function<void(bool)> wireframeCallback;
       bool enableWireframe{false};
+
+      std::unique_ptr<NFD::Guard> guard;
 
       void handleModelFutures();
       void handleTerrainFutures();
@@ -74,10 +76,11 @@ namespace ed::ui {
       void renderDockSpace();
       void renderMenuBar();
       void renderEntityEditor();
-      void renderDialogs();
       void showMatrix4x4(const glm::mat4& matrix, const char* label);
       void renderAnimationArea(tr::gp::ecs::Animation& animationComponent);
 
       void renderDebugWindow();
+
+      auto getSavePath() -> std::optional<std::filesystem::path>;
    };
 }
