@@ -184,7 +184,10 @@ namespace ed::ui {
                const auto result =
                    NFD::OpenDialog(inPath, ProjectFileFilters.data(), ProjectFileFilters.size());
                if (result == NFD_OKAY) {
-                  dataFacade.load(std::filesystem::path{inPath.get()});
+                  const auto filePath = std::filesystem::path{inPath.get()};
+                  dataFacade.load(filePath);
+                  openFilePath.emplace(filePath);
+                  pr::Properties::getInstance().setRecentFilePath(filePath);
                } else {
                   Log::error << "Error: " << NFD::GetError() << std::endl;
                }
@@ -253,15 +256,6 @@ namespace ed::ui {
       if (showAnimation) {
          ImGui::OpenPopup("Import Animation");
       }
-
-      auto skeletonFilters = std::vector<nfdfilteritem_t>{nfdfilteritem_t{"Ozz Skeleton", "ozz"}};
-      auto animationFilters = std::vector<nfdfilteritem_t>{nfdfilteritem_t{"Ozz Animation", "ozz"}};
-
-      static auto skeletonName = std::string{};
-      static auto skeletonFileName = std::string{};
-
-      static auto animationName = std::string{};
-      static auto animationFileName = std::string{};
 
       helpers::renderImportSkeletonModal(dataFacade);
       helpers::renderImportAnimationModal(dataFacade);
