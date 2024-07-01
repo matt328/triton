@@ -23,6 +23,7 @@ namespace ImGuiEx {
       style.ScrollbarRounding = 3;
       style.GrabRounding = 3;
       style.TabRounding = 3;
+      style.IndentSpacing = 30;
       style.WindowTitleAlign = ImVec2{0.5f, 0.5f};
       style.ButtonTextAlign = ImVec2{0.5f, 0.5f};
 

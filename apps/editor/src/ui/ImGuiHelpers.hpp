@@ -1,6 +1,7 @@
 #pragma once
 
 #include "data/DataFacade.hpp"
+#include <imgui.h>
 #include <imgui_stdlib.h>
 
 namespace ed::ui::helpers {
@@ -95,45 +96,35 @@ namespace ed::ui::helpers {
 
       Creating an entity should only allow to choose from loaded assets.
    */
-   void renderAssetTree() {
+   void renderAssetTree(data::DataFacade& dataFacade) {
       if (ImGui::Begin("Asset Tree")) {
-
-         ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-         ImGui::PushID("Scripts");
-         if (ImGui::TreeNode("Scripts")) {
+         ImGui::SetNextItemOpen(true);
+         if (ImGui::CollapsingHeader("Scripts", ImGuiTreeNodeFlags_None)) {
             ImGui::Selectable("MainCharacter");
             ImGui::Selectable("MillAbout");
             ImGui::Selectable("IdleInPlace");
-            ImGui::TreePop();
          }
-         ImGui::PopID();
 
-         ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-         ImGui::PushID("Skeletons");
-         if (ImGui::TreeNode("Skeletons")) {
-            ImGui::Selectable("Skeleton1");
-            ImGui::Selectable("Skeleton2");
-            ImGui::TreePop();
+         ImGui::SetNextItemOpen(true);
+         if (ImGui::CollapsingHeader("Skeletons", ImGuiTreeNodeFlags_None)) {
+            for (const auto& [name, filename] : dataFacade.getSkeletons()) {
+               ImGui::Selectable(name.c_str());
+            }
          }
-         ImGui::PopID();
 
-         ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-         ImGui::PushID("Animations");
-         if (ImGui::TreeNode("Animations")) {
-            ImGui::Selectable("Walk");
-            ImGui::Selectable("Run");
-            ImGui::TreePop();
+         ImGui::SetNextItemOpen(true);
+         if (ImGui::CollapsingHeader("Animations", ImGuiTreeNodeFlags_None)) {
+            for (const auto& [name, filename] : dataFacade.getAnimations()) {
+               ImGui::Selectable(name.c_str());
+            }
          }
-         ImGui::PopID();
 
-         ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-         ImGui::PushID("Models");
-         if (ImGui::TreeNode("Models")) {
-            ImGui::Selectable("Peasant");
-            ImGui::Selectable("CesiumMan");
-            ImGui::TreePop();
+         ImGui::SetNextItemOpen(true);
+         if (ImGui::CollapsingHeader("Models", ImGuiTreeNodeFlags_None)) {
+            for (const auto& [name, filename] : dataFacade.getModels()) {
+               ImGui::Selectable(name.c_str());
+            }
          }
-         ImGui::PopID();
       }
       ImGui::End();
    }
