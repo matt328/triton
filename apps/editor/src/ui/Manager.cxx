@@ -1,14 +1,18 @@
 #include "Manager.hpp"
 #include "ctx/GameplayFacade.hpp"
 #include "Properties.hpp"
-#include "ProjectFile.hpp"
 #include "RobotoRegular.h"
+#include "data/DataFacade.hpp"
 #include "gp/ecs/component/DebugConstants.hpp"
-#include "util/MathUtils.hpp"
-#include <imgui.h>
+#include "ImGuiHelpers.hpp"
+
+/*
+   TODO: view showing skeletons, animations, models in the current project.
+*/
 
 namespace ed::ui {
-   Manager::Manager(tr::ctx::GameplayFacade& facade) : facade{facade} {
+   Manager::Manager(tr::ctx::GameplayFacade& facade, data::DataFacade& dataFacade)
+       : facade{facade}, dataFacade{dataFacade} {
       ImGuiEx::setupImGuiStyle();
       ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
@@ -26,18 +30,7 @@ namespace ed::ui {
 
       ImGui_ImplVulkan_CreateFontsTexture();
 
-      openProjectFileDialog.SetTitle("Load Project");
-      openProjectFileDialog.SetTypeFilters({".json"});
-
-      const auto recentPath = pr::Properties::getInstance().getRecentFilePath();
-
-      if (recentPath.has_value()) {
-         openProjectFileDialog.SetPwd(recentPath.value().parent_path());
-         saveProjectFileDialog.SetPwd(recentPath.value().parent_path());
-      }
-
-      saveProjectFileDialog.SetTitle("Save Project");
-      saveProjectFileDialog.SetTypeFilters({".json"});
+      guard = std::make_unique<NFD::Guard>();
    }
 
    Manager::~Manager() {
@@ -56,8 +49,8 @@ namespace ed::ui {
       renderDockSpace();
       renderMenuBar();
       renderEntityEditor();
-      renderDialogs();
       renderDebugWindow();
+      helpers::renderAssetTree();
    }
 
    void Manager::handleTerrainFutures() {
@@ -155,6 +148,7 @@ namespace ed::ui {
                                                             nullptr,
                                                             &dockspace_id);
             ImGui::DockBuilderDockWindow("Entity Editor", dock_id_left);
+            ImGui::DockBuilderDockWindow("Asset Tree", dock_id_left);
             ImGui::DockBuilderFinish(dockspace_id);
          }
       }
@@ -163,17 +157,37 @@ namespace ed::ui {
 
    void Manager::renderMenuBar() {
       auto b = false;
+      auto showPopup = false;
+      auto showAnimation = false;
+      static auto show = true;
+
       if (ImGui::BeginMainMenuBar()) {
          if (ImGui::BeginMenu("File")) {
 
+            if (ImGui::MenuItem("Import Skeleton")) {
+               showPopup = true;
+            }
+
+            if (ImGui::MenuItem("Import Animation")) {
+               showAnimation = true;
+            }
+
             if (ImGui::MenuItem("New Project...")) {
-               if (dirty) {
+               if (dataFacade.isUnsaved()) {
                   b = true;
                }
             }
+
             ImGui::Separator();
             if (ImGui::MenuItem("Open Project...")) {
-               openProjectFileDialog.Open();
+               auto inPath = NFD::UniquePath{};
+               const auto result =
+                   NFD::OpenDialog(inPath, ProjectFileFilters.data(), ProjectFileFilters.size());
+               if (result == NFD_OKAY) {
+                  dataFacade.load(std::filesystem::path{inPath.get()});
+               } else {
+                  Log::error << "Error: " << NFD::GetError() << std::endl;
+               }
             }
 
             if (ImGui::BeginMenu("Open Recent")) {
@@ -181,8 +195,8 @@ namespace ed::ui {
                if (recentFile.has_value()) {
                   const auto nameOnly = recentFile.value().string();
                   if (ImGui::MenuItem(nameOnly.c_str())) {
-                     facade.clear();
-                     io::readProjectFile(recentFile.value().string(), facade);
+                     dataFacade.clear();
+                     dataFacade.load(recentFile.value());
                      openFilePath.emplace(recentFile.value());
                   }
                }
@@ -190,17 +204,26 @@ namespace ed::ui {
             }
 
             ImGui::Separator();
-            if (ImGui::MenuItem("Save Project", nullptr, false, dirty)) {
+            if (ImGui::MenuItem("Save Project", "Ctrl+S", false, dataFacade.isUnsaved())) {
                if (openFilePath.has_value()) {
-                  io::writeProjectFile(openFilePath.value().string(), facade);
-                  dirty = false;
+                  dataFacade.save(openFilePath.value());
                } else {
-                  saveProjectFileDialog.Open();
+                  auto savePath = getSavePath();
+                  try {
+                     if (savePath.has_value()) {
+                        dataFacade.save(savePath.value());
+                     }
+                  } catch (const std::exception& ex) { Log::error << ex.what() << std::endl; }
                }
             }
 
-            if (ImGui::MenuItem("Save Project As...", nullptr, false, dirty)) {
-               saveProjectFileDialog.Open();
+            if (ImGui::MenuItem("Save Project As...", nullptr, false, dataFacade.isUnsaved())) {
+               auto savePath = getSavePath();
+               try {
+                  if (savePath.has_value()) {
+                     dataFacade.save(savePath.value());
+                  }
+               } catch (const std::exception& ex) { Log::error << ex.what() << std::endl; }
             }
 
             ImGui::Separator();
@@ -215,10 +238,34 @@ namespace ed::ui {
                this->fullscreen = !this->fullscreen;
                toggleFullscreenFn();
             }
+            if (ImGui::MenuItem("Demo Window", nullptr)) {
+               show = !show;
+            }
             ImGui::EndMenu();
          }
          ImGui::EndMainMenuBar();
       }
+
+      if (showPopup) {
+         ImGui::OpenPopup("Import Skeleton");
+      }
+
+      if (showAnimation) {
+         ImGui::OpenPopup("Import Animation");
+      }
+
+      auto skeletonFilters = std::vector<nfdfilteritem_t>{nfdfilteritem_t{"Ozz Skeleton", "ozz"}};
+      auto animationFilters = std::vector<nfdfilteritem_t>{nfdfilteritem_t{"Ozz Animation", "ozz"}};
+
+      static auto skeletonName = std::string{};
+      static auto skeletonFileName = std::string{};
+
+      static auto animationName = std::string{};
+      static auto animationFileName = std::string{};
+
+      helpers::renderImportSkeletonModal(dataFacade);
+      helpers::renderImportAnimationModal(dataFacade);
+
       if (b) {
          ImGui::OpenPopup("Unsaved");
       }
@@ -238,13 +285,16 @@ namespace ed::ui {
          }
          ImGui::EndPopup();
       }
+      ImGui::ShowDemoWindow(&show);
    }
 
    void Manager::renderEntityEditor() {
       // Entity Editor
       auto& es = facade.getAllEntities();
 
-      if (ImGui::Begin("Entity Editor", nullptr, dirty ? ImGuiWindowFlags_UnsavedDocument : 0)) {
+      if (ImGui::Begin("Entity Editor",
+                       nullptr,
+                       dataFacade.isUnsaved() ? ImGuiWindowFlags_UnsavedDocument : 0)) {
          // Left
          ImGui::BeginChild("left pane",
                            ImVec2(150, 0),
@@ -353,9 +403,6 @@ namespace ed::ui {
             ImGui::EndGroup();
          }
       }
-      if (ImGui::IsItemDeactivatedAfterEdit()) {
-         dirty = true;
-      }
       ImGui::End();
    }
 
@@ -425,40 +472,28 @@ namespace ed::ui {
       }
    }
 
-   void Manager::renderDialogs() {
-      openProjectFileDialog.Display();
-
-      if (openProjectFileDialog.HasSelected()) {
-         Log::info << "Selected filename " << openProjectFileDialog.GetSelected().string()
-                   << std::endl;
-
-         auto path = std::filesystem::path{openProjectFileDialog.GetSelected().string()};
-         openFilePath.emplace(path.parent_path());
-
-         facade.clear();
-         io::readProjectFile(openProjectFileDialog.GetSelected().string(), facade);
-
-         pr::Properties::getInstance().setRecentFilePath(path);
-
-         openProjectFileDialog.ClearSelected();
-      }
-
-      saveProjectFileDialog.Display();
-
-      if (saveProjectFileDialog.HasSelected()) {
-         Log::info << "Selected filename " << saveProjectFileDialog.GetSelected().string()
-                   << std::endl;
-         io::writeProjectFile(saveProjectFileDialog.GetSelected().string(), facade);
-         dirty = false;
-         saveProjectFileDialog.ClearSelected();
-      }
-   }
-
    void Manager::renderDebugWindow() {
       ImGui::Begin("Debug Window");
 
       ImGui::Checkbox("Wireframe", &enableWireframe);
 
       ImGui::End();
+   }
+
+   auto Manager::getSavePath() -> std::optional<std::filesystem::path> {
+      auto outPath = NFD::UniquePath{};
+
+      const auto result =
+          NFD::SaveDialog(outPath, ProjectFileFilters.data(), ProjectFileFilters.size());
+      if (result == NFD_OKAY) {
+         Log::info << "Success: " << outPath.get() << std::endl;
+         return std::optional{std::filesystem::path{outPath.get()}};
+      } else if (result == NFD_CANCEL) {
+         Log::info << "User pressed cancel." << std::endl;
+         return std::nullopt;
+      } else {
+         Log::error << "Error: " << NFD::GetError() << std::endl;
+         return std::nullopt;
+      }
    }
 }

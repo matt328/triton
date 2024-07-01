@@ -65,8 +65,7 @@ namespace ed::pr {
       }
 
     private:
-      Properties() {
-      }
+      Properties() = default;
 
       std::filesystem::path filePath;
       ordered_json rootJson{};
