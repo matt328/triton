@@ -126,6 +126,18 @@ namespace ed::data {
          return unsaved;
       }
 
+      [[nodiscard]] auto& getSkeletons() const {
+         return dataStore.skeletons;
+      }
+
+      [[nodiscard]] auto& getAnimations() const {
+         return dataStore.animations;
+      }
+
+      [[nodiscard]] auto& getModels() const {
+         return dataStore.models;
+      }
+
     private:
       bool unsaved{};
       DataStore dataStore;

@@ -50,7 +50,7 @@ namespace ed::ui {
       renderMenuBar();
       renderEntityEditor();
       renderDebugWindow();
-      helpers::renderAssetTree();
+      helpers::renderAssetTree(dataFacade);
    }
 
    void Manager::handleTerrainFutures() {
