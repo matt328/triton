@@ -56,11 +56,17 @@ namespace ed::ui {
       helpers::renderImportAnimationModal(dataFacade);
 
       bool openSkeleton{};
+      bool openAnimation{};
+      bool openModel{};
 
-      helpers::renderAssetTree(dataFacade, openSkeleton);
+      helpers::renderAssetTree(dataFacade, openSkeleton, openAnimation, openModel);
 
       if (openSkeleton) {
          ImGui::OpenPopup("Import Skeleton");
+      }
+
+      if (openAnimation) {
+         ImGui::OpenPopup("Import Animation");
       }
    }
 

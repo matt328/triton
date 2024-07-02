@@ -90,53 +90,88 @@ namespace ed::ui::helpers {
       }
    }
 
-   /*
-      Asset Tree should just show assets available to create entities from.
-      This will be a way to see what is loaded into the project.
-
-      Creating an entity should only allow to choose from loaded assets.
-   */
-   void renderAssetTree(data::DataFacade& dataFacade, bool& openSkeleton) {
+   void renderAssetTree(data::DataFacade& dataFacade,
+                        bool& openSkeleton,
+                        bool& openAnimation,
+                        bool& openModel) {
       const auto unsaved = dataFacade.isUnsaved() ? ImGuiWindowFlags_UnsavedDocument : 0;
       if (ImGui::Begin("Asset Tree", nullptr, ImGuiWindowFlags_MenuBar | unsaved)) {
 
          if (ImGui::BeginMenuBar()) {
             if (ImGui::BeginMenu("Import")) {
-               if (ImGui::MenuItem("Skeleton")) {
+               if (ImGui::MenuItem("Skeleton...")) {
                   openSkeleton = true;
                }
-               if (ImGui::MenuItem("Animation")) {}
-               if (ImGui::MenuItem("Model")) {}
+               if (ImGui::MenuItem("Animation...")) {
+                  openAnimation = true;
+               }
+               if (ImGui::MenuItem("Model...")) {
+                  openModel = true;
+               }
                ImGui::EndMenu();
             }
             ImGui::EndMenuBar();
          }
 
-         ImGui::SetNextItemOpen(true);
-         if (ImGui::CollapsingHeader("Scripts", ImGuiTreeNodeFlags_None)) {
-            ImGui::Selectable("MainCharacter");
-            ImGui::Selectable("MillAbout");
-            ImGui::Selectable("IdleInPlace");
-         }
+         static auto headerState = std::array<bool, 4>{true, true, true, true};
 
-         ImGui::SetNextItemOpen(true);
-         if (ImGui::CollapsingHeader("Skeletons", ImGuiTreeNodeFlags_None)) {
-            for (const auto& [name, filename] : dataFacade.getSkeletons()) {
-               ImGui::Selectable(name.c_str());
+         {
+            auto ss = std::stringstream{};
+            ss << "Scripts (" << 3 << ")";
+            const auto str = ss.str();
+            ImGui::SetNextItemOpen(headerState[0]);
+            if (ImGui::CollapsingHeader(str.c_str())) {
+               ImGui::Selectable("MainCharacter");
+               ImGui::Selectable("MillAbout");
+               ImGui::Selectable("IdleInPlace");
+               headerState[0] = true;
+            } else {
+               headerState[0] = false;
             }
          }
 
-         ImGui::SetNextItemOpen(true);
-         if (ImGui::CollapsingHeader("Animations", ImGuiTreeNodeFlags_None)) {
-            for (const auto& [name, filename] : dataFacade.getAnimations()) {
-               ImGui::Selectable(name.c_str());
+         {
+            auto ss = std::stringstream{};
+            ss << "Skeletons (" << dataFacade.getSkeletons().size() << ")";
+            const auto str = ss.str();
+            ImGui::SetNextItemOpen(headerState[1]);
+            if (ImGui::CollapsingHeader(str.c_str())) {
+               for (const auto& [name, filename] : dataFacade.getSkeletons()) {
+                  ImGui::Selectable(name.c_str());
+               }
+               headerState[1] = true;
+            } else {
+               headerState[1] = false;
             }
          }
 
-         ImGui::SetNextItemOpen(true);
-         if (ImGui::CollapsingHeader("Models", ImGuiTreeNodeFlags_None)) {
-            for (const auto& [name, filename] : dataFacade.getModels()) {
-               ImGui::Selectable(name.c_str());
+         {
+            auto ss = std::stringstream{};
+            ss << "Animations (" << dataFacade.getAnimations().size() << ")";
+            const auto str = ss.str();
+            ImGui::SetNextItemOpen(headerState[2]);
+            if (ImGui::CollapsingHeader(str.c_str())) {
+               for (const auto& [name, filename] : dataFacade.getAnimations()) {
+                  ImGui::Selectable(name.c_str());
+               }
+               headerState[2] = true;
+            } else {
+               headerState[2] = false;
+            }
+         }
+
+         {
+            auto ss = std::stringstream{};
+            ss << "Models (" << dataFacade.getModels().size() << ")";
+            const auto str = ss.str();
+            ImGui::SetNextItemOpen(headerState[3]);
+            if (ImGui::CollapsingHeader(str.c_str())) {
+               for (const auto& [name, filename] : dataFacade.getModels()) {
+                  ImGui::Selectable(name.c_str());
+               }
+               headerState[3] = true;
+            } else {
+               headerState[3] = false;
             }
          }
       }
