@@ -28,6 +28,8 @@ namespace ed::data {
    }
 
    void DataFacade::addModel(const std::string_view& name, const std::filesystem::path& path) {
+      dataStore.models.insert({name.data(), ModelData{name.data(), path.string()}});
+      unsaved = true;
    }
 
    void DataFacade::removeModel(const std::string_view& name) {

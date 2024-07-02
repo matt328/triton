@@ -5,6 +5,7 @@
 #include "gp/ecs/component/Animation.hpp"
 #include "gfx/Handles.hpp"
 #include <entt/entt.hpp>
+#include "components/EntityEditor.hpp"
 
 namespace ed {
    class Application;
@@ -50,6 +51,8 @@ namespace ed::ui {
 
       tr::ctx::GameplayFacade& facade;
       data::DataFacade& dataFacade;
+
+      components::EntityEditor entityEditor;
 
       std::vector<std::future<tr::gfx::ModelHandle>> modelFutures{};
       std::vector<std::future<tr::gfx::ModelHandle>> terrainFutures{};

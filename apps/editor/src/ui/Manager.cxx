@@ -3,8 +3,8 @@
 #include "Properties.hpp"
 #include "RobotoRegular.h"
 #include "data/DataFacade.hpp"
-#include "gp/ecs/component/DebugConstants.hpp"
 #include "ImGuiHelpers.hpp"
+#include "ui/components/EntityEditor.hpp"
 #include <imgui.h>
 
 /*
@@ -13,7 +13,11 @@
 
 namespace ed::ui {
    Manager::Manager(tr::ctx::GameplayFacade& facade, data::DataFacade& dataFacade)
-       : facade{facade}, dataFacade{dataFacade} {
+       : facade{facade},
+         dataFacade{dataFacade},
+         entityEditor{components::EntityEditor{[this, &facade](uint32_t size) {
+            terrainFutures.push_back(facade.createTerrainMesh(512));
+         }}} {
       ImGuiEx::setupImGuiStyle();
       ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
@@ -49,11 +53,12 @@ namespace ed::ui {
 
       renderDockSpace();
       renderMenuBar();
-      renderEntityEditor();
+      entityEditor.render(facade, dataFacade);
       renderDebugWindow();
 
       helpers::renderImportSkeletonModal(dataFacade);
       helpers::renderImportAnimationModal(dataFacade);
+      helpers::renderImportModelModal(dataFacade);
 
       bool openSkeleton{};
       bool openAnimation{};
@@ -68,8 +73,20 @@ namespace ed::ui {
       if (openAnimation) {
          ImGui::OpenPopup("Import Animation");
       }
+
+      if (openModel) {
+         ImGui::OpenPopup("Import Model");
+      }
    }
 
+   /*
+      Can this be moved inside the facade, and just register a callback to be called after it's all
+      done?
+      so like
+      facade.doAsyncThing([]() {Log::debug << "done" << std::endl;})
+      Context would have to call gameplayFacade.tick() or something so it could check it's internal
+      list of futures
+   */
    void Manager::handleTerrainFutures() {
       for (auto it = terrainFutures.begin(); it != terrainFutures.end();) {
          auto status = it->wait_for(std::chrono::seconds(0));
@@ -294,179 +311,6 @@ namespace ed::ui {
          ImGui::EndPopup();
       }
       ImGui::ShowDemoWindow(&show);
-   }
-
-   void Manager::renderEntityEditor() {
-      // Entity Editor
-      auto& es = facade.getAllEntities();
-
-      if (ImGui::Begin("Entity Editor",
-                       nullptr,
-                       dataFacade.isUnsaved() ? ImGuiWindowFlags_UnsavedDocument : 0)) {
-         // Left
-         ImGui::BeginChild("left pane",
-                           ImVec2(150, 0),
-                           ImGuiChildFlags_Border | ImGuiChildFlags_ResizeX);
-         for (auto e : es) {
-            auto& infoComponent = facade.getEditorInfo(e);
-            if (ImGui::Selectable(infoComponent.name.c_str(),
-                                  static_cast<uint32_t>(e) == selectedEntity)) {
-               selectedEntity = static_cast<uint32_t>(e);
-            }
-         }
-         ImGui::EndChild();
-         ImGui::SameLine();
-
-         // Right
-         {
-            ImGui::BeginGroup();
-            ImGui::BeginChild(
-                "item view",
-                ImVec2(0,
-                       -ImGui::GetFrameHeightWithSpacing() * 4)); // Leave room for 1 line below us
-
-            if (selectedEntity.has_value()) {
-               ImGui::Text("Entity ID: %d", selectedEntity.value());
-            } else {
-               ImGui::Text("No Entity Selected");
-            }
-
-            if (selectedEntity.has_value()) {
-               const auto maybeTransform = facade.getComponent<tr::gp::ecs::Transform>(
-                   static_cast<entt::entity>(selectedEntity.value()));
-               const auto maybeDebug = facade.getComponent<tr::gp::ecs::DebugConstants>(
-                   static_cast<entt::entity>(selectedEntity.value()));
-               const auto maybeAnimated = facade.getComponent<tr::gp::ecs::Animation>(
-                   static_cast<entt::entity>(selectedEntity.value()));
-               if (maybeTransform.has_value()) {
-                  auto& transform = maybeTransform.value().get();
-                  ImGui::SeparatorText("Transform");
-                  ImGui::DragFloat3("Position", glm::value_ptr(transform.position), 1.f);
-                  ImGui::DragFloat3("Rotation",
-                                    glm::value_ptr(transform.rotation),
-                                    .1f,
-                                    -180.f,
-                                    180.f);
-               }
-               if (maybeDebug.has_value()) {
-                  auto& d = maybeDebug.value().get();
-                  ImGui::SeparatorText("DebugConstants");
-                  ImGui::DragFloat("Specular Power", &d.specularPower, 0.5f);
-               }
-
-               if (maybeAnimated.has_value()) {
-                  auto& animationComponent = maybeAnimated.value().get();
-                  renderAnimationArea(animationComponent);
-               }
-            }
-            ImGui::EndChild();
-
-            if (ImGui::Button("Load Terrain")) {
-               terrainFutures.push_back(facade.createTerrainMesh(512));
-            }
-            ImGui::SameLine();
-            if (ImGui::Button("Load Cube")) {
-               const auto modelName = std::filesystem::path{
-                   R"(C:\Users\Matt\Projects\game-assets\models\cube\cube2.gltf)"};
-               const auto skeletonPath = std::filesystem::path{
-                   R"(C:\Users\Matt\Projects\game-assets\models\cube\skeleton.ozz)"};
-               const auto animationPath = std::filesystem::path{
-                   R"(C:\Users\Matt\Projects\game-assets\models\cube\animation.ozz)"};
-               skinnedModelFutures.push_back(
-                   facade.loadSkinnedModelAsync(modelName, skeletonPath, animationPath));
-            }
-            if (ImGui::Button("Load Cesium")) {
-               const auto modelName = std::filesystem::path{
-                   R"(C:\Users\Matt\Projects\game-assets\models\cesiumman\CesiumMan.gltf)"};
-               const auto skeletonPath = std::filesystem::path{
-                   R"(C:\Users\Matt\Projects\game-assets\models\cesiumman\skeleton.ozz)"};
-               const auto animationPath = std::filesystem::path{
-                   R"(C:\Users\Matt\Projects\game-assets\models\cesiumman\animation.ozz)"};
-               skinnedModelFutures.push_back(
-                   facade.loadSkinnedModelAsync(modelName, skeletonPath, animationPath));
-            }
-
-            if (ImGui::Button("Load Cesium Reexport")) {
-               const auto modelName = std::filesystem::path{
-                   R"(C:\Users\Matt\Projects\game-assets\models\cesiumman\reexport\CesiumManReexported.gltf)"};
-               const auto skeletonPath = std::filesystem::path{
-                   R"(C:\Users\Matt\Projects\game-assets\models\cesiumman\reexport\skeleton.ozz)"};
-               const auto animationPath = std::filesystem::path{
-                   R"(C:\Users\Matt\Projects\game-assets\models\cesiumman\reexport\animation.ozz)"};
-               skinnedModelFutures.push_back(
-                   facade.loadSkinnedModelAsync(modelName, skeletonPath, animationPath));
-            }
-
-            if (ImGui::Button("Load Peasant")) {
-               const auto modelName = std::filesystem::path{
-                   R"(C:\Users\Matt\Projects\game-assets\models\gltf-working\walking.gltf)"};
-               const auto skeletonPath = std::filesystem::path{
-                   R"(C:\Users\Matt\Projects\game-assets\models\gltf-working\skeleton.ozz)"};
-               const auto animationPath = std::filesystem::path{
-                   R"(C:\Users\Matt\Projects\game-assets\models\gltf-working\animation.ozz)"};
-               skinnedModelFutures.push_back(
-                   facade.loadSkinnedModelAsync(modelName, skeletonPath, animationPath));
-            }
-
-            ImGui::EndGroup();
-         }
-      }
-      ImGui::End();
-   }
-
-   void Manager::renderAnimationArea(tr::gp::ecs::Animation& animationComponent) {
-      ImGui::SeparatorText("Animation");
-      static size_t itemCurrentIndex{};
-      static bool playing{};
-      static bool bindPose{};
-
-      std::vector<const char*> items;
-      items.push_back("Animation");
-
-      if (ImGui::BeginCombo("Animation Name", items[itemCurrentIndex])) {
-         for (size_t n = 0; n < items.size(); ++n) {
-            const bool isSelected = (itemCurrentIndex == n);
-            if (ImGui::Selectable(items[n], isSelected)) {
-               itemCurrentIndex = n;
-               animationComponent.currentAnimationName = std::string{items[itemCurrentIndex]};
-            }
-            if (isSelected) {
-               ImGui::SetItemDefaultFocus();
-            }
-         }
-         ImGui::EndCombo();
-      }
-
-      bool previousBindPose = bindPose;
-
-      ImGui::BeginDisabled(playing);
-      if (ImGui::Checkbox("Bind Pose", &bindPose)) {
-         if (bindPose != previousBindPose) {
-            animationComponent.renderBindPose = bindPose;
-         }
-      }
-      ImGui::EndDisabled();
-
-      bool previousPlaying = playing;
-
-      ImGui::BeginDisabled(bindPose);
-
-      if (ImGui::Checkbox("Play", &playing)) {
-         if (playing != previousPlaying) {
-            animationComponent.playing = playing;
-         }
-      }
-
-      ImGui::BeginDisabled(playing);
-      const auto [min_v, max_v] = facade.getAnimationTimeRange(animationComponent.animationHandle);
-
-      static float timeValue = min_v;
-      if (ImGui::SliderFloat("Time", &timeValue, min_v, max_v, "%.2f")) {
-         const auto value = (timeValue - min_v) / (max_v - min_v);
-         animationComponent.timeRatio = value;
-      }
-      ImGui::EndDisabled();
-      ImGui::EndDisabled();
    }
 
    void Manager::showMatrix4x4(const glm::mat4& matrix, const char* label) {
