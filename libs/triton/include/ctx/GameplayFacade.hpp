@@ -79,11 +79,20 @@ namespace tr::ctx {
                                  const std::filesystem::path& animationPath)
           -> std::future<gfx::LoadedSkinnedModelData>;
 
+      void loadModelResources(const std::filesystem::path& modelPath,
+                              const std::filesystem::path& skeletonPath,
+                              const std::filesystem::path& animationPath,
+                              const std::function<void()> done);
+
+      void update();
+
     private:
       bool debugEnabled{};
       gp::GameplaySystem& gameplaySystem;
       gfx::RenderContext& renderer;
       std::vector<gp::EntityType> allEntities;
+
+      std::vector<std::future<tr::gfx::ModelHandle>> terrainFutures{};
    };
 
 }
