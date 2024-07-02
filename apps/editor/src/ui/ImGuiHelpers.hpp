@@ -33,7 +33,7 @@ namespace ed::ui::helpers {
             }
          }
 
-         if (ImGui::Button("OK", ImVec2(120, 0))) {
+         if (ImGui::Button("Ok", ImVec2(120, 0))) {
             dataFacade.addSkeleton(skeletonName, skeletonFilename);
             skeletonName = "";
             skeletonFilename = "";
@@ -75,8 +75,49 @@ namespace ed::ui::helpers {
             }
          }
 
-         if (ImGui::Button("OK", ImVec2(120, 0))) {
+         if (ImGui::Button("Ok", ImVec2(120, 0))) {
             dataFacade.addAnimation(name, filename);
+            name = "";
+            filename = "";
+            ImGui::CloseCurrentPopup();
+         }
+         ImGui::SameLine();
+         if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+            ImGui::CloseCurrentPopup();
+         }
+
+         ImGui::EndPopup();
+      }
+   }
+
+   void renderImportModelModal(data::DataFacade& dataFacade) {
+      constexpr auto ModelFilters =
+          std::array<nfdfilteritem_t, 1>{nfdfilteritem_t{"Triton Model", "trm"}};
+
+      if (ImGui::BeginPopupModal("Import Model")) {
+         static std::string filename{}; // Temporary value to store input
+         static std::string name{"Unnamed Model"};
+
+         ImGui::Text("Model Name");
+         ImGui::InputText("##nameInput", &name);
+
+         ImGui::Text("Model File");
+         ImGui::InputText("##ValueInput", &filename);
+         ImGui::SameLine();
+         if (ImGui::Button("...")) {
+            auto inPath = NFD::UniquePath{};
+            const auto result = NFD::OpenDialog(inPath, ModelFilters.data(), ModelFilters.size());
+            if (result == NFD_OKAY) {
+               filename = std::string{inPath.get()};
+            } else if (result == NFD_CANCEL) {
+               Log::info << "User pressed cancel." << std::endl;
+            } else {
+               Log::error << "Error: " << NFD::GetError() << std::endl;
+            }
+         }
+
+         if (ImGui::Button("Ok", ImVec2(120, 0))) {
+            dataFacade.addModel(name, filename);
             name = "";
             filename = "";
             ImGui::CloseCurrentPopup();
