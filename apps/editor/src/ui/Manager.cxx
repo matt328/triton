@@ -5,11 +5,6 @@
 #include "data/DataFacade.hpp"
 #include "ImGuiHelpers.hpp"
 #include "ui/components/EntityEditor.hpp"
-#include <imgui.h>
-
-/*
-   TODO: view showing skeletons, animations, models in the current project.
-*/
 
 namespace ed::ui {
    Manager::Manager(tr::ctx::GameplayFacade& facade, data::DataFacade& dataFacade)

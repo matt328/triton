@@ -56,6 +56,30 @@ namespace tr::ctx {
       return renderer.getResourceManager().loadModelAsync(path.string());
    }
 
+   void GameplayFacade::loadModelResources(const std::filesystem::path& modelPath,
+                                           const std::filesystem::path& skeletonPath,
+                                           const std::filesystem::path& animationPath,
+                                           const std::function<void()> done) {
+   }
+
+   void GameplayFacade::update() {
+      for (auto it = terrainFutures.begin(); it != terrainFutures.end();) {
+         auto status = it->wait_for(std::chrono::seconds(0));
+         if (status == std::future_status::ready) {
+            ZoneNamedN(loadComplete, "Creating Terrain Entities", true);
+            try {
+               auto r = it->get();
+               createTerrainEntity(r);
+            } catch (const std::exception& e) {
+               Log::error << "error loading model: " << e.what() << std::endl;
+            }
+            it = terrainFutures.erase(it);
+         } else {
+            ++it;
+         }
+      }
+   }
+
    auto GameplayFacade::loadSkinnedModelAsync(const std::filesystem::path& modelPath,
                                               const std::filesystem::path& skeletonPath,
                                               const std::filesystem::path& animationPath)
