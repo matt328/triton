@@ -31,9 +31,14 @@ namespace tr::ctx {
 }
 
 namespace tr::gp {
-   using EntityType = entt::entity;
    using RenderDataProducer = entt::delegate<void(gfx::RenderData&)>;
 
+   /*
+      This class serves as a bridge between the gfx and gp halves of the game engine.
+      It recieves update and resize info as well as input information from the Application layer.
+      It owns the entity system, action system, and also for some reason the animationFactory.
+      // TODO move animation factory into ResourceManager
+   */
    class GameplaySystem {
     public:
       GameplaySystem(gfx::geo::AnimationFactory& animationFactory);
@@ -66,9 +71,7 @@ namespace tr::gp {
     private:
       friend class ctx::GameplayFacade;
 
-      std::unique_ptr<entt::registry> registry;
       std::unique_ptr<EntitySystem> entitySystem;
-
       std::unique_ptr<ActionSystem> actionSystem;
 
       /// This is a preallocated RenderData that the ECS collects all of he GameWorld data into
