@@ -1,5 +1,6 @@
 #pragma once
 
+#include "gp/EntitySystem.hpp"
 namespace tr::gp {
    enum class ActionSets : uint32_t {
       Main = 0,
@@ -23,7 +24,7 @@ namespace tr::gp {
       ActionSystem& operator=(const ActionSystem&) = delete;
       ActionSystem& operator=(ActionSystem&&) = delete;
 
-      [[nodiscard]] entt::delegate<void(Action)>& getDelegate() {
+      [[nodiscard]] auto& getDelegate() {
          return actionDelegate;
       }
 

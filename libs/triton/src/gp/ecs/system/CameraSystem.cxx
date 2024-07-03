@@ -2,7 +2,6 @@
 
 #include "gp/EntitySystem.hpp"
 #include "gp/ecs/component/Camera.hpp"
-#include "gp/ecs/component/Resources.hpp"
 #include "gp/actions/ActionType.hpp"
 #include "gp/actions/Action.hpp"
 
@@ -64,35 +63,29 @@ namespace tr::gp::ecs::CameraSystem {
    }
 
    void fixedUpdate(EntitySystem& entitySystem) {
-      // Lock Cameras for Writing
-      auto camWriteLock = entitySystem.getCameraWriteLock();
-      const auto view = entitySystem.getRegistry()->view<Camera>();
+      entitySystem.writeCameras(
+          []([[maybe_unused]] auto entity, auto cam, auto width, auto height) {
+             auto direction = glm::vec3{cos(glm::radians(cam.yaw)) * cos(glm::radians(cam.pitch)),
+                                        sin(glm::radians(cam.pitch)),
+                                        sin(glm::radians(cam.yaw)) * cos(glm::radians(cam.pitch))};
 
-      const auto [width, height] = entitySystem.getRegistry()->ctx().get<const WindowDimensions>();
+             cam.front = glm::normalize(direction);
+             cam.right = glm::normalize(glm::cross(cam.front, glm::vec3(0.0f, 1.0f, 0.0f)));
 
-      for (auto [entity, cam] : view.each()) {
+             glm::mat3 rotationMatrix{cam.right, worldUp, cam.front};
 
-         auto direction = glm::vec3{cos(glm::radians(cam.yaw)) * cos(glm::radians(cam.pitch)),
-                                    sin(glm::radians(cam.pitch)),
-                                    sin(glm::radians(cam.yaw)) * cos(glm::radians(cam.pitch))};
+             auto rotatedVelocity = rotationMatrix * cam.velocity;
 
-         cam.front = glm::normalize(direction);
-         cam.right = glm::normalize(glm::cross(cam.front, glm::vec3(0.0f, 1.0f, 0.0f)));
+             cam.position += rotatedVelocity;
 
-         glm::mat3 rotationMatrix{cam.right, worldUp, cam.front};
+             cam.view = glm::lookAt(cam.position, cam.position + cam.front, {0.f, 1.f, 0.f});
 
-         auto rotatedVelocity = rotationMatrix * cam.velocity;
-
-         cam.position += rotatedVelocity;
-
-         cam.view = glm::lookAt(cam.position, cam.position + cam.front, {0.f, 1.f, 0.f});
-
-         float aspect = static_cast<float>(width) / static_cast<float>(height);
-         cam.projection =
-             glm::perspective(glm::radians(cam.fov), aspect, cam.nearClip, cam.farClip);
-         // Apparently everyone except me knew glm was for OpenGL and you have to adjust these
-         // matrices for Vulkan
-         cam.projection[1][1] *= -1;
-      }
+             float aspect = static_cast<float>(width) / static_cast<float>(height);
+             cam.projection =
+                 glm::perspective(glm::radians(cam.fov), aspect, cam.nearClip, cam.farClip);
+             // Apparently everyone except me knew glm was for OpenGL and you have to adjust these
+             // matrices for Vulkan
+             cam.projection[1][1] *= -1;
+          });
    }
 }
