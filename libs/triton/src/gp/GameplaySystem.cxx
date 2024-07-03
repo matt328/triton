@@ -25,12 +25,12 @@ namespace tr::gp {
    using namespace tr::gp;
 
    GameplaySystem::GameplaySystem(gfx::geo::AnimationFactory& animationFactory)
-       : registry{std::make_unique<entt::registry>()},
-         entitySystem{},
-         animationFactory{animationFactory} {
+       : registry{std::make_unique<entt::registry>()}, animationFactory{animationFactory} {
+
+      entitySystem = std::make_unique<EntitySystem>();
       actionSystem = std::make_unique<ActionSystem>();
 
-      actionSystem->getDelegate().connect<&ecs::CameraSystem::handleAction>(entitySystem);
+      actionSystem->getDelegate().connect<&ecs::CameraSystem::handleAction>(*entitySystem);
 
       // Forward
       actionSystem->mapSource(Source{Key::Up, SourceType::Boolean},
@@ -108,6 +108,8 @@ namespace tr::gp {
    }
 
    void GameplaySystem::resize(const std::pair<uint32_t, uint32_t> size) {
+      entitySystem->writeWindowDimensions(size);
+      // TODO: delete registry
       registry->ctx().insert_or_assign<ecs::WindowDimensions>(
           ecs::WindowDimensions{static_cast<int>(size.first), static_cast<int>(size.second)});
    }
