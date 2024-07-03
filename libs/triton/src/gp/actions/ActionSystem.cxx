@@ -8,9 +8,6 @@
 namespace tr::gp {
 
    void ActionSystem::mapSource(Source source, StateType sType, ActionType aType) {
-      // This is crazy evil. It's essentially a switch on the possible types in source.src's
-      // std::variant with the added bonus of 'if constexpr' causing branches involving types in the
-      // variant that are not used to not even be present in the compiled code.
       std::visit(
           [&](auto&& arg) {
              using T = std::decay_t<decltype(arg)>;

@@ -1,5 +1,6 @@
 #include "CameraSystem.hpp"
 
+#include "gp/EntitySystem.hpp"
 #include "gp/ecs/component/Camera.hpp"
 #include "gp/ecs/component/Resources.hpp"
 #include "gp/actions/ActionType.hpp"
@@ -26,11 +27,8 @@ namespace tr::gp::ecs::CameraSystem {
       that others have run to completion before they do. Ex the action system has to have a chance
       to set an entity's velocity before the TransformSystem calculates its position.
    */
-   void handleAction(entt::registry& registry, const Action& action) {
-
-      const auto view = registry.view<Camera>();
-      for (auto [entity, cam] : view.each()) {
-
+   void handleAction(EntitySystem& entitySystem, const Action& action) {
+      entitySystem.writeCameras([&action]([[maybe_unused]] auto entity, auto cam) {
          if (action.stateType == StateType::State) {
             auto value = std::get<bool>(action.value);
 
@@ -62,13 +60,15 @@ namespace tr::gp::ecs::CameraSystem {
                cam.pitch = std::max(cam.pitch, -PitchExtent);
             }
          }
-      }
+      });
    }
 
-   void fixedUpdate(entt::registry& registry) {
-      const auto view = registry.view<Camera>();
+   void fixedUpdate(EntitySystem& entitySystem) {
+      // Lock Cameras for Writing
+      auto camWriteLock = entitySystem.getCameraWriteLock();
+      const auto view = entitySystem.getRegistry()->view<Camera>();
 
-      const auto [width, height] = registry.ctx().get<const WindowDimensions>();
+      const auto [width, height] = entitySystem.getRegistry()->ctx().get<const WindowDimensions>();
 
       for (auto [entity, cam] : view.each()) {
 
