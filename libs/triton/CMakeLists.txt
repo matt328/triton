@@ -21,6 +21,7 @@ set(triton_SRC
    "src/gfx/sb/ShaderBindingFactory.cxx"
 
    "src/gp/GameplaySystem.cxx"
+   "src/gp/EntitySystem.cxx"
    "src/gp/actions/ActionSystem.cxx"
    "src/gp/ecs/system/CameraSystem.cxx"
    "src/gp/ecs/system/RenderDataSystem.cxx"

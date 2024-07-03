@@ -22,6 +22,7 @@ namespace tr::gfx::tx {
 }
 
 namespace tr::gp {
+   class EntitySystem;
    class ActionSystem;
 }
 
@@ -66,6 +67,7 @@ namespace tr::gp {
       friend class ctx::GameplayFacade;
 
       std::unique_ptr<entt::registry> registry;
+      std::unique_ptr<EntitySystem> entitySystem;
 
       std::unique_ptr<ActionSystem> actionSystem;
 

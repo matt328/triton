@@ -1,4 +1,5 @@
 #include "gp/GameplaySystem.hpp"
+#include "gp/EntitySystem.hpp"
 
 #include "gp/actions/ActionType.hpp"
 #include "gp/actions/ActionSystem.hpp"
@@ -24,12 +25,12 @@ namespace tr::gp {
    using namespace tr::gp;
 
    GameplaySystem::GameplaySystem(gfx::geo::AnimationFactory& animationFactory)
-       : registry{std::make_unique<entt::registry>()}, animationFactory{animationFactory} {
+       : registry{std::make_unique<entt::registry>()},
+         entitySystem{},
+         animationFactory{animationFactory} {
       actionSystem = std::make_unique<ActionSystem>();
 
-      auto& reg = *registry;
-
-      actionSystem->getDelegate().connect<&ecs::CameraSystem::handleAction>(reg);
+      actionSystem->getDelegate().connect<&ecs::CameraSystem::handleAction>(entitySystem);
 
       // Forward
       actionSystem->mapSource(Source{Key::Up, SourceType::Boolean},
@@ -76,7 +77,14 @@ namespace tr::gp {
    void GameplaySystem::fixedUpdate([[maybe_unused]] const util::Timer& timer) {
       ZoneNamedN(upd, "FixedUpdate", true);
 
-      ecs::CameraSystem::fixedUpdate(*registry);
+      /*
+       TODO create a wrapper around the registry
+
+       utilize a shared lock for reading and an exclusive lock for writing
+       profile and add more granularity if needed.
+      */
+
+      ecs::CameraSystem::fixedUpdate(*entitySystem);
       ecs::TransformSystem::update(*registry);
       ecs::AnimationSystem::update(*registry, animationFactory);
    }

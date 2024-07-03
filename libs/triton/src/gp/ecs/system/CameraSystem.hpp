@@ -2,11 +2,12 @@
 
 namespace tr::gp {
    struct Action;
+   class EntitySystem;
 }
 
 namespace tr::gp::ecs::CameraSystem {
-   void fixedUpdate(entt::registry& registry);
+   void fixedUpdate(EntitySystem& entitySystem);
 
-   void handleAction(entt::registry& registry, const Action& action);
+   void handleAction(EntitySystem& entitySystem, const Action& action);
 
 }
