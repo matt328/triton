@@ -4,13 +4,11 @@
 #include "gp/GameplaySystem.hpp"
 #include "gp/ecs/component/Transform.hpp"
 #include "gp/ecs/component/Camera.hpp"
-#include <entt/entt.hpp>
+#include "gp/EntitySystemTypes.hpp"
 
 namespace tr::ctx {
    template <typename T>
    using OptionalRef = std::optional<std::reference_wrapper<T>>;
-
-   using MeshHandles = std::unordered_map<gfx::MeshHandle, gfx::TextureHandle>;
 
    struct EditorInfoComponent {
       std::string name;
@@ -32,9 +30,9 @@ namespace tr::ctx {
 
       auto createSkinnedModelEntity(const gfx::LoadedSkinnedModelData model) -> gp::EntityType;
 
-      auto createStaticMultiMeshEntity(const MeshHandles meshes) -> gp::EntityType;
+      auto createStaticMultiMeshEntity(const gfx::MeshHandles meshes) -> gp::EntityType;
 
-      auto createTerrainEntity(const MeshHandles meshes) -> gp::EntityType;
+      auto createTerrainEntity(const gfx::MeshHandles meshes) -> gp::EntityType;
 
       auto createTerrainMesh(const uint32_t size) -> std::future<gfx::ModelHandle>;
 
