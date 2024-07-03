@@ -22,4 +22,6 @@ namespace tr::gfx {
       std::unordered_map<int, int> jointMap;
       std::vector<glm::mat4> inverseBindMatrices;
    };
+
+   using MeshHandles = std::unordered_map<gfx::MeshHandle, gfx::TextureHandle>;
 }

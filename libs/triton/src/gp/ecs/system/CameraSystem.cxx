@@ -1,7 +1,7 @@
 #include "CameraSystem.hpp"
 
-#include "gp/EntitySystem.hpp"
 #include "gp/ecs/component/Camera.hpp"
+#include "gp/ecs/component/Resources.hpp"
 #include "gp/actions/ActionType.hpp"
 #include "gp/actions/Action.hpp"
 
@@ -26,8 +26,11 @@ namespace tr::gp::ecs::CameraSystem {
       that others have run to completion before they do. Ex the action system has to have a chance
       to set an entity's velocity before the TransformSystem calculates its position.
    */
-   void handleAction(EntitySystem& entitySystem, const Action& action) {
-      entitySystem.writeCameras([&action]([[maybe_unused]] auto entity, auto cam) {
+   void handleAction(entt::registry& registry, const Action& action) {
+
+      const auto view = registry.view<Camera>();
+      for (auto [entity, cam] : view.each()) {
+
          if (action.stateType == StateType::State) {
             auto value = std::get<bool>(action.value);
 
@@ -59,33 +62,37 @@ namespace tr::gp::ecs::CameraSystem {
                cam.pitch = std::max(cam.pitch, -PitchExtent);
             }
          }
-      });
+      }
    }
 
-   void fixedUpdate(EntitySystem& entitySystem) {
-      entitySystem.writeCameras(
-          []([[maybe_unused]] auto entity, auto cam, auto width, auto height) {
-             auto direction = glm::vec3{cos(glm::radians(cam.yaw)) * cos(glm::radians(cam.pitch)),
-                                        sin(glm::radians(cam.pitch)),
-                                        sin(glm::radians(cam.yaw)) * cos(glm::radians(cam.pitch))};
+   void fixedUpdate(entt::registry& registry) {
+      const auto view = registry.view<Camera>();
 
-             cam.front = glm::normalize(direction);
-             cam.right = glm::normalize(glm::cross(cam.front, glm::vec3(0.0f, 1.0f, 0.0f)));
+      const auto [width, height] = registry.ctx().get<const WindowDimensions>();
 
-             glm::mat3 rotationMatrix{cam.right, worldUp, cam.front};
+      for (auto [entity, cam] : view.each()) {
 
-             auto rotatedVelocity = rotationMatrix * cam.velocity;
+         auto direction = glm::vec3{cos(glm::radians(cam.yaw)) * cos(glm::radians(cam.pitch)),
+                                    sin(glm::radians(cam.pitch)),
+                                    sin(glm::radians(cam.yaw)) * cos(glm::radians(cam.pitch))};
 
-             cam.position += rotatedVelocity;
+         cam.front = glm::normalize(direction);
+         cam.right = glm::normalize(glm::cross(cam.front, glm::vec3(0.0f, 1.0f, 0.0f)));
 
-             cam.view = glm::lookAt(cam.position, cam.position + cam.front, {0.f, 1.f, 0.f});
+         glm::mat3 rotationMatrix{cam.right, worldUp, cam.front};
 
-             float aspect = static_cast<float>(width) / static_cast<float>(height);
-             cam.projection =
-                 glm::perspective(glm::radians(cam.fov), aspect, cam.nearClip, cam.farClip);
-             // Apparently everyone except me knew glm was for OpenGL and you have to adjust these
-             // matrices for Vulkan
-             cam.projection[1][1] *= -1;
-          });
+         auto rotatedVelocity = rotationMatrix * cam.velocity;
+
+         cam.position += rotatedVelocity;
+
+         cam.view = glm::lookAt(cam.position, cam.position + cam.front, {0.f, 1.f, 0.f});
+
+         float aspect = static_cast<float>(width) / static_cast<float>(height);
+         cam.projection =
+             glm::perspective(glm::radians(cam.fov), aspect, cam.nearClip, cam.farClip);
+         // Apparently everyone except me knew glm was for OpenGL and you have to adjust these
+         // matrices for Vulkan
+         cam.projection[1][1] *= -1;
+      }
    }
 }

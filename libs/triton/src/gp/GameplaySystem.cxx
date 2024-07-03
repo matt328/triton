@@ -12,7 +12,6 @@
 #include "gp/ecs/system/RenderDataSystem.hpp"
 #include "gp/ecs/system/TransformSystem.hpp"
 #include "gp/ecs/system/AnimationSystem.hpp"
-#include "gp/ecs/component/Resources.hpp"
 
 namespace tr::gp {
 
@@ -25,7 +24,7 @@ namespace tr::gp {
    using namespace tr::gp;
 
    GameplaySystem::GameplaySystem(gfx::geo::AnimationFactory& animationFactory)
-       : registry{std::make_unique<entt::registry>()}, animationFactory{animationFactory} {
+       : animationFactory{animationFactory} {
 
       entitySystem = std::make_unique<EntitySystem>();
       actionSystem = std::make_unique<ActionSystem>();
@@ -76,17 +75,7 @@ namespace tr::gp {
 
    void GameplaySystem::fixedUpdate([[maybe_unused]] const util::Timer& timer) {
       ZoneNamedN(upd, "FixedUpdate", true);
-
-      /*
-       TODO create a wrapper around the registry
-
-       utilize a shared lock for reading and an exclusive lock for writing
-       profile and add more granularity if needed.
-      */
-
-      ecs::CameraSystem::fixedUpdate(*entitySystem);
-      ecs::TransformSystem::update(*registry);
-      ecs::AnimationSystem::update(*registry, animationFactory);
+      entitySystem->fixedUpdate(timer);
    }
 
    void GameplaySystem::update(const double blendingFactor) {
@@ -102,16 +91,13 @@ namespace tr::gp {
       renderData.skinnedMeshData.clear();
       renderData.animationData.clear();
 
-      ecs::RenderDataSystem::update(*registry, renderData);
+      entitySystem->prepareRenderData(renderData);
 
       renderDataProducer(renderData);
    }
 
    void GameplaySystem::resize(const std::pair<uint32_t, uint32_t> size) {
       entitySystem->writeWindowDimensions(size);
-      // TODO: delete registry
-      registry->ctx().insert_or_assign<ecs::WindowDimensions>(
-          ecs::WindowDimensions{static_cast<int>(size.first), static_cast<int>(size.second)});
    }
 
    void GameplaySystem::keyCallback(int key, int scancode, int action, int mods) {
