@@ -3,7 +3,6 @@ project("editor" VERSION "0.0.1" LANGUAGES CXX)
 set(editor_SRC
    "src/main.cxx"
    "src/Application.cxx"
-   "src/ProjectFile.cxx"
    "src/ui/Manager.cxx"
    "src/data/DataFacade.cxx"
 )

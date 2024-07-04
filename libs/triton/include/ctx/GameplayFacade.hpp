@@ -16,6 +16,13 @@ namespace tr::ctx {
       std::optional<std::string> sourceTexture;
    };
 
+   /*
+      This class is a facade over the gameplay api, and the ResourceManager.
+      It ensures that as game world objects are created, required gfx resources are created and
+      linked to.
+
+      This class should also live in the intermediate module between gp and gfx.
+   */
    class GameplayFacade {
     public:
       GameplayFacade(gp::GameplaySystem& gameplaySystem,
@@ -28,6 +35,7 @@ namespace tr::ctx {
       GameplayFacade& operator=(const GameplayFacade&) = delete;
       GameplayFacade& operator=(GameplayFacade&&) = delete;
 
+      // Entity Creation Methods
       auto createSkinnedModelEntity(const gfx::LoadedSkinnedModelData model) -> gp::EntityType;
 
       auto createStaticMultiMeshEntity(const gfx::MeshHandles meshes) -> gp::EntityType;
@@ -46,30 +54,21 @@ namespace tr::ctx {
 
       auto setCurrentCamera(gp::EntityType currentCamera) -> void;
 
-      [[nodiscard]] auto getAllEntities() -> std::vector<gp::EntityType>&;
-
-      template <typename T>
-      auto getComponent(gp::EntityType entityId) -> OptionalRef<T> {
-         if (gameplaySystem.registry->all_of<T>(entityId)) {
-            auto& v = gameplaySystem.registry->get<T>(entityId);
-            return OptionalRef<T>{std::ref(v)};
-         } else {
-            return {};
-         }
-      }
-
-      auto getEntityTransform(gp::EntityType entityId) -> OptionalRef<gp::ecs::Transform>;
-
-      auto getEditorInfo(gp::EntityType entityId) -> EditorInfoComponent&;
-
-      auto getCameraComponent(const gp::EntityType entity) -> OptionalRef<gp::ecs::Camera>;
-
-      auto getActiveCameraName() -> std::string&;
-
       auto getAnimationTimeRange(const gfx::AnimationHandle handle) -> std::tuple<float, float>;
 
       auto clear() -> void;
 
+      // Resource Creation Methods
+      /*
+         TODO:
+         This facade shouldn't expose the two parts of gfx loading and then gp creation. It should
+         just be able to tell the gp system to create something, then the gp system should be able
+         to tell the gfx system what assets it should use to render the entity.
+
+         In a game application, these assets might be loaded differently, from a pack or something,
+         so we'll need to think about what API the editor needs vs what API the game needs, and how
+         to factor out a common API that both of those can talk to.
+      */
       auto loadModelAsync(const std::filesystem::path& path) -> std::future<gfx::ModelHandle>;
 
       auto loadSkinnedModelAsync(const std::filesystem::path& modelPath,

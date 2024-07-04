@@ -7,10 +7,8 @@
 #include "gp/actions/Action.hpp"
 #include "gp/actions/Sources.hpp"
 
-#include "gp/ecs/component/Resources.hpp"
 #include "gp/ecs/system/CameraSystem.hpp"
 #include "gp/ecs/system/RenderDataSystem.hpp"
-#include "gp/ecs/system/TransformSystem.hpp"
 #include "gp/ecs/system/AnimationSystem.hpp"
 
 namespace tr::gp {
@@ -29,7 +27,9 @@ namespace tr::gp {
       entitySystem = std::make_unique<EntitySystem>();
       actionSystem = std::make_unique<ActionSystem>();
 
-      actionSystem->getDelegate().connect<&ecs::CameraSystem::handleAction>(*entitySystem);
+      // TODO: synchronization isn't applied correctly (at all) here.
+      actionSystem->getDelegate().connect<&ecs::CameraSystem::handleAction>(
+          *entitySystem->getRegistry());
 
       // Forward
       actionSystem->mapSource(Source{Key::Up, SourceType::Boolean},
@@ -75,7 +75,7 @@ namespace tr::gp {
 
    void GameplaySystem::fixedUpdate([[maybe_unused]] const util::Timer& timer) {
       ZoneNamedN(upd, "FixedUpdate", true);
-      entitySystem->fixedUpdate(timer);
+      entitySystem->fixedUpdate(timer, animationFactory);
    }
 
    void GameplaySystem::update(const double blendingFactor) {
