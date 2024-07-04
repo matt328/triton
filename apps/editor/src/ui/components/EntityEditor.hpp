@@ -16,6 +16,12 @@ namespace ed::ui::components {
 
       void render(tr::ctx::GameplayFacade& gameplayFacade, data::DataFacade& dataFacade) {
          // Entity Editor
+         /*
+         This editor directly altered the properties inside the ECS. This won't work like this
+         anymore, as the editor has its own data store, and the data flow is only one way from
+         editor store into ECS. Nothing that changes inside the ECS should propagate back out to the
+         editor's data store.
+
          auto& es = gameplayFacade.getAllEntities();
 
          const auto unsaved = dataFacade.isUnsaved() ? ImGuiWindowFlags_UnsavedDocument : 0;
@@ -146,6 +152,7 @@ namespace ed::ui::components {
             }
          }
          ImGui::End();
+         */
       }
 
       void renderAnimationArea(tr::ctx::GameplayFacade& gameplayFacade,

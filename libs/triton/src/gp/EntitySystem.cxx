@@ -2,6 +2,9 @@
 
 #include <entt/entity/fwd.hpp>
 
+#include "gfx/Handles.hpp"
+#include "gfx/geometry/AnimationFactory.hpp"
+#include "gp/ecs/component/Animation.hpp"
 #include "gp/ecs/component/Resources.hpp"
 #include "gp/ecs/component/DebugConstants.hpp"
 #include "gp/ecs/component/Renderable.hpp"
@@ -24,7 +27,8 @@ namespace tr::gp {
    EntitySystem::~EntitySystem() {
    }
 
-   void EntitySystem::fixedUpdate(const util::Timer& timer) {
+   void EntitySystem::fixedUpdate(const util::Timer& timer,
+                                  gfx::geo::AnimationFactory& animationFactory) {
       auto lock = std::unique_lock<std::shared_mutex>{registryMutex};
 
       ecs::CameraSystem::fixedUpdate(*registry);
@@ -75,6 +79,61 @@ namespace tr::gp {
                                             glm::vec3(200.f, 1000.f, 200.f));
       registry->emplace<gp::ecs::DebugConstants>(debugConstants, 16.f);
       return e;
+   }
+
+   auto EntitySystem::createStaticModel(const gfx::MeshHandles handles) -> gp::EntityType {
+      auto lock = std::unique_lock<std::shared_mutex>{registryMutex};
+
+      auto e = registry->create();
+      registry->emplace<gp::ecs::Renderable>(e, handles);
+      registry->emplace<gp::ecs::Transform>(e);
+      return e;
+   }
+
+   auto EntitySystem::createAnimatedModel(const gfx::LoadedSkinnedModelData modelData)
+       -> gp::EntityType {
+      auto lock = std::unique_lock<std::shared_mutex>{registryMutex};
+      auto e = registry->create();
+
+      registry->emplace<gp::ecs::Animation>(e,
+                                            modelData.animationHandle,
+                                            modelData.skeletonHandle,
+                                            modelData.jointMap,
+                                            modelData.inverseBindMatrices);
+      registry->emplace<gp::ecs::Transform>(e);
+
+      const auto meshes = std::unordered_map<gfx::MeshHandle, gfx::TextureHandle>{
+          {modelData.meshHandle, modelData.textureHandle}};
+
+      registry->emplace<gp::ecs::Renderable>(e, meshes);
+
+      return e;
+   }
+
+   auto EntitySystem::createCamera(uint32_t width,
+                                   uint32_t height,
+                                   float fov,
+                                   float zNear,
+                                   float zFar,
+                                   glm::vec3 position,
+                                   std::optional<std::string> name) -> gp::EntityType {
+
+      auto lock = std::unique_lock<std::shared_mutex>{registryMutex};
+      const auto camera = registry->create();
+      registry->emplace<gp::ecs::Camera>(camera, width, height, fov, zNear, zFar, position);
+      return camera;
+   }
+
+   void EntitySystem::setCurrentCamera(gp::EntityType currentCamera) {
+      auto lock = std::unique_lock<std::shared_mutex>{registryMutex};
+      registry->ctx().insert_or_assign<gp::ecs::CurrentCamera>(
+          gp::ecs::CurrentCamera{currentCamera});
+   }
+
+   void EntitySystem::removeAll() {
+      auto lock = std::unique_lock<std::shared_mutex>{registryMutex};
+      registry->clear();
+      registry->ctx().erase<gp::ecs::CurrentCamera>();
    }
 
 }

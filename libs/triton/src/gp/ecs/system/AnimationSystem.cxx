@@ -22,6 +22,13 @@ namespace tr::gp::ecs::AnimationSystem {
          }
 
          const auto& animation = animationFactory.getAnimation(animationData.animationHandle);
+         const auto& skeleton = animationFactory.getSkeleton(animationData.animationHandle);
+
+         // This should do this once, then be a no op on subsequent invocations
+         animationData.context.Resize(skeleton.num_joints());
+         animationData.locals.resize(skeleton.num_soa_joints(),
+                                     ozz::math::SoaTransform::identity());
+         animationData.models.resize(skeleton.num_joints(), ozz::math::Float4x4::identity());
 
          auto samplingJob = ozz::animation::SamplingJob{};
          samplingJob.animation = &animation;
@@ -32,7 +39,6 @@ namespace tr::gp::ecs::AnimationSystem {
             Log::warn << "Sampling job fail" << std::endl;
          }
 
-         const auto& skeleton = animationFactory.getSkeleton(animationData.skeletonHandle);
          auto ltmJob = ozz::animation::LocalToModelJob{};
          ltmJob.skeleton = &skeleton;
          ltmJob.input = ozz::make_span(animationData.locals);

@@ -34,9 +34,21 @@ namespace tr::gp {
    using RenderDataProducer = entt::delegate<void(gfx::RenderData&)>;
 
    /*
-      This class serves as a bridge between the gfx and gp halves of the game engine.
-      It recieves update and resize info as well as input information from the Application layer.
-      It owns the entity system, action system, and also for some reason the animationFactory.
+      This class serves as the API of the gp module of the engine.
+      It recieves update and resize and input information from the app module.
+      It owns the EntitySystem, ActionSystem, and also for some reason the AnimationFactory.
+
+      The whole point of the gp module is to operate on the EntitySystem. The gfx module then
+      queries the gp module at the sync point to determine what to render.
+
+      For now, the Editor directly drives the gp module by creating Entities and setting their
+      properties and the gfx module renders them.
+
+      At some point a layer in the gp module will drive itself via properties set on the Entities in
+      the EntitySystem, these will be entity controllers in the form of Behaviors, Scripts, etc
+      The Editor will then only create entities, set properties, and then be able to start, stop,
+      and reset the timestep.
+
       // TODO move animation factory into ResourceManager
    */
    class GameplaySystem {
@@ -74,6 +86,10 @@ namespace tr::gp {
       std::unique_ptr<EntitySystem> entitySystem;
       std::unique_ptr<ActionSystem> actionSystem;
 
+      /*
+         TODO: Move RenderData into an intermediate module so it's not part of either gfx or gp
+         Probably GameplayFacade belongs there too?
+      */
       /// This is a preallocated RenderData that the ECS collects all of he GameWorld data into
       /// before the Renderer takes a copy of it
       gfx::RenderData renderData{};
