@@ -68,49 +68,12 @@ namespace tr::ctx {
    }
 
    gp::EntityType GameplayFacade::createStaticMultiMeshEntity(gfx::MeshHandles meshes) {
-      auto e = gameplaySystem.registry->create();
-      gameplaySystem.registry->emplace<gp::ecs::Renderable>(e, meshes);
-      gameplaySystem.registry->emplace<gp::ecs::Transform>(e);
-
-      if (debugEnabled) {
-         gameplaySystem.registry->emplace<EditorInfoComponent>(e, "gltf model");
-      }
-
-      return e;
+      return gameplaySystem.entitySystem->createStaticModel(meshes);
    }
 
    auto GameplayFacade::createSkinnedModelEntity(
        [[maybe_unused]] const gfx::LoadedSkinnedModelData model) -> gp::EntityType {
-      auto e = gameplaySystem.registry->create();
-
-      auto numJoints = this->renderer.getResourceManager()
-                           .getAnimationFactory()
-                           .getSkeleton(model.skeletonHandle)
-                           .num_joints();
-      auto numSoaJoints = this->renderer.getResourceManager()
-                              .getAnimationFactory()
-                              .getSkeleton(model.skeletonHandle)
-                              .num_soa_joints();
-
-      gameplaySystem.registry->emplace<gp::ecs::Animation>(e,
-                                                           model.animationHandle,
-                                                           model.skeletonHandle,
-                                                           numJoints,
-                                                           numSoaJoints,
-                                                           model.jointMap,
-                                                           model.inverseBindMatrices);
-      gameplaySystem.registry->emplace<gp::ecs::Transform>(e);
-
-      const auto meshes = std::unordered_map<gfx::MeshHandle, gfx::TextureHandle>{
-          {model.meshHandle, model.textureHandle}};
-
-      gameplaySystem.registry->emplace<gp::ecs::Renderable>(e, meshes);
-
-      if (debugEnabled) {
-         gameplaySystem.registry->emplace<EditorInfoComponent>(e, "skinned model");
-      }
-
-      return e;
+      return gameplaySystem.entitySystem->createAnimatedModel(model);
    }
 
    gp::EntityType GameplayFacade::createCamera(uint32_t width,
@@ -121,59 +84,16 @@ namespace tr::ctx {
                                                glm::vec3 position,
                                                std::optional<std::string> name) {
 
-      const auto camera = gameplaySystem.registry->create();
-      gameplaySystem.registry
-          ->emplace<gp::ecs::Camera>(camera, width, height, fov, zNear, zFar, position);
-
-      if (debugEnabled && name.has_value()) {
-         gameplaySystem.registry->emplace<EditorInfoComponent>(camera, name.value());
-      }
-      return camera;
+      return gameplaySystem.entitySystem
+          ->createCamera(width, height, fov, zNear, zFar, position, name);
    }
 
    void GameplayFacade::setCurrentCamera(gp::EntityType currentCamera) {
-      gameplaySystem.registry->ctx().insert_or_assign<gp::ecs::CurrentCamera>(
-          gp::ecs::CurrentCamera{currentCamera});
+      return gameplaySystem.entitySystem->setCurrentCamera(currentCamera);
    }
 
    void GameplayFacade::clear() {
-      gameplaySystem.registry->clear();
-      gameplaySystem.registry->ctx().erase<gp::ecs::CurrentCamera>();
-   }
-
-   std::string& GameplayFacade::getActiveCameraName() {
-      auto c = gameplaySystem.registry->ctx().get<gp::ecs::CurrentCamera>();
-      auto e = getComponent<EditorInfoComponent>(c.currentCamera);
-      return e.value().get().name;
-   }
-
-   std::vector<gp::EntityType>& GameplayFacade::getAllEntities() {
-      allEntities.clear();
-      for (auto e : gameplaySystem.registry->view<entt::entity>()) {
-         allEntities.push_back(e);
-      }
-      return allEntities;
-   }
-
-   OptionalRef<gp::ecs::Transform> GameplayFacade::getEntityTransform(gp::EntityType entityId) {
-      if (gameplaySystem.registry->all_of<gp::ecs::Transform>(entityId)) {
-         auto& v = gameplaySystem.registry->get<gp::ecs::Transform>(entityId);
-         return std::optional<std::reference_wrapper<gp::ecs::Transform>>{std::ref(v)};
-      }
-      return {};
-   }
-
-   EditorInfoComponent& GameplayFacade::getEditorInfo(gp::EntityType entityId) {
-      auto& nameComponent = gameplaySystem.registry->get<EditorInfoComponent>(entityId);
-      return nameComponent;
-   }
-
-   OptionalRef<gp::ecs::Camera> GameplayFacade::getCameraComponent(const gp::EntityType entityId) {
-      if (gameplaySystem.registry->all_of<gp::ecs::Camera>(entityId)) {
-         auto& c = gameplaySystem.registry->get<gp::ecs::Camera>(entityId);
-         return std::optional<std::reference_wrapper<gp::ecs::Camera>>{std::ref(c)};
-      }
-      return {};
+      gameplaySystem.entitySystem->removeAll();
    }
 
    auto GameplayFacade::getAnimationTimeRange(const gfx::AnimationHandle handle)
