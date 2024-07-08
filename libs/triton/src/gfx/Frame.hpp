@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gfx/ObjectData.hpp"
+#include "cm/ObjectData.hpp"
 #include "gfx/sb/LayoutFactory.hpp"
 #include "gfx/sb/ShaderBindingFactory.hpp"
 
@@ -97,9 +97,9 @@ namespace tr::gfx {
          return *animationDataShaderBinding;
       }
 
-      void updateObjectDataBuffer(const ObjectData* data, const size_t size);
-      void updatePerFrameDataBuffer(const CameraData* data, const size_t size);
-      void updateAnimationDataBuffer(const AnimationData* data, const size_t size);
+      void updateObjectDataBuffer(const cm::ObjectData* data, const size_t size);
+      void updatePerFrameDataBuffer(const cm::CameraData* data, const size_t size);
+      void updateAnimationDataBuffer(const cm::AnimationData* data, const size_t size);
 
       void destroySwapchainResources();
       void createSwapchainResources(const GraphicsDevice& graphicsDevice);

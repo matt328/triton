@@ -1,8 +1,8 @@
 project("triton")
 
 set(triton_SRC
-   "src/ctx/Context.cxx"
-   "src/ctx/GameplayFacade.cxx"
+   "src/Context.cxx"
+   "src/GameplayFacade.cxx"
 
    "src/gfx/Frame.cxx"
    "src/gfx/GraphicsDevice.cxx"
@@ -20,21 +20,11 @@ set(triton_SRC
    "src/gfx/sb/DSShaderBinding.cxx"
    "src/gfx/sb/ShaderBindingFactory.cxx"
 
-   "src/gp/GameplaySystem.cxx"
-   "src/gp/EntitySystem.cxx"
-   "src/gp/actions/ActionSystem.cxx"
-   "src/gp/ecs/system/CameraSystem.cxx"
-   "src/gp/ecs/system/RenderDataSystem.cxx"
-   "src/gp/ecs/system/TransformSystem.cxx"
-   "src/gp/ecs/system/AnimationSystem.cxx"
-
    "src/gfx/sb/LayoutFactory.cxx"
    "src/gfx/sb/Layout.cxx"
 
    "src/ct/Heightfield.cxx"
    "src/gfx/geometry/GeometryFactory.cxx"
-   "src/gfx/geometry/AnimationFactory.cxx"
-   "src/gfx/geometry/OzzMesh.cxx"
 )
 
 add_library(${PROJECT_NAME} STATIC ${triton_SRC})
@@ -62,7 +52,6 @@ find_package(fastgltf CONFIG REQUIRED FASTGLTF_DISABLE_CUSTOM_MEMORY_POOL FASTGL
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glslang CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
-find_package(Tracy CONFIG REQUIRED)
 find_package(Stb REQUIRED)
 find_package(VulkanMemoryAllocator CONFIG REQUIRED)
 find_package(unofficial-vulkan-memory-allocator-hpp CONFIG REQUIRED)
@@ -136,9 +125,6 @@ target_precompile_headers(${PROJECT_NAME}
    <ozz/base/io/stream.h>
    <queue>
    <tiny_gltf.h>
-   <tracy/Tracy.hpp>
-   <tracy/TracyVulkan.hpp>
-   <tracy/TracyC.h>
    <vulkan-memory-allocator-hpp/vk_mem_alloc.hpp>
    <vulkan/vulkan_raii.hpp>
 )
@@ -148,15 +134,15 @@ target_link_libraries(${PROJECT_NAME}
    glfw
    GPUOpen::VulkanMemoryAllocator
    ozz_animation
+   common
    PRIVATE
-   utils-lib
+   gameplay
    fastgltf::fastgltf
    glslang::glslang
    glslang::glslang-default-resource-limits
    glslang::SPIRV
    imgui::imgui
    nfd::nfd
-   Tracy::TracyClient
    unofficial::noise::noise
    unofficial::noiseutils::noiseutils
    unofficial::VulkanMemoryAllocator-Hpp::VulkanMemoryAllocator-Hpp
@@ -168,7 +154,11 @@ target_include_directories(${PROJECT_NAME}
    include
    PRIVATE
    src
+   include/tr
    ${Vulkan_INCLUDE_DIRS}
 )
 
 add_dependencies(${PROJECT_NAME} assets)
+
+add_subdirectory(common)
+add_subdirectory(gameplay)

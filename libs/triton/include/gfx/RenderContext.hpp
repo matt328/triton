@@ -1,6 +1,7 @@
 #pragma once
 
-#include "gfx/ObjectData.hpp"
+#include "cm/ObjectData.hpp"
+
 #include "gfx/GraphicsDevice.hpp"
 #include "gfx/PipelineBuilder.hpp"
 #include "gfx/sb/ShaderBindingFactory.hpp"
@@ -58,7 +59,7 @@ namespace tr::gfx {
 
       void enqueueRenderObject(RenderObject renderObject);
 
-      void setCurrentCameraData(CameraData&& cameraData) {
+      void setCurrentCameraData(cm::CameraData&& cameraData) {
          this->cameraData = std::move(cameraData);
       }
 
@@ -110,20 +111,20 @@ namespace tr::gfx {
       std::unique_ptr<tx::ResourceManager> resourceManager;
 
       std::vector<RenderObject> renderObjects{};
-      std::vector<ObjectData> objectDataList{};
-      CameraData cameraData{glm::identity<glm::mat4>(),
-                            glm::identity<glm::mat4>(),
-                            glm::identity<glm::mat4>()};
+      std::vector<cm::ObjectData> objectDataList{};
+      cm::CameraData cameraData{glm::identity<glm::mat4>(),
+                                glm::identity<glm::mat4>(),
+                                glm::identity<glm::mat4>()};
 
       uint32_t currentFrame = 0;
       bool framebufferResized = false;
 
       ResizeDelegateType resizeDelegate{};
 
-      std::vector<MeshData> staticMeshDataList;
-      std::vector<MeshData> terrainDataList;
-      std::vector<MeshData> skinnedModelList;
-      PushConstants pushConstants;
+      std::vector<cm::MeshData> staticMeshDataList;
+      std::vector<cm::MeshData> terrainDataList;
+      std::vector<cm::MeshData> skinnedModelList;
+      cm::PushConstants pushConstants;
 
       void initDepthResources();
 

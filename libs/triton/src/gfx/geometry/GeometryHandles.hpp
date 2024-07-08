@@ -1,6 +1,7 @@
 #pragma once
 
-#include "gfx/geometry/AnimationFactory.hpp"
+#include "cm/Handles.hpp"
+
 namespace tr::gfx::geo {
 
    using GeometryHandle = size_t;
@@ -10,8 +11,8 @@ namespace tr::gfx::geo {
    struct SkinnedGeometryData {
       GeometryHandle geometryHandle;
       ImageHandle imageHandle;
-      SkeletonHandle skeletonHandle;
-      AnimationHandle animationHandle;
+      cm::SkeletonHandle skeletonHandle;
+      cm::AnimationHandle animationHandle;
       std::unordered_map<int, int> jointMap;
       std::vector<glm::mat4> inverseBindMatrices;
    };
