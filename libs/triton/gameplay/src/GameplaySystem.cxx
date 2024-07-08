@@ -119,4 +119,8 @@ namespace tr::gp {
    void GameplaySystem::setMouseState(bool captured) {
       actionSystem->setMouseState(captured);
    }
+
+   void GameplaySystem::createTerrain(const cm::MeshHandles handles) {
+      entitySystem->createTerrain(handles);
+   }
 }
