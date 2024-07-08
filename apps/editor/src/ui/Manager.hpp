@@ -1,11 +1,12 @@
 #pragma once
 
+#include <entt/entt.hpp>
+
 #include "cm/Handles.hpp"
 
 #include "Application.hpp"
 #include "data/DataFacade.hpp"
-#include "gp/cmp/Animation.hpp"
-#include <entt/entt.hpp>
+
 #include "components/EntityEditor.hpp"
 
 namespace ed {
