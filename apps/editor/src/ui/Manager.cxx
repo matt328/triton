@@ -1,16 +1,18 @@
 #include "Manager.hpp"
-#include "ctx/GameplayFacade.hpp"
+
 #include "Properties.hpp"
 #include "RobotoRegular.h"
 #include "data/DataFacade.hpp"
 #include "ImGuiHelpers.hpp"
 #include "ui/components/EntityEditor.hpp"
 
+#include "tr/ctx/GameplayFacade.hpp"
+
 namespace ed::ui {
    Manager::Manager(tr::ctx::GameplayFacade& facade, data::DataFacade& dataFacade)
        : facade{facade},
          dataFacade{dataFacade},
-         entityEditor{components::EntityEditor{[this, &facade](uint32_t size) {
+         entityEditor{components::EntityEditor{[this, &facade]([[maybe_unused]] uint32_t size) {
             terrainFutures.push_back(facade.createTerrainMesh(512));
          }}} {
       ImGuiEx::setupImGuiStyle();

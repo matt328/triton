@@ -13,6 +13,7 @@ namespace tr::ct {
    constexpr float MaxHeight = 20;
 
    HeightField::HeightField(const int size) : width{size} {
+
       module::Perlin myModule;
       utils::NoiseMap heightMap;
       utils::NoiseMapBuilderPlane heightMapBuilder;

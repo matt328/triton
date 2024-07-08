@@ -1,13 +1,13 @@
 #pragma once
 
-#include "gfx/Handles.hpp"
+#include "cm/Handles.hpp"
 
 namespace tr::gfx {
 
    struct RenderObject {
       RenderObject(RenderObject&& other) noexcept = default;
 
-      RenderObject(MeshHandle meshId, TextureHandle textureId, glm::mat4 modelMatrix)
+      RenderObject(cm::MeshHandle meshId, cm::TextureHandle textureId, glm::mat4 modelMatrix)
           : meshId(meshId), textureId(textureId), modelMatrix(modelMatrix) {
       }
 
@@ -18,8 +18,8 @@ namespace tr::gfx {
       RenderObject& operator=(RenderObject&&) = delete;
       ~RenderObject() = default;
 
-      MeshHandle meshId;
-      TextureHandle textureId;
+      cm::MeshHandle meshId;
+      cm::TextureHandle textureId;
       glm::mat4 modelMatrix;
    };
 

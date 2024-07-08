@@ -1,0 +1,59 @@
+#pragma once
+
+#include "cm/Handles.hpp"
+#include "cm/RenderData.hpp"
+#include "cm/EntitySystemTypes.hpp"
+#include "cm/Timer.hpp"
+
+#include "cmp/Camera.hpp"
+#include <entt/entity/fwd.hpp>
+
+namespace tr::gfx::geo {
+   class AnimationFactory;
+}
+
+namespace tr::gp {
+
+   class EntitySystem {
+    public:
+      EntitySystem();
+      ~EntitySystem();
+
+      EntitySystem(const EntitySystem&) = delete;
+      EntitySystem& operator=(const EntitySystem&) = delete;
+
+      EntitySystem(EntitySystem&&) = delete;
+      EntitySystem& operator=(EntitySystem&&) = delete;
+
+      [[nodiscard]] auto& getRegistry() {
+         return registry;
+      }
+
+      void fixedUpdate(const cm::Timer& timer, gfx::geo::AnimationFactory& animationFactory);
+      void prepareRenderData(cm::RenderData& renderData);
+
+      auto createTerrain(const cm::MeshHandles handles) -> cm::EntityType;
+      auto createStaticModel(const cm::MeshHandles handles) -> cm::EntityType;
+      auto createAnimatedModel(const cm::LoadedSkinnedModelData modelData) -> cm::EntityType;
+      auto createCamera(uint32_t width,
+                        uint32_t height,
+                        float fov,
+                        float zNear,
+                        float zFar,
+                        glm::vec3 position,
+                        std::optional<std::string> name) -> cm::EntityType;
+      void setCurrentCamera(cm::EntityType);
+
+      void removeAll();
+
+      void writeCameras(std::function<void(entt::entity, ecs::Camera)> fn);
+      void writeCameras(
+          std::function<void(entt::entity, ecs::Camera, uint32_t width, uint32_t height)> fn);
+
+      void writeWindowDimensions(const std::pair<uint32_t, uint32_t> size);
+
+    private:
+      std::shared_mutex registryMutex{};
+      std::unique_ptr<entt::registry> registry;
+   };
+}

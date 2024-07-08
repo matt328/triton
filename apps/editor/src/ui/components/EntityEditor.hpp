@@ -1,9 +1,8 @@
 #pragma once
 
-#include "ctx/GameplayFacade.hpp"
+#include "tr/ctx/GameplayFacade.hpp"
 #include "data/DataFacade.hpp"
 #include "gp/ecs/component/Animation.hpp"
-#include "gp/ecs/component/DebugConstants.hpp"
 
 namespace ed::ui::components {
    struct EntityEditor {
@@ -14,7 +13,8 @@ namespace ed::ui::components {
       std::optional<uint32_t> selectedEntity{};
       std::function<void(uint32_t size)> onLoadTerrain;
 
-      void render(tr::ctx::GameplayFacade& gameplayFacade, data::DataFacade& dataFacade) {
+      void render([[maybe_unused]] tr::ctx::GameplayFacade& gameplayFacade,
+                  [[maybe_unused]] data::DataFacade& dataFacade) {
          // Entity Editor
          /*
          This editor directly altered the properties inside the ECS. This won't work like this

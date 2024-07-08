@@ -1,5 +1,5 @@
 #include "PipelineBuilder.hpp"
-#include "gfx/ObjectData.hpp"
+#include "cm/ObjectData.hpp"
 #include "gfx/geometry/Vertex.hpp"
 #include "gfx/helpers/Vulkan.hpp"
 
@@ -36,7 +36,7 @@ namespace tr::gfx {
       auto pcr = vk::PushConstantRange{.stageFlags = vk::ShaderStageFlagBits::eVertex |
                                                      vk::ShaderStageFlagBits::eFragment,
                                        .offset = 0,
-                                       .size = sizeof(PushConstants)};
+                                       .size = sizeof(cm::PushConstants)};
 
       vk::PipelineLayoutCreateInfo pipelineLayoutCreateInfo{
           .setLayoutCount = static_cast<uint32_t>(layouts.size()),

@@ -1,8 +1,10 @@
 #include "gfx/textures/ResourceManager.hpp"
+
+#include "cm/Handles.hpp"
+#include "cm/RenderData.hpp"
+
 #include "ct/HeightField.hpp"
-#include "gfx/Handles.hpp"
-#include "gfx/RenderData.hpp"
-#include "gfx/geometry/AnimationFactory.hpp"
+
 #include "gfx/geometry/GeometryFactory.hpp"
 #include "gfx/geometry/GeometryHandles.hpp"
 
@@ -25,32 +27,31 @@ namespace tr::gfx::tx {
    ResourceManager::ResourceManager(const GraphicsDevice& graphicsDevice)
        : graphicsDevice{graphicsDevice} {
       taskQueue = std::make_unique<util::TaskQueue>();
-      animationFactory = std::make_unique<geo::AnimationFactory>();
-      geometryFactory = std::make_unique<geo::GeometryFactory>(*animationFactory);
+      geometryFactory = std::make_unique<geo::GeometryFactory>();
    }
 
    ResourceManager::~ResourceManager() {
    }
 
-   void ResourceManager::setRenderData(RenderData& newRenderData) {
+   void ResourceManager::setRenderData(cm::RenderData& newRenderData) {
       std::lock_guard<LockableBase(std::mutex)> lock(renderDataMutex);
       LockableName(renderDataMutex, "SetRenderData", 13);
       LockMark(renderDataMutex);
       renderData = newRenderData;
    }
 
-   void ResourceManager::accessRenderData(std::function<void(RenderData&)> fn) {
+   void ResourceManager::accessRenderData(std::function<void(cm::RenderData&)> fn) {
       std::lock_guard<LockableBase(std::mutex)> lock(renderDataMutex);
       LockableName(renderDataMutex, "AccessRenderData", 16);
       LockMark(renderDataMutex);
       fn(renderData);
    }
 
-   auto ResourceManager::createTerrain() -> std::future<ModelHandle> {
+   auto ResourceManager::createTerrain() -> std::future<cm::ModelHandle> {
       return taskQueue->enqueue([this]() { return createTerrainInt(); });
    }
 
-   auto ResourceManager::createTerrainInt() -> ModelHandle {
+   auto ResourceManager::createTerrainInt() -> cm::ModelHandle {
       const auto heightfield = ct::HeightField{1024};
       const auto dataHandle = geometryFactory->createGeometryFromHeightfield(heightfield);
       const auto modelHandle = uploadGeometry(dataHandle);
@@ -58,16 +59,19 @@ namespace tr::gfx::tx {
       return modelHandle;
    }
 
-   std::future<ModelHandle> ResourceManager::loadModelAsync(const std::filesystem::path& filename) {
+   std::future<cm::ModelHandle> ResourceManager::loadModelAsync(
+       const std::filesystem::path& filename) {
       return taskQueue->enqueue([this, filename]() { return loadModelInt(filename); });
    }
 
-   ModelHandle ResourceManager::loadModelInt(const std::filesystem::path& filename) {
-      const auto texturedGeometryHandle = geometryFactory->loadGeometryFromGltf(filename);
-      return uploadGeometry(texturedGeometryHandle);
+   cm::ModelHandle ResourceManager::loadModelInt(const std::filesystem::path& filename) {
+      // TODO: Implement trm loader
+      // const auto texturedGeometryHandle = geometryFactory->loadGeometryFromGltf(filename);
+      // return uploadGeometry(texturedGeometryHandle);
+      return cm::ModelHandle{};
    }
 
-   std::future<LoadedSkinnedModelData> ResourceManager::loadSkinnedModelAsync(
+   std::future<cm::LoadedSkinnedModelData> ResourceManager::loadSkinnedModelAsync(
        const std::filesystem::path& modelPath,
        const std::filesystem::path& skeletonPath,
        const std::filesystem::path& animationPath) {
@@ -76,7 +80,7 @@ namespace tr::gfx::tx {
       });
    }
 
-   LoadedSkinnedModelData ResourceManager::loadSkinnedModelInt(
+   cm::LoadedSkinnedModelData ResourceManager::loadSkinnedModelInt(
        const std::filesystem::path& modelPath,
        const std::filesystem::path& skeletonPath,
        const std::filesystem::path& animationPath) {
@@ -91,15 +95,15 @@ namespace tr::gfx::tx {
    /// Uploads the Geometry and Texture data and creates space in a buffer for the skeleton's
    /// joint matrix data
    auto ResourceManager::uploadSkinnedGeometry(const geo::SkinnedGeometryData& sgd)
-       -> LoadedSkinnedModelData {
+       -> cm::LoadedSkinnedModelData {
       const auto tgh = geo::TexturedGeometryHandle{{sgd.geometryHandle, sgd.imageHandle}};
       const auto modelHandle = uploadGeometry(tgh);
       const auto meshHandle = modelHandle.begin()->first;
       const auto textureHandle = modelHandle.begin()->second;
-      const auto smh = LoadedSkinnedModelData{.meshHandle = meshHandle,
-                                              .textureHandle = textureHandle,
-                                              .skeletonHandle = sgd.skeletonHandle,
-                                              .animationHandle = sgd.animationHandle};
+      const auto smh = cm::LoadedSkinnedModelData{.meshHandle = meshHandle,
+                                                  .textureHandle = textureHandle,
+                                                  .skeletonHandle = sgd.skeletonHandle,
+                                                  .animationHandle = sgd.animationHandle};
 
       return smh;
    }
@@ -113,8 +117,9 @@ namespace tr::gfx::tx {
       encapsulate the logic instead of ResourceManager. Factories can use RVO to return aggregate
       types by value and avoid a copy.
    */
-   auto ResourceManager::uploadGeometry(const geo::TexturedGeometryHandle& handles) -> ModelHandle {
-      auto modelHandles = ModelHandle{};
+   auto ResourceManager::uploadGeometry(const geo::TexturedGeometryHandle& handles)
+       -> cm::ModelHandle {
+      auto modelHandles = cm::ModelHandle{};
       auto& allocator = graphicsDevice.getAllocator();
       auto& context = graphicsDevice.getAsyncTransferContext();
 

@@ -1,9 +1,10 @@
 #pragma once
 
+#include "cm/Handles.hpp"
+
 #include "Application.hpp"
 #include "data/DataFacade.hpp"
-#include "gp/ecs/component/Animation.hpp"
-#include "gfx/Handles.hpp"
+#include "gp/cmp/Animation.hpp"
 #include <entt/entt.hpp>
 #include "components/EntityEditor.hpp"
 
@@ -54,9 +55,9 @@ namespace ed::ui {
 
       components::EntityEditor entityEditor;
 
-      std::vector<std::future<tr::gfx::ModelHandle>> modelFutures{};
-      std::vector<std::future<tr::gfx::ModelHandle>> terrainFutures{};
-      std::vector<std::future<tr::gfx::LoadedSkinnedModelData>> skinnedModelFutures{};
+      std::vector<std::future<tr::cm::ModelHandle>> modelFutures{};
+      std::vector<std::future<tr::cm::ModelHandle>> terrainFutures{};
+      std::vector<std::future<tr::cm::LoadedSkinnedModelData>> skinnedModelFutures{};
 
       // HACK: get this from the application somehow instead of tracking it in 2 places
       bool fullscreen{};

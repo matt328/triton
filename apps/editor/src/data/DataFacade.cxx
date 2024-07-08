@@ -16,7 +16,7 @@ namespace ed::data {
       unsaved = true;
    }
 
-   void DataFacade::removeSkeleton(const std::string_view& name) {
+   void DataFacade::removeSkeleton([[maybe_unused]] const std::string_view& name) {
    }
 
    void DataFacade::addAnimation(const std::string_view& name, const std::filesystem::path& path) {
@@ -24,7 +24,7 @@ namespace ed::data {
       unsaved = true;
    }
 
-   void DataFacade::removeAnimation(const std::string_view& name) {
+   void DataFacade::removeAnimation([[maybe_unused]] const std::string_view& name) {
    }
 
    void DataFacade::addModel(const std::string_view& name, const std::filesystem::path& path) {
@@ -32,21 +32,21 @@ namespace ed::data {
       unsaved = true;
    }
 
-   void DataFacade::removeModel(const std::string_view& name) {
+   void DataFacade::removeModel([[maybe_unused]] const std::string_view& name) {
    }
 
-   void DataFacade::createEntity(const std::string_view& entityName) {
+   void DataFacade::createEntity([[maybe_unused]] const std::string_view& entityName) {
    }
 
-   void DataFacade::addAnimationToEntity(const std::string_view& entityName,
-                                         const std::string_view& animationName) {
+   void DataFacade::addAnimationToEntity([[maybe_unused]] const std::string_view& entityName,
+                                         [[maybe_unused]] const std::string_view& animationName) {
    }
 
-   void DataFacade::setEntitySkeleton(const std::string_view& entityName,
-                                      std::string_view& skeletonName) {
+   void DataFacade::setEntitySkeleton([[maybe_unused]] const std::string_view& entityName,
+                                      [[maybe_unused]] std::string_view& skeletonName) {
    }
 
-   void DataFacade::createTerrain(const std::string_view& terrainName) {
+   void DataFacade::createTerrain([[maybe_unused]] const std::string_view& terrainName) {
    }
 
    void DataFacade::save(const std::filesystem::path& outputFile) {

@@ -3,7 +3,7 @@
 #include "GraphicsDevice.hpp"
 #include "gfx/RenderObject.hpp"
 
-#include "gfx/ObjectData.hpp"
+#include "cm/ObjectData.hpp"
 #include "gfx/sb/LayoutFactory.hpp"
 #include "gfx/geometry/Vertex.hpp"
 #include "gfx/gui/ImguiHelper.hpp"
@@ -326,14 +326,15 @@ namespace tr::gfx {
       terrainDataList.clear();
       skinnedModelList.clear();
 
-      resourceManager->accessRenderData([&frame, this](RenderData& renderData) {
+      resourceManager->accessRenderData([&frame, this](cm::RenderData& renderData) {
          frame.updateObjectDataBuffer(renderData.objectData.data(),
-                                      sizeof(ObjectData) * renderData.objectData.size());
+                                      sizeof(cm::ObjectData) * renderData.objectData.size());
 
-         frame.updatePerFrameDataBuffer(&renderData.cameraData, sizeof(CameraData));
+         frame.updatePerFrameDataBuffer(&renderData.cameraData, sizeof(cm::CameraData));
 
          frame.updateAnimationDataBuffer(renderData.animationData.data(),
-                                         sizeof(AnimationData) * renderData.animationData.size());
+                                         sizeof(cm::AnimationData) *
+                                             renderData.animationData.size());
 
          staticMeshDataList.reserve(renderData.staticMeshData.size());
          std::copy(renderData.staticMeshData.begin(),
@@ -399,11 +400,11 @@ namespace tr::gfx {
          // Terrain
          cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, **terrainPipeline);
          {
-            cmd.pushConstants<PushConstants>(**terrainPipelineLayout,
-                                             vk::ShaderStageFlagBits::eVertex |
-                                                 vk::ShaderStageFlagBits::eFragment,
-                                             0,
-                                             pushConstants);
+            cmd.pushConstants<cm::PushConstants>(**terrainPipelineLayout,
+                                                 vk::ShaderStageFlagBits::eVertex |
+                                                     vk::ShaderStageFlagBits::eFragment,
+                                                 0,
+                                                 pushConstants);
             for (const auto& meshData : terrainDataList) {
                const auto& mesh = resourceManager->getMesh(meshData.handle);
 

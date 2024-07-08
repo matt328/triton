@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gfx/Handles.hpp"
+#include "cm/Handles.hpp"
 
 namespace tr::gfx::geo {
    struct SkinnedModel {
