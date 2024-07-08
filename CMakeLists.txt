@@ -21,10 +21,8 @@ set(TRITON_COMPILE_OPTIONS
 )
 
 add_subdirectory(assets)
-add_subdirectory("vendor/ozz-animation" "ozz-animation" SYSTEM)
 add_subdirectory(libs/triton)
 add_subdirectory(apps/editor)
 add_subdirectory(apps/testarea)
 add_subdirectory(apps/assettool)
 add_subdirectory(libs/asset-lib)
-add_subdirectory(libs/utils-lib)

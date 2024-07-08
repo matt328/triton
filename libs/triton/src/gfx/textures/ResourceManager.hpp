@@ -1,8 +1,8 @@
 #pragma once
 
-#include "gfx/Handles.hpp"
-#include "gfx/RenderData.hpp"
-#include "gfx/geometry/AnimationFactory.hpp"
+#include "cm/Handles.hpp"
+#include "cm/RenderData.hpp"
+
 #include "gfx/geometry/Mesh.hpp"
 #include "gfx/textures/Texture.hpp"
 #include "gfx/geometry/GeometryHandles.hpp"
@@ -63,35 +63,31 @@ namespace tr::gfx::tx {
       ResourceManager& operator=(const ResourceManager&) = delete;
       ResourceManager& operator=(ResourceManager&&) = delete;
 
-      auto createTerrain() -> std::future<ModelHandle>;
-      auto createTerrainInt() -> ModelHandle;
+      auto createTerrain() -> std::future<cm::ModelHandle>;
+      auto createTerrainInt() -> cm::ModelHandle;
 
-      std::future<ModelHandle> loadModelAsync(const std::filesystem::path& filename);
-      ModelHandle loadModelInt(const std::filesystem::path& filename);
+      std::future<cm::ModelHandle> loadModelAsync(const std::filesystem::path& filename);
+      cm::ModelHandle loadModelInt(const std::filesystem::path& filename);
 
-      std::future<LoadedSkinnedModelData> loadSkinnedModelAsync(
+      std::future<cm::LoadedSkinnedModelData> loadSkinnedModelAsync(
           const std::filesystem::path& modelPath,
           const std::filesystem::path& skeletonPath,
           const std::filesystem::path& animationPath);
-      LoadedSkinnedModelData loadSkinnedModelInt(const std::filesystem::path& modelPath,
-                                                 const std::filesystem::path& skeletonPath,
-                                                 const std::filesystem::path& animationPath);
+      cm::LoadedSkinnedModelData loadSkinnedModelInt(const std::filesystem::path& modelPath,
+                                                     const std::filesystem::path& skeletonPath,
+                                                     const std::filesystem::path& animationPath);
 
-      auto createStaticMesh(const geo::GeometryData& geometry) -> MeshHandle;
+      auto createStaticMesh(const geo::GeometryData& geometry) -> cm::MeshHandle;
 
-      auto& getMesh(MeshHandle meshHandle) {
+      auto& getMesh(cm::MeshHandle meshHandle) {
          return meshList.at(meshHandle);
-      }
-
-      [[nodiscard]] auto& getAnimationFactory() {
-         return *animationFactory;
       }
 
       void accessTextures(
           std::function<void(const std::vector<vk::DescriptorImageInfo>&)> fn) const;
 
-      void setRenderData(RenderData& newRenderData);
-      void accessRenderData(std::function<void(RenderData&)> fn);
+      void setRenderData(cm::RenderData& newRenderData);
+      void accessRenderData(std::function<void(cm::RenderData&)> fn);
 
     private:
       const GraphicsDevice& graphicsDevice;
@@ -100,19 +96,17 @@ namespace tr::gfx::tx {
       std::unique_ptr<util::TaskQueue> taskQueue;
       std::vector<geo::Mesh> meshList;
 
-      std::unique_ptr<geo::AnimationFactory> animationFactory;
-
       mutable TracyLockable(std::mutex, textureListMutex);
       std::vector<vk::DescriptorImageInfo> textureInfoList;
       std::vector<std::unique_ptr<Textures::Texture>> textureList;
 
       mutable TracyLockable(std::mutex, renderDataMutex);
-      RenderData renderData;
+      cm::RenderData renderData;
 
-      auto uploadGeometry(const geo::TexturedGeometryHandle& handles) -> ModelHandle;
-      auto uploadSkinnedGeometry(const geo::SkinnedGeometryData& sgd) -> LoadedSkinnedModelData;
+      auto uploadGeometry(const geo::TexturedGeometryHandle& handles) -> cm::ModelHandle;
+      auto uploadSkinnedGeometry(const geo::SkinnedGeometryData& sgd) -> cm::LoadedSkinnedModelData;
 
-      MeshHandle createMesh(const tinygltf::Model&, const tinygltf::Primitive& primitive);
-      TextureHandle createTexture(const tinygltf::Model& model, std::size_t textureIndex);
+      cm::MeshHandle createMesh(const tinygltf::Model&, const tinygltf::Primitive& primitive);
+      cm::TextureHandle createTexture(const tinygltf::Model& model, std::size_t textureIndex);
    };
 }

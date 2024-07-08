@@ -1,13 +1,15 @@
 #include "Application.hpp"
-#include "Properties.hpp"
 
-#include "ctx/Context.hpp"
-#include "ctx/GameplayFacade.hpp"
+#include "KeyMap.hpp"
+#include "cm/Inputs.hpp"
+#include "tr/ctx/Context.hpp"
+
 #include "util/Paths.hpp"
 
+#include "Properties.hpp"
 #include "ui/Manager.hpp"
 #include "data/DataFacade.hpp"
-#include <memory>
+#include <GLFW/glfw3.h>
 
 #ifdef _WIN32
 #define GLFW_EXPOSE_NATIVE_WIN32
@@ -168,7 +170,12 @@ namespace ed {
       if (key == GLFW_KEY_ENTER && mods == GLFW_MOD_ALT && action == GLFW_RELEASE) {
          toggleFullscreen(*app);
       } else {
-         app->context->keyCallback(key, scancode, action, mods);
+         const auto mappedKey = tr::gp::keyMap.at(key);
+         auto buttonState = tr::gp::ButtonState::Pressed;
+         if (action == GLFW_RELEASE) {
+            buttonState = tr::gp::ButtonState::Released;
+         }
+         app->context->keyCallback(key, buttonState);
       }
    }
 
