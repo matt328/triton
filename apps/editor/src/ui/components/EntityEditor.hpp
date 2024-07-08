@@ -1,8 +1,7 @@
 #pragma once
 
-#include "tr/ctx/GameplayFacade.hpp"
+#include "tr/GameplayFacade.hpp"
 #include "data/DataFacade.hpp"
-#include "gp/ecs/component/Animation.hpp"
 
 namespace ed::ui::components {
    struct EntityEditor {
@@ -155,61 +154,61 @@ namespace ed::ui::components {
          */
       }
 
-      void renderAnimationArea(tr::ctx::GameplayFacade& gameplayFacade,
-                               tr::gp::ecs::Animation& animationComponent) {
+      void renderAnimationArea(tr::ctx::GameplayFacade& gameplayFacade, ) {
          ImGui::SeparatorText("Animation");
-         static size_t itemCurrentIndex{};
-         static bool playing{};
-         static bool bindPose{};
+         // static size_t itemCurrentIndex{};
+         // static bool playing{};
+         // static bool bindPose{};
 
-         std::vector<const char*> items;
-         items.push_back("Animation");
+         // std::vector<const char*> items;
+         // items.push_back("Animation");
 
-         if (ImGui::BeginCombo("Animation Name", items[itemCurrentIndex])) {
-            for (size_t n = 0; n < items.size(); ++n) {
-               const bool isSelected = (itemCurrentIndex == n);
-               if (ImGui::Selectable(items[n], isSelected)) {
-                  itemCurrentIndex = n;
-                  animationComponent.currentAnimationName = std::string{items[itemCurrentIndex]};
-               }
-               if (isSelected) {
-                  ImGui::SetItemDefaultFocus();
-               }
-            }
-            ImGui::EndCombo();
-         }
+         //    if (ImGui::BeginCombo("Animation Name", items[itemCurrentIndex])) {
+         //       for (size_t n = 0; n < items.size(); ++n) {
+         //          const bool isSelected = (itemCurrentIndex == n);
+         //          if (ImGui::Selectable(items[n], isSelected)) {
+         //             itemCurrentIndex = n;
+         //             animationComponent.currentAnimationName =
+         //             std::string{items[itemCurrentIndex]};
+         //          }
+         //          if (isSelected) {
+         //             ImGui::SetItemDefaultFocus();
+         //          }
+         //       }
+         //       ImGui::EndCombo();
+         //    }
 
-         bool previousBindPose = bindPose;
+         //    bool previousBindPose = bindPose;
 
-         ImGui::BeginDisabled(playing);
-         if (ImGui::Checkbox("Bind Pose", &bindPose)) {
-            if (bindPose != previousBindPose) {
-               animationComponent.renderBindPose = bindPose;
-            }
-         }
-         ImGui::EndDisabled();
+         //    ImGui::BeginDisabled(playing);
+         //    if (ImGui::Checkbox("Bind Pose", &bindPose)) {
+         //       if (bindPose != previousBindPose) {
+         //          animationComponent.renderBindPose = bindPose;
+         //       }
+         //    }
+         //    ImGui::EndDisabled();
 
-         bool previousPlaying = playing;
+         //    bool previousPlaying = playing;
 
-         ImGui::BeginDisabled(bindPose);
+         //    ImGui::BeginDisabled(bindPose);
 
-         if (ImGui::Checkbox("Play", &playing)) {
-            if (playing != previousPlaying) {
-               animationComponent.playing = playing;
-            }
-         }
+         //    if (ImGui::Checkbox("Play", &playing)) {
+         //       if (playing != previousPlaying) {
+         //          animationComponent.playing = playing;
+         //       }
+         //    }
 
-         ImGui::BeginDisabled(playing);
-         const auto [min_v, max_v] =
-             gameplayFacade.getAnimationTimeRange(animationComponent.animationHandle);
+         //    ImGui::BeginDisabled(playing);
+         //    const auto [min_v, max_v] =
+         //        gameplayFacade.getAnimationTimeRange(animationComponent.animationHandle);
 
-         static float timeValue = min_v;
-         if (ImGui::SliderFloat("Time", &timeValue, min_v, max_v, "%.2f")) {
-            const auto value = (timeValue - min_v) / (max_v - min_v);
-            animationComponent.timeRatio = value;
-         }
-         ImGui::EndDisabled();
-         ImGui::EndDisabled();
-      }
-   };
-}
+         //    static float timeValue = min_v;
+         //    if (ImGui::SliderFloat("Time", &timeValue, min_v, max_v, "%.2f")) {
+         //       const auto value = (timeValue - min_v) / (max_v - min_v);
+         //       animationComponent.timeRatio = value;
+         //    }
+         //    ImGui::EndDisabled();
+         //    ImGui::EndDisabled();
+         // }
+      };
+   }

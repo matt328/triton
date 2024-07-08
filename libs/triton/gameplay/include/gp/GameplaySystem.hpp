@@ -70,6 +70,9 @@ namespace tr::gp {
       void mouseButtonCallback(int button, int action, int mods);
       void setMouseState(bool captured);
 
+      // Gameworld State Methods
+      void createTerrain(const cm::MeshHandles handles);
+
       template <auto Candidate, typename Type>
       void addRenderDataListener(Type* valueOrInstance) noexcept {
          renderDataProducer.connect<Candidate>(valueOrInstance);
