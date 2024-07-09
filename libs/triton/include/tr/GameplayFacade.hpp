@@ -59,8 +59,6 @@ namespace tr::ctx {
 
       auto setCurrentCamera(cm::EntityType currentCamera) -> void;
 
-      auto getAnimationTimeRange(const cm::AnimationHandle handle) -> std::tuple<float, float>;
-
       auto clear() -> void;
 
       // Resource Creation Methods

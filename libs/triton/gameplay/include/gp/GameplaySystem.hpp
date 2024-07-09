@@ -1,18 +1,18 @@
 #pragma once
 
+#include "AnimationFactory.hpp"
+#include "cm/Handles.hpp"
 #include "cm/Inputs.hpp"
 #include "cm/RenderData.hpp"
+#include "cm/EntitySystemTypes.hpp"
 
 namespace tr::cm {
    class Timer;
+
 }
 
 namespace tr::gfx {
    class RenderContext;
-}
-
-namespace tr::gfx::geo {
-   class AnimationFactory;
 }
 
 namespace tr::gfx::tx {
@@ -26,6 +26,7 @@ namespace tr::ctx {
 namespace tr::gp {
    using RenderDataProducer = entt::delegate<void(cm::RenderData&)>;
 
+   class AnimationFactory;
    class EntitySystem;
    class ActionSystem;
 
@@ -52,7 +53,7 @@ namespace tr::gp {
    */
    class GameplaySystem {
     public:
-      GameplaySystem(gfx::geo::AnimationFactory& animationFactory);
+      GameplaySystem();
       ~GameplaySystem();
 
       GameplaySystem(const GameplaySystem&) = delete;
@@ -72,14 +73,21 @@ namespace tr::gp {
 
       // Gameworld State Methods
       void createTerrain(const cm::MeshHandles handles);
+      auto createStaticModel(cm::MeshHandles meshes) -> cm::EntityType;
+      auto createAnimatedModel(const cm::LoadedSkinnedModelData model) -> cm::EntityType;
+      auto createCamera(uint32_t width,
+                        uint32_t height,
+                        float fov,
+                        float zNear,
+                        float zFar,
+                        glm::vec3 position,
+                        std::optional<std::string> name) -> cm::EntityType;
+      void setCurrentCamera(cm::EntityType currentCamera);
+      void clearEntities();
 
       template <auto Candidate, typename Type>
       void addRenderDataListener(Type* valueOrInstance) noexcept {
          renderDataProducer.connect<Candidate>(valueOrInstance);
-      }
-
-      [[nodiscard]] auto& getAnimationFactory() {
-         return animationFactory;
       }
 
     private:
@@ -87,6 +95,7 @@ namespace tr::gp {
 
       std::unique_ptr<EntitySystem> entitySystem;
       std::unique_ptr<ActionSystem> actionSystem;
+      std::unique_ptr<AnimationFactory> animationFactory;
 
       /*
          TODO: Move RenderData into an intermediate module so it's not part of either gfx or gp
@@ -99,7 +108,5 @@ namespace tr::gp {
       // This delegate seems overengineered, but keeps the Application from having to #include
       // half the engine
       RenderDataProducer renderDataProducer{};
-
-      gfx::geo::AnimationFactory& animationFactory;
    };
 }
