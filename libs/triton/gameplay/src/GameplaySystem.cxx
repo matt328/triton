@@ -3,6 +3,7 @@
 #include "cm/Inputs.hpp"
 
 #include "EntitySystem.hpp"
+#include "AnimationFactory.hpp"
 
 #include "actions/ActionType.hpp"
 #include "actions/ActionSystem.hpp"
@@ -11,7 +12,6 @@
 
 #include "systems/CameraSystem.hpp"
 #include "systems/RenderDataSystem.hpp"
-#include "systems/AnimationSystem.hpp"
 
 namespace tr::gp {
 
@@ -23,11 +23,11 @@ namespace tr::gp {
 
    using namespace tr::gp;
 
-   GameplaySystem::GameplaySystem(gfx::geo::AnimationFactory& animationFactory)
-       : animationFactory{animationFactory} {
+   GameplaySystem::GameplaySystem() {
 
       entitySystem = std::make_unique<EntitySystem>();
       actionSystem = std::make_unique<ActionSystem>();
+      animationFactory = std::make_unique<AnimationFactory>();
 
       using gp::Key;
 
@@ -122,5 +122,32 @@ namespace tr::gp {
 
    void GameplaySystem::createTerrain(const cm::MeshHandles handles) {
       entitySystem->createTerrain(handles);
+   }
+
+   auto GameplaySystem::createStaticModel(cm::MeshHandles meshes) -> cm::EntityType {
+      return entitySystem->createStaticModel(meshes);
+   }
+
+   auto GameplaySystem::createAnimatedModel(const cm::LoadedSkinnedModelData model)
+       -> cm::EntityType {
+      return entitySystem->createAnimatedModel(model);
+   }
+
+   auto GameplaySystem::createCamera(uint32_t width,
+                                     uint32_t height,
+                                     float fov,
+                                     float zNear,
+                                     float zFar,
+                                     glm::vec3 position,
+                                     std::optional<std::string> name) -> cm::EntityType {
+      return entitySystem->createCamera(width, height, fov, zNear, zFar, position, name);
+   }
+
+   void GameplaySystem::setCurrentCamera(cm::EntityType currentCamera) {
+      entitySystem->setCurrentCamera(currentCamera);
+   }
+
+   void GameplaySystem::clearEntities() {
+      entitySystem->removeAll();
    }
 }

@@ -20,15 +20,7 @@ namespace tr::ctx {
    // }
 
    /*
-      TODO: Consider having the ResourceManager not expose the std::future, but take in a callback
-      function that will get called on the main thread when async loading has completed
-      That would clean up this Facade significantly
-      Enable the API in the commented out code below, and do away with the GameplayFacade::update()
-      method
-
-      Actually with the EntitySystem becoming thread safe, this can be greatly simplified. Can just
-      load resources and then add them to the ES in the same 'Task'
-      Actually actually maybe not since the resource manager is inside the renderer and doesn't know
+      Resource Manager is inside the renderer and doesn't know
       what clients of the resourcemanager might decide to do with the handles it returns.
       May be able to leverage futures to be able to specify continuations so that we can have
       modular tasks whose pieces can be decoupled from each other.
@@ -84,12 +76,12 @@ namespace tr::ctx {
    }
 
    cm::EntityType GameplayFacade::createStaticMultiMeshEntity(cm::MeshHandles meshes) {
-      return gameplaySystem.entitySystem->createStaticModel(meshes);
+      return gameplaySystem.createStaticModel(meshes);
    }
 
-   auto GameplayFacade::createSkinnedModelEntity(
-       [[maybe_unused]] const cm::LoadedSkinnedModelData model) -> cm::EntityType {
-      return gameplaySystem.entitySystem->createAnimatedModel(model);
+   auto GameplayFacade::createSkinnedModelEntity(const cm::LoadedSkinnedModelData model)
+       -> cm::EntityType {
+      return gameplaySystem.createAnimatedModel(model);
    }
 
    cm::EntityType GameplayFacade::createCamera(uint32_t width,
@@ -100,22 +92,15 @@ namespace tr::ctx {
                                                glm::vec3 position,
                                                std::optional<std::string> name) {
 
-      return gameplaySystem.entitySystem
-          ->createCamera(width, height, fov, zNear, zFar, position, name);
+      return gameplaySystem.createCamera(width, height, fov, zNear, zFar, position, name);
    }
 
    void GameplayFacade::setCurrentCamera(cm::EntityType currentCamera) {
-      return gameplaySystem.entitySystem->setCurrentCamera(currentCamera);
+      return gameplaySystem.setCurrentCamera(currentCamera);
    }
 
    void GameplayFacade::clear() {
-      gameplaySystem.entitySystem->removeAll();
+      gameplaySystem.clearEntities();
    }
 
-   auto GameplayFacade::getAnimationTimeRange(const cm::AnimationHandle handle)
-       -> std::tuple<float, float> {
-      const auto& animation = gameplaySystem.getAnimationFactory().getAnimation(handle);
-
-      return std::make_tuple(0.f, animation.duration());
-   }
 }
