@@ -125,6 +125,7 @@ target_precompile_headers(${PROJECT_NAME}
    <ozz/base/io/stream.h>
    <queue>
    <tiny_gltf.h>
+   <tracy/TracyVulkan.hpp>
    <vulkan-memory-allocator-hpp/vk_mem_alloc.hpp>
    <vulkan/vulkan_raii.hpp>
 )
