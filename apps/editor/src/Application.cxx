@@ -172,9 +172,9 @@ namespace ed {
          toggleFullscreen(*app);
       } else {
          const auto mappedKey = tr::gp::keyMap.at(key);
-         auto buttonState = tr::gp::ButtonState::Pressed;
+         auto buttonState = tr::cm::ButtonState::Pressed;
          if (action == GLFW_RELEASE) {
-            buttonState = tr::gp::ButtonState::Released;
+            buttonState = tr::cm::ButtonState::Released;
          }
          app->context->keyCallback(mappedKey, buttonState);
       }

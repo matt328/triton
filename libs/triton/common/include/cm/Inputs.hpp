@@ -1,6 +1,6 @@
 #pragma once
 
-namespace tr::gp {
+namespace tr::cm {
 
    enum class ButtonState : uint32_t {
       None = 0,

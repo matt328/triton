@@ -12,8 +12,6 @@ namespace tr::gp {
    struct Source;
    enum class StateType : uint32_t;
    enum class ActionType : uint32_t;
-   enum class Key : uint32_t;
-   enum class MouseInput;
 
    class ActionSystem {
     public:
@@ -31,10 +29,10 @@ namespace tr::gp {
 
       void mapSource(Source source, StateType sType, ActionType aType);
 
-      void mapKeyState(Key key, ActionType aType);
-      void mapKeyAction(Key, ActionType aType);
+      void mapKeyState(cm::Key key, ActionType aType);
+      void mapKeyAction(cm::Key, ActionType aType);
 
-      void keyCallback(gp::Key key, gp::ButtonState state);
+      void keyCallback(cm::Key key, cm::ButtonState state);
       void cursorPosCallback(double xpos, double ypos);
       void mouseButtonCallback(int button, int action, int mods);
       void setMouseState(bool captured);
@@ -44,7 +42,7 @@ namespace tr::gp {
 
       double prevX{}, prevY{};
       bool firstMouse = true;
-      std::unordered_map<Key, Action> keyActionMap{};
-      std::unordered_map<MouseInput, Action> mouseActionMap{};
+      std::unordered_map<cm::Key, Action> keyActionMap{};
+      std::unordered_map<cm::MouseInput, Action> mouseActionMap{};
    };
 }

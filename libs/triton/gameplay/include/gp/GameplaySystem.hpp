@@ -65,7 +65,7 @@ namespace tr::gp {
       void resize(const std::pair<uint32_t, uint32_t>);
 
       // Input Handlers
-      void keyCallback(gp::Key key, gp::ButtonState buttonState);
+      void keyCallback(cm::Key key, cm::ButtonState buttonState);
       void cursorPosCallback(double xpos, double ypos);
       void mouseButtonCallback(int button, int action, int mods);
       void setMouseState(bool captured);

@@ -29,46 +29,46 @@ namespace tr::gp {
       actionSystem = std::make_unique<ActionSystem>();
       animationFactory = std::make_unique<AnimationFactory>();
 
-      using gp::Key;
+      using cm::Key;
 
       // TODO: synchronization isn't applied correctly (at all) here.
       actionSystem->getDelegate().connect<&ecs::CameraSystem::handleAction>(
           *entitySystem->getRegistry());
 
       // Forward
-      actionSystem->mapSource(Source{Key::Up, SourceType::Boolean},
+      actionSystem->mapSource(Source{cm::Key::Up, SourceType::Boolean},
                               StateType::State,
                               ActionType::MoveForward);
-      actionSystem->mapSource(Source{Key::W, SourceType::Boolean},
+      actionSystem->mapSource(Source{cm::Key::W, SourceType::Boolean},
                               StateType::State,
                               ActionType::MoveForward);
 
       // Backward
-      actionSystem->mapSource(Source{Key::Down, SourceType::Boolean},
+      actionSystem->mapSource(Source{cm::Key::Down, SourceType::Boolean},
                               StateType::State,
                               ActionType::MoveBackward);
-      actionSystem->mapSource(Source{Key::S, SourceType::Boolean},
+      actionSystem->mapSource(Source{cm::Key::S, SourceType::Boolean},
                               StateType::State,
                               ActionType::MoveBackward);
       // Left
-      actionSystem->mapSource(Source{Key::Left, SourceType::Boolean},
+      actionSystem->mapSource(Source{cm::Key::Left, SourceType::Boolean},
                               StateType::State,
                               ActionType::StrafeLeft);
-      actionSystem->mapSource(Source{Key::A, SourceType::Boolean},
+      actionSystem->mapSource(Source{cm::Key::A, SourceType::Boolean},
                               StateType::State,
                               ActionType::StrafeLeft);
       // Right
-      actionSystem->mapSource(Source{Key::Right, SourceType::Boolean},
+      actionSystem->mapSource(Source{cm::Key::Right, SourceType::Boolean},
                               StateType::State,
                               ActionType::StrafeRight);
-      actionSystem->mapSource(Source{Key::D, SourceType::Boolean},
+      actionSystem->mapSource(Source{cm::Key::D, SourceType::Boolean},
                               StateType::State,
                               ActionType::StrafeRight);
       // Look
-      actionSystem->mapSource(Source{MouseInput::MOVE_X, SourceType::Float},
+      actionSystem->mapSource(Source{cm::MouseInput::MOVE_X, SourceType::Float},
                               StateType::Range,
                               ActionType::LookHorizontal);
-      actionSystem->mapSource(Source{MouseInput::MOVE_Y, SourceType::Float},
+      actionSystem->mapSource(Source{cm::MouseInput::MOVE_Y, SourceType::Float},
                               StateType::Range,
                               ActionType::LookVertical);
    }
@@ -104,7 +104,7 @@ namespace tr::gp {
       entitySystem->writeWindowDimensions(size);
    }
 
-   void GameplaySystem::keyCallback(gp::Key key, gp::ButtonState buttonState) {
+   void GameplaySystem::keyCallback(cm::Key key, cm::ButtonState buttonState) {
       actionSystem->keyCallback(key, buttonState);
    }
 
