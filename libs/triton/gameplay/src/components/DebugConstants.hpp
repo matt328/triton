@@ -1,6 +1,6 @@
 #pragma once
 
-namespace tr::gp::ecs {
+namespace tr::gp::cmp {
    struct DebugConstants {
       float specularPower;
    };

@@ -1,10 +1,10 @@
-#include "cmp/Animation.hpp"
+#include "components/Animation.hpp"
 
 #include "AnimationFactory.hpp"
 
-namespace tr::gp::ecs::AnimationSystem {
+namespace tr::gp::sys::AnimationSystem {
    void update(entt::registry& registry, AnimationFactory& animationFactory) {
-      const auto view = registry.view<Animation>();
+      const auto view = registry.view<cmp::Animation>();
 
       for (auto [entity, animationData] : view.each()) {
 

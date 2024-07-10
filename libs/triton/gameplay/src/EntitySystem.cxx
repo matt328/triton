@@ -4,15 +4,15 @@
 
 #include "cm/Handles.hpp"
 
-#include "cmp/Animation.hpp"
-#include "cmp/Resources.hpp"
-#include "cmp/DebugConstants.hpp"
-#include "cmp/Renderable.hpp"
-#include "cmp/Terrain.hpp"
-#include "cmp/Transform.hpp"
-#include "cmp/Camera.hpp"
-#include "cmp/Resources.hpp"
-#include "cmp/DebugConstants.hpp"
+#include "components/Animation.hpp"
+#include "components/Resources.hpp"
+#include "components/DebugConstants.hpp"
+#include "components/Renderable.hpp"
+#include "components/Terrain.hpp"
+#include "components/Transform.hpp"
+#include "components/Camera.hpp"
+#include "components/Resources.hpp"
+#include "components/DebugConstants.hpp"
 
 #include "systems/CameraSystem.hpp"
 #include "systems/RenderDataSystem.hpp"
@@ -31,35 +31,35 @@ namespace tr::gp {
                                   AnimationFactory& animationFactory) {
       auto lock = std::unique_lock<std::shared_mutex>{registryMutex};
 
-      ecs::CameraSystem::fixedUpdate(*registry);
-      ecs::TransformSystem::update(*registry);
-      ecs::AnimationSystem::update(*registry, animationFactory);
+      sys::CameraSystem::fixedUpdate(*registry);
+      sys::TransformSystem::update(*registry);
+      sys::AnimationSystem::update(*registry, animationFactory);
    }
 
    void EntitySystem::prepareRenderData(cm::RenderData& renderData) {
       auto lock = std::shared_lock<std::shared_mutex>{registryMutex};
 
-      ecs::RenderDataSystem::update(*registry, renderData);
+      sys::RenderDataSystem::update(*registry, renderData);
    }
 
-   void EntitySystem::writeCameras(std::function<void(entt::entity, ecs::Camera)> fn) {
+   void EntitySystem::writeCameras(std::function<void(entt::entity, cmp::Camera)> fn) {
       auto lock = std::unique_lock<std::shared_mutex>{registryMutex};
-      registry->view<ecs::Camera>().each(fn);
+      registry->view<cmp::Camera>().each(fn);
    }
 
    void EntitySystem::writeCameras(
-       std::function<void(entt::entity, ecs::Camera, uint32_t width, uint32_t height)> fn) {
+       std::function<void(entt::entity, cmp::Camera, uint32_t width, uint32_t height)> fn) {
 
       auto lock = std::unique_lock<std::shared_mutex>{registryMutex};
-      const auto [width, height] = registry->ctx().get<const ecs::WindowDimensions>();
-      registry->view<ecs::Camera>().each(
+      const auto [width, height] = registry->ctx().get<const cmp::WindowDimensions>();
+      registry->view<cmp::Camera>().each(
           [&width, &height, &fn](auto entity, auto cam) { fn(entity, cam, width, height); });
    }
 
    void EntitySystem::writeWindowDimensions(const std::pair<uint32_t, uint32_t> size) {
       auto lock = std::shared_lock<std::shared_mutex>{registryMutex};
-      registry->ctx().insert_or_assign<ecs::WindowDimensions>(
-          ecs::WindowDimensions{static_cast<int>(size.first), static_cast<int>(size.second)});
+      registry->ctx().insert_or_assign<cmp::WindowDimensions>(
+          cmp::WindowDimensions{static_cast<int>(size.first), static_cast<int>(size.second)});
    }
 
    auto EntitySystem::createTerrain(const cm::MeshHandles handles) -> cm::EntityType {
@@ -67,17 +67,17 @@ namespace tr::gp {
 
       auto e = registry->create();
 
-      registry->emplace<gp::ecs::Renderable>(e, handles);
-      registry->emplace<gp::ecs::TerrainMarker>(e);
-      registry->emplace<gp::ecs::Transform>(e,
+      registry->emplace<cmp::Renderable>(e, handles);
+      registry->emplace<cmp::TerrainMarker>(e);
+      registry->emplace<gp::cmp::Transform>(e,
                                             glm::zero<glm::vec3>(),
                                             glm::vec3(-550.f, -1000.f, -5700.f));
 
       auto debugConstants = registry->create();
-      registry->emplace<gp::ecs::Transform>(debugConstants,
+      registry->emplace<gp::cmp::Transform>(debugConstants,
                                             glm::zero<glm::vec3>(),
                                             glm::vec3(200.f, 1000.f, 200.f));
-      registry->emplace<gp::ecs::DebugConstants>(debugConstants, 16.f);
+      registry->emplace<cmp::DebugConstants>(debugConstants, 16.f);
       return e;
    }
 
@@ -85,8 +85,8 @@ namespace tr::gp {
       auto lock = std::unique_lock<std::shared_mutex>{registryMutex};
 
       auto e = registry->create();
-      registry->emplace<gp::ecs::Renderable>(e, handles);
-      registry->emplace<gp::ecs::Transform>(e);
+      registry->emplace<cmp::Renderable>(e, handles);
+      registry->emplace<gp::cmp::Transform>(e);
       return e;
    }
 
@@ -95,17 +95,17 @@ namespace tr::gp {
       auto lock = std::unique_lock<std::shared_mutex>{registryMutex};
       auto e = registry->create();
 
-      registry->emplace<gp::ecs::Animation>(e,
-                                            modelData.animationHandle,
-                                            modelData.skeletonHandle,
-                                            modelData.jointMap,
-                                            modelData.inverseBindMatrices);
-      registry->emplace<gp::ecs::Transform>(e);
+      registry->emplace<cmp::Animation>(e,
+                                        modelData.animationHandle,
+                                        modelData.skeletonHandle,
+                                        modelData.jointMap,
+                                        modelData.inverseBindMatrices);
+      registry->emplace<gp::cmp::Transform>(e);
 
       const auto meshes = std::unordered_map<cm::MeshHandle, cm::TextureHandle>{
           {modelData.meshHandle, modelData.textureHandle}};
 
-      registry->emplace<gp::ecs::Renderable>(e, meshes);
+      registry->emplace<cmp::Renderable>(e, meshes);
 
       return e;
    }
@@ -121,20 +121,19 @@ namespace tr::gp {
 
       auto lock = std::unique_lock<std::shared_mutex>{registryMutex};
       const auto camera = registry->create();
-      registry->emplace<gp::ecs::Camera>(camera, width, height, fov, zNear, zFar, position);
+      registry->emplace<gp::cmp::Camera>(camera, width, height, fov, zNear, zFar, position);
       return camera;
    }
 
    void EntitySystem::setCurrentCamera(cm::EntityType currentCamera) {
       auto lock = std::unique_lock<std::shared_mutex>{registryMutex};
-      registry->ctx().insert_or_assign<gp::ecs::CurrentCamera>(
-          gp::ecs::CurrentCamera{currentCamera});
+      registry->ctx().insert_or_assign<cmp::CurrentCamera>(cmp::CurrentCamera{currentCamera});
    }
 
    void EntitySystem::removeAll() {
       auto lock = std::unique_lock<std::shared_mutex>{registryMutex};
       registry->clear();
-      registry->ctx().erase<gp::ecs::CurrentCamera>();
+      registry->ctx().erase<cmp::CurrentCamera>();
    }
 
 }

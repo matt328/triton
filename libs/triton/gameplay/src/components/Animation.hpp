@@ -3,7 +3,7 @@
 #include "cm/Handles.hpp"
 #include "ozz/base/maths/soa_transform.h"
 
-namespace tr::gp::ecs {
+namespace tr::gp::cmp {
    struct Animation {
       Animation(cm::AnimationHandle animationHandle,
                 cm::SkeletonHandle skeletonHandle,

@@ -21,8 +21,6 @@ namespace tr::gp {
       AnimationSystem::update()
    */
 
-   using namespace tr::gp;
-
    GameplaySystem::GameplaySystem() {
 
       entitySystem = std::make_unique<EntitySystem>();
@@ -32,7 +30,7 @@ namespace tr::gp {
       using cm::Key;
 
       // TODO: synchronization isn't applied correctly (at all) here.
-      actionSystem->getDelegate().connect<&ecs::CameraSystem::handleAction>(
+      actionSystem->getDelegate().connect<&sys::CameraSystem::handleAction>(
           *entitySystem->getRegistry());
 
       // Forward

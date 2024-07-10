@@ -1,6 +1,6 @@
 #pragma once
 
-namespace tr::rng {
+namespace tr::cm {
    struct MapKey {
     public:
       MapKey()

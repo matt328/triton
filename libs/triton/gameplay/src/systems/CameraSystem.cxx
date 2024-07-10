@@ -1,12 +1,12 @@
 #include "CameraSystem.hpp"
 
-#include "cmp/Camera.hpp"
-#include "cmp/Resources.hpp"
+#include "components/Camera.hpp"
+#include "components/Resources.hpp"
 
 #include "actions/ActionType.hpp"
 #include "actions/Action.hpp"
 
-namespace tr::gp::ecs::CameraSystem {
+namespace tr::gp::sys::CameraSystem {
 
    const auto CameraSpeed = .05f;
    const auto MouseSensitivity = 0.025f;
@@ -29,7 +29,7 @@ namespace tr::gp::ecs::CameraSystem {
    */
    void handleAction(entt::registry& registry, const Action& action) {
 
-      const auto view = registry.view<Camera>();
+      const auto view = registry.view<cmp::Camera>();
       for (auto [entity, cam] : view.each()) {
 
          if (action.stateType == StateType::State) {
@@ -67,9 +67,9 @@ namespace tr::gp::ecs::CameraSystem {
    }
 
    void fixedUpdate(entt::registry& registry) {
-      const auto view = registry.view<Camera>();
+      const auto view = registry.view<cmp::Camera>();
 
-      const auto [width, height] = registry.ctx().get<const WindowDimensions>();
+      const auto [width, height] = registry.ctx().get<const cmp::WindowDimensions>();
 
       for (auto [entity, cam] : view.each()) {
 
@@ -80,7 +80,7 @@ namespace tr::gp::ecs::CameraSystem {
          cam.front = glm::normalize(direction);
          cam.right = glm::normalize(glm::cross(cam.front, glm::vec3(0.0f, 1.0f, 0.0f)));
 
-         glm::mat3 rotationMatrix{cam.right, worldUp, cam.front};
+         glm::mat3 rotationMatrix{cam.right, cmp::worldUp, cam.front};
 
          auto rotatedVelocity = rotationMatrix * cam.velocity;
 
