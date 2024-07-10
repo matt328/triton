@@ -15,9 +15,9 @@ namespace tr::ctx {
    GameplayFacade::~GameplayFacade() {
    }
 
-   // auto GameplayFacade::createTerrainEntity(const cm::MeshHandles handles) -> cm::EntityType {
-   //    return gameplaySystem.entitySystem->createTerrain(handles);
-   // }
+   auto GameplayFacade::createTerrainEntity(const cm::MeshHandles handles) -> cm::EntityType {
+      return gameplaySystem.createTerrain(handles);
+   }
 
    /*
       Resource Manager is inside the renderer and doesn't know

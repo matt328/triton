@@ -1,9 +1,9 @@
-#include "gp/cmp/Animation.hpp"
+#include "cmp/Animation.hpp"
 
-#include "gfx/geometry/AnimationFactory.hpp"
+#include "AnimationFactory.hpp"
 
 namespace tr::gp::ecs::AnimationSystem {
-   void update(entt::registry& registry, gfx::geo::AnimationFactory& animationFactory) {
+   void update(entt::registry& registry, AnimationFactory& animationFactory) {
       const auto view = registry.view<Animation>();
 
       for (auto [entity, animationData] : view.each()) {

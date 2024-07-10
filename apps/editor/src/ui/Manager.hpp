@@ -82,7 +82,7 @@ namespace ed::ui {
       void renderMenuBar();
       void renderEntityEditor();
       void showMatrix4x4(const glm::mat4& matrix, const char* label);
-      void renderAnimationArea(tr::gp::ecs::Animation& animationComponent);
+      void renderAnimationArea();
 
       void renderDebugWindow();
 

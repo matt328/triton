@@ -176,7 +176,7 @@ namespace ed {
          if (action == GLFW_RELEASE) {
             buttonState = tr::gp::ButtonState::Released;
          }
-         app->context->keyCallback(key, buttonState);
+         app->context->keyCallback(mappedKey, buttonState);
       }
    }
 
