@@ -63,7 +63,7 @@ namespace tr::ctx {
       this->paused = paused;
    }
 
-   void Context::keyCallback(gp::Key key, gp::ButtonState buttonState) {
+   void Context::keyCallback(cm::Key key, cm::ButtonState buttonState) {
       gameplaySystem->keyCallback(key, buttonState);
    }
 
