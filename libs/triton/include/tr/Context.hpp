@@ -29,7 +29,7 @@ namespace tr::ctx {
 
       void start(std::function<void()> pollFn);
 
-      void keyCallback(gp::Key key, gp::ButtonState buttonState);
+      void keyCallback(cm::Key key, cm::ButtonState buttonState);
       void cursorPosCallback(double xpos, double ypos);
       void mouseButtonCallback(int button, int action, int mods);
       void setMouseState(bool captured);

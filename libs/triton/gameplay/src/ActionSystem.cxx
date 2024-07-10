@@ -10,11 +10,11 @@ namespace tr::gp {
       std::visit(
           [&](auto&& arg) {
              using T = std::decay_t<decltype(arg)>;
-             if constexpr (std::is_same_v<T, Key>) {
+             if constexpr (std::is_same_v<T, cm::Key>) {
                 keyActionMap.insert_or_assign(arg, Action{aType, sType});
-             } else if constexpr (std::is_same_v<T, MouseInput>) {
+             } else if constexpr (std::is_same_v<T, cm::MouseInput>) {
                 mouseActionMap.insert_or_assign(arg, Action{aType, sType});
-             } else if constexpr (std::is_same_v<T, GamepadInput>) {
+             } else if constexpr (std::is_same_v<T, cm::GamepadInput>) {
              }
           },
           source.src);
@@ -44,21 +44,21 @@ namespace tr::gp {
       }
 
       if (deltaX != 0) {
-         const auto xit = mouseActionMap.find(MouseInput::MOVE_X);
+         const auto xit = mouseActionMap.find(cm::MouseInput::MOVE_X);
          if (xit != mouseActionMap.end()) {
             actionDelegate(Action{xit->second.actionType, xit->second.stateType, deltaX});
          }
       }
 
       if (deltaY != 0) {
-         const auto yit = mouseActionMap.find(MouseInput::MOVE_Y);
+         const auto yit = mouseActionMap.find(cm::MouseInput::MOVE_Y);
          if (yit != mouseActionMap.end()) {
             actionDelegate(Action{yit->second.actionType, yit->second.stateType, deltaY});
          }
       }
    }
 
-   void ActionSystem::keyCallback(gp::Key key, gp::ButtonState state) {
+   void ActionSystem::keyCallback(cm::Key key, cm::ButtonState state) {
 
       const auto sourceIt = keyActionMap.find(key);
       if (sourceIt == keyActionMap.end()) {
@@ -66,9 +66,9 @@ namespace tr::gp {
       }
       const auto& source = sourceIt->second;
 
-      if (state == ButtonState::Pressed) {
+      if (state == cm::ButtonState::Pressed) {
          actionDelegate(Action{source.actionType, source.stateType, true});
-      } else if (state == ButtonState::Released) {
+      } else if (state == cm::ButtonState::Released) {
          actionDelegate(Action{source.actionType, source.stateType, false});
       }
    }
