@@ -7,7 +7,6 @@
 
 namespace tr::cm {
    class Timer;
-
 }
 
 namespace tr::gfx {
@@ -90,16 +89,10 @@ namespace tr::gp {
       }
 
     private:
-      friend class ctx::GameplayFacade;
-
       std::unique_ptr<EntitySystem> entitySystem;
       std::unique_ptr<ActionSystem> actionSystem;
       std::unique_ptr<AnimationFactory> animationFactory;
 
-      /*
-         TODO: Move RenderData into an intermediate module so it's not part of either gfx or gp
-         Probably GameplayFacade belongs there too?
-      */
       /// This is a preallocated RenderData that the ECS collects all of he GameWorld data into
       /// before the Renderer takes a copy of it
       cm::RenderData renderData{};
