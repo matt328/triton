@@ -1,5 +1,5 @@
 #pragma once
 
-namespace tr::gp::ecs::TransformSystem {
+namespace tr::gp::sys::TransformSystem {
    void update(entt::registry& registry);
 }

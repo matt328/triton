@@ -5,7 +5,7 @@
 #include "cm/EntitySystemTypes.hpp"
 #include "cm/Timer.hpp"
 
-#include "cmp/Camera.hpp"
+#include "components/Camera.hpp"
 #include <entt/entity/fwd.hpp>
 
 namespace tr::gp {
@@ -44,9 +44,9 @@ namespace tr::gp {
 
       void removeAll();
 
-      void writeCameras(std::function<void(entt::entity, ecs::Camera)> fn);
+      void writeCameras(std::function<void(entt::entity, cmp::Camera)> fn);
       void writeCameras(
-          std::function<void(entt::entity, ecs::Camera, uint32_t width, uint32_t height)> fn);
+          std::function<void(entt::entity, cmp::Camera, uint32_t width, uint32_t height)> fn);
 
       void writeWindowDimensions(const std::pair<uint32_t, uint32_t> size);
 

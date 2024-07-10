@@ -64,7 +64,7 @@ namespace ed::ui::components {
                }
 
                if (selectedEntity.has_value()) {
-                  const auto maybeTransform = gameplayFacade.getComponent<tr::gp::ecs::Transform>(
+                  const auto maybeTransform = gameplayFacade.getComponent<tr::gp::cmp::Transform>(
                       static_cast<entt::entity>(selectedEntity.value()));
 
                   const auto maybeDebug = gameplayFacade.getComponent<tr::gp::ecs::DebugConstants>(

@@ -3,15 +3,15 @@
 #include "cm/ObjectData.hpp"
 #include "cm/RenderData.hpp"
 
-#include "cmp/Animation.hpp"
-#include "cmp/Camera.hpp"
-#include "cmp/DebugConstants.hpp"
-#include "cmp/Renderable.hpp"
-#include "cmp/Resources.hpp"
-#include "cmp/Terrain.hpp"
-#include "cmp/Transform.hpp"
+#include "components/Animation.hpp"
+#include "components/Camera.hpp"
+#include "components/DebugConstants.hpp"
+#include "components/Renderable.hpp"
+#include "components/Resources.hpp"
+#include "components/Terrain.hpp"
+#include "components/Transform.hpp"
 
-namespace tr::gp::ecs::RenderDataSystem {
+namespace tr::gp::sys::RenderDataSystem {
 
    glm::mat4 convertOzzToGlm(const ozz::math::Float4x4& ozzMatrix) {
       glm::mat4 glmMatrix{};
@@ -30,15 +30,16 @@ namespace tr::gp::ecs::RenderDataSystem {
    /// Loops through the registry and fills in the given RenderData struct
    void update(const entt::registry& registry, cm::RenderData& renderData) {
 
-      const auto cameraEntity = registry.ctx().get<const CurrentCamera>();
-      const auto cam = registry.get<Camera>(cameraEntity.currentCamera);
+      const auto cameraEntity = registry.ctx().get<const cmp::CurrentCamera>();
+      const auto cam = registry.get<cmp::Camera>(cameraEntity.currentCamera);
 
       renderData.cameraData = cm::CameraData{cam.view, cam.projection, cam.view * cam.projection};
 
-      const auto view = registry.view<Renderable, Transform>(entt::exclude<Animation>);
+      const auto view =
+          registry.view<cmp::Renderable, cmp::Transform>(entt::exclude<cmp::Animation>);
       for (auto [entity, renderable, transform] : view.each()) {
 
-         const auto isTerrainEntity = registry.any_of<TerrainMarker>(entity);
+         const auto isTerrainEntity = registry.any_of<cmp::TerrainMarker>(entity);
 
          for (auto& it : renderable.meshes) {
             const auto pos = renderData.objectData.size();
@@ -51,7 +52,7 @@ namespace tr::gp::ecs::RenderDataSystem {
          }
       }
 
-      const auto animationsView = registry.view<Animation, Renderable, Transform>();
+      const auto animationsView = registry.view<cmp::Animation, cmp::Renderable, cmp::Transform>();
       uint32_t jointMatricesIndex = 0;
       for (auto [entity, animationData, renderable, transform] : animationsView.each()) {
          auto jointMatrices = std::vector<glm::mat4>{};
@@ -82,7 +83,7 @@ namespace tr::gp::ecs::RenderDataSystem {
          jointMatricesIndex += jointMatrices.size();
       }
 
-      const auto debugView = registry.view<Transform, DebugConstants>();
+      const auto debugView = registry.view<cmp::Transform, cmp::DebugConstants>();
       for (const auto [entity, transform, debugConstants] : debugView.each()) {
          renderData.pushConstants.lightPosition = glm::vec4(transform.position, 1.f);
          renderData.pushConstants.params = glm::vec4(debugConstants.specularPower, 0.f, 0.f, 0.f);

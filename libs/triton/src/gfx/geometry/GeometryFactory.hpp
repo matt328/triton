@@ -45,8 +45,8 @@ namespace tr::gfx::geo {
       [[nodiscard]] auto getImageData(const ImageHandle& handle) -> ImageData&;
 
     private:
-      rng::MapKey geometryKey{};
-      rng::MapKey imageKey{};
+      cm::MapKey geometryKey{};
+      cm::MapKey imageKey{};
 
       std::unordered_map<GeometryHandle, GeometryData> geometryDataMap;
       std::unordered_map<ImageHandle, ImageData> imageDataMap;

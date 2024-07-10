@@ -30,8 +30,8 @@ namespace tr::gp {
       auto loadAnimation(const std::filesystem::path& path) -> AnimationHandle;
 
     private:
-      rng::MapKey skeletonMapKey{};
-      rng::MapKey animationMapKey{};
+      cm::MapKey skeletonMapKey{};
+      cm::MapKey animationMapKey{};
       std::unordered_map<std::string, AnimationHandle> loadedAnimations;
       std::unordered_map<std::string, SkeletonHandle> loadedSkeletons;
 
