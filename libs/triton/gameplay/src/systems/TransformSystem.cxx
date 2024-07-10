@@ -1,11 +1,11 @@
 #include "TransformSystem.hpp"
 
-#include "cmp/Transform.hpp"
+#include "components/Transform.hpp"
 
-namespace tr::gp::ecs::TransformSystem {
+namespace tr::gp::sys::TransformSystem {
 
    void update(entt::registry& registry) {
-      const auto view = registry.view<Transform>();
+      const auto view = registry.view<cmp::Transform>();
       for (auto [entity, transform] : view.each()) {
          auto rotationMatrix = glm::rotate(glm::mat4(1.0f),
                                            glm::radians(transform.rotation.x),
