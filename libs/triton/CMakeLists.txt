@@ -4,27 +4,7 @@ set(triton_SRC
    "src/Context.cxx"
    "src/GameplayFacade.cxx"
 
-   "src/gfx/Frame.cxx"
-   "src/gfx/GraphicsDevice.cxx"
-   "src/gfx/PipelineBuilder.cxx"
-   "src/gfx/VkContext.cxx"
-   "src/gfx/RenderContext.cxx"
-   "src/gfx/geometry/Vertex.cxx"
-   "src/gfx/gui/ImguiHelper.cxx"
-   "src/gfx/helpers/SpirvHelper.cxx"
-   "src/gfx/textures/Texture.cxx"
-   "src/gfx/textures/ResourceManager.cxx"
-   "src/gfx/mem/Image.cxx"
-   "src/gfx/mem/Buffer.cxx"
-   "src/gfx/mem/Allocator.cxx"
-   "src/gfx/sb/DSShaderBinding.cxx"
-   "src/gfx/sb/ShaderBindingFactory.cxx"
-
-   "src/gfx/sb/LayoutFactory.cxx"
-   "src/gfx/sb/Layout.cxx"
-
    "src/ct/Heightfield.cxx"
-   "src/gfx/geometry/GeometryFactory.cxx"
 )
 
 add_library(${PROJECT_NAME} STATIC ${triton_SRC})
@@ -53,11 +33,9 @@ find_package(glfw3 CONFIG REQUIRED)
 find_package(glslang CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
 find_package(Stb REQUIRED)
-find_package(VulkanMemoryAllocator CONFIG REQUIRED)
-find_package(unofficial-vulkan-memory-allocator-hpp CONFIG REQUIRED)
 find_package(unofficial-noise CONFIG REQUIRED)
 find_package(unofficial-noiseutils CONFIG REQUIRED)
-find_package(Vulkan REQUIRED)
+
 find_package(nfd CONFIG REQUIRED)
 
 target_compile_definitions(${PROJECT_NAME}
@@ -83,7 +61,6 @@ target_precompile_headers(${PROJECT_NAME}
    <fastgltf/tools.hpp>
    <fastgltf/types.hpp>
    <fastgltf/util.hpp>
-   <filesystem>
    <fstream>
    <functional>
    <future>
@@ -102,6 +79,7 @@ target_precompile_headers(${PROJECT_NAME}
    <string>
    <string_view>
    PUBLIC
+   <filesystem>
    <GLFW/glfw3.h>
    <glm/gtc/matrix_transform.hpp>
    <glm/gtc/type_ptr.hpp>
@@ -133,9 +111,9 @@ target_precompile_headers(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
    PUBLIC
    glfw
-   GPUOpen::VulkanMemoryAllocator
    ozz_animation
    common
+   graphics
    PRIVATE
    gameplay
    fastgltf::fastgltf
@@ -146,7 +124,6 @@ target_link_libraries(${PROJECT_NAME}
    nfd::nfd
    unofficial::noise::noise
    unofficial::noiseutils::noiseutils
-   unofficial::VulkanMemoryAllocator-Hpp::VulkanMemoryAllocator-Hpp
    ${Vulkan_LIBRARIES}
 )
 
@@ -163,3 +140,4 @@ add_dependencies(${PROJECT_NAME} assets)
 
 add_subdirectory(common)
 add_subdirectory(gameplay)
+add_subdirectory(graphics)

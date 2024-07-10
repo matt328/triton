@@ -5,7 +5,7 @@
 #include "KeyMap.hpp"
 #include "cm/Inputs.hpp"
 
-#include "util/Paths.hpp"
+#include "Paths.hpp"
 
 #include "Properties.hpp"
 #include "ui/Manager.hpp"
