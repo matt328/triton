@@ -79,7 +79,7 @@ namespace tr::gp {
 
    void GameplaySystem::fixedUpdate([[maybe_unused]] const cm::Timer& timer) {
       ZoneNamedN(upd, "FixedUpdate", true);
-      entitySystem->fixedUpdate(timer, animationFactory);
+      entitySystem->fixedUpdate(timer, *animationFactory);
    }
 
    void GameplaySystem::update(const double blendingFactor) {
@@ -120,8 +120,8 @@ namespace tr::gp {
       actionSystem->setMouseState(captured);
    }
 
-   void GameplaySystem::createTerrain(const cm::MeshHandles handles) {
-      entitySystem->createTerrain(handles);
+   auto GameplaySystem::createTerrain(const cm::MeshHandles handles) -> cm::EntityType {
+      return entitySystem->createTerrain(handles);
    }
 
    auto GameplaySystem::createStaticModel(cm::MeshHandles meshes) -> cm::EntityType {

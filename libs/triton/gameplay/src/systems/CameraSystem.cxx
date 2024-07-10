@@ -1,10 +1,10 @@
 #include "CameraSystem.hpp"
 
-#include "gp/cmp/Camera.hpp"
-#include "gp/cmp/Resources.hpp"
+#include "cmp/Camera.hpp"
+#include "cmp/Resources.hpp"
 
-#include "gp/actions/ActionType.hpp"
-#include "gp/actions/Action.hpp"
+#include "actions/ActionType.hpp"
+#include "actions/Action.hpp"
 
 namespace tr::gp::ecs::CameraSystem {
 

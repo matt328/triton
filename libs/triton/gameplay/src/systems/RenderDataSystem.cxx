@@ -2,13 +2,14 @@
 
 #include "cm/ObjectData.hpp"
 #include "cm/RenderData.hpp"
-#include "gp/ecs/component/Animation.hpp"
-#include "gp/ecs/component/Camera.hpp"
-#include "gp/ecs/component/DebugConstants.hpp"
-#include "gp/ecs/component/Renderable.hpp"
-#include "gp/ecs/component/Resources.hpp"
-#include "gp/ecs/component/Terrain.hpp"
-#include "gp/ecs/component/Transform.hpp"
+
+#include "cmp/Animation.hpp"
+#include "cmp/Camera.hpp"
+#include "cmp/DebugConstants.hpp"
+#include "cmp/Renderable.hpp"
+#include "cmp/Resources.hpp"
+#include "cmp/Terrain.hpp"
+#include "cmp/Transform.hpp"
 
 namespace tr::gp::ecs::RenderDataSystem {
 

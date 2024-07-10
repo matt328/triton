@@ -1,12 +1,12 @@
 #include "Manager.hpp"
 
+#include "tr/GameplayFacade.hpp"
+
 #include "Properties.hpp"
 #include "RobotoRegular.h"
 #include "data/DataFacade.hpp"
 #include "ImGuiHelpers.hpp"
 #include "ui/components/EntityEditor.hpp"
-
-#include "tr/ctx/GameplayFacade.hpp"
 
 namespace ed::ui {
    Manager::Manager(tr::ctx::GameplayFacade& facade, data::DataFacade& dataFacade)

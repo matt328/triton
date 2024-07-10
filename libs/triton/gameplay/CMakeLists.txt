@@ -6,6 +6,12 @@ set(gameplay_SRC
    "src/EntitySystem.cxx"
    "src/AnimationFactory.cxx"
    "src/ActionSystem.cxx"
+   "src/EntitySystem.cxx"
+
+   "src/systems/AnimationSystem.cxx"
+   "src/systems/CameraSystem.cxx"
+   "src/systems/RenderDataSystem.cxx"
+   "src/systems/TransformSystem.cxx"
 )
 
 add_library(${PROJECT_NAME} STATIC ${gameplay_SRC})
@@ -21,7 +27,7 @@ IF(WIN32)
    )
 ENDIF(WIN32)
 
-find_package(entt CONFIG REQUIRED)
+find_package(EnTT CONFIG REQUIRED)
 
 target_compile_definitions(${PROJECT_NAME}
    PRIVATE
@@ -49,7 +55,7 @@ target_precompile_headers(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
    PUBLIC
-   entt # TODO: use a pImpl to be able to make this private
+   EnTT::EnTT # TODO: use a pImpl to be able to make this private
    PRIVATE
    common
    ozz_animation
