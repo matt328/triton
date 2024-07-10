@@ -1,4 +1,4 @@
-#include "ct/HeightField.hpp"
+#include "HeightField.hpp"
 
 #include <noise/noise.h>
 #include <noise/noiseutils.h>
