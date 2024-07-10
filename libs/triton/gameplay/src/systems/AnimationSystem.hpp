@@ -1,9 +1,9 @@
 #pragma once
 
-namespace tr::gfx::geo {
+namespace tr::gp {
    class AnimationFactory;
 }
 
 namespace tr::gp::ecs::AnimationSystem {
-   void update(entt::registry& registry, gfx::geo::AnimationFactory& animationFactory);
+   void update(entt::registry& registry, AnimationFactory& animationFactory);
 }

@@ -1,6 +1,6 @@
 #include "TransformSystem.hpp"
 
-#include "gp/ecs/component/Transform.hpp"
+#include "cmp/Transform.hpp"
 
 namespace tr::gp::ecs::TransformSystem {
 

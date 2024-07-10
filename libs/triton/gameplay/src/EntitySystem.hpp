@@ -8,11 +8,9 @@
 #include "cmp/Camera.hpp"
 #include <entt/entity/fwd.hpp>
 
-namespace tr::gfx::geo {
-   class AnimationFactory;
-}
-
 namespace tr::gp {
+
+   class AnimationFactory;
 
    class EntitySystem {
     public:
@@ -29,7 +27,7 @@ namespace tr::gp {
          return registry;
       }
 
-      void fixedUpdate(const cm::Timer& timer, gfx::geo::AnimationFactory& animationFactory);
+      void fixedUpdate(const cm::Timer& timer, AnimationFactory& animationFactory);
       void prepareRenderData(cm::RenderData& renderData);
 
       auto createTerrain(const cm::MeshHandles handles) -> cm::EntityType;

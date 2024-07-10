@@ -1,6 +1,5 @@
 #pragma once
 
-#include "AnimationFactory.hpp"
 #include "cm/Handles.hpp"
 #include "cm/Inputs.hpp"
 #include "cm/RenderData.hpp"
@@ -72,7 +71,7 @@ namespace tr::gp {
       void setMouseState(bool captured);
 
       // Gameworld State Methods
-      void createTerrain(const cm::MeshHandles handles);
+      auto createTerrain(const cm::MeshHandles handles) -> cm::EntityType;
       auto createStaticModel(cm::MeshHandles meshes) -> cm::EntityType;
       auto createAnimatedModel(const cm::LoadedSkinnedModelData model) -> cm::EntityType;
       auto createCamera(uint32_t width,

@@ -28,7 +28,7 @@ namespace tr::gp {
    }
 
    void EntitySystem::fixedUpdate([[maybe_unused]] const cm::Timer& timer,
-                                  gfx::geo::AnimationFactory& animationFactory) {
+                                  AnimationFactory& animationFactory) {
       auto lock = std::unique_lock<std::shared_mutex>{registryMutex};
 
       ecs::CameraSystem::fixedUpdate(*registry);
