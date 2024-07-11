@@ -23,6 +23,7 @@ namespace tr::ctx {
 
 namespace tr::gp {
    using RenderDataProducer = entt::delegate<void(cm::RenderData&)>;
+   using RenderDataFn = std::function<void(cm::RenderData&)>;
 
    class AnimationFactory;
    class EntitySystem;
@@ -83,9 +84,8 @@ namespace tr::gp {
       void setCurrentCamera(cm::EntityType currentCamera);
       void clearEntities();
 
-      template <auto Candidate, typename Type>
-      void addRenderDataListener(Type* valueOrInstance) noexcept {
-         renderDataProducer.connect<Candidate>(valueOrInstance);
+      void setRenderDataFn(const RenderDataFn& fn) {
+         renderDataFn = fn;
       }
 
     private:
@@ -97,8 +97,6 @@ namespace tr::gp {
       /// before the Renderer takes a copy of it
       cm::RenderData renderData{};
 
-      // This delegate seems overengineered, but keeps the Application from having to #include
-      // half the engine
-      RenderDataProducer renderDataProducer{};
+      RenderDataFn renderDataFn{};
    };
 }

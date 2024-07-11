@@ -1,17 +1,9 @@
 #pragma once
 
 #include "cm/ObjectData.hpp"
-
-#include "GraphicsDevice.hpp"
-#include "PipelineBuilder.hpp"
-#include "sb/ShaderBindingFactory.hpp"
-#include "textures/ResourceManager.hpp"
+#include "cm/RenderData.hpp"
 
 #include <entt/signal/fwd.hpp>
-
-/*
-   TODO: This should be a pImpl
-*/
 
 namespace tr::gfx {
    struct RenderObject;
@@ -54,87 +46,23 @@ namespace tr::gfx {
       RenderContext(RenderContext&&) = delete;
       RenderContext& operator=(RenderContext&&) = delete;
 
-      [[nodiscard]] tx::ResourceManager& getResourceManager() const {
-         return *resourceManager;
-      }
+      [[nodiscard]] auto& getResourceManager() const;
 
       void render();
       void waitIdle();
 
       void enqueueRenderObject(RenderObject renderObject);
 
-      void setCurrentCameraData(cm::CameraData&& cameraData) {
-         this->cameraData = std::move(cameraData);
-      }
+      void setCurrentCameraData(cm::CameraData&& cameraData);
 
-      template <auto Candidate, typename Type>
-      void addResizeListener(Type* valueOrInstance) noexcept {
-         resizeDelegate.connect<Candidate>(valueOrInstance);
-         resizeDelegate(graphicsDevice->getCurrentSize());
-      }
+      void setResizeListener(const std::function<void(std::pair<uint32_t, uint32_t>)>& fn);
 
-      void setDebugRendering(bool wireframeEnabled) {
-         debugRendering = wireframeEnabled;
-      }
+      void setRenderData(cm::RenderData& renderData);
+
+      void setDebugRendering(bool wireframeEnabled);
 
     private:
-      static constexpr int FRAMES_IN_FLIGHT = 2;
-
-      bool guiEnabled{};
-      bool debugRendering{false};
-
-      std::unique_ptr<GraphicsDevice> graphicsDevice;
-
-      std::unique_ptr<PipelineBuilder> pb;
-
-      vk::Viewport mainViewport;
-      vk::Rect2D mainScissor;
-
-      std::unique_ptr<vk::raii::Pipeline> staticModelPipeline;
-      std::unique_ptr<vk::raii::PipelineLayout> staticModelPipelineLayout;
-
-      std::unique_ptr<vk::raii::Pipeline> terrainPipeline;
-      std::unique_ptr<vk::raii::PipelineLayout> terrainPipelineLayout;
-
-      std::unique_ptr<vk::raii::Pipeline> debugPipeline;
-      std::unique_ptr<vk::raii::PipelineLayout> debugPipelineLayout;
-
-      std::unique_ptr<vk::raii::Pipeline> skinnedModelPipeline;
-      std::unique_ptr<vk::raii::PipelineLayout> skinnedModelPipelineLayout;
-
-      std::unique_ptr<mem::Image> depthImage;
-      std::shared_ptr<vk::raii::ImageView> depthImageView;
-
-      std::unique_ptr<ds::LayoutFactory> layoutFactory;
-      std::unique_ptr<sb::ShaderBindingFactory> sbFactory;
-
-      std::vector<std::unique_ptr<Frame>> frames;
-
-      std::unique_ptr<Gui::ImGuiHelper> imguiHelper;
-
-      std::unique_ptr<tx::ResourceManager> resourceManager;
-
-      std::vector<RenderObject> renderObjects{};
-      std::vector<cm::ObjectData> objectDataList{};
-      cm::CameraData cameraData{glm::identity<glm::mat4>(),
-                                glm::identity<glm::mat4>(),
-                                glm::identity<glm::mat4>()};
-
-      uint32_t currentFrame = 0;
-      bool framebufferResized = false;
-
-      ResizeDelegateType resizeDelegate{};
-
-      std::vector<cm::MeshData> staticMeshDataList;
-      std::vector<cm::MeshData> terrainDataList;
-      std::vector<cm::MeshData> skinnedModelList;
-      cm::PushConstants pushConstants;
-
-      void initDepthResources();
-
-      void recreateSwapchain();
-      void drawFrame();
-      void recordCommandBuffer(Frame& frame, unsigned imageIndex);
-      void drawImgui(const vk::raii::CommandBuffer& cmd, const vk::raii::ImageView& image) const;
+      class Impl;
+      std::unique_ptr<Impl> impl;
    };
 }
