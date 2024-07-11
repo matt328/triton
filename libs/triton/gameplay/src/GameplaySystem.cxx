@@ -95,7 +95,7 @@ namespace tr::gp {
 
       entitySystem->prepareRenderData(renderData);
 
-      renderDataProducer(renderData);
+      renderDataFn(renderData);
    }
 
    void GameplaySystem::resize(const std::pair<uint32_t, uint32_t> size) {

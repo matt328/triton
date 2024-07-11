@@ -19,13 +19,11 @@ namespace tr::ctx {
 
       gameplaySystem = std::make_unique<gp::GameplaySystem>();
 
-      renderContext->addResizeListener<&gp::GameplaySystem::resize>(gameplaySystem.get());
+      renderContext->setResizeListener(
+          [this](std::pair<uint32_t, uint32_t> size) { this->gameplaySystem->resize(size); });
 
-      // Have this take in a reference to the resource manager
-      // No we can't do that or else game world would have to know about a lot of gfx
-      // and we should honestly move gp into its own lib away from rendering
-      gameplaySystem->addRenderDataListener<&gfx::tx::ResourceManager::setRenderData>(
-          &renderContext->getResourceManager());
+      gameplaySystem->setRenderDataFn(
+          [this](cm::RenderData& renderData) { renderContext->setRenderData(renderData); });
 
       // Have the facade also take a reference to the resourceManager
       gameplayFacade =
