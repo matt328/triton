@@ -47,16 +47,14 @@ namespace tr::gfx::tx {
       fn(renderData);
    }
 
-   auto ResourceManager::createTerrain() -> std::future<cm::ModelHandle> {
-      return taskQueue->enqueue([this]() { return createTerrainInt(); });
-   }
-
-   auto ResourceManager::createTerrainInt() -> cm::ModelHandle {
-      const auto heightfield = ct::HeightField{1024};
-      const auto dataHandle = geometryFactory->createGeometryFromHeightfield(heightfield);
-      const auto modelHandle = uploadGeometry(dataHandle);
-      geometryFactory->unload(dataHandle);
-      return modelHandle;
+   auto ResourceManager::createTerrain() -> futures::cfuture<cm::ModelHandle> {
+      return futures::async([this]() {
+         const auto heightfield = ct::HeightField{1024};
+         const auto dataHandle = geometryFactory->createGeometryFromHeightfield(heightfield);
+         const auto modelHandle = uploadGeometry(dataHandle);
+         geometryFactory->unload(dataHandle);
+         return modelHandle;
+      });
    }
 
    std::future<cm::ModelHandle> ResourceManager::loadModelAsync(
