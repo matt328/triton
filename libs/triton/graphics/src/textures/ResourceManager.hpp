@@ -3,6 +3,7 @@
 #include "cm/Handles.hpp"
 #include "cm/RenderData.hpp"
 
+#include "futures/future.hpp"
 #include "geometry/Mesh.hpp"
 #include "textures/Texture.hpp"
 #include "geometry/GeometryHandles.hpp"
@@ -63,8 +64,7 @@ namespace tr::gfx::tx {
       ResourceManager& operator=(const ResourceManager&) = delete;
       ResourceManager& operator=(ResourceManager&&) = delete;
 
-      auto createTerrain() -> std::future<cm::ModelHandle>;
-      auto createTerrainInt() -> cm::ModelHandle;
+      auto createTerrain() -> futures::cfuture<cm::ModelHandle>;
 
       std::future<cm::ModelHandle> loadModelAsync(const std::filesystem::path& filename);
       cm::ModelHandle loadModelInt(const std::filesystem::path& filename);
