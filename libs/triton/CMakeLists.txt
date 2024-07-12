@@ -33,6 +33,7 @@ find_package(imgui CONFIG REQUIRED)
 find_package(Stb REQUIRED)
 find_package(unofficial-noise CONFIG REQUIRED)
 find_package(unofficial-noiseutils CONFIG REQUIRED)
+find_package(Tracy CONFIG REQUIRED)
 
 find_package(nfd CONFIG REQUIRED)
 
@@ -76,6 +77,8 @@ target_precompile_headers(${PROJECT_NAME}
    <stb_image.h>
    <string>
    <string_view>
+   <tracy/Tracy.hpp>
+   <tracy/TracyC.h>
    PUBLIC
    <filesystem>
    <GLFW/glfw3.h>
@@ -122,6 +125,7 @@ target_link_libraries(${PROJECT_NAME}
    nfd::nfd
    unofficial::noise::noise
    unofficial::noiseutils::noiseutils
+   Tracy::TracyClient
    ${Vulkan_LIBRARIES}
 )
 

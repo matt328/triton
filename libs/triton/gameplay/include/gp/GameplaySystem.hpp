@@ -44,11 +44,6 @@ namespace tr::gp {
       the EntitySystem, these will be entity controllers in the form of Behaviors, Scripts, etc
       The Editor will then only create entities, set properties, and then be able to start, stop,
       and reset the timestep.
-
-      // TODO Find a home for animation factory
-
-      - Should the Gameplay system abstract away the EntitySystem as an internal detail? Probably so
-      that we could replace the EntitySystem with something different like a GameObject system.
    */
    class GameplaySystem {
     public:
