@@ -56,7 +56,7 @@ namespace tr::gfx {
       void setDebugRendering(bool wireframeEnabled);
 
       // Resource Creation
-      auto createTerrain() -> std::future<cm::ModelHandle>;
+      auto createTerrain() -> futures::cfuture<cm::ModelHandle>;
       auto loadModelAsync(const std::filesystem::path& modelPath) -> std::future<cm::ModelHandle>;
       auto loadSkinnedModelAsync(const std::filesystem::path& modelPath,
                                  const std::filesystem::path& skeletonPath,

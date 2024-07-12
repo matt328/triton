@@ -37,6 +37,13 @@ IF(WIN32)
    )
 ENDIF(WIN32)
 
+include(FetchContent)
+FetchContent_Declare(futures
+   GIT_REPOSITORY https://github.com/alandefreitas/futures
+   GIT_TAG v0.1.5
+)
+FetchContent_MakeAvailable(futures)
+
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glslang CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
@@ -64,6 +71,7 @@ target_precompile_headers(${PROJECT_NAME}
    <GLFW/glfw3.h>
    <imgui_impl_glfw.h>
    <imgui_impl_vulkan.h>
+   <futures/futures.hpp>
    PRIVATE
    <filesystem>
    <fstream>
@@ -89,6 +97,7 @@ target_link_libraries(${PROJECT_NAME}
    PUBLIC
    glfw # Get rid of glfw usage in graphics
    imgui::imgui # Look into externalizing this code
+   futures::futures # Futures is part of Graphics' API it shares with Triton
    PRIVATE
    common
    glslang::glslang

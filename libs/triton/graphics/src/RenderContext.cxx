@@ -638,7 +638,7 @@ namespace tr::gfx {
       impl->setDebugRendering(wireframeEnabled);
    }
 
-   auto RenderContext::createTerrain() -> std::future<cm::ModelHandle> {
+   auto RenderContext::createTerrain() -> futures::cfuture<cm::ModelHandle> {
       return impl->createTerrain();
    }
 
