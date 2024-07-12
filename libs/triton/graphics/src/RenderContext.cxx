@@ -184,8 +184,8 @@ namespace tr::gfx {
          resourceManager->setRenderData(renderData);
       }
 
-      auto createTerrain() {
-         return resourceManager->createTerrain();
+      auto createTerrain(const uint32_t size) {
+         return resourceManager->createTerrain(size);
       }
 
       auto loadModelAsync(const std::filesystem::path& modelPath) {
@@ -638,8 +638,8 @@ namespace tr::gfx {
       impl->setDebugRendering(wireframeEnabled);
    }
 
-   auto RenderContext::createTerrain() -> futures::cfuture<cm::ModelHandle> {
-      return impl->createTerrain();
+   auto RenderContext::createTerrain(const uint32_t size) -> futures::cfuture<cm::ModelHandle> {
+      return impl->createTerrain(size);
    }
 
    auto RenderContext::loadModelAsync(const std::filesystem::path& modelPath)

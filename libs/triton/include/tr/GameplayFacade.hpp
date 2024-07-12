@@ -45,9 +45,7 @@ namespace tr::ctx {
 
       auto createStaticMultiMeshEntity(const cm::MeshHandles meshes) -> cm::EntityType;
 
-      auto createTerrainEntity(const cm::MeshHandles meshes) -> cm::EntityType;
-
-      auto createTerrainMesh(const uint32_t size) -> std::future<cm::ModelHandle>;
+      auto createTerrain(const uint32_t size) -> futures::cfuture<cm::EntityType>;
 
       auto createCamera(uint32_t width,
                         uint32_t height,

@@ -54,7 +54,7 @@ namespace ed::ui {
       tr::ctx::GameplayFacade& facade;
       data::DataFacade& dataFacade;
 
-      components::EntityEditor entityEditor;
+      // components::EntityEditor entityEditor;
 
       std::vector<std::future<tr::cm::ModelHandle>> modelFutures{};
       std::vector<std::future<tr::cm::ModelHandle>> terrainFutures{};
@@ -74,7 +74,6 @@ namespace ed::ui {
 
       std::unique_ptr<NFD::Guard> guard;
 
-      void handleModelFutures();
       void handleTerrainFutures();
       void handleSkinnedModelFutures();
 
