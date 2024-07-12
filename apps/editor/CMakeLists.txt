@@ -19,6 +19,7 @@ find_package(cereal CONFIG REQUIRED)
 find_package(nfd CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(platform_folders CONFIG REQUIRED)
+find_package(glfw3 CONFIG REQUIRED)
 
 target_compile_definitions(${PROJECT_NAME}
    PRIVATE
@@ -39,6 +40,7 @@ target_precompile_headers(${PROJECT_NAME}
    <filesystem>
    <future>
    <functional>
+   <GLFW/glfw3.h>
    <nfd.hpp>
    <nlohmann/json.hpp>
    <sago/platform_folders.h>
@@ -63,8 +65,10 @@ endif()
 
 target_link_libraries(${PROJECT_NAME}
    PRIVATE
+   glfw
    cereal::cereal
    triton
+   nfd::nfd
    nlohmann_json::nlohmann_json
    sago::platform_folders
 )

@@ -29,6 +29,7 @@ ENDIF(WIN32)
 
 find_package(EnTT CONFIG REQUIRED)
 find_package(Tracy CONFIG REQUIRED)
+find_package(glm CONFIG REQUIRED)
 
 target_compile_definitions(${PROJECT_NAME}
    PRIVATE
@@ -58,8 +59,9 @@ target_precompile_headers(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
    PUBLIC
-   EnTT::EnTT # TODO: use a pImpl to be able to make this private
    PRIVATE
+   EnTT::EnTT
+   glm
    Tracy::TracyClient
    common
    ozz_animation

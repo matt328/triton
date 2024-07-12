@@ -25,25 +25,25 @@ target_compile_definitions(${PROJECT_NAME}
 
 target_precompile_headers(${PROJECT_NAME}
    PUBLIC
+   <chrono>
+   <functional>
+   <glm/glm.hpp>
    <iomanip>
    <iostream>
    <random>
    <string_view>
    <cm/Logger.hpp>
    PRIVATE
-   <chrono>
    <ctime>
    <cstdint>
-   <functional>
-   <glm/glm.hpp>
    <unordered_map>
    <vector>
 )
 
 target_link_libraries(${PROJECT_NAME}
    PUBLIC
-   PRIVATE
    glm
+   PRIVATE
 )
 
 target_include_directories(${PROJECT_NAME}
