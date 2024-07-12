@@ -65,7 +65,6 @@ target_precompile_headers(${PROJECT_NAME}
    <imgui_impl_glfw.h>
    <imgui_impl_vulkan.h>
    PRIVATE
-   <entt/entt.hpp>
    <filesystem>
    <fstream>
    <future>
@@ -88,8 +87,8 @@ target_precompile_headers(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
    PUBLIC
-   glfw
-   imgui::imgui
+   glfw # Get rid of glfw usage in graphics
+   imgui::imgui # Look into externalizing this code
    PRIVATE
    common
    glslang::glslang

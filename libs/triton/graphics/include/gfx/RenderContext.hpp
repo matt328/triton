@@ -31,8 +31,6 @@ namespace tr::gfx {
       class Image;
    }
 
-   using ResizeDelegateType = entt::delegate<void(std::pair<uint32_t, uint32_t>)>;
-
    class RenderContext {
     public:
       RenderContext(GLFWwindow* window, bool guiEnabled = false);

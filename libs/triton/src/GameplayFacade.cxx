@@ -19,15 +19,11 @@ namespace tr::ctx {
 
       auto createTerrainMesh([[maybe_unused]] const uint32_t size) {
 
+         // TODO: Replace taskqueue with better futures now that entity system is thread safe
          /*
-            Have these methods also take in an optional lambda to add to the then chain
-            so that the UI of the editor can know when they've completed
-            Also whatever logic system caused them to be loaded in a game might also want to
-            register a callback for when it's been loaded. This logic system will be encapsulated in
-            a 'Game' module. The editor will export a set of game data files that a single Game
-            module will know how to start up and run. The Game module will load up the assets and
-            scripts and stuff that the editor produces and be able to just run.
-            TODO: see if entt's events can handle this?
+            Do clients need to know when the engine is finished loading the thing?
+            Editor will just add to its own data store.
+            I don't think Game will need to know either
          */
 
          // const auto createTerrainEntity = [this](cm::ModelHandle handle) {

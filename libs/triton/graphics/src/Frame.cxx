@@ -90,7 +90,6 @@ namespace tr::gfx {
           graphicsDevice.getAllocator().createBuffer(&animationDataBufferCreateInfo,
                                                      &animationDataAllocationCreateInfo,
                                                      "Animation Data Buffer");
-      // TODO: abstraction over buffers that supports creating them mapped
       animationDataBuffer->mapBuffer();
 
       // Create PerFrame ShaderBinding

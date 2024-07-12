@@ -48,9 +48,3 @@ void main() {
    fragTexCoord = inTexCoord;
    textureId = thisObject.textureId;
 }
-
-/*
-   TODO: Figure out why this test file is jacking up the animated vertices
-   probably make a ui to control the animation, at least play/pause it and maybe a slider to
-   move through the timeline
-*/
