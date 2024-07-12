@@ -43,6 +43,7 @@ find_package(imgui CONFIG REQUIRED)
 find_package(Vulkan REQUIRED)
 find_package(VulkanMemoryAllocator CONFIG REQUIRED)
 find_package(unofficial-vulkan-memory-allocator-hpp CONFIG REQUIRED)
+find_package(Tracy CONFIG REQUIRED)
 
 target_compile_definitions(${PROJECT_NAME}
    PRIVATE
@@ -78,6 +79,8 @@ target_precompile_headers(${PROJECT_NAME}
    <stb_image.h>
    <vulkan-memory-allocator-hpp/vk_mem_alloc.hpp>
    <vulkan/vulkan_raii.hpp>
+   <tracy/Tracy.hpp>
+   <tracy/TracyC.h>
    <tracy/TracyVulkan.hpp>
 )
 
@@ -90,6 +93,7 @@ target_link_libraries(${PROJECT_NAME}
    glslang::glslang-default-resource-limits
    glslang::SPIRV
    unofficial::VulkanMemoryAllocator-Hpp::VulkanMemoryAllocator-Hpp
+   Tracy::TracyClient
    ${Vulkan_LIBRARIES}
 )
 

@@ -2,14 +2,6 @@
 
 #include "cm/Inputs.hpp"
 
-namespace tr::gp {
-   class GameplaySystem;
-}
-
-namespace tr::gfx {
-   class RenderContext;
-}
-
 namespace tr::ctx {
 
    class GameplayFacade;

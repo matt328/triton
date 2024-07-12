@@ -18,7 +18,6 @@ IF(WIN32)
 ENDIF(WIN32)
 
 find_package(glm CONFIG REQUIRED)
-find_package(Tracy CONFIG REQUIRED)
 
 target_compile_definitions(${PROJECT_NAME}
    PRIVATE
@@ -26,24 +25,25 @@ target_compile_definitions(${PROJECT_NAME}
 
 target_precompile_headers(${PROJECT_NAME}
    PUBLIC
+   <iomanip>
+   <iostream>
+   <random>
+   <string_view>
+   <cm/Logger.hpp>
+   PRIVATE
    <chrono>
+   <ctime>
    <cstdint>
    <functional>
    <glm/glm.hpp>
-   <cm/Logger.hpp>
-   <random>
-   <tracy/Tracy.hpp>
-   <tracy/TracyC.h>
    <unordered_map>
    <vector>
-   PRIVATE
 )
 
 target_link_libraries(${PROJECT_NAME}
    PUBLIC
-   glm
-   Tracy::TracyClient
    PRIVATE
+   glm
 )
 
 target_include_directories(${PROJECT_NAME}

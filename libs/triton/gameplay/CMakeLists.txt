@@ -28,6 +28,7 @@ IF(WIN32)
 ENDIF(WIN32)
 
 find_package(EnTT CONFIG REQUIRED)
+find_package(Tracy CONFIG REQUIRED)
 
 target_compile_definitions(${PROJECT_NAME}
    PRIVATE
@@ -50,6 +51,8 @@ target_precompile_headers(${PROJECT_NAME}
    <ozz/base/io/archive.h>
    <ozz/base/io/stream.h>
    <shared_mutex>
+   <tracy/Tracy.hpp>
+   <tracy/TracyC.h>
    <variant>
 )
 
@@ -57,6 +60,7 @@ target_link_libraries(${PROJECT_NAME}
    PUBLIC
    EnTT::EnTT # TODO: use a pImpl to be able to make this private
    PRIVATE
+   Tracy::TracyClient
    common
    ozz_animation
 )
