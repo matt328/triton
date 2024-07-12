@@ -18,7 +18,7 @@ namespace tr::ctx {
       Context& operator=(const Context&) = delete;
       Context& operator=(Context&&) = delete;
 
-      void start(std::function<void()> pollFn);
+      void start(const std::function<void()>& pollFn);
 
       void keyCallback(cm::Key key, cm::ButtonState buttonState);
       void cursorPosCallback(double xpos, double ypos);

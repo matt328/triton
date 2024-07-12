@@ -64,7 +64,7 @@ namespace tr::gfx::tx {
       ResourceManager& operator=(const ResourceManager&) = delete;
       ResourceManager& operator=(ResourceManager&&) = delete;
 
-      auto createTerrain() -> futures::cfuture<cm::ModelHandle>;
+      auto createTerrain(const uint32_t size) -> futures::cfuture<cm::ModelHandle>;
 
       std::future<cm::ModelHandle> loadModelAsync(const std::filesystem::path& filename);
       cm::ModelHandle loadModelInt(const std::filesystem::path& filename);

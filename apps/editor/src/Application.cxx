@@ -8,7 +8,6 @@
 #include "Properties.hpp"
 #include "ui/Manager.hpp"
 #include "data/DataFacade.hpp"
-#include <GLFW/glfw3.h>
 
 #ifdef _WIN32
 #define GLFW_EXPOSE_NATIVE_WIN32

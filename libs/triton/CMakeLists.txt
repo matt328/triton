@@ -13,6 +13,8 @@ ENDIF()
 
 IF(WIN32)
    target_compile_definitions(${PROJECT_NAME}
+      PUBLIC
+      WIN32_LEAN_AND_MEAN
       PRIVATE
       -D_CRT_SECURE_NO_WARNINGS
       VK_USE_PLATFORM_WIN32_KHR

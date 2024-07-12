@@ -1,3 +1,4 @@
+#include <futures/futures.hpp>
 #include "config.h"
 #include "Application.hpp"
 

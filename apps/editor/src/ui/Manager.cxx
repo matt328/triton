@@ -6,15 +6,10 @@
 #include "RobotoRegular.h"
 #include "data/DataFacade.hpp"
 #include "ImGuiHelpers.hpp"
-#include "ui/components/EntityEditor.hpp"
 
 namespace ed::ui {
    Manager::Manager(tr::ctx::GameplayFacade& facade, data::DataFacade& dataFacade)
-       : facade{facade},
-         dataFacade{dataFacade},
-         entityEditor{components::EntityEditor{[this, &facade]([[maybe_unused]] uint32_t size) {
-            terrainFutures.push_back(facade.createTerrainMesh(512));
-         }}} {
+       : facade{facade}, dataFacade{dataFacade} {
       ImGuiEx::setupImGuiStyle();
       ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
@@ -40,8 +35,6 @@ namespace ed::ui {
 
    void Manager::render() {
       ZoneNamedN(guiRender, "Gui Render", true);
-      handleTerrainFutures();
-      handleModelFutures();
       handleSkinnedModelFutures();
 
       if (wireframeCallback) {
@@ -50,7 +43,7 @@ namespace ed::ui {
 
       renderDockSpace();
       renderMenuBar();
-      entityEditor.render(facade, dataFacade);
+      // entityEditor.render(facade, dataFacade);
       renderDebugWindow();
 
       helpers::renderImportSkeletonModal(dataFacade);
@@ -73,42 +66,6 @@ namespace ed::ui {
 
       if (openModel) {
          ImGui::OpenPopup("Import Model");
-      }
-   }
-
-   void Manager::handleTerrainFutures() {
-      for (auto it = terrainFutures.begin(); it != terrainFutures.end();) {
-         auto status = it->wait_for(std::chrono::seconds(0));
-         if (status == std::future_status::ready) {
-            ZoneNamedN(loadComplete, "Creating Terrain Entities", true);
-            try {
-               auto r = it->get();
-               facade.createTerrainEntity(r);
-            } catch (const std::exception& e) {
-               Log::error << "error loading model: " << e.what() << std::endl;
-            }
-            it = terrainFutures.erase(it);
-         } else {
-            ++it;
-         }
-      }
-   }
-
-   void Manager::handleModelFutures() {
-      for (auto it = modelFutures.begin(); it != modelFutures.end();) {
-         auto status = it->wait_for(std::chrono::seconds(0));
-         if (status == std::future_status::ready) {
-            ZoneNamedN(loadComplete, "Creating Mesh Entities", true);
-            try {
-               auto r = it->get();
-               facade.createStaticMultiMeshEntity(r);
-            } catch (const std::exception& e) {
-               Log::error << "error loading model: " << e.what() << std::endl;
-            }
-            it = modelFutures.erase(it);
-         } else {
-            ++it;
-         }
       }
    }
 
@@ -186,6 +143,10 @@ namespace ed::ui {
 
       if (ImGui::BeginMainMenuBar()) {
          if (ImGui::BeginMenu("File")) {
+
+            if (ImGui::MenuItem("Create Terrain")) {
+               facade.createTerrain(1024);
+            }
 
             if (ImGui::MenuItem("Import Skeleton")) {
                showPopup = true;
