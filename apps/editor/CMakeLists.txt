@@ -46,7 +46,6 @@ target_precompile_headers(${PROJECT_NAME}
    <fstream>
    <imgui.h>
    <imgui_internal.h>
-   "src/ui/ImFileBrowser.hpp"
    "src/ui/ImGuiStyle.hpp"
    <stb_image.h>
    <glm/gtc/type_ptr.hpp>

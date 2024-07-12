@@ -1,10 +1,5 @@
 #pragma once
 
-#include <ctime>
-#include <iomanip>
-#include <iostream>
-#include <string_view>
-
 namespace Log {
 
    enum class Level {
