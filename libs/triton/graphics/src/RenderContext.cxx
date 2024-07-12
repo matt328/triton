@@ -180,6 +180,20 @@ namespace tr::gfx {
          resourceManager->setRenderData(renderData);
       }
 
+      auto createTerrain() {
+         return resourceManager->createTerrain();
+      }
+
+      auto loadModelAsync(const std::filesystem::path& modelPath) {
+         return resourceManager->loadModelAsync(modelPath);
+      }
+
+      auto loadSkinnedModelAsync(const std::filesystem::path& modelPath,
+                                 const std::filesystem::path& skeletonPath,
+                                 const std::filesystem::path& animationPath) {
+         return resourceManager->loadSkinnedModelAsync(modelPath, skeletonPath, animationPath);
+      }
+
     private:
       void initDepthResources() {
          const auto depthFormat = Helpers::findDepthFormat(graphicsDevice->getPhysicalDevice());
@@ -609,10 +623,6 @@ namespace tr::gfx {
       impl->enqueueRenderObject(std::move(renderObject));
    }
 
-   [[nodiscard]] auto& RenderContext::getResourceManager() const {
-      return impl->getResourceManager();
-   }
-
    void RenderContext::setCurrentCameraData(cm::CameraData&& cameraData) {
       impl->setCurrentCameraData(std::move(cameraData));
    }
@@ -623,5 +633,21 @@ namespace tr::gfx {
 
    void RenderContext::setDebugRendering(bool wireframeEnabled) {
       impl->setDebugRendering(wireframeEnabled);
+   }
+
+   auto RenderContext::createTerrain() -> std::future<cm::ModelHandle> {
+      return impl->createTerrain();
+   }
+
+   auto RenderContext::loadModelAsync(const std::filesystem::path& modelPath)
+       -> std::future<cm::ModelHandle> {
+      return impl->loadModelAsync(modelPath);
+   }
+
+   auto RenderContext::loadSkinnedModelAsync(const std::filesystem::path& modelPath,
+                                             const std::filesystem::path& skeletonPath,
+                                             const std::filesystem::path& animationPath)
+       -> std::future<cm::LoadedSkinnedModelData> {
+      return impl->loadSkinnedModelAsync(modelPath, skeletonPath, animationPath);
    }
 }
