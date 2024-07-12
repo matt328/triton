@@ -79,7 +79,6 @@ namespace ed {
       GetWindowRect(hWnd, &rcClient);
       // I feel like trash for this but i can't figure out how to make it repaint enough of the
       // window to actually update it and glfw doesn't want to support dark mode yet.
-      // TODO: roll my own cross platform windowing library.
       SetWindowPos(hWnd,
                    nullptr,
                    rcClient.left,

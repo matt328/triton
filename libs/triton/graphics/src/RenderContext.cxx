@@ -24,6 +24,10 @@
 
 namespace tr::gfx {
 
+   /*
+      TODO: This thing is a monolith. Look at all those #includes.
+   */
+
    class RenderContext::RenderContext::Impl {
     public:
       Impl(GLFWwindow* window, bool guiEnabled) {
@@ -257,7 +261,7 @@ namespace tr::gfx {
 
          // staticModelPipeline->resize({size.width, size.height});
 
-         resizeDelegate(graphicsDevice->getCurrentSize());
+         resizeFn(graphicsDevice->getCurrentSize());
 
          for (const auto& fd : frames) {
             fd->createSwapchainResources(*graphicsDevice);
@@ -589,7 +593,6 @@ namespace tr::gfx {
       uint32_t currentFrame = 0;
       bool framebufferResized = false;
 
-      ResizeDelegateType resizeDelegate{};
       std::function<void(std::pair<uint32_t, uint32_t>)> resizeFn;
 
       std::vector<cm::MeshData> staticMeshDataList;

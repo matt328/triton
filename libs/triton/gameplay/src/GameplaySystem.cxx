@@ -84,9 +84,6 @@ namespace tr::gp {
       TracyPlot("Physics Blend Factor", blendingFactor);
       ZoneNamedN(upd, "Update", true);
 
-      // TODO: implement some logic to move things around
-      // and if it looks unsmooth or sus or whatever, then add interpolation based on blending
-      // factor. This probably won't factor in until we have physics and skeletal animation
       renderData.objectData.clear();
       renderData.staticMeshData.clear();
       renderData.terrainMeshData.clear();

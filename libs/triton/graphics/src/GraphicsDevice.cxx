@@ -78,7 +78,7 @@ namespace tr::gfx {
       VkSurfaceKHR tempSurface = nullptr;
       // TODO: register a callback to create a surface
       // std::function<std::unique_ptr<vk::raii::SurfaceKHR>(const vk::raii::Instance&)>
-      // Should try to remove any glfw from triton, keep all of that in the 'client'
+      // Should try to remove any glfw from triton, keep all of that in the 'clients'
       glfwCreateWindowSurface(**instance, window, nullptr, &tempSurface);
       Log::trace << "Created Surface" << std::endl;
       surface = std::make_unique<vk::raii::SurfaceKHR>(*instance, tempSurface);
