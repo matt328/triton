@@ -3,8 +3,6 @@ project("triton")
 set(triton_SRC
    "src/Context.cxx"
    "src/GameplayFacade.cxx"
-
-   "src/ct/Heightfield.cxx"
 )
 
 add_library(${PROJECT_NAME} STATIC ${triton_SRC})

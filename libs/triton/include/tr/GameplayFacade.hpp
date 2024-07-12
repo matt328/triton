@@ -87,12 +87,8 @@ namespace tr::ctx {
       void update();
 
     private:
-      bool debugEnabled{};
-      gp::GameplaySystem& gameplaySystem;
-      gfx::RenderContext& renderer;
-      std::vector<cm::EntityType> allEntities;
-
-      std::vector<std::future<tr::cm::ModelHandle>> terrainFutures{};
+      class Impl;
+      std::unique_ptr<Impl> impl;
    };
 
 }

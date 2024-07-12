@@ -2,6 +2,11 @@
 
 #include "data/DataFacade.hpp"
 
+/*
+   Facade and context both need to be pImpls bc they're both separate entry classes each used by
+   Editor and Game
+*/
+
 namespace tr::ctx {
    class Context;
    class GameplayFacade;

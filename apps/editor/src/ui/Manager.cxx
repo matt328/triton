@@ -76,14 +76,6 @@ namespace ed::ui {
       }
    }
 
-   /*
-      Can this be moved inside the facade, and just register a callback to be called after it's all
-      done?
-      so like
-      facade.doAsyncThing([]() {Log::debug << "done" << std::endl;})
-      Context would have to call gameplayFacade.tick() or something so it could check it's internal
-      list of futures
-   */
    void Manager::handleTerrainFutures() {
       for (auto it = terrainFutures.begin(); it != terrainFutures.end();) {
          auto status = it->wait_for(std::chrono::seconds(0));
