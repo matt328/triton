@@ -3,8 +3,6 @@
 #include "cm/ObjectData.hpp"
 #include "cm/RenderData.hpp"
 
-#include <entt/signal/fwd.hpp>
-
 namespace tr::gfx {
    struct RenderObject;
    struct PerFrameData;
@@ -46,8 +44,6 @@ namespace tr::gfx {
       RenderContext(RenderContext&&) = delete;
       RenderContext& operator=(RenderContext&&) = delete;
 
-      [[nodiscard]] auto& getResourceManager() const;
-
       void render();
       void waitIdle();
 
@@ -60,6 +56,14 @@ namespace tr::gfx {
       void setRenderData(cm::RenderData& renderData);
 
       void setDebugRendering(bool wireframeEnabled);
+
+      // Resource Creation
+      auto createTerrain() -> std::future<cm::ModelHandle>;
+      auto loadModelAsync(const std::filesystem::path& modelPath) -> std::future<cm::ModelHandle>;
+      auto loadSkinnedModelAsync(const std::filesystem::path& modelPath,
+                                 const std::filesystem::path& skeletonPath,
+                                 const std::filesystem::path& animationPath)
+          -> std::future<cm::LoadedSkinnedModelData>;
 
     private:
       class Impl;

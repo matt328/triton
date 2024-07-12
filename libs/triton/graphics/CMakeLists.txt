@@ -1,6 +1,7 @@
 project("graphics")
 
 set(graphics_SRC
+   "src/HeightField.cxx"
    "src/Frame.cxx"
    "src/GraphicsDevice.cxx"
    "src/PipelineBuilder.cxx"

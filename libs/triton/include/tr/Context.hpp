@@ -1,7 +1,6 @@
 #pragma once
 
 #include "cm/Inputs.hpp"
-#include "cm/Timer.hpp"
 
 namespace tr::gp {
    class GameplaySystem;
@@ -36,19 +35,12 @@ namespace tr::ctx {
       void pause(bool paused);
       void hostWindowClosed();
 
-      [[nodiscard]] GameplayFacade& getGameplayFacade() const {
-         return *gameplayFacade;
-      }
+      [[nodiscard]] GameplayFacade& getGameplayFacade() const;
 
       void setWireframe(bool wireframeEnabled);
 
     private:
-      bool running{}, paused{};
-      tr::cm::Timer timer;
-
-      std::unique_ptr<GameplayFacade> gameplayFacade;
-
-      std::unique_ptr<tr::gp::GameplaySystem> gameplaySystem;
-      std::unique_ptr<tr::gfx::RenderContext> renderContext;
+      class Impl;
+      std::unique_ptr<Impl> impl;
    };
 }

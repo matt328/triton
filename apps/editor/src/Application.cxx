@@ -5,8 +5,6 @@
 #include "KeyMap.hpp"
 #include "cm/Inputs.hpp"
 
-#include "Paths.hpp"
-
 #include "Properties.hpp"
 #include "ui/Manager.hpp"
 #include "data/DataFacade.hpp"
@@ -47,8 +45,10 @@ namespace ed {
 
 #ifdef _WIN32
 
+      auto iconPath = std::filesystem::current_path() / "assets" / "textures" / "icon.png";
+
       int imageWidth{}, imageHeight{}, channels{};
-      unsigned char* iconData = stbi_load((tr::util::Paths::TEXTURES / "icon.png").string().c_str(),
+      unsigned char* iconData = stbi_load(iconPath.string().c_str(),
                                           &imageWidth,
                                           &imageHeight,
                                           &channels,
