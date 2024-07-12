@@ -154,7 +154,7 @@ namespace ed::ui::components {
          */
       }
 
-      void renderAnimationArea(tr::ctx::GameplayFacade& gameplayFacade) {
+      void renderAnimationArea([[maybe_unused]] tr::ctx::GameplayFacade& gameplayFacade) {
          ImGui::SeparatorText("Animation");
          // static size_t itemCurrentIndex{};
          // static bool playing{};
