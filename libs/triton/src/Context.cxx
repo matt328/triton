@@ -41,18 +41,33 @@ namespace tr::ctx {
          renderContext->setDebugRendering(wireframeEnabled);
       }
 
-      void start(std::function<void()> pollFn) {
+      void start(const std::function<void()>& pollFn) {
          running = true;
          while (running) {
-            pollFn();
+
+            {
+               ZoneNamedN(poll, "Poll", true);
+               pollFn();
+            }
             if (this->paused) {
                std::this_thread::sleep_for(std::chrono::milliseconds(SleepMillis));
                continue;
             }
-            timer.tick([&]() { gameplaySystem->fixedUpdate(timer); });
-            gameplaySystem->update(timer.getBlendingFactor());
 
-            renderContext->render();
+            {
+               ZoneNamedN(fixedUpdate, "Gameplay FixedUpdate", true);
+               timer.tick([&]() { gameplaySystem->fixedUpdate(timer); });
+            }
+
+            {
+               ZoneNamedN(z, "Gameplay Update", true);
+               gameplaySystem->update(timer.getBlendingFactor());
+            }
+
+            {
+               ZoneNamedN(z, "RenderContext Render", true);
+               renderContext->render();
+            }
             FrameMark;
          }
          renderContext->waitIdle();
@@ -110,7 +125,7 @@ namespace tr::ctx {
       return impl->getGameplayFacade();
    }
 
-   void Context::start(std::function<void()> pollFn) {
+   void Context::start(const std::function<void()>& pollFn) {
       impl->start(pollFn);
    }
 

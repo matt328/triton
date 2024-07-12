@@ -52,6 +52,7 @@ namespace tr::gp::sys::CameraSystem {
             }
          } else if (action.stateType == StateType::Range) {
             auto value = std::get<float>(action.value);
+            Log::debug << "action value: " << value << std::endl;
 
             if (action.actionType == ActionType::LookHorizontal) {
                cam.yaw -= (value * MouseSensitivity);

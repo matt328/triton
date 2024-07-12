@@ -29,11 +29,13 @@ namespace tr::gp {
 
    void EntitySystem::fixedUpdate([[maybe_unused]] const cm::Timer& timer,
                                   AnimationFactory& animationFactory) {
-      auto lock = std::unique_lock<std::shared_mutex>{registryMutex};
+      std::unique_lock<std::shared_mutex> lock{registryMutex};
 
+      lock.lock();
       sys::CameraSystem::fixedUpdate(*registry);
       sys::TransformSystem::update(*registry);
       sys::AnimationSystem::update(*registry, animationFactory);
+      lock.unlock();
    }
 
    void EntitySystem::prepareRenderData(cm::RenderData& renderData) {

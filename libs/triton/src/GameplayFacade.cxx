@@ -13,25 +13,11 @@ namespace tr::ctx {
           : debugEnabled{debugEnabled}, gameplaySystem{gameplaySystem}, renderer{renderer} {
       }
 
-      auto createTerrainEntity(const cm::MeshHandles handles) -> cm::EntityType {
-         return gameplaySystem.createTerrain(handles);
-      }
-
-      auto createTerrainMesh([[maybe_unused]] const uint32_t size) {
-
-         // TODO: Replace TaskQueue with better futures now that entity system is thread safe
-         /*
-            Do clients need to know when the engine is finished loading the thing?
-            Editor will just add to its own data store.
-            I don't think Game will need to know either
-         */
-
-         // const auto createTerrainEntity = [this](cm::ModelHandle handle) {
-         //    gameplaySystem.createTerrain(handle);
-         // };
-         // renderer.getResourceManager().createTerrain().then(createTerrainEntity);
-
-         return renderer.createTerrain();
+      auto createTerrain(const uint32_t size) {
+         const auto createEntity = [this](cm::ModelHandle handle) {
+            return gameplaySystem.createTerrain(handle);
+         };
+         return renderer.createTerrain(size).then(createEntity);
       }
 
       auto loadModelAsync(const std::filesystem::path& path) {
@@ -113,19 +99,8 @@ namespace tr::ctx {
    GameplayFacade::~GameplayFacade() {
    }
 
-   auto GameplayFacade::createTerrainEntity(const cm::MeshHandles handles) -> cm::EntityType {
-      return impl->createTerrainEntity(handles);
-   }
-
-   auto GameplayFacade::createTerrainMesh([[maybe_unused]] const uint32_t size)
-       -> std::future<cm::ModelHandle> {
-
-      // const auto createTerrainEntity = [this](cm::ModelHandle handle) {
-      //    gameplaySystem.createTerrain(handle);
-      // };
-      // renderer.getResourceManager().createTerrain().then(createTerrainEntity);
-
-      return impl->createTerrainMesh(size);
+   auto GameplayFacade::createTerrain(const uint32_t size) -> futures::cfuture<cm::EntityType> {
+      return impl->createTerrain(size);
    }
 
    auto GameplayFacade::loadModelAsync(const std::filesystem::path& path)
