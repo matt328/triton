@@ -163,7 +163,11 @@ namespace ed {
       app->context->hostWindowClosed();
    }
 
-   void Application::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+   void Application::keyCallback(GLFWwindow* window,
+                                 int key,
+                                 [[maybe_unused]] int scancode,
+                                 [[maybe_unused]] int action,
+                                 int mods) {
       if (ImGui::GetIO().WantCaptureKeyboard || ImGui::GetIO().WantTextInput) {
          return;
       }
