@@ -75,7 +75,7 @@ namespace tr::gp {
       Log::info << "destroying game" << std::endl;
    };
 
-   void GameplaySystem::fixedUpdate([[maybe_unused]] const cm::Timer& timer) {
+   void GameplaySystem::fixedUpdate(const cm::Timer& timer) {
       ZoneNamedN(upd, "FixedUpdate", true);
       entitySystem->fixedUpdate(timer, *animationFactory);
    }

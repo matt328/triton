@@ -30,17 +30,13 @@ namespace tr::gp {
    void EntitySystem::fixedUpdate([[maybe_unused]] const cm::Timer& timer,
                                   AnimationFactory& animationFactory) {
       std::unique_lock<std::shared_mutex> lock{registryMutex};
-
-      lock.lock();
       sys::CameraSystem::fixedUpdate(*registry);
       sys::TransformSystem::update(*registry);
       sys::AnimationSystem::update(*registry, animationFactory);
-      lock.unlock();
    }
 
    void EntitySystem::prepareRenderData(cm::RenderData& renderData) {
       auto lock = std::shared_lock<std::shared_mutex>{registryMutex};
-
       sys::RenderDataSystem::update(*registry, renderData);
    }
 
@@ -59,13 +55,13 @@ namespace tr::gp {
    }
 
    void EntitySystem::writeWindowDimensions(const std::pair<uint32_t, uint32_t> size) {
-      auto lock = std::shared_lock<std::shared_mutex>{registryMutex};
+      auto lock = std::unique_lock<std::shared_mutex>{registryMutex};
       registry->ctx().insert_or_assign<cmp::WindowDimensions>(
           cmp::WindowDimensions{static_cast<int>(size.first), static_cast<int>(size.second)});
    }
 
    auto EntitySystem::createTerrain(const cm::MeshHandles handles) -> cm::EntityType {
-      auto lock = std::shared_lock<std::shared_mutex>{registryMutex};
+      auto lock = std::unique_lock<std::shared_mutex>{registryMutex};
 
       auto e = registry->create();
 
