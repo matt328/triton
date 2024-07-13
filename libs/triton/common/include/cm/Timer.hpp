@@ -6,7 +6,8 @@ namespace tr::cm {
     public:
       /// Supply the desired max FPS and the maximum number of physics steps to take during a frame
       Timer(int targetFps, int maxUpdatesPerFrame)
-          : maxFrameTime(frameTimeNumerator / targetFps),
+          : startTime{std::chrono::steady_clock::now()},
+            maxFrameTime(frameTimeNumerator / targetFps),
             fixedTimeStep(1.f / static_cast<float>(maxUpdatesPerFrame * targetFps)){};
       ~Timer() = default;
 
@@ -42,18 +43,15 @@ namespace tr::cm {
       }
 
     private:
+      std::chrono::steady_clock::time_point startTime;
       double maxFrameTime{};
       double fixedTimeStep{};
       double currentInstant{}, previousInstant{}, accumulatedTime{}, blendingFactor{};
 
       double getTime() {
-         using namespace std::chrono;
-         auto now = high_resolution_clock::now();
-         auto nowInTimeT = time_point_cast<seconds>(now);
-         auto durationSinceEpoch = nowInTimeT.time_since_epoch();
-         return durationSinceEpoch.count() + (now - nowInTimeT).count() *
-                                                 high_resolution_clock::period::num /
-                                                 high_resolution_clock::period::den;
+         auto currentTime = std::chrono::steady_clock::now();
+         auto elapsedTime = currentTime - startTime;
+         return static_cast<double>(elapsedTime.count());
       }
    };
 }
