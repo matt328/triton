@@ -116,6 +116,7 @@ namespace tr::gp {
    }
 
    auto GameplaySystem::createTerrain(const cm::MeshHandles handles) -> cm::EntityType {
+      ZoneNamedN(n, "gameplaySystem.createTerrain", true);
       return entitySystem->createTerrain(handles);
    }
 

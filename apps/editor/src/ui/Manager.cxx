@@ -43,6 +43,7 @@ namespace ed::ui {
 
       renderDockSpace();
       renderMenuBar();
+      TracyMessageL("After renderMenuBar");
       // entityEditor.render(facade, dataFacade);
       renderDebugWindow();
 
@@ -139,13 +140,14 @@ namespace ed::ui {
       auto b = false;
       auto showPopup = false;
       auto showAnimation = false;
+      auto loadTerrain = false;
       static auto show = true;
 
       if (ImGui::BeginMainMenuBar()) {
          if (ImGui::BeginMenu("File")) {
 
             if (ImGui::MenuItem("Create Terrain")) {
-               facade.createTerrain(1024);
+               loadTerrain = true;
             }
 
             if (ImGui::MenuItem("Import Skeleton")) {
@@ -261,6 +263,12 @@ namespace ed::ui {
          ImGui::EndPopup();
       }
       ImGui::ShowDemoWindow(&show);
+
+      if (loadTerrain) {
+         ZoneNamedN(n, "Create Terrain", true);
+         TracyMessageL("Before CreateTerrain");
+         terrainFutures.push_back(facade.createTerrain(1024));
+      }
    }
 
    void Manager::showMatrix4x4(const glm::mat4& matrix, const char* label) {

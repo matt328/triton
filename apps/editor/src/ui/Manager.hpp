@@ -2,6 +2,7 @@
 
 #include <entt/entt.hpp>
 
+#include "cm/EntitySystemTypes.hpp"
 #include "cm/Handles.hpp"
 
 #include "Application.hpp"
@@ -57,7 +58,9 @@ namespace ed::ui {
       // components::EntityEditor entityEditor;
 
       std::vector<std::future<tr::cm::ModelHandle>> modelFutures{};
-      std::vector<std::future<tr::cm::ModelHandle>> terrainFutures{};
+
+      std::vector<futures::cfuture<tr::cm::EntityType>> terrainFutures{};
+
       std::vector<std::future<tr::cm::LoadedSkinnedModelData>> skinnedModelFutures{};
 
       // HACK: get this from the application somehow instead of tracking it in 2 places
