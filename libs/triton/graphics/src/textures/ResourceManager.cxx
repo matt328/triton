@@ -48,8 +48,9 @@ namespace tr::gfx::tx {
    }
 
    auto ResourceManager::createTerrain(const uint32_t size) -> futures::cfuture<cm::ModelHandle> {
-      Log::debug << "creating terrain" << std::endl;
-      return futures::async([this, &size]() {
+      ZoneNamedN(n, "ResourceManager::createTerrain", true);
+      return futures::async([this, size]() {
+         ZoneNamedN(z, "Creating Terrain", true);
          const auto heightfield = ct::HeightField{static_cast<int>(size)};
          const auto dataHandle = geometryFactory->createGeometryFromHeightfield(heightfield);
          const auto modelHandle = uploadGeometry(dataHandle);
