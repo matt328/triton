@@ -14,6 +14,7 @@ namespace tr::ctx {
       }
 
       auto createTerrain(const uint32_t size) {
+         ZoneNamedN(n, "facade.createTerrain", true);
          const auto createEntity = [this](cm::ModelHandle handle) {
             return gameplaySystem.createTerrain(handle);
          };

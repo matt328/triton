@@ -61,6 +61,7 @@ namespace tr::gp {
    }
 
    auto EntitySystem::createTerrain(const cm::MeshHandles handles) -> cm::EntityType {
+      ZoneNamedN(n, "entitySystem.createTerrain", true);
       auto lock = std::unique_lock<std::shared_mutex>{registryMutex};
 
       auto e = registry->create();

@@ -157,11 +157,8 @@ namespace ed::ui::helpers {
          static auto headerState = std::array<bool, 4>{true, true, true, true};
 
          {
-            auto ss = std::stringstream{};
-            ss << "Scripts (" << 3 << ")";
-            const auto str = ss.str();
             ImGui::SetNextItemOpen(headerState[0]);
-            if (ImGui::CollapsingHeader(str.c_str())) {
+            if (ImGui::CollapsingHeader("Scripts")) {
                ImGui::Selectable("MainCharacter");
                ImGui::Selectable("MillAbout");
                ImGui::Selectable("IdleInPlace");
@@ -172,11 +169,8 @@ namespace ed::ui::helpers {
          }
 
          {
-            auto ss = std::stringstream{};
-            ss << "Skeletons (" << dataFacade.getSkeletons().size() << ")";
-            const auto str = ss.str();
             ImGui::SetNextItemOpen(headerState[1]);
-            if (ImGui::CollapsingHeader(str.c_str())) {
+            if (ImGui::CollapsingHeader("Skeletons")) {
                for (const auto& [name, filename] : dataFacade.getSkeletons()) {
                   ImGui::Selectable(name.c_str());
                }
@@ -187,11 +181,8 @@ namespace ed::ui::helpers {
          }
 
          {
-            auto ss = std::stringstream{};
-            ss << "Animations (" << dataFacade.getAnimations().size() << ")";
-            const auto str = ss.str();
             ImGui::SetNextItemOpen(headerState[2]);
-            if (ImGui::CollapsingHeader(str.c_str())) {
+            if (ImGui::CollapsingHeader("Animations")) {
                for (const auto& [name, filename] : dataFacade.getAnimations()) {
                   ImGui::Selectable(name.c_str());
                }
@@ -202,11 +193,8 @@ namespace ed::ui::helpers {
          }
 
          {
-            auto ss = std::stringstream{};
-            ss << "Models (" << dataFacade.getModels().size() << ")";
-            const auto str = ss.str();
             ImGui::SetNextItemOpen(headerState[3]);
-            if (ImGui::CollapsingHeader(str.c_str())) {
+            if (ImGui::CollapsingHeader("Models")) {
                for (const auto& [name, filename] : dataFacade.getModels()) {
                   ImGui::Selectable(name.c_str());
                }
