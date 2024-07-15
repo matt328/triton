@@ -110,7 +110,7 @@ namespace ed {
       context =
           std::make_unique<tr::ctx::Context>(window.get(), ImguiEnabled, GameplayDebugEnabled);
 
-      dataFacade = std::make_unique<data::DataFacade>();
+      dataFacade = std::make_unique<data::DataFacade>(context->getGameplayFacade());
 
       manager = std::make_unique<ui::Manager>(context->getGameplayFacade(), *dataFacade);
 

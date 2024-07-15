@@ -21,6 +21,15 @@ namespace tr::ctx {
          return renderer.createTerrain(size).then(createEntity);
       }
 
+      auto createStaticModelEntity(const std::filesystem::path& modelPath)
+          -> futures::cfuture<cm::EntityType> {
+
+         const auto createEntity = [this](cm::MeshHandles handles) {
+            return gameplaySystem.createStaticModel(handles);
+         };
+         return renderer.createStaticModel(modelPath).then(createEntity);
+      }
+
       auto loadModelAsync(const std::filesystem::path& path) {
          return renderer.loadModelAsync(path.string());
       }
@@ -98,6 +107,11 @@ namespace tr::ctx {
    }
 
    GameplayFacade::~GameplayFacade() {
+   }
+
+   auto GameplayFacade::createStaticModelEntity(const std::filesystem::path& modelPath)
+       -> futures::cfuture<cm::EntityType> {
+      return impl->createStaticModelEntity(modelPath);
    }
 
    auto GameplayFacade::createTerrain(const uint32_t size) -> futures::cfuture<cm::EntityType> {
