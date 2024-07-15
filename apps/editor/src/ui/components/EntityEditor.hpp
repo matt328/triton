@@ -3,33 +3,43 @@
 #include "tr/GameplayFacade.hpp"
 #include "data/DataFacade.hpp"
 
+// TODO tomorrow fire this back up
+// Add a way to create a static model entity by selecting a model
+// Figure out how to be able to position them using the editor, while saving their data in the
+// editor's data store, and replicating it out to the engine.
+
+// Add a way to create an animated model entity by selecting a model, skeleton, and animation
+// Work on controllers, behaviors, scripts with the goal of controlling a model walking around the
+// terrain
+
 namespace ed::ui::components {
    struct EntityEditor {
 
-      EntityEditor(const std::function<void(uint32_t)>& loadTerrain) : onLoadTerrain{loadTerrain} {
+      EntityEditor() {
       }
 
-      std::optional<uint32_t> selectedEntity{};
-      std::function<void(uint32_t size)> onLoadTerrain;
+      std::optional<std::string> selectedEntity{};
 
       void render([[maybe_unused]] tr::ctx::GameplayFacade& gameplayFacade,
                   [[maybe_unused]] data::DataFacade& dataFacade) {
-         // Entity Editor
-         /*
-         This editor directly altered the properties inside the ECS. This won't work like this
-         anymore, as the editor has its own data store, and the data flow is only one way from
-         editor store into ECS. Nothing that changes inside the ECS should propagate back out to the
-         editor's data store.
-
-         auto& es = gameplayFacade.getAllEntities();
 
          const auto unsaved = dataFacade.isUnsaved() ? ImGuiWindowFlags_UnsavedDocument : 0;
+
+         static auto position = glm::vec3{1.f};
+         static auto previousPosition = position;
+         static auto rotation = glm::identity<glm::quat>();
+         static auto previousRotation = rotation;
 
          if (ImGui::Begin("Entity Editor", nullptr, ImGuiWindowFlags_MenuBar | unsaved)) {
 
             if (ImGui::BeginMenuBar()) {
                if (ImGui::BeginMenu("New")) {
-                  if (ImGui::MenuItem("Entity...")) {}
+                  if (ImGui::MenuItem("Entity...")) {
+                     dataFacade.createEntity("Test Entity");
+                  }
+                  if (ImGui::MenuItem("Entity #2...")) {
+                     dataFacade.createEntity("Test Entity #2");
+                  }
                   ImGui::EndMenu();
                }
                ImGui::EndMenuBar();
@@ -39,13 +49,20 @@ namespace ed::ui::components {
             ImGui::BeginChild("left pane",
                               ImVec2(150, 0),
                               ImGuiChildFlags_Border | ImGuiChildFlags_ResizeX);
-            for (auto e : es) {
-               auto& infoComponent = gameplayFacade.getEditorInfo(e);
-               if (ImGui::Selectable(infoComponent.name.c_str(),
-                                     static_cast<uint32_t>(e) == selectedEntity)) {
-                  selectedEntity = static_cast<uint32_t>(e);
+
+            const auto& sceneData = dataFacade.getScene();
+
+            for (const auto& [name, entityData] : sceneData) {
+               if (ImGui::Selectable(name.c_str(), name == selectedEntity)) {
+                  selectedEntity = name;
+                  auto data = dataFacade.getEntityData(selectedEntity.value());
+                  position = data.position;
+                  previousPosition = position;
+                  rotation = data.rotation;
+                  previousRotation = data.rotation;
                }
             }
+
             ImGui::EndChild();
             ImGui::SameLine();
 
@@ -58,100 +75,46 @@ namespace ed::ui::components {
                                             4)); // Leave room for 1 line below us
 
                if (selectedEntity.has_value()) {
-                  ImGui::Text("Entity ID: %d", selectedEntity.value());
+                  ImGui::Text("%s", selectedEntity.value().c_str());
+
+                  if (ImGui::Button("Add..")) {
+                     ImGui::OpenPopup("component_popup");
+                  }
+
+                  const std::array<std::string, 4> names = {"Model",
+                                                            "Animated Model",
+                                                            "Script",
+                                                            "Behavior"};
+
+                  if (ImGui::BeginPopup("component_popup")) {
+                     ImGui::SeparatorText("Components");
+                     for (const auto& name : names) {
+                        if (ImGui::Selectable(name.c_str())) {
+                           Log::debug << "Adding component: " << name << std::endl;
+                           // TODO: Create Modals to Create different components.
+                        }
+                     }
+                     ImGui::EndPopup();
+                  }
+
                } else {
                   ImGui::Text("No Entity Selected");
                }
 
                if (selectedEntity.has_value()) {
-                  const auto maybeTransform = gameplayFacade.getComponent<tr::gp::cmp::Transform>(
-                      static_cast<entt::entity>(selectedEntity.value()));
-
-                  const auto maybeDebug = gameplayFacade.getComponent<tr::gp::ecs::DebugConstants>(
-                      static_cast<entt::entity>(selectedEntity.value()));
-
-                  const auto maybeAnimated = gameplayFacade.getComponent<tr::gp::ecs::Animation>(
-                      static_cast<entt::entity>(selectedEntity.value()));
-
-                  if (maybeTransform.has_value()) {
-                     auto& transform = maybeTransform.value().get();
-                     ImGui::SeparatorText("Transform");
-                     ImGui::DragFloat3("Position", glm::value_ptr(transform.position), 1.f);
-                     ImGui::DragFloat3("Rotation",
-                                       glm::value_ptr(transform.rotation),
-                                       .1f,
-                                       -180.f,
-                                       180.f);
+                  ImGui::SeparatorText("Transform");
+                  if (ImGui::DragFloat3("Position", glm::value_ptr(position), 1.f)) {
+                     if (position != previousPosition) {
+                        dataFacade.setEntityPosition(selectedEntity.value(), position);
+                     }
                   }
-                  if (maybeDebug.has_value()) {
-                     auto& d = maybeDebug.value().get();
-                     ImGui::SeparatorText("DebugConstants");
-                     ImGui::DragFloat("Specular Power", &d.specularPower, 0.5f);
-                  }
-
-                  if (maybeAnimated.has_value()) {
-                     auto& animationComponent = maybeAnimated.value().get();
-                     renderAnimationArea(gameplayFacade, animationComponent);
-                  }
+                  ImGui::DragFloat3("Rotation", glm::value_ptr(rotation), .1f, -180.f, 180.f);
                }
-               ImGui::EndChild();
-
-               if (ImGui::Button("Load Terrain")) {
-                  onLoadTerrain(512);
-               }
-               ImGui::SameLine();
-               if (ImGui::Button("Load Cube")) {
-                  const auto modelName = std::filesystem::path{
-                      R"(C:\Users\Matt\Projects\game-assets\models\cube\cube2.gltf)"};
-                  const auto skeletonPath = std::filesystem::path{
-                      R"(C:\Users\Matt\Projects\game-assets\models\cube\skeleton.ozz)"};
-                  const auto animationPath = std::filesystem::path{
-                      R"(C:\Users\Matt\Projects\game-assets\models\cube\animation.ozz)"};
-                  // skinnedModelFutures.push_back(
-                  //     gameplayFacade.loadSkinnedModelAsync(modelName, skeletonPath,
-                  //     animationPath));
-               }
-               if (ImGui::Button("Load Cesium")) {
-                  const auto modelName = std::filesystem::path{
-                      R"(C:\Users\Matt\Projects\game-assets\models\cesiumman\CesiumMan.gltf)"};
-                  const auto skeletonPath = std::filesystem::path{
-                      R"(C:\Users\Matt\Projects\game-assets\models\cesiumman\skeleton.ozz)"};
-                  const auto animationPath = std::filesystem::path{
-                      R"(C:\Users\Matt\Projects\game-assets\models\cesiumman\animation.ozz)"};
-                  // skinnedModelFutures.push_back(
-                  //     gameplayFacade.loadSkinnedModelAsync(modelName, skeletonPath,
-                  //     animationPath));
-               }
-
-               if (ImGui::Button("Load Cesium Reexport")) {
-                  const auto modelName = std::filesystem::path{
-                      R"(C:\Users\Matt\Projects\game-assets\models\cesiumman\reexport\CesiumManReexported.gltf)"};
-                  const auto skeletonPath = std::filesystem::path{
-                      R"(C:\Users\Matt\Projects\game-assets\models\cesiumman\reexport\skeleton.ozz)"};
-                  const auto animationPath = std::filesystem::path{
-                      R"(C:\Users\Matt\Projects\game-assets\models\cesiumman\reexport\animation.ozz)"};
-                  // skinnedModelFutures.push_back(
-                  //     gameplayFacade.loadSkinnedModelAsync(modelName, skeletonPath,
-                  //     animationPath));
-               }
-
-               if (ImGui::Button("Load Peasant")) {
-                  const auto modelName = std::filesystem::path{
-                      R"(C:\Users\Matt\Projects\game-assets\models\gltf-working\walking.gltf)"};
-                  const auto skeletonPath = std::filesystem::path{
-                      R"(C:\Users\Matt\Projects\game-assets\models\gltf-working\skeleton.ozz)"};
-                  const auto animationPath = std::filesystem::path{
-                      R"(C:\Users\Matt\Projects\game-assets\models\gltf-working\animation.ozz)"};
-                  // skinnedModelFutures.push_back(
-                  //     gameplayFacade.loadSkinnedModelAsync(modelName, skeletonPath,
-                  //     animationPath));
-               }
-
-               ImGui::EndGroup();
             }
+            ImGui::EndChild();
+            ImGui::EndGroup();
          }
          ImGui::End();
-         */
       }
 
       void renderAnimationArea([[maybe_unused]] tr::ctx::GameplayFacade& gameplayFacade) {

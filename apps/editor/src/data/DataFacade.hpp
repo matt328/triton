@@ -122,20 +122,30 @@ namespace ed::data {
       void save(const std::filesystem::path& outputFile);
       void load(const std::filesystem::path& inputFile);
 
+      void setEntityPosition(const std::string_view& name, glm::vec3 newPosition);
+
+      [[nodiscard]] EntityData getEntityData(const std::string_view& name) const {
+         return dataStore.scene.at(name.data());
+      }
+
       [[nodiscard]] auto isUnsaved() const {
          return unsaved;
       }
 
-      [[nodiscard]] auto& getSkeletons() const {
+      [[nodiscard]] const auto& getSkeletons() const {
          return dataStore.skeletons;
       }
 
-      [[nodiscard]] auto& getAnimations() const {
+      [[nodiscard]] const auto& getAnimations() const {
          return dataStore.animations;
       }
 
-      [[nodiscard]] auto& getModels() const {
+      [[nodiscard]] const auto& getModels() const {
          return dataStore.models;
+      }
+
+      [[nodiscard]] const auto& getScene() const {
+         return dataStore.scene;
       }
 
     private:

@@ -55,7 +55,7 @@ namespace ed::ui {
       tr::ctx::GameplayFacade& facade;
       data::DataFacade& dataFacade;
 
-      // components::EntityEditor entityEditor;
+      components::EntityEditor entityEditor;
 
       std::vector<std::future<tr::cm::ModelHandle>> modelFutures{};
 

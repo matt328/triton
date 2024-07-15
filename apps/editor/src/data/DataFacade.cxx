@@ -36,14 +36,27 @@ namespace ed::data {
    }
 
    void DataFacade::createEntity([[maybe_unused]] const std::string_view& entityName) {
+      dataStore.scene.insert({entityName.data(),
+                              EntityData{
+                                  .name = entityName.data(),
+                                  .position = glm::vec3{0.f},
+                                  .rotation = glm::identity<glm::quat>(),
+                              }});
+      unsaved = true;
    }
 
    void DataFacade::addAnimationToEntity([[maybe_unused]] const std::string_view& entityName,
                                          [[maybe_unused]] const std::string_view& animationName) {
+      auto& entityData = dataStore.scene.at(entityName.data());
+      entityData.animations.emplace_back(animationName.data());
+      unsaved = true;
    }
 
    void DataFacade::setEntitySkeleton([[maybe_unused]] const std::string_view& entityName,
                                       [[maybe_unused]] std::string_view& skeletonName) {
+      auto& entityData = dataStore.scene.at(entityName.data());
+      entityData.skeleton = skeletonName.data();
+      unsaved = true;
    }
 
    void DataFacade::createTerrain([[maybe_unused]] const std::string_view& terrainName) {
@@ -66,5 +79,12 @@ namespace ed::data {
             unsaved = false;
          }
       } catch (const std::exception& ex) { Log::error << ex.what() << std::endl; }
+   }
+
+   void DataFacade::setEntityPosition(const std::string_view& name, glm::vec3 newPosition) {
+      auto& entityData = dataStore.scene.at(name.data());
+      entityData.position = newPosition;
+      unsaved = true;
+      Log::debug << "need to push entity position change into engine" << std::endl;
    }
 }
