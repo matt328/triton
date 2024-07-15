@@ -92,6 +92,15 @@ namespace ed::ui::components {
                         if (ImGui::Selectable(name.c_str())) {
                            Log::debug << "Adding component: " << name << std::endl;
                            // TODO: Create Modals to Create different components.
+                           /* Once a Model component is added to an entity, should trigger the model
+                              to be loaded by the engine.
+                              Need to think about how to map entities in the editor's data store to
+                              cm::Entity.  This information will be temporary, and won't be saved
+                              with the project since the entity ids aren't predictable.
+                              The entityId to entity name map should be created on demand, and
+                              updated as the dataFacade sends things to the gameplayFacade.
+                              Maybe dataFacade should own the mapping.
+                           */
                         }
                      }
                      ImGui::EndPopup();
