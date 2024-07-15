@@ -57,6 +57,9 @@ namespace tr::ctx {
 
       auto setCurrentCamera(cm::EntityType currentCamera) -> void;
 
+      auto createStaticModelEntity(const std::filesystem::path& modelPath)
+          -> futures::cfuture<cm::EntityType>;
+
       auto clear() -> void;
 
       // Resource Creation Methods

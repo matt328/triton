@@ -3,6 +3,9 @@
 #include "tr/GameplayFacade.hpp"
 #include "data/DataFacade.hpp"
 
+#include <imgui.h>
+#include <imgui_stdlib.h>
+
 // TODO tomorrow fire this back up
 // Add a way to create a static model entity by selecting a model
 // Figure out how to be able to position them using the editor, while saving their data in the
@@ -29,6 +32,7 @@ namespace ed::ui::components {
          static auto previousPosition = position;
          static auto rotation = glm::identity<glm::quat>();
          static auto previousRotation = rotation;
+         static auto showModelEntityModal = bool{};
 
          if (ImGui::Begin("Entity Editor", nullptr, ImGuiWindowFlags_MenuBar | unsaved)) {
 
@@ -91,6 +95,9 @@ namespace ed::ui::components {
                      for (const auto& name : names) {
                         if (ImGui::Selectable(name.c_str())) {
                            Log::debug << "Adding component: " << name << std::endl;
+                           if (name == "Model") {
+                              showModelEntityModal = true;
+                           }
                            // TODO: Create Modals to Create different components.
                            /* Once a Model component is added to an entity, should trigger the model
                               to be loaded by the engine.
@@ -124,6 +131,43 @@ namespace ed::ui::components {
             ImGui::EndGroup();
          }
          ImGui::End();
+
+         if (showModelEntityModal) {
+            ImGui::OpenPopup("Static Model Entity");
+            showModelEntityModal = false;
+         }
+
+         if (ImGui::BeginPopupModal("Static Model Entity")) {
+
+            auto& models = dataFacade.getModels();
+            auto modelNames = std::vector<const char*>{};
+            modelNames.resize(models.size());
+
+            std::transform(models.begin(), models.end(), modelNames.begin(), [](const auto& pair) {
+               return pair.first.c_str();
+            });
+
+            static int selectedModel = 0;
+
+            ImGui::Combo("Model",
+                         &selectedModel,
+                         modelNames.data(),
+                         static_cast<int>(modelNames.size()));
+
+            if (ImGui::Button("Ok", ImVec2(120, 0))) {
+               const auto& modelName = modelNames[selectedModel];
+               Log::debug << "Selected Model : " << modelName << std::endl;
+               selectedModel = 0;
+               ImGui::CloseCurrentPopup();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+               selectedModel = 0;
+               ImGui::CloseCurrentPopup();
+            }
+
+            ImGui::EndPopup();
+         }
       }
 
       void renderAnimationArea([[maybe_unused]] tr::ctx::GameplayFacade& gameplayFacade) {
