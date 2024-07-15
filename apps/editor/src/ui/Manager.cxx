@@ -44,7 +44,7 @@ namespace ed::ui {
       renderDockSpace();
       renderMenuBar();
       TracyMessageL("After renderMenuBar");
-      // entityEditor.render(facade, dataFacade);
+      entityEditor.render(facade, dataFacade);
       renderDebugWindow();
 
       helpers::renderImportSkeletonModal(dataFacade);
