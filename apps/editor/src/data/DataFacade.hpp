@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GlmCereal.hpp"
+#include "tr/GameplayFacade.hpp"
 
 /*
    Think of the editor as a tool for editing the project data nothing more.
@@ -51,15 +52,15 @@ namespace ed::data {
 
    struct EntityData {
       std::string name;
+      glm::vec3 position;
+      glm::quat rotation;
       std::string modelName;
       std::string skeleton;
       std::vector<std::string> animations;
-      glm::vec3 position;
-      glm::quat rotation;
 
       template <class T>
       void serialize(T& archive) {
-         archive(name, modelName, skeleton, animations, position, rotation);
+         archive(name, position, rotation, modelName, skeleton, animations);
       }
    };
 
@@ -90,11 +91,12 @@ namespace ed::data {
 
    class DataFacade {
     public:
-      DataFacade() = default;
+      DataFacade(tr::ctx::GameplayFacade& gameplayFacade) : gameplayFacade{gameplayFacade} {
+      }
       ~DataFacade();
 
-      DataFacade(const DataFacade&) = default;
-      DataFacade& operator=(const DataFacade&) = default;
+      DataFacade(const DataFacade&) = delete;
+      DataFacade& operator=(const DataFacade&) = delete;
 
       DataFacade(DataFacade&&) = delete;
       DataFacade& operator=(DataFacade&&) = delete;
@@ -110,7 +112,8 @@ namespace ed::data {
       void addModel(const std::string_view& name, const std::filesystem::path& path);
       void removeModel(const std::string_view& name);
 
-      void createEntity(const std::string_view& entityName);
+      void createEntity(const std::string_view& entityName,
+                        const std::optional<const std::string> modelName = std::nullopt);
 
       void addAnimationToEntity(const std::string_view& entityName,
                                 const std::string_view& animationName);
@@ -151,5 +154,6 @@ namespace ed::data {
     private:
       bool unsaved{};
       DataStore dataStore;
+      tr::ctx::GameplayFacade& gameplayFacade;
    };
 }

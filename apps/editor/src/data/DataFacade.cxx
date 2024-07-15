@@ -35,13 +35,24 @@ namespace ed::data {
    void DataFacade::removeModel([[maybe_unused]] const std::string_view& name) {
    }
 
-   void DataFacade::createEntity([[maybe_unused]] const std::string_view& entityName) {
-      dataStore.scene.insert({entityName.data(),
-                              EntityData{
-                                  .name = entityName.data(),
-                                  .position = glm::vec3{0.f},
-                                  .rotation = glm::identity<glm::quat>(),
-                              }});
+   void DataFacade::createEntity(const std::string_view& entityName,
+                                 const std::optional<const std::string> modelName) {
+
+      if (modelName.has_value()) {
+         dataStore.scene.insert({entityName.data(),
+                                 EntityData{.name = entityName.data(),
+                                            .position = glm::vec3{0.f},
+                                            .rotation = glm::identity<glm::quat>(),
+                                            .modelName = modelName.value()}});
+      } else {
+         dataStore.scene.insert({entityName.data(),
+                                 EntityData{
+                                     .name = entityName.data(),
+                                     .position = glm::vec3{0.f},
+                                     .rotation = glm::identity<glm::quat>(),
+                                 }});
+      }
+
       unsaved = true;
    }
 
