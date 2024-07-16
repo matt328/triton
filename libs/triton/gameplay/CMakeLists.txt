@@ -58,8 +58,8 @@ target_precompile_headers(${PROJECT_NAME}
 )
 
 target_link_libraries(${PROJECT_NAME}
-   PUBLIC
    PRIVATE
+   util-lib
    EnTT::EnTT
    glm
    Tracy::TracyClient

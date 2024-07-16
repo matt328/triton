@@ -44,7 +44,7 @@ target_precompile_headers(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
    PRIVATE
    ozz_animation
-   utils-lib
+   util-lib
    asset-lib
    nfd::nfd
 )

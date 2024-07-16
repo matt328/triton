@@ -2,6 +2,8 @@
 #include "GlmCereal.hpp"
 #include <filesystem>
 
+#include "Logger.hpp"
+
 #include <nfd.hpp>
 
 auto parseCommandLine(int argc, char* argv[]) {
