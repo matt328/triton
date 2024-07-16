@@ -4,7 +4,6 @@
 
 #include "tr/GameplayFacade.hpp"
 #include "data/DataFacade.hpp"
-#include "ui/FutureMonitor.hpp"
 
 #include <imgui.h>
 #include <imgui_stdlib.h>
@@ -21,10 +20,7 @@
 namespace ed::ui::components {
    struct EntityEditor {
 
-      EntityEditor(FutureMonitor& futureMonitor) : futureMonitor{futureMonitor} {
-      }
-
-      FutureMonitor& futureMonitor;
+      EntityEditor() = default;
 
       std::optional<std::string> selectedEntity{};
 
@@ -43,11 +39,11 @@ namespace ed::ui::components {
 
             if (ImGui::BeginMenuBar()) {
                if (ImGui::BeginMenu("New")) {
-                  if (ImGui::MenuItem("Entity...")) {
-                     dataFacade.createEntity("Test Entity");
+                  if (ImGui::MenuItem("Static Model...")) {
+                     showModelEntityModal = true;
                   }
                   if (ImGui::MenuItem("Entity #2...")) {
-                     dataFacade.createEntity("Test Entity #2");
+                     // dataFacade.createEntity("Test Entity #2");
                   }
                   ImGui::EndMenu();
                }
@@ -153,6 +149,9 @@ namespace ed::ui::components {
             });
 
             static int selectedModel = 0;
+            static auto entityName = std::string{"Unnamed Entity"};
+
+            ImGui::InputText("Entity Name", &entityName);
 
             ImGui::Combo("Model",
                          &selectedModel,
@@ -163,13 +162,22 @@ namespace ed::ui::components {
                const auto& modelName = modelNames[selectedModel];
                Log::debug << "Selected Model : " << modelName << std::endl;
 
-               std::function<void(tr::cm::EntityType)> handler = [](tr::cm::EntityType e) {
-                  Log::debug << "created entity with id: " << static_cast<long long>(e);
-               };
+               /*
+                  Have the data facade own the future monitor, it can just set it's own state
+                  of 'busy' and the manager and ui can respond to that to show a progress spinner.
+                  Since the data facadw owns the future monitor, it can attach lambdas to run when
+                  futures finish to populate the map<entityName to entityId> and outside the facade
+                  should never know about entity ids as the facade will take in names and translate
+                  them
 
-               futureMonitor.monitorFuture(
-                   dataFacade.createEntity(selectedEntity.value(), models.at(modelName).name),
-                   handler);
+               */
+
+               Log::debug << "beginning creating entity" << std::endl;
+               try {
+                  dataFacade.createStaticModel(entityName, models.at(modelName).name);
+               } catch (const std::exception& e) {
+                  Log::error << "Caught Exception creating static model " << e.what() << std::endl;
+               }
                selectedModel = 0;
                ImGui::CloseCurrentPopup();
             }

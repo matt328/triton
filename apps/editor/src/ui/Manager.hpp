@@ -9,7 +9,6 @@
 #include "data/DataFacade.hpp"
 
 #include "components/EntityEditor.hpp"
-#include "ui/FutureMonitor.hpp"
 
 namespace ed {
    class Application;
@@ -17,10 +16,6 @@ namespace ed {
 
 namespace tr::ctx {
    class GameplayFacade;
-}
-
-namespace tr::util {
-   class TaskQueue;
 }
 
 namespace ed::ui {
@@ -55,8 +50,6 @@ namespace ed::ui {
 
       tr::ctx::GameplayFacade& facade;
       data::DataFacade& dataFacade;
-
-      std::unique_ptr<FutureMonitor> futureMonitor;
 
       components::EntityEditor entityEditor;
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GlmCereal.hpp"
+#include "cm/EntitySystemTypes.hpp"
 #include "tr/GameplayFacade.hpp"
 
 /*
@@ -89,10 +90,11 @@ namespace ed::data {
       }
    };
 
+   class FutureMonitor;
+
    class DataFacade {
     public:
-      DataFacade(tr::ctx::GameplayFacade& gameplayFacade) : gameplayFacade{gameplayFacade} {
-      }
+      DataFacade(tr::ctx::GameplayFacade& gameplayFacade);
       ~DataFacade();
 
       DataFacade(const DataFacade&) = delete;
@@ -100,6 +102,8 @@ namespace ed::data {
 
       DataFacade(DataFacade&&) = delete;
       DataFacade& operator=(DataFacade&&) = delete;
+
+      void update();
 
       void clear();
 
@@ -112,9 +116,7 @@ namespace ed::data {
       void addModel(const std::string_view& name, const std::filesystem::path& path);
       void removeModel(const std::string_view& name);
 
-      auto createEntity(const std::string_view& entityName,
-                        const std::optional<const std::string> modelName = std::nullopt)
-          -> futures::cfuture<tr::cm::EntityType>;
+      void createStaticModel(const std::string_view& entityName, const std::string_view& modelName);
 
       void addAnimationToEntity(const std::string_view& entityName,
                                 const std::string_view& animationName);
@@ -154,7 +156,10 @@ namespace ed::data {
 
     private:
       bool unsaved{};
+      bool engineBusy{};
       DataStore dataStore;
       tr::ctx::GameplayFacade& gameplayFacade;
+      std::unique_ptr<FutureMonitor> futureMonitor;
+      std::unordered_map<std::string, tr::cm::EntityType> entityNameMap{};
    };
 }

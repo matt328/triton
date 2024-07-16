@@ -1,6 +1,6 @@
 #pragma once
 
-namespace ed::ui {
+namespace ed::data {
 
    class FutureWrapperBase {
     public:
