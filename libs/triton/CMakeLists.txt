@@ -50,6 +50,7 @@ target_link_libraries(${PROJECT_NAME}
    graphics
    Tracy::TracyClient
    PRIVATE
+   util-lib
    gameplay
 )
 

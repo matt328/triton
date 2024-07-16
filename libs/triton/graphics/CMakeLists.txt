@@ -99,6 +99,7 @@ target_link_libraries(${PROJECT_NAME}
    imgui::imgui # Look into externalizing this code
    futures::futures # Futures is part of Graphics' API it shares with Triton
    PRIVATE
+   util-lib
    common
    glslang::glslang
    glslang::glslang-default-resource-limits

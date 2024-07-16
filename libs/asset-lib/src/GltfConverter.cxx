@@ -8,6 +8,8 @@
 // #define TINYGLTF_NOEXCEPTION // optional. disable exception handling.
 #include "tiny_gltf.h"
 
+#include "Logger.hpp"
+
 namespace al::gltf {
    Converter::~Converter() noexcept {
    }
