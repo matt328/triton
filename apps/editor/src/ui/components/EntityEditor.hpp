@@ -1,7 +1,10 @@
 #pragma once
 
+#include "cm/EntitySystemTypes.hpp"
+
 #include "tr/GameplayFacade.hpp"
 #include "data/DataFacade.hpp"
+#include "ui/FutureMonitor.hpp"
 
 #include <imgui.h>
 #include <imgui_stdlib.h>
@@ -18,8 +21,10 @@
 namespace ed::ui::components {
    struct EntityEditor {
 
-      EntityEditor() {
+      EntityEditor(FutureMonitor& futureMonitor) : futureMonitor{futureMonitor} {
       }
+
+      FutureMonitor& futureMonitor;
 
       std::optional<std::string> selectedEntity{};
 
@@ -157,6 +162,14 @@ namespace ed::ui::components {
             if (ImGui::Button("Ok", ImVec2(120, 0))) {
                const auto& modelName = modelNames[selectedModel];
                Log::debug << "Selected Model : " << modelName << std::endl;
+
+               std::function<void(tr::cm::EntityType)> handler = [](tr::cm::EntityType e) {
+                  Log::debug << "created entity with id: " << static_cast<long long>(e);
+               };
+
+               futureMonitor.monitorFuture(
+                   dataFacade.createEntity(selectedEntity.value(), models.at(modelName).name),
+                   handler);
                selectedModel = 0;
                ImGui::CloseCurrentPopup();
             }

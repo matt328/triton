@@ -56,8 +56,10 @@ namespace tr::gfx {
       void setDebugRendering(bool wireframeEnabled);
 
       // Resource Creation
+      auto createStaticModel(const std::filesystem::path& modelPath)
+          -> futures::cfuture<cm::MeshHandles>;
       auto createTerrain(const uint32_t size) -> futures::cfuture<cm::ModelHandle>;
-      auto loadModelAsync(const std::filesystem::path& modelPath) -> std::future<cm::ModelHandle>;
+
       auto loadSkinnedModelAsync(const std::filesystem::path& modelPath,
                                  const std::filesystem::path& skeletonPath,
                                  const std::filesystem::path& animationPath)

@@ -6,10 +6,14 @@
 #include "RobotoRegular.h"
 #include "data/DataFacade.hpp"
 #include "ImGuiHelpers.hpp"
+#include "ui/FutureMonitor.hpp"
 
 namespace ed::ui {
    Manager::Manager(tr::ctx::GameplayFacade& facade, data::DataFacade& dataFacade)
-       : facade{facade}, dataFacade{dataFacade} {
+       : facade{facade},
+         dataFacade{dataFacade},
+         futureMonitor{std::make_unique<FutureMonitor>()},
+         entityEditor{*futureMonitor} {
       ImGuiEx::setupImGuiStyle();
       ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
@@ -35,6 +39,9 @@ namespace ed::ui {
 
    void Manager::render() {
       ZoneNamedN(guiRender, "Gui Render", true);
+
+      futureMonitor->update();
+
       handleSkinnedModelFutures();
 
       if (wireframeCallback) {
