@@ -30,10 +30,6 @@ namespace tr::ctx {
          return renderer.createStaticModel(modelPath).then(createEntity);
       }
 
-      auto loadModelAsync(const std::filesystem::path& path) {
-         return renderer.loadModelAsync(path.string());
-      }
-
       void loadModelResources([[maybe_unused]] const std::filesystem::path& modelPath,
                               [[maybe_unused]] const std::filesystem::path& skeletonPath,
                               [[maybe_unused]] const std::filesystem::path& animationPath,
@@ -116,11 +112,6 @@ namespace tr::ctx {
 
    auto GameplayFacade::createTerrain(const uint32_t size) -> futures::cfuture<cm::EntityType> {
       return impl->createTerrain(size);
-   }
-
-   auto GameplayFacade::loadModelAsync(const std::filesystem::path& path)
-       -> std::future<cm::ModelHandle> {
-      return impl->loadModelAsync(path);
    }
 
    void GameplayFacade::loadModelResources(

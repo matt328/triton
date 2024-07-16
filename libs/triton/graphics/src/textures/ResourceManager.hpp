@@ -66,13 +66,15 @@ namespace tr::gfx::tx {
 
       auto createTerrain(const uint32_t size) -> futures::cfuture<cm::ModelHandle>;
 
-      std::future<cm::ModelHandle> loadModelAsync(const std::filesystem::path& filename);
+      futures::cfuture<cm::ModelHandle> createModel(const std::filesystem::path& filename);
+
       cm::ModelHandle loadModelInt(const std::filesystem::path& filename);
 
       std::future<cm::LoadedSkinnedModelData> loadSkinnedModelAsync(
           const std::filesystem::path& modelPath,
           const std::filesystem::path& skeletonPath,
           const std::filesystem::path& animationPath);
+
       cm::LoadedSkinnedModelData loadSkinnedModelInt(const std::filesystem::path& modelPath,
                                                      const std::filesystem::path& skeletonPath,
                                                      const std::filesystem::path& animationPath);

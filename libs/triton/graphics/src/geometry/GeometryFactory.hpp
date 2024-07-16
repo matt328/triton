@@ -34,6 +34,8 @@ namespace tr::gfx::geo {
       auto createGeometryFromHeightfield(const ct::HeightField& heightfield)
           -> TexturedGeometryHandle;
 
+      auto loadTrm(const std::filesystem::path& modelPath) -> TexturedGeometryHandle;
+
       auto loadSkinnedModel(const std::filesystem::path& modelPath,
                             const std::filesystem::path& skeletonPath,
                             const std::filesystem::path& animationPath) -> SkinnedGeometryData;

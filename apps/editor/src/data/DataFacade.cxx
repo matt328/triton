@@ -35,15 +35,17 @@ namespace ed::data {
    void DataFacade::removeModel([[maybe_unused]] const std::string_view& name) {
    }
 
-   void DataFacade::createEntity(const std::string_view& entityName,
-                                 const std::optional<const std::string> modelName) {
-
+   auto DataFacade::createEntity(const std::string_view& entityName,
+                                 const std::optional<const std::string> modelName)
+       -> futures::cfuture<tr::cm::EntityType> {
       if (modelName.has_value()) {
          dataStore.scene.insert({entityName.data(),
                                  EntityData{.name = entityName.data(),
                                             .position = glm::vec3{0.f},
                                             .rotation = glm::identity<glm::quat>(),
                                             .modelName = modelName.value()}});
+         const auto modelFilename = dataStore.models.at(modelName.value()).filePath;
+         return gameplayFacade.createStaticModelEntity(modelFilename);
       } else {
          dataStore.scene.insert({entityName.data(),
                                  EntityData{

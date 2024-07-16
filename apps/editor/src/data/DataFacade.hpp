@@ -112,8 +112,9 @@ namespace ed::data {
       void addModel(const std::string_view& name, const std::filesystem::path& path);
       void removeModel(const std::string_view& name);
 
-      void createEntity(const std::string_view& entityName,
-                        const std::optional<const std::string> modelName = std::nullopt);
+      auto createEntity(const std::string_view& entityName,
+                        const std::optional<const std::string> modelName = std::nullopt)
+          -> futures::cfuture<tr::cm::EntityType>;
 
       void addAnimationToEntity(const std::string_view& entityName,
                                 const std::string_view& animationName);
