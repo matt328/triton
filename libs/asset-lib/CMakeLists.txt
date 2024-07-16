@@ -35,9 +35,9 @@ target_link_libraries(${PROJECT_NAME}
    PUBLIC
    cereal::cereal
    PRIVATE
-   utils-lib
    glm
    ozz_animation
+   util-lib
 )
 
 target_include_directories(${PROJECT_NAME}

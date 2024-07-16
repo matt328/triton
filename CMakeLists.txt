@@ -21,6 +21,7 @@ set(TRITON_COMPILE_OPTIONS
 )
 
 add_subdirectory(assets)
+add_subdirectory(libs/util-lib)
 add_subdirectory(libs/triton)
 add_subdirectory(apps/editor)
 add_subdirectory(apps/testarea)

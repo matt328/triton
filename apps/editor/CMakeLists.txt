@@ -71,6 +71,7 @@ target_link_libraries(${PROJECT_NAME}
    nfd::nfd
    nlohmann_json::nlohmann_json
    sago::platform_folders
+   util-lib
 )
 
 target_include_directories(${PROJECT_NAME}
