@@ -1,7 +1,21 @@
 #include "DataFacade.hpp"
 
+#include "FutureMonitor.hpp"
+#include "cm/EntitySystemTypes.hpp"
+#include "cm/Logger.hpp"
+
 namespace ed::data {
+
+   DataFacade::DataFacade(tr::ctx::GameplayFacade& gameplayFacade)
+       : gameplayFacade{gameplayFacade} {
+      futureMonitor = std::make_unique<FutureMonitor>();
+   }
+
    DataFacade::~DataFacade() {
+   }
+
+   void DataFacade::update() {
+      futureMonitor->update();
    }
 
    void DataFacade::clear() {
@@ -35,27 +49,24 @@ namespace ed::data {
    void DataFacade::removeModel([[maybe_unused]] const std::string_view& name) {
    }
 
-   auto DataFacade::createEntity(const std::string_view& entityName,
-                                 const std::optional<const std::string> modelName)
-       -> futures::cfuture<tr::cm::EntityType> {
-      if (modelName.has_value()) {
-         dataStore.scene.insert({entityName.data(),
-                                 EntityData{.name = entityName.data(),
-                                            .position = glm::vec3{0.f},
-                                            .rotation = glm::identity<glm::quat>(),
-                                            .modelName = modelName.value()}});
-         const auto modelFilename = dataStore.models.at(modelName.value()).filePath;
-         return gameplayFacade.createStaticModelEntity(modelFilename);
-      } else {
-         dataStore.scene.insert({entityName.data(),
-                                 EntityData{
-                                     .name = entityName.data(),
-                                     .position = glm::vec3{0.f},
-                                     .rotation = glm::identity<glm::quat>(),
-                                 }});
-      }
-
+   void DataFacade::createStaticModel(const std::string_view& entityName,
+                                      const std::string_view& modelName) {
+      dataStore.scene.insert({entityName.data(),
+                              EntityData{.name = entityName.data(),
+                                         .position = glm::vec3{0.f},
+                                         .rotation = glm::identity<glm::quat>(),
+                                         .modelName = modelName.data()}});
       unsaved = true;
+      const auto modelFilename = dataStore.models.at(modelName.data()).filePath;
+
+      std::function<void(tr::cm::EntityType)> fn = [this, &entityName](tr::cm::EntityType entity) {
+         entityNameMap.insert({entityName.data(), entity});
+         engineBusy = false;
+      };
+
+      engineBusy = true;
+
+      futureMonitor->monitorFuture(gameplayFacade.createStaticModelEntity(modelFilename), fn);
    }
 
    void DataFacade::addAnimationToEntity([[maybe_unused]] const std::string_view& entityName,
@@ -85,12 +96,10 @@ namespace ed::data {
 
    void DataFacade::load(const std::filesystem::path& inputFile) {
       try {
-         {
-            auto is = std::ifstream(inputFile, std::ios::binary);
-            cereal::BinaryInputArchive input(is);
-            input(dataStore);
-            unsaved = false;
-         }
+         auto is = std::ifstream(inputFile, std::ios::binary);
+         cereal::BinaryInputArchive input(is);
+         input(dataStore);
+         unsaved = false;
       } catch (const std::exception& ex) { Log::error << ex.what() << std::endl; }
    }
 
