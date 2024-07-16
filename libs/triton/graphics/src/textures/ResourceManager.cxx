@@ -59,9 +59,16 @@ namespace tr::gfx::tx {
       });
    }
 
-   std::future<cm::ModelHandle> ResourceManager::loadModelAsync(
+   futures::cfuture<cm::ModelHandle> ResourceManager::createModel(
        const std::filesystem::path& filename) {
-      return taskQueue->enqueue([this, filename]() { return loadModelInt(filename); });
+      ZoneNamedN(n, "ResourceManager::loadModel", true);
+      return futures::async([this, filename]() {
+         ZoneNamedN(z, "Loading Model", true);
+         const auto dataHandle = geometryFactory->loadTrm(filename);
+         const auto modelHandle = uploadGeometry(dataHandle);
+         geometryFactory->unload(dataHandle);
+         return modelHandle;
+      });
    }
 
    cm::ModelHandle ResourceManager::loadModelInt(
