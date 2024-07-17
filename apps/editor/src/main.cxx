@@ -2,6 +2,12 @@
 #include "config.h"
 #include "Application.hpp"
 
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
+
+#include "ImGuiSink.hpp"
+#include "Logger2.hpp"
+
 #if defined(TRACY_ENABLE)
 
 void* operator new(std::size_t count) {
@@ -16,6 +22,20 @@ void operator delete(void* ptr) noexcept {
 #endif
 
 int main() {
+
+   Log2.info("Hello from spdlog");
+
+   return 0;
+
+   // auto mySink = std::make_shared<my_sink_mt>();
+
+   // auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+
+   // auto logger = spdlog::logger("basic", {mySink, console_sink});
+
+   // logger.info("Hello from my logger with my sink");
+   // logger.trace("Trace here");
+
    Log::LogManager::getInstance().setMinLevel(Log::Level::Trace);
 
    static constexpr int width = 1920;
