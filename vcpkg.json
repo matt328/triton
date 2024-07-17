@@ -12,6 +12,7 @@
       "nativefiledialog-extended",
       "nlohmann-json",
       "platform-folders",
+      "spdlog",
       "stb",
       "tinygltf",
       "tracy",
