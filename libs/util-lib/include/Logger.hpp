@@ -34,22 +34,38 @@ namespace Log {
       Logger(Level level) : level(level) {
       }
 
-      [[nodiscard]] const std::string_view header() const {
+      [[nodiscard]] const std::string_view header(bool color = true) const {
 
          if (level == Level::Trace) {
             return "Trace";
          }
          if (level == Level::Debug) {
-            return "\033[1;34mDebug\033[0m";
+            if (color) {
+               return "\033[1;34mDebug\033[0m";
+            } else {
+               return "Debug";
+            }
          }
          if (level == Level::Info) {
-            return "\033[1;32mInfo \033[0m";
+            if (color) {
+               return "\033[1;32mInfo \033[0m";
+            } else {
+               return "Info ";
+            }
          }
          if (level == Level::Warn) {
-            return "\033[1;33mWarn \033[0m";
+            if (color) {
+               return "\033[1;33mWarn \033[0m";
+            } else {
+               return "Warn ";
+            }
          }
          if (level == Level::Error) {
-            return "\033[1;31mError\033[0m";
+            if (color) {
+               return "\033[1;31mError\033[0m";
+            } else {
+               return "Error";
+            }
          }
          return "Unknown";
       }
@@ -62,8 +78,14 @@ namespace Log {
          if (isNextBegin) {
             auto t = std::time(nullptr);
             auto tm = *std::localtime(&t);
+            if (sink) {
+               ss << std::put_time(&tm, "%I:%M:%S") << " | " << header(false) << " | " << value;
+            }
             std::cout << std::put_time(&tm, "%I:%M:%S") << " | " << header() << " | " << value;
          } else {
+            if (sink) {
+               ss << value;
+            }
             std::cout << value;
          }
          isNextBegin = false;
@@ -75,13 +97,24 @@ namespace Log {
             return *this;
          }
          isNextBegin = true;
+         if (sink) {
+            ss << manip;
+            sink(ss.str());
+            ss.clear();
+         }
          std::cout << manip;
          return *this;
+      }
+
+      void addSink(const std::function<void(std::string)>& fn) {
+         sink = fn;
       }
 
     private:
       Level level;
       bool isNextBegin{true};
+      std::function<void(std::string)> sink = nullptr;
+      std::stringstream ss;
    };
 
    // I'd like to make these const but because of L82 they can't be

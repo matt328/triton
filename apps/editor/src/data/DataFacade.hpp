@@ -138,6 +138,10 @@ namespace ed::data {
          return unsaved;
       }
 
+      [[nodiscard]] auto isEngineBusy() const {
+         return engineBusy;
+      }
+
       [[nodiscard]] const auto& getSkeletons() const {
          return dataStore.skeletons;
       }
