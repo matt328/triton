@@ -20,6 +20,7 @@ find_package(nfd CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(platform_folders CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
+find_package(spdlog CONFIG REQUIRED)
 
 target_compile_definitions(${PROJECT_NAME}
    PRIVATE
@@ -71,6 +72,7 @@ target_link_libraries(${PROJECT_NAME}
    nfd::nfd
    nlohmann_json::nlohmann_json
    sago::platform_folders
+   spdlog::spdlog_header_only
    util-lib
 )
 

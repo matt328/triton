@@ -80,12 +80,11 @@ namespace Log {
             auto tm = *std::localtime(&t);
             if (sink) {
                ss << std::put_time(&tm, "%I:%M:%S") << " | " << header(false) << " | " << value;
+               sink(ss.str());
+               ss.clear();
             }
             std::cout << std::put_time(&tm, "%I:%M:%S") << " | " << header() << " | " << value;
          } else {
-            if (sink) {
-               ss << value;
-            }
             std::cout << value;
          }
          isNextBegin = false;
@@ -97,11 +96,6 @@ namespace Log {
             return *this;
          }
          isNextBegin = true;
-         if (sink) {
-            ss << manip;
-            sink(ss.str());
-            ss.clear();
-         }
          std::cout << manip;
          return *this;
       }

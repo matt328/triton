@@ -2,9 +2,12 @@ project("util-lib")
 
 set(utillib_SRC
    src/Thing.cxx
+   src/Logger2.cxx
 )
 
 add_library(${PROJECT_NAME} STATIC ${utillib_SRC})
+
+find_package(spdlog CONFIG REQUIRED)
 
 target_compile_definitions(${PROJECT_NAME}
    PRIVATE
@@ -22,6 +25,7 @@ target_precompile_headers(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
    PUBLIC
+   spdlog::spdlog_header_only
    PRIVATE
 )
 
