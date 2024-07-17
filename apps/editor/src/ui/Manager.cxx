@@ -4,8 +4,11 @@
 
 #include "Properties.hpp"
 #include "RobotoRegular.h"
+#include "SourceCodePro.h"
 #include "data/DataFacade.hpp"
 #include "ImGuiHelpers.hpp"
+#include "components/AppLog.hpp"
+#include <imgui.h>
 
 namespace ed::ui {
    Manager::Manager(tr::ctx::GameplayFacade& facade, data::DataFacade& dataFacade)
@@ -25,9 +28,23 @@ namespace ed::ui {
                                       &config,
                                       ranges);
 
+      sauce = fontAtlas->AddFontFromMemoryTTF(SourceCodePro_Regular_ttf,
+                                              SourceCodePro_Regular_ttf_len,
+                                              18.f,
+                                              &config,
+                                              ranges);
+
       ImGui_ImplVulkan_CreateFontsTexture();
 
       guard = std::make_unique<NFD::Guard>();
+
+      appLog = std::make_unique<ui::cmp::AppLog>();
+
+      Log::debug.addSink([this](std::string message) { appLog->AddLog("%s", message.c_str()); });
+
+      Log::debug << "Added another log message here" << std::endl;
+
+      Log::debug << "Added ImGui Log Console as a sink" << std::endl;
    }
 
    Manager::~Manager() {
@@ -48,7 +65,11 @@ namespace ed::ui {
       renderMenuBar();
       TracyMessageL("After renderMenuBar");
       entityEditor.render(facade, dataFacade);
+
       renderDebugWindow();
+
+      appLog->font = sauce;
+      appLog->Draw("Log");
 
       helpers::renderImportSkeletonModal(dataFacade);
       helpers::renderImportAnimationModal(dataFacade);
@@ -92,7 +113,7 @@ namespace ed::ui {
    }
 
    void Manager::renderDockSpace() {
-      static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_PassthruCentralNode;
+      static ImGuiDockNodeFlags dockspaceFlags = ImGuiDockNodeFlags_PassthruCentralNode;
       ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
 
       ImGuiViewport* viewport = ImGui::GetMainViewport();
@@ -105,7 +126,7 @@ namespace ed::ui {
                       ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
       window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
 
-      if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
+      if (dockspaceFlags & ImGuiDockNodeFlags_PassthruCentralNode)
          window_flags |= ImGuiWindowFlags_NoBackground;
 
       ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
@@ -116,24 +137,39 @@ namespace ed::ui {
       // DockSpace
       ImGuiIO& io = ImGui::GetIO();
       if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable) {
-         ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
-         ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
+         ImGuiID dockspaceId = ImGui::GetID("MyDockSpace");
+         ImGui::DockSpace(dockspaceId, ImVec2(0.0f, 0.0f), dockspaceFlags);
 
          static auto first_time = true;
          if (first_time) {
             first_time = false;
 
-            ImGui::DockBuilderRemoveNode(dockspace_id); // clear any previous layout
-            ImGui::DockBuilderAddNode(dockspace_id, dockspace_flags | ImGuiDockNodeFlags_DockSpace);
-            ImGui::DockBuilderSetNodeSize(dockspace_id, viewport->Size);
-            auto dock_id_left = ImGui::DockBuilderSplitNode(dockspace_id,
-                                                            ImGuiDir_Left,
-                                                            0.2f,
-                                                            nullptr,
-                                                            &dockspace_id);
-            ImGui::DockBuilderDockWindow("Entity Editor", dock_id_left);
-            ImGui::DockBuilderDockWindow("Asset Tree", dock_id_left);
-            ImGui::DockBuilderFinish(dockspace_id);
+            ImGui::DockBuilderRemoveNode(dockspaceId); // clear any previous layout
+            ImGui::DockBuilderAddNode(dockspaceId, dockspaceFlags | ImGuiDockNodeFlags_DockSpace);
+            ImGui::DockBuilderSetNodeSize(dockspaceId, viewport->Size);
+
+            auto dockIdLeft = ImGui::DockBuilderSplitNode(dockspaceId,
+                                                          ImGuiDir_Left,
+                                                          0.2f,
+                                                          nullptr,
+                                                          &dockspaceId);
+
+            auto dockIdRight = ImGui::DockBuilderSplitNode(dockspaceId,
+                                                           ImGuiDir_Right,
+                                                           0.8f,
+                                                           nullptr,
+                                                           &dockspaceId);
+            auto dockIdRightBottom = ImGui::DockBuilderSplitNode(dockIdRight,
+                                                                 ImGuiDir_Down,
+                                                                 0.2f,
+                                                                 nullptr,
+                                                                 &dockIdRight);
+
+            ImGui::DockBuilderDockWindow("Entity Editor", dockIdLeft);
+            ImGui::DockBuilderDockWindow("Asset Tree", dockIdLeft);
+            ImGui::DockBuilderDockWindow("Log", dockIdRight);
+
+            ImGui::DockBuilderFinish(dockspaceId);
          }
       }
       ImGui::End(); // Dockspace

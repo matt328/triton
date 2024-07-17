@@ -13,6 +13,7 @@ target_compile_definitions(${PROJECT_NAME}
 target_precompile_headers(${PROJECT_NAME}
    PUBLIC
    <chrono>
+   <functional>
    <iomanip>
    <iostream>
    <string_view>

@@ -9113,8 +9113,12 @@ struct ExampleAppLog {
                const char* line_end = (line_no + 1 < LineOffsets.Size)
                                           ? (buf + LineOffsets[line_no + 1] - 1)
                                           : buf_end;
-               if (Filter.PassFilter(line_start, line_end))
-                  ImGui::TextUnformatted(line_start, line_end);
+
+               if (Filter.PassFilter(line_start, line_end)) {
+                  ImGui::TextColored(ImVec4(1.0f, 0.0f, 1.0f, 1.0f), line_start);
+                  ImGui::TextColored(ImVec4(1.0f, 0.0f, 1.0f, 1.0f), line_end);
+                  // ImGui::TextUnformatted(line_start, line_end);
+               }
             }
          } else {
             // The simplest and easy way to display the entire buffer:

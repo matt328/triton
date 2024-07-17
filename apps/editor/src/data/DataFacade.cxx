@@ -8,6 +8,7 @@ namespace ed::data {
    DataFacade::DataFacade(tr::ctx::GameplayFacade& gameplayFacade)
        : gameplayFacade{gameplayFacade} {
       futureMonitor = std::make_unique<FutureMonitor>();
+      Log::debug << "created data facade" << std::endl;
    }
 
    DataFacade::~DataFacade() {

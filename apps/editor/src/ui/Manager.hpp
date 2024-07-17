@@ -12,6 +12,9 @@
 
 namespace ed {
    class Application;
+   namespace ui::cmp {
+      struct AppLog;
+   }
 }
 
 namespace tr::ctx {
@@ -72,6 +75,10 @@ namespace ed::ui {
       bool enableWireframe{false};
 
       std::unique_ptr<NFD::Guard> guard;
+
+      ImFont* sauce = nullptr;
+
+      std::unique_ptr<ui::cmp::AppLog> appLog;
 
       void handleTerrainFutures();
       void handleSkinnedModelFutures();
