@@ -79,7 +79,7 @@ namespace tr::gfx::sb {
              "Animation Data DS");
       }
 
-      Log::error << "unhandled, uh, handle when creating shaderbinding: " << std::endl;
+      Log.error("Unhandled, um, handle I guess when creating ShaderBinding");
       assert(true);
 
       return nullptr;

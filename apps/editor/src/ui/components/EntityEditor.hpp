@@ -95,7 +95,7 @@ namespace ed::ui::components {
                      ImGui::SeparatorText("Components");
                      for (const auto& name : names) {
                         if (ImGui::Selectable(name.c_str())) {
-                           Log::debug << "Adding component: " << name << std::endl;
+                           Log.debug("Adding Component: {0}", name);
                            if (name == "Model") {
                               showModelEntityModal = true;
                            }
@@ -160,7 +160,7 @@ namespace ed::ui::components {
 
             if (ImGui::Button("Ok", ImVec2(120, 0))) {
                const auto& modelName = modelNames[selectedModel];
-               Log::debug << "Selected Model : " << modelName << std::endl;
+               Log.debug("Selected Model: {0}", modelName);
 
                /*
                   Have the data facade own the future monitor, it can just set it's own state
@@ -171,12 +171,11 @@ namespace ed::ui::components {
                   them
 
                */
-
-               Log::debug << "beginning creating entity" << std::endl;
+               Log.debug("Beginning creating eneity");
                try {
                   dataFacade.createStaticModel(entityName, models.at(modelName).name);
                } catch (const std::exception& e) {
-                  Log::error << "Caught Exception creating static model " << e.what() << std::endl;
+                  Log.error("Caught exception creating static model: {0}", e.what());
                }
                selectedModel = 0;
                ImGui::CloseCurrentPopup();

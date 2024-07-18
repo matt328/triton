@@ -18,9 +18,7 @@ namespace tr::gfx::sb {
       try {
          vkDescriptorSet = std::make_unique<vk::raii::DescriptorSet>(
              std::move(device.allocateDescriptorSets(allocInfo).front()));
-      } catch (const vk::SystemError& e) {
-         Log::warn << "Descriptor Pool is full: " << e.what() << std::endl;
-      }
+      } catch (const vk::SystemError& e) { Log.warn("Descriptor Pool is full: {0}", e.what()); }
       Helpers::setObjectName(**vkDescriptorSet, device, name);
    }
 

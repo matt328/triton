@@ -3,6 +3,7 @@
 #include "data/DataFacade.hpp"
 #include <imgui.h>
 #include <imgui_stdlib.h>
+#include <nfd.hpp>
 
 namespace ed::ui::helpers {
 
@@ -27,9 +28,9 @@ namespace ed::ui::helpers {
             if (result == NFD_OKAY) {
                skeletonFilename = std::string{inPath.get()};
             } else if (result == NFD_CANCEL) {
-               Log::info << "User pressed cancel." << std::endl;
+               Log.info("User pressed cancel");
             } else {
-               Log::error << "Error: " << NFD::GetError() << std::endl;
+               Log.error("Error selecting skeleton file: {0}", NFD::GetError());
             }
          }
 
@@ -68,10 +69,8 @@ namespace ed::ui::helpers {
                 NFD::OpenDialog(inPath, AnimationFilters.data(), AnimationFilters.size());
             if (result == NFD_OKAY) {
                filename = std::string{inPath.get()};
-            } else if (result == NFD_CANCEL) {
-               Log::info << "User pressed cancel." << std::endl;
             } else {
-               Log::error << "Error: " << NFD::GetError() << std::endl;
+               Log.error("Error: {0}", NFD::GetError());
             }
          }
 
@@ -109,10 +108,8 @@ namespace ed::ui::helpers {
             const auto result = NFD::OpenDialog(inPath, ModelFilters.data(), ModelFilters.size());
             if (result == NFD_OKAY) {
                filename = std::string{inPath.get()};
-            } else if (result == NFD_CANCEL) {
-               Log::info << "User pressed cancel." << std::endl;
             } else {
-               Log::error << "Error: " << NFD::GetError() << std::endl;
+               Log.error("Error: {0}", NFD::GetError());
             }
          }
 

@@ -37,7 +37,7 @@ namespace tr::gp::sys::AnimationSystem {
          samplingJob.ratio = animationData.timeRatio;
          samplingJob.output = ozz::make_span(animationData.locals);
          if (!samplingJob.Run()) {
-            Log::warn << "Sampling job fail" << std::endl;
+            Log.warn("Sampling job fail");
          }
 
          auto ltmJob = ozz::animation::LocalToModelJob{};
@@ -45,7 +45,7 @@ namespace tr::gp::sys::AnimationSystem {
          ltmJob.input = ozz::make_span(animationData.locals);
          ltmJob.output = ozz::make_span(animationData.models);
          if (!ltmJob.Run()) {
-            Log::warn << "Ltm Job Fail" << std::endl;
+            Log.warn("ltm job fail");
          }
       }
    }

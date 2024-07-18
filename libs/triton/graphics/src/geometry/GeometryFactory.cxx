@@ -25,7 +25,7 @@ namespace tr::gfx::geo {
 
    auto GeometryFactory::loadTrm(const std::filesystem::path& modelPath) -> TexturedGeometryHandle {
       // TODO: Load trm file.
-      Log::debug << "Loading TRM file: " << modelPath.string() << std::endl;
+      Log.debug("Loading TRM File: {0}", modelPath.string());
       std::this_thread::sleep_for(std::chrono::seconds(3));
       return TexturedGeometryHandle{};
    }

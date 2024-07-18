@@ -45,7 +45,7 @@ namespace tr::ctx {
                   auto r = it->get();
                   gameplaySystem.createTerrain(r);
                } catch (const std::exception& e) {
-                  Log::error << "error loading model: " << e.what() << std::endl;
+                  Log.error("Error loading model: {0}", e.what());
                }
                it = terrainFutures.erase(it);
             } else {

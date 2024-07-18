@@ -20,7 +20,8 @@ target_precompile_headers(${PROJECT_NAME}
    <iomanip>
    <iostream>
    <string_view>
-   <Logger.hpp>
+   <spdlog/spdlog.h>
+   <Logger2.hpp>
 )
 
 target_link_libraries(${PROJECT_NAME}

@@ -2,6 +2,7 @@
 #include "config.h"
 #include "Application.hpp"
 
+#include <spdlog/common.h>
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 
@@ -23,28 +24,19 @@ void operator delete(void* ptr) noexcept {
 
 int main() {
 
-   Log2.info("Hello from spdlog");
+   initLogger();
 
-   return 0;
+   Log.set_level(spdlog::level::trace);
 
-   // auto mySink = std::make_shared<my_sink_mt>();
-
-   // auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-
-   // auto logger = spdlog::logger("basic", {mySink, console_sink});
-
-   // logger.info("Hello from my logger with my sink");
-   // logger.trace("Trace here");
-
-   Log::LogManager::getInstance().setMinLevel(Log::Level::Trace);
+   Log.info("Hello from spdlog");
 
    static constexpr int width = 1920;
    static constexpr int height = 1080;
 
 #ifdef _DEBUG
-   Log::info << "Debug Build" << std::endl;
+   Log.info("Debug Build");
 #else
-   Log::info << "Release Build" << std::endl;
+   Log.info("Release Build");
 #endif
 
    auto ss = std::stringstream{};
@@ -59,9 +51,9 @@ int main() {
 
    try {
       auto app = std::make_unique<ed::Application>(width, height, ss.str());
-      Log::info << "Initialized" << std::endl;
+      Log.info("Initialized");
 
       app->run();
 
-   } catch (const std::exception& e) { Log::error << e.what() << std::endl; }
+   } catch (const std::exception& e) { Log.critical(e.what()); }
 }

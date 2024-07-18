@@ -1,7 +1,14 @@
 #include "Logger2.hpp"
 
-spdlog::logger Log2("basic");
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
+
+spdlog::logger Log("basic");
+
+const std::string LOG_PATTERN = "%^%I:%M:%S | %-5l | %-6n | %v%$";
 
 void initLogger() {
-   Log2 = spdlog::logger("basic");
+   auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+   console_sink->set_pattern(LOG_PATTERN);
+   Log = spdlog::logger("basic", console_sink);
 }

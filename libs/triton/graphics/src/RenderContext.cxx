@@ -296,7 +296,7 @@ namespace tr::gfx {
                 *currentFrameData->getImageAvailableSemaphore(),
                 nullptr);
          } catch (const std::exception& ex) {
-            Log::error << "Swapchain needs resized: " << ex.what() << std::endl;
+            Log.warn("Swapchain needs resized: {0}", ex.what());
             recreateSwapchain();
             return;
          }
@@ -345,7 +345,7 @@ namespace tr::gfx {
                recreateSwapchain();
             }
          } catch (const std::exception& ex) {
-            Log::info << "swapchain needs recreated: " << ex.what() << std::endl;
+            Log.info("Swapchain needs recreated: {0}", ex.what());
             recreateSwapchain();
          }
 
@@ -441,7 +441,7 @@ namespace tr::gfx {
             cmd.setScissorWithCount(mainScissor);
             {
                for (const auto& meshData : staticMeshDataList) {
-                  Log::debug << "Rendering Static Mesh" << std::endl;
+                  Log.debug("Rendering Static Mesh");
                   const auto& mesh = resourceManager->getMesh(meshData.handle);
 
                   cmd.bindVertexBuffers(0, mesh.vertexBuffer->getBuffer(), {0});
@@ -607,7 +607,7 @@ namespace tr::gfx {
    }
 
    RenderContext::~RenderContext() {
-      Log::info << "destroying renderer" << std::endl;
+      Log.info("Destroying RenderContext");
    }
 
    void RenderContext::setResizeListener(
