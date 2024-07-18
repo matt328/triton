@@ -171,7 +171,7 @@ namespace ed::ui::components {
                   them
 
                */
-               Log.debug("Beginning creating eneity");
+               Log.debug("Beginning creating entity");
                try {
                   dataFacade.createStaticModel(entityName, models.at(modelName).name);
                } catch (const std::exception& e) {
