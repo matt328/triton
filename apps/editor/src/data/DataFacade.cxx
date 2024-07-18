@@ -58,9 +58,13 @@ namespace ed::data {
       unsaved = true;
       const auto modelFilename = dataStore.models.at(modelName.data()).filePath;
 
-      std::function<void(tr::cm::EntityType)> fn = [this, &entityName](tr::cm::EntityType entity) {
-         entityNameMap.insert({entityName.data(), entity});
+      std::function<void(tr::cm::EntityType)> fn = [this, entityName](tr::cm::EntityType entity) {
+         const auto name = entityName.data();
+         entityNameMap.insert({name, entity});
          engineBusy = false;
+         Log.info("Finished creating entity: id: {0}, name: {1}",
+                  static_cast<long long>(entity),
+                  name);
       };
 
       engineBusy = true;

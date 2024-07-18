@@ -1,10 +1,5 @@
 #include "GltfConverter.hpp"
 #include "GlmCereal.hpp"
-#include <filesystem>
-
-#include "Logger2.hpp"
-
-#include <nfd.hpp>
 
 auto parseCommandLine(int argc, char* argv[]) {
    auto options = std::unordered_map<std::string, std::string>{};
@@ -13,18 +8,15 @@ auto parseCommandLine(int argc, char* argv[]) {
 
    auto outPath = NFD::UniquePath{};
 
-   auto filterItems = std::array<nfdfilteritem_t, 2>{nfdfilteritem_t{"Source code", "c,cpp,cc,cxx"},
-                                                     nfdfilteritem_t{"Headers", "h,hpp"}};
+   auto filterItems = std::array<nfdfilteritem_t, 1>{nfdfilteritem_t{"gltf Model", "gltf, glb"}};
 
    // show the dialog
    const auto result = NFD::OpenDialog(outPath, filterItems.data(), filterItems.size());
 
    if (result == NFD_OKAY) {
-      Log::info << "Success: " << outPath.get() << std::endl;
-   } else if (result == NFD_CANCEL) {
-      Log::info << "User pressed cancel." << std::endl;
+      Log.info("Success: {0}", outPath.get());
    } else {
-      Log::error << "Error: " << NFD::GetError() << std::endl;
+      Log.error("Error: {0}", NFD::GetError());
    }
 
    options["mode"] = argv[1];
@@ -45,9 +37,11 @@ auto parseCommandLine(int argc, char* argv[]) {
 }
 
 int main(int argc, char* argv[]) {
-   namespace fs = std::filesystem;
-   Log::LogManager::getInstance().setMinLevel(Log::Level::Trace);
 
+   initLogger();
+   Log.set_level(spdlog::level::trace);
+
+   namespace fs = std::filesystem;
    auto options = parseCommandLine(argc, argv);
 
    if (options["mode"] == "gltf") {
@@ -68,8 +62,9 @@ int main(int argc, char* argv[]) {
          outputFile = fs::absolute(outputFile);
       }
 
-      Log::info << "Converting Gltf file, input: " << gltfFile.string()
-                << ", skeletonFile: " << skeletonFile.string() << std::endl;
+      Log.info("Converting Gltf file, input: {0}, skeleton file: {1}",
+               gltfFile.string(),
+               skeletonFile.string());
 
       auto converter = al::gltf::Converter{};
 
@@ -80,10 +75,10 @@ int main(int argc, char* argv[]) {
             cereal::BinaryOutputArchive output(os);
             output(tritonModel);
          }
-         Log::info << "Wrote binary output file to " << outputFile.string() << std::endl;
-      } catch (const std::exception& ex) { Log::error << ex.what() << std::endl; }
+         Log.info("Wrote binary output file to {0}", outputFile.string());
+      } catch (const std::exception& ex) { Log.error(ex.what()); }
    } else {
-      Log::error << "First arg must be 'gltf' for now" << std::endl;
+      Log.error("First arg must be 'gltf' for now");
       return -1;
    }
 

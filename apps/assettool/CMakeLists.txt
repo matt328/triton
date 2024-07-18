@@ -24,6 +24,7 @@ target_precompile_headers(${PROJECT_NAME}
    <fstream>
    <cstdint>
    <glm/fwd.hpp>
+   <nfd.hpp>
    <ozz/animation/runtime/animation.h>
    <ozz/animation/runtime/local_to_model_job.h>
    <ozz/animation/runtime/sampling_job.h>
