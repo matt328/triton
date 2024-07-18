@@ -21,6 +21,7 @@ target_precompile_headers(${PROJECT_NAME}
    <iostream>
    <string_view>
    <spdlog/spdlog.h>
+   <spdlog/sinks/stdout_color_sinks.h>
    <Logger2.hpp>
 )
 
