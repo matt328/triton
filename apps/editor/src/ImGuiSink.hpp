@@ -1,4 +1,4 @@
-#include "spdlog/sinks/base_sink.h"
+#pragma once
 
 template <typename Mutex>
 class my_sink : public spdlog::sinks::base_sink<Mutex> {
@@ -23,7 +23,5 @@ class my_sink : public spdlog::sinks::base_sink<Mutex> {
    std::function<void(std::string)> fn;
 };
 
-#include "spdlog/details/null_mutex.h"
-#include <mutex>
 using my_sink_mt = my_sink<std::mutex>;
 using my_sink_st = my_sink<spdlog::details::null_mutex>;

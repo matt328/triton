@@ -1,12 +1,6 @@
-#include <futures/futures.hpp>
 #include "config.h"
 #include "Application.hpp"
 
-#include <spdlog/common.h>
-#include <spdlog/spdlog.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
-
-#include "ImGuiSink.hpp"
 #include "Logger2.hpp"
 
 #if defined(TRACY_ENABLE)
