@@ -59,7 +59,7 @@ namespace tr::gfx {
 
       instance = std::make_unique<vk::raii::Instance>(*context, instanceCreateInfo);
 
-      Log::trace << "Created Instance" << std::endl;
+      Log.trace("Created Instance");
 
       const vk::DebugReportCallbackCreateInfoEXT ci = {
           .pNext = nullptr,
@@ -80,7 +80,7 @@ namespace tr::gfx {
       // std::function<std::unique_ptr<vk::raii::SurfaceKHR>(const vk::raii::Instance&)>
       // Should try to remove any glfw from triton, keep all of that in the 'clients'
       glfwCreateWindowSurface(**instance, window, nullptr, &tempSurface);
-      Log::trace << "Created Surface" << std::endl;
+      Log.trace("Created Surface");
       surface = std::make_unique<vk::raii::SurfaceKHR>(*instance, tempSurface);
 
       // Select a PhysicalDevice
@@ -101,8 +101,7 @@ namespace tr::gfx {
          throw std::runtime_error("Failed to find a suitable GPU");
       }
 
-      Log::info << "Using physical device: " << physicalDevice->getProperties().deviceName.data()
-                << std::endl;
+      Log.info("Using physical device: {0}", physicalDevice->getProperties().deviceName.data());
 
       // Select and identify queues Queues
       auto queueFamilyIndices = Helpers::findQueueFamilies(*physicalDevice, *surface);
@@ -197,27 +196,27 @@ namespace tr::gfx {
       //                        (**vulkanDevice).debugReportObjectType,
       //                        "Primary Device");
 
-      Log::trace << "Created Logical Device" << std::endl;
+      Log.trace("Created Logical Device");
 
       graphicsQueue = std::make_unique<vk::raii::Queue>(
           vulkanDevice->getQueue(queueFamilyIndices.graphicsFamily.value(), 0));
       Helpers::setObjectName(**graphicsQueue, *vulkanDevice.get(), "Graphics Queue");
-      Log::trace << "Created Graphics Queue" << std::endl;
+      Log.trace("Created Graphics Queue");
 
       presentQueue = std::make_unique<vk::raii::Queue>(
           vulkanDevice->getQueue(queueFamilyIndices.presentFamily.value(), 0));
       Helpers::setObjectName(**presentQueue, *vulkanDevice.get(), "Present Queue");
-      Log::trace << "Created Present Queue" << std::endl;
+      Log.trace("Created Present Queue");
 
       transferQueue = std::make_shared<vk::raii::Queue>(
           vulkanDevice->getQueue(queueFamilyIndices.transferFamily.value(), 0));
       Helpers::setObjectName(**transferQueue, *vulkanDevice.get(), "Transfer Queue");
-      Log::trace << "Created Transfer Queue" << std::endl;
+      Log.trace("Created Transfer Queue");
 
       computeQueue = std::make_unique<vk::raii::Queue>(
           vulkanDevice->getQueue(queueFamilyIndices.computeFamily.value(), 0));
       Helpers::setObjectName(**computeQueue, *vulkanDevice.get(), "Compute Queue");
-      Log::trace << "Created Compute Queue" << std::endl;
+      Log.trace("Created Compute Queue");
 
       createSwapchain();
 
@@ -244,7 +243,7 @@ namespace tr::gfx {
    }
 
    GraphicsDevice::~GraphicsDevice() {
-      Log::info << "destroying graphicsDevice" << std::endl;
+      Log.info("destroying graphicsDevice");
       vulkanDevice->waitIdle();
    };
 
@@ -307,7 +306,7 @@ namespace tr::gfx {
       }
 
       swapchain = std::make_unique<vk::raii::SwapchainKHR>(*vulkanDevice, swapchainCreateInfo);
-      Log::info << "Created Swapchain" << std::endl;
+      Log.info("Created Swapchain");
 
       swapchainExtent = extent;
       swapchainImageFormat = surfaceFormat.format;
@@ -336,8 +335,7 @@ namespace tr::gfx {
 
          swapchainImageViews.emplace_back(*vulkanDevice, createInfo);
       }
-      Log::info << "Created " << swapchainImageViews.size() << " swapchain image views"
-                << std::endl;
+      Log.info("Created {0} swapchain image views", swapchainImageViews.size());
 
       // Create Command Pools
       auto commandPoolCreateInfo = vk::CommandPoolCreateInfo{
@@ -360,9 +358,6 @@ namespace tr::gfx {
 
    bool GraphicsDevice::checkValidationLayerSupport() const {
       const auto availableLayers = context->enumerateInstanceLayerProperties();
-      for (const auto& layerProps : availableLayers) {
-         Log::trace << layerProps.layerName << std::endl;
-      }
 
       for (const auto layerName : DESIRED_VALIDATION_LAYERS) {
          bool layerFound = false;
@@ -439,7 +434,7 @@ namespace tr::gfx {
       if (!strcmp(pLayerPrefix, "Loader Message")) {
          return VK_FALSE;
       }
-      Log::debug << "Debug Callback (" << pLayerPrefix << "): " << pMessage << std::endl;
+      Log.debug("Debug Callback ({0}): {1}", pLayerPrefix, pMessage);
       return VK_FALSE;
    }
 }

@@ -144,7 +144,7 @@ namespace ed {
 
    // GLFW Callbacks
    void Application::errorCallback(int code, const char* description) {
-      Log::error << "GLFW Error. Code: " << code << ", description: " << description << std::endl;
+      Log.critical("GLFW Error Code: {}, description: {}", code, description);
       throw std::runtime_error("GLFW Error. See log output for details");
    }
 

@@ -8,7 +8,6 @@ namespace ed::data {
    DataFacade::DataFacade(tr::ctx::GameplayFacade& gameplayFacade)
        : gameplayFacade{gameplayFacade} {
       futureMonitor = std::make_unique<FutureMonitor>();
-      Log::debug << "created data facade" << std::endl;
    }
 
    DataFacade::~DataFacade() {
@@ -90,7 +89,7 @@ namespace ed::data {
       auto os = std::ofstream(outputFile, std::ios::binary);
       cereal::BinaryOutputArchive output(os);
       output(dataStore);
-      Log::info << "Wrote binary output file to " << outputFile.string() << std::endl;
+      Log.info("Wrote binary output file to {0}", outputFile.string());
       unsaved = false;
    }
 
@@ -100,13 +99,13 @@ namespace ed::data {
          cereal::BinaryInputArchive input(is);
          input(dataStore);
          unsaved = false;
-      } catch (const std::exception& ex) { Log::error << ex.what() << std::endl; }
+      } catch (const std::exception& ex) { Log.error(ex.what()); }
    }
 
    void DataFacade::setEntityPosition(const std::string_view& name, glm::vec3 newPosition) {
       auto& entityData = dataStore.scene.at(name.data());
       entityData.position = newPosition;
       unsaved = true;
-      Log::debug << "need to push entity position change into engine" << std::endl;
+      Log.debug("need to push entity position change into engine");
    }
 }

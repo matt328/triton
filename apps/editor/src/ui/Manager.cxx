@@ -9,6 +9,8 @@
 #include "ImGuiHelpers.hpp"
 #include "components/AppLog.hpp"
 #include <imgui.h>
+#include <Logger2.hpp>
+#include "ImGuiSink.hpp"
 
 namespace ed::ui {
    Manager::Manager(tr::ctx::GameplayFacade& facade, data::DataFacade& dataFacade)
@@ -40,14 +42,17 @@ namespace ed::ui {
 
       appLog = std::make_unique<ui::cmp::AppLog>();
 
-      Log::debug.addSink([this](std::string message) {
-         std::cout << std::endl << "adding log: " << message.c_str() << std::endl;
-         appLog->AddLog("%s", message.c_str());
-      });
+      const auto logFn = [this](std::string message) { appLog->AddLog("%s", message.c_str()); };
 
-      Log::debug << "Added another log message here" << std::endl;
+      Log.sinks().push_back(std::make_shared<my_sink_mt>(logFn));
 
-      Log::debug << "Added ImGui Log Console as a sink" << std::endl;
+      const std::string a = "some string";
+
+      Log.info("Info Message after my_sink is added, {0}", a);
+
+      Log.info("Another message after sink is added");
+
+      Log.debug("Here's a debug message");
    }
 
    Manager::~Manager() {
@@ -105,9 +110,7 @@ namespace ed::ui {
             try {
                auto r = it->get();
                facade.createSkinnedModelEntity(r);
-            } catch (const std::exception& e) {
-               Log::error << "error loading model: " << e.what() << std::endl;
-            }
+            } catch (const std::exception& e) { Log.error("Error loading model: {0}"); }
             it = skinnedModelFutures.erase(it);
          } else {
             ++it;
@@ -212,7 +215,7 @@ namespace ed::ui {
                   openFilePath.emplace(filePath);
                   pr::Properties::getInstance().setRecentFilePath(filePath);
                } else {
-                  Log::error << "Error: " << NFD::GetError() << std::endl;
+                  Log.error("File Dialog Error: ", NFD::GetError());
                }
             }
 
@@ -239,7 +242,7 @@ namespace ed::ui {
                      if (savePath.has_value()) {
                         dataFacade.save(savePath.value());
                      }
-                  } catch (const std::exception& ex) { Log::error << ex.what() << std::endl; }
+                  } catch (const std::exception& ex) { Log.error(ex.what()); }
                }
             }
 
@@ -249,7 +252,7 @@ namespace ed::ui {
                   if (savePath.has_value()) {
                      dataFacade.save(savePath.value());
                   }
-               } catch (const std::exception& ex) { Log::error << ex.what() << std::endl; }
+               } catch (const std::exception& ex) { Log.error(ex.what()); }
             }
 
             ImGui::Separator();
@@ -290,7 +293,7 @@ namespace ed::ui {
 
          if (ImGui::Button("Ok", ImVec2(120, 0))) {
             ImGui::CloseCurrentPopup();
-            Log::info << "ok" << std::endl;
+            Log.info("Ok");
          }
          ImGui::SetItemDefaultFocus();
          ImGui::SameLine();
@@ -333,13 +336,13 @@ namespace ed::ui {
       const auto result =
           NFD::SaveDialog(outPath, ProjectFileFilters.data(), ProjectFileFilters.size());
       if (result == NFD_OKAY) {
-         Log::info << "Success: " << outPath.get() << std::endl;
+         Log.debug("Success: {0}", outPath.get());
          return std::optional{std::filesystem::path{outPath.get()}};
       } else if (result == NFD_CANCEL) {
-         Log::info << "User pressed cancel." << std::endl;
+         Log.debug("User pressed Cancel");
          return std::nullopt;
       } else {
-         Log::error << "Error: " << NFD::GetError() << std::endl;
+         Log.error("Error getting save path: {0}", NFD::GetError());
          return std::nullopt;
       }
    }

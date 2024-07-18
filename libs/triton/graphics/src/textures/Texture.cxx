@@ -12,7 +12,7 @@ namespace tr::gfx::Textures {
                     const vk::raii::Device& device,
                     const VkContext& transferContext)
        : imageLayout{vk::ImageLayout::eShaderReadOnlyOptimal} {
-      Log::debug << "Creating Texture from file: " << filename.data() << std::endl;
+      Log.debug("Creating Texture from file: {0}", filename.data());
 
       int width = 0, height = 0, channels = 0;
 
