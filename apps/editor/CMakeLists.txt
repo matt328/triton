@@ -53,6 +53,9 @@ target_precompile_headers(${PROJECT_NAME}
    <stb_image.h>
    <glm/gtc/type_ptr.hpp>
    <glm/gtx/string_cast.hpp>
+   <mutex>
+   <spdlog/details/null_mutex.h>
+   <spdlog/sinks/base_sink.h>
    <string>
 )
 

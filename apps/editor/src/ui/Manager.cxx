@@ -8,7 +8,6 @@
 #include "data/DataFacade.hpp"
 #include "ImGuiHelpers.hpp"
 #include "components/AppLog.hpp"
-#include <imgui.h>
 #include <Logger2.hpp>
 #include "ImGuiSink.hpp"
 
