@@ -49,7 +49,7 @@ namespace ed::pr {
                o << std::setw(2) << rootJson << std::endl;
                o.close();
             } else {
-               Log::warn << "Could not open config file for writing: " << filePath << std::endl;
+               Log.warn("Could not open config file for writing: {0}", filePath.string());
             }
          }
 
@@ -58,10 +58,9 @@ namespace ed::pr {
             i >> rootJson;
             i.close();
          } else {
-            Log::warn << "Error opening application config file: " << filePath << std::endl;
+            Log.warn("Error opening application configuration file: {0}", filePath.string());
          }
-
-         Log::info << rootJson.dump(2) << std::endl;
+         Log.info(rootJson.dump(2));
       }
 
     private:
@@ -76,7 +75,7 @@ namespace ed::pr {
             o << std::setw(2) << rootJson << std::endl;
             o.close();
          } else {
-            Log::warn << "Error saving application config file: " << filePath << std::endl;
+            Log.warn("Error saving application config file: {0}", filePath.string());
          }
       }
    };

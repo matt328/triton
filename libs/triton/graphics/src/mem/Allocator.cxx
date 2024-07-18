@@ -16,7 +16,7 @@ namespace tr::gfx::mem {
    }
 
    Allocator::~Allocator() {
-      Log::debug << "Destroying Allocator" << std::endl;
+      Log.debug("Destroying Allocator");
       allocator.destroy();
    }
 

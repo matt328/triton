@@ -14,7 +14,7 @@ namespace tr::gfx {
          queue{std::make_unique<vk::raii::Queue>(device.getQueue(queueFamily, queueIndex))} {
 
       Helpers::setObjectName(**queue, device, name);
-      Log::trace << "Created Transfer Queue" << std::endl;
+      Log.trace("Created Transfer Queue");
 
       // Create Command Pool
       const auto poolCreateInfo = vk::CommandPoolCreateInfo{
@@ -65,7 +65,7 @@ namespace tr::gfx {
 
       if (const auto result = device.waitForFences(**fence, true, UINT64_MAX);
           result != vk::Result::eSuccess) {
-         Log::warn << "During Immediate Submit, timeout waiting for fence" << std::endl;
+         Log.warn("Timeout waiting for fence during immediate submit");
       }
       device.resetFences(**fence);
       commandPool->reset();

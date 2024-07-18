@@ -2,7 +2,7 @@
 #include "GlmCereal.hpp"
 #include <filesystem>
 
-#include "Logger.hpp"
+#include "Logger2.hpp"
 
 #include <nfd.hpp>
 
