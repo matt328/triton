@@ -5,10 +5,10 @@
 #include "Properties.hpp"
 #include "RobotoRegular.h"
 #include "SourceCodePro.h"
+
 #include "data/DataFacade.hpp"
 #include "ImGuiHelpers.hpp"
 #include "components/AppLog.hpp"
-#include <Logger2.hpp>
 #include "ImGuiSink.hpp"
 
 namespace ed::ui {
@@ -44,14 +44,6 @@ namespace ed::ui {
       const auto logFn = [this](std::string message) { appLog->AddLog("%s", message.c_str()); };
 
       Log.sinks().push_back(std::make_shared<my_sink_mt>(logFn));
-
-      const std::string a = "some string";
-
-      Log.info("Info Message after my_sink is added, {0}", a);
-
-      Log.info("Another message after sink is added");
-
-      Log.debug("Here's a debug message");
    }
 
    Manager::~Manager() {

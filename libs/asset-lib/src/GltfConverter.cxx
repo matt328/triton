@@ -8,8 +8,6 @@
 // #define TINYGLTF_NOEXCEPTION // optional. disable exception handling.
 #include "tiny_gltf.h"
 
-#include "Logger.hpp"
-
 namespace al::gltf {
    Converter::~Converter() noexcept {
    }
@@ -32,7 +30,7 @@ namespace al::gltf {
       }
 
       if (!ret) {
-         Log::error << "Failed to parse glTF file" << std::endl;
+         Log.error("Failed to parse glTF file");
          throw std::runtime_error("Failed to parse glTF file");
       }
 
@@ -76,13 +74,12 @@ namespace al::gltf {
          ozz::io::File file(skeleton.string().c_str(), "rb");
 
          if (!file.opened()) {
-            Log::error << "Failed to open skeleton file " << skeleton.string() << "." << std::endl;
+            Log.error("Failed to open skeleton file {0}", skeleton.string());
          }
 
          ozz::io::IArchive archive(&file);
          if (!archive.TestTag<ozz::animation::Skeleton>()) {
-            Log::error << "Failed to load skeleton instance from file " << skeleton.string() << "."
-                       << std::endl;
+            Log.error("Failed to load skeleton instance from file {0}", skeleton.string());
          }
 
          auto ozzSkeleton = ozz::animation::Skeleton{};
