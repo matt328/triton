@@ -1,7 +1,20 @@
 #pragma once
 
-#include <imgui.h>
 namespace ed::ui::cmp {
+
+   constexpr ImVec4 red = ImVec4(0.77f, .42f, .36f, 1.f);
+   constexpr ImVec4 orange = ImVec4(.949f, .784f, .608f, 1.f);
+   constexpr ImVec4 green = ImVec4(0.443f, .694f, .529f, 1.f);
+   constexpr ImVec4 blue = ImVec4(.388f, .541f, .592f, 1.f);
+   constexpr ImVec4 white = ImVec4(1.f, 1.f, 1.f, 1.f);
+
+   const auto colorMap = std::unordered_map<std::string, ImVec4>{{"info", green},
+                                                                 {"trace", blue},
+                                                                 {"debug", white},
+                                                                 {"warning", orange},
+                                                                 {"error", red},
+                                                                 {"critical", red}};
+
    struct AppLog {
       ImGuiTextBuffer Buf;
       ImGuiTextFilter Filter;
@@ -30,6 +43,15 @@ namespace ed::ui::cmp {
                LineOffsets.push_back(old_size + 1);
             }
          }
+      }
+
+      auto getColor(const char* begin, const char* end) {
+         for (const auto& [key, value] : colorMap) {
+            if (std::search(begin, end, key.begin(), key.end()) != end) {
+               return value;
+            }
+         }
+         return white;
       }
 
       void Draw(const char* title, bool* p_open = nullptr) {
@@ -86,15 +108,7 @@ namespace ed::ui::cmp {
                      const char* line_end = (line_no + 1 < LineOffsets.Size)
                                                 ? (buf + LineOffsets[line_no + 1] - 1)
                                                 : buf_end;
-                     auto color = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
-
-                     const std::string info = "info";
-
-                     const auto result =
-                         std::search(line_start, line_end, info.begin(), info.end());
-                     if (result != line_end) {
-                        color = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
-                     }
+                     auto color = getColor(line_start, line_end);
 
                      ImGui::PushStyleColor(ImGuiCol_Text, color);
                      ImGui::TextUnformatted(line_start, line_end);

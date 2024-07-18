@@ -98,6 +98,7 @@ namespace ImGuiEx {
    }
 
    inline static void setupImGuiStyle() {
+      static ImVec3 redColor = ImVec3(177.f / 255.f, 50.f / 255.f, 50.f / 255.f);
       static ImVec3 color_for_text = ImVec3(236.f / 255.f, 240.f / 255.f, 241.f / 255.f);
       static ImVec3 color_for_head = ImVec3(38.f / 255.f, 118.f / 255.f, 166.f / 255.f);
       static ImVec3 color_for_area = ImVec3(57.f / 255.f, 79.f / 255.f, 105.f / 255.f);
