@@ -1,12 +1,12 @@
 #pragma once
 
-#include "geometry/Vertex.hpp"
+#include "geometry/VertexStruct.hpp"
 
 namespace tr::gfx::geo {
 
    class GeometryData {
     public:
-      std::vector<Vertex> vertices;
+      std::vector<VertexData> vertices;
       std::vector<uint32_t> indices;
 
       [[nodiscard]] auto vertexDataSize() const {

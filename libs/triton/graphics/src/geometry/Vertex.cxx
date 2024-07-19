@@ -1,5 +1,7 @@
 #include "geometry/Vertex.hpp"
 
+#include "VertexStruct.hpp"
+
 namespace tr::gfx::geo {
    vk::VertexInputBindingDescription Vertex::vertexInputBindingDescription;
    std::vector<vk::VertexInputAttributeDescription> Vertex::vertexInputAttributeDescriptions;
@@ -24,32 +26,32 @@ namespace tr::gfx::geo {
             return {.location = location,
                     .binding = binding,
                     .format = vk::Format::eR32G32B32Sfloat,
-                    .offset = offsetof(Vertex, normal)};
+                    .offset = offsetof(VertexData, normal)};
          case VertexComponent::UV:
             return {.location = location,
                     .binding = binding,
                     .format = vk::Format::eR32G32Sfloat,
-                    .offset = offsetof(Vertex, uv)};
+                    .offset = offsetof(VertexData, uv)};
          case VertexComponent::Color:
             return {.location = location,
                     .binding = binding,
                     .format = vk::Format::eR32G32B32Sfloat,
-                    .offset = offsetof(Vertex, color)};
+                    .offset = offsetof(VertexData, color)};
          case VertexComponent::Tangent:
             return {.location = location,
                     .binding = binding,
                     .format = vk::Format::eR32G32B32Sfloat,
-                    .offset = offsetof(Vertex, tangent)};
+                    .offset = offsetof(VertexData, tangent)};
          case VertexComponent::Joint0:
             return {.location = location,
                     .binding = binding,
                     .format = vk::Format::eR8G8B8A8Uint,
-                    .offset = offsetof(Vertex, joint0)};
+                    .offset = offsetof(VertexData, joint0)};
          case VertexComponent::Weight0:
             return {.location = location,
                     .binding = binding,
                     .format = vk::Format::eR32G32B32A32Sfloat,
-                    .offset = offsetof(Vertex, weight0)};
+                    .offset = offsetof(VertexData, weight0)};
          default:
             return {};
       }

@@ -4,6 +4,7 @@
 #include "geometry/Vertex.hpp"
 #include "HeightField.hpp"
 #include "geometry/GeometryHandles.hpp"
+#include "geometry/VertexStruct.hpp"
 
 namespace tr::gfx::geo {
 
@@ -32,7 +33,7 @@ namespace tr::gfx::geo {
 
    auto GeometryFactory::createGeometryFromHeightfield(const ct::HeightField& heightField)
        -> TexturedGeometryHandle {
-      auto vertices = std::vector<Vertex>{};
+      auto vertices = std::vector<VertexData>{};
       auto indices = std::vector<uint32_t>{};
       auto width = heightField.getWidth();
 
@@ -40,7 +41,7 @@ namespace tr::gfx::geo {
 
       for (int x = 0; x < width; x++) {
          for (int y = 0; y < width; y++) {
-            Vertex vert{};
+            VertexData vert{};
             vert.pos = glm::vec4(static_cast<float>(x) * scaleFactor,
                                  static_cast<float>(heightField.valueAt(x, y) * scaleFactor),
                                  static_cast<float>(y) * scaleFactor,
