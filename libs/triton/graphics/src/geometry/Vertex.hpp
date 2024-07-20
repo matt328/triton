@@ -11,7 +11,7 @@ namespace tr::gfx::geo {
       Weight0
    };
 
-   struct Vertex {
+   struct VertexBuilder {
       static vk::VertexInputBindingDescription vertexInputBindingDescription;
       static std::vector<vk::VertexInputAttributeDescription> vertexInputAttributeDescriptions;
       static vk::PipelineVertexInputStateCreateInfo pipelineVertexInputStateCreateInfo;

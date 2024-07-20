@@ -3,6 +3,8 @@
 #include "cm/Handles.hpp"
 #include "cm/RenderData.hpp"
 
+#include "as/Model.hpp"
+
 #include "HeightField.hpp"
 
 #include "geometry/GeometryFactory.hpp"
@@ -71,14 +73,6 @@ namespace tr::gfx::tx {
       });
    }
 
-   cm::ModelHandle ResourceManager::loadModelInt(
-       [[maybe_unused]] const std::filesystem::path& filename) {
-      // TODO: Implement trm loader
-      // const auto texturedGeometryHandle = geometryFactory->loadGeometryFromGltf(filename);
-      // return uploadGeometry(texturedGeometryHandle);
-      return cm::ModelHandle{};
-   }
-
    std::future<cm::LoadedSkinnedModelData> ResourceManager::loadSkinnedModelAsync(
        const std::filesystem::path& modelPath,
        const std::filesystem::path& skeletonPath,
@@ -137,7 +131,14 @@ namespace tr::gfx::tx {
          meshList.emplace_back(geo::Mesh{});
          auto& mesh = meshList.back();
 
-         const auto geometryData = geometryFactory->getGeometryData(geometryHandle);
+         const auto geometryDataRef = geometryFactory->getGeometryData(geometryHandle);
+
+         if (!geometryDataRef.has_value()) {
+            Log.warn("Geometry Handle ({0}) does not have any actual geometry data",
+                     geometryHandle);
+            continue;
+         }
+         auto geometryData = geometryDataRef.value().get();
 
          // Prepare Vertex Buffer
          const auto vbSize = geometryData.vertexDataSize();
