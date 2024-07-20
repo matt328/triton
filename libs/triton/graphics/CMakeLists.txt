@@ -95,6 +95,7 @@ target_precompile_headers(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
    PUBLIC
+   asset-lib
    glfw # Get rid of glfw usage in graphics
    imgui::imgui # Look into externalizing this code
    futures::futures # Futures is part of Graphics' API it shares with Triton

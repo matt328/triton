@@ -3,7 +3,7 @@
 #include "Model.hpp"
 #include "tiny_gltf.h"
 
-namespace al::gltf::Helpers {
+namespace tr::as::gltf::Helpers {
 
    auto parseNodeTransform(const tinygltf::Node& node) {
       // If glft file has a matrix, we should prefer that
@@ -101,7 +101,7 @@ namespace al::gltf::Helpers {
                for (size_t i = 0; i < vertexCount; i++) {
                   auto vertexPosition = glm::make_vec3(&data[i * 3]);
                   auto tempVec = transform * glm::vec4(vertexPosition, 1.f);
-                  vertices[i].position = glm::vec3(tempVec);
+                  vertices[i].pos = glm::vec3(tempVec);
                }
             }
             if (attribute.first.compare("NORMAL") == 0) {
@@ -118,12 +118,12 @@ namespace al::gltf::Helpers {
                for (size_t i = 0; i < vertexCount; i++) {
                   const auto& jointData =
                       reinterpret_cast<const uint8_t*>(&buffer.data[dataOffset]);
-                  vertices[i].joints = glm::make_vec4(&jointData[i * 4]);
+                  vertices[i].joint0 = glm::make_vec4(&jointData[i * 4]);
                }
             }
             if (attribute.first.compare("WEIGHTS_0") == 0) {
                for (size_t i = 0; i < vertexCount; i++) {
-                  vertices[i].weights = glm::make_vec4(&data[i * 4]);
+                  vertices[i].weight0 = glm::make_vec4(&data[i * 4]);
                }
             }
          }
