@@ -4,21 +4,6 @@
 auto parseCommandLine(int argc, char* argv[]) {
    auto options = std::unordered_map<std::string, std::string>{};
 
-   NFD::Guard nfdGuard;
-
-   auto outPath = NFD::UniquePath{};
-
-   auto filterItems = std::array<nfdfilteritem_t, 1>{nfdfilteritem_t{"gltf Model", "gltf, glb"}};
-
-   // show the dialog
-   const auto result = NFD::OpenDialog(outPath, filterItems.data(), filterItems.size());
-
-   if (result == NFD_OKAY) {
-      Log.info("Success: {0}", outPath.get());
-   } else {
-      Log.error("Error: {0}", NFD::GetError());
-   }
-
    options["mode"] = argv[1];
 
    for (int i = 2; i < argc; ++i) {
@@ -66,7 +51,7 @@ int main(int argc, char* argv[]) {
                gltfFile.string(),
                skeletonFile.string());
 
-      auto converter = al::gltf::Converter{};
+      auto converter = tr::as::gltf::Converter{};
 
       try {
          auto tritonModel = converter.convert(gltfFile, skeletonFile);

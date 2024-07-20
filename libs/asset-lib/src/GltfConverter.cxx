@@ -8,7 +8,7 @@
 // #define TINYGLTF_NOEXCEPTION // optional. disable exception handling.
 #include "tiny_gltf.h"
 
-namespace al::gltf {
+namespace tr::as::gltf {
    Converter::~Converter() noexcept {
    }
 
@@ -43,6 +43,9 @@ namespace al::gltf {
       }
 
       // Load Inverse Bind Matrices
+      if (model.skins.empty()) {
+         throw std::runtime_error("Model file contains no skins.");
+      }
       const auto& skin = model.skins[0];
       auto accessorIndex = static_cast<size_t>(skin.inverseBindMatrices);
 

@@ -47,6 +47,7 @@ namespace ed::ui {
    }
 
    Manager::~Manager() {
+      Log.sinks().clear();
    }
 
    void Manager::render() {

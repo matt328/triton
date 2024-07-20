@@ -5,6 +5,11 @@
 #include "geometry/GeometryHandles.hpp"
 #include "HeightField.hpp"
 
+namespace tr::as {
+   struct Model;
+   class ImageData;
+}
+
 namespace tr::ct {
    class HeightField;
 }
@@ -19,6 +24,8 @@ namespace tr::gfx::geo {
       int number;
       std::string name;
    };
+
+   using GeometryDataRef = std::optional<std::reference_wrapper<GeometryData>>;
 
    class GeometryFactory {
     public:
@@ -42,17 +49,18 @@ namespace tr::gfx::geo {
 
       void unload(const TexturedGeometryHandle& handle);
 
-      [[nodiscard]] auto getGeometryData(const GeometryHandle& handle) -> GeometryData&;
+      [[nodiscard]] auto getGeometryData(const GeometryHandle& handle) -> GeometryDataRef;
 
-      [[nodiscard]] auto getImageData(const ImageHandle& handle) -> ImageData&;
+      [[nodiscard]] auto getImageData(const ImageHandle& handle) -> as::ImageData&;
 
     private:
       cm::MapKey geometryKey{};
       cm::MapKey imageKey{};
 
       std::unordered_map<GeometryHandle, GeometryData> geometryDataMap;
-      std::unordered_map<ImageHandle, ImageData> imageDataMap;
+      std::unordered_map<ImageHandle, as::ImageData> imageDataMap;
 
       auto generateNormal(int x, int y, const ct::HeightField& heightField) -> glm::vec3;
+      auto loadTrmFile(const std::string& modelPath) -> std::optional<as::Model>;
    };
 }

@@ -1,17 +1,20 @@
 #include "GeometryFactory.hpp"
 
+#include "as/Vertex.hpp"
+#include "as/Model.hpp"
+
 #include "GeometryData.hpp"
-#include "geometry/Vertex.hpp"
 #include "HeightField.hpp"
 #include "geometry/GeometryHandles.hpp"
-#include "geometry/VertexStruct.hpp"
+#include <cereal/details/helpers.hpp>
+#include <cereal/archives/binary.hpp>
 
 namespace tr::gfx::geo {
 
    GeometryFactory::GeometryFactory() {
       const auto imageHandle = 0;
       const auto data = std::vector<unsigned char>(4, 255);
-      imageDataMap.emplace(imageHandle, ImageData{data, 1, 1, 4});
+      imageDataMap.emplace(imageHandle, as::ImageData{data, 1, 1, 4});
    }
 
    GeometryFactory::~GeometryFactory() {
@@ -25,15 +28,50 @@ namespace tr::gfx::geo {
    }
 
    auto GeometryFactory::loadTrm(const std::filesystem::path& modelPath) -> TexturedGeometryHandle {
-      // TODO: Load trm file.
       Log.debug("Loading TRM File: {0}", modelPath.string());
-      std::this_thread::sleep_for(std::chrono::seconds(3));
+      auto tritonModel = loadTrmFile(modelPath.string());
+
+      if (tritonModel.has_value()) {
+         const auto imageHandle = imageKey.getKey();
+         imageDataMap.emplace(imageHandle, tritonModel.value().imageData);
+
+         const auto geometryHandle = geometryKey.getKey();
+         geometryDataMap.emplace(
+             geometryHandle,
+             GeometryData{tritonModel.value().vertices, tritonModel.value().indices});
+         return TexturedGeometryHandle{{geometryHandle, imageHandle}};
+      }
+
+      Log.warn("Returning empty TexturedGeometryHandle after loading file {0}", modelPath.string());
       return TexturedGeometryHandle{};
+   }
+
+   auto GeometryFactory::loadTrmFile(const std::string& modelPath) -> std::optional<as::Model> {
+      try {
+         ZoneNamedN(z, "Loading Model from Disk", true);
+         auto is = std::ifstream(modelPath, std::ios::binary);
+         if (!is) {
+            throw std::runtime_error("Failed to open file: " + modelPath);
+         }
+
+         std::optional<as::Model> tritonModel;
+
+         cereal::BinaryInputArchive input(is);
+
+         auto tempModel = as::Model{};
+
+         input(tempModel);
+         tritonModel = tempModel;
+         return tritonModel;
+      } catch (const std::exception& ex) {
+         Log.error("Error loading model: {0}", ex.what());
+         return std::nullopt;
+      }
    }
 
    auto GeometryFactory::createGeometryFromHeightfield(const ct::HeightField& heightField)
        -> TexturedGeometryHandle {
-      auto vertices = std::vector<VertexData>{};
+      auto vertices = std::vector<as::Vertex>{};
       auto indices = std::vector<uint32_t>{};
       auto width = heightField.getWidth();
 
@@ -41,7 +79,7 @@ namespace tr::gfx::geo {
 
       for (int x = 0; x < width; x++) {
          for (int y = 0; y < width; y++) {
-            VertexData vert{};
+            as::Vertex vert{};
             vert.pos = glm::vec4(static_cast<float>(x) * scaleFactor,
                                  static_cast<float>(heightField.valueAt(x, y) * scaleFactor),
                                  static_cast<float>(y) * scaleFactor,
@@ -85,7 +123,7 @@ namespace tr::gfx::geo {
 
       const auto imageHandle = imageKey.getKey();
       const auto data = std::vector<unsigned char>(4, 255);
-      imageDataMap.emplace(imageHandle, ImageData{data, 1, 1, 4});
+      imageDataMap.emplace(imageHandle, as::ImageData{data, 1, 1, 4});
 
       const auto geometryHandle = geometryKey.getKey();
       geometryDataMap.emplace(geometryHandle, GeometryData{vertices, indices});
@@ -129,11 +167,16 @@ namespace tr::gfx::geo {
    }
 
    [[nodiscard]] auto GeometryFactory::getGeometryData(const GeometryHandle& handle)
-       -> GeometryData& {
-      return geometryDataMap.at(handle);
+       -> GeometryDataRef {
+      auto it = geometryDataMap.find(handle);
+      if (it != geometryDataMap.end()) {
+         return {geometryDataMap.at(handle)};
+      } else {
+         return std::nullopt;
+      }
    }
 
-   [[nodiscard]] auto GeometryFactory::getImageData(const ImageHandle& handle) -> ImageData& {
+   [[nodiscard]] auto GeometryFactory::getImageData(const ImageHandle& handle) -> as::ImageData& {
       return imageDataMap.at(handle);
    }
 

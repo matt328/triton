@@ -23,12 +23,12 @@ namespace tr::gfx {
                              geo::VertexComponent::UV,
                              geo::VertexComponent::Normal};
       vertexAttributeDescriptions =
-          geo::Vertex::inputAttributeDescriptions(0, std::span(vec.begin(), vec.end()));
+          geo::VertexBuilder::inputAttributeDescriptions(0, std::span(vec.begin(), vec.end()));
    }
 
    void PipelineBuilder::setVertexAttributeDescriptions(
        std::span<geo::VertexComponent> components) {
-      vertexAttributeDescriptions = geo::Vertex::inputAttributeDescriptions(0, components);
+      vertexAttributeDescriptions = geo::VertexBuilder::inputAttributeDescriptions(0, components);
    }
 
    auto PipelineBuilder::buildPipelineLayout(const std::span<vk::DescriptorSetLayout>& layouts,
@@ -63,7 +63,7 @@ namespace tr::gfx {
                                                 .attachmentCount = 1,
                                                 .pAttachments = &colorBlendAttachment};
 
-      const auto bindingDescription = geo::Vertex::inputBindingDescription(0);
+      const auto bindingDescription = geo::VertexBuilder::inputBindingDescription(0);
 
       const auto vertexInputStateCreateInfo = vk::PipelineVertexInputStateCreateInfo{
           .vertexBindingDescriptionCount = 1,
