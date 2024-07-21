@@ -441,7 +441,6 @@ namespace tr::gfx {
             cmd.setScissorWithCount(mainScissor);
             {
                for (const auto& meshData : staticMeshDataList) {
-                  Log.debug("Rendering Static Mesh");
                   const auto& mesh = resourceManager->getMesh(meshData.handle);
 
                   cmd.bindVertexBuffers(0, mesh.vertexBuffer->getBuffer(), {0});
