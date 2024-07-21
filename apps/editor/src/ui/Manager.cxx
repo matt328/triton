@@ -66,8 +66,6 @@ namespace ed::ui {
       TracyMessageL("After renderMenuBar");
       entityEditor.render(facade, dataFacade);
 
-      renderDebugWindow();
-
       appLog->font = sauce;
       appLog->Draw("Log");
 
@@ -173,7 +171,7 @@ namespace ed::ui {
       auto showPopup = false;
       auto showAnimation = false;
       auto loadTerrain = false;
-      static auto show = true;
+      static auto show = false;
 
       if (ImGui::BeginMainMenuBar()) {
          if (ImGui::BeginMenu("File")) {
@@ -259,8 +257,11 @@ namespace ed::ui {
                this->fullscreen = !this->fullscreen;
                toggleFullscreenFn();
             }
-            if (ImGui::MenuItem("Demo Window", nullptr)) {
+            if (ImGui::MenuItem("Demo Window", nullptr, show)) {
                show = !show;
+            }
+            if (ImGui::MenuItem("Wireframe", nullptr, enableWireframe)) {
+               enableWireframe = !enableWireframe;
             }
             ImGui::EndMenu();
          }
@@ -294,7 +295,9 @@ namespace ed::ui {
          }
          ImGui::EndPopup();
       }
-      ImGui::ShowDemoWindow(&show);
+      if (show) {
+         ImGui::ShowDemoWindow(&show);
+      }
 
       if (loadTerrain) {
          ZoneNamedN(n, "Create Terrain", true);
@@ -312,14 +315,6 @@ namespace ed::ui {
                      matrix[2][col],
                      matrix[3][col]);
       }
-   }
-
-   void Manager::renderDebugWindow() {
-      ImGui::Begin("Debug Window");
-
-      ImGui::Checkbox("Wireframe", &enableWireframe);
-
-      ImGui::End();
    }
 
    auto Manager::getSavePath() -> std::optional<std::filesystem::path> {
