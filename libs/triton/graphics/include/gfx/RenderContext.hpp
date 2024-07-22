@@ -58,12 +58,13 @@ namespace tr::gfx {
       // Resource Creation
       auto createStaticModel(const std::filesystem::path& modelPath)
           -> futures::cfuture<cm::MeshHandles>;
+
       auto createTerrain(const uint32_t size) -> futures::cfuture<cm::ModelHandle>;
 
-      auto loadSkinnedModelAsync(const std::filesystem::path& modelPath,
-                                 const std::filesystem::path& skeletonPath,
-                                 const std::filesystem::path& animationPath)
-          -> std::future<cm::LoadedSkinnedModelData>;
+      auto createAnimatedModel(const std::filesystem::path& modelPath,
+                               const std::filesystem::path& skeletonPath,
+                               const std::filesystem::path& animationPath)
+          -> futures::cfuture<cm::LoadedSkinnedModelData>;
 
     private:
       class Impl;

@@ -51,57 +51,64 @@ namespace tr::gfx::tx {
 
    auto ResourceManager::createTerrain(const uint32_t size) -> futures::cfuture<cm::ModelHandle> {
       ZoneNamedN(n, "ResourceManager::createTerrain", true);
-      return futures::async([this, size]() {
+
+      const auto createFn = [this, size]() {
          ZoneNamedN(z, "Creating Terrain", true);
          const auto heightfield = ct::HeightField{static_cast<int>(size)};
+
+         // change this to return
          const auto dataHandle = geometryFactory->createGeometryFromHeightfield(heightfield);
-         const auto modelHandle = uploadGeometry(dataHandle);
+
+         const auto pr = dataHandle.begin();
+
+         const auto modelHandle = uploadGeometry(pr->first, pr->second);
          geometryFactory->unload(dataHandle);
          return modelHandle;
-      });
+      };
+
+      return futures::async(createFn);
    }
 
-   futures::cfuture<cm::ModelHandle> ResourceManager::createModel(
-       const std::filesystem::path& filename) {
+   auto ResourceManager::createModel(const std::filesystem::path& filename)
+       -> futures::cfuture<std::optional<cm::ModelHandle>> {
       ZoneNamedN(n, "ResourceManager::loadModel", true);
-      return futures::async([this, filename]() {
+
+      const auto createFn = [this, filename]() -> std::optional<cm::ModelHandle> {
          ZoneNamedN(z, "Loading Model", true);
-         const auto dataHandle = geometryFactory->loadTrm(filename);
-         const auto modelHandle = uploadGeometry(dataHandle);
-         geometryFactory->unload(dataHandle);
+
+         const auto modelData = geometryFactory->loadTrm(filename);
+
+         if (!modelData) {
+            return std::nullopt;
+         }
+
+         const auto& md = *modelData;
+
+         const auto modelHandle = uploadGeometry(md.getGeometryHandle(), md.getImageHandle());
+
+         // geometryFactory->unload(tgh);
+
          return modelHandle;
-      });
-   }
+      };
 
-   std::future<cm::LoadedSkinnedModelData> ResourceManager::loadSkinnedModelAsync(
-       const std::filesystem::path& modelPath,
-       const std::filesystem::path& skeletonPath,
-       const std::filesystem::path& animationPath) {
-      return taskQueue->enqueue([this, modelPath, skeletonPath, animationPath]() {
-         return loadSkinnedModelInt(modelPath, skeletonPath, animationPath);
-      });
-   }
-
-   cm::LoadedSkinnedModelData ResourceManager::loadSkinnedModelInt(
-       const std::filesystem::path& modelPath,
-       const std::filesystem::path& skeletonPath,
-       const std::filesystem::path& animationPath) {
-      const auto sgd = geometryFactory->loadSkinnedModel(modelPath, skeletonPath, animationPath);
-      auto lsmd = uploadSkinnedGeometry(sgd);
-      lsmd.jointMap = sgd.jointMap;
-      lsmd.inverseBindMatrices = sgd.inverseBindMatrices;
-
-      return lsmd;
+      return futures::async(createFn);
    }
 
    /// Uploads the Geometry and Texture data and creates space in a buffer for the skeleton's
    /// joint matrix data
    auto ResourceManager::uploadSkinnedGeometry(const geo::SkinnedGeometryData& sgd)
-       -> cm::LoadedSkinnedModelData {
-      const auto tgh = geo::TexturedGeometryHandle{{sgd.geometryHandle, sgd.imageHandle}};
-      const auto modelHandle = uploadGeometry(tgh);
-      const auto meshHandle = modelHandle.begin()->first;
-      const auto textureHandle = modelHandle.begin()->second;
+       -> std::optional<cm::LoadedSkinnedModelData> {
+      const auto modelHandle = uploadGeometry(sgd.geometryHandle, sgd.imageHandle);
+
+      if (!modelHandle) {
+         Log.warn("Geometry was not uploaded");
+         return std::nullopt;
+      }
+
+      const auto handle = *modelHandle;
+
+      const auto meshHandle = handle.begin()->first;
+      const auto textureHandle = handle.begin()->second;
       const auto smh = cm::LoadedSkinnedModelData{.meshHandle = meshHandle,
                                                   .textureHandle = textureHandle,
                                                   .skeletonHandle = sgd.skeletonHandle,
@@ -110,88 +117,65 @@ namespace tr::gfx::tx {
       return smh;
    }
 
-   /*
-      TODO: Consider making ResourceManager's data either aggregate types that the
-      ResourceManager is responsible for knowing how to construct, or make them classes that know
-      how to construct themselves. Aggregate types moves a lot of logic into the ResourceManager,
-      but classes need alot of dependencies passed into their constructors.  Probably factories
-      that produce aggregate types might be a good compromise, that way the factories could
-      encapsulate the logic instead of ResourceManager. Factories can use RVO to return aggregate
-      types by value and avoid a copy.
-   */
-   auto ResourceManager::uploadGeometry(const geo::TexturedGeometryHandle& handles)
-       -> cm::ModelHandle {
-      auto modelHandles = cm::ModelHandle{};
+   auto ResourceManager::uploadGeometry(const geo::GeometryHandle& geometryHandle,
+                                        const geo::ImageHandle& imageHandle)
+       -> std::optional<cm::ModelHandle> {
       auto& allocator = graphicsDevice.getAllocator();
       auto& context = graphicsDevice.getAsyncTransferContext();
 
-      for (const auto& [geometryHandle, imageHandle] : handles) {
-         const auto meshHandle = meshList.size();
+      const auto geometryData = geometryFactory->getGeometryData(geometryHandle);
 
-         meshList.emplace_back(geo::Mesh{});
-         auto& mesh = meshList.back();
+      // Prepare Vertex Buffer
+      const auto vbSize = geometryData.vertexDataSize();
+      const auto vbStagingBuffer = allocator.createStagingBuffer(vbSize, "Vertex Staging Buffer");
 
-         const auto geometryDataRef = geometryFactory->getGeometryData(geometryHandle);
+      void* vbData = allocator.mapMemory(*vbStagingBuffer);
+      memcpy(vbData, geometryData.vertices.data(), static_cast<size_t>(vbSize));
+      allocator.unmapMemory(*vbStagingBuffer);
 
-         if (!geometryDataRef.has_value()) {
-            Log.warn("Geometry Handle ({0}) does not have any actual geometry data",
-                     geometryHandle);
-            continue;
-         }
-         auto geometryData = geometryDataRef.value().get();
+      const auto ibSize = geometryData.indexDataSize();
 
-         // Prepare Vertex Buffer
-         const auto vbSize = geometryData.vertexDataSize();
-         const auto vbStagingBuffer =
-             allocator.createStagingBuffer(vbSize, "Vertex Staging Buffer");
+      auto vertexBuffer = allocator.createGpuVertexBuffer(vbSize, "GPU Vertex");
+      auto indexBuffer = allocator.createGpuIndexBuffer(ibSize, "GPU Index");
+      const auto indicesCount = geometryData.indices.size();
 
-         void* vbData = allocator.mapMemory(*vbStagingBuffer);
-         memcpy(vbData, geometryData.vertices.data(), static_cast<size_t>(vbSize));
-         allocator.unmapMemory(*vbStagingBuffer);
+      // Prepare Index Buffer
+      const auto ibStagingBuffer = allocator.createStagingBuffer(ibSize, "Index Staging Buffer");
 
-         mesh.vertexBuffer = allocator.createGpuVertexBuffer(vbSize, "GPU Vertex");
+      auto data = allocator.mapMemory(*ibStagingBuffer);
+      memcpy(data, geometryData.indices.data(), static_cast<size_t>(ibSize));
+      allocator.unmapMemory(*ibStagingBuffer);
 
-         // Prepare Index Buffer
-         const auto ibSize = geometryData.indexDataSize();
-         const auto ibStagingBuffer = allocator.createStagingBuffer(ibSize, "Index Staging Buffer");
+      // Upload Buffers
+      context.submit([&](const vk::raii::CommandBuffer& cmd) {
+         const auto vbCopy = vk::BufferCopy{.srcOffset = 0, .dstOffset = 0, .size = vbSize};
+         cmd.copyBuffer(vbStagingBuffer->getBuffer(), vertexBuffer->getBuffer(), vbCopy);
+         const auto copy = vk::BufferCopy{.srcOffset = 0, .dstOffset = 0, .size = ibSize};
+         cmd.copyBuffer(ibStagingBuffer->getBuffer(), indexBuffer->getBuffer(), copy);
+      });
 
-         auto data = allocator.mapMemory(*ibStagingBuffer);
-         memcpy(data, geometryData.indices.data(), static_cast<size_t>(ibSize));
-         allocator.unmapMemory(*ibStagingBuffer);
+      const auto image = geometryFactory->getImageData(imageHandle);
+      const auto textureHandle = textureList.size();
+      textureList.emplace_back(std::make_unique<Textures::Texture>((void*)image.data.data(),
+                                                                   image.width,
+                                                                   image.height,
+                                                                   image.component,
+                                                                   allocator,
+                                                                   graphicsDevice.getVulkanDevice(),
+                                                                   context));
 
-         mesh.indexBuffer = allocator.createGpuIndexBuffer(ibSize, "GPU Index");
-         mesh.indicesCount = geometryData.indices.size();
-
-         // Upload Buffers
-         context.submit([&](const vk::raii::CommandBuffer& cmd) {
-            const auto vbCopy = vk::BufferCopy{.srcOffset = 0, .dstOffset = 0, .size = vbSize};
-            cmd.copyBuffer(vbStagingBuffer->getBuffer(), mesh.vertexBuffer->getBuffer(), vbCopy);
-            const auto copy = vk::BufferCopy{.srcOffset = 0, .dstOffset = 0, .size = ibSize};
-            cmd.copyBuffer(ibStagingBuffer->getBuffer(), mesh.indexBuffer->getBuffer(), copy);
-         });
-
-         const auto image = geometryFactory->getImageData(imageHandle);
-         const auto textureHandle = textureList.size();
-         textureList.emplace_back(
-             std::make_unique<Textures::Texture>((void*)image.data.data(),
-                                                 image.width,
-                                                 image.height,
-                                                 image.component,
-                                                 allocator,
-                                                 graphicsDevice.getVulkanDevice(),
-                                                 context));
-
-         { // Only need to guard access to the textureInfoList
-            ZoneNamedN(c, "Update TextureInfoList", true);
-            std::lock_guard<LockableBase(std::mutex)> lock(textureListMutex);
-            LockMark(textureListMutex);
-            LockableName(textureListMutex, "Mutate", 6);
-            textureInfoList.emplace_back(textureList[textureHandle]->getImageInfo());
-         }
-         modelHandles.insert({meshHandle, textureHandle});
+      { // Only need to guard access to the textureInfoList
+         ZoneNamedN(c, "Update TextureInfoList", true);
+         std::lock_guard<LockableBase(std::mutex)> lock(textureListMutex);
+         LockMark(textureListMutex);
+         LockableName(textureListMutex, "Mutate", 6);
+         textureInfoList.emplace_back(textureList[textureHandle]->getImageInfo());
       }
 
-      return modelHandles;
+      const auto meshHandle = meshList.size();
+      meshList.emplace_back(std::move(vertexBuffer), std::move(indexBuffer), indicesCount);
+
+      return cm::ModelHandle{meshHandle, textureHandle};
    }
 
    void ResourceManager::accessTextures(

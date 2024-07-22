@@ -118,6 +118,11 @@ namespace ed::data {
 
       void createStaticModel(const std::string_view& entityName, const std::string_view& modelName);
 
+      void createAnimatedModel(const std::string_view& entityName,
+                               const std::string_view& modelName,
+                               const std::string_view& skeletonName,
+                               const std::string_view& animationName);
+
       void addAnimationToEntity(const std::string_view& entityName,
                                 const std::string_view& animationName);
 

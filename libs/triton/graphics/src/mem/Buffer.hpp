@@ -8,7 +8,7 @@ namespace tr::gfx::mem {
              const vk::DeviceSize range,
              const vma::Allocation newAllocation,
              const vk::Device& device,
-             const vma::AllocationInfo allocationInfo);
+             const vma::AllocationInfo allocationInfo) noexcept;
 
       ~Buffer();
 

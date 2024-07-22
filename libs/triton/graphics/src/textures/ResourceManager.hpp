@@ -66,18 +66,8 @@ namespace tr::gfx::tx {
 
       auto createTerrain(const uint32_t size) -> futures::cfuture<cm::ModelHandle>;
 
-      futures::cfuture<cm::ModelHandle> createModel(const std::filesystem::path& filename);
-
-      cm::ModelHandle loadModelInt(const std::filesystem::path& filename);
-
-      std::future<cm::LoadedSkinnedModelData> loadSkinnedModelAsync(
-          const std::filesystem::path& modelPath,
-          const std::filesystem::path& skeletonPath,
-          const std::filesystem::path& animationPath);
-
-      cm::LoadedSkinnedModelData loadSkinnedModelInt(const std::filesystem::path& modelPath,
-                                                     const std::filesystem::path& skeletonPath,
-                                                     const std::filesystem::path& animationPath);
+      auto createModel(const std::filesystem::path& filename)
+          -> futures::cfuture<std::optional<cm::ModelHandle>>;
 
       auto createStaticMesh(const geo::GeometryData& geometry) -> cm::MeshHandle;
 
@@ -96,7 +86,7 @@ namespace tr::gfx::tx {
 
       std::unique_ptr<geo::GeometryFactory> geometryFactory;
       std::unique_ptr<util::TaskQueue> taskQueue;
-      std::vector<geo::Mesh> meshList;
+      std::vector<geo::ImmutableMesh> meshList;
 
       mutable TracyLockable(std::mutex, textureListMutex);
       std::vector<vk::DescriptorImageInfo> textureInfoList;
@@ -105,7 +95,10 @@ namespace tr::gfx::tx {
       mutable TracyLockable(std::mutex, renderDataMutex);
       cm::RenderData renderData;
 
-      auto uploadGeometry(const geo::TexturedGeometryHandle& handles) -> cm::ModelHandle;
-      auto uploadSkinnedGeometry(const geo::SkinnedGeometryData& sgd) -> cm::LoadedSkinnedModelData;
+      auto uploadGeometry(const geo::GeometryHandle& geometryHandle,
+                          const geo::ImageHandle& imageHandle) -> std::optional<cm::ModelHandle>;
+
+      auto uploadSkinnedGeometry(const geo::SkinnedGeometryData& sgd)
+          -> std::optional<cm::LoadedSkinnedModelData>;
    };
 }

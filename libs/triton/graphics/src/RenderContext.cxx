@@ -193,9 +193,9 @@ namespace tr::gfx {
          return resourceManager->createTerrain(size);
       }
 
-      auto loadSkinnedModelAsync(const std::filesystem::path& modelPath,
-                                 const std::filesystem::path& skeletonPath,
-                                 const std::filesystem::path& animationPath) {
+      auto createAnimatedModel(const std::filesystem::path& modelPath,
+                               const std::filesystem::path& skeletonPath,
+                               const std::filesystem::path& animationPath) {
          return resourceManager->loadSkinnedModelAsync(modelPath, skeletonPath, animationPath);
       }
 
@@ -647,10 +647,10 @@ namespace tr::gfx {
       return impl->createStaticModel(modelPath);
    }
 
-   auto RenderContext::loadSkinnedModelAsync(const std::filesystem::path& modelPath,
-                                             const std::filesystem::path& skeletonPath,
-                                             const std::filesystem::path& animationPath)
-       -> std::future<cm::LoadedSkinnedModelData> {
-      return impl->loadSkinnedModelAsync(modelPath, skeletonPath, animationPath);
+   auto RenderContext::createAnimatedModel(const std::filesystem::path& modelPath,
+                                           const std::filesystem::path& skeletonPath,
+                                           const std::filesystem::path& animationPath)
+       -> futures::cfuture<cm::LoadedSkinnedModelData> {
+      return impl->createAnimatedModel(modelPath, skeletonPath, animationPath);
    }
 }

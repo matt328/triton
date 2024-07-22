@@ -68,7 +68,9 @@ namespace tr::gp {
       // Gameworld State Methods
       auto createTerrain(const cm::MeshHandles handles) -> cm::EntityType;
       auto createStaticModel(cm::MeshHandles meshes) -> cm::EntityType;
-      auto createAnimatedModel(const cm::LoadedSkinnedModelData model) -> cm::EntityType;
+      auto createAnimatedModel(cm::MeshHandles meshes,
+                               const std::filesystem::path& skeletonPath,
+                               const std::filesystem::path& animationPath) -> cm::EntityType;
       auto createCamera(uint32_t width,
                         uint32_t height,
                         float fov,

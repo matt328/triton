@@ -25,6 +25,13 @@ namespace tr::gfx::geo {
       std::string name;
    };
 
+   class GeometryDataNotFoundException : public std::logic_error {
+    public:
+      explicit GeometryDataNotFoundException(const std::string& message)
+          : std::logic_error(message) {
+      }
+   };
+
    using GeometryDataRef = std::optional<std::reference_wrapper<GeometryData>>;
 
    class GeometryFactory {
@@ -41,15 +48,13 @@ namespace tr::gfx::geo {
       auto createGeometryFromHeightfield(const ct::HeightField& heightfield)
           -> TexturedGeometryHandle;
 
-      auto loadTrm(const std::filesystem::path& modelPath) -> TexturedGeometryHandle;
-
-      auto loadSkinnedModel(const std::filesystem::path& modelPath,
-                            const std::filesystem::path& skeletonPath,
-                            const std::filesystem::path& animationPath) -> SkinnedGeometryData;
+      auto loadTrm(const std::filesystem::path& modelPath) -> std::optional<TritonModelData>;
 
       void unload(const TexturedGeometryHandle& handle);
 
-      [[nodiscard]] auto getGeometryData(const GeometryHandle& handle) -> GeometryDataRef;
+      /// Gets the GeometryData from the internal cache
+      /// @throws GeometryDataNotFoundException if no data in the cache matches the given handle.
+      [[nodiscard]] auto getGeometryData(const GeometryHandle& handle) -> GeometryData;
 
       [[nodiscard]] auto getImageData(const ImageHandle& handle) -> as::ImageData&;
 

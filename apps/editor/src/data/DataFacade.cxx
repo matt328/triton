@@ -72,6 +72,39 @@ namespace ed::data {
       futureMonitor->monitorFuture(gameplayFacade.createStaticModelEntity(modelFilename), fn);
    }
 
+   void DataFacade::createAnimatedModel(const std::string_view& entityName,
+                                        const std::string_view& modelName,
+                                        const std::string_view& skeletonName,
+                                        const std::string_view& animationName) {
+      auto entityData = EntityData{.name = entityName.data(),
+                                   .position = glm::vec3{0.f},
+                                   .rotation = glm::identity<glm::quat>(),
+                                   .modelName = modelName.data(),
+                                   .skeleton = skeletonName.data()};
+      entityData.animations = std::vector<std::string>{animationName.data()};
+      dataStore.scene.insert({entityName.data(), entityData});
+      unsaved = true;
+
+      const auto modelFilename = dataStore.models.at(modelName.data()).filePath;
+      const auto skeletonFilename = dataStore.skeletons.at(skeletonName.data()).filePath;
+      const auto animationFilename = dataStore.animations.at(animationName.data()).filePath;
+
+      std::function<void(tr::cm::EntityType)> fn = [this, entityName](tr::cm::EntityType entity) {
+         const auto name = entityName.data();
+         entityNameMap.insert({name, entity});
+         engineBusy = false;
+         Log.info("Finished creating entity: id: {0}, name: {1}",
+                  static_cast<long long>(entity),
+                  name);
+      };
+      engineBusy = true;
+
+      futureMonitor->monitorFuture(gameplayFacade.createAnimatedModelEntity(modelFilename,
+                                                                            skeletonFilename,
+                                                                            animationFilename),
+                                   fn);
+   }
+
    void DataFacade::addAnimationToEntity([[maybe_unused]] const std::string_view& entityName,
                                          [[maybe_unused]] const std::string_view& animationName) {
       auto& entityData = dataStore.scene.at(entityName.data());

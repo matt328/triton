@@ -34,6 +34,7 @@ namespace ed::ui::components {
          static auto rotation = glm::identity<glm::quat>();
          static auto previousRotation = rotation;
          static auto showModelEntityModal = bool{};
+         static auto showAnimatedModelModal = bool{};
 
          if (ImGui::Begin("Entity Editor", nullptr, ImGuiWindowFlags_MenuBar | unsaved)) {
 
@@ -42,8 +43,8 @@ namespace ed::ui::components {
                   if (ImGui::MenuItem("Static Model...")) {
                      showModelEntityModal = true;
                   }
-                  if (ImGui::MenuItem("Entity #2...")) {
-                     // dataFacade.createEntity("Test Entity #2");
+                  if (ImGui::MenuItem("Animated Model...")) {
+                     showAnimatedModelModal = true;
                   }
                   ImGui::EndMenu();
                }
@@ -81,39 +82,6 @@ namespace ed::ui::components {
 
                if (selectedEntity.has_value()) {
                   ImGui::Text("%s", selectedEntity.value().c_str());
-
-                  if (ImGui::Button("Add..")) {
-                     ImGui::OpenPopup("component_popup");
-                  }
-
-                  const std::array<std::string, 4> names = {"Model",
-                                                            "Animated Model",
-                                                            "Script",
-                                                            "Behavior"};
-
-                  if (ImGui::BeginPopup("component_popup")) {
-                     ImGui::SeparatorText("Components");
-                     for (const auto& name : names) {
-                        if (ImGui::Selectable(name.c_str())) {
-                           Log.debug("Adding Component: {0}", name);
-                           if (name == "Model") {
-                              showModelEntityModal = true;
-                           }
-                           // TODO: Create Modals to Create different components.
-                           /* Once a Model component is added to an entity, should trigger the model
-                              to be loaded by the engine.
-                              Need to think about how to map entities in the editor's data store to
-                              cm::Entity.  This information will be temporary, and won't be saved
-                              with the project since the entity ids aren't predictable.
-                              The entityId to entity name map should be created on demand, and
-                              updated as the dataFacade sends things to the gameplayFacade.
-                              Maybe dataFacade should own the mapping.
-                           */
-                        }
-                     }
-                     ImGui::EndPopup();
-                  }
-
                } else {
                   ImGui::Text("No Entity Selected");
                }
@@ -138,6 +106,96 @@ namespace ed::ui::components {
             showModelEntityModal = false;
          }
 
+         if (showAnimatedModelModal) {
+            ImGui::OpenPopup("Animated Model Entity");
+            showAnimatedModelModal = false;
+         }
+
+         renderStaticEntityDialog(dataFacade);
+         renderAnimatedEntityDialog(dataFacade);
+      }
+
+      void renderAnimatedEntityDialog(data::DataFacade& dataFacade) {
+         if (ImGui::BeginPopupModal("Animated Model Entity")) {
+
+            auto& models = dataFacade.getModels();
+            auto modelNames = std::vector<const char*>{};
+            modelNames.reserve(models.size());
+            std::transform(models.begin(),
+                           models.end(),
+                           std::back_inserter(modelNames),
+                           [](const auto& pair) { return pair.first.c_str(); });
+
+            auto& skeletons = dataFacade.getSkeletons();
+            auto skeletonNames = std::vector<const char*>{};
+            skeletonNames.reserve(skeletons.size());
+            std::transform(skeletons.begin(),
+                           skeletons.end(),
+                           std::back_inserter(skeletonNames),
+                           [](const auto& pair) { return pair.first.c_str(); });
+
+            auto& animations = dataFacade.getAnimations();
+            auto animationNames = std::vector<const char*>{};
+            animationNames.reserve(animations.size());
+            std::transform(animations.begin(),
+                           animations.end(),
+                           std::back_inserter(animationNames),
+                           [](const auto& pair) { return pair.first.c_str(); });
+
+            static int selectedModel = 0;
+            static int selectedSkeleton = 0;
+            static int selectedAnimation = 0;
+            static auto entityName = std::string{"Unnamed Entity"};
+
+            ImGui::InputText("Entity Name", &entityName);
+
+            ImGui::Combo("Model",
+                         &selectedModel,
+                         modelNames.data(),
+                         static_cast<int>(modelNames.size()));
+
+            ImGui::Combo("Skeleton",
+                         &selectedSkeleton,
+                         skeletonNames.data(),
+                         static_cast<int>(skeletonNames.size()));
+
+            ImGui::Combo("Animation",
+                         &selectedAnimation,
+                         animationNames.data(),
+                         static_cast<int>(animationNames.size()));
+
+            if (ImGui::Button("Ok", ImVec2(120, 0))) {
+               const auto& modelName = modelNames[selectedModel];
+               const auto& skeletonName = skeletonNames[selectedSkeleton];
+               const auto& animationName = animationNames[selectedAnimation];
+
+               Log.debug("Beginning creating entity, modelName: {0}, skeletonName: {1}, "
+                         "animationName: {2}",
+                         modelName,
+                         skeletonName,
+                         animationName);
+               try {
+                  dataFacade.createAnimatedModel(entityName,
+                                                 modelName,
+                                                 skeletonName,
+                                                 animationName);
+               } catch (const std::exception& e) {
+                  Log.error("Caught exception creating static model: {0}", e.what());
+               }
+               selectedModel = 0;
+               ImGui::CloseCurrentPopup();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+               selectedModel = 0;
+               ImGui::CloseCurrentPopup();
+            }
+
+            ImGui::EndPopup();
+         }
+      }
+
+      void renderStaticEntityDialog(data::DataFacade& dataFacade) {
          if (ImGui::BeginPopupModal("Static Model Entity")) {
 
             auto& models = dataFacade.getModels();
@@ -160,17 +218,6 @@ namespace ed::ui::components {
 
             if (ImGui::Button("Ok", ImVec2(120, 0))) {
                const auto& modelName = modelNames[selectedModel];
-               Log.debug("Selected Model: {0}", modelName);
-
-               /*
-                  Have the data facade own the future monitor, it can just set it's own state
-                  of 'busy' and the manager and ui can respond to that to show a progress spinner.
-                  Since the data facadw owns the future monitor, it can attach lambdas to run when
-                  futures finish to populate the map<entityName to entityId> and outside the facade
-                  should never know about entity ids as the facade will take in names and translate
-                  them
-
-               */
                Log.debug("Beginning creating entity");
                try {
                   dataFacade.createStaticModel(entityName, models.at(modelName).name);
