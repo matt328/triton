@@ -124,8 +124,12 @@ namespace tr::gp {
       return entitySystem->createStaticModel(meshes);
    }
 
-   auto GameplaySystem::createAnimatedModel(const cm::LoadedSkinnedModelData model)
+   auto GameplaySystem::createAnimatedModel(cm::MeshHandles meshes,
+                                            const std::filesystem::path& skeletonPath,
+                                            const std::filesystem::path& animationPath)
        -> cm::EntityType {
+      const auto skeletonHandle = animationFactory->loadSkeleton(skeletonPath);
+      const auto animationHandle = animationFactory->loadAnimation(animationPath);
       return entitySystem->createAnimatedModel(model);
    }
 

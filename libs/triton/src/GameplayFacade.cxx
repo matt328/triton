@@ -30,6 +30,21 @@ namespace tr::ctx {
          return renderer.createStaticModel(modelPath).then(createEntity);
       }
 
+      auto createAnimatedModelEntity(const std::filesystem::path& modelPath,
+                                     const std::filesystem::path& skeletonPath,
+                                     const std::filesystem::path& animationPath)
+          -> futures::cfuture<cm::EntityType> {
+         // I think here we should have the gameplay system load the skeleton and animation
+         // Probably won't need anything different other than loadTrm from the renderer.
+         // it can just return the meshhandles and the gameplay system will add in the skeleton and
+         // animation handles
+         const auto createEntity = [this](cm::MeshHandles handles) {
+            return gameplaySystem.createAnimatedModel(handles, skeletonPath, animationPath);
+         };
+
+         return renderer.createStaticModel(modelPath).then(createEntity);
+      }
+
       void loadModelResources([[maybe_unused]] const std::filesystem::path& modelPath,
                               [[maybe_unused]] const std::filesystem::path& skeletonPath,
                               [[maybe_unused]] const std::filesystem::path& animationPath,
@@ -108,6 +123,13 @@ namespace tr::ctx {
    auto GameplayFacade::createStaticModelEntity(const std::filesystem::path& modelPath)
        -> futures::cfuture<cm::EntityType> {
       return impl->createStaticModelEntity(modelPath);
+   }
+
+   auto GameplayFacade::createAnimatedModelEntity(const std::filesystem::path& modelPath,
+                                                  const std::filesystem::path& skeletonPath,
+                                                  const std::filesystem::path& animationPath)
+       -> futures::cfuture<cm::EntityType> {
+      return impl->createAnimatedModelEntity(modelPath, skeletonPath, animationPath);
    }
 
    auto GameplayFacade::createTerrain(const uint32_t size) -> futures::cfuture<cm::EntityType> {

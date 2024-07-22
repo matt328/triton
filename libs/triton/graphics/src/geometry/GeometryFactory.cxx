@@ -27,23 +27,33 @@ namespace tr::gfx::geo {
       }
    }
 
-   auto GeometryFactory::loadTrm(const std::filesystem::path& modelPath) -> TexturedGeometryHandle {
+   auto GeometryFactory::loadTrm(const std::filesystem::path& modelPath)
+       -> std::optional<TritonModelData> {
+
       Log.debug("Loading TRM File: {0}", modelPath.string());
+
       auto tritonModel = loadTrmFile(modelPath.string());
 
-      if (tritonModel.has_value()) {
-         const auto imageHandle = imageKey.getKey();
-         imageDataMap.emplace(imageHandle, tritonModel.value().imageData);
-
-         const auto geometryHandle = geometryKey.getKey();
-         geometryDataMap.emplace(
-             geometryHandle,
-             GeometryData{tritonModel.value().vertices, tritonModel.value().indices});
-         return TexturedGeometryHandle{{geometryHandle, imageHandle}};
+      if (!tritonModel) {
+         Log.warn("Returning empty TexturedGeometryHandle after loading file {0}",
+                  modelPath.string());
+         return std::nullopt;
       }
 
-      Log.warn("Returning empty TexturedGeometryHandle after loading file {0}", modelPath.string());
-      return TexturedGeometryHandle{};
+      const auto& model = *tritonModel;
+
+      const auto imageHandle = imageKey.getKey();
+      imageDataMap.emplace(imageHandle, model.imageData);
+
+      const auto geometryHandle = geometryKey.getKey();
+      geometryDataMap.emplace(geometryHandle, GeometryData{model.vertices, model.indices});
+
+      auto animationData = std::optional<AnimationData>{};
+      if (model.skinned()) {
+         animationData = AnimationData(model.jointRemaps, model.inverseBindPoses);
+      }
+
+      return TritonModelData{geometryHandle, imageHandle, animationData};
    }
 
    auto GeometryFactory::loadTrmFile(const std::string& modelPath) -> std::optional<as::Model> {
@@ -145,39 +155,25 @@ namespace tr::gfx::geo {
       return glm::normalize(glm::vec3(-dx, NormalY, dy));
    }
 
-   auto GeometryFactory::loadSkinnedModel(
-       [[maybe_unused]] const std::filesystem::path& modelPath,
-       [[maybe_unused]] const std::filesystem::path& skeletonPath,
-       [[maybe_unused]] const std::filesystem::path& animationPath) -> SkinnedGeometryData {
-      auto sgd = SkinnedGeometryData{};
-      // TODO: don't load gltf with engine, only trm
-      //  try {
-
-      //    const auto skeletonHandle = animationFactory.loadSkeleton(skeletonPath);
-      //    const auto animationHandle = animationFactory.loadAnimation(animationPath);
-
-      //    auto sgd = loadAnimatedGeometryFromGltf(modelPath, skeletonHandle);
-
-      //    sgd.animationHandle = animationHandle;
-      //    return sgd;
-      // } catch (const std::exception& ex) {
-      //    Log::error << "Error during loadGeometryFromGltf: " << ex.what() << std::endl;
-      // }
-      return sgd;
-   }
-
    [[nodiscard]] auto GeometryFactory::getGeometryData(const GeometryHandle& handle)
-       -> GeometryDataRef {
+       -> GeometryData {
       auto it = geometryDataMap.find(handle);
       if (it != geometryDataMap.end()) {
-         return {geometryDataMap.at(handle)};
+         return geometryDataMap.at(handle);
       } else {
-         return std::nullopt;
+         throw GeometryDataNotFoundException(
+             fmt::format("Geometry Data with handle {0} was not found", handle));
       }
    }
 
    [[nodiscard]] auto GeometryFactory::getImageData(const ImageHandle& handle) -> as::ImageData& {
-      return imageDataMap.at(handle);
+      auto it = imageDataMap.find(handle);
+      if (it != imageDataMap.end()) {
+         return imageDataMap.at(handle);
+      } else {
+         throw GeometryDataNotFoundException(
+             fmt::format("Image Data with handle {0} was not found", handle));
+      }
    }
 
 }
