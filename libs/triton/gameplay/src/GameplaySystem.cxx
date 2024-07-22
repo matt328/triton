@@ -1,5 +1,6 @@
 #include "gp/GameplaySystem.hpp"
 
+#include "cm/Handles.hpp"
 #include "cm/Inputs.hpp"
 
 #include "EntitySystem.hpp"
@@ -115,7 +116,7 @@ namespace tr::gp {
       actionSystem->setMouseState(captured);
    }
 
-   auto GameplaySystem::createTerrain(const cm::MeshHandles handles) -> cm::EntityType {
+   auto GameplaySystem::createTerrain(const cm::LoadedModelData handles) -> cm::EntityType {
       ZoneNamedN(n, "gameplaySystem.createTerrain", true);
       return entitySystem->createTerrain(handles);
    }

@@ -27,36 +27,28 @@ namespace tr::gfx::geo {
       }
    }
 
-   auto GeometryFactory::loadTrm(const std::filesystem::path& modelPath)
-       -> std::optional<TritonModelData> {
+   auto GeometryFactory::loadTrm(const std::filesystem::path& modelPath) -> TritonModelData {
 
       Log.debug("Loading TRM File: {0}", modelPath.string());
 
       auto tritonModel = loadTrmFile(modelPath.string());
 
-      if (!tritonModel) {
-         Log.warn("Returning empty TexturedGeometryHandle after loading file {0}",
-                  modelPath.string());
-         return std::nullopt;
-      }
-
-      const auto& model = *tritonModel;
-
       const auto imageHandle = imageKey.getKey();
-      imageDataMap.emplace(imageHandle, model.imageData);
+      imageDataMap.emplace(imageHandle, tritonModel.imageData);
 
       const auto geometryHandle = geometryKey.getKey();
-      geometryDataMap.emplace(geometryHandle, GeometryData{model.vertices, model.indices});
+      geometryDataMap.emplace(geometryHandle,
+                              GeometryData{tritonModel.vertices, tritonModel.indices});
 
       auto animationData = std::optional<AnimationData>{};
-      if (model.skinned()) {
-         animationData = AnimationData(model.jointRemaps, model.inverseBindPoses);
+      if (tritonModel.skinned()) {
+         animationData = AnimationData(tritonModel.jointRemaps, tritonModel.inverseBindPoses);
       }
 
       return TritonModelData{geometryHandle, imageHandle, animationData};
    }
 
-   auto GeometryFactory::loadTrmFile(const std::string& modelPath) -> std::optional<as::Model> {
+   auto GeometryFactory::loadTrmFile(const std::string& modelPath) -> as::Model {
       try {
          ZoneNamedN(z, "Loading Model from Disk", true);
          auto is = std::ifstream(modelPath, std::ios::binary);
@@ -64,18 +56,13 @@ namespace tr::gfx::geo {
             throw std::runtime_error("Failed to open file: " + modelPath);
          }
 
-         std::optional<as::Model> tritonModel;
-
          cereal::BinaryInputArchive input(is);
+         auto tritonModel = as::Model{};
 
-         auto tempModel = as::Model{};
-
-         input(tempModel);
-         tritonModel = tempModel;
+         input(tritonModel);
          return tritonModel;
       } catch (const std::exception& ex) {
-         Log.error("Error loading model: {0}", ex.what());
-         return std::nullopt;
+         throw IOException(fmt::format("Error loading model: {0}", ex.what()));
       }
    }
 
