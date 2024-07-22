@@ -10,12 +10,6 @@
 #include "geometry/GeometryFactory.hpp"
 #include "geometry/GeometryHandles.hpp"
 
-#define TINYGLTF_IMPLEMENTATION
-#define STB_IMAGE_IMPLEMENTATION
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-// #define TINYGLTF_NOEXCEPTION // optional. disable exception handling.
-#include "tiny_gltf.h"
-
 #include "GraphicsDevice.hpp"
 #include "VkContext.hpp"
 
@@ -76,17 +70,25 @@ namespace tr::gfx::tx {
       const auto createFn = [this, filename]() -> std::optional<cm::ModelHandle> {
          ZoneNamedN(z, "Loading Model", true);
 
-         const auto modelData = geometryFactory->loadTrm(filename);
+         const auto modelData = [this, &filename]() {
+            try {
+               return geometryFactory->loadTrm(filename);
+            } catch (const geo::IOException& ex) {
+               throw ResourceCreateException(fmt::format("Error loading model from file: {0}, {1}",
+                                                         filename.string(),
+                                                         ex.what()));
+            }
+         }();
 
-         if (!modelData) {
-            return std::nullopt;
-         }
+         const auto modelHandle = [this, &modelData]() {
+            try {
+               return uploadGeometry(modelData.getGeometryHandle(), modelData.getImageHandle());
+            } catch (const ResourceUploadException& ex) {
+               throw ResourceCreateException(fmt::format("Error uploading model: {0}", ex.what()));
+            }
+         }();
 
-         const auto& md = *modelData;
-
-         const auto modelHandle = uploadGeometry(md.getGeometryHandle(), md.getImageHandle());
-
-         // geometryFactory->unload(tgh);
+         geometryFactory->unload({{modelData.getGeometryHandle(), modelData.getImageHandle()}});
 
          return modelHandle;
       };
@@ -94,88 +96,79 @@ namespace tr::gfx::tx {
       return futures::async(createFn);
    }
 
-   /// Uploads the Geometry and Texture data and creates space in a buffer for the skeleton's
-   /// joint matrix data
-   auto ResourceManager::uploadSkinnedGeometry(const geo::SkinnedGeometryData& sgd)
-       -> std::optional<cm::LoadedSkinnedModelData> {
-      const auto modelHandle = uploadGeometry(sgd.geometryHandle, sgd.imageHandle);
-
-      if (!modelHandle) {
-         Log.warn("Geometry was not uploaded");
-         return std::nullopt;
-      }
-
-      const auto handle = *modelHandle;
-
-      const auto meshHandle = handle.begin()->first;
-      const auto textureHandle = handle.begin()->second;
-      const auto smh = cm::LoadedSkinnedModelData{.meshHandle = meshHandle,
-                                                  .textureHandle = textureHandle,
-                                                  .skeletonHandle = sgd.skeletonHandle,
-                                                  .animationHandle = sgd.animationHandle};
-
-      return smh;
-   }
-
    auto ResourceManager::uploadGeometry(const geo::GeometryHandle& geometryHandle,
-                                        const geo::ImageHandle& imageHandle)
-       -> std::optional<cm::ModelHandle> {
+                                        const geo::ImageHandle& imageHandle) -> cm::ModelHandle {
       auto& allocator = graphicsDevice.getAllocator();
       auto& context = graphicsDevice.getAsyncTransferContext();
 
-      const auto geometryData = geometryFactory->getGeometryData(geometryHandle);
+      auto geometryData = geo::GeometryData{};
+      try {
+         geometryData = geometryFactory->getGeometryData(geometryHandle);
+      } catch (const geo::GeometryDataNotFoundException& ex) {
+         throw ResourceUploadException(fmt::format("Error getting geometry data: {0}", ex.what()));
+      }
 
       // Prepare Vertex Buffer
       const auto vbSize = geometryData.vertexDataSize();
-      const auto vbStagingBuffer = allocator.createStagingBuffer(vbSize, "Vertex Staging Buffer");
-
-      void* vbData = allocator.mapMemory(*vbStagingBuffer);
-      memcpy(vbData, geometryData.vertices.data(), static_cast<size_t>(vbSize));
-      allocator.unmapMemory(*vbStagingBuffer);
-
       const auto ibSize = geometryData.indexDataSize();
 
-      auto vertexBuffer = allocator.createGpuVertexBuffer(vbSize, "GPU Vertex");
-      auto indexBuffer = allocator.createGpuIndexBuffer(ibSize, "GPU Index");
-      const auto indicesCount = geometryData.indices.size();
+      try {
+         const auto vbStagingBuffer =
+             allocator.createStagingBuffer(vbSize, "Vertex Staging Buffer");
+         void* vbData = allocator.mapMemory(*vbStagingBuffer);
+         memcpy(vbData, geometryData.vertices.data(), static_cast<size_t>(vbSize));
+         allocator.unmapMemory(*vbStagingBuffer);
 
-      // Prepare Index Buffer
-      const auto ibStagingBuffer = allocator.createStagingBuffer(ibSize, "Index Staging Buffer");
+         // Prepare Index Buffer
+         const auto ibStagingBuffer = allocator.createStagingBuffer(ibSize, "Index Staging Buffer");
 
-      auto data = allocator.mapMemory(*ibStagingBuffer);
-      memcpy(data, geometryData.indices.data(), static_cast<size_t>(ibSize));
-      allocator.unmapMemory(*ibStagingBuffer);
+         auto data = allocator.mapMemory(*ibStagingBuffer);
+         memcpy(data, geometryData.indices.data(), static_cast<size_t>(ibSize));
+         allocator.unmapMemory(*ibStagingBuffer);
 
-      // Upload Buffers
-      context.submit([&](const vk::raii::CommandBuffer& cmd) {
-         const auto vbCopy = vk::BufferCopy{.srcOffset = 0, .dstOffset = 0, .size = vbSize};
-         cmd.copyBuffer(vbStagingBuffer->getBuffer(), vertexBuffer->getBuffer(), vbCopy);
-         const auto copy = vk::BufferCopy{.srcOffset = 0, .dstOffset = 0, .size = ibSize};
-         cmd.copyBuffer(ibStagingBuffer->getBuffer(), indexBuffer->getBuffer(), copy);
-      });
+         auto vertexBuffer = allocator.createGpuVertexBuffer(vbSize, "GPU Vertex");
+         auto indexBuffer = allocator.createGpuIndexBuffer(ibSize, "GPU Index");
+         const auto indicesCount = geometryData.indices.size();
 
-      const auto image = geometryFactory->getImageData(imageHandle);
-      const auto textureHandle = textureList.size();
-      textureList.emplace_back(std::make_unique<Textures::Texture>((void*)image.data.data(),
-                                                                   image.width,
-                                                                   image.height,
-                                                                   image.component,
-                                                                   allocator,
-                                                                   graphicsDevice.getVulkanDevice(),
-                                                                   context));
+         // Upload Buffers
+         context.submit([&](const vk::raii::CommandBuffer& cmd) {
+            const auto vbCopy = vk::BufferCopy{.srcOffset = 0, .dstOffset = 0, .size = vbSize};
+            cmd.copyBuffer(vbStagingBuffer->getBuffer(), vertexBuffer->getBuffer(), vbCopy);
+            const auto copy = vk::BufferCopy{.srcOffset = 0, .dstOffset = 0, .size = ibSize};
+            cmd.copyBuffer(ibStagingBuffer->getBuffer(), indexBuffer->getBuffer(), copy);
+         });
 
-      { // Only need to guard access to the textureInfoList
-         ZoneNamedN(c, "Update TextureInfoList", true);
-         std::lock_guard<LockableBase(std::mutex)> lock(textureListMutex);
-         LockMark(textureListMutex);
-         LockableName(textureListMutex, "Mutate", 6);
-         textureInfoList.emplace_back(textureList[textureHandle]->getImageInfo());
+         const auto image = geometryFactory->getImageData(imageHandle);
+         const auto textureHandle = textureList.size();
+         textureList.emplace_back(
+             std::make_unique<Textures::Texture>((void*)image.data.data(),
+                                                 image.width,
+                                                 image.height,
+                                                 image.component,
+                                                 allocator,
+                                                 graphicsDevice.getVulkanDevice(),
+                                                 context));
+
+         { // Only need to guard access to the textureInfoList
+            ZoneNamedN(c, "Update TextureInfoList", true);
+            std::lock_guard<LockableBase(std::mutex)> lock(textureListMutex);
+            LockMark(textureListMutex);
+            LockableName(textureListMutex, "Mutate", 6);
+            textureInfoList.emplace_back(textureList[textureHandle]->getImageInfo());
+         }
+
+         const auto meshHandle = meshList.size();
+         meshList.emplace_back(std::move(vertexBuffer), std::move(indexBuffer), indicesCount);
+
+         return cm::ModelHandle{meshHandle, textureHandle};
+
+      } catch (const mem::AllocationException& ex) {
+         throw ResourceUploadException(
+             fmt::format("Error allocating resources for geometry: {0} and image: {1}, {2}",
+                         geometryHandle,
+                         imageHandle,
+                         ex.what()));
       }
-
-      const auto meshHandle = meshList.size();
-      meshList.emplace_back(std::move(vertexBuffer), std::move(indexBuffer), indicesCount);
-
-      return cm::ModelHandle{meshHandle, textureHandle};
    }
 
    void ResourceManager::accessTextures(

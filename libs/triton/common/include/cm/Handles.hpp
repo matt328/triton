@@ -11,17 +11,15 @@ namespace tr::cm {
    using SkeletonHandle = uint64_t;
    using AnimationHandle = uint64_t;
 
-   using ModelHandle = std::unordered_map<MeshHandle, TextureHandle>;
-
-   // TODO: Find a new home for this struct
-   struct LoadedSkinnedModelData {
+   struct LoadedModelData {
       MeshHandle meshHandle;
       TextureHandle textureHandle;
+   };
+
+   struct SkinnedLoadedModelData : public LoadedModelData {
       SkeletonHandle skeletonHandle;
       AnimationHandle animationHandle;
       std::unordered_map<int, int> jointMap;
       std::vector<glm::mat4> inverseBindMatrices;
    };
-
-   using MeshHandles = std::unordered_map<cm::MeshHandle, cm::TextureHandle>;
 }

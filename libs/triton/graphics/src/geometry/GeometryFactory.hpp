@@ -32,6 +32,12 @@ namespace tr::gfx::geo {
       }
    };
 
+   class IOException : public std::logic_error {
+    public:
+      explicit IOException(const std::string& message) : std::logic_error(message) {
+      }
+   };
+
    using GeometryDataRef = std::optional<std::reference_wrapper<GeometryData>>;
 
    class GeometryFactory {
@@ -48,7 +54,9 @@ namespace tr::gfx::geo {
       auto createGeometryFromHeightfield(const ct::HeightField& heightfield)
           -> TexturedGeometryHandle;
 
-      auto loadTrm(const std::filesystem::path& modelPath) -> std::optional<TritonModelData>;
+      /// Load a TRM file and cache its data
+      /// @throws IOException if there's an error loading the file.
+      auto loadTrm(const std::filesystem::path& modelPath) -> TritonModelData;
 
       void unload(const TexturedGeometryHandle& handle);
 
@@ -66,6 +74,9 @@ namespace tr::gfx::geo {
       std::unordered_map<ImageHandle, as::ImageData> imageDataMap;
 
       auto generateNormal(int x, int y, const ct::HeightField& heightField) -> glm::vec3;
-      auto loadTrmFile(const std::string& modelPath) -> std::optional<as::Model>;
+
+      /// Loads a TRM file from the given path.
+      /// @throws IOException if the file cannot be opened or parsed.
+      auto loadTrmFile(const std::string& modelPath) -> as::Model;
    };
 }

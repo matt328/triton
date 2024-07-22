@@ -66,7 +66,7 @@ namespace tr::gp {
       void setMouseState(bool captured);
 
       // Gameworld State Methods
-      auto createTerrain(const cm::MeshHandles handles) -> cm::EntityType;
+      auto createTerrain(const cm::LoadedModelData handles) -> cm::EntityType;
       auto createStaticModel(cm::MeshHandles meshes) -> cm::EntityType;
       auto createAnimatedModel(cm::MeshHandles meshes,
                                const std::filesystem::path& skeletonPath,
