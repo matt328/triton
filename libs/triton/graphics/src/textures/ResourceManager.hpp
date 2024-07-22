@@ -54,6 +54,18 @@ namespace tr::gfx::tx {
                              .borderColor = vk::BorderColor::eIntOpaqueBlack,
                              .unnormalizedCoordinates = VK_FALSE};
 
+   class ResourceUploadException : public std::runtime_error {
+    public:
+      explicit ResourceUploadException(const std::string& message) : std::runtime_error(message) {
+      }
+   };
+
+   class ResourceCreateException : public std::runtime_error {
+    public:
+      explicit ResourceCreateException(const std::string& message) : std::runtime_error(message) {
+      }
+   };
+
    class ResourceManager {
     public:
       ResourceManager(const GraphicsDevice& graphicsDevice);
@@ -95,10 +107,9 @@ namespace tr::gfx::tx {
       mutable TracyLockable(std::mutex, renderDataMutex);
       cm::RenderData renderData;
 
+      /// Uploads Geometry (and images) to the GPU
+      /// @throws ResourceUploadException if there's an error uploading.
       auto uploadGeometry(const geo::GeometryHandle& geometryHandle,
-                          const geo::ImageHandle& imageHandle) -> std::optional<cm::ModelHandle>;
-
-      auto uploadSkinnedGeometry(const geo::SkinnedGeometryData& sgd)
-          -> std::optional<cm::LoadedSkinnedModelData>;
+                          const geo::ImageHandle& imageHandle) -> cm::ModelHandle;
    };
 }
