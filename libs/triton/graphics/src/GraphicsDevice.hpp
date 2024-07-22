@@ -68,7 +68,7 @@ namespace tr::gfx {
          return *physicalDevice;
       }
 
-      [[nodiscard]] const mem::Allocator& getAllocator() const {
+      [[nodiscard]] const mem::Allocator& getAllocator() const noexcept {
          return *raiillocator;
       }
 
@@ -100,7 +100,7 @@ namespace tr::gfx {
          return *swapchain;
       }
 
-      [[nodiscard]] const VkContext& getAsyncTransferContext() const {
+      [[nodiscard]] const VkContext& getAsyncTransferContext() const noexcept {
          return *asyncTransferContext;
       }
 

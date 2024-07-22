@@ -60,6 +60,11 @@ namespace tr::ctx {
       auto createStaticModelEntity(const std::filesystem::path& modelPath)
           -> futures::cfuture<cm::EntityType>;
 
+      auto createAnimatedModelEntity(const std::filesystem::path& modelPath,
+                                     const std::filesystem::path& skeletonPath,
+                                     const std::filesystem::path& animationPath)
+          -> futures::cfuture<cm::EntityType>;
+
       auto clear() -> void;
 
       // Resource Creation Methods
