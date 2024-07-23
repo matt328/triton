@@ -1,9 +1,9 @@
 #pragma once
 
-namespace tr::cm {
+namespace tr::cm::gpu {
    struct RenderData;
 }
 
 namespace tr::gp::sys::RenderDataSystem {
-   void update(const entt::registry& registry, cm::RenderData& renderData);
+   void update(const entt::registry& registry, cm::gpu::RenderData& renderData);
 }

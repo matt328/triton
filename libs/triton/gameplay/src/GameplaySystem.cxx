@@ -116,22 +116,23 @@ namespace tr::gp {
       actionSystem->setMouseState(captured);
    }
 
-   auto GameplaySystem::createTerrain(const cm::LoadedModelData handles) -> cm::EntityType {
+   auto GameplaySystem::createTerrain(const cm::ModelData handles) -> cm::EntityType {
       ZoneNamedN(n, "gameplaySystem.createTerrain", true);
       return entitySystem->createTerrain(handles);
    }
 
-   auto GameplaySystem::createStaticModel(cm::MeshHandles meshes) -> cm::EntityType {
+   auto GameplaySystem::createStaticModel(cm::ModelData meshes) -> cm::EntityType {
       return entitySystem->createStaticModel(meshes);
    }
 
-   auto GameplaySystem::createAnimatedModel(cm::MeshHandles meshes,
+   auto GameplaySystem::createAnimatedModel(cm::ModelData modelData,
                                             const std::filesystem::path& skeletonPath,
                                             const std::filesystem::path& animationPath)
        -> cm::EntityType {
-      const auto skeletonHandle = animationFactory->loadSkeleton(skeletonPath);
-      const auto animationHandle = animationFactory->loadAnimation(animationPath);
-      return entitySystem->createAnimatedModel(model);
+      modelData.animationData->animationHandle = animationFactory->loadAnimation(animationPath);
+      modelData.animationData->skeletonHandle = animationFactory->loadSkeleton(skeletonPath);
+
+      return entitySystem->createAnimatedModel(modelData);
    }
 
    auto GameplaySystem::createCamera(uint32_t width,

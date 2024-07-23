@@ -28,12 +28,13 @@ namespace tr::gp::sys::RenderDataSystem {
    }
 
    /// Loops through the registry and fills in the given RenderData struct
-   void update(const entt::registry& registry, cm::RenderData& renderData) {
+   void update(const entt::registry& registry, cm::gpu::RenderData& renderData) {
 
       const auto cameraEntity = registry.ctx().get<const cmp::CurrentCamera>();
       const auto cam = registry.get<cmp::Camera>(cameraEntity.currentCamera);
 
-      renderData.cameraData = cm::CameraData{cam.view, cam.projection, cam.view * cam.projection};
+      renderData.cameraData =
+          cm::gpu::CameraData{cam.view, cam.projection, cam.view * cam.projection};
 
       const auto view =
           registry.view<cmp::Renderable, cmp::Transform>(entt::exclude<cmp::Animation>);

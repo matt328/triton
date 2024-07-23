@@ -76,10 +76,9 @@ namespace tr::gfx::tx {
       ResourceManager& operator=(const ResourceManager&) = delete;
       ResourceManager& operator=(ResourceManager&&) = delete;
 
-      auto createTerrain(const uint32_t size) -> futures::cfuture<cm::ModelHandle>;
+      auto createTerrain(const uint32_t size) -> futures::cfuture<cm::ModelData>;
 
-      auto createModel(const std::filesystem::path& filename)
-          -> futures::cfuture<std::optional<cm::ModelHandle>>;
+      auto createModel(const std::filesystem::path& filename) -> futures::cfuture<cm::ModelData>;
 
       auto createStaticMesh(const geo::GeometryData& geometry) -> cm::MeshHandle;
 
@@ -90,8 +89,8 @@ namespace tr::gfx::tx {
       void accessTextures(
           std::function<void(const std::vector<vk::DescriptorImageInfo>&)> fn) const;
 
-      void setRenderData(cm::RenderData& newRenderData);
-      void accessRenderData(std::function<void(cm::RenderData&)> fn);
+      void setRenderData(cm::gpu::RenderData& newRenderData);
+      void accessRenderData(std::function<void(cm::gpu::RenderData&)> fn);
 
     private:
       const GraphicsDevice& graphicsDevice;
@@ -105,11 +104,11 @@ namespace tr::gfx::tx {
       std::vector<std::unique_ptr<Textures::Texture>> textureList;
 
       mutable TracyLockable(std::mutex, renderDataMutex);
-      cm::RenderData renderData;
+      cm::gpu::RenderData renderData;
 
       /// Uploads Geometry (and images) to the GPU
       /// @throws ResourceUploadException if there's an error uploading.
       auto uploadGeometry(const geo::GeometryHandle& geometryHandle,
-                          const geo::ImageHandle& imageHandle) -> cm::ModelHandle;
+                          const geo::ImageHandle& imageHandle) -> cm::ModelData;
    };
 }

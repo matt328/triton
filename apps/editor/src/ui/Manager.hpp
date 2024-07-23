@@ -56,12 +56,6 @@ namespace ed::ui {
 
       components::EntityEditor entityEditor;
 
-      std::vector<std::future<tr::cm::ModelHandle>> modelFutures{};
-
-      std::vector<futures::cfuture<tr::cm::EntityType>> terrainFutures{};
-
-      std::vector<std::future<tr::cm::LoadedSkinnedModelData>> skinnedModelFutures{};
-
       // HACK: get this from the application somehow instead of tracking it in 2 places
       bool fullscreen{};
 
