@@ -40,12 +40,12 @@ namespace tr::gfx::geo {
       geometryDataMap.emplace(geometryHandle,
                               GeometryData{tritonModel.vertices, tritonModel.indices});
 
-      auto animationData = std::optional<AnimationData>{};
+      auto skinData = std::optional<cm::SkinData>{};
       if (tritonModel.skinned()) {
-         animationData = AnimationData(tritonModel.jointRemaps, tritonModel.inverseBindPoses);
+         skinData = cm::SkinData(tritonModel.jointRemaps, tritonModel.inverseBindPoses);
       }
 
-      return TritonModelData{geometryHandle, imageHandle, animationData};
+      return TritonModelData{geometryHandle, imageHandle, skinData};
    }
 
    auto GeometryFactory::loadTrmFile(const std::string& modelPath) -> as::Model {

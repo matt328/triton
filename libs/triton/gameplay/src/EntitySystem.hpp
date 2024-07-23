@@ -28,11 +28,11 @@ namespace tr::gp {
       }
 
       void fixedUpdate(const cm::Timer& timer, AnimationFactory& animationFactory);
-      void prepareRenderData(cm::RenderData& renderData);
+      void prepareRenderData(cm::gpu::RenderData& renderData);
 
-      auto createTerrain(const cm::MeshHandles handles) -> cm::EntityType;
-      auto createStaticModel(const cm::MeshHandles handles) -> cm::EntityType;
-      auto createAnimatedModel(const cm::LoadedSkinnedModelData modelData) -> cm::EntityType;
+      auto createTerrain(const cm::ModelData handles) -> cm::EntityType;
+      auto createStaticModel(const cm::ModelData handles) -> cm::EntityType;
+      auto createAnimatedModel(const cm::ModelData modelData) -> cm::EntityType;
       auto createCamera(uint32_t width,
                         uint32_t height,
                         float fov,

@@ -38,7 +38,7 @@ namespace tr::gfx {
       auto pcr = vk::PushConstantRange{.stageFlags = vk::ShaderStageFlagBits::eVertex |
                                                      vk::ShaderStageFlagBits::eFragment,
                                        .offset = 0,
-                                       .size = sizeof(cm::PushConstants)};
+                                       .size = sizeof(cm::gpu::PushConstants)};
 
       vk::PipelineLayoutCreateInfo pipelineLayoutCreateInfo{
           .setLayoutCount = static_cast<uint32_t>(layouts.size()),

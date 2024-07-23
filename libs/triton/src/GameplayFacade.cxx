@@ -9,13 +9,13 @@ namespace tr::ctx {
 
    class GameplayFacade::GameplayFacade::Impl {
     public:
-      Impl(gp::GameplaySystem& gameplaySystem, gfx::RenderContext& renderer, bool debugEnabled)
-          : debugEnabled{debugEnabled}, gameplaySystem{gameplaySystem}, renderer{renderer} {
+      Impl(gp::GameplaySystem& gameplaySystem, gfx::RenderContext& renderer)
+          : gameplaySystem{gameplaySystem}, renderer{renderer} {
       }
 
       auto createTerrain(const uint32_t size) {
          ZoneNamedN(n, "facade.createTerrain", true);
-         const auto createEntity = [this](cm::ModelHandle handle) {
+         const auto createEntity = [this](cm::ModelData handle) {
             return gameplaySystem.createTerrain(handle);
          };
          return renderer.createTerrain(size).then(createEntity);
@@ -24,63 +24,33 @@ namespace tr::ctx {
       auto createStaticModelEntity(const std::filesystem::path& modelPath)
           -> futures::cfuture<cm::EntityType> {
 
-         const auto createEntity = [this](cm::MeshHandles handles) {
+         auto gpCreate = [this](cm::ModelData handles) {
             return gameplaySystem.createStaticModel(handles);
          };
-         return renderer.createStaticModel(modelPath).then(createEntity);
+
+         auto createModel = renderer.createStaticModel(modelPath);
+
+         return createModel.then(gpCreate);
       }
 
       auto createAnimatedModelEntity(const std::filesystem::path& modelPath,
                                      const std::filesystem::path& skeletonPath,
                                      const std::filesystem::path& animationPath)
           -> futures::cfuture<cm::EntityType> {
-         // I think here we should have the gameplay system load the skeleton and animation
-         // Probably won't need anything different other than loadTrm from the renderer.
-         // it can just return the meshhandles and the gameplay system will add in the skeleton and
-         // animation handles
-         const auto createEntity = [this](cm::MeshHandles handles) {
-            return gameplaySystem.createAnimatedModel(handles, skeletonPath, animationPath);
+
+         auto gpCreate = [this, &skeletonPath, &animationPath](cm::ModelData modelData) {
+            return gameplaySystem.createAnimatedModel(modelData, skeletonPath, animationPath);
          };
 
-         return renderer.createStaticModel(modelPath).then(createEntity);
+         auto createModel = renderer.createSkinnedModel(modelPath);
+
+         return createModel.then(gpCreate);
       }
 
       void loadModelResources([[maybe_unused]] const std::filesystem::path& modelPath,
                               [[maybe_unused]] const std::filesystem::path& skeletonPath,
                               [[maybe_unused]] const std::filesystem::path& animationPath,
                               [[maybe_unused]] const std::function<void()> done) {
-      }
-
-      void update() {
-         for (auto it = terrainFutures.begin(); it != terrainFutures.end();) {
-            auto status = it->wait_for(std::chrono::seconds(0));
-            if (status == std::future_status::ready) {
-               ZoneNamedN(loadComplete, "Creating Terrain Entities", true);
-               try {
-                  auto r = it->get();
-                  gameplaySystem.createTerrain(r);
-               } catch (const std::exception& e) {
-                  Log.error("Error loading model: {0}", e.what());
-               }
-               it = terrainFutures.erase(it);
-            } else {
-               ++it;
-            }
-         }
-      }
-
-      auto loadSkinnedModelAsync(const std::filesystem::path& modelPath,
-                                 const std::filesystem::path& skeletonPath,
-                                 const std::filesystem::path& animationPath) {
-         return renderer.loadSkinnedModelAsync(modelPath, skeletonPath, animationPath);
-      }
-
-      auto createStaticMultiMeshEntity(cm::MeshHandles meshes) {
-         return gameplaySystem.createStaticModel(meshes);
-      }
-
-      auto createSkinnedModelEntity(const cm::LoadedSkinnedModelData model) {
-         return gameplaySystem.createAnimatedModel(model);
       }
 
       auto createCamera(uint32_t width,
@@ -103,18 +73,13 @@ namespace tr::ctx {
       }
 
     private:
-      bool debugEnabled{};
       gp::GameplaySystem& gameplaySystem;
       gfx::RenderContext& renderer;
       std::vector<cm::EntityType> allEntities;
-
-      std::vector<std::future<tr::cm::ModelHandle>> terrainFutures{};
    };
 
-   GameplayFacade::GameplayFacade(gp::GameplaySystem& gameplaySystem,
-                                  gfx::RenderContext& renderer,
-                                  bool debugEnabled)
-       : impl(std::make_unique<Impl>(gameplaySystem, renderer, debugEnabled)) {
+   GameplayFacade::GameplayFacade(gp::GameplaySystem& gameplaySystem, gfx::RenderContext& renderer)
+       : impl(std::make_unique<Impl>(gameplaySystem, renderer)) {
    }
 
    GameplayFacade::~GameplayFacade() {
@@ -134,33 +99,6 @@ namespace tr::ctx {
 
    auto GameplayFacade::createTerrain(const uint32_t size) -> futures::cfuture<cm::EntityType> {
       return impl->createTerrain(size);
-   }
-
-   void GameplayFacade::loadModelResources(
-       [[maybe_unused]] const std::filesystem::path& modelPath,
-       [[maybe_unused]] const std::filesystem::path& skeletonPath,
-       [[maybe_unused]] const std::filesystem::path& animationPath,
-       [[maybe_unused]] const std::function<void()> done) {
-   }
-
-   void GameplayFacade::update() {
-      impl->update();
-   }
-
-   auto GameplayFacade::loadSkinnedModelAsync(const std::filesystem::path& modelPath,
-                                              const std::filesystem::path& skeletonPath,
-                                              const std::filesystem::path& animationPath)
-       -> std::future<cm::LoadedSkinnedModelData> {
-      return impl->loadSkinnedModelAsync(modelPath, skeletonPath, animationPath);
-   }
-
-   cm::EntityType GameplayFacade::createStaticMultiMeshEntity(cm::MeshHandles meshes) {
-      return impl->createStaticMultiMeshEntity(meshes);
-   }
-
-   auto GameplayFacade::createSkinnedModelEntity(const cm::LoadedSkinnedModelData model)
-       -> cm::EntityType {
-      return impl->createSkinnedModelEntity(model);
    }
 
    cm::EntityType GameplayFacade::createCamera(uint32_t width,

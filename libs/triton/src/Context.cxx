@@ -14,8 +14,7 @@ namespace tr::ctx {
 
    class Context::Context::Impl {
     public:
-      Impl(void* nativeWindow, bool guiEnabled, bool debugEnabled)
-          : timer{TARGET_FPS, MAX_UPDATES} {
+      Impl(void* nativeWindow, bool guiEnabled) : timer{TARGET_FPS, MAX_UPDATES} {
          renderContext =
              std::make_unique<gfx::RenderContext>(static_cast<GLFWwindow*>(nativeWindow),
                                                   guiEnabled);
@@ -26,11 +25,10 @@ namespace tr::ctx {
              [this](std::pair<uint32_t, uint32_t> size) { this->gameplaySystem->resize(size); });
 
          gameplaySystem->setRenderDataFn(
-             [this](cm::RenderData& renderData) { renderContext->setRenderData(renderData); });
+             [this](cm::gpu::RenderData& renderData) { renderContext->setRenderData(renderData); });
 
          // Have the facade also take a reference to the resourceManager
-         gameplayFacade =
-             std::make_unique<GameplayFacade>(*gameplaySystem, *renderContext, debugEnabled);
+         gameplayFacade = std::make_unique<GameplayFacade>(*gameplaySystem, *renderContext);
       }
 
       [[nodiscard]] GameplayFacade& getGameplayFacade() const {
@@ -107,8 +105,8 @@ namespace tr::ctx {
       std::unique_ptr<tr::gfx::RenderContext> renderContext;
    };
 
-   Context::Context(void* nativeWindow, bool guiEnabled, bool debugEnabled)
-       : impl(std::make_unique<Impl>(nativeWindow, guiEnabled, debugEnabled)) {
+   Context::Context(void* nativeWindow, bool guiEnabled)
+       : impl(std::make_unique<Impl>(nativeWindow, guiEnabled)) {
    }
 
    // Since a default destructor doesn't have access to the complete definition of the forward
