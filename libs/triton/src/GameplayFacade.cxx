@@ -38,7 +38,7 @@ namespace tr::ctx {
                                      const std::filesystem::path& animationPath)
           -> futures::cfuture<cm::EntityType> {
 
-         auto gpCreate = [this, &skeletonPath, &animationPath](cm::ModelData modelData) {
+         auto gpCreate = [this, skeletonPath, animationPath](cm::ModelData modelData) {
             return gameplaySystem.createAnimatedModel(modelData, skeletonPath, animationPath);
          };
 

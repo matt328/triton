@@ -129,8 +129,9 @@ namespace tr::gp {
                                             const std::filesystem::path& skeletonPath,
                                             const std::filesystem::path& animationPath)
        -> cm::EntityType {
-      modelData.animationData->animationHandle = animationFactory->loadAnimation(animationPath);
-      modelData.animationData->skeletonHandle = animationFactory->loadSkeleton(skeletonPath);
+      modelData.animationData =
+          cm::AnimationData{.skeletonHandle = animationFactory->loadSkeleton(skeletonPath),
+                            .animationHandle = animationFactory->loadAnimation(animationPath)};
 
       return entitySystem->createAnimatedModel(modelData);
    }
