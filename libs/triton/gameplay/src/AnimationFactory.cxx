@@ -20,11 +20,8 @@ namespace tr::gp {
          Log.error("Failed to load skeleton instance from file: {0}", filename);
       }
 
-      auto skeletonPtr = std::make_shared<ozz::animation::Skeleton>();
-
       auto skeleton = ozz::animation::Skeleton{};
       archive >> skeleton;
-      archive >> *skeletonPtr;
 
       const auto key = skeletonMapKey.getKey();
 

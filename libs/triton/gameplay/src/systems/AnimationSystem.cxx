@@ -23,7 +23,7 @@ namespace tr::gp::sys::AnimationSystem {
          }
 
          const auto& animation = animationFactory.getAnimation(animationData.animationHandle);
-         const auto& skeleton = animationFactory.getSkeleton(animationData.animationHandle);
+         const auto& skeleton = animationFactory.getSkeleton(animationData.skeletonHandle);
 
          // This should do this once, then be a no op on subsequent invocations
          animationData.context.Resize(skeleton.num_joints());
