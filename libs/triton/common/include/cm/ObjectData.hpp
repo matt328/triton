@@ -2,7 +2,7 @@
 
 #include "cm/Handles.hpp"
 
-namespace tr::cm {
+namespace tr::cm::gpu {
 
    // Maximum size of the ObjectData buffer array
    constexpr auto MAX_OBJECTS = 128;

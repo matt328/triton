@@ -1,5 +1,6 @@
 #pragma once
 
+#include "cm/Handles.hpp"
 #include "cm/ObjectData.hpp"
 #include "cm/RenderData.hpp"
 
@@ -47,24 +48,22 @@ namespace tr::gfx {
 
       void enqueueRenderObject(RenderObject renderObject);
 
-      void setCurrentCameraData(cm::CameraData&& cameraData);
+      void setCurrentCameraData(cm::gpu::CameraData&& cameraData);
 
       void setResizeListener(const std::function<void(std::pair<uint32_t, uint32_t>)>& fn);
 
-      void setRenderData(cm::RenderData& renderData);
+      void setRenderData(cm::gpu::RenderData& renderData);
 
       void setDebugRendering(bool wireframeEnabled);
 
       // Resource Creation
       auto createStaticModel(const std::filesystem::path& modelPath)
-          -> futures::cfuture<cm::MeshHandles>;
+          -> futures::cfuture<cm::ModelData>;
 
-      auto createTerrain(const uint32_t size) -> futures::cfuture<cm::ModelHandle>;
+      auto createTerrain(const uint32_t size) -> futures::cfuture<cm::ModelData>;
 
-      auto createAnimatedModel(const std::filesystem::path& modelPath,
-                               const std::filesystem::path& skeletonPath,
-                               const std::filesystem::path& animationPath)
-          -> futures::cfuture<cm::LoadedSkinnedModelData>;
+      auto createSkinnedModel(const std::filesystem::path& modelPath)
+          -> futures::cfuture<cm::ModelData>;
 
     private:
       class Impl;

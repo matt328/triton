@@ -27,7 +27,6 @@ namespace ed {
    constexpr auto CamStart = glm::vec3{1.f, 1.f, 3.f};
 
    constexpr auto ImguiEnabled = true;
-   constexpr auto GameplayDebugEnabled = true;
 
    Application::Application(const int width, const int height, const std::string_view& windowTitle)
        : window(nullptr), context(nullptr), running(true) {
@@ -107,8 +106,7 @@ namespace ed {
       glfwSetMouseButtonCallback(window.get(), mouseButtonCallback);
       glfwSetWindowIconifyCallback(window.get(), windowIconifiedCallback);
 
-      context =
-          std::make_unique<tr::ctx::Context>(window.get(), ImguiEnabled, GameplayDebugEnabled);
+      context = std::make_unique<tr::ctx::Context>(window.get(), ImguiEnabled);
 
       dataFacade = std::make_unique<data::DataFacade>(context->getGameplayFacade());
 

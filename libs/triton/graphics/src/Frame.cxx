@@ -48,7 +48,7 @@ namespace tr::gfx {
 
       // Create an ObjectData buffer
       constexpr auto objectDataBufferCreateInfo =
-          vk::BufferCreateInfo{.size = sizeof(cm::ObjectData) * cm::MAX_OBJECTS,
+          vk::BufferCreateInfo{.size = sizeof(cm::gpu::ObjectData) * cm::gpu::MAX_OBJECTS,
                                .usage = vk::BufferUsageFlagBits::eStorageBuffer |
                                         vk::BufferUsageFlagBits::eShaderDeviceAddress};
 
@@ -63,7 +63,7 @@ namespace tr::gfx {
 
       // create CameraData (PerFrame) buffer
       constexpr auto cameraDataBufferCreateInfo =
-          vk::BufferCreateInfo{.size = sizeof(cm::CameraData),
+          vk::BufferCreateInfo{.size = sizeof(cm::gpu::CameraData),
                                .usage = vk::BufferUsageFlagBits::eUniformBuffer |
                                         vk::BufferUsageFlagBits::eShaderDeviceAddress};
 
@@ -78,7 +78,7 @@ namespace tr::gfx {
 
       // Create AnimationDataBuffer
       constexpr auto animationDataBufferCreateInfo =
-          vk::BufferCreateInfo{.size = sizeof(cm::AnimationData) * cm::MAX_OBJECTS,
+          vk::BufferCreateInfo{.size = sizeof(cm::AnimationData) * cm::gpu::MAX_OBJECTS,
                                .usage = vk::BufferUsageFlagBits::eStorageBuffer |
                                         vk::BufferUsageFlagBits::eShaderDeviceAddress};
 
@@ -95,13 +95,13 @@ namespace tr::gfx {
       // Create PerFrame ShaderBinding
       perFrameShaderBinding =
           shaderBindingFactory.createShaderBinding(sb::ShaderBindingHandle::PerFrame);
-      perFrameShaderBinding->bindBuffer(0, *cameraDataBuffer, sizeof(cm::CameraData));
+      perFrameShaderBinding->bindBuffer(0, *cameraDataBuffer, sizeof(cm::gpu::CameraData));
 
       objectDataShaderBinding =
           shaderBindingFactory.createShaderBinding(sb::ShaderBindingHandle::ObjectData);
       objectDataShaderBinding->bindBuffer(0,
                                           *objectDataBuffer,
-                                          sizeof(cm::ObjectData) * cm::MAX_OBJECTS);
+                                          sizeof(cm::gpu::ObjectData) * cm::gpu::MAX_OBJECTS);
 
       textureShaderBinding =
           shaderBindingFactory.createShaderBinding(sb::ShaderBindingHandle::Bindless);
@@ -110,7 +110,7 @@ namespace tr::gfx {
           shaderBindingFactory.createShaderBinding(sb::ShaderBindingHandle::AnimationData);
       animationDataShaderBinding->bindBuffer(0,
                                              *animationDataBuffer,
-                                             sizeof(cm::AnimationData) * cm::MAX_OBJECTS);
+                                             sizeof(cm::AnimationData) * cm::gpu::MAX_OBJECTS);
 
       const auto drawImageFormat = vk::Format::eR16G16B16A16Sfloat;
       const auto drawImageExtent = graphicsDevice.DrawImageExtent2D;
@@ -248,15 +248,15 @@ namespace tr::gfx {
       return drawImage->getImage();
    }
 
-   void Frame::updateObjectDataBuffer(const cm::ObjectData* data, const size_t size) {
+   void Frame::updateObjectDataBuffer(const cm::gpu::ObjectData* data, const size_t size) {
       this->objectDataBuffer->updateMappedBufferValue(data, size);
    }
 
-   void Frame::updatePerFrameDataBuffer(const cm::CameraData* data, const size_t size) {
+   void Frame::updatePerFrameDataBuffer(const cm::gpu::CameraData* data, const size_t size) {
       this->cameraDataBuffer->updateMappedBufferValue(data, size);
    }
 
-   void Frame::updateAnimationDataBuffer(const cm::AnimationData* data, const size_t size) {
+   void Frame::updateAnimationDataBuffer(const cm::gpu::AnimationData* data, const size_t size) {
       this->animationDataBuffer->updateMappedBufferValue(data, size);
    }
 

@@ -97,9 +97,9 @@ namespace tr::gfx {
          return *animationDataShaderBinding;
       }
 
-      void updateObjectDataBuffer(const cm::ObjectData* data, const size_t size);
-      void updatePerFrameDataBuffer(const cm::CameraData* data, const size_t size);
-      void updateAnimationDataBuffer(const cm::AnimationData* data, const size_t size);
+      void updateObjectDataBuffer(const cm::gpu::ObjectData* data, const size_t size);
+      void updatePerFrameDataBuffer(const cm::gpu::CameraData* data, const size_t size);
+      void updateAnimationDataBuffer(const cm::gpu::AnimationData* data, const size_t size);
 
       void destroySwapchainResources();
       void createSwapchainResources(const GraphicsDevice& graphicsDevice);

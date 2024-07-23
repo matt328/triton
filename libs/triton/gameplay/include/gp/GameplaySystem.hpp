@@ -22,8 +22,8 @@ namespace tr::ctx {
 }
 
 namespace tr::gp {
-   using RenderDataProducer = entt::delegate<void(cm::RenderData&)>;
-   using RenderDataFn = std::function<void(cm::RenderData&)>;
+   using RenderDataProducer = entt::delegate<void(cm::gpu::RenderData&)>;
+   using RenderDataFn = std::function<void(cm::gpu::RenderData&)>;
 
    class AnimationFactory;
    class EntitySystem;
@@ -66,9 +66,9 @@ namespace tr::gp {
       void setMouseState(bool captured);
 
       // Gameworld State Methods
-      auto createTerrain(const cm::LoadedModelData handles) -> cm::EntityType;
-      auto createStaticModel(cm::MeshHandles meshes) -> cm::EntityType;
-      auto createAnimatedModel(cm::MeshHandles meshes,
+      auto createTerrain(const cm::ModelData handles) -> cm::EntityType;
+      auto createStaticModel(cm::ModelData meshes) -> cm::EntityType;
+      auto createAnimatedModel(cm::ModelData modelData,
                                const std::filesystem::path& skeletonPath,
                                const std::filesystem::path& animationPath) -> cm::EntityType;
       auto createCamera(uint32_t width,
@@ -92,7 +92,7 @@ namespace tr::gp {
 
       /// This is a preallocated RenderData that the ECS collects all of he GameWorld data into
       /// before the Renderer takes a copy of it
-      cm::RenderData renderData{};
+      cm::gpu::RenderData renderData{};
 
       RenderDataFn renderDataFn{};
    };

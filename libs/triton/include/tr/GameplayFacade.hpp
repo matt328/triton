@@ -1,6 +1,5 @@
 #pragma once
 
-#include "cm/Handles.hpp"
 #include "cm/EntitySystemTypes.hpp"
 
 namespace tr::gp {
@@ -30,9 +29,7 @@ namespace tr::ctx {
    */
    class GameplayFacade {
     public:
-      GameplayFacade(gp::GameplaySystem& gameplaySystem,
-                     gfx::RenderContext& renderer,
-                     bool debugEnabled = false);
+      GameplayFacade(gp::GameplaySystem& gameplaySystem, gfx::RenderContext& renderer);
       ~GameplayFacade();
 
       GameplayFacade(const GameplayFacade&) = delete;
@@ -41,10 +38,6 @@ namespace tr::ctx {
       GameplayFacade& operator=(GameplayFacade&&) = delete;
 
       // Entity Creation Methods
-      auto createSkinnedModelEntity(const cm::LoadedSkinnedModelData model) -> cm::EntityType;
-
-      auto createStaticMultiMeshEntity(const cm::MeshHandles meshes) -> cm::EntityType;
-
       auto createTerrain(const uint32_t size) -> futures::cfuture<cm::EntityType>;
 
       auto createCamera(uint32_t width,
@@ -66,31 +59,6 @@ namespace tr::ctx {
           -> futures::cfuture<cm::EntityType>;
 
       auto clear() -> void;
-
-      // Resource Creation Methods
-      /*
-         TODO:
-         This facade shouldn't expose the two parts of gfx loading and then gp creation. It should
-         just be able to tell the gp system to create something, then the gp system should be able
-         to tell the gfx system what assets it should use to render the entity.
-
-         In a game application, these assets might be loaded differently, from a pack or something,
-         so we'll need to think about what API the editor needs vs what API the game needs, and how
-         to factor out a common API that both of those can talk to.
-      */
-      auto loadModelAsync(const std::filesystem::path& path) -> std::future<cm::ModelHandle>;
-
-      auto loadSkinnedModelAsync(const std::filesystem::path& modelPath,
-                                 const std::filesystem::path& skeletonPath,
-                                 const std::filesystem::path& animationPath)
-          -> std::future<cm::LoadedSkinnedModelData>;
-
-      void loadModelResources(const std::filesystem::path& modelPath,
-                              const std::filesystem::path& skeletonPath,
-                              const std::filesystem::path& animationPath,
-                              const std::function<void()> done);
-
-      void update();
 
     private:
       class Impl;

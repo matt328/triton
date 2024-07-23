@@ -35,7 +35,7 @@ namespace tr::gp {
       sys::AnimationSystem::update(*registry, animationFactory);
    }
 
-   void EntitySystem::prepareRenderData(cm::RenderData& renderData) {
+   void EntitySystem::prepareRenderData(cm::gpu::RenderData& renderData) {
       auto lock = std::shared_lock<std::shared_mutex>{registryMutex};
       sys::RenderDataSystem::update(*registry, renderData);
    }
@@ -60,13 +60,16 @@ namespace tr::gp {
           cmp::WindowDimensions{static_cast<int>(size.first), static_cast<int>(size.second)});
    }
 
-   auto EntitySystem::createTerrain(const cm::MeshHandles handles) -> cm::EntityType {
+   auto EntitySystem::createTerrain(const cm::ModelData handles) -> cm::EntityType {
       ZoneNamedN(n, "entitySystem.createTerrain", true);
       auto lock = std::unique_lock<std::shared_mutex>{registryMutex};
 
+      auto renderable = std::unordered_map<cm::MeshHandle, cm::TextureHandle>{
+          {handles.meshData.meshHandle, handles.meshData.textureHandle}};
+
       auto e = registry->create();
 
-      registry->emplace<cmp::Renderable>(e, handles);
+      registry->emplace<cmp::Renderable>(e, renderable);
       registry->emplace<cmp::TerrainMarker>(e);
       registry->emplace<gp::cmp::Transform>(e,
                                             glm::zero<glm::vec3>(),
@@ -80,29 +83,40 @@ namespace tr::gp {
       return e;
    }
 
-   auto EntitySystem::createStaticModel(const cm::MeshHandles handles) -> cm::EntityType {
+   auto EntitySystem::createStaticModel(const cm::ModelData handles) -> cm::EntityType {
       auto lock = std::unique_lock<std::shared_mutex>{registryMutex};
 
+      auto renderable = std::unordered_map<cm::MeshHandle, cm::TextureHandle>{
+          {handles.meshData.meshHandle, handles.meshData.textureHandle}};
+
       auto e = registry->create();
-      registry->emplace<cmp::Renderable>(e, handles);
+      registry->emplace<cmp::Renderable>(e, renderable);
       registry->emplace<gp::cmp::Transform>(e);
       return e;
    }
 
-   auto EntitySystem::createAnimatedModel(const cm::LoadedSkinnedModelData modelData)
-       -> cm::EntityType {
+   auto EntitySystem::createAnimatedModel(const cm::ModelData modelData) -> cm::EntityType {
       auto lock = std::unique_lock<std::shared_mutex>{registryMutex};
       auto e = registry->create();
 
+      if (!modelData.animationData) {
+         // TODO Better Exceptions here
+         throw std::runtime_error("Animated Model created without animation data");
+      }
+
+      if (!modelData.skinData) {
+         throw std::runtime_error("Animated Model created without skin data");
+      }
+
       registry->emplace<cmp::Animation>(e,
-                                        modelData.animationHandle,
-                                        modelData.skeletonHandle,
-                                        modelData.jointMap,
-                                        modelData.inverseBindMatrices);
+                                        modelData.animationData->animationHandle,
+                                        modelData.animationData->skeletonHandle,
+                                        modelData.skinData->jointMap,
+                                        modelData.skinData->inverseBindMatrices);
       registry->emplace<gp::cmp::Transform>(e);
 
       const auto meshes = std::unordered_map<cm::MeshHandle, cm::TextureHandle>{
-          {modelData.meshHandle, modelData.textureHandle}};
+          {modelData.meshData.meshHandle, modelData.meshData.textureHandle}};
 
       registry->emplace<cmp::Renderable>(e, meshes);
 

@@ -55,8 +55,6 @@ namespace ed::ui {
 
       dataFacade.update();
 
-      handleSkinnedModelFutures();
-
       if (wireframeCallback) {
          wireframeCallback(enableWireframe);
       }
@@ -89,22 +87,6 @@ namespace ed::ui {
 
       if (openModel) {
          ImGui::OpenPopup("Import Model");
-      }
-   }
-
-   void Manager::handleSkinnedModelFutures() {
-      for (auto it = skinnedModelFutures.begin(); it != skinnedModelFutures.end();) {
-         auto status = it->wait_for(std::chrono::seconds(0));
-         if (status == std::future_status::ready) {
-            ZoneNamedN(loadComplete, "Creating Mesh Entities", true);
-            try {
-               auto r = it->get();
-               facade.createSkinnedModelEntity(r);
-            } catch (const std::exception& e) { Log.error("Error loading model: {0}"); }
-            it = skinnedModelFutures.erase(it);
-         } else {
-            ++it;
-         }
       }
    }
 
@@ -297,12 +279,6 @@ namespace ed::ui {
       }
       if (show) {
          ImGui::ShowDemoWindow(&show);
-      }
-
-      if (loadTerrain) {
-         ZoneNamedN(n, "Create Terrain", true);
-         TracyMessageL("Before CreateTerrain");
-         terrainFutures.push_back(facade.createTerrain(1024));
       }
    }
 

@@ -62,6 +62,8 @@ namespace ed::data {
          }
       }
 
+      // TODO: Add an error handler function here.
+      // catch the exception thrown by .get on L32 and call the error function
       template <typename T>
       void monitorFuture(futures::cfuture<T> future, const std::function<void(T)>& fn) {
          futures.emplace_back(std::make_unique<FutureWrapper<T>>(std::move(future), fn));

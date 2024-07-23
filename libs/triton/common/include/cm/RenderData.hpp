@@ -2,7 +2,7 @@
 
 #include "cm/ObjectData.hpp"
 
-namespace tr::cm {
+namespace tr::cm::gpu {
 
    struct MeshData {
       cm::MeshHandle handle;

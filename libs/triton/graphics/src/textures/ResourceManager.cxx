@@ -29,21 +29,21 @@ namespace tr::gfx::tx {
    ResourceManager::~ResourceManager() {
    }
 
-   void ResourceManager::setRenderData(cm::RenderData& newRenderData) {
+   void ResourceManager::setRenderData(cm::gpu::RenderData& newRenderData) {
       std::lock_guard<LockableBase(std::mutex)> lock(renderDataMutex);
       LockableName(renderDataMutex, "SetRenderData", 13);
       LockMark(renderDataMutex);
       renderData = newRenderData;
    }
 
-   void ResourceManager::accessRenderData(std::function<void(cm::RenderData&)> fn) {
+   void ResourceManager::accessRenderData(std::function<void(cm::gpu::RenderData&)> fn) {
       std::lock_guard<LockableBase(std::mutex)> lock(renderDataMutex);
       LockableName(renderDataMutex, "AccessRenderData", 16);
       LockMark(renderDataMutex);
       fn(renderData);
    }
 
-   auto ResourceManager::createTerrain(const uint32_t size) -> futures::cfuture<cm::ModelHandle> {
+   auto ResourceManager::createTerrain(const uint32_t size) -> futures::cfuture<cm::ModelData> {
       ZoneNamedN(n, "ResourceManager::createTerrain", true);
 
       const auto createFn = [this, size]() {
@@ -64,13 +64,13 @@ namespace tr::gfx::tx {
    }
 
    auto ResourceManager::createModel(const std::filesystem::path& filename)
-       -> futures::cfuture<std::optional<cm::ModelHandle>> {
+       -> futures::cfuture<cm::ModelData> {
       ZoneNamedN(n, "ResourceManager::loadModel", true);
 
-      const auto createFn = [this, filename]() -> std::optional<cm::ModelHandle> {
+      const auto createFn = [this, filename]() -> cm::ModelData {
          ZoneNamedN(z, "Loading Model", true);
 
-         const auto modelData = [this, &filename]() {
+         auto tritonModelData = [this, &filename]() {
             try {
                return geometryFactory->loadTrm(filename);
             } catch (const geo::IOException& ex) {
@@ -80,24 +80,31 @@ namespace tr::gfx::tx {
             }
          }();
 
-         const auto modelHandle = [this, &modelData]() {
+         // Upload Meshes and Textures and fill out handles in modelData
+         auto modelData = [this, &tritonModelData]() {
             try {
-               return uploadGeometry(modelData.getGeometryHandle(), modelData.getImageHandle());
+               return uploadGeometry(tritonModelData.getGeometryHandle(),
+                                     tritonModelData.getImageHandle());
             } catch (const ResourceUploadException& ex) {
                throw ResourceCreateException(fmt::format("Error uploading model: {0}", ex.what()));
             }
          }();
+         geometryFactory->unload(
+             {{tritonModelData.getGeometryHandle(), tritonModelData.getImageHandle()}});
 
-         geometryFactory->unload({{modelData.getGeometryHandle(), modelData.getImageHandle()}});
+         const auto skinData = tritonModelData.getSkinData();
+         if (skinData) {
+            modelData.skinData = std::move(skinData);
+         }
 
-         return modelHandle;
+         return modelData;
       };
 
       return futures::async(createFn);
    }
 
    auto ResourceManager::uploadGeometry(const geo::GeometryHandle& geometryHandle,
-                                        const geo::ImageHandle& imageHandle) -> cm::ModelHandle {
+                                        const geo::ImageHandle& imageHandle) -> cm::ModelData {
       auto& allocator = graphicsDevice.getAllocator();
       auto& context = graphicsDevice.getAsyncTransferContext();
 
@@ -160,7 +167,7 @@ namespace tr::gfx::tx {
          const auto meshHandle = meshList.size();
          meshList.emplace_back(std::move(vertexBuffer), std::move(indexBuffer), indicesCount);
 
-         return cm::ModelHandle{meshHandle, textureHandle};
+         return cm::ModelData{.meshData = {meshHandle, textureHandle}};
 
       } catch (const mem::AllocationException& ex) {
          throw ResourceUploadException(

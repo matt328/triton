@@ -3,6 +3,7 @@
 #include "GraphicsDevice.hpp"
 #include "RenderObject.hpp"
 
+#include "cm/Handles.hpp"
 #include "cm/ObjectData.hpp"
 #include "cm/RenderData.hpp"
 #include "sb/LayoutFactory.hpp"
@@ -167,7 +168,7 @@ namespace tr::gfx {
          return *resourceManager;
       }
 
-      void setCurrentCameraData(cm::CameraData&& cameraData) {
+      void setCurrentCameraData(cm::gpu::CameraData&& cameraData) {
          this->cameraData = std::move(cameraData);
       }
 
@@ -180,12 +181,11 @@ namespace tr::gfx {
          resizeFn(graphicsDevice->getCurrentSize());
       }
 
-      void setRenderData(cm::RenderData& renderData) {
+      void setRenderData(cm::gpu::RenderData& renderData) {
          resourceManager->setRenderData(renderData);
       }
 
-      auto createStaticModel(const std::filesystem::path& modelPath)
-          -> futures::cfuture<cm::MeshHandles> {
+      auto createStaticModel(const std::filesystem::path& modelPath) {
          return resourceManager->createModel(modelPath);
       }
 
@@ -193,10 +193,8 @@ namespace tr::gfx {
          return resourceManager->createTerrain(size);
       }
 
-      auto createAnimatedModel(const std::filesystem::path& modelPath,
-                               const std::filesystem::path& skeletonPath,
-                               const std::filesystem::path& animationPath) {
-         return resourceManager->loadSkinnedModelAsync(modelPath, skeletonPath, animationPath);
+      auto createSkinnedModel(const std::filesystem::path& modelPath) {
+         return resourceManager->createModel(modelPath);
       }
 
     private:
@@ -381,11 +379,12 @@ namespace tr::gfx {
          terrainDataList.clear();
          skinnedModelList.clear();
 
-         resourceManager->accessRenderData([&frame, this](cm::RenderData& renderData) {
+         resourceManager->accessRenderData([&frame, this](cm::gpu::RenderData& renderData) {
             frame.updateObjectDataBuffer(renderData.objectData.data(),
-                                         sizeof(cm::ObjectData) * renderData.objectData.size());
+                                         sizeof(cm::gpu::ObjectData) *
+                                             renderData.objectData.size());
 
-            frame.updatePerFrameDataBuffer(&renderData.cameraData, sizeof(cm::CameraData));
+            frame.updatePerFrameDataBuffer(&renderData.cameraData, sizeof(cm::gpu::CameraData));
 
             frame.updateAnimationDataBuffer(renderData.animationData.data(),
                                             sizeof(cm::AnimationData) *
@@ -443,30 +442,34 @@ namespace tr::gfx {
                for (const auto& meshData : staticMeshDataList) {
                   const auto& mesh = resourceManager->getMesh(meshData.handle);
 
-                  cmd.bindVertexBuffers(0, mesh.vertexBuffer->getBuffer(), {0});
-                  cmd.bindIndexBuffer(mesh.indexBuffer->getBuffer(), 0, vk::IndexType::eUint32);
+                  cmd.bindVertexBuffers(0, mesh.getVertexBuffer()->getBuffer(), {0});
+                  cmd.bindIndexBuffer(mesh.getIndexBuffer()->getBuffer(),
+                                      0,
+                                      vk::IndexType::eUint32);
 
                   // instanceId becomes gl_BaseInstance in the shader
-                  cmd.drawIndexed(mesh.indicesCount, 1, 0, 0, meshData.objectDataId);
+                  cmd.drawIndexed(mesh.getIndicesCount(), 1, 0, 0, meshData.objectDataId);
                }
             }
 
             // Terrain
             cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, **terrainPipeline);
             {
-               cmd.pushConstants<cm::PushConstants>(**terrainPipelineLayout,
-                                                    vk::ShaderStageFlagBits::eVertex |
-                                                        vk::ShaderStageFlagBits::eFragment,
-                                                    0,
-                                                    pushConstants);
+               cmd.pushConstants<cm::gpu::PushConstants>(**terrainPipelineLayout,
+                                                         vk::ShaderStageFlagBits::eVertex |
+                                                             vk::ShaderStageFlagBits::eFragment,
+                                                         0,
+                                                         pushConstants);
                for (const auto& meshData : terrainDataList) {
                   const auto& mesh = resourceManager->getMesh(meshData.handle);
 
-                  cmd.bindVertexBuffers(0, mesh.vertexBuffer->getBuffer(), {0});
-                  cmd.bindIndexBuffer(mesh.indexBuffer->getBuffer(), 0, vk::IndexType::eUint32);
+                  cmd.bindVertexBuffers(0, mesh.getVertexBuffer()->getBuffer(), {0});
+                  cmd.bindIndexBuffer(mesh.getIndexBuffer()->getBuffer(),
+                                      0,
+                                      vk::IndexType::eUint32);
 
                   // instanceId becomes gl_BaseInstance in the shader
-                  cmd.drawIndexed(mesh.indicesCount, 1, 0, 0, meshData.objectDataId);
+                  cmd.drawIndexed(mesh.getIndicesCount(), 1, 0, 0, meshData.objectDataId);
                }
             }
 
@@ -479,11 +482,13 @@ namespace tr::gfx {
                for (const auto& meshData : skinnedModelList) {
                   const auto& mesh = resourceManager->getMesh(meshData.handle);
 
-                  cmd.bindVertexBuffers(0, mesh.vertexBuffer->getBuffer(), {0});
-                  cmd.bindIndexBuffer(mesh.indexBuffer->getBuffer(), 0, vk::IndexType::eUint32);
+                  cmd.bindVertexBuffers(0, mesh.getVertexBuffer()->getBuffer(), {0});
+                  cmd.bindIndexBuffer(mesh.getIndexBuffer()->getBuffer(),
+                                      0,
+                                      vk::IndexType::eUint32);
 
                   // instanceId becomes gl_BaseInstance in the shader
-                  cmd.drawIndexed(mesh.indicesCount, 1, 0, 0, meshData.objectDataId);
+                  cmd.drawIndexed(mesh.getIndicesCount(), 1, 0, 0, meshData.objectDataId);
                }
             }
 
@@ -494,21 +499,25 @@ namespace tr::gfx {
                   for (const auto& meshData : terrainDataList) {
                      const auto& mesh = resourceManager->getMesh(meshData.handle);
 
-                     cmd.bindVertexBuffers(0, mesh.vertexBuffer->getBuffer(), {0});
-                     cmd.bindIndexBuffer(mesh.indexBuffer->getBuffer(), 0, vk::IndexType::eUint32);
+                     cmd.bindVertexBuffers(0, mesh.getVertexBuffer()->getBuffer(), {0});
+                     cmd.bindIndexBuffer(mesh.getIndexBuffer()->getBuffer(),
+                                         0,
+                                         vk::IndexType::eUint32);
 
                      // instanceId becomes gl_BaseInstance in the shader
-                     cmd.drawIndexed(mesh.indicesCount, 1, 0, 0, meshData.objectDataId);
+                     cmd.drawIndexed(mesh.getIndicesCount(), 1, 0, 0, meshData.objectDataId);
                   }
 
                   for (const auto& meshData : staticMeshDataList) {
                      const auto& mesh = resourceManager->getMesh(meshData.handle);
 
-                     cmd.bindVertexBuffers(0, mesh.vertexBuffer->getBuffer(), {0});
-                     cmd.bindIndexBuffer(mesh.indexBuffer->getBuffer(), 0, vk::IndexType::eUint32);
+                     cmd.bindVertexBuffers(0, mesh.getVertexBuffer()->getBuffer(), {0});
+                     cmd.bindIndexBuffer(mesh.getIndexBuffer()->getBuffer(),
+                                         0,
+                                         vk::IndexType::eUint32);
 
                      // instanceId becomes gl_BaseInstance in the shader
-                     cmd.drawIndexed(mesh.indicesCount, 1, 0, 0, meshData.objectDataId);
+                     cmd.drawIndexed(mesh.getIndicesCount(), 1, 0, 0, meshData.objectDataId);
                   }
                }
             }
@@ -585,20 +594,20 @@ namespace tr::gfx {
       std::unique_ptr<tx::ResourceManager> resourceManager;
 
       std::vector<RenderObject> renderObjects{};
-      std::vector<cm::ObjectData> objectDataList{};
-      cm::CameraData cameraData{glm::identity<glm::mat4>(),
-                                glm::identity<glm::mat4>(),
-                                glm::identity<glm::mat4>()};
+      std::vector<cm::gpu::ObjectData> objectDataList{};
+      cm::gpu::CameraData cameraData{glm::identity<glm::mat4>(),
+                                     glm::identity<glm::mat4>(),
+                                     glm::identity<glm::mat4>()};
 
       uint32_t currentFrame = 0;
       bool framebufferResized = false;
 
       std::function<void(std::pair<uint32_t, uint32_t>)> resizeFn;
 
-      std::vector<cm::MeshData> staticMeshDataList;
-      std::vector<cm::MeshData> terrainDataList;
-      std::vector<cm::MeshData> skinnedModelList;
-      cm::PushConstants pushConstants;
+      std::vector<cm::gpu::MeshData> staticMeshDataList;
+      std::vector<cm::gpu::MeshData> terrainDataList;
+      std::vector<cm::gpu::MeshData> skinnedModelList;
+      cm::gpu::PushConstants pushConstants;
    };
 
    RenderContext::RenderContext(GLFWwindow* window, bool guiEnabled) {
@@ -626,11 +635,11 @@ namespace tr::gfx {
       impl->enqueueRenderObject(std::move(renderObject));
    }
 
-   void RenderContext::setCurrentCameraData(cm::CameraData&& cameraData) {
+   void RenderContext::setCurrentCameraData(cm::gpu::CameraData&& cameraData) {
       impl->setCurrentCameraData(std::move(cameraData));
    }
 
-   void RenderContext::setRenderData(cm::RenderData& renderData) {
+   void RenderContext::setRenderData(cm::gpu::RenderData& renderData) {
       impl->setRenderData(renderData);
    }
 
@@ -638,19 +647,18 @@ namespace tr::gfx {
       impl->setDebugRendering(wireframeEnabled);
    }
 
-   auto RenderContext::createTerrain(const uint32_t size) -> futures::cfuture<cm::ModelHandle> {
+   auto RenderContext::createTerrain(const uint32_t size) -> futures::cfuture<cm::ModelData> {
       return impl->createTerrain(size);
    }
 
    auto RenderContext::createStaticModel(const std::filesystem::path& modelPath)
-       -> futures::cfuture<cm::MeshHandles> {
+       -> futures::cfuture<cm::ModelData> {
       return impl->createStaticModel(modelPath);
    }
 
-   auto RenderContext::createAnimatedModel(const std::filesystem::path& modelPath,
-                                           const std::filesystem::path& skeletonPath,
-                                           const std::filesystem::path& animationPath)
-       -> futures::cfuture<cm::LoadedSkinnedModelData> {
-      return impl->createAnimatedModel(modelPath, skeletonPath, animationPath);
+   auto RenderContext::createSkinnedModel(const std::filesystem::path& modelPath)
+       -> futures::cfuture<cm::ModelData> {
+      return impl->createSkinnedModel(modelPath);
    }
+
 }
