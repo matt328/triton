@@ -58,6 +58,8 @@ namespace tr::gp::sys::RenderDataSystem {
       for (auto [entity, animationData, renderable, transform] : animationsView.each()) {
          auto jointMatrices = std::vector<glm::mat4>{};
 
+         // Jointmap only has 25 things in it while animationData.models has 27
+
          jointMatrices.resize(animationData.jointMap.size());
          int i = 0;
          for (const auto [position, jointId] : animationData.jointMap) {
@@ -81,6 +83,7 @@ namespace tr::gp::sys::RenderDataSystem {
                                                it.second,
                                                jointMatricesIndex);
          }
+         // JointMatrices in the shader is all 0s after #6
          jointMatricesIndex += jointMatrices.size();
       }
 
