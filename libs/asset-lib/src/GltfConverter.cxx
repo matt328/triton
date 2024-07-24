@@ -87,6 +87,9 @@ namespace tr::as::gltf {
          auto ozzSkeleton = ozz::animation::Skeleton{};
          archive >> ozzSkeleton;
 
+         Log.debug("Skeleton has {0} joints", ozzSkeleton.num_joints());
+         Log.debug("gltf Skin has {0} joints", skin.joints.size());
+
          int position = 0;
          for (const auto& jointIndex : skin.joints) {
             const auto& jointNode = model.nodes[jointIndex];

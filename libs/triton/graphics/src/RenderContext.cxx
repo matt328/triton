@@ -386,8 +386,9 @@ namespace tr::gfx {
 
             frame.updatePerFrameDataBuffer(&renderData.cameraData, sizeof(cm::gpu::CameraData));
 
+            // TODO Rename this AnimationData class
             frame.updateAnimationDataBuffer(renderData.animationData.data(),
-                                            sizeof(cm::AnimationData) *
+                                            sizeof(cm::gpu::AnimationData) *
                                                 renderData.animationData.size());
 
             staticMeshDataList.reserve(renderData.staticMeshData.size());
