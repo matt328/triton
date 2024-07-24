@@ -16,7 +16,7 @@ namespace tr::gp::sys::AnimationSystem {
          }
 
          if (animationData.playing) {
-            animationData.timeRatio += 0.005f;
+            animationData.timeRatio += 0.0005f;
             if (animationData.timeRatio >= 1.f) {
                animationData.timeRatio = 0.f;
             }

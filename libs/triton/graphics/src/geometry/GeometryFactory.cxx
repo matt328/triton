@@ -33,6 +33,13 @@ namespace tr::gfx::geo {
 
       auto tritonModel = loadTrmFile(modelPath.string());
 
+      Log.debug("Joint Remaps Size: {0}", tritonModel.jointRemaps.size());
+      for (const auto& [position, sortedIndex] : tritonModel.jointRemaps) {
+         Log.debug("Joint Remap: {0}, {1}", position, sortedIndex);
+      }
+
+      Log.debug("inverseBindPoses.size(): {0}", tritonModel.inverseBindPoses.size());
+
       const auto imageHandle = imageKey.getKey();
       imageDataMap.emplace(imageHandle, tritonModel.imageData);
 
