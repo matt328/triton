@@ -72,9 +72,13 @@ namespace tr::gp::sys::RenderDataSystem {
             ++i;
          }
 
-         renderData.animationData.insert(renderData.animationData.begin(),
-                                         jointMatrices.begin(),
-                                         jointMatrices.end());
+         for (const auto jointMatrix : jointMatrices) {
+            renderData.animationData.push_back({jointMatrix});
+         }
+
+         // renderData.animationData.insert(renderData.animationData.begin(),
+         //                                 jointMatrices.begin(),
+         //                                 jointMatrices.end());
 
          for (auto& it : renderable.meshes) {
             const auto pos = renderData.objectData.size();
@@ -83,7 +87,7 @@ namespace tr::gp::sys::RenderDataSystem {
                                                it.second,
                                                jointMatricesIndex);
          }
-         // JointMatrices in the shader is all 0s after #6
+
          jointMatricesIndex += jointMatrices.size();
       }
 
