@@ -72,7 +72,6 @@ namespace tr::as::gltf {
       }
 
       // Calculate JointMap
-
       {
          ozz::io::File file(skeleton.string().c_str(), "rb");
 
@@ -109,6 +108,13 @@ namespace tr::as::gltf {
             ++position;
          }
       }
+
+      Log.debug("Joint Remaps Size: {0}", tritonModel.jointRemaps.size());
+      for (const auto& [position, sortedIndex] : tritonModel.jointRemaps) {
+         Log.debug("Joint Remap: {0}, {1}", position, sortedIndex);
+      }
+
+      Log.debug("inverseBindPoses.size(): {0}", tritonModel.inverseBindPoses.size());
 
       return tritonModel;
    }

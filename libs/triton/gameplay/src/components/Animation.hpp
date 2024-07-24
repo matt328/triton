@@ -11,15 +11,15 @@ namespace tr::gp::cmp {
                 std::vector<glm::mat4> inverseBindMatrices)
           : animationHandle{animationHandle},
             skeletonHandle{skeletonHandle},
-            jointMap{jointMap},
-            inverseBindMatrices{inverseBindMatrices} {
+            jointMap{std::move(jointMap)},
+            inverseBindMatrices{std::move(inverseBindMatrices)} {
       }
 
       cm::AnimationHandle animationHandle;
       cm::SkeletonHandle skeletonHandle;
 
       bool renderBindPose{};
-      bool playing{};
+      bool playing{true};
       std::string currentAnimationName;
 
       std::unordered_map<int, int> jointMap;
