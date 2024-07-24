@@ -133,10 +133,29 @@ namespace tr::as::gltf::Helpers {
       }
    }
 
-   auto createTexture(const tinygltf::Model& model, std::size_t textureIndex, Model& tritonModel) {
-      const auto& texture = model.textures[textureIndex];
-      const auto& image = model.images[texture.source];
-      tritonModel.imageData = ImageData{image.image, image.width, image.height, image.component};
+   auto createTexture(const tinygltf::Model& model, int textureIndex, Model& tritonModel) {
+      if (textureIndex == -1) {
+         tinygltf::Image image;
+
+         image.width = 1;
+         image.height = 1;
+         image.component = 4;
+         image.bits = 8;
+         image.pixel_type = TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE;
+
+         std::vector<unsigned char> imageData(image.width * image.height * image.component);
+         imageData[0] = 255; // Red
+         imageData[1] = 255; // Green
+         imageData[2] = 255; // Blue
+         imageData[3] = 255; // Alpha
+
+         image.image = std::move(imageData);
+         tritonModel.imageData = ImageData{image.image, image.width, image.height, image.component};
+      } else {
+         const auto& texture = model.textures[textureIndex];
+         const auto& image = model.images[texture.source];
+         tritonModel.imageData = ImageData{image.image, image.width, image.height, image.component};
+      }
    }
 
    void parseNode(const tinygltf::Model& model, const tinygltf::Node& node, Model& tritonModel) {
@@ -151,9 +170,7 @@ namespace tr::as::gltf::Helpers {
             const auto& material = model.materials[materialIndex];
             const auto& baseColorTextureIndex =
                 material.pbrMetallicRoughness.baseColorTexture.index;
-            if (baseColorTextureIndex != -1) {
-               createTexture(model, baseColorTextureIndex, tritonModel);
-            }
+            createTexture(model, baseColorTextureIndex, tritonModel);
          }
       }
       // Exit Criteria is node.children is empty
