@@ -87,8 +87,8 @@ namespace tr::as::gltf {
          auto ozzSkeleton = ozz::animation::Skeleton{};
          archive >> ozzSkeleton;
 
-         Log.debug("Skeleton has {0} joints", ozzSkeleton.num_joints());
-         Log.debug("gltf Skin has {0} joints", skin.joints.size());
+         Log.trace("Skeleton has {0} joints", ozzSkeleton.num_joints());
+         Log.trace("gltf Skin has {0} joints", skin.joints.size());
 
          int position = 0;
          for (const auto& jointIndex : skin.joints) {
@@ -112,12 +112,12 @@ namespace tr::as::gltf {
          }
       }
 
-      Log.debug("Joint Remaps Size: {0}", tritonModel.jointRemaps.size());
+      Log.trace("Joint Remaps Size: {0}", tritonModel.jointRemaps.size());
       for (const auto& [position, sortedIndex] : tritonModel.jointRemaps) {
-         Log.debug("Joint Remap: {0}, {1}", position, sortedIndex);
+         Log.trace("Joint Remap: {0}, {1}", position, sortedIndex);
       }
 
-      Log.debug("inverseBindPoses.size(): {0}", tritonModel.inverseBindPoses.size());
+      Log.trace("inverseBindPoses.size(): {0}", tritonModel.inverseBindPoses.size());
 
       return tritonModel;
    }
