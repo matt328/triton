@@ -11,7 +11,7 @@ namespace ed::ui::helpers {
       constexpr auto SkeletonFilters =
           std::array<nfdfilteritem_t, 1>{nfdfilteritem_t{"Ozz Skeleton", "ozz"}};
 
-      if (ImGui::BeginPopupModal("Import Skeleton")) {
+      if (ImGui::BeginPopupModal("Import Skeleton", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
          static std::string skeletonFilename{}; // Temporary value to store input
          static std::string skeletonName{"Unnamed Skeleton"};
 
@@ -34,14 +34,20 @@ namespace ed::ui::helpers {
             }
          }
 
-         if (ImGui::Button("Ok", ImVec2(120, 0))) {
+         auto style = ImGui::GetStyle();
+         ImVec2 buttonSize(95.f, 0.f);
+         auto widthNeeded = buttonSize.x + style.ItemSpacing.x + buttonSize.x;
+         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x -
+                              widthNeeded);
+
+         if (ImGui::Button("Ok", ImVec2(95, 0))) {
             dataFacade.addSkeleton(skeletonName, skeletonFilename);
             skeletonName = "";
             skeletonFilename = "";
             ImGui::CloseCurrentPopup();
          }
          ImGui::SameLine();
-         if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+         if (ImGui::Button("Cancel", ImVec2(95, 0))) {
             ImGui::CloseCurrentPopup();
          }
 
