@@ -14,7 +14,7 @@
 namespace ed::ui {
    Manager::Manager(tr::ctx::GameplayFacade& facade, data::DataFacade& dataFacade)
        : facade{facade}, dataFacade{dataFacade} {
-      ImGuiEx::setupImGuiStyle();
+      ImGuiEx::setupImGuiStyle2();
       ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
       auto& io = ImGui::GetIO();
