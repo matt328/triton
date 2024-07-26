@@ -75,10 +75,7 @@ namespace ed::ui::components {
             // Right
             {
                ImGui::BeginGroup();
-               ImGui::BeginChild("item view",
-                                 ImVec2(0,
-                                        -ImGui::GetFrameHeightWithSpacing() *
-                                            4)); // Leave room for 1 line below us
+               ImGui::BeginChild("item view");
 
                if (selectedEntity.has_value()) {
                   ImGui::Text("%s", selectedEntity.value().c_str());
