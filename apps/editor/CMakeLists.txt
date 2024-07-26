@@ -49,6 +49,7 @@ target_precompile_headers(${PROJECT_NAME}
    <fstream>
    <imgui.h>
    <imgui_internal.h>
+   <imgui_stdlib.h>
    "src/ui/ImGuiStyle.hpp"
    <stb_image.h>
    <glm/gtc/type_ptr.hpp>
