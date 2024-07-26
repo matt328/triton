@@ -76,21 +76,21 @@ namespace ed::data {
                                         const std::string_view& modelName,
                                         const std::string_view& skeletonName,
                                         const std::string_view& animationName) {
-      auto entityData = EntityData{.name = entityName.data(),
+      auto name = std::string{entityName.data()};
+      auto entityData = EntityData{.name = name,
                                    .position = glm::vec3{0.f},
                                    .rotation = glm::identity<glm::quat>(),
                                    .modelName = modelName.data(),
                                    .skeleton = skeletonName.data()};
       entityData.animations = std::vector<std::string>{animationName.data()};
-      dataStore.scene.insert({entityName.data(), entityData});
+      dataStore.scene.insert({name, entityData});
       unsaved = true;
 
       const auto modelFilename = dataStore.models.at(modelName.data()).filePath;
       const auto skeletonFilename = dataStore.skeletons.at(skeletonName.data()).filePath;
       const auto animationFilename = dataStore.animations.at(animationName.data()).filePath;
 
-      std::function<void(tr::cm::EntityType)> fn = [this, entityName](tr::cm::EntityType entity) {
-         const auto name = entityName.data();
+      std::function<void(tr::cm::EntityType)> fn = [this, name](tr::cm::EntityType entity) {
          entityNameMap.insert({name, entity});
          engineBusy = false;
          Log.info("Finished creating entity: id: {0}, name: {1}",
@@ -134,7 +134,34 @@ namespace ed::data {
       try {
          auto is = std::ifstream(inputFile, std::ios::binary);
          cereal::BinaryInputArchive input(is);
-         input(dataStore);
+         auto tempStore = DataStore{};
+         input(tempStore);
+
+         clear();
+
+         for (const auto& [name, skeleton] : tempStore.skeletons) {
+            addSkeleton(skeleton.name, skeleton.filePath);
+         }
+
+         for (const auto& [name, animation] : tempStore.animations) {
+            addAnimation(animation.name, animation.filePath);
+         }
+
+         for (const auto& [name, model] : tempStore.models) {
+            addModel(model.name, model.filePath);
+         }
+
+         for (const auto& [name, entityData] : tempStore.scene) {
+            if (entityData.animations.empty()) {
+               createStaticModel(entityData.name, entityData.modelName);
+            } else {
+               createAnimatedModel(entityData.name,
+                                   entityData.modelName,
+                                   entityData.skeleton,
+                                   entityData.animations[0]);
+            }
+         }
+
          unsaved = false;
       } catch (const std::exception& ex) { Log.error(ex.what()); }
    }
