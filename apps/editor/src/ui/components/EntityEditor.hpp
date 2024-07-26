@@ -1,12 +1,8 @@
 #pragma once
 
-#include "cm/EntitySystemTypes.hpp"
-
 #include "tr/GameplayFacade.hpp"
 #include "data/DataFacade.hpp"
-
 #include <imgui.h>
-#include <imgui_stdlib.h>
 
 // TODO tomorrow fire this back up
 // Add a way to create a static model entity by selecting a model
@@ -36,7 +32,9 @@ namespace ed::ui::components {
          static auto showModelEntityModal = bool{};
          static auto showAnimatedModelModal = bool{};
 
-         if (ImGui::Begin("Entity Editor", nullptr, ImGuiWindowFlags_MenuBar | unsaved)) {
+         if (ImGui::Begin("Entity Editor",
+                          nullptr,
+                          ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_MenuBar | unsaved)) {
 
             if (ImGui::BeginMenuBar()) {
                if (ImGui::BeginMenu("New")) {
@@ -74,9 +72,7 @@ namespace ed::ui::components {
 
             // Right
             {
-               ImGui::BeginGroup();
-               ImGui::BeginChild("item view");
-
+               ImGui::BeginChild("item view", ImVec2(0, 0), ImGuiChildFlags_Border);
                if (selectedEntity.has_value()) {
                   ImGui::Text("%s", selectedEntity.value().c_str());
                } else {
@@ -92,9 +88,15 @@ namespace ed::ui::components {
                   }
                   ImGui::DragFloat3("Rotation", glm::value_ptr(rotation), .1f, -180.f, 180.f);
                }
+
+               if (selectedEntity.has_value()) {
+                  const auto entityData = dataFacade.getEntityData(selectedEntity.value());
+                  if (!entityData.animations.empty()) {
+                     renderAnimationArea(gameplayFacade);
+                  }
+               }
             }
             ImGui::EndChild();
-            ImGui::EndGroup();
          }
          ImGui::End();
 
@@ -236,60 +238,58 @@ namespace ed::ui::components {
 
       void renderAnimationArea([[maybe_unused]] tr::ctx::GameplayFacade& gameplayFacade) {
          ImGui::SeparatorText("Animation");
-         // static size_t itemCurrentIndex{};
-         // static bool playing{};
-         // static bool bindPose{};
+         static size_t itemCurrentIndex{};
+         static bool playing{};
+         static bool bindPose{};
 
-         // std::vector<const char*> items;
-         // items.push_back("Animation");
+         std::vector<const char*> items;
+         items.push_back("Animation");
 
-         //    if (ImGui::BeginCombo("Animation Name", items[itemCurrentIndex])) {
-         //       for (size_t n = 0; n < items.size(); ++n) {
-         //          const bool isSelected = (itemCurrentIndex == n);
-         //          if (ImGui::Selectable(items[n], isSelected)) {
-         //             itemCurrentIndex = n;
-         //             animationComponent.currentAnimationName =
-         //             std::string{items[itemCurrentIndex]};
-         //          }
-         //          if (isSelected) {
-         //             ImGui::SetItemDefaultFocus();
-         //          }
-         //       }
-         //       ImGui::EndCombo();
-         //    }
+         if (ImGui::BeginCombo("Animation", items[itemCurrentIndex])) {
+            for (size_t n = 0; n < items.size(); ++n) {
+               const bool isSelected = (itemCurrentIndex == n);
+               if (ImGui::Selectable(items[n], isSelected)) {
+                  itemCurrentIndex = n;
+                  Log.debug("Set Current Animation Name to {0}",
+                            std::string{items[itemCurrentIndex]});
+               }
+               if (isSelected) {
+                  ImGui::SetItemDefaultFocus();
+               }
+            }
+            ImGui::EndCombo();
+         }
 
-         //    bool previousBindPose = bindPose;
+         bool previousBindPose = bindPose;
 
-         //    ImGui::BeginDisabled(playing);
-         //    if (ImGui::Checkbox("Bind Pose", &bindPose)) {
-         //       if (bindPose != previousBindPose) {
-         //          animationComponent.renderBindPose = bindPose;
-         //       }
-         //    }
-         //    ImGui::EndDisabled();
+         ImGui::BeginDisabled(playing);
+         if (ImGui::Checkbox("Bind Pose", &bindPose)) {
+            if (bindPose != previousBindPose) {
+               Log.debug("Set renderBindPose to {0}", bindPose);
+            }
+         }
+         ImGui::EndDisabled();
 
-         //    bool previousPlaying = playing;
+         bool previousPlaying = playing;
 
-         //    ImGui::BeginDisabled(bindPose);
+         ImGui::BeginDisabled(bindPose);
 
-         //    if (ImGui::Checkbox("Play", &playing)) {
-         //       if (playing != previousPlaying) {
-         //          animationComponent.playing = playing;
-         //       }
-         //    }
+         ImGui::SameLine();
 
-         //    ImGui::BeginDisabled(playing);
-         //    const auto [min_v, max_v] =
-         //        gameplayFacade.getAnimationTimeRange(animationComponent.animationHandle);
+         if (ImGui::Checkbox("Play", &playing)) {
+            if (playing != previousPlaying) {
+               Log.debug("Set playing to {0}", playing);
+            }
+         }
 
-         //    static float timeValue = min_v;
-         //    if (ImGui::SliderFloat("Time", &timeValue, min_v, max_v, "%.2f")) {
-         //       const auto value = (timeValue - min_v) / (max_v - min_v);
-         //       animationComponent.timeRatio = value;
-         //    }
-         //    ImGui::EndDisabled();
-         //    ImGui::EndDisabled();
-         // }
-      };
+         ImGui::BeginDisabled(playing);
+
+         static float timeValue = 0.f;
+         if (ImGui::SliderFloat("Time", &timeValue, 0.f, 1.f, "%.2f")) {
+            Log.debug("Set timeValue to {0}", timeValue);
+         }
+         ImGui::EndDisabled();
+         ImGui::EndDisabled();
+      }
    };
 }
