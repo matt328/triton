@@ -34,7 +34,7 @@ namespace ed::ui::components {
 
          if (ImGui::Begin("Entity Editor",
                           nullptr,
-                          ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_MenuBar | unsaved)) {
+                          ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_MenuBar)) {
 
             if (ImGui::BeginMenuBar()) {
                if (ImGui::BeginMenu("New")) {
