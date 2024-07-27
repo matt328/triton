@@ -128,7 +128,7 @@ namespace ed::ui {
 
             auto dockIdLeft = ImGui::DockBuilderSplitNode(dockspaceId,
                                                           ImGuiDir_Left,
-                                                          0.2f,
+                                                          0.25f,
                                                           nullptr,
                                                           &dockspaceId);
 
