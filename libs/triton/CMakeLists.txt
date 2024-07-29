@@ -7,10 +7,6 @@ set(triton_SRC
 
 add_library(${PROJECT_NAME} STATIC ${triton_SRC})
 
-IF(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-   target_compile_options(${PROJECT_NAME} PRIVATE ${TRITON_COMPILE_OPTIONS})
-ENDIF()
-
 IF(WIN32)
    target_compile_definitions(${PROJECT_NAME}
       PUBLIC
