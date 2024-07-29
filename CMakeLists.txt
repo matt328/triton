@@ -7,23 +7,12 @@ project(Triton)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/vendor/cmake-scripts;")
 
 include(c++-standards)
+include(compiler-options)
 cxx_20()
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 
-SET(CMAKE_CXX_STANDARD 20)
-SET(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin/")
-
-set(TRITON_COMPILE_OPTIONS
-   "-Wall"
-   "-Wextra"
-   "-pedantic"
-   "-Wno-nullability-extension"
-   "-Wno-nullability-completeness"
-   "-Wno-deprecated-volatile"
-)
 
 add_subdirectory(assets)
 add_subdirectory(libs/util-lib)

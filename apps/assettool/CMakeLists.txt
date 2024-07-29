@@ -9,10 +9,6 @@ add_executable(${PROJECT_NAME} ${assettool_SRC})
 find_package(cereal CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 
-IF(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-   target_compile_options(${PROJECT_NAME} PRIVATE ${TRITON_COMPILE_OPTIONS})
-ENDIF()
-
 target_compile_definitions(${PROJECT_NAME}
    PRIVATE
 )
