@@ -4,6 +4,11 @@ set(CMAKE_TOOLCHAIN_FILE ./vcpkg/scripts/buildsystems/vcpkg.cmake)
 
 project(Triton)
 
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/vendor/cmake-scripts;")
+
+include(c++-standards)
+cxx_20()
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 
 SET(CMAKE_CXX_STANDARD 20)
@@ -27,3 +32,5 @@ add_subdirectory(apps/editor)
 add_subdirectory(apps/testarea)
 add_subdirectory(apps/assettool)
 add_subdirectory(libs/asset-lib)
+
+include(CTest)
