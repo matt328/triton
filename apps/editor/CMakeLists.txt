@@ -9,10 +9,6 @@ set(editor_SRC
 
 add_executable(${PROJECT_NAME} ${editor_SRC})
 
-IF(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-   target_compile_options(${PROJECT_NAME} PRIVATE ${TRITON_COMPILE_OPTIONS})
-ENDIF()
-
 configure_file(src/config.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/config.h)
 
 find_package(cereal CONFIG REQUIRED)

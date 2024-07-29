@@ -3,6 +3,10 @@
 #include <catch2/catch_test_macros.hpp>
 
 TEST_CASE("Vector is tested", "[factorial]") {
+
+   const auto result = factorial(3);
+   REQUIRE(result == 6);
+
    // This setup will be done 4 times in total, once for each section
    std::vector<int> v(5);
 
