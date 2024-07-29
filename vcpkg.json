@@ -3,6 +3,7 @@
    "version-string": "0.1.0",
    "builtin-baseline": "67a300519ea09dbf02b4d06982e781a01b617b93",
    "dependencies": [
+      "catch2",
       "cereal",
       "entt",
       "glfw3",
@@ -15,6 +16,7 @@
       "spdlog",
       "stb",
       "tinygltf",
+      "trompeloeil",
       "tracy",
       "vulkan-memory-allocator",
       "vulkan-memory-allocator-hpp",
