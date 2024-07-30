@@ -27,7 +27,7 @@ namespace tr::gp {
          return registry;
       }
 
-      void fixedUpdate(const cm::Timer& timer, AnimationFactory& animationFactory);
+      void fixedUpdate(const cm::Timer& timer, const AnimationFactory& animationFactory);
       void prepareRenderData(cm::gpu::RenderData& renderData);
 
       auto createTerrain(const cm::ModelData& handles) -> cm::EntityType;

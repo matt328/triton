@@ -17,8 +17,8 @@ namespace ed::ui {
       ImGuiEx::setupImGuiStyle2();
       ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
-      auto& io = ImGui::GetIO();
-      auto fontAtlas = io.Fonts;
+      const auto& io = ImGui::GetIO();
+      const auto fontAtlas = io.Fonts;
       const auto ranges = io.Fonts->GetGlyphRangesDefault();
 
       auto config = ImFontConfig{};
@@ -35,13 +35,17 @@ namespace ed::ui {
                                               &config,
                                               ranges);
 
-      ImGui_ImplVulkan_CreateFontsTexture();
+      if (!ImGui_ImplVulkan_CreateFontsTexture()) {
+         Log.warn("Error creating Fonts Texture");
+      }
 
       guard = std::make_unique<NFD::Guard>();
 
-      appLog = std::make_unique<ui::cmp::AppLog>();
+      appLog = std::make_unique<cmp::AppLog>();
 
-      const auto logFn = [this](std::string message) { appLog->AddLog("%s", message.c_str()); };
+      const auto logFn = [this](const std::string& message) {
+         appLog->AddLog("%s", message.c_str());
+      };
 
       Log.sinks().push_back(std::make_shared<my_sink_mt>(logFn));
    }
@@ -94,7 +98,7 @@ namespace ed::ui {
       static ImGuiDockNodeFlags dockspaceFlags = ImGuiDockNodeFlags_PassthruCentralNode;
       ImGuiWindowFlags windowFlags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
 
-      ImGuiViewport* viewport = ImGui::GetMainViewport();
+      const ImGuiViewport* viewport = ImGui::GetMainViewport();
       ImGui::SetNextWindowPos(viewport->Pos);
       ImGui::SetNextWindowSize(viewport->Size);
       ImGui::SetNextWindowViewport(viewport->ID);
@@ -104,8 +108,9 @@ namespace ed::ui {
                      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
       windowFlags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
 
-      if (dockspaceFlags & ImGuiDockNodeFlags_PassthruCentralNode)
+      if (dockspaceFlags & ImGuiDockNodeFlags_PassthruCentralNode) {
          windowFlags |= ImGuiWindowFlags_NoBackground;
+      }
 
       ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
       ImGui::Begin("DockSpace", nullptr, windowFlags);
@@ -113,7 +118,7 @@ namespace ed::ui {
       ImGui::PopStyleVar(2);
 
       // DockSpace
-      ImGuiIO& io = ImGui::GetIO();
+      const ImGuiIO& io = ImGui::GetIO();
       if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable) {
          ImGuiID dockspaceId = ImGui::GetID("MyDockSpace");
          ImGui::DockSpace(dockspaceId, ImVec2(0.0f, 0.0f), dockspaceFlags);
@@ -126,17 +131,17 @@ namespace ed::ui {
             ImGui::DockBuilderAddNode(dockspaceId, dockspaceFlags | ImGuiDockNodeFlags_DockSpace);
             ImGui::DockBuilderSetNodeSize(dockspaceId, viewport->Size);
 
-            auto dockIdLeft = ImGui::DockBuilderSplitNode(dockspaceId,
-                                                          ImGuiDir_Left,
-                                                          0.25f,
-                                                          nullptr,
-                                                          &dockspaceId);
+            const auto dockIdLeft = ImGui::DockBuilderSplitNode(dockspaceId,
+                                                                ImGuiDir_Left,
+                                                                0.25f,
+                                                                nullptr,
+                                                                &dockspaceId);
 
-            auto dockIdRight = ImGui::DockBuilderSplitNode(dockspaceId,
-                                                           ImGuiDir_Down,
-                                                           0.2f,
-                                                           nullptr,
-                                                           &dockspaceId);
+            const auto dockIdRight = ImGui::DockBuilderSplitNode(dockspaceId,
+                                                                 ImGuiDir_Down,
+                                                                 0.2f,
+                                                                 nullptr,
+                                                                 &dockspaceId);
 
             ImGui::DockBuilderDockWindow("Entity Editor", dockIdLeft);
             ImGui::DockBuilderDockWindow("Asset Tree", dockIdLeft);
@@ -152,15 +157,12 @@ namespace ed::ui {
       auto b = false;
       auto showPopup = false;
       auto showAnimation = false;
-      auto loadTerrain = false;
       static auto show = false;
 
       if (ImGui::BeginMainMenuBar()) {
          if (ImGui::BeginMenu("File")) {
 
-            if (ImGui::MenuItem("Create Terrain")) {
-               loadTerrain = true;
-            }
+            if (ImGui::MenuItem("Create Terrain")) {}
 
             if (ImGui::MenuItem("Import Skeleton")) {
                showPopup = true;
@@ -179,12 +181,12 @@ namespace ed::ui {
             ImGui::Separator();
             if (ImGui::MenuItem("Open Project...")) {
                auto inPath = NFD::UniquePath{};
-               const auto result =
-                   NFD::OpenDialog(inPath, ProjectFileFilters.data(), ProjectFileFilters.size());
-               if (result == NFD_OKAY) {
+               constexpr auto filterSize = static_cast<nfdfiltersize_t>(ProjectFileFilters.size());
+               if (const auto result = OpenDialog(inPath, ProjectFileFilters.data(), filterSize);
+                   result == NFD_OKAY) {
                   const auto filePath = std::filesystem::path{inPath.get()};
                   dataFacade.load(filePath);
-                  openFilePath.emplace(filePath);
+                  openFilePath = filePath;
                   pr::Properties::getInstance().setRecentFilePath(filePath);
                } else {
                   Log.error("File Dialog Error: ", NFD::GetError());
@@ -209,7 +211,7 @@ namespace ed::ui {
                if (openFilePath.has_value()) {
                   dataFacade.save(openFilePath.value());
                } else {
-                  auto savePath = getSavePath();
+                  const auto savePath = getSavePath();
                   try {
                      if (savePath.has_value()) {
                         dataFacade.save(savePath.value());
@@ -219,7 +221,7 @@ namespace ed::ui {
             }
 
             if (ImGui::MenuItem("Save Project As...", nullptr, false, dataFacade.isUnsaved())) {
-               auto savePath = getSavePath();
+               const auto savePath = getSavePath();
                try {
                   if (savePath.has_value()) {
                      dataFacade.save(savePath.value());

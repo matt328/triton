@@ -4,8 +4,7 @@ namespace tr::gp {
    auto AnimationFactory::loadSkeleton(const std::filesystem::path& path) -> SkeletonHandle {
       const auto filename = path.string();
 
-      const auto it = loadedSkeletons.find(filename);
-      if (it != loadedSkeletons.end()) {
+      if (const auto it = loadedSkeletons.find(filename); it != loadedSkeletons.end()) {
          return it->second;
       }
 
@@ -35,8 +34,7 @@ namespace tr::gp {
    auto AnimationFactory::loadAnimation(const std::filesystem::path& path) -> AnimationHandle {
       const auto filename = path.string();
 
-      const auto it = loadedAnimations.find(filename);
-      if (it != loadedAnimations.end()) {
+      if (const auto it = loadedAnimations.find(filename); it != loadedAnimations.end()) {
          return it->second;
       }
       ozz::io::File file(filename.c_str(), "rb");
