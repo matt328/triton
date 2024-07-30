@@ -29,8 +29,12 @@ namespace ed::data {
 
       void execute() override {
          if (future.valid()) {
-            auto result = future.get();
-            fn(result);
+            try {
+               auto result = future.get();
+               fn(result);
+            } catch (const std::exception& ex) {
+               Log.error("Exception {0}", ex.what());
+            }
          }
       }
 

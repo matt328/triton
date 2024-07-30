@@ -55,31 +55,31 @@ namespace tr::gp {
       GameplaySystem& operator=(const GameplaySystem&) = delete;
       GameplaySystem& operator=(GameplaySystem&&) = delete;
 
-      void fixedUpdate(const cm::Timer& timer);
+      void fixedUpdate(const cm::Timer& timer) const;
       void update(const double blendingFactor);
-      void resize(const std::pair<uint32_t, uint32_t>);
+      void resize(const std::pair<uint32_t, uint32_t>) const;
 
       // Input Handlers
-      void keyCallback(cm::Key key, cm::ButtonState buttonState);
-      void cursorPosCallback(double xpos, double ypos);
-      void mouseButtonCallback(int button, int action, int mods);
-      void setMouseState(bool captured);
+      void keyCallback(cm::Key key, cm::ButtonState buttonState) const;
+      void cursorPosCallback(double xpos, double ypos) const;
+      void mouseButtonCallback(int button, int action, int mods) const;
+      void setMouseState(bool captured) const;
 
       // Gameworld State Methods
-      auto createTerrain(const cm::ModelData handles) -> cm::EntityType;
-      auto createStaticModel(cm::ModelData meshes) -> cm::EntityType;
+      auto createTerrain(const cm::ModelData& handles) const -> cm::EntityType;
+      auto createStaticModel(const cm::ModelData& meshes) const -> cm::EntityType;
       auto createAnimatedModel(cm::ModelData modelData,
                                const std::filesystem::path& skeletonPath,
-                               const std::filesystem::path& animationPath) -> cm::EntityType;
+                               const std::filesystem::path& animationPath) const -> cm::EntityType;
       auto createCamera(uint32_t width,
                         uint32_t height,
                         float fov,
                         float zNear,
                         float zFar,
-                        glm::vec3 position,
-                        std::optional<std::string> name) -> cm::EntityType;
-      void setCurrentCamera(cm::EntityType currentCamera);
-      void clearEntities();
+                        const glm::vec3& position,
+                        const std::optional<std::string>& name) const -> cm::EntityType;
+      void setCurrentCamera(cm::EntityType currentCamera) const;
+      void clearEntities() const;
 
       void setRenderDataFn(const RenderDataFn& fn) {
          renderDataFn = fn;

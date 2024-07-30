@@ -12,7 +12,7 @@
 namespace tr::gfx::geo {
 
    GeometryFactory::GeometryFactory() {
-      const auto imageHandle = 0;
+      constexpr auto imageHandle = 0;
       const auto data = std::vector<unsigned char>(4, 255);
       imageDataMap.emplace(imageHandle, as::ImageData{data, 1, 1, 4});
    }
@@ -79,10 +79,9 @@ namespace tr::gfx::geo {
       auto indices = std::vector<uint32_t>{};
       auto width = heightField.getWidth();
 
-      const float scaleFactor = 25.f;
-
       for (int x = 0; x < width; x++) {
          for (int y = 0; y < width; y++) {
+            constexpr float scaleFactor = 25.f;
             as::Vertex vert{};
             vert.pos = glm::vec4(static_cast<float>(x) * scaleFactor,
                                  static_cast<float>(heightField.valueAt(x, y) * scaleFactor),

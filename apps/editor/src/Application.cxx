@@ -72,7 +72,7 @@ namespace ed {
       ExtTextOut(hdc, 0, 0, ETO_OPAQUE, &rc, nullptr, 0, nullptr);
       EndPaint(hWnd, &ps);
       BOOL value = TRUE;
-      ::DwmSetWindowAttribute(hWnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &value, sizeof(value));
+      DwmSetWindowAttribute(hWnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &value, sizeof(value));
       RECT rcClient{};
       GetWindowRect(hWnd, &rcClient);
       // I feel like trash for this but i can't figure out how to make it repaint enough of the
@@ -93,7 +93,7 @@ namespace ed {
                    SWP_FRAMECHANGED);
 #endif
 
-      glfwSetWindowSizeLimits(window.get(), MinHeight, MinWidth, GLFW_DONT_CARE, GLFW_DONT_CARE);
+      glfwSetWindowSizeLimits(window.get(), MinWidth, MinHeight, GLFW_DONT_CARE, GLFW_DONT_CARE);
 
       if (glfwRawMouseMotionSupported()) {
          glfwSetInputMode(window.get(), GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
@@ -127,7 +127,7 @@ namespace ed {
       glfwTerminate();
    }
 
-   void Application::run() {
+   void Application::run() const {
       context->start([this]() {
          glfwPollEvents();
          ImGui_ImplVulkan_NewFrame();
@@ -146,7 +146,7 @@ namespace ed {
       throw std::runtime_error("GLFW Error. See log output for details");
    }
 
-   void Application::windowIconifiedCallback(GLFWwindow* window, int iconified) {
+   void Application::windowIconifiedCallback(GLFWwindow* window, const int iconified) {
       const auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
       // Just stop crashing for now.
       app->context->pause(iconified);
@@ -181,7 +181,7 @@ namespace ed {
    }
 
    void Application::toggleFullscreen(Application& app) {
-      auto window = app.window.get();
+      const auto window = app.window.get();
       if (app.fullscreen) {
          glfwSetWindowMonitor(window,
                               nullptr,
@@ -214,7 +214,10 @@ namespace ed {
       }
    }
 
-   void Application::mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
+   void Application::mouseButtonCallback(GLFWwindow* window,
+                                         const int button,
+                                         const int action,
+                                         const int mods) {
       const auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
       if (ImGui::GetIO().WantCaptureMouse && !app->mouseCaptured) {
          return;
