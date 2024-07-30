@@ -32,7 +32,7 @@ namespace ed {
       Application& operator=(const Application&) = delete;
       Application& operator=(Application&&) = delete;
 
-      void run();
+      void run() const;
 
     private:
       struct DestroyGlfwWindow {

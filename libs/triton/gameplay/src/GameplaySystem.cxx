@@ -12,7 +12,6 @@
 #include "actions/Sources.hpp"
 
 #include "systems/CameraSystem.hpp"
-#include "systems/RenderDataSystem.hpp"
 
 namespace tr::gp {
 
@@ -76,7 +75,7 @@ namespace tr::gp {
       Log.info("Destroying Game");
    };
 
-   void GameplaySystem::fixedUpdate(const cm::Timer& timer) {
+   void GameplaySystem::fixedUpdate(const cm::Timer& timer) const {
       ZoneNamedN(upd, "FixedUpdate", true);
       entitySystem->fixedUpdate(timer, *animationFactory);
    }
@@ -96,38 +95,40 @@ namespace tr::gp {
       renderDataFn(renderData);
    }
 
-   void GameplaySystem::resize(const std::pair<uint32_t, uint32_t> size) {
+   void GameplaySystem::resize(const std::pair<uint32_t, uint32_t> size) const {
       entitySystem->writeWindowDimensions(size);
    }
 
-   void GameplaySystem::keyCallback(cm::Key key, cm::ButtonState buttonState) {
+   void GameplaySystem::keyCallback(const cm::Key key, const cm::ButtonState buttonState) const {
       actionSystem->keyCallback(key, buttonState);
    }
 
-   void GameplaySystem::cursorPosCallback(double xpos, double ypos) {
+   void GameplaySystem::cursorPosCallback(const double xpos, const double ypos) const {
       actionSystem->cursorPosCallback(xpos, ypos);
    }
 
-   void GameplaySystem::mouseButtonCallback(int button, int action, int mods) {
+   void GameplaySystem::mouseButtonCallback(const int button,
+                                            const int action,
+                                            const int mods) const {
       actionSystem->mouseButtonCallback(button, action, mods);
    }
 
-   void GameplaySystem::setMouseState(bool captured) {
+   void GameplaySystem::setMouseState(const bool captured) const {
       actionSystem->setMouseState(captured);
    }
 
-   auto GameplaySystem::createTerrain(const cm::ModelData handles) -> cm::EntityType {
+   auto GameplaySystem::createTerrain(const cm::ModelData& handles) const -> cm::EntityType {
       ZoneNamedN(n, "gameplaySystem.createTerrain", true);
       return entitySystem->createTerrain(handles);
    }
 
-   auto GameplaySystem::createStaticModel(cm::ModelData meshes) -> cm::EntityType {
+   auto GameplaySystem::createStaticModel(const cm::ModelData& meshes) const -> cm::EntityType {
       return entitySystem->createStaticModel(meshes);
    }
 
    auto GameplaySystem::createAnimatedModel(cm::ModelData modelData,
                                             const std::filesystem::path& skeletonPath,
-                                            const std::filesystem::path& animationPath)
+                                            const std::filesystem::path& animationPath) const
        -> cm::EntityType {
       modelData.animationData =
           cm::AnimationData{.skeletonHandle = animationFactory->loadSkeleton(skeletonPath),
@@ -136,21 +137,22 @@ namespace tr::gp {
       return entitySystem->createAnimatedModel(modelData);
    }
 
-   auto GameplaySystem::createCamera(uint32_t width,
-                                     uint32_t height,
-                                     float fov,
-                                     float zNear,
-                                     float zFar,
-                                     glm::vec3 position,
-                                     std::optional<std::string> name) -> cm::EntityType {
+   auto GameplaySystem::createCamera(const uint32_t width,
+                                     const uint32_t height,
+                                     const float fov,
+                                     const float zNear,
+                                     const float zFar,
+                                     const glm::vec3& position,
+                                     const std::optional<std::string>& name) const
+       -> cm::EntityType {
       return entitySystem->createCamera(width, height, fov, zNear, zFar, position, name);
    }
 
-   void GameplaySystem::setCurrentCamera(cm::EntityType currentCamera) {
+   void GameplaySystem::setCurrentCamera(const cm::EntityType currentCamera) const {
       entitySystem->setCurrentCamera(currentCamera);
    }
 
-   void GameplaySystem::clearEntities() {
+   void GameplaySystem::clearEntities() const {
       entitySystem->removeAll();
    }
 }
