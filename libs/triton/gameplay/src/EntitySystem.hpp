@@ -30,25 +30,25 @@ namespace tr::gp {
       void fixedUpdate(const cm::Timer& timer, AnimationFactory& animationFactory);
       void prepareRenderData(cm::gpu::RenderData& renderData);
 
-      auto createTerrain(const cm::ModelData handles) -> cm::EntityType;
-      auto createStaticModel(const cm::ModelData handles) -> cm::EntityType;
-      auto createAnimatedModel(const cm::ModelData modelData) -> cm::EntityType;
+      auto createTerrain(const cm::ModelData& handles) -> cm::EntityType;
+      auto createStaticModel(const cm::ModelData& handles) -> cm::EntityType;
+      auto createAnimatedModel(const cm::ModelData& modelData) -> cm::EntityType;
       auto createCamera(uint32_t width,
                         uint32_t height,
                         float fov,
                         float zNear,
                         float zFar,
                         glm::vec3 position,
-                        std::optional<std::string> name) -> cm::EntityType;
+                        const std::optional<std::string>& name) -> cm::EntityType;
       void setCurrentCamera(cm::EntityType);
 
       void removeAll();
 
-      void writeCameras(std::function<void(entt::entity, cmp::Camera)> fn);
+      void writeCameras(const std::function<void(entt::entity, cmp::Camera)>& fn);
       void writeCameras(
           std::function<void(entt::entity, cmp::Camera, uint32_t width, uint32_t height)> fn);
 
-      void writeWindowDimensions(const std::pair<uint32_t, uint32_t> size);
+      void writeWindowDimensions(std::pair<uint32_t, uint32_t> size);
 
     private:
       std::shared_mutex registryMutex{};

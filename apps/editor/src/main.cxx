@@ -5,8 +5,8 @@
 
 #if defined(TRACY_ENABLE)
 
-void* operator new(std::size_t count) {
-   auto ptr = malloc(count);
+void* operator new(const std::size_t count) {
+   const auto ptr = malloc(count);
    TracyAllocS(ptr, count, 32);
    return ptr;
 }
@@ -44,7 +44,7 @@ int main() {
 #endif
 
    try {
-      auto app = std::make_unique<ed::Application>(width, height, ss.str());
+      const auto app = std::make_unique<ed::Application>(width, height, ss.str());
       Log.info("Initialized");
 
       app->run();

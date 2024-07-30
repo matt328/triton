@@ -11,8 +11,6 @@
 #include "components/Terrain.hpp"
 #include "components/Transform.hpp"
 #include "components/Camera.hpp"
-#include "components/Resources.hpp"
-#include "components/DebugConstants.hpp"
 
 #include "systems/CameraSystem.hpp"
 #include "systems/RenderDataSystem.hpp"
@@ -40,7 +38,7 @@ namespace tr::gp {
       sys::RenderDataSystem::update(*registry, renderData);
    }
 
-   void EntitySystem::writeCameras(std::function<void(entt::entity, cmp::Camera)> fn) {
+   void EntitySystem::writeCameras(const std::function<void(entt::entity, cmp::Camera)>& fn) {
       auto lock = std::unique_lock<std::shared_mutex>{registryMutex};
       registry->view<cmp::Camera>().each(fn);
    }
@@ -60,44 +58,44 @@ namespace tr::gp {
           cmp::WindowDimensions{static_cast<int>(size.first), static_cast<int>(size.second)});
    }
 
-   auto EntitySystem::createTerrain(const cm::ModelData handles) -> cm::EntityType {
+   auto EntitySystem::createTerrain(const cm::ModelData& handles) -> cm::EntityType {
       ZoneNamedN(n, "entitySystem.createTerrain", true);
       auto lock = std::unique_lock<std::shared_mutex>{registryMutex};
 
       auto renderable = std::unordered_map<cm::MeshHandle, cm::TextureHandle>{
           {handles.meshData.meshHandle, handles.meshData.textureHandle}};
 
-      auto e = registry->create();
+      const auto e = registry->create();
 
       registry->emplace<cmp::Renderable>(e, renderable);
       registry->emplace<cmp::TerrainMarker>(e);
-      registry->emplace<gp::cmp::Transform>(e,
-                                            glm::zero<glm::vec3>(),
-                                            glm::vec3(-550.f, -1000.f, -5700.f));
+      registry->emplace<cmp::Transform>(e,
+                                        glm::zero<glm::vec3>(),
+                                        glm::vec3(-550.f, -1000.f, -5700.f));
 
-      auto debugConstants = registry->create();
-      registry->emplace<gp::cmp::Transform>(debugConstants,
-                                            glm::zero<glm::vec3>(),
-                                            glm::vec3(200.f, 1000.f, 200.f));
+      const auto debugConstants = registry->create();
+      registry->emplace<cmp::Transform>(debugConstants,
+                                        glm::zero<glm::vec3>(),
+                                        glm::vec3(200.f, 1000.f, 200.f));
       registry->emplace<cmp::DebugConstants>(debugConstants, 16.f);
       return e;
    }
 
-   auto EntitySystem::createStaticModel(const cm::ModelData handles) -> cm::EntityType {
+   auto EntitySystem::createStaticModel(const cm::ModelData& handles) -> cm::EntityType {
       auto lock = std::unique_lock<std::shared_mutex>{registryMutex};
 
       auto renderable = std::unordered_map<cm::MeshHandle, cm::TextureHandle>{
           {handles.meshData.meshHandle, handles.meshData.textureHandle}};
 
-      auto e = registry->create();
+      const auto e = registry->create();
       registry->emplace<cmp::Renderable>(e, renderable);
-      registry->emplace<gp::cmp::Transform>(e);
+      registry->emplace<cmp::Transform>(e);
       return e;
    }
 
-   auto EntitySystem::createAnimatedModel(const cm::ModelData modelData) -> cm::EntityType {
+   auto EntitySystem::createAnimatedModel(const cm::ModelData& modelData) -> cm::EntityType {
       auto lock = std::unique_lock<std::shared_mutex>{registryMutex};
-      auto e = registry->create();
+      const auto e = registry->create();
 
       if (!modelData.animationData) {
          // TODO Better Exceptions here
@@ -129,7 +127,7 @@ namespace tr::gp {
                                    float zNear,
                                    float zFar,
                                    glm::vec3 position,
-                                   [[maybe_unused]] std::optional<std::string> name)
+                                   [[maybe_unused]] const std::optional<std::string>& name)
        -> cm::EntityType {
 
       auto lock = std::unique_lock<std::shared_mutex>{registryMutex};
@@ -138,7 +136,7 @@ namespace tr::gp {
       return camera;
    }
 
-   void EntitySystem::setCurrentCamera(cm::EntityType currentCamera) {
+   void EntitySystem::setCurrentCamera(const cm::EntityType currentCamera) {
       auto lock = std::unique_lock<std::shared_mutex>{registryMutex};
       registry->ctx().insert_or_assign<cmp::CurrentCamera>(cmp::CurrentCamera{currentCamera});
    }
