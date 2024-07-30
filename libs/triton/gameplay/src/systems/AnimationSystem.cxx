@@ -3,10 +3,10 @@
 #include "AnimationFactory.hpp"
 
 namespace tr::gp::sys::AnimationSystem {
-   void update(entt::registry& registry, AnimationFactory& animationFactory) {
-      const auto view = registry.view<cmp::Animation>();
+   void update(entt::registry& registry, const AnimationFactory& animationFactory) {
 
-      for (auto [entity, animationData] : view.each()) {
+      for (const auto view = registry.view<cmp::Animation>();
+           auto [entity, animationData] : view.each()) {
 
          if (animationData.renderBindPose) {
             for (auto& model : animationData.models) {
@@ -35,15 +35,15 @@ namespace tr::gp::sys::AnimationSystem {
          samplingJob.animation = &animation;
          samplingJob.context = &animationData.context;
          samplingJob.ratio = animationData.timeRatio;
-         samplingJob.output = ozz::make_span(animationData.locals);
+         samplingJob.output = make_span(animationData.locals);
          if (!samplingJob.Run()) {
             Log.warn("Sampling job fail");
          }
 
          auto ltmJob = ozz::animation::LocalToModelJob{};
          ltmJob.skeleton = &skeleton;
-         ltmJob.input = ozz::make_span(animationData.locals);
-         ltmJob.output = ozz::make_span(animationData.models);
+         ltmJob.input = make_span(animationData.locals);
+         ltmJob.output = make_span(animationData.models);
          if (!ltmJob.Run()) {
             Log.warn("ltm job fail");
          }

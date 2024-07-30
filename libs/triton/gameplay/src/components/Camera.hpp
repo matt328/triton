@@ -2,15 +2,20 @@
 
 namespace tr::gp::cmp {
 
-   const auto DefaultYaw = -90.f;
+   constexpr auto DefaultYaw = -90.f;
    constexpr glm::vec3 worldUp = {0.f, 1.f, 0.f};
 
    struct Camera {
       Camera() = default;
-      Camera(int width, int height, float fov, float nearClip, float farClip, glm::vec3 position)
+      Camera(const int width,
+             const int height,
+             const float fov,
+             const float nearClip,
+             const float farClip,
+             const glm::vec3& position)
           : position{position},
             projection(
-                glm::perspective(glm::radians(fov), (float)(width / height), nearClip, farClip)),
+                glm::perspective(glm::radians(fov), static_cast<float>(width) / static_cast<float>(height), nearClip, farClip)),
             width(width),
             height(height),
             fov(fov),
@@ -24,8 +29,8 @@ namespace tr::gp::cmp {
       glm::vec3 cameraUp = worldUp; // for now
 
       glm::vec3 target{0.f, 0.f, 0.f};
-      glm::vec3 direction = glm::normalize(position - target);
-      glm::vec3 right = glm::normalize(glm::cross(worldUp, direction));
+      glm::vec3 direction = normalize(position - target);
+      glm::vec3 right = normalize(cross(worldUp, direction));
 
       glm::vec3 velocity{};
 

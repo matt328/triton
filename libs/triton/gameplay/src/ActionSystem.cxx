@@ -6,10 +6,10 @@
 
 namespace tr::gp {
 
-   void ActionSystem::mapSource(Source source, StateType sType, ActionType aType) {
+   void ActionSystem::mapSource(Source source, const StateType sType, const ActionType aType) {
       std::visit(
-          [&](auto&& arg) {
-             using T = std::decay_t<decltype(arg)>;
+          [&]<typename T>(T&& arg) {
+             using T = std::decay_t<T>;
              if constexpr (std::is_same_v<T, cm::Key>) {
                 keyActionMap.insert_or_assign(arg, Action{aType, sType});
              } else if constexpr (std::is_same_v<T, cm::MouseInput>) {
@@ -20,7 +20,7 @@ namespace tr::gp {
           source.src);
    }
 
-   void ActionSystem::setMouseState(bool captured) {
+   void ActionSystem::setMouseState(const bool captured) {
       if (captured) {
          firstMouse = true;
       }
@@ -31,7 +31,7 @@ namespace tr::gp {
                                           [[maybe_unused]] int mods) {
    }
 
-   void ActionSystem::cursorPosCallback(double xpos, double ypos) {
+   void ActionSystem::cursorPosCallback(const double xpos, const double ypos) {
       const auto deltaX = static_cast<float>(prevX - xpos);
       const auto deltaY = static_cast<float>(prevY - ypos);
 
@@ -51,25 +51,25 @@ namespace tr::gp {
       }
 
       if (deltaY != 0) {
-         const auto yit = mouseActionMap.find(cm::MouseInput::MOVE_Y);
-         if (yit != mouseActionMap.end()) {
+         if (const auto yit = mouseActionMap.find(cm::MouseInput::MOVE_Y);
+             yit != mouseActionMap.end()) {
             actionDelegate(Action{yit->second.actionType, yit->second.stateType, deltaY});
          }
       }
    }
 
-   void ActionSystem::keyCallback(cm::Key key, cm::ButtonState state) {
+   void ActionSystem::keyCallback(const cm::Key key, const cm::ButtonState state) {
 
       const auto sourceIt = keyActionMap.find(key);
       if (sourceIt == keyActionMap.end()) {
          return;
       }
-      const auto& source = sourceIt->second;
+      const auto& [actionType, stateType, value] = sourceIt->second;
 
       if (state == cm::ButtonState::Pressed) {
-         actionDelegate(Action{source.actionType, source.stateType, true});
+         actionDelegate(Action{actionType, stateType, true});
       } else if (state == cm::ButtonState::Released) {
-         actionDelegate(Action{source.actionType, source.stateType, false});
+         actionDelegate(Action{actionType, stateType, false});
       }
    }
 
