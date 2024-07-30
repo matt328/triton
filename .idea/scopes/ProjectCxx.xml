@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="ProjectCxx" pattern="!file[triton]:build//*&amp;&amp;!file[triton]:bin//*&amp;&amp;!file[triton]:.github//*&amp;&amp;!file[triton]:.idea//*&amp;&amp;!file[triton]:.vscode//*&amp;&amp;!file[triton]:cmake-build-debug//*&amp;&amp;!file[triton]:deps//*&amp;&amp;!file[triton]:vcpkg//*&amp;&amp;!file[triton]:vendor//*&amp;&amp;!file:apps/editor/src/ui/RobotoRegular.h&amp;&amp;!file:apps/editor/src/ui/SourceCodePro.h" />
+</component>

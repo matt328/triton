@@ -1,0 +1,26 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <option name="scopesOrder">
+      <list>
+        <option value="ProjectCxx" />
+        <option value="All Changed Files" />
+        <option value="Open Files" />
+        <option value="Project Files" />
+        <option value="Scratches and Consoles" />
+      </list>
+    </option>
+    <inspection_tool class="ClangTidy" enabled="true" level="WARNING" enabled_by_default="false">
+      <scope name="ProjectCxx" level="WARNING" enabled="true" />
+      <scope name="Project Files" level="WARNING" enabled="false" />
+    </inspection_tool>
+    <inspection_tool class="Clazy" enabled="true" level="WARNING" enabled_by_default="false">
+      <scope name="ProjectCxx" level="WARNING" enabled="true" />
+      <scope name="Project Files" level="WARNING" enabled="false" />
+    </inspection_tool>
+    <inspection_tool class="Misra" enabled="true" level="WARNING" enabled_by_default="false">
+      <scope name="ProjectCxx" level="WARNING" enabled="true" />
+      <scope name="Project Files" level="WARNING" enabled="false" />
+    </inspection_tool>
+  </profile>
+</component>
