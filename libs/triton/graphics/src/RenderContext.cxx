@@ -392,18 +392,15 @@ namespace tr::gfx {
                                                 renderData.animationData.size());
 
             staticMeshDataList.reserve(renderData.staticMeshData.size());
-            std::copy(renderData.staticMeshData.begin(),
-                      renderData.staticMeshData.end(),
+            std::ranges::copy(renderData.staticMeshData,
                       std::back_inserter(staticMeshDataList));
 
             terrainDataList.reserve(renderData.terrainMeshData.size());
-            std::copy(renderData.terrainMeshData.begin(),
-                      renderData.terrainMeshData.end(),
+            std::ranges::copy(renderData.terrainMeshData,
                       std::back_inserter(terrainDataList));
 
             skinnedModelList.reserve(renderData.skinnedMeshData.size());
-            std::copy(renderData.skinnedMeshData.begin(),
-                      renderData.skinnedMeshData.end(),
+            std::ranges::copy(renderData.skinnedMeshData,
                       std::back_inserter(skinnedModelList));
 
             pushConstants = renderData.pushConstants;

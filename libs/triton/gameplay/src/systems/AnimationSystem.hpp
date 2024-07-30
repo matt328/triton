@@ -5,5 +5,5 @@ namespace tr::gp {
 }
 
 namespace tr::gp::sys::AnimationSystem {
-   void update(entt::registry& registry, AnimationFactory& animationFactory);
+   void update(entt::registry& registry, const AnimationFactory& animationFactory);
 }

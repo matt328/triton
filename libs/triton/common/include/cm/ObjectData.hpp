@@ -8,9 +8,9 @@ namespace tr::cm::gpu {
    constexpr auto MAX_OBJECTS = 128;
 
    struct alignas(16) ObjectData {
-      glm::mat4 model;
-      cm::TextureHandle textureId;
-      uint32_t animationDataIndex;
+      glm::mat4 model{};
+      TextureHandle textureId{};
+      uint32_t animationDataIndex{};
    };
 
    struct CameraData {

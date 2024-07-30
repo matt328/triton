@@ -5,8 +5,8 @@
 
 namespace tr::gp::cmp {
    struct Animation {
-      Animation(cm::AnimationHandle animationHandle,
-                cm::SkeletonHandle skeletonHandle,
+      Animation(const cm::AnimationHandle animationHandle,
+                const cm::SkeletonHandle skeletonHandle,
                 std::unordered_map<int, int> jointMap,
                 std::vector<glm::mat4> inverseBindMatrices)
           : animationHandle{animationHandle},

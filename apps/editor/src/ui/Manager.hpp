@@ -2,12 +2,8 @@
 
 #include <entt/entt.hpp>
 
-#include "cm/EntitySystemTypes.hpp"
 #include "cm/Handles.hpp"
-
-#include "Application.hpp"
 #include "data/DataFacade.hpp"
-
 #include "components/EntityEditor.hpp"
 
 namespace ed {
@@ -39,17 +35,17 @@ namespace ed::ui {
          quitDelegate.connect<Candidate>(v);
       }
 
-      void setFullscreenFn(std::function<void(void)> fn) {
+      void setFullscreenFn(const std::function<void()>& fn) {
          this->toggleFullscreenFn = fn;
       }
 
-      void setWireframeFn(std::function<void(bool)> fn) {
+      void setWireframeFn(const std::function<void(bool)>& fn) {
          this->wireframeCallback = fn;
       }
 
     private:
       static constexpr auto ProjectFileFilters =
-          std::array<nfdfilteritem_t, 1>{nfdfilteritem_t{"Triton Project", "trp"}};
+          std::array{nfdfilteritem_t{"Triton Project", "trp"}};
 
       tr::ctx::GameplayFacade& facade;
       data::DataFacade& dataFacade;
@@ -62,9 +58,9 @@ namespace ed::ui {
       std::optional<uint32_t> selectedEntity{};
       std::optional<std::filesystem::path> openFilePath{};
 
-      entt::delegate<void(void)> quitDelegate{};
+      entt::delegate<void()> quitDelegate{};
 
-      std::function<void(void)> toggleFullscreenFn;
+      std::function<void()> toggleFullscreenFn;
       std::function<void(bool)> wireframeCallback;
       bool enableWireframe{false};
 
@@ -72,12 +68,12 @@ namespace ed::ui {
 
       ImFont* sauce = nullptr;
 
-      std::unique_ptr<ui::cmp::AppLog> appLog;
+      std::unique_ptr<cmp::AppLog> appLog;
 
       void handleTerrainFutures();
       void handleSkinnedModelFutures();
 
-      void renderDockSpace();
+      static void renderDockSpace();
       void renderMenuBar();
       void renderEntityEditor();
       void showMatrix4x4(const glm::mat4& matrix, const char* label);

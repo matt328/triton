@@ -4,13 +4,13 @@
 
 namespace tr::as {
    struct Vertex {
-      glm::vec3 pos;
-      glm::vec3 normal;
-      glm::vec2 uv;
-      glm::vec4 color;
-      glm::u8vec4 joint0;
-      glm::vec4 weight0;
-      glm::vec4 tangent;
+      glm::vec3 pos{};
+      glm::vec3 normal{};
+      glm::vec2 uv{};
+      glm::vec4 color{};
+      glm::u8vec4 joint0{};
+      glm::vec4 weight0{};
+      glm::vec4 tangent{};
 
       bool operator==(const Vertex& other) const {
          return pos == other.pos && normal == other.normal && uv == other.uv &&

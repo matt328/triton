@@ -34,7 +34,7 @@ namespace tr::gp {
 
       void keyCallback(cm::Key key, cm::ButtonState state);
       void cursorPosCallback(double xpos, double ypos);
-      void mouseButtonCallback(int button, int action, int mods);
+      static void mouseButtonCallback(int button, int action, int mods);
       void setMouseState(bool captured);
 
     private:

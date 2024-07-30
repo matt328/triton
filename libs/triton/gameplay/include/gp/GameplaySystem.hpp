@@ -56,8 +56,8 @@ namespace tr::gp {
       GameplaySystem& operator=(GameplaySystem&&) = delete;
 
       void fixedUpdate(const cm::Timer& timer) const;
-      void update(const double blendingFactor);
-      void resize(const std::pair<uint32_t, uint32_t>) const;
+      void update(double blendingFactor);
+      void resize(std::pair<uint32_t, uint32_t>) const;
 
       // Input Handlers
       void keyCallback(cm::Key key, cm::ButtonState buttonState) const;
@@ -66,12 +66,12 @@ namespace tr::gp {
       void setMouseState(bool captured) const;
 
       // Gameworld State Methods
-      auto createTerrain(const cm::ModelData& handles) const -> cm::EntityType;
-      auto createStaticModel(const cm::ModelData& meshes) const -> cm::EntityType;
-      auto createAnimatedModel(cm::ModelData modelData,
+      [[nodiscard]] auto createTerrain(const cm::ModelData& handles) const -> cm::EntityType;
+      [[nodiscard]] auto createStaticModel(const cm::ModelData& meshes) const -> cm::EntityType;
+      [[nodiscard]] auto createAnimatedModel(cm::ModelData modelData,
                                const std::filesystem::path& skeletonPath,
                                const std::filesystem::path& animationPath) const -> cm::EntityType;
-      auto createCamera(uint32_t width,
+      [[nodiscard]] auto createCamera(uint32_t width,
                         uint32_t height,
                         float fov,
                         float zNear,

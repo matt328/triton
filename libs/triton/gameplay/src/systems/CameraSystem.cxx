@@ -8,9 +8,9 @@
 
 namespace tr::gp::sys::CameraSystem {
 
-   const auto CameraSpeed = .05f;
-   const auto MouseSensitivity = 0.025f;
-   const auto PitchExtent = 89.f;
+   constexpr auto CameraSpeed = .05f;
+   constexpr auto MouseSensitivity = 0.025f;
+   constexpr auto PitchExtent = 89.f;
 
    /*
       TODO: this function shouldn't be like this. The system needs to be able to poll for actions
@@ -29,11 +29,10 @@ namespace tr::gp::sys::CameraSystem {
    */
    void handleAction(entt::registry& registry, const Action& action) {
 
-      const auto view = registry.view<cmp::Camera>();
-      for (auto [entity, cam] : view.each()) {
+      for (const auto view = registry.view<cmp::Camera>(); auto [entity, cam] : view.each()) {
 
          if (action.stateType == StateType::State) {
-            auto value = std::get<bool>(action.value);
+            const auto value = std::get<bool>(action.value);
 
             if (action.actionType == ActionType::StrafeLeft) {
                cam.velocity.x = value ? -CameraSpeed : 0.f;
@@ -51,14 +50,14 @@ namespace tr::gp::sys::CameraSystem {
                cam.velocity.z = value ? -CameraSpeed : 0.f;
             }
          } else if (action.stateType == StateType::Range) {
-            auto value = std::get<float>(action.value);
+            const auto value = std::get<float>(action.value);
 
             if (action.actionType == ActionType::LookHorizontal) {
-               cam.yaw -= (value * MouseSensitivity);
+               cam.yaw -= value * MouseSensitivity;
             }
 
             if (action.actionType == ActionType::LookVertical) {
-               cam.pitch += (value * MouseSensitivity); // Invert Y-Axis 4 life
+               cam.pitch += value * MouseSensitivity; // Invert Y-Axis 4 life
                cam.pitch = std::min(cam.pitch, PitchExtent);
                cam.pitch = std::max(cam.pitch, -PitchExtent);
             }
@@ -77,18 +76,18 @@ namespace tr::gp::sys::CameraSystem {
                                     sin(glm::radians(cam.pitch)),
                                     sin(glm::radians(cam.yaw)) * cos(glm::radians(cam.pitch))};
 
-         cam.front = glm::normalize(direction);
-         cam.right = glm::normalize(glm::cross(cam.front, glm::vec3(0.0f, 1.0f, 0.0f)));
+         cam.front = normalize(direction);
+         cam.right = normalize(cross(cam.front, glm::vec3(0.0f, 1.0f, 0.0f)));
 
          glm::mat3 rotationMatrix{cam.right, cmp::worldUp, cam.front};
 
-         auto rotatedVelocity = rotationMatrix * cam.velocity;
+         const auto rotatedVelocity = rotationMatrix * cam.velocity;
 
          cam.position += rotatedVelocity;
 
-         cam.view = glm::lookAt(cam.position, cam.position + cam.front, {0.f, 1.f, 0.f});
+         cam.view = lookAt(cam.position, cam.position + cam.front, {0.f, 1.f, 0.f});
 
-         float aspect = static_cast<float>(width) / static_cast<float>(height);
+         const float aspect = static_cast<float>(width) / static_cast<float>(height);
          cam.projection =
              glm::perspective(glm::radians(cam.fov), aspect, cam.nearClip, cam.farClip);
          // Apparently everyone except me knew glm was for OpenGL and you have to adjust these
