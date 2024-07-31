@@ -54,21 +54,25 @@ namespace tr::gfx::tx {
                              .borderColor = vk::BorderColor::eIntOpaqueBlack,
                              .unnormalizedCoordinates = VK_FALSE};
 
-   class ResourceUploadException : public std::runtime_error {
+   /// Exception thrown when an error occurs uploading a resource to the GPU
+   class ResourceUploadException final : public std::runtime_error {
     public:
       explicit ResourceUploadException(const std::string& message) : std::runtime_error(message) {
       }
    };
 
-   class ResourceCreateException : public std::runtime_error {
+   class ResourceCreateException final : public std::runtime_error {
     public:
+      explicit ResourceCreateException(const char* message) : std::runtime_error(message) {
+      }
+
       explicit ResourceCreateException(const std::string& message) : std::runtime_error(message) {
       }
    };
 
    class ResourceManager {
     public:
-      ResourceManager(const GraphicsDevice& graphicsDevice);
+      explicit ResourceManager(const GraphicsDevice& graphicsDevice);
       ~ResourceManager();
 
       ResourceManager(const ResourceManager&) = delete;
@@ -82,15 +86,15 @@ namespace tr::gfx::tx {
 
       auto createStaticMesh(const geo::GeometryData& geometry) -> cm::MeshHandle;
 
-      auto& getMesh(cm::MeshHandle meshHandle) {
+      auto& getMesh(const cm::MeshHandle meshHandle) {
          return meshList.at(meshHandle);
       }
 
       void accessTextures(
-          std::function<void(const std::vector<vk::DescriptorImageInfo>&)> fn) const;
+          const std::function<void(const std::vector<vk::DescriptorImageInfo>&)>& fn) const;
 
-      void setRenderData(cm::gpu::RenderData& newRenderData);
-      void accessRenderData(std::function<void(cm::gpu::RenderData&)> fn);
+      void setRenderData(const cm::gpu::RenderData& newRenderData);
+      void accessRenderData(const std::function<void(cm::gpu::RenderData&)>& fn);
 
     private:
       const GraphicsDevice& graphicsDevice;

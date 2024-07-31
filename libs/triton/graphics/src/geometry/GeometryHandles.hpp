@@ -8,26 +8,6 @@ namespace tr::gfx::geo {
    using ImageHandle = size_t;
    using TexturedGeometryHandle = std::unordered_map<GeometryHandle, ImageHandle>;
 
-   // struct AnimationData {
-   //  private:
-   //    std::unordered_map<int, int> jointMap;
-   //    std::vector<glm::mat4> inverseBindMatrices;
-
-   //  public:
-   //    AnimationData(std::unordered_map<int, int> jointMap,
-   //                  std::vector<glm::mat4> inverseBindMatrices)
-   //        : jointMap(std::move(jointMap)), inverseBindMatrices(std::move(inverseBindMatrices)) {
-   //    }
-
-   //    [[nodiscard]] const std::unordered_map<int, int>& getJointMap() const {
-   //       return jointMap;
-   //    }
-
-   //    [[nodiscard]] const std::vector<glm::mat4>& getInverseBindMatrices() const {
-   //       return inverseBindMatrices;
-   //    }
-   // };
-
    struct TritonModelData {
     private:
       GeometryHandle geometryHandle;

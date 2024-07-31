@@ -14,7 +14,6 @@
 #include "VkContext.hpp"
 
 #include "geometry/GeometryData.hpp"
-#include "geometry/Mesh.hpp"
 
 #include "mem/Allocator.hpp"
 #include "mem/Buffer.hpp"
@@ -26,18 +25,18 @@ namespace tr::gfx::tx {
       geometryFactory = std::make_unique<geo::GeometryFactory>();
    }
 
-   ResourceManager::~ResourceManager() {
+   ResourceManager::~ResourceManager() { // NOLINT(*-use-equals-default)
    }
 
-   void ResourceManager::setRenderData(cm::gpu::RenderData& newRenderData) {
-      std::lock_guard<LockableBase(std::mutex)> lock(renderDataMutex);
+   void ResourceManager::setRenderData(const cm::gpu::RenderData& newRenderData) {
+      std::lock_guard lock(renderDataMutex);
       LockableName(renderDataMutex, "SetRenderData", 13);
       LockMark(renderDataMutex);
       renderData = newRenderData;
    }
 
-   void ResourceManager::accessRenderData(std::function<void(cm::gpu::RenderData&)> fn) {
-      std::lock_guard<LockableBase(std::mutex)> lock(renderDataMutex);
+   void ResourceManager::accessRenderData(const std::function<void(cm::gpu::RenderData&)>& fn) {
+      std::lock_guard lock(renderDataMutex);
       LockableName(renderDataMutex, "AccessRenderData", 16);
       LockMark(renderDataMutex);
       fn(renderData);
@@ -74,9 +73,10 @@ namespace tr::gfx::tx {
             try {
                return geometryFactory->loadTrm(filename);
             } catch (const geo::IOException& ex) {
-               throw ResourceCreateException(fmt::format("Error loading model from file: {0}, {1}",
-                                                         filename.string(),
-                                                         ex.what()));
+               const auto msg = fmt::format("Error loading model from file: {0}, {1}",
+                                            filename.string(),
+                                            ex.what());
+               throw ResourceCreateException(msg);
             }
          }();
 
@@ -86,14 +86,14 @@ namespace tr::gfx::tx {
                return uploadGeometry(tritonModelData.getGeometryHandle(),
                                      tritonModelData.getImageHandle());
             } catch (const ResourceUploadException& ex) {
-               throw ResourceCreateException(fmt::format("Error uploading model: {0}", ex.what()));
+               const auto msg = fmt::format("Error uploading model: {0}", ex.what());
+               throw ResourceCreateException(msg);
             }
          }();
          geometryFactory->unload(
              {{tritonModelData.getGeometryHandle(), tritonModelData.getImageHandle()}});
 
-         const auto skinData = tritonModelData.getSkinData();
-         if (skinData) {
+         if (auto skinData = tritonModelData.getSkinData()) {
             modelData.skinData = std::move(skinData);
          }
 
@@ -129,8 +129,8 @@ namespace tr::gfx::tx {
          // Prepare Index Buffer
          const auto ibStagingBuffer = allocator.createStagingBuffer(ibSize, "Index Staging Buffer");
 
-         auto data = allocator.mapMemory(*ibStagingBuffer);
-         memcpy(data, geometryData.indices.data(), static_cast<size_t>(ibSize));
+         const auto data = allocator.mapMemory(*ibStagingBuffer);
+         memcpy(data, geometryData.indices.data(), ibSize);
          allocator.unmapMemory(*ibStagingBuffer);
 
          auto vertexBuffer = allocator.createGpuVertexBuffer(vbSize, "GPU Vertex");
@@ -145,20 +145,20 @@ namespace tr::gfx::tx {
             cmd.copyBuffer(ibStagingBuffer->getBuffer(), indexBuffer->getBuffer(), copy);
          });
 
-         const auto image = geometryFactory->getImageData(imageHandle);
+         auto [imageData, width, height, component] = geometryFactory->getImageData(imageHandle);
          const auto textureHandle = textureList.size();
-         textureList.emplace_back(
-             std::make_unique<Textures::Texture>((void*)image.data.data(),
-                                                 image.width,
-                                                 image.height,
-                                                 image.component,
+         textureList.push_back(
+             std::make_unique<Textures::Texture>((static_cast<void*>(imageData.data())),
+                                                 width,
+                                                 height,
+                                                 component,
                                                  allocator,
                                                  graphicsDevice.getVulkanDevice(),
                                                  context));
 
          { // Only need to guard access to the textureInfoList
             ZoneNamedN(c, "Update TextureInfoList", true);
-            std::lock_guard<LockableBase(std::mutex)> lock(textureListMutex);
+            std::lock_guard lock(textureListMutex);
             LockMark(textureListMutex);
             LockableName(textureListMutex, "Mutate", 6);
             textureInfoList.emplace_back(textureList[textureHandle]->getImageInfo());
@@ -179,11 +179,11 @@ namespace tr::gfx::tx {
    }
 
    void ResourceManager::accessTextures(
-       std::function<void(const std::vector<vk::DescriptorImageInfo>&)> fn) const {
+       const std::function<void(const std::vector<vk::DescriptorImageInfo>&)>& fn) const {
       if (textureInfoList.empty()) {
          return;
       }
-      std::lock_guard<LockableBase(std::mutex)> lock(textureListMutex);
+      std::lock_guard lock(textureListMutex);
       LockableName(textureListMutex, "Access", 6);
       LockMark(textureListMutex);
       fn(textureInfoList);
