@@ -5,3 +5,5 @@ cmake-build-debug
 vcpkg_installed
 imgui.ini
 deps/*
+cmake-build-debug-coverage/*
+/cmake-build-debug-coverage/

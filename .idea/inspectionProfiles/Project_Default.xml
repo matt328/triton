@@ -19,7 +19,7 @@
       <scope name="Project Files" level="WARNING" enabled="false" />
     </inspection_tool>
     <inspection_tool class="Misra" enabled="true" level="WARNING" enabled_by_default="false">
-      <scope name="ProjectCxx" level="WARNING" enabled="true" />
+      <scope name="ProjectCxx" level="TEXT ATTRIBUTES" enabled="true" editorAttributes="INFO_ATTRIBUTES" />
       <scope name="Project Files" level="WARNING" enabled="false" />
     </inspection_tool>
   </profile>
