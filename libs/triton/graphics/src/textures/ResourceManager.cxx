@@ -148,7 +148,7 @@ namespace tr::gfx::tx {
          auto [imageData, width, height, component] = geometryFactory->getImageData(imageHandle);
          const auto textureHandle = textureList.size();
          textureList.push_back(
-             std::make_unique<Textures::Texture>((static_cast<void*>(imageData.data())),
+             std::make_unique<Textures::Texture>(static_cast<void*>(imageData.data()),
                                                  width,
                                                  height,
                                                  component,

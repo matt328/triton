@@ -6,7 +6,6 @@
 #include "GeometryData.hpp"
 #include "HeightField.hpp"
 #include "geometry/GeometryHandles.hpp"
-#include <cereal/details/helpers.hpp>
 #include <cereal/archives/binary.hpp>
 
 namespace tr::gfx::geo {
@@ -17,13 +16,13 @@ namespace tr::gfx::geo {
       imageDataMap.emplace(imageHandle, as::ImageData{data, 1, 1, 4});
    }
 
-   GeometryFactory::~GeometryFactory() {
+   GeometryFactory::~GeometryFactory() { // NOLINT(*-use-equals-default)
    }
 
    void GeometryFactory::unload(const TexturedGeometryHandle& handle) {
-      for (const auto& p : handle) {
-         geometryDataMap.erase(p.first);
-         imageDataMap.erase(p.second);
+      for (const auto& [geometry, texture] : handle) {
+         geometryDataMap.erase(geometry);
+         imageDataMap.erase(texture);
       }
    }
 
@@ -84,7 +83,7 @@ namespace tr::gfx::geo {
             constexpr float scaleFactor = 25.f;
             as::Vertex vert{};
             vert.pos = glm::vec4(static_cast<float>(x) * scaleFactor,
-                                 static_cast<float>(heightField.valueAt(x, y) * scaleFactor),
+                                 heightField.valueAt(x, y) * scaleFactor,
                                  static_cast<float>(y) * scaleFactor,
                                  1.0f);
             vert.normal = glm::zero<glm::vec3>();
@@ -113,15 +112,15 @@ namespace tr::gfx::geo {
 
          auto edge1 = v1 - v0;
          auto edge2 = v2 - v0;
-         auto faceNormal = glm::normalize(glm::cross(edge1, edge2));
+         const auto faceNormal = normalize(cross(edge1, edge2));
          for (size_t j = 0; j < 3; ++j) {
             vertices[indices[i + j]].normal += faceNormal;
          }
       }
 
       // Normalize normals
-      for (auto& vertex : vertices) {
-         vertex.normal = glm::normalize(vertex.normal);
+      for (auto& [pos, normal, uv, color, joint0, weight0, tangent] : vertices) {
+         normal = normalize(normal);
       }
 
       const auto imageHandle = imageKey.getKey();
@@ -134,39 +133,36 @@ namespace tr::gfx::geo {
       return {{geometryHandle, imageHandle}};
    }
 
-   auto GeometryFactory::generateNormal(int x, int y, const ct::HeightField& heightField)
-       -> glm::vec3 {
+   auto GeometryFactory::generateNormal(const int x,
+                                        const int y,
+                                        const ct::HeightField& heightField) -> glm::vec3 {
       constexpr auto NormalY = 2.f;
-      int left = std::max(x - 1, 0);
-      int right = std::min(x + 1, heightField.getWidth() - 1);
-      int up = std::max(y - 1, 0);
-      int down = std::min(y + 1, heightField.getWidth() - 1);
+      const int left = std::max(x - 1, 0);
+      const int right = std::min(x + 1, heightField.getWidth() - 1);
+      const int up = std::max(y - 1, 0);
+      const int down = std::min(y + 1, heightField.getWidth() - 1);
 
-      float dx = heightField.valueAt(y, right) - heightField.valueAt(y, left);
-      float dy = heightField.valueAt(down, x) - heightField.valueAt(up, x);
+      const float dx = heightField.valueAt(y, right) - heightField.valueAt(y, left);
+      const float dy = heightField.valueAt(down, x) - heightField.valueAt(up, x);
 
-      return glm::normalize(glm::vec3(-dx, NormalY, dy));
+      return normalize(glm::vec3(-dx, NormalY, dy));
    }
 
    [[nodiscard]] auto GeometryFactory::getGeometryData(const GeometryHandle& handle)
        -> GeometryData {
-      auto it = geometryDataMap.find(handle);
-      if (it != geometryDataMap.end()) {
+      if (const auto it = geometryDataMap.find(handle); it != geometryDataMap.end()) {
          return geometryDataMap.at(handle);
-      } else {
-         throw GeometryDataNotFoundException(
-             fmt::format("Geometry Data with handle {0} was not found", handle));
       }
+      throw GeometryDataNotFoundException(
+          fmt::format("Geometry Data with handle {0} was not found", handle));
    }
 
    [[nodiscard]] auto GeometryFactory::getImageData(const ImageHandle& handle) -> as::ImageData& {
-      auto it = imageDataMap.find(handle);
-      if (it != imageDataMap.end()) {
+      if (const auto it = imageDataMap.find(handle); it != imageDataMap.end()) {
          return imageDataMap.at(handle);
-      } else {
-         throw GeometryDataNotFoundException(
-             fmt::format("Image Data with handle {0} was not found", handle));
       }
+      throw GeometryDataNotFoundException(
+          fmt::format("Image Data with handle {0} was not found", handle));
    }
 
 }

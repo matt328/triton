@@ -73,7 +73,7 @@ namespace tr::gp {
 
    GameplaySystem::~GameplaySystem() {
       Log.info("Destroying Game");
-   };
+   }
 
    void GameplaySystem::fixedUpdate(const cm::Timer& timer) const {
       ZoneNamedN(upd, "FixedUpdate", true);

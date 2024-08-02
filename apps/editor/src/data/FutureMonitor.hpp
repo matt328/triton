@@ -17,7 +17,7 @@ namespace ed::data {
    };
 
    template <typename T>
-   class FutureWrapper : public FutureWrapperBase {
+   class FutureWrapper final : public FutureWrapperBase {
     public:
       FutureWrapper(futures::cfuture<T>&& future, std::function<void(T)> fn)
           : FutureWrapperBase{}, future(std::move(future)), fn(fn) {
@@ -32,9 +32,7 @@ namespace ed::data {
             try {
                auto result = future.get();
                fn(result);
-            } catch (const std::exception& ex) {
-               Log.error("Exception {0}", ex.what());
-            }
+            } catch (const std::exception& ex) { Log.error("Exception {0}", ex.what()); }
          }
       }
 
@@ -46,7 +44,7 @@ namespace ed::data {
    class FutureMonitor {
     public:
       FutureMonitor() = default;
-      ~FutureMonitor() {
+      ~FutureMonitor() { // NOLINT(*-use-equals-default)
       }
 
       FutureMonitor(const FutureMonitor&) = delete;

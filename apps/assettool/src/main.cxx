@@ -1,18 +1,16 @@
 #include "GltfConverter.hpp"
 #include "GlmCereal.hpp"
 
-auto parseCommandLine(int argc, char* argv[]) {
+auto parseCommandLine(const int argc, char* argv[]) {
    auto options = std::unordered_map<std::string, std::string>{};
 
    options["mode"] = argv[1];
 
    for (int i = 2; i < argc; ++i) {
-      std::string arg = argv[i];
-      if (arg.starts_with('-')) {
-         auto delimiter_pos = arg.find('=');
-         if (delimiter_pos != std::string::npos) {
+      if (std::string arg = argv[i]; arg.starts_with('-')) {
+         if (const auto delimiter_pos = arg.find('='); delimiter_pos != std::string::npos) {
             std::string key = arg.substr(1, delimiter_pos - 1); // Skip the leading '-'
-            std::string value = arg.substr(delimiter_pos + 1);
+            const std::string value = arg.substr(delimiter_pos + 1);
             options[key] = value;
          }
       }
@@ -27,35 +25,32 @@ int main(int argc, char* argv[]) {
    Log.set_level(spdlog::level::trace);
 
    namespace fs = std::filesystem;
-   auto options = parseCommandLine(argc, argv);
 
-   if (options["mode"] == "gltf") {
+   if (auto options = parseCommandLine(argc, argv); options["mode"] == "gltf") {
       const auto gltfFileStr = options["f"];
       auto gltfFile = fs::path{gltfFileStr};
 
       if (gltfFile.is_relative()) {
-         gltfFile = fs::absolute(gltfFile);
+         gltfFile = absolute(gltfFile);
       }
 
       auto skeletonFile = fs::path{options["s"]};
       if (skeletonFile.is_relative()) {
-         skeletonFile = fs::absolute(skeletonFile);
+         skeletonFile = absolute(skeletonFile);
       }
 
       auto outputFile = fs::path{options["o"]};
       if (outputFile.is_relative()) {
-         outputFile = fs::absolute(outputFile);
+         outputFile = absolute(outputFile);
       }
 
       Log.info("Converting Gltf file, input: {0}, skeleton file: {1}",
                gltfFile.string(),
                skeletonFile.string());
 
-      auto converter = tr::as::gltf::Converter{};
-
       try {
-         auto tritonModel = converter.convert(gltfFile, skeletonFile);
          {
+            auto tritonModel = tr::as::gltf::Converter::convert(gltfFile, skeletonFile);
             auto os = std::ofstream(outputFile, std::ios::binary);
             cereal::BinaryOutputArchive output(os);
             output(tritonModel);

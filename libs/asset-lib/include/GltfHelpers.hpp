@@ -5,43 +5,44 @@
 
 namespace tr::as::gltf::Helpers {
 
-   auto parseNodeTransform(const tinygltf::Node& node) {
+   inline auto parseNodeTransform(const tinygltf::Node& node) {
       // If glft file has a matrix, we should prefer that
       if (node.matrix.size() == 16) {
-         auto floatVec = std::vector<float>{node.matrix.begin(), node.matrix.end()};
+         const auto floatVec = std::vector<float>{node.matrix.begin(), node.matrix.end()};
          return glm::make_mat4(floatVec.data());
-      } else {
-         // If none of these exist, it will end up with an identity matrix
-         auto translation = glm::vec3{0.f, 0.f, 0.f};
-         auto rotation = glm::identity<glm::quat>();
-         auto scale = glm::vec3(1.f, 1.f, 1.f);
-
-         if (node.translation.size() == 3) {
-            translation = glm::vec3(node.translation[0], node.translation[1], node.translation[2]);
-         }
-
-         if (node.rotation.size() == 4) {
-            rotation =
-                glm::quat(node.rotation[3], node.rotation[0], node.rotation[1], node.rotation[2]);
-         }
-
-         if (node.scale.size() == 3) {
-            scale = glm::vec3(node.scale[0], node.scale[1], node.scale[2]);
-         }
-
-         auto translationMatrix = glm::translate(glm::mat4(1.f), translation);
-         auto rotationMatrix = glm::mat4_cast(rotation);
-         auto scaleMatrix = glm::scale(glm::mat4(1.f), scale);
-
-         return translationMatrix * rotationMatrix * scaleMatrix;
       }
+      // If none of these exist, it will end up with an identity matrix
+      auto translation = glm::vec3{0.f, 0.f, 0.f};
+      auto rotation = glm::identity<glm::quat>();
+      auto scale = glm::vec3(1.f, 1.f, 1.f);
+
+      if (node.translation.size() == 3) {
+         translation = glm::vec3(node.translation[0], node.translation[1], node.translation[2]);
+      }
+
+      if (node.rotation.size() == 4) {
+         rotation = glm::quat(static_cast<float>(node.rotation[3]),
+                              static_cast<float>(node.rotation[0]),
+                              static_cast<float>(node.rotation[1]),
+                              static_cast<float>(node.rotation[2]));
+      }
+
+      if (node.scale.size() == 3) {
+         scale = glm::vec3(node.scale[0], node.scale[1], node.scale[2]);
+      }
+
+      const auto translationMatrix = glm::translate(glm::mat4(1.f), translation);
+      const auto rotationMatrix = glm::mat4_cast(rotation);
+      const auto scaleMatrix = glm::scale(glm::mat4(1.f), scale);
+
+      return translationMatrix * rotationMatrix * scaleMatrix;
    }
 
    /// Populate the indices and vertices in the tritonModel from the gltf model
-   auto createGeometry(const tinygltf::Model& model,
-                       const tinygltf::Primitive& primitive,
-                       const glm::mat4& transform,
-                       Model& tritonModel) {
+   inline auto createGeometry(const tinygltf::Model& model,
+                              const tinygltf::Primitive& primitive,
+                              const glm::mat4& transform,
+                              Model& tritonModel) {
       // Load Indices
       std::vector<uint32_t> indices;
       {
@@ -68,8 +69,7 @@ namespace tr::as::gltf::Helpers {
                break;
             }
             case TINYGLTF_PARAMETER_TYPE_UNSIGNED_BYTE: {
-               auto buf = reinterpret_cast<const uint8_t*>(
-                   &buffer.data[accessor.byteOffset + bufferView.byteOffset]);
+               auto buf = &buffer.data[accessor.byteOffset + bufferView.byteOffset];
                for (size_t index = 0; index < accessor.count; index++) {
                   indices.push_back(buf[index]);
                }
@@ -82,10 +82,10 @@ namespace tr::as::gltf::Helpers {
          }
       }
 
-      std::vector<Vertex> vertices;
       {
-         for (const auto& attribute : primitive.attributes) {
-            const auto& accessor = model.accessors[attribute.second];
+         std::vector<Vertex> vertices;
+         for (const auto& [attribute, value] : primitive.attributes) {
+            const auto& accessor = model.accessors[value];
 
             const auto& vertexCount = accessor.count;
             const auto& view = model.bufferViews[accessor.bufferView];
@@ -97,31 +97,31 @@ namespace tr::as::gltf::Helpers {
 
             vertices.resize(vertexCount);
 
-            if (attribute.first.compare("POSITION") == 0) {
+            if (attribute == "POSITION") {
                for (size_t i = 0; i < vertexCount; i++) {
                   auto vertexPosition = glm::make_vec3(&data[i * 3]);
                   auto tempVec = transform * glm::vec4(vertexPosition, 1.f);
                   vertices[i].pos = glm::vec3(tempVec);
                }
             }
-            if (attribute.first.compare("NORMAL") == 0) {
+            if (attribute == "NORMAL") {
                for (size_t i = 0; i < vertexCount; i++) {
                   vertices[i].normal = glm::make_vec3(&data[i * 3]);
                }
             }
-            if (attribute.first.compare("TEXCOORD_0") == 0) {
+            if (attribute == "TEXCOORD_0") {
                for (size_t i = 0; i < vertexCount; i++) {
                   vertices[i].uv = glm::make_vec2(&data[i * 2]);
                }
             }
-            if (attribute.first.compare("JOINTS_0") == 0) {
+            if (attribute == "JOINTS_0") {
                for (size_t i = 0; i < vertexCount; i++) {
                   const auto& jointData =
                       reinterpret_cast<const uint8_t*>(&buffer.data[dataOffset]);
                   vertices[i].joint0 = glm::make_vec4(&jointData[i * 4]);
                }
             }
-            if (attribute.first.compare("WEIGHTS_0") == 0) {
+            if (attribute == "WEIGHTS_0") {
                for (size_t i = 0; i < vertexCount; i++) {
                   vertices[i].weight0 = glm::make_vec4(&data[i * 4]);
                }
@@ -133,7 +133,8 @@ namespace tr::as::gltf::Helpers {
       }
    }
 
-   auto createTexture(const tinygltf::Model& model, int textureIndex, Model& tritonModel) {
+   inline auto createTexture(const tinygltf::Model& model,
+                             const int textureIndex, Model& tritonModel) {
       if (textureIndex == -1) {
          tinygltf::Image image;
 
@@ -158,9 +159,11 @@ namespace tr::as::gltf::Helpers {
       }
    }
 
-   void parseNode(const tinygltf::Model& model, const tinygltf::Node& node, Model& tritonModel) {
+   inline void parseNode(const tinygltf::Model& model, // NOLINT(*-no-recursion)
+                         const tinygltf::Node& node,
+                         Model& tritonModel) {
       if (node.mesh != -1) {
-         auto nodeTransform = parseNodeTransform(node);
+         const auto nodeTransform = parseNodeTransform(node);
          const auto& mesh = model.meshes[node.mesh];
          for (const auto& primitive : mesh.primitives) {
 
@@ -175,8 +178,8 @@ namespace tr::as::gltf::Helpers {
       }
       // Exit Criteria is node.children is empty
       for (auto& child : node.children) {
-         auto& node = model.nodes[child];
-         parseNode(model, node, tritonModel);
+         auto& localNode = model.nodes[child];
+         parseNode(model, localNode, tritonModel);
       }
    }
 }

@@ -10,10 +10,10 @@ namespace ed::data {
       futureMonitor = std::make_unique<FutureMonitor>();
    }
 
-   DataFacade::~DataFacade() {
+   DataFacade::~DataFacade() { // NOLINT(*-use-equals-default)
    }
 
-   void DataFacade::update() {
+   void DataFacade::update() const {
       futureMonitor->update();
    }
 
@@ -113,7 +113,7 @@ namespace ed::data {
    }
 
    void DataFacade::setEntitySkeleton([[maybe_unused]] const std::string_view& entityName,
-                                      [[maybe_unused]] std::string_view& skeletonName) {
+                                      [[maybe_unused]] const std::string_view& skeletonName) {
       auto& entityData = dataStore.scene.at(entityName.data());
       entityData.skeleton = skeletonName.data();
       unsaved = true;
@@ -139,19 +139,19 @@ namespace ed::data {
 
          clear();
 
-         for (const auto& [name, skeleton] : tempStore.skeletons) {
+         for (const auto& skeleton : tempStore.skeletons | std::views::values) {
             addSkeleton(skeleton.name, skeleton.filePath);
          }
 
-         for (const auto& [name, animation] : tempStore.animations) {
+         for (const auto& animation : tempStore.animations | std::views::values) {
             addAnimation(animation.name, animation.filePath);
          }
 
-         for (const auto& [name, model] : tempStore.models) {
+         for (const auto& model : tempStore.models | std::views::values) {
             addModel(model.name, model.filePath);
          }
 
-         for (const auto& [name, entityData] : tempStore.scene) {
+         for (const auto& entityData : tempStore.scene | std::views::values) {
             if (entityData.animations.empty()) {
                createStaticModel(entityData.name, entityData.modelName);
             } else {
@@ -166,9 +166,10 @@ namespace ed::data {
       } catch (const std::exception& ex) { Log.error(ex.what()); }
    }
 
-   void DataFacade::setEntityPosition(const std::string_view& name, glm::vec3 newPosition) {
-      auto& entityData = dataStore.scene.at(name.data());
-      entityData.position = newPosition;
+   void DataFacade::setEntityPosition(const std::string_view& name, const glm::vec3& newPosition) {
+      auto& [name2, position, rotation, modelName, skeleton, animations] =
+          dataStore.scene.at(name.data());
+      position = newPosition;
       unsaved = true;
       Log.debug("need to push entity position change into engine");
    }

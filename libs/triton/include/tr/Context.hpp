@@ -8,7 +8,7 @@ namespace tr::ctx {
 
    class Context {
     public:
-      Context(void* nativeWindow, bool guiEnabled = false);
+      explicit Context(void* nativeWindow, bool guiEnabled = false);
       ~Context();
 
       Context(const Context&) = delete;
@@ -16,18 +16,18 @@ namespace tr::ctx {
       Context& operator=(const Context&) = delete;
       Context& operator=(Context&&) = delete;
 
-      void start(const std::function<void()>& pollFn);
+      void start(const std::function<void()>& pollFn) const;
 
-      void keyCallback(cm::Key key, cm::ButtonState buttonState);
-      void cursorPosCallback(double xpos, double ypos);
-      void mouseButtonCallback(int button, int action, int mods);
-      void setMouseState(bool captured);
-      void pause(bool paused);
-      void hostWindowClosed();
+      void keyCallback(cm::Key key, cm::ButtonState buttonState) const;
+      void cursorPosCallback(double xpos, double ypos) const;
+      void mouseButtonCallback(int button, int action, int mods) const;
+      void setMouseState(bool captured) const;
+      void pause(bool paused) const;
+      void hostWindowClosed() const;
 
       [[nodiscard]] GameplayFacade& getGameplayFacade() const;
 
-      void setWireframe(bool wireframeEnabled);
+      void setWireframe(bool wireframeEnabled) const;
 
     private:
       class Impl;

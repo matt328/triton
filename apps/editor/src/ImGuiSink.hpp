@@ -1,10 +1,10 @@
 #pragma once
 
 template <typename Mutex>
-class my_sink : public spdlog::sinks::base_sink<Mutex> {
+class my_sink final : public spdlog::sinks::base_sink<Mutex> {
 
  public:
-   my_sink(const std::function<void(std::string)> sinkFn) : fn{sinkFn} {
+   explicit my_sink(const std::function<void(std::string)>& sinkFn) : fn{sinkFn} {
       spdlog::sinks::base_sink<Mutex>::set_pattern("%I:%M:%S %-8l %v%$");
    }
 

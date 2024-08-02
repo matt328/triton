@@ -17,7 +17,6 @@ namespace tr::ct {
 namespace tr::gfx::geo {
 
    class GeometryData;
-   class ImageData;
 
    struct GltfNode {
       int index;
@@ -51,7 +50,7 @@ namespace tr::gfx::geo {
       GeometryFactory(GeometryFactory&&) = delete;
       GeometryFactory& operator=(GeometryFactory&&) = delete;
 
-      auto createGeometryFromHeightfield(const ct::HeightField& heightfield)
+      auto createGeometryFromHeightfield(const ct::HeightField& heightField)
           -> TexturedGeometryHandle;
 
       /// Load a TRM file and cache its data
@@ -73,7 +72,7 @@ namespace tr::gfx::geo {
       std::unordered_map<GeometryHandle, GeometryData> geometryDataMap;
       std::unordered_map<ImageHandle, as::ImageData> imageDataMap;
 
-      auto generateNormal(int x, int y, const ct::HeightField& heightField) -> glm::vec3;
+      static auto generateNormal(int x, int y, const ct::HeightField& heightField) -> glm::vec3;
 
       /// Loads a TRM file from the given path.
       /// @throws IOException if the file cannot be opened or parsed.

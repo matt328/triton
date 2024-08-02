@@ -23,7 +23,7 @@ namespace tr::gfx::sb {
     public:
       ShaderBindingFactory(const GraphicsDevice& graphicsDevice,
                            const ds::LayoutFactory& layoutFactory,
-                           const bool useDescriptorBuffers = false);
+                           bool useDescriptorBuffers = false);
       ~ShaderBindingFactory();
 
       ShaderBindingFactory(const ShaderBindingFactory&) = delete;
@@ -33,9 +33,10 @@ namespace tr::gfx::sb {
       ShaderBindingFactory& operator=(ShaderBindingFactory&&) = delete;
 
       /// Allocates a new ShaderBinding
-      auto createShaderBinding(ShaderBindingHandle handle) -> std::unique_ptr<ShaderBinding>;
+      [[nodiscard]] auto createShaderBinding(ShaderBindingHandle handle) const
+          -> std::unique_ptr<ShaderBinding>;
 
-      [[nodiscard]] auto& getLayoutFactory() {
+      [[nodiscard]] auto& getLayoutFactory() const {
          return layoutFactory;
       }
 

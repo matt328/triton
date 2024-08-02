@@ -108,7 +108,7 @@ namespace tr::gfx {
          return descriptorBufferProperties;
       }
 
-      [[nodiscard]] const std::pair<uint32_t, uint32_t> getCurrentSize() const;
+      [[nodiscard]] std::pair<uint32_t, uint32_t> getCurrentSize() const;
 
       void recreateSwapchain();
 

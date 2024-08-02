@@ -35,7 +35,7 @@ namespace tr::gfx::Textures {
       Texture& operator=(const Texture&) = delete;
       Texture& operator=(Texture&&) = delete;
 
-      [[nodiscard]] const vk::DescriptorImageInfo getImageInfo() const {
+      [[nodiscard]] vk::DescriptorImageInfo getImageInfo() const {
          return imageInfo;
       }
 
@@ -62,8 +62,8 @@ namespace tr::gfx::Textures {
 
       static TransitionBarrierInfo createTransitionBarrier(
           const vk::Image& image,
-          const vk::ImageLayout oldLayout,
-          const vk::ImageLayout newLayout,
-          const vk::ImageSubresourceRange subresourceRange);
+          vk::ImageLayout oldLayout,
+          vk::ImageLayout newLayout,
+          const vk::ImageSubresourceRange& subresourceRange);
    };
 }

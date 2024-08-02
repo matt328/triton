@@ -9,7 +9,7 @@
 #include "tiny_gltf.h"
 
 namespace tr::as::gltf {
-   Converter::~Converter() noexcept {
+   Converter::~Converter() noexcept { // NOLINT(*-use-equals-default)
    }
 
    auto Converter::convert(const std::filesystem::path& gltf, const std::filesystem::path& skeleton)
@@ -37,8 +37,8 @@ namespace tr::as::gltf {
       auto tritonModel = Model{};
 
       // Load Geometry and Textures
-      const auto& scene = model.scenes[model.defaultScene];
-      for (const auto& nodeIndex : scene.nodes) {
+      for (const auto& scene = model.scenes[model.defaultScene];
+           const auto& nodeIndex : scene.nodes) {
          Helpers::parseNode(model, model.nodes[nodeIndex], tritonModel);
       }
 
@@ -49,7 +49,7 @@ namespace tr::as::gltf {
       const auto& skin = model.skins[0];
       auto accessorIndex = static_cast<size_t>(skin.inverseBindMatrices);
 
-      if (accessorIndex < 0 || accessorIndex >= model.accessors.size()) {
+      if (accessorIndex >= model.accessors.size()) {
          throw std::runtime_error("Invalid accessor index for inverse bind matrices");
       }
 
@@ -98,11 +98,10 @@ namespace tr::as::gltf {
 
             int sortedIndex = -1;
 
-            auto it = std::find(ozzSkeleton.joint_names().begin(),
-                                ozzSkeleton.joint_names().end(),
-                                jointNodeName);
-
-            if (it != ozzSkeleton.joint_names().end()) {
+            if (const auto it = std::find(ozzSkeleton.joint_names().begin(),
+                                          ozzSkeleton.joint_names().end(),
+                                          jointNodeName);
+                it != ozzSkeleton.joint_names().end()) {
                sortedIndex = static_cast<int>(std::distance(ozzSkeleton.joint_names().begin(), it));
             }
 
