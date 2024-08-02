@@ -18,6 +18,11 @@
       <scope name="ProjectCxx" level="WARNING" enabled="true" />
       <scope name="Project Files" level="WARNING" enabled="false" />
     </inspection_tool>
+    <inspection_tool class="CppEnforceDoStatementBraces" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="CppEnforceForStatementBraces" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="CppEnforceIfStatementBraces" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="CppEnforceWhileStatementBraces" enabled="true" level="WARNING" enabled_by_default="true" />
+    <inspection_tool class="CppRemoveRedundantBraces" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="Misra" enabled="true" level="WARNING" enabled_by_default="false">
       <scope name="ProjectCxx" level="TEXT ATTRIBUTES" enabled="true" editorAttributes="INFO_ATTRIBUTES" />
       <scope name="Project Files" level="WARNING" enabled="false" />

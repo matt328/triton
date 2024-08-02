@@ -11,25 +11,25 @@ namespace tr::gfx::ds {
       initAnimationDataLayout(device);
    }
 
-   LayoutFactory::~LayoutFactory() {
+   LayoutFactory::~LayoutFactory() { // NOLINT(*-use-equals-default)
    }
 
    [[nodiscard]] const vk::DescriptorSetLayout& LayoutFactory::getVkLayout(
-       LayoutHandle handle) const {
+       const LayoutHandle handle) const {
       return layoutCache.at(handle)->getVkLayout();
    }
 
    void LayoutFactory::initBindlessLayout(const GraphicsDevice& device) {
-      const auto binding = vk::DescriptorSetLayoutBinding{
+      constexpr auto binding = vk::DescriptorSetLayoutBinding{
           .binding = 3,
           .descriptorType = vk::DescriptorType::eCombinedImageSampler,
           .descriptorCount = 128,
           .stageFlags = vk::ShaderStageFlagBits::eAll};
 
-      const vk::DescriptorBindingFlags bindlessFlags =
+      static constexpr vk::DescriptorBindingFlags bindlessFlags =
           vk::DescriptorBindingFlagBits::ePartiallyBound;
 
-      const auto extendedInfo =
+      constexpr auto extendedInfo =
           vk::DescriptorSetLayoutBindingFlagsCreateInfoEXT{.bindingCount = 1,
                                                            .pBindingFlags = &bindlessFlags};
 
@@ -48,7 +48,7 @@ namespace tr::gfx::ds {
    }
 
    void LayoutFactory::initPerFrameLayout(const GraphicsDevice& device) {
-      const auto binding =
+      constexpr auto binding =
           vk::DescriptorSetLayoutBinding{.binding = 0,
                                          .descriptorType = vk::DescriptorType::eUniformBuffer,
                                          .descriptorCount = 1,
@@ -68,7 +68,7 @@ namespace tr::gfx::ds {
    }
 
    void LayoutFactory::initObjectDataLayout(const GraphicsDevice& device) {
-      const auto binding =
+      constexpr auto binding =
           vk::DescriptorSetLayoutBinding{.binding = 0,
                                          .descriptorType = vk::DescriptorType::eStorageBuffer,
                                          .descriptorCount = 1,
@@ -88,7 +88,7 @@ namespace tr::gfx::ds {
    }
 
    void LayoutFactory::initAnimationDataLayout(const GraphicsDevice& device) {
-      const auto binding =
+      constexpr auto binding =
           vk::DescriptorSetLayoutBinding{.binding = 0,
                                          .descriptorType = vk::DescriptorType::eStorageBuffer,
                                          .descriptorCount = 1,

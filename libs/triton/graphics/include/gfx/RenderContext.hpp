@@ -34,7 +34,7 @@ namespace tr::gfx {
 
    class RenderContext {
     public:
-      RenderContext(GLFWwindow* window, bool guiEnabled = false);
+      explicit RenderContext(GLFWwindow* window, bool guiEnabled = false);
       ~RenderContext();
 
       RenderContext(const RenderContext&) = delete;
@@ -43,26 +43,26 @@ namespace tr::gfx {
       RenderContext(RenderContext&&) = delete;
       RenderContext& operator=(RenderContext&&) = delete;
 
-      void render();
-      void waitIdle();
+      void render() const;
+      void waitIdle() const;
 
-      void enqueueRenderObject(RenderObject renderObject);
+      void enqueueRenderObject(RenderObject renderObject) const;
 
-      void setCurrentCameraData(cm::gpu::CameraData&& cameraData);
+      void setCurrentCameraData(cm::gpu::CameraData&& cameraData) const;
 
-      void setResizeListener(const std::function<void(std::pair<uint32_t, uint32_t>)>& fn);
+      void setResizeListener(const std::function<void(std::pair<uint32_t, uint32_t>)>& fn) const;
 
-      void setRenderData(cm::gpu::RenderData& renderData);
+      void setRenderData(const cm::gpu::RenderData& renderData) const;
 
-      void setDebugRendering(bool wireframeEnabled);
+      void setDebugRendering(bool wireframeEnabled) const;
 
       // Resource Creation
-      auto createStaticModel(const std::filesystem::path& modelPath)
+      auto createStaticModel(const std::filesystem::path& modelPath) const
           -> futures::cfuture<cm::ModelData>;
 
-      auto createTerrain(const uint32_t size) -> futures::cfuture<cm::ModelData>;
+      auto createTerrain(uint32_t size) const -> futures::cfuture<cm::ModelData>;
 
-      auto createSkinnedModel(const std::filesystem::path& modelPath)
+      auto createSkinnedModel(const std::filesystem::path& modelPath) const
           -> futures::cfuture<cm::ModelData>;
 
     private:

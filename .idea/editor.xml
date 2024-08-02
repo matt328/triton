@@ -101,6 +101,7 @@
     <option name="/Default/CodeStyle/CodeFormatting/CppFormatting/TAB_WIDTH/@EntryValue" value="4" type="int" />
     <option name="/Default/Environment/InlayHints/GeneralInlayHintsOptions/DefaultMode/@EntryValue" value="PushToShowHints" type="string" />
     <option name="/Default/CodeEditing/CppDocumentationComment/CommentStyle/@EntryValue" value="Eol" type="string" />
-    <option name="/Default/CodeEditing/CppDocumentationComment/AddBriefTag/@EntryValue" />
+    <option name="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=7020124F_002D9FFC_002D4AC3_002D8F3D_002DAAB8E0240759_002Ff_003AObjectData_002Ehpp_002Fl_003Alibs_003Ftriton_003Fcommon_003Finclude_003Fcm_003FObjectData_002Ehpp/@EntryIndexedValue" value="ForceIncluded" type="string" />
+    <option name="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=7020124F_002D9FFC_002D4AC3_002D8F3D_002DAAB8E0240759_002Ff_003AObjectData_002Ehpp_002Fl_003Alibs_003Ftriton_003Fcommon_003Finclude_003Fcm_003FObjectData_002Ehpp/@EntryIndexRemoved" />
   </component>
 </project>

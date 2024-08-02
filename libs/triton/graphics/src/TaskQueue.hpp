@@ -6,12 +6,13 @@ namespace tr::util {
 
    class TaskQueue {
     public:
-      TaskQueue(size_t maxQueueSize = DefaultMaxQueueSize) : maxQueueSize{maxQueueSize} {
+      explicit TaskQueue(const size_t maxQueueSize = DefaultMaxQueueSize)
+          : maxQueueSize{maxQueueSize} {
          thread = std::thread([this]() { this->worker(); });
       }
 
       ~TaskQueue() {
-         std::unique_lock<LockableBase(std::mutex)> lock(mtx);
+         std::unique_lock lock(mtx);
          stopFlag = true;
          lock.unlock();
          cv.notify_all();
@@ -32,7 +33,7 @@ namespace tr::util {
 
          std::future<ReturnType> res = task->get_future();
 
-         std::unique_lock<LockableBase(std::mutex)> lock(mtx);
+         std::unique_lock lock(mtx);
          LockMark(mtx);
          if (taskQueue.size() >= maxQueueSize) {
             cv.wait(lock, [this] { return taskQueue.size() < maxQueueSize || stopFlag; });
@@ -42,7 +43,7 @@ namespace tr::util {
             throw std::runtime_error("enqueue on stopped ThreadPool");
          }
 
-         taskQueue.emplace([task]() { (*task)(); });
+         taskQueue.emplace([task] { (*task)(); });
          cv.notify_one();
 
          return res;
@@ -60,9 +61,9 @@ namespace tr::util {
       void worker() {
          while (true) {
             ZoneNamedN(v2, "TaskQueue Worker", true);
-            std::unique_lock<LockableBase(std::mutex)> lock(mtx);
+            std::unique_lock lock(mtx);
             LockMark(mtx);
-            cv.wait(lock, [this]() { return !taskQueue.empty() || stopFlag; });
+            cv.wait(lock, [this] { return !taskQueue.empty() || stopFlag; });
 
             if (stopFlag && taskQueue.empty()) {
                return;

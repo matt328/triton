@@ -150,7 +150,7 @@ namespace tr::gfx::Helpers {
    }
 
    template <typename T>
-   inline void setObjectName(T const& handle,
+   void setObjectName(T const& handle,
                              [[maybe_unused]] const vk::raii::Device& device,
                              const std::string_view name) {
       // NOLINTNEXTLINE this is just debug anyway

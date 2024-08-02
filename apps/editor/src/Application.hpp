@@ -24,7 +24,7 @@ namespace ed {
 
    class Application {
     public:
-      Application(const int width, const int height, const std::string_view& windowTitle);
+      Application(int width, int height, const std::string_view& windowTitle);
       ~Application();
 
       Application(const Application&) = delete;

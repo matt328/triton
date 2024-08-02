@@ -72,7 +72,11 @@ namespace ed {
       ExtTextOut(hdc, 0, 0, ETO_OPAQUE, &rc, nullptr, 0, nullptr);
       EndPaint(hWnd, &ps);
       BOOL value = TRUE;
-      DwmSetWindowAttribute(hWnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &value, sizeof(value));
+      HRESULT result;
+      result = DwmSetWindowAttribute(hWnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &value, sizeof(value));
+      if (result != S_OK) {
+         Log.warn("Error setting Window Attributes");
+      }
       RECT rcClient{};
       GetWindowRect(hWnd, &rcClient);
       // I feel like trash for this but i can't figure out how to make it repaint enough of the
@@ -114,7 +118,7 @@ namespace ed {
 
       manager->addQuitListener<&tr::ctx::Context::hostWindowClosed>(context.get());
       manager->setFullscreenFn([this]() { toggleFullscreen(*this); });
-      manager->setWireframeFn([this](bool b) { context->setWireframe(b); });
+      manager->setWireframeFn([this](const bool b) { context->setWireframe(b); });
 
       auto& facade = context->getGameplayFacade();
 
@@ -160,14 +164,14 @@ namespace ed {
    }
 
    void Application::keyCallback(GLFWwindow* window,
-                                 int key,
+                                 const int key,
                                  [[maybe_unused]] int scancode,
-                                 [[maybe_unused]] int action,
-                                 int mods) {
+                                 [[maybe_unused]] const int action,
+                                 const int mods) {
       if (ImGui::GetIO().WantCaptureKeyboard || ImGui::GetIO().WantTextInput) {
          return;
       }
-      auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
+      const auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
       if (key == GLFW_KEY_ENTER && mods == GLFW_MOD_ALT && action == GLFW_RELEASE) {
          toggleFullscreen(*app);
       } else {
@@ -207,9 +211,9 @@ namespace ed {
       }
    }
 
-   void Application::cursorPosCallback(GLFWwindow* window, double xpos, double ypos) {
-      const auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
-      if (app->mouseCaptured) {
+   void Application::cursorPosCallback(GLFWwindow* window, const double xpos, const double ypos) {
+      if (const auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
+          app->mouseCaptured) {
          app->context->cursorPosCallback(xpos, ypos);
       }
    }

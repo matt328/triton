@@ -6,9 +6,9 @@ namespace tr::gfx::sb {
 
    DSShaderBinding::DSShaderBinding(const vk::raii::Device& device,
                                     const vk::DescriptorPool& pool,
-                                    vk::DescriptorType descriptorType,
-                                    vk::DescriptorSetLayout layout,
-                                    std::string_view name)
+                                    const vk::DescriptorType descriptorType,
+                                    const vk::DescriptorSetLayout layout,
+                                    const std::string_view name)
        : ShaderBinding{}, device{device}, descriptorType{descriptorType} {
 
       const auto allocInfo = vk::DescriptorSetAllocateInfo{.descriptorPool = pool,

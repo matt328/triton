@@ -7,24 +7,24 @@
 
 namespace tr::ctx {
 
-   class GameplayFacade::GameplayFacade::Impl {
+   class GameplayFacade::Impl {
     public:
       Impl(gp::GameplaySystem& gameplaySystem, gfx::RenderContext& renderer)
           : gameplaySystem{gameplaySystem}, renderer{renderer} {
       }
 
-      auto createTerrain(const uint32_t size) {
+      [[nodiscard]] auto createTerrain(const uint32_t size) const {
          ZoneNamedN(n, "facade.createTerrain", true);
-         const auto createEntity = [this](cm::ModelData handle) {
+         const auto createEntity = [this](const cm::ModelData& handle) {
             return gameplaySystem.createTerrain(handle);
          };
          return renderer.createTerrain(size).then(createEntity);
       }
 
-      auto createStaticModelEntity(const std::filesystem::path& modelPath)
+      [[nodiscard]] auto createStaticModelEntity(const std::filesystem::path& modelPath) const
           -> futures::cfuture<cm::EntityType> {
 
-         auto gpCreate = [this](cm::ModelData handles) {
+         auto gpCreate = [this](const cm::ModelData& handles) {
             return gameplaySystem.createStaticModel(handles);
          };
 
@@ -33,12 +33,12 @@ namespace tr::ctx {
          return createModel.then(gpCreate);
       }
 
-      auto createAnimatedModelEntity(const std::filesystem::path& modelPath,
-                                     const std::filesystem::path& skeletonPath,
-                                     const std::filesystem::path& animationPath)
+      [[nodiscard]] auto createAnimatedModelEntity(const std::filesystem::path& modelPath,
+                                                   const std::filesystem::path& skeletonPath,
+                                                   const std::filesystem::path& animationPath) const
           -> futures::cfuture<cm::EntityType> {
 
-         auto gpCreate = [this, skeletonPath, animationPath](cm::ModelData modelData) {
+         auto gpCreate = [this, skeletonPath, animationPath](const cm::ModelData& modelData) {
             return gameplaySystem.createAnimatedModel(modelData, skeletonPath, animationPath);
          };
 
@@ -47,28 +47,28 @@ namespace tr::ctx {
          return createModel.then(gpCreate);
       }
 
-      void loadModelResources([[maybe_unused]] const std::filesystem::path& modelPath,
-                              [[maybe_unused]] const std::filesystem::path& skeletonPath,
-                              [[maybe_unused]] const std::filesystem::path& animationPath,
-                              [[maybe_unused]] const std::function<void()> done) {
+      static void loadModelResources([[maybe_unused]] const std::filesystem::path& modelPath,
+                                     [[maybe_unused]] const std::filesystem::path& skeletonPath,
+                                     [[maybe_unused]] const std::filesystem::path& animationPath,
+                                     [[maybe_unused]] const std::function<void()>& done) {
       }
 
-      auto createCamera(uint32_t width,
-                        uint32_t height,
-                        float fov,
-                        float zNear,
-                        float zFar,
-                        glm::vec3 position,
-                        std::optional<std::string> name) {
+      [[nodiscard]] auto createCamera(const uint32_t width,
+                                      const uint32_t height,
+                                      const float fov,
+                                      const float zNear,
+                                      const float zFar,
+                                      const glm::vec3& position,
+                                      const std::optional<std::string>& name) const {
 
          return gameplaySystem.createCamera(width, height, fov, zNear, zFar, position, name);
       }
 
-      void setCurrentCamera(cm::EntityType currentCamera) {
+      void setCurrentCamera(const cm::EntityType currentCamera) const {
          gameplaySystem.setCurrentCamera(currentCamera);
       }
 
-      void clear() {
+      void clear() const {
          gameplaySystem.clearEntities();
       }
 
@@ -82,41 +82,42 @@ namespace tr::ctx {
        : impl(std::make_unique<Impl>(gameplaySystem, renderer)) {
    }
 
-   GameplayFacade::~GameplayFacade() {
+   GameplayFacade::~GameplayFacade() { // NOLINT(*-use-equals-default)
    }
 
-   auto GameplayFacade::createStaticModelEntity(const std::filesystem::path& modelPath)
+   auto GameplayFacade::createStaticModelEntity(const std::filesystem::path& modelPath) const
        -> futures::cfuture<cm::EntityType> {
       return impl->createStaticModelEntity(modelPath);
    }
 
    auto GameplayFacade::createAnimatedModelEntity(const std::filesystem::path& modelPath,
                                                   const std::filesystem::path& skeletonPath,
-                                                  const std::filesystem::path& animationPath)
+                                                  const std::filesystem::path& animationPath) const
        -> futures::cfuture<cm::EntityType> {
       return impl->createAnimatedModelEntity(modelPath, skeletonPath, animationPath);
    }
 
-   auto GameplayFacade::createTerrain(const uint32_t size) -> futures::cfuture<cm::EntityType> {
+   auto GameplayFacade::createTerrain(const uint32_t size) const
+       -> futures::cfuture<cm::EntityType> {
       return impl->createTerrain(size);
    }
 
-   cm::EntityType GameplayFacade::createCamera(uint32_t width,
-                                               uint32_t height,
-                                               float fov,
-                                               float zNear,
-                                               float zFar,
-                                               glm::vec3 position,
-                                               std::optional<std::string> name) {
+   cm::EntityType GameplayFacade::createCamera(const uint32_t width,
+                                               const uint32_t height,
+                                               const float fov,
+                                               const float zNear,
+                                               const float zFar,
+                                               const glm::vec3& position,
+                                               const std::optional<std::string>& name) const {
 
       return impl->createCamera(width, height, fov, zNear, zFar, position, name);
    }
 
-   void GameplayFacade::setCurrentCamera(cm::EntityType currentCamera) {
+   void GameplayFacade::setCurrentCamera(const cm::EntityType currentCamera) const {
       return impl->setCurrentCamera(currentCamera);
    }
 
-   void GameplayFacade::clear() {
+   void GameplayFacade::clear() const {
       impl->clear();
    }
 

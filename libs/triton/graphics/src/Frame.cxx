@@ -1,13 +1,13 @@
 #include "Frame.hpp"
 #include "cm/ObjectData.hpp"
 #include "GraphicsDevice.hpp"
-#include "sb/LayoutFactory.hpp"
 #include "helpers/Rendering.hpp"
 #include "mem/Buffer.hpp"
 #include "mem/Image.hpp"
 #include "mem/Allocator.hpp"
 #include "sb/ShaderBindingFactory.hpp"
 #include "sb/ShaderBinding.hpp"
+#include <utility>
 #include <vulkan/vulkan_enums.hpp>
 
 namespace tr::gfx {
@@ -21,9 +21,9 @@ namespace tr::gfx {
        : graphicsDevice{graphicsDevice.getVulkanDevice()},
          combinedImageSamplerDescriptorSize{
              graphicsDevice.getDescriptorBufferProperties().combinedImageSamplerDescriptorSize},
-         depthImageView{depthImageView},
+         depthImageView{std::move(depthImageView)},
          shaderBindingFactory{shaderBindingFactory},
-         drawExtent{graphicsDevice.DrawImageExtent2D} {
+         drawExtent{GraphicsDevice::DrawImageExtent2D} {
 
       createSwapchainResources(graphicsDevice);
 
@@ -31,7 +31,7 @@ namespace tr::gfx {
       tracyContext = TracyVkContext(*graphicsDevice.getPhysicalDevice(),
                                     *graphicsDevice.getVulkanDevice(),
                                     *graphicsDevice.getGraphicsQueue(),
-                                    *(*commandBuffer));
+                                    **commandBuffer);
       TracyVkContextName(tracyContext, name.data(), name.length());
 
       constexpr auto semaphoreCreateInfo = vk::SemaphoreCreateInfo{};
@@ -112,13 +112,13 @@ namespace tr::gfx {
                                              *animationDataBuffer,
                                              sizeof(cm::AnimationData) * cm::gpu::MAX_OBJECTS);
 
-      const auto drawImageFormat = vk::Format::eR16G16B16A16Sfloat;
-      const auto drawImageExtent = graphicsDevice.DrawImageExtent2D;
+      constexpr auto drawImageFormat = vk::Format::eR16G16B16A16Sfloat;
+      const auto [width, height] = GraphicsDevice::DrawImageExtent2D;
 
       const auto imageCreateInfo = vk::ImageCreateInfo{
           .imageType = vk::ImageType::e2D,
           .format = drawImageFormat,
-          .extent = vk::Extent3D{drawImageExtent.width, drawImageExtent.height, 1},
+          .extent = vk::Extent3D{width, height, 1},
           .mipLevels = 1,
           .arrayLayers = 1,
           .samples = vk::SampleCountFlagBits::e1,
@@ -128,7 +128,7 @@ namespace tr::gfx {
           .sharingMode = vk::SharingMode::eExclusive,
           .initialLayout = vk::ImageLayout::eUndefined};
 
-      const auto imageAllocateCreateInfo =
+      constexpr auto imageAllocateCreateInfo =
           vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eGpuOnly,
                                     .requiredFlags = vk::MemoryPropertyFlagBits::eDeviceLocal};
       drawImage = graphicsDevice.getAllocator().createImage(imageCreateInfo,
@@ -148,11 +148,11 @@ namespace tr::gfx {
           graphicsDevice.getVulkanDevice().createImageView(imageViewCreateInfo));
    }
 
-   void Frame::updateTextures(const std::vector<vk::DescriptorImageInfo>& imageInfos) {
+   void Frame::updateTextures(const std::vector<vk::DescriptorImageInfo>& imageInfos) const {
       textureShaderBinding->bindImageSamplers(3, imageInfos);
    }
 
-   void Frame::prepareFrame() {
+   void Frame::prepareFrame() const {
       TracyVkZone(tracyContext, **commandBuffer, "render room");
 
       Helpers::transitionImage(*commandBuffer,
@@ -188,7 +188,7 @@ namespace tr::gfx {
       commandBuffer->beginRendering(renderingInfo);
    }
 
-   void Frame::end3D(const vk::Image& swapchainImage, const vk::Extent2D& swapchainExtent) {
+   void Frame::end3D(const vk::Image& swapchainImage, const vk::Extent2D& swapchainExtent) const {
       commandBuffer->endRendering();
 
       Helpers::transitionImage(*commandBuffer,
@@ -213,7 +213,7 @@ namespace tr::gfx {
    }
 
    void Frame::renderOverlay(const vk::raii::ImageView& swapchainImageView,
-                             const vk::Extent2D& swapchainExtent) {
+                             const vk::Extent2D& swapchainExtent) const {
       const auto colorAttachment = vk::RenderingAttachmentInfo{
           .imageView = *swapchainImageView,
           .imageLayout = vk::ImageLayout::eColorAttachmentOptimal,
@@ -235,7 +235,7 @@ namespace tr::gfx {
       commandBuffer->endRendering();
    }
 
-   void Frame::endFrame(const vk::Image& swapchainImage) {
+   void Frame::endFrame(const vk::Image& swapchainImage) const {
       Helpers::transitionImage(*commandBuffer,
                                swapchainImage,
                                vk::ImageLayout::eColorAttachmentOptimal,
@@ -248,15 +248,16 @@ namespace tr::gfx {
       return drawImage->getImage();
    }
 
-   void Frame::updateObjectDataBuffer(const cm::gpu::ObjectData* data, const size_t size) {
+   void Frame::updateObjectDataBuffer(const cm::gpu::ObjectData* data, const size_t size) const {
       this->objectDataBuffer->updateMappedBufferValue(data, size);
    }
 
-   void Frame::updatePerFrameDataBuffer(const cm::gpu::CameraData* data, const size_t size) {
+   void Frame::updatePerFrameDataBuffer(const cm::gpu::CameraData* data, const size_t size) const {
       this->cameraDataBuffer->updateMappedBufferValue(data, size);
    }
 
-   void Frame::updateAnimationDataBuffer(const cm::gpu::AnimationData* data, const size_t size) {
+   void Frame::updateAnimationDataBuffer(const cm::gpu::AnimationData* data,
+                                         const size_t size) const {
       this->animationDataBuffer->updateMappedBufferValue(data, size);
    }
 

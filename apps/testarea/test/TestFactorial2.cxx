@@ -19,7 +19,7 @@ bool interface_func(Interface* i) {
    return i->foo(3, emptyString);
 } // function to test
 
-class Mock : public Interface {
+class Mock final : public Interface {
  public:
    MAKE_MOCK2(foo, bool(int, std::string&), override);
    MAKE_MOCK1(bar, bool(int), override);
@@ -55,7 +55,8 @@ TEST_CASE("Mocking is tested", "[factorial]") {
        .SIDE_EFFECT(_2 = "cat")   // and set param string to "cat"
        .RETURN(true);
 
-   auto result = interface_func(&m);
+   const auto result = interface_func(&m);
 
+   REQUIRE(local_var == 0);
    REQUIRE(result == true);
 }

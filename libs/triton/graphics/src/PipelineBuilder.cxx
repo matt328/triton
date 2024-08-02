@@ -7,14 +7,7 @@
 
 namespace tr::gfx {
    PipelineBuilder::PipelineBuilder(const vk::raii::Device& device)
-       : device{device},
-         inputAssembly{},
-         rasterizer{},
-         colorBlendAttachment{},
-         multisampling{},
-         depthStencil{},
-         renderInfo{},
-         colorAttachmentformat{vk::Format::eB8G8R8A8Srgb} {
+       : device{device}, colorAttachmentformat{vk::Format::eB8G8R8A8Srgb} {
    }
 
    void PipelineBuilder::setDefaultVertexAttributeDescriptions() {
@@ -27,12 +20,12 @@ namespace tr::gfx {
    }
 
    void PipelineBuilder::setVertexAttributeDescriptions(
-       std::span<geo::VertexComponent> components) {
+       const std::span<geo::VertexComponent> components) {
       vertexAttributeDescriptions = geo::VertexBuilder::inputAttributeDescriptions(0, components);
    }
 
    auto PipelineBuilder::buildPipelineLayout(const std::span<vk::DescriptorSetLayout>& layouts,
-                                             std::string_view name)
+                                             const std::string_view name) const
        -> std::unique_ptr<vk::raii::PipelineLayout> {
 
       auto pcr = vk::PushConstantRange{.stageFlags = vk::ShaderStageFlagBits::eVertex |
@@ -40,7 +33,7 @@ namespace tr::gfx {
                                        .offset = 0,
                                        .size = sizeof(cm::gpu::PushConstants)};
 
-      vk::PipelineLayoutCreateInfo pipelineLayoutCreateInfo{
+      const vk::PipelineLayoutCreateInfo pipelineLayoutCreateInfo{
           .setLayoutCount = static_cast<uint32_t>(layouts.size()),
           .pSetLayouts = layouts.data(),
           .pushConstantRangeCount = 1,
@@ -55,7 +48,7 @@ namespace tr::gfx {
    }
 
    auto PipelineBuilder::buildPipeline(const vk::raii::PipelineLayout& pipelineLayout,
-                                       std::string_view name)
+                                       const std::string_view name) const
        -> std::unique_ptr<vk::raii::Pipeline> {
       const auto colorBlending =
           vk::PipelineColorBlendStateCreateInfo{.logicOpEnable = VK_FALSE,
@@ -73,7 +66,7 @@ namespace tr::gfx {
           .pVertexAttributeDescriptions = vertexAttributeDescriptions.data()};
 
       // Switch pNext here to a chained structure
-      auto pipelineCreateInfo =
+      const auto pipelineCreateInfo =
           vk::GraphicsPipelineCreateInfo{.pNext = &renderInfo,
                                          .stageCount = static_cast<uint32_t>(shaderStages.size()),
                                          .pStages = shaderStages.data(),
@@ -118,21 +111,21 @@ namespace tr::gfx {
 
    void PipelineBuilder::setTessellationStages(
        [[maybe_unused]] const vk::raii::ShaderModule& controlModule,
-       [[maybe_unused]] const vk::raii::ShaderModule evaluationModule) {
+       [[maybe_unused]] const vk::raii::ShaderModule& evaluationModule) {
    }
 
-   void PipelineBuilder::setInputTopology(vk::PrimitiveTopology topology) {
+   void PipelineBuilder::setInputTopology(const vk::PrimitiveTopology topology) {
       inputAssembly.topology = topology;
       inputAssembly.primitiveRestartEnable = VK_FALSE;
    }
 
-   void PipelineBuilder::setPolygonMode(vk::PolygonMode polygonMode) {
+   void PipelineBuilder::setPolygonMode(const vk::PolygonMode polygonMode) {
       rasterizer.polygonMode = polygonMode;
       rasterizer.lineWidth = 1.f;
    }
 
-   void PipelineBuilder::setCullMode(vk::CullModeFlagBits cullModeFlagBits,
-                                     vk::FrontFace frontFace) {
+   void PipelineBuilder::setCullMode(const vk::CullModeFlagBits cullModeFlagBits,
+                                     const vk::FrontFace frontFace) {
       rasterizer.cullMode = cullModeFlagBits;
       rasterizer.frontFace = frontFace;
    }
@@ -150,13 +143,13 @@ namespace tr::gfx {
           vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA;
    }
 
-   void PipelineBuilder::setColorAttachmentFormat(vk::Format format) {
+   void PipelineBuilder::setColorAttachmentFormat(const vk::Format format) {
       colorAttachmentformat = format;
       renderInfo.colorAttachmentCount = 1;
       renderInfo.pColorAttachmentFormats = &colorAttachmentformat;
    }
 
-   void PipelineBuilder::setDepthFormat(vk::Format format) {
+   void PipelineBuilder::setDepthFormat(const vk::Format format) {
       renderInfo.depthAttachmentFormat = format;
    }
 

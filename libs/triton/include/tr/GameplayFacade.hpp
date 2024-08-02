@@ -38,27 +38,28 @@ namespace tr::ctx {
       GameplayFacade& operator=(GameplayFacade&&) = delete;
 
       // Entity Creation Methods
-      auto createTerrain(const uint32_t size) -> futures::cfuture<cm::EntityType>;
+      auto createTerrain(uint32_t size) const -> futures::cfuture<cm::EntityType>;
 
       auto createCamera(uint32_t width,
                         uint32_t height,
                         float fov,
                         float zNear,
                         float zFar,
-                        glm::vec3 position,
-                        std::optional<std::string> name = std::nullopt) -> cm::EntityType;
+                        const glm::vec3& position,
+                        const std::optional<std::string>& name = std::nullopt) const
+          -> cm::EntityType;
 
-      auto setCurrentCamera(cm::EntityType currentCamera) -> void;
+      auto setCurrentCamera(cm::EntityType currentCamera) const -> void;
 
-      auto createStaticModelEntity(const std::filesystem::path& modelPath)
+      auto createStaticModelEntity(const std::filesystem::path& modelPath) const
           -> futures::cfuture<cm::EntityType>;
 
       auto createAnimatedModelEntity(const std::filesystem::path& modelPath,
                                      const std::filesystem::path& skeletonPath,
-                                     const std::filesystem::path& animationPath)
+                                     const std::filesystem::path& animationPath) const
           -> futures::cfuture<cm::EntityType>;
 
-      auto clear() -> void;
+      auto clear() const -> void;
 
     private:
       class Impl;

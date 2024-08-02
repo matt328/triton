@@ -10,14 +10,15 @@ namespace tr::gfx::Helpers {
       glslang::FinalizeProcess();
    }
 
-   auto SpirvHelper::createShaderModule(vk::ShaderStageFlagBits shaderType,
-                                        const std::filesystem::path& filename)
+   auto SpirvHelper::createShaderModule(const vk::ShaderStageFlagBits shaderType,
+                                        const std::filesystem::path& filename) const
        -> vk::raii::ShaderModule {
 
       const auto vertexSpirv = compileShader(shaderType, readShaderFile(filename).data());
 
-      auto vertexShaderCreateInfo = vk::ShaderModuleCreateInfo{.codeSize = 4 * vertexSpirv.size(),
-                                                               .pCode = vertexSpirv.data()};
+      const auto vertexShaderCreateInfo =
+          vk::ShaderModuleCreateInfo{.codeSize = 4 * vertexSpirv.size(),
+                                     .pCode = vertexSpirv.data()};
 
       return device.createShaderModule(vertexShaderCreateInfo);
    }
@@ -43,7 +44,7 @@ namespace tr::gfx::Helpers {
    }
 
    std::vector<uint32_t> SpirvHelper::compileShader(const vk::ShaderStageFlagBits shaderType,
-                                                    const char* shaderCode) const {
+                                                    const char* shaderCode) {
       const EShLanguage stage = findLanguage(shaderType);
 
       glslang::TShader shader(stage);
@@ -170,15 +171,15 @@ namespace tr::gfx::Helpers {
       resources.maxTaskWorkGroupSizeY_NV = 1;
       resources.maxTaskWorkGroupSizeZ_NV = 1;
       resources.maxMeshViewCountNV = 4;
-      resources.limits.nonInductiveForLoops = 1;
-      resources.limits.whileLoops = 1;
-      resources.limits.doWhileLoops = 1;
-      resources.limits.generalUniformIndexing = 1;
-      resources.limits.generalAttributeMatrixVectorIndexing = 1;
-      resources.limits.generalVaryingIndexing = 1;
-      resources.limits.generalSamplerIndexing = 1;
-      resources.limits.generalVariableIndexing = 1;
-      resources.limits.generalConstantMatrixVectorIndexing = 1;
+      resources.limits.nonInductiveForLoops = true;
+      resources.limits.whileLoops = true;
+      resources.limits.doWhileLoops = true;
+      resources.limits.generalUniformIndexing = true;
+      resources.limits.generalAttributeMatrixVectorIndexing = true;
+      resources.limits.generalVaryingIndexing = true;
+      resources.limits.generalSamplerIndexing = true;
+      resources.limits.generalVariableIndexing = true;
+      resources.limits.generalConstantMatrixVectorIndexing = true;
       return resources;
    }
 

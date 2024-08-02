@@ -5,7 +5,7 @@
 namespace tr::gfx {
    class PipelineBuilder {
     public:
-      PipelineBuilder(const vk::raii::Device& device);
+      explicit PipelineBuilder(const vk::raii::Device& device);
 
       void clear();
 
@@ -15,8 +15,8 @@ namespace tr::gfx {
       void clearShaderStages();
       void setVertexShaderStage(const vk::raii::ShaderModule& vertexShaderModule);
       void setFragmentShaderStage(const vk::raii::ShaderModule& fragmentShaderModule);
-      void setTessellationStages(const vk::raii::ShaderModule& controlModule,
-                                 const vk::raii::ShaderModule evaluationModule);
+      static void setTessellationStages(const vk::raii::ShaderModule& controlModule,
+                                        const vk::raii::ShaderModule& evaluationModule);
       void setInputTopology(vk::PrimitiveTopology topology);
       void setPolygonMode(vk::PolygonMode polygonMode);
       void setCullMode(vk::CullModeFlagBits cullModeFlagBits, vk::FrontFace frontFace);
@@ -27,11 +27,12 @@ namespace tr::gfx {
       void setDefaultDepthStencil();
       void setSetLayouts(const std::span<vk::DescriptorSetLayout>& layouts);
 
-      auto buildPipelineLayout(const std::span<vk::DescriptorSetLayout>& layouts,
-                               std::string_view name = "Unnamed Pipeline Layout")
-          -> std::unique_ptr<vk::raii::PipelineLayout>;
-      auto buildPipeline(const vk::raii::PipelineLayout& pipelineLayout,
-                         std::string_view name = "Unnamed Pipeline")
+      [[nodiscard]] auto buildPipelineLayout(const std::span<vk::DescriptorSetLayout>& layouts,
+                                             std::string_view name = "Unnamed Pipeline Layout")
+          const -> std::unique_ptr<vk::raii::PipelineLayout>;
+
+      [[nodiscard]] auto buildPipeline(const vk::raii::PipelineLayout& pipelineLayout,
+                                       std::string_view name = "Unnamed Pipeline") const
           -> std::unique_ptr<vk::raii::Pipeline>;
 
     private:

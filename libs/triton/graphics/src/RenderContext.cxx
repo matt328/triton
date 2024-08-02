@@ -17,8 +17,6 @@
 #include "helpers/SpirvHelper.hpp"
 #include "Paths.hpp"
 #include "textures/ResourceManager.hpp"
-#include "VkContext.hpp"
-#include "sb/LayoutFactory.hpp"
 #include "PipelineBuilder.hpp"
 #include "mem/Allocator.hpp"
 #include "sb/ShaderBinding.hpp"
@@ -29,7 +27,7 @@ namespace tr::gfx {
       TODO: This thing is a monolith. Look at all those #includes.
    */
 
-   class RenderContext::RenderContext::Impl {
+   class RenderContext::Impl {
     public:
       Impl(GLFWwindow* window, bool guiEnabled) {
          graphicsDevice = std::make_unique<GraphicsDevice>(window, true);
@@ -155,7 +153,7 @@ namespace tr::gfx {
          objectDataList.clear();
       }
 
-      void waitIdle() {
+      void waitIdle() const {
          graphicsDevice->getVulkanDevice().waitIdle();
       }
 
@@ -169,10 +167,10 @@ namespace tr::gfx {
       }
 
       void setCurrentCameraData(cm::gpu::CameraData&& cameraData) {
-         this->cameraData = std::move(cameraData);
+         this->cameraData = cameraData;
       }
 
-      void setDebugRendering(bool wireframeEnabled) {
+      void setDebugRendering(const bool wireframeEnabled) {
          debugRendering = wireframeEnabled;
       }
 
@@ -181,19 +179,19 @@ namespace tr::gfx {
          resizeFn(graphicsDevice->getCurrentSize());
       }
 
-      void setRenderData(cm::gpu::RenderData& renderData) {
+      void setRenderData(const cm::gpu::RenderData& renderData) const {
          resourceManager->setRenderData(renderData);
       }
 
-      auto createStaticModel(const std::filesystem::path& modelPath) {
+      [[nodiscard]] auto createStaticModel(const std::filesystem::path& modelPath) const {
          return resourceManager->createModel(modelPath);
       }
 
-      auto createTerrain(const uint32_t size) {
+      [[nodiscard]] auto createTerrain(const uint32_t size) const {
          return resourceManager->createTerrain(size);
       }
 
-      auto createSkinnedModel(const std::filesystem::path& modelPath) {
+      [[nodiscard]] auto createSkinnedModel(const std::filesystem::path& modelPath) const {
          return resourceManager->createModel(modelPath);
       }
 
@@ -242,11 +240,7 @@ namespace tr::gfx {
 
          graphicsDevice->recreateSwapchain();
 
-         const auto size = graphicsDevice->DrawImageExtent2D;
-
-         if (size.width == 0 || size.height == 0) {
-            return;
-         }
+         constexpr auto size = GraphicsDevice::DrawImageExtent2D;
 
          // resize Viewport and Scissor Rect
          mainViewport = vk::Viewport{.x = 0.f,
@@ -257,8 +251,6 @@ namespace tr::gfx {
                                      .maxDepth = 1.f};
 
          mainScissor = vk::Rect2D{.offset = {0, 0}, .extent = size};
-
-         // staticModelPipeline->resize({size.width, size.height});
 
          resizeFn(graphicsDevice->getCurrentSize());
 
@@ -332,14 +324,14 @@ namespace tr::gfx {
          // Ask the GPU to present the image once the submit semaphore is signaled. Also trap errors
          // here and recreate (resize) the swapchain
          try {
-            const auto result = graphicsDevice->getGraphicsQueue().presentKHR(
-                vk::PresentInfoKHR{.waitSemaphoreCount = 1,
-                                   .pWaitSemaphores = renderFinishedSemaphores.data(),
-                                   .swapchainCount = 1,
-                                   .pSwapchains = &(*graphicsDevice->getSwapchain()),
-                                   .pImageIndices = &imageIndex});
 
-            if (result == vk::Result::eSuboptimalKHR) {
+            if (const auto result2 = graphicsDevice->getGraphicsQueue().presentKHR(
+                    vk::PresentInfoKHR{.waitSemaphoreCount = 1,
+                                       .pWaitSemaphores = renderFinishedSemaphores.data(),
+                                       .swapchainCount = 1,
+                                       .pSwapchains = &*graphicsDevice->getSwapchain(),
+                                       .pImageIndices = &imageIndex});
+                result2 == vk::Result::eSuboptimalKHR) {
                recreateSwapchain();
             }
          } catch (const std::exception& ex) {
@@ -351,7 +343,7 @@ namespace tr::gfx {
          currentFrame = (currentFrame + 1) % FRAMES_IN_FLIGHT;
       }
 
-      void recordCommandBuffer(Frame& frame, unsigned imageIndex) {
+      void recordCommandBuffer(Frame& frame, const unsigned imageIndex) {
          auto& cmd = frame.getCommandBuffer();
 
          /*
@@ -392,16 +384,13 @@ namespace tr::gfx {
                                                 renderData.animationData.size());
 
             staticMeshDataList.reserve(renderData.staticMeshData.size());
-            std::ranges::copy(renderData.staticMeshData,
-                      std::back_inserter(staticMeshDataList));
+            std::ranges::copy(renderData.staticMeshData, std::back_inserter(staticMeshDataList));
 
             terrainDataList.reserve(renderData.terrainMeshData.size());
-            std::ranges::copy(renderData.terrainMeshData,
-                      std::back_inserter(terrainDataList));
+            std::ranges::copy(renderData.terrainMeshData, std::back_inserter(terrainDataList));
 
             skinnedModelList.reserve(renderData.skinnedMeshData.size());
-            std::ranges::copy(renderData.skinnedMeshData,
-                      std::back_inserter(skinnedModelList));
+            std::ranges::copy(renderData.skinnedMeshData, std::back_inserter(skinnedModelList));
 
             pushConstants = renderData.pushConstants;
          });
@@ -605,7 +594,7 @@ namespace tr::gfx {
       std::vector<cm::gpu::MeshData> staticMeshDataList;
       std::vector<cm::gpu::MeshData> terrainDataList;
       std::vector<cm::gpu::MeshData> skinnedModelList;
-      cm::gpu::PushConstants pushConstants;
+      cm::gpu::PushConstants pushConstants{};
    };
 
    RenderContext::RenderContext(GLFWwindow* window, bool guiEnabled) {
@@ -617,44 +606,45 @@ namespace tr::gfx {
    }
 
    void RenderContext::setResizeListener(
-       const std::function<void(std::pair<uint32_t, uint32_t>)>& fn) {
+       const std::function<void(std::pair<uint32_t, uint32_t>)>& fn) const {
       impl->setResizeListener(fn);
    }
 
-   void RenderContext::render() {
+   void RenderContext::render() const {
       impl->render();
    }
 
-   void RenderContext::waitIdle() {
+   void RenderContext::waitIdle() const {
       impl->waitIdle();
    }
 
-   void RenderContext::enqueueRenderObject(RenderObject renderObject) {
+   void RenderContext::enqueueRenderObject(RenderObject renderObject) const {
       impl->enqueueRenderObject(std::move(renderObject));
    }
 
-   void RenderContext::setCurrentCameraData(cm::gpu::CameraData&& cameraData) {
+   // TODO: Profile this and see if we can eliminate this move here
+   void RenderContext::setCurrentCameraData(cm::gpu::CameraData&& cameraData) const {
       impl->setCurrentCameraData(std::move(cameraData));
    }
 
-   void RenderContext::setRenderData(cm::gpu::RenderData& renderData) {
+   void RenderContext::setRenderData(const cm::gpu::RenderData& renderData) const {
       impl->setRenderData(renderData);
    }
 
-   void RenderContext::setDebugRendering(bool wireframeEnabled) {
+   void RenderContext::setDebugRendering(const bool wireframeEnabled) const {
       impl->setDebugRendering(wireframeEnabled);
    }
 
-   auto RenderContext::createTerrain(const uint32_t size) -> futures::cfuture<cm::ModelData> {
+   auto RenderContext::createTerrain(const uint32_t size) const -> futures::cfuture<cm::ModelData> {
       return impl->createTerrain(size);
    }
 
-   auto RenderContext::createStaticModel(const std::filesystem::path& modelPath)
+   auto RenderContext::createStaticModel(const std::filesystem::path& modelPath) const
        -> futures::cfuture<cm::ModelData> {
       return impl->createStaticModel(modelPath);
    }
 
-   auto RenderContext::createSkinnedModel(const std::filesystem::path& modelPath)
+   auto RenderContext::createSkinnedModel(const std::filesystem::path& modelPath) const
        -> futures::cfuture<cm::ModelData> {
       return impl->createSkinnedModel(modelPath);
    }

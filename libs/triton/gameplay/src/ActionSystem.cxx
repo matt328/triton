@@ -44,8 +44,8 @@ namespace tr::gp {
       }
 
       if (deltaX != 0) {
-         const auto xit = mouseActionMap.find(cm::MouseInput::MOVE_X);
-         if (xit != mouseActionMap.end()) {
+         if (const auto xit = mouseActionMap.find(cm::MouseInput::MOVE_X);
+             xit != mouseActionMap.end()) {
             actionDelegate(Action{xit->second.actionType, xit->second.stateType, deltaX});
          }
       }

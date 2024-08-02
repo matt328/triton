@@ -20,14 +20,13 @@ namespace ed::pr {
 
       [[nodiscard]] std::optional<std::filesystem::path> getRecentFilePath() const {
          if (rootJson.contains("recentFile")) {
-            std::string recentFile = rootJson["recentFile"];
-            return std::optional<FsPath>{std::filesystem::path{recentFile}};
-         } else {
-            return std::nullopt;
+            const std::string recentFile = rootJson["recentFile"];
+            return std::optional{std::filesystem::path{recentFile}};
          }
+         return std::nullopt;
       }
 
-      void setRecentFilePath(FsPath fsPath) {
+      void setRecentFilePath(const FsPath& fsPath) {
          rootJson["recentFile"] = fsPath.string();
          save();
       }
@@ -35,17 +34,16 @@ namespace ed::pr {
       void load(const std::filesystem::path& filePath) {
          this->filePath = filePath;
 
-         if (!std::filesystem::exists(filePath.parent_path())) {
-            std::filesystem::create_directories(filePath.parent_path());
+         if (!exists(filePath.parent_path())) {
+            create_directories(filePath.parent_path());
          }
 
-         if (!std::filesystem::exists(filePath)) {
+         if (!exists(filePath)) {
             using nlohmann::ordered_json;
             ordered_json rootJson{};
             rootJson["version"] = "0.0.1";
 
-            std::ofstream o{filePath};
-            if (o.is_open()) {
+            if (std::ofstream o{filePath}; o.is_open()) {
                o << std::setw(2) << rootJson << std::endl;
                o.close();
             } else {
@@ -53,8 +51,7 @@ namespace ed::pr {
             }
          }
 
-         std::ifstream i{filePath};
-         if (i.is_open()) {
+         if (std::ifstream i{filePath}; i.is_open()) {
             i >> rootJson;
             i.close();
          } else {
@@ -69,9 +66,8 @@ namespace ed::pr {
       std::filesystem::path filePath;
       ordered_json rootJson{};
 
-      void save() {
-         std::ofstream o{filePath};
-         if (o.is_open()) {
+      void save() const {
+         if (std::ofstream o{filePath}; o.is_open()) {
             o << std::setw(2) << rootJson << std::endl;
             o.close();
          } else {

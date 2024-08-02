@@ -5,13 +5,13 @@
 namespace tr::gfx::ds {
    Layout::Layout(const GraphicsDevice& device,
                   const vk::DescriptorSetLayoutCreateInfo& info,
-                  std::string_view name)
+                  const std::string_view name)
        : vkLayout{std::make_unique<vk::raii::DescriptorSetLayout>(
              device.getVulkanDevice().createDescriptorSetLayout(info))},
          graphicsDevice{device} {
       Helpers::setObjectName(**vkLayout, device.getVulkanDevice(), name);
    }
 
-   Layout::~Layout() {
+   Layout::~Layout() { // NOLINT(*-use-equals-default)
    }
 }

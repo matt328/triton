@@ -14,7 +14,7 @@ namespace tr::gfx::sb {
          layoutFactory{layoutFactory},
          useDescriptorBuffers{useDescriptorBuffers} {
       if (!useDescriptorBuffers) {
-         const auto poolSize = std::array{
+         constexpr auto poolSize = std::array{
              vk::DescriptorPoolSize{.type = vk::DescriptorType::eUniformBuffer,
                                     .descriptorCount = 3 * 10},
              vk::DescriptorPoolSize{.type = vk::DescriptorType::eCombinedImageSampler,
@@ -37,10 +37,10 @@ namespace tr::gfx::sb {
       }
    }
 
-   ShaderBindingFactory::~ShaderBindingFactory() {
+   ShaderBindingFactory::~ShaderBindingFactory() { // NOLINT(*-use-equals-default)
    }
 
-   auto ShaderBindingFactory::createShaderBinding(ShaderBindingHandle handle)
+   auto ShaderBindingFactory::createShaderBinding(const ShaderBindingHandle handle) const
        -> std::unique_ptr<ShaderBinding> {
 
       if (handle == ShaderBindingHandle::PerFrame) {

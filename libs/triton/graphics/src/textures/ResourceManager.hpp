@@ -80,7 +80,7 @@ namespace tr::gfx::tx {
       ResourceManager& operator=(const ResourceManager&) = delete;
       ResourceManager& operator=(ResourceManager&&) = delete;
 
-      auto createTerrain(const uint32_t size) -> futures::cfuture<cm::ModelData>;
+      auto createTerrain(uint32_t size) -> futures::cfuture<cm::ModelData>;
 
       auto createModel(const std::filesystem::path& filename) -> futures::cfuture<cm::ModelData>;
 

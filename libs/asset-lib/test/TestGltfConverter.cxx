@@ -3,7 +3,7 @@
 #include "GltfHelpers.hpp"
 
 TEST_CASE("Gltf Conversion is tested", "[gltf]") {
-   NodeNoTransforms mockNode;
+   const NodeNoTransforms mockNode;
 
    auto result = tr::as::gltf::Helpers::parseNodeTransform(mockNode);
 

@@ -35,7 +35,7 @@ namespace tr::gfx::geo {
 
       ImmutableMesh(std::unique_ptr<mem::Buffer>&& vertexBuffer,
                     std::unique_ptr<mem::Buffer>&& indexBuffer,
-                    uint32_t indicesCount)
+                    const uint32_t indicesCount)
           : vertexBuffer(std::move(vertexBuffer)),
             indexBuffer(std::move(indexBuffer)),
             indicesCount(indicesCount) {

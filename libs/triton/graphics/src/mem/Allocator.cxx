@@ -36,7 +36,7 @@ namespace tr::gfx::mem {
       }
    }
 
-   std::unique_ptr<Buffer> Allocator::createDescriptorBuffer(size_t size,
+   std::unique_ptr<Buffer> Allocator::createDescriptorBuffer(const size_t size,
                                                              const std::string_view& name) const {
       const auto bci =
           vk::BufferCreateInfo{.size = size,
@@ -87,7 +87,7 @@ namespace tr::gfx::mem {
       try {
          auto [image, allocation] = allocator.createImage(imageCreateInfo, allocationCreateInfo);
          allocator.setAllocationName(allocation, newName.data());
-         return std::make_unique<Image>(allocator, std::move(image), std::move(allocation));
+         return std::make_unique<Image>(allocator, image, allocation);
       } catch (const std::exception& ex) {
          throw AllocationException(
              fmt::format("Error creating and/or naming Image: {0}, {1}", newName, ex.what()));

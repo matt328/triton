@@ -2,7 +2,7 @@
 
 namespace tr::cm {
    struct MapKey {
-    public:
+
       MapKey()
           : imageGen{imageRandomDevice()},
             imageDistribution(1, 10000),

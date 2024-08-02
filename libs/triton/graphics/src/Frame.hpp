@@ -35,7 +35,7 @@ namespace tr::gfx {
       Frame(const GraphicsDevice& graphicsDevice,
             std::shared_ptr<vk::raii::ImageView> depthImageView,
             sb::ShaderBindingFactory& shaderBindingFactory,
-            const std::string_view name);
+            std::string_view name);
       ~Frame();
 
       Frame(const Frame&) = delete;
@@ -97,22 +97,22 @@ namespace tr::gfx {
          return *animationDataShaderBinding;
       }
 
-      void updateObjectDataBuffer(const cm::gpu::ObjectData* data, const size_t size);
-      void updatePerFrameDataBuffer(const cm::gpu::CameraData* data, const size_t size);
-      void updateAnimationDataBuffer(const cm::gpu::AnimationData* data, const size_t size);
+      void updateObjectDataBuffer(const cm::gpu::ObjectData* data, size_t size) const;
+      void updatePerFrameDataBuffer(const cm::gpu::CameraData* data, size_t size) const;
+      void updateAnimationDataBuffer(const cm::gpu::AnimationData* data, size_t size) const;
 
       void destroySwapchainResources();
       void createSwapchainResources(const GraphicsDevice& graphicsDevice);
 
-      void updateTextures(const std::vector<vk::DescriptorImageInfo>& imageInfos);
+      void updateTextures(const std::vector<vk::DescriptorImageInfo>& imageInfos) const;
 
       /// Sets up the attachments for renderingInfo and calls cmd.beginRendering()
-      void prepareFrame();
+      void prepareFrame() const;
 
-      void end3D(const vk::Image& swapchainImage, const vk::Extent2D& swapchainExtent);
-      void renderOverlay(const vk::raii::ImageView& swapchainImage,
-                         const vk::Extent2D& swapchainExtent);
-      void endFrame(const vk::Image& swapchainImage);
+      void end3D(const vk::Image& swapchainImage, const vk::Extent2D& swapchainExtent) const;
+      void renderOverlay(const vk::raii::ImageView& swapchainImageView,
+                         const vk::Extent2D& swapchainExtent) const;
+      void endFrame(const vk::Image& swapchainImage) const;
 
     private:
       const vk::raii::Device& graphicsDevice;
