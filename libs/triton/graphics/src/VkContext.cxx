@@ -34,7 +34,7 @@ namespace tr::gfx {
       commandBuffer = std::make_unique<vk::raii::CommandBuffer>(
           std::move(device.allocateCommandBuffers(cmdAllocInfo)[0]));
 
-      tracyContext = TracyVkContext((*physicalDevice), (*device), **queue, *(*commandBuffer));
+      tracyContext = TracyVkContext(*physicalDevice, *device, **queue, **commandBuffer);
 
       TracyVkContextName(tracyContext, name.data(), name.length());
 
@@ -59,7 +59,7 @@ namespace tr::gfx {
       commandBuffer->end();
 
       const auto submitInfo =
-          vk::SubmitInfo{.commandBufferCount = 1, .pCommandBuffers = &(**commandBuffer)};
+          vk::SubmitInfo{.commandBufferCount = 1, .pCommandBuffers = &**commandBuffer};
 
       queue->submit(submitInfo, **fence);
 

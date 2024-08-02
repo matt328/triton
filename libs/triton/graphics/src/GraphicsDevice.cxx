@@ -91,7 +91,7 @@ namespace tr::gfx {
       }
 
       for (const auto& possibleDevice : physicalDevices) {
-         if (Helpers::isDeviceSuitable(possibleDevice, *surface.get(), desiredDeviceExtensions)) {
+         if (Helpers::isDeviceSuitable(possibleDevice, *surface, desiredDeviceExtensions)) {
             physicalDevice = std::make_unique<vk::raii::PhysicalDevice>(possibleDevice);
             break;
          }
@@ -144,10 +144,9 @@ namespace tr::gfx {
       auto drawParamsFeatures =
           vk::PhysicalDeviceShaderDrawParametersFeatures{.shaderDrawParameters = VK_TRUE};
 
-      const auto bindlessTexturesSupported = indexingFeatures.descriptorBindingPartiallyBound &&
-                                             indexingFeatures.runtimeDescriptorArray;
-
-      if (!bindlessTexturesSupported) {
+      if (const auto bindlessTexturesSupported = indexingFeatures.descriptorBindingPartiallyBound &&
+                                                 indexingFeatures.runtimeDescriptorArray;
+          !bindlessTexturesSupported) {
          throw std::runtime_error("GPU does not support bindless textures :(");
       }
 
@@ -169,23 +168,16 @@ namespace tr::gfx {
       // const auto dbFeatures =
       // vk::PhysicalDeviceDescriptorBufferFeaturesEXT{.descriptorBuffer = true};
 
-      const auto bdaFeatures =
+      constexpr auto bdaFeatures =
           vk::PhysicalDeviceBufferDeviceAddressFeaturesKHR{.bufferDeviceAddress = true};
 
-      const vk::StructureChain<vk::DeviceCreateInfo,
-                               vk::PhysicalDeviceFeatures2,
-                               vk::PhysicalDeviceShaderDrawParametersFeatures,
-                               vk::PhysicalDeviceDescriptorIndexingFeatures,
-                               vk::PhysicalDeviceDynamicRenderingFeaturesKHR,
-                               //  vk::PhysicalDeviceDescriptorBufferFeaturesEXT,
-                               vk::PhysicalDeviceBufferDeviceAddressFeaturesKHR>
-          c{createInfo,
-            physicalFeatures2,
-            drawParamsFeatures,
-            indexingFeatures,
-            drfs,
-            // dbFeatures,
-            bdaFeatures};
+      const vk::StructureChain c{createInfo,
+                                 physicalFeatures2,
+                                 drawParamsFeatures,
+                                 indexingFeatures,
+                                 drfs,
+                                 // dbFeatures,
+                                 bdaFeatures};
 
       vulkanDevice =
           std::make_unique<vk::raii::Device>(physicalDevice->createDevice(c.get(), nullptr));
@@ -200,33 +192,33 @@ namespace tr::gfx {
 
       graphicsQueue = std::make_unique<vk::raii::Queue>(
           vulkanDevice->getQueue(queueFamilyIndices.graphicsFamily.value(), 0));
-      Helpers::setObjectName(**graphicsQueue, *vulkanDevice.get(), "Graphics Queue");
+      Helpers::setObjectName(**graphicsQueue, *vulkanDevice, "Graphics Queue");
       Log.trace("Created Graphics Queue");
 
       presentQueue = std::make_unique<vk::raii::Queue>(
           vulkanDevice->getQueue(queueFamilyIndices.presentFamily.value(), 0));
-      Helpers::setObjectName(**presentQueue, *vulkanDevice.get(), "Present Queue");
+      Helpers::setObjectName(**presentQueue, *vulkanDevice, "Present Queue");
       Log.trace("Created Present Queue");
 
       transferQueue = std::make_shared<vk::raii::Queue>(
           vulkanDevice->getQueue(queueFamilyIndices.transferFamily.value(), 0));
-      Helpers::setObjectName(**transferQueue, *vulkanDevice.get(), "Transfer Queue");
+      Helpers::setObjectName(**transferQueue, *vulkanDevice, "Transfer Queue");
       Log.trace("Created Transfer Queue");
 
       computeQueue = std::make_unique<vk::raii::Queue>(
           vulkanDevice->getQueue(queueFamilyIndices.computeFamily.value(), 0));
-      Helpers::setObjectName(**computeQueue, *vulkanDevice.get(), "Compute Queue");
+      Helpers::setObjectName(**computeQueue, *vulkanDevice, "Compute Queue");
       Log.trace("Created Compute Queue");
 
       createSwapchain();
 
-      asyncTransferContext = std::make_unique<VkContext>(*vulkanDevice.get(),
+      asyncTransferContext = std::make_unique<VkContext>(*vulkanDevice,
                                                          *physicalDevice,
                                                          1,
                                                          queueFamilyIndices.transferFamily.value(),
                                                          "Async Transfer Context");
 
-      const auto vulkanFunctions = vma::VulkanFunctions{
+      constexpr auto vulkanFunctions = vma::VulkanFunctions{
           .vkGetInstanceProcAddr = vkGetInstanceProcAddr,
           .vkGetDeviceProcAddr = vkGetDeviceProcAddr,
       };
@@ -245,9 +237,9 @@ namespace tr::gfx {
    GraphicsDevice::~GraphicsDevice() {
       Log.info("destroying graphicsDevice");
       vulkanDevice->waitIdle();
-   };
+   }
 
-   const std::pair<uint32_t, uint32_t> GraphicsDevice::getCurrentSize() const {
+   std::pair<uint32_t, uint32_t> GraphicsDevice::getCurrentSize() const {
       const auto surfaceCaps = physicalDevice->getSurfaceCapabilitiesKHR(**surface);
       return std::make_pair(surfaceCaps.currentExtent.width, surfaceCaps.currentExtent.height);
    }
@@ -293,9 +285,8 @@ namespace tr::gfx {
          swapchainCreateInfo.oldSwapchain = **oldSwapchain;
       }
 
-      const auto queueFamilyIndices =
-          std::array<uint32_t, 2>{queueFamilyIndicesInfo.graphicsFamily.value(),
-                                  queueFamilyIndicesInfo.presentFamily.value()};
+      const auto queueFamilyIndices = std::array{queueFamilyIndicesInfo.graphicsFamily.value(),
+                                                 queueFamilyIndicesInfo.presentFamily.value()};
 
       if (queueFamilyIndicesInfo.graphicsFamily != queueFamilyIndicesInfo.presentFamily) {
          swapchainCreateInfo.imageSharingMode = vk::SharingMode::eConcurrent;
@@ -344,7 +335,7 @@ namespace tr::gfx {
 
       commandPool = std::make_unique<vk::raii::CommandPool>(
           vulkanDevice->createCommandPool(commandPoolCreateInfo));
-      Helpers::setObjectName(**commandPool, *vulkanDevice.get(), "Graphics Command Pool");
+      Helpers::setObjectName(**commandPool, *vulkanDevice, "Graphics Command Pool");
    }
 
    void GraphicsDevice::recreateSwapchain() {
@@ -392,6 +383,7 @@ namespace tr::gfx {
 
       std::vector<std::string> extNames = {};
 
+      extNames.reserve(exts.size());
       for (auto& ext : exts) {
          extNames.push_back(ext.extensionName);
       }
@@ -422,7 +414,7 @@ namespace tr::gfx {
       return VK_FALSE;
    }
 
-   VkBool32 GraphicsDevice::vulkanDebugReportCallback(
+   auto GraphicsDevice::vulkanDebugReportCallback(
        [[maybe_unused]] VkDebugReportFlagsEXT flags,
        [[maybe_unused]] VkDebugReportObjectTypeEXT objectType,
        [[maybe_unused]] uint64_t object,
@@ -430,11 +422,11 @@ namespace tr::gfx {
        [[maybe_unused]] int32_t messageCode,
        const char* pLayerPrefix,
        const char* pMessage,
-       [[maybe_unused]] void* userData) {
+       [[maybe_unused]] void* userData) -> VkBool32 {
       if (!strcmp(pLayerPrefix, "Loader Message")) {
          return VK_FALSE;
       }
       Log.debug("Debug Callback ({0}): {1}", pLayerPrefix, pMessage);
-      return VK_FALSE;
+      return VK_TRUE;
    }
 }

@@ -6,7 +6,7 @@ namespace tr::gfx::mem {
                   const vk::DeviceSize range,
                   const vma::Allocation newAllocation,
                   const vk::Device& device,
-                  const vma::AllocationInfo allocationInfo) noexcept
+                  const vma::AllocationInfo& allocationInfo) noexcept
        : device{device},
          buffer(newBuffer),
          bufferInfo{vk::DescriptorBufferInfo{.buffer = newBuffer, .offset = 0, .range = range}},
@@ -39,7 +39,7 @@ namespace tr::gfx::mem {
    }
 
    void Buffer::updateBufferValue(const void* data, const size_t dataSize) const {
-      auto dst = allocator.mapMemory(allocation);
+      const auto dst = allocator.mapMemory(allocation);
       memcpy(dst, data, dataSize);
       allocator.unmapMemory(allocation);
    }

@@ -94,7 +94,7 @@ namespace ed::data {
 
    class DataFacade {
     public:
-      DataFacade(tr::ctx::GameplayFacade& gameplayFacade);
+      explicit DataFacade(tr::ctx::GameplayFacade& gameplayFacade);
       ~DataFacade();
 
       DataFacade(const DataFacade&) = delete;
@@ -103,7 +103,7 @@ namespace ed::data {
       DataFacade(DataFacade&&) = delete;
       DataFacade& operator=(DataFacade&&) = delete;
 
-      void update();
+      void update() const;
 
       void clear();
 
@@ -126,14 +126,15 @@ namespace ed::data {
       void addAnimationToEntity(const std::string_view& entityName,
                                 const std::string_view& animationName);
 
-      void setEntitySkeleton(const std::string_view& entityName, std::string_view& skeletonName);
+      void setEntitySkeleton(const std::string_view& entityName,
+                             const std::string_view& skeletonName);
 
       void createTerrain(const std::string_view& terrainName);
 
       void save(const std::filesystem::path& outputFile);
       void load(const std::filesystem::path& inputFile);
 
-      void setEntityPosition(const std::string_view& name, glm::vec3 newPosition);
+      void setEntityPosition(const std::string_view& name, const glm::vec3& newPosition);
 
       [[nodiscard]] EntityData getEntityData(const std::string_view& name) const {
          return dataStore.scene.at(name.data());

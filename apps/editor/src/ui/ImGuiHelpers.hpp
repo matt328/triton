@@ -6,9 +6,8 @@ namespace ed::ui::helpers {
 
    constexpr auto ButtonSize = ImVec2(95.f, 0.f);
 
-   void renderImportSkeletonModal(data::DataFacade& dataFacade) {
-      constexpr auto SkeletonFilters =
-          std::array<nfdfilteritem_t, 1>{nfdfilteritem_t{"Ozz Skeleton", "ozz"}};
+   inline void renderImportSkeletonModal(data::DataFacade& dataFacade) {
+      constexpr auto SkeletonFilters = std::array{nfdfilteritem_t{"Ozz Skeleton", "ozz"}};
 
       if (ImGui::BeginPopupModal("Import Skeleton", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
          static std::string skeletonFilename{}; // Temporary value to store input
@@ -22,9 +21,9 @@ namespace ed::ui::helpers {
          ImGui::SameLine();
          if (ImGui::Button("...")) {
             auto inPath = NFD::UniquePath{};
-            const auto result =
-                NFD::OpenDialog(inPath, SkeletonFilters.data(), SkeletonFilters.size());
-            if (result == NFD_OKAY) {
+            if (const auto result =
+                    OpenDialog(inPath, SkeletonFilters.data(), SkeletonFilters.size());
+                result == NFD_OKAY) {
                skeletonFilename = std::string{inPath.get()};
             } else if (result == NFD_CANCEL) {
                Log.info("User pressed cancel");
@@ -33,8 +32,8 @@ namespace ed::ui::helpers {
             }
          }
 
-         auto style = ImGui::GetStyle();
-         auto widthNeeded = ButtonSize.x + style.ItemSpacing.x + ButtonSize.x;
+         const auto style = ImGui::GetStyle();
+         const auto widthNeeded = ButtonSize.x + style.ItemSpacing.x + ButtonSize.x;
          ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x -
                               widthNeeded);
 
@@ -53,9 +52,8 @@ namespace ed::ui::helpers {
       }
    }
 
-   void renderImportAnimationModal(data::DataFacade& dataFacade) {
-      constexpr auto AnimationFilters =
-          std::array<nfdfilteritem_t, 1>{nfdfilteritem_t{"Ozz Animation", "ozz"}};
+   inline void renderImportAnimationModal(data::DataFacade& dataFacade) {
+      constexpr auto AnimationFilters = std::array{nfdfilteritem_t{"Ozz Animation", "ozz"}};
 
       if (ImGui::BeginPopupModal("Import Animation", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
          static std::string filename{}; // Temporary value to store input
@@ -69,9 +67,9 @@ namespace ed::ui::helpers {
          ImGui::SameLine();
          if (ImGui::Button("...")) {
             auto inPath = NFD::UniquePath{};
-            const auto result =
-                NFD::OpenDialog(inPath, AnimationFilters.data(), AnimationFilters.size());
-            if (result == NFD_OKAY) {
+            if (const auto result =
+                    OpenDialog(inPath, AnimationFilters.data(), AnimationFilters.size());
+                result == NFD_OKAY) {
                filename = std::string{inPath.get()};
             } else {
                Log.error("Error: {0}", NFD::GetError());
@@ -93,9 +91,8 @@ namespace ed::ui::helpers {
       }
    }
 
-   void renderImportModelModal(data::DataFacade& dataFacade) {
-      constexpr auto ModelFilters =
-          std::array<nfdfilteritem_t, 1>{nfdfilteritem_t{"Triton Model", "trm"}};
+   inline void renderImportModelModal(data::DataFacade& dataFacade) {
+      constexpr auto ModelFilters = std::array{nfdfilteritem_t{"Triton Model", "trm"}};
 
       if (ImGui::BeginPopupModal("Import Model", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
          static std::string filename{}; // Temporary value to store input
@@ -109,8 +106,8 @@ namespace ed::ui::helpers {
          ImGui::SameLine();
          if (ImGui::Button("...")) {
             auto inPath = NFD::UniquePath{};
-            const auto result = NFD::OpenDialog(inPath, ModelFilters.data(), ModelFilters.size());
-            if (result == NFD_OKAY) {
+            if (const auto result = OpenDialog(inPath, ModelFilters.data(), ModelFilters.size());
+                result == NFD_OKAY) {
                filename = std::string{inPath.get()};
             } else {
                Log.error("Error: {0}", NFD::GetError());
@@ -132,12 +129,12 @@ namespace ed::ui::helpers {
       }
    }
 
-   void renderAssetTree(data::DataFacade& dataFacade,
-                        bool& openSkeleton,
-                        bool& openAnimation,
-                        bool& openModel) {
-      const auto unsaved = dataFacade.isUnsaved() ? ImGuiWindowFlags_UnsavedDocument : 0;
-      if (ImGui::Begin("Asset Tree", nullptr, ImGuiWindowFlags_MenuBar | unsaved)) {
+   inline void renderAssetTree(const data::DataFacade& dataFacade,
+                               bool& openSkeleton,
+                               bool& openAnimation,
+                               bool& openModel) {
+      if (const auto unsaved = dataFacade.isUnsaved() ? ImGuiWindowFlags_UnsavedDocument : 0;
+          ImGui::Begin("Asset Tree", nullptr, ImGuiWindowFlags_MenuBar | unsaved)) {
 
          if (ImGui::BeginMenuBar()) {
             if (ImGui::BeginMenu("Import")) {
@@ -155,7 +152,7 @@ namespace ed::ui::helpers {
             ImGui::EndMenuBar();
          }
 
-         static auto headerState = std::array<bool, 4>{true, true, true, true};
+         static auto headerState = std::array{true, true, true, true};
 
          {
             ImGui::SetNextItemOpen(headerState[0]);
@@ -172,7 +169,7 @@ namespace ed::ui::helpers {
          {
             ImGui::SetNextItemOpen(headerState[1]);
             if (ImGui::CollapsingHeader("Skeletons")) {
-               for (const auto& [name, filename] : dataFacade.getSkeletons()) {
+               for (const auto& name : dataFacade.getSkeletons() | std::views::keys) {
                   ImGui::Selectable(name.c_str());
                }
                headerState[1] = true;
@@ -184,7 +181,7 @@ namespace ed::ui::helpers {
          {
             ImGui::SetNextItemOpen(headerState[2]);
             if (ImGui::CollapsingHeader("Animations")) {
-               for (const auto& [name, filename] : dataFacade.getAnimations()) {
+               for (const auto& name : dataFacade.getAnimations() | std::views::keys) {
                   ImGui::Selectable(name.c_str());
                }
                headerState[2] = true;
@@ -196,7 +193,7 @@ namespace ed::ui::helpers {
          {
             ImGui::SetNextItemOpen(headerState[3]);
             if (ImGui::CollapsingHeader("Models")) {
-               for (const auto& [name, filename] : dataFacade.getModels()) {
+               for (const auto& name : dataFacade.getModels() | std::views::keys) {
                   ImGui::Selectable(name.c_str());
                }
                headerState[3] = true;

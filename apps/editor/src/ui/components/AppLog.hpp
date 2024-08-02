@@ -2,11 +2,11 @@
 
 namespace ed::ui::cmp {
 
-   constexpr ImVec4 red = ImVec4(0.77f, .42f, .36f, 1.f);
-   constexpr ImVec4 orange = ImVec4(.949f, .784f, .608f, 1.f);
-   constexpr ImVec4 green = ImVec4(0.443f, .694f, .529f, 1.f);
-   constexpr ImVec4 blue = ImVec4(.388f, .541f, .592f, 1.f);
-   constexpr ImVec4 white = ImVec4(1.f, 1.f, 1.f, 1.f);
+   constexpr auto red = ImVec4(0.77f, .42f, .36f, 1.f);
+   constexpr auto orange = ImVec4(.949f, .784f, .608f, 1.f);
+   constexpr auto green = ImVec4(0.443f, .694f, .529f, 1.f);
+   constexpr auto blue = ImVec4(.388f, .541f, .592f, 1.f);
+   constexpr auto white = ImVec4(1.f, 1.f, 1.f, 1.f);
 
    const auto colorMap = std::unordered_map<std::string, ImVec4>{{"info", green},
                                                                  {"trace", blue},
@@ -45,7 +45,7 @@ namespace ed::ui::cmp {
          }
       }
 
-      auto getColor(const char* begin, const char* end) {
+      static auto getColor(const char* begin, const char* end) {
          for (const auto& [key, value] : colorMap) {
             if (std::search(begin, end, key.begin(), key.end()) != end) {
                return value;

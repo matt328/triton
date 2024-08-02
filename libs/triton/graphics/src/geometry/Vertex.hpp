@@ -25,11 +25,11 @@ namespace tr::gfx::geo {
 
       static std::vector<vk::VertexInputAttributeDescription> inputAttributeDescriptions(
           uint32_t binding,
-          const std::span<VertexComponent> components);
+          std::span<VertexComponent> components);
 
       /** @brief Returns the default pipeline vertex input state create info structure for the
        * requested vertex components */
       static vk::PipelineVertexInputStateCreateInfo* getPipelineVertexInputState(
-          const std::span<VertexComponent> components);
+          std::span<VertexComponent> components);
    };
 }

@@ -76,11 +76,11 @@ namespace ed::ui {
       static void renderDockSpace();
       void renderMenuBar();
       void renderEntityEditor();
-      void showMatrix4x4(const glm::mat4& matrix, const char* label);
+      static void showMatrix4x4(const glm::mat4& matrix, const char* label);
       void renderAnimationArea();
 
       void renderDebugWindow();
 
-      auto getSavePath() -> std::optional<std::filesystem::path>;
+      static auto getSavePath() -> std::optional<std::filesystem::path>;
    };
 }

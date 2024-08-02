@@ -18,7 +18,7 @@ namespace tr::gfx::ds {
 
    class LayoutFactory {
     public:
-      LayoutFactory(const GraphicsDevice& device, const bool useDescriptorBuffers = false);
+      explicit LayoutFactory(const GraphicsDevice& device, bool useDescriptorBuffers = false);
       ~LayoutFactory();
 
       LayoutFactory(const LayoutFactory&) = delete;
@@ -27,7 +27,7 @@ namespace tr::gfx::ds {
       LayoutFactory(LayoutFactory&&) = delete;
       LayoutFactory& operator=(LayoutFactory&&) = delete;
 
-      [[nodiscard]] const Layout& getLayout(LayoutHandle handle) const {
+      [[nodiscard]] const Layout& getLayout(const LayoutHandle handle) const {
          return *layoutCache.at(handle);
       }
 

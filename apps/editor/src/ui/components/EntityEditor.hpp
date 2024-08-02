@@ -23,8 +23,6 @@ namespace ed::ui::components {
       void render([[maybe_unused]] tr::ctx::GameplayFacade& gameplayFacade,
                   [[maybe_unused]] data::DataFacade& dataFacade) {
 
-         const auto unsaved = dataFacade.isUnsaved() ? ImGuiWindowFlags_UnsavedDocument : 0;
-
          static auto position = glm::vec3{1.f};
          static auto previousPosition = position;
          static auto rotation = glm::identity<glm::quat>();
@@ -54,9 +52,8 @@ namespace ed::ui::components {
                               ImVec2(150, 0),
                               ImGuiChildFlags_Border | ImGuiChildFlags_ResizeX);
 
-            const auto& sceneData = dataFacade.getScene();
-
-            for (const auto& [name, entityData] : sceneData) {
+            for (const auto& sceneData = dataFacade.getScene();
+                 const auto& name : sceneData | std::views::keys) {
                if (ImGui::Selectable(name.c_str(), name == selectedEntity)) {
                   selectedEntity = name;
                   auto data = dataFacade.getEntityData(selectedEntity.value());
@@ -114,32 +111,29 @@ namespace ed::ui::components {
          renderAnimatedEntityDialog(dataFacade);
       }
 
-      void renderAnimatedEntityDialog(data::DataFacade& dataFacade) {
+      static void renderAnimatedEntityDialog(data::DataFacade& dataFacade) {
          if (ImGui::BeginPopupModal("Animated Model Entity")) {
 
             auto& models = dataFacade.getModels();
             auto modelNames = std::vector<const char*>{};
             modelNames.reserve(models.size());
-            std::transform(models.begin(),
-                           models.end(),
-                           std::back_inserter(modelNames),
-                           [](const auto& pair) { return pair.first.c_str(); });
+            std::ranges::transform(models, std::back_inserter(modelNames), [](const auto& pair) {
+               return pair.first.c_str();
+            });
 
             auto& skeletons = dataFacade.getSkeletons();
             auto skeletonNames = std::vector<const char*>{};
             skeletonNames.reserve(skeletons.size());
-            std::transform(skeletons.begin(),
-                           skeletons.end(),
-                           std::back_inserter(skeletonNames),
-                           [](const auto& pair) { return pair.first.c_str(); });
+            std::ranges::transform(skeletons,
+                                   std::back_inserter(skeletonNames),
+                                   [](const auto& pair) { return pair.first.c_str(); });
 
             auto& animations = dataFacade.getAnimations();
             auto animationNames = std::vector<const char*>{};
             animationNames.reserve(animations.size());
-            std::transform(animations.begin(),
-                           animations.end(),
-                           std::back_inserter(animationNames),
-                           [](const auto& pair) { return pair.first.c_str(); });
+            std::ranges::transform(animations,
+                                   std::back_inserter(animationNames),
+                                   [](const auto& pair) { return pair.first.c_str(); });
 
             static int selectedModel = 0;
             static int selectedSkeleton = 0;
@@ -194,14 +188,14 @@ namespace ed::ui::components {
          }
       }
 
-      void renderStaticEntityDialog(data::DataFacade& dataFacade) {
+      static void renderStaticEntityDialog(data::DataFacade& dataFacade) {
          if (ImGui::BeginPopupModal("Static Model Entity")) {
 
             auto& models = dataFacade.getModels();
             auto modelNames = std::vector<const char*>{};
             modelNames.resize(models.size());
 
-            std::transform(models.begin(), models.end(), modelNames.begin(), [](const auto& pair) {
+            std::ranges::transform(models, modelNames.begin(), [](const auto& pair) {
                return pair.first.c_str();
             });
 
@@ -236,7 +230,7 @@ namespace ed::ui::components {
          }
       }
 
-      void renderAnimationArea([[maybe_unused]] tr::ctx::GameplayFacade& gameplayFacade) {
+      static void renderAnimationArea([[maybe_unused]] tr::ctx::GameplayFacade& gameplayFacade) {
          ImGui::SeparatorText("Animation");
          static size_t itemCurrentIndex{};
          static bool playing{};
@@ -260,7 +254,7 @@ namespace ed::ui::components {
             ImGui::EndCombo();
          }
 
-         bool previousBindPose = bindPose;
+         const bool previousBindPose = bindPose;
 
          ImGui::BeginDisabled(playing);
          if (ImGui::Checkbox("Bind Pose", &bindPose)) {
@@ -270,7 +264,7 @@ namespace ed::ui::components {
          }
          ImGui::EndDisabled();
 
-         bool previousPlaying = playing;
+         const bool previousPlaying = playing;
 
          ImGui::BeginDisabled(bindPose);
 

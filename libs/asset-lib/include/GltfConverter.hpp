@@ -17,7 +17,7 @@ namespace tr::as::gltf {
       /// Reads a gltf file and a skeleton in order to build the runtime structure representing an
       /// animated model.  The skeleton is only referenced in order to map the joints in the model
       /// to those in the skeleton.
-      auto convert(const std::filesystem::path& gltf, const std::filesystem::path& skeleton)
+      static auto convert(const std::filesystem::path& gltf, const std::filesystem::path& skeleton)
           -> Model;
    };
 }

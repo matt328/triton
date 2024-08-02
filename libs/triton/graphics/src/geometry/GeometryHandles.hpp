@@ -15,11 +15,11 @@ namespace tr::gfx::geo {
       std::optional<cm::SkinData> skinData = std::nullopt;
 
     public:
-      TritonModelData(GeometryHandle geometryHandle,
-                      ImageHandle imageHandle,
+      TritonModelData(const GeometryHandle geometryHandle,
+                      const ImageHandle imageHandle,
                       std::optional<cm::SkinData> skinData)
-          : geometryHandle(std::move(geometryHandle)),
-            imageHandle(std::move(imageHandle)),
+          : geometryHandle(geometryHandle),
+            imageHandle(imageHandle),
             skinData(std::move(skinData)) {
       }
 

@@ -5,7 +5,7 @@
 
 namespace tr::gfx::Gui {
    ImGuiHelper::ImGuiHelper(const GraphicsDevice& graphicsDevice, GLFWwindow* window) {
-      const auto poolSizes = std::array{
+      static constexpr auto poolSizes = std::array{
           vk::DescriptorPoolSize{.type = vk::DescriptorType::eSampler, .descriptorCount = 1000},
           vk::DescriptorPoolSize{.type = vk::DescriptorType::eCombinedImageSampler,
                                  .descriptorCount = 1000},
@@ -28,7 +28,7 @@ namespace tr::gfx::Gui {
           vk::DescriptorPoolSize{.type = vk::DescriptorType::eInputAttachment,
                                  .descriptorCount = 1000}};
 
-      const vk::DescriptorPoolCreateInfo poolInfo{
+      constexpr vk::DescriptorPoolCreateInfo poolInfo{
           .flags = vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet,
           .maxSets = 1000,
           .poolSizeCount = poolSizes.size(),

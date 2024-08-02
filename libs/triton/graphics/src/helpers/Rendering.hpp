@@ -2,10 +2,10 @@
 
 namespace tr::gfx::Helpers {
    /// Maybe could make this a little more specific without having 15 params
-   void transitionImage(const vk::raii::CommandBuffer& cmd,
-                        const vk::Image& image,
-                        vk::ImageLayout currentLayout,
-                        vk::ImageLayout newLayout) {
+   inline void transitionImage(const vk::raii::CommandBuffer& cmd,
+                               const vk::Image& image,
+                               const vk::ImageLayout currentLayout,
+                               const vk::ImageLayout newLayout) {
       const auto barrier = vk::ImageMemoryBarrier{
           .srcAccessMask = vk::AccessFlagBits::eMemoryWrite,
           .dstAccessMask = vk::AccessFlagBits::eMemoryWrite | vk::AccessFlagBits::eMemoryRead,
@@ -24,11 +24,11 @@ namespace tr::gfx::Helpers {
                           barrier);
    }
 
-   void copyImageToImage(const vk::raii::CommandBuffer& cmd,
-                         vk::Image source,
-                         vk::Image destination,
-                         vk::Extent2D srcSize,
-                         vk::Extent2D dstSize) {
+   inline void copyImageToImage(const vk::raii::CommandBuffer& cmd,
+                                const vk::Image source,
+                                const vk::Image destination,
+                                const vk::Extent2D srcSize,
+                                const vk::Extent2D dstSize) {
 
       const auto blitRegion = vk::ImageBlit2{
           .srcSubresource = {.aspectMask = vk::ImageAspectFlagBits::eColor, .layerCount = 1},

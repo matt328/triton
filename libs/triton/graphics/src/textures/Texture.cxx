@@ -26,9 +26,9 @@ namespace tr::gfx::Textures {
    }
 
    Texture::Texture(void* data,
-                    uint32_t width,
-                    uint32_t height,
-                    uint32_t channels,
+                    const uint32_t width,
+                    const uint32_t height,
+                    const uint32_t channels,
                     const mem::Allocator& allocator,
                     const vk::raii::Device& device,
                     const VkContext& transferContext)
@@ -36,7 +36,7 @@ namespace tr::gfx::Textures {
       initialize(data, width, height, channels, allocator, device, transferContext);
    }
 
-   Texture::~Texture() {
+   Texture::~Texture() { // NOLINT(*-use-equals-default)
    }
 
    void Texture::initialize(void* data,
@@ -72,9 +72,9 @@ namespace tr::gfx::Textures {
       std::vector<vk::BufferImageCopy> bufferCopyRegions;
 
       // hack
-      const uint32_t mipLevels = 1;
-      const auto uWidth = static_cast<uint32_t>(width);
-      const auto uHeight = static_cast<uint32_t>(height);
+      constexpr uint32_t mipLevels = 1;
+      const auto uWidth = width;
+      const auto uHeight = height;
 
       for (uint32_t i = 0; i < mipLevels; i++) {
          vk::DeviceSize offset{0};
@@ -93,7 +93,7 @@ namespace tr::gfx::Textures {
                                                              .depth = 1}};
          bufferCopyRegions.push_back(bufferCopyRegion);
       }
-      const auto format = vk::Format::eR8G8B8A8Srgb;
+      constexpr auto format = vk::Format::eR8G8B8A8Srgb;
       auto imageCreateInfo = vk::ImageCreateInfo{
           .imageType = vk::ImageType::e2D,
           .format = format,
@@ -116,7 +116,7 @@ namespace tr::gfx::Textures {
 
       image = allocator.createImage(imageCreateInfo, imageAllocateCreateInfo, textureName);
 
-      const auto subresourceRange =
+      constexpr auto subresourceRange =
           vk::ImageSubresourceRange{.aspectMask = vk::ImageAspectFlagBits::eColor,
                                     .baseMipLevel = 0,
                                     .levelCount = mipLevels,
@@ -201,7 +201,7 @@ namespace tr::gfx::Textures {
        const vk::Image& image,
        const vk::ImageLayout oldLayout,
        const vk::ImageLayout newLayout,
-       const vk::ImageSubresourceRange subresourceRange) {
+       const vk::ImageSubresourceRange& subresourceRange) {
       vk::ImageMemoryBarrier barrier{
           .srcAccessMask = vk::AccessFlagBits::eNone,
           .dstAccessMask = vk::AccessFlagBits::eNone,

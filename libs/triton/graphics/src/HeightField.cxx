@@ -14,7 +14,7 @@ namespace tr::ct {
 
    HeightField::HeightField(const int size) : width{size} {
 
-      module::Perlin myModule;
+      const module::Perlin myModule;
       utils::NoiseMap heightMap;
       utils::NoiseMapBuilderPlane heightMapBuilder;
       heightMapBuilder.SetSourceModule(myModule);
@@ -34,6 +34,6 @@ namespace tr::ct {
       }
    }
 
-   HeightField::~HeightField() {
+   HeightField::~HeightField() { // NOLINT(*-use-equals-default)
    }
 }

@@ -6,7 +6,7 @@ namespace tr::gfx::Helpers {
 
    class SpirvHelper {
     public:
-      SpirvHelper(const vk::raii::Device& device);
+      explicit SpirvHelper(const vk::raii::Device& device);
       ~SpirvHelper();
 
       SpirvHelper(const SpirvHelper&) = default;
@@ -14,13 +14,14 @@ namespace tr::gfx::Helpers {
       SpirvHelper& operator=(const SpirvHelper&) = delete;
       SpirvHelper& operator=(SpirvHelper&&) = delete;
 
-      std::vector<uint32_t> compileShader(vk::ShaderStageFlagBits shaderType,
-                                          const char* shaderCode) const;
+      static std::vector<uint32_t> compileShader(vk::ShaderStageFlagBits shaderType,
+                                                 const char* shaderCode);
 
-      auto readShaderFile(const std::filesystem::path& filename) -> std::string;
+      static auto readShaderFile(const std::filesystem::path& filename) -> std::string;
 
-      auto createShaderModule(vk::ShaderStageFlagBits shaderType,
-                              const std::filesystem::path& filename) -> vk::raii::ShaderModule;
+      [[nodiscard]] auto createShaderModule(vk::ShaderStageFlagBits shaderType,
+                                            const std::filesystem::path& filename) const
+          -> vk::raii::ShaderModule;
 
     private:
       const vk::raii::Device& device;

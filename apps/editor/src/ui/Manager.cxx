@@ -24,16 +24,17 @@ namespace ed::ui {
       auto config = ImFontConfig{};
       config.FontDataOwnedByAtlas = false;
       fontAtlas->AddFontFromMemoryTTF(Roboto_Regular_ttf,
-                                      Roboto_Regular_ttf_len,
+                                      Roboto_Regular_ttf_len, // NOLINT(*-narrowing-conversions)
                                       18.f,
                                       &config,
                                       ranges);
 
-      sauce = fontAtlas->AddFontFromMemoryTTF(SourceCodePro_Regular_ttf,
-                                              SourceCodePro_Regular_ttf_len,
-                                              18.f,
-                                              &config,
-                                              ranges);
+      sauce = fontAtlas->AddFontFromMemoryTTF(
+          SourceCodePro_Regular_ttf,
+          SourceCodePro_Regular_ttf_len, // NOLINT(*-narrowing-conversions)
+          18.f,
+          &config,
+          ranges);
 
       if (!ImGui_ImplVulkan_CreateFontsTexture()) {
          Log.warn("Error creating Fonts Texture");
@@ -118,8 +119,7 @@ namespace ed::ui {
       ImGui::PopStyleVar(2);
 
       // DockSpace
-      const ImGuiIO& io = ImGui::GetIO();
-      if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable) {
+      if (const ImGuiIO& io = ImGui::GetIO(); io.ConfigFlags & ImGuiConfigFlags_DockingEnable) {
          ImGuiID dockspaceId = ImGui::GetID("MyDockSpace");
          ImGui::DockSpace(dockspaceId, ImVec2(0.0f, 0.0f), dockspaceFlags);
 
@@ -194,8 +194,8 @@ namespace ed::ui {
             }
 
             if (ImGui::BeginMenu("Open Recent")) {
-               const auto recentFile = pr::Properties::getInstance().getRecentFilePath();
-               if (recentFile.has_value()) {
+               if (const auto recentFile = pr::Properties::getInstance().getRecentFilePath();
+                   recentFile.has_value()) {
                   const auto nameOnly = recentFile.value().string();
                   if (ImGui::MenuItem(nameOnly.c_str())) {
                      dataFacade.clear();
@@ -264,7 +264,7 @@ namespace ed::ui {
          ImGui::OpenPopup("Unsaved");
       }
 
-      if (ImGui::BeginPopupModal("Unsaved", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+      if (ImGui::BeginPopupModal("Unsaved", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
          ImGui::Text("Unsaved changes will be lost. Are you sure?");
          ImGui::Separator();
 
@@ -298,15 +298,16 @@ namespace ed::ui {
    auto Manager::getSavePath() -> std::optional<std::filesystem::path> {
       auto outPath = NFD::UniquePath{};
 
-      const auto result =
-          NFD::SaveDialog(outPath, ProjectFileFilters.data(), ProjectFileFilters.size());
-      if (result == NFD_OKAY) {
+      if (const auto result =
+              SaveDialog(outPath, ProjectFileFilters.data(), ProjectFileFilters.size());
+          result == NFD_OKAY) {
          Log.debug("Success: {0}", outPath.get());
          return std::optional{std::filesystem::path{outPath.get()}};
-      } else if (result == NFD_CANCEL) {
-         Log.debug("User pressed Cancel");
-         return std::nullopt;
       } else {
+         if (result == NFD_CANCEL) {
+            Log.debug("User pressed Cancel");
+            return std::nullopt;
+         }
          Log.error("Error getting save path: {0}", NFD::GetError());
          return std::nullopt;
       }

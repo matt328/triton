@@ -64,7 +64,7 @@ namespace tr::gfx::geo {
       std::vector<vk::VertexInputAttributeDescription> result;
       uint32_t location = 0;
       for (const auto component : components) {
-         result.push_back(VertexBuilder::inputAttributeDescription(binding, location, component));
+         result.push_back(inputAttributeDescription(binding, location, component));
          location++;
       }
       return result;
@@ -74,16 +74,15 @@ namespace tr::gfx::geo {
     * requested vertex components */
    vk::PipelineVertexInputStateCreateInfo* VertexBuilder::getPipelineVertexInputState(
        const std::span<VertexComponent> components) {
-      vertexInputBindingDescription = VertexBuilder::inputBindingDescription(0);
-      VertexBuilder::vertexInputAttributeDescriptions =
-          VertexBuilder::inputAttributeDescriptions(0, components);
+      vertexInputBindingDescription = inputBindingDescription(0);
+      vertexInputAttributeDescriptions = inputAttributeDescriptions(0, components);
       pipelineVertexInputStateCreateInfo.vertexBindingDescriptionCount = 1;
       pipelineVertexInputStateCreateInfo.pVertexBindingDescriptions =
           &VertexBuilder::vertexInputBindingDescription;
       pipelineVertexInputStateCreateInfo.vertexAttributeDescriptionCount =
-          static_cast<uint32_t>(VertexBuilder::vertexInputAttributeDescriptions.size());
+          static_cast<uint32_t>(vertexInputAttributeDescriptions.size());
       pipelineVertexInputStateCreateInfo.pVertexAttributeDescriptions =
-          VertexBuilder::vertexInputAttributeDescriptions.data();
+          vertexInputAttributeDescriptions.data();
       return &pipelineVertexInputStateCreateInfo;
    }
 }
