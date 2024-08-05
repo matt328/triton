@@ -9,9 +9,7 @@
    - Return an opaque MeshHandle
 */
 
-namespace tr::gfx::mem {
-   class Buffer;
-}
+#include "mem/Buffer.hpp"
 
 namespace tr::gfx::geo {
 

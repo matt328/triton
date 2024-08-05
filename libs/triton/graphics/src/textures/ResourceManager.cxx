@@ -17,6 +17,7 @@
 
 #include "mem/Allocator.hpp"
 #include "mem/Buffer.hpp"
+#include <stacktrace>
 
 namespace tr::gfx::tx {
    ResourceManager::ResourceManager(const GraphicsDevice& graphicsDevice)
@@ -76,6 +77,7 @@ namespace tr::gfx::tx {
                const auto msg = fmt::format("Error loading model from file: {0}, {1}",
                                             filename.string(),
                                             ex.what());
+               std::cout << std::stacktrace::current() << std::endl;
                throw ResourceCreateException(msg);
             }
          }();
