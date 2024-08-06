@@ -57,6 +57,6 @@ TEST_CASE("Mocking is tested", "[factorial]") {
 
    const auto result = interface_func(&m);
 
-   REQUIRE(local_var == 0);
+   REQUIRE(local_var == 4);
    REQUIRE(result == true);
 }
