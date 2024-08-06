@@ -1,8 +1,14 @@
 #pragma once
 
 #include "Vertex.hpp"
+#include "BaseException.hpp"
 
 namespace tr::as {
+
+   class SerializationException final : public BaseException {
+      using BaseException::BaseException;
+   };
+
    class ImageData {
     public:
       std::vector<unsigned char> data{};
@@ -31,8 +37,15 @@ namespace tr::as {
       }
 
       template <class Archive>
-      void serialize(Archive& archive) {
+      void serialize(Archive& archive, std::uint32_t const version) {
+         if (version != 1) {
+            auto msg =
+                fmt::format("Version mismatch in tr::as:Model, found {0}, expected 1", version);
+            throw SerializationException(msg);
+         }
          archive(vertices, indices, jointRemaps, inverseBindPoses, imageData);
       }
    };
 }
+
+CEREAL_CLASS_VERSION(tr::as::Model, 1);
