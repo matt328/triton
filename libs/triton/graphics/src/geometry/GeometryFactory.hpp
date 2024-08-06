@@ -5,6 +5,8 @@
 #include "geometry/GeometryHandles.hpp"
 #include "HeightField.hpp"
 
+#include <BaseException.hpp>
+
 namespace tr::as {
    struct Model;
    class ImageData;
@@ -31,10 +33,9 @@ namespace tr::gfx::geo {
       }
    };
 
-   class IOException : public std::logic_error {
+   class IOException final : public tr::BaseException {
     public:
-      explicit IOException(const std::string& message) : std::logic_error(message) {
-      }
+      using BaseException::BaseException;
    };
 
    using GeometryDataRef = std::optional<std::reference_wrapper<GeometryData>>;

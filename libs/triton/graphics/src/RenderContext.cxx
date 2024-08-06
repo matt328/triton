@@ -183,7 +183,7 @@ namespace tr::gfx {
          resourceManager->setRenderData(renderData);
       }
 
-      [[nodiscard]] auto createStaticModel(const std::filesystem::path& modelPath) const {
+      [[nodiscard]] auto createStaticModel(const std::filesystem::path& modelPath) const noexcept {
          return resourceManager->createModel(modelPath);
       }
 
@@ -191,7 +191,7 @@ namespace tr::gfx {
          return resourceManager->createTerrain(size);
       }
 
-      [[nodiscard]] auto createSkinnedModel(const std::filesystem::path& modelPath) const {
+      [[nodiscard]] auto createSkinnedModel(const std::filesystem::path& modelPath) const noexcept {
          return resourceManager->createModel(modelPath);
       }
 

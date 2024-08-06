@@ -1,4 +1,5 @@
 #pragma once
+#include <BaseException.hpp>
 
 namespace ed::data {
 
@@ -32,7 +33,9 @@ namespace ed::data {
             try {
                auto result = future.get();
                fn(result);
-            } catch (const std::exception& ex) { Log.error("Exception {0}", ex.what()); }
+            } catch (const tr::BaseException& ex) {
+               Log.error("FutureWrapper::execute(): {0}", ex.what());
+            }
          }
       }
 

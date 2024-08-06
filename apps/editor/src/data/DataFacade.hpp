@@ -116,7 +116,8 @@ namespace ed::data {
       void addModel(const std::string_view& name, const std::filesystem::path& path);
       void removeModel(const std::string_view& name);
 
-      void createStaticModel(const std::string_view& entityName, const std::string_view& modelName);
+      void createStaticModel(const std::string_view& entityName,
+                             const std::string_view& modelName) noexcept;
 
       void createAnimatedModel(const std::string_view& entityName,
                                const std::string_view& modelName,

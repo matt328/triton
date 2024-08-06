@@ -49,7 +49,7 @@ namespace ed::data {
    }
 
    void DataFacade::createStaticModel(const std::string_view& entityName,
-                                      const std::string_view& modelName) {
+                                      const std::string_view& modelName) noexcept {
       dataStore.scene.insert({entityName.data(),
                               EntityData{.name = entityName.data(),
                                          .position = glm::vec3{0.f},

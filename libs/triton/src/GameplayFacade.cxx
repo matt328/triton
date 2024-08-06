@@ -5,6 +5,8 @@
 #include "gp/GameplaySystem.hpp"
 #include "gfx/RenderContext.hpp"
 
+#include "BaseException.hpp"
+
 namespace tr::ctx {
 
    class GameplayFacade::Impl {
@@ -21,7 +23,7 @@ namespace tr::ctx {
          return renderer.createTerrain(size).then(createEntity);
       }
 
-      [[nodiscard]] auto createStaticModelEntity(const std::filesystem::path& modelPath) const
+      [[nodiscard]] auto createStaticModelEntity(const std::filesystem::path& modelPath) const noexcept
           -> futures::cfuture<cm::EntityType> {
 
          auto gpCreate = [this](const cm::ModelData& handles) {
@@ -29,7 +31,6 @@ namespace tr::ctx {
          };
 
          auto createModel = renderer.createStaticModel(modelPath);
-
          return createModel.then(gpCreate);
       }
 
@@ -42,9 +43,13 @@ namespace tr::ctx {
             return gameplaySystem.createAnimatedModel(modelData, skeletonPath, animationPath);
          };
 
-         auto createModel = renderer.createSkinnedModel(modelPath);
-
-         return createModel.then(gpCreate);
+         try {
+            auto createModel = renderer.createSkinnedModel(modelPath);
+            return createModel.then(gpCreate);
+         } catch (tr::BaseException& ex) {
+            ex << "GameplayFacade::createAnimatedModelEntity(): ";
+            throw;
+         }
       }
 
       static void loadModelResources([[maybe_unused]] const std::filesystem::path& modelPath,
@@ -85,7 +90,7 @@ namespace tr::ctx {
    GameplayFacade::~GameplayFacade() { // NOLINT(*-use-equals-default)
    }
 
-   auto GameplayFacade::createStaticModelEntity(const std::filesystem::path& modelPath) const
+   auto GameplayFacade::createStaticModelEntity(const std::filesystem::path& modelPath) const noexcept
        -> futures::cfuture<cm::EntityType> {
       return impl->createStaticModelEntity(modelPath);
    }

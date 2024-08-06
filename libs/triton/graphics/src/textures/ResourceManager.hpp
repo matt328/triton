@@ -1,5 +1,7 @@
 #pragma once
 
+#include "BaseException.hpp"
+
 #include "cm/Handles.hpp"
 #include "cm/RenderData.hpp"
 
@@ -55,19 +57,14 @@ namespace tr::gfx::tx {
                              .unnormalizedCoordinates = VK_FALSE};
 
    /// Exception thrown when an error occurs uploading a resource to the GPU
-   class ResourceUploadException final : public std::runtime_error {
+   class ResourceUploadException final : public BaseException {
     public:
-      explicit ResourceUploadException(const std::string& message) : std::runtime_error(message) {
-      }
+      using BaseException::BaseException;
    };
 
-   class ResourceCreateException final : public std::runtime_error {
+   class ResourceCreateException final : public tr::BaseException {
     public:
-      explicit ResourceCreateException(const char* message) : std::runtime_error(message) {
-      }
-
-      explicit ResourceCreateException(const std::string& message) : std::runtime_error(message) {
-      }
+      using BaseException::BaseException;
    };
 
    class ResourceManager {
@@ -82,7 +79,8 @@ namespace tr::gfx::tx {
 
       auto createTerrain(uint32_t size) -> futures::cfuture<cm::ModelData>;
 
-      auto createModel(const std::filesystem::path& filename) -> futures::cfuture<cm::ModelData>;
+      auto createModel(const std::filesystem::path& filename) noexcept
+          -> futures::cfuture<cm::ModelData>;
 
       auto createStaticMesh(const geo::GeometryData& geometry) -> cm::MeshHandle;
 

@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="assettool-working-model" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="gltf -f=$PROJECT_DIR$/../game-assets/models/gltf-working/textured.gltf -s=$PROJECT_DIR$/../game-assets/models/gltf-working/skeleton.ozz -o=$PROJECT_DIR$/../game-assets/models/gltf-working/model.trm" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Triton" TARGET_NAME="assettool" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="Triton" RUN_TARGET_NAME="assettool">
+    <method v="2">
+      <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+    </method>
+  </configuration>
+</component>

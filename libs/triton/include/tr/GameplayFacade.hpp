@@ -15,9 +15,9 @@ namespace tr::ctx {
    using OptionalRef = std::optional<std::reference_wrapper<T>>;
 
    struct EditorInfoComponent {
-      std::string name;
-      std::optional<std::string> sourceMesh;
-      std::optional<std::string> sourceTexture;
+      std::string name{};
+      std::optional<std::string> sourceMesh{};
+      std::optional<std::string> sourceTexture{};
    };
 
    /*
@@ -38,25 +38,25 @@ namespace tr::ctx {
       GameplayFacade& operator=(GameplayFacade&&) = delete;
 
       // Entity Creation Methods
-      auto createTerrain(uint32_t size) const -> futures::cfuture<cm::EntityType>;
+      [[nodiscard]] auto createTerrain(uint32_t size) const -> futures::cfuture<cm::EntityType>;
 
-      auto createCamera(uint32_t width,
-                        uint32_t height,
-                        float fov,
-                        float zNear,
-                        float zFar,
-                        const glm::vec3& position,
-                        const std::optional<std::string>& name = std::nullopt) const
+      [[nodiscard]] auto createCamera(uint32_t width,
+                                      uint32_t height,
+                                      float fov,
+                                      float zNear,
+                                      float zFar,
+                                      const glm::vec3& position,
+                                      const std::optional<std::string>& name = std::nullopt) const
           -> cm::EntityType;
 
       auto setCurrentCamera(cm::EntityType currentCamera) const -> void;
 
-      auto createStaticModelEntity(const std::filesystem::path& modelPath) const
-          -> futures::cfuture<cm::EntityType>;
+      [[nodiscard]] auto createStaticModelEntity(const std::filesystem::path& modelPath)
+          const noexcept -> futures::cfuture<cm::EntityType>;
 
-      auto createAnimatedModelEntity(const std::filesystem::path& modelPath,
-                                     const std::filesystem::path& skeletonPath,
-                                     const std::filesystem::path& animationPath) const
+      [[nodiscard]] auto createAnimatedModelEntity(const std::filesystem::path& modelPath,
+                                                   const std::filesystem::path& skeletonPath,
+                                                   const std::filesystem::path& animationPath) const
           -> futures::cfuture<cm::EntityType>;
 
       auto clear() const -> void;

@@ -63,7 +63,7 @@ namespace tr::gfx::tx {
       return futures::async(createFn);
    }
 
-   auto ResourceManager::createModel(const std::filesystem::path& filename)
+   auto ResourceManager::createModel(const std::filesystem::path& filename) noexcept
        -> futures::cfuture<cm::ModelData> {
       ZoneNamedN(n, "ResourceManager::loadModel", true);
 
@@ -73,12 +73,8 @@ namespace tr::gfx::tx {
          auto tritonModelData = [this, &filename]() {
             try {
                return geometryFactory->loadTrm(filename);
-            } catch (const geo::IOException& ex) {
-               const auto msg = fmt::format("Error loading model from file: {0}, {1}",
-                                            filename.string(),
-                                            ex.what());
-               std::cout << std::stacktrace::current() << std::endl;
-               throw ResourceCreateException(msg);
+            } catch (const BaseException& ex) {
+               throw ResourceCreateException("ResourceManager::createModel(): ", ex);
             }
          }();
 
@@ -87,9 +83,9 @@ namespace tr::gfx::tx {
             try {
                return uploadGeometry(tritonModelData.getGeometryHandle(),
                                      tritonModelData.getImageHandle());
-            } catch (const ResourceUploadException& ex) {
-               const auto msg = fmt::format("Error uploading model: {0}", ex.what());
-               throw ResourceCreateException(msg);
+            } catch (BaseException& ex) {
+               ex << "ResourceManager::createModel(): ";
+               throw;
             }
          }();
          geometryFactory->unload(

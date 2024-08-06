@@ -26,6 +26,8 @@ namespace tr::gfx::geo {
       }
    }
 
+   /// Loads a TRM model.
+   /// @throws IOException if there's an issue opening or reading the file.
    auto GeometryFactory::loadTrm(const std::filesystem::path& modelPath) -> TritonModelData {
 
       Log.debug("Loading TRM File: {0}", modelPath.string());
@@ -59,16 +61,21 @@ namespace tr::gfx::geo {
          ZoneNamedN(z, "Loading Model from Disk", true);
          auto is = std::ifstream(modelPath, std::ios::binary);
          if (!is) {
-            throw std::runtime_error("Failed to open file: " + modelPath);
+            throw IOException("Failed to open file: " + modelPath);
          }
 
-         cereal::BinaryInputArchive input(is);
-         auto tritonModel = as::Model{};
+         try {
+            cereal::BinaryInputArchive input(is);
+            auto tritonModel = as::Model{};
 
-         input(tritonModel);
-         return tritonModel;
-      } catch (const std::exception& ex) {
-         throw IOException(fmt::format("Error loading model: {0}", ex.what()));
+            input(tritonModel);
+            return tritonModel;
+         } catch (const std::exception& ex) {
+            throw IOException("Error reading: " + modelPath + ": ", ex);
+         }
+      } catch (BaseException& ex) {
+         ex << "GeometryFactory::loadTrmFile(): ";
+         throw;
       }
    }
 
