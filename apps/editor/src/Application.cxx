@@ -14,7 +14,6 @@
 #include <glfw/glfw3native.h>
 #include <windows.h> // For general Windows APIs
 #include <dwmapi.h>  // For DWMWINDOWATTRIBUTE
-#include <uxtheme.h>
 #endif
 
 namespace ed {
@@ -117,7 +116,7 @@ namespace ed {
       manager = std::make_unique<ui::Manager>(context->getGameplayFacade(), *dataFacade);
 
       manager->addQuitListener<&tr::ctx::Context::hostWindowClosed>(context.get());
-      manager->setFullscreenFn([this]() { toggleFullscreen(*this); });
+      manager->setFullscreenFn([this] { toggleFullscreen(*this); });
       manager->setWireframeFn([this](const bool b) { context->setWireframe(b); });
 
       auto& facade = context->getGameplayFacade();
@@ -132,7 +131,7 @@ namespace ed {
    }
 
    void Application::run() const {
-      context->start([this]() {
+      context->start([this] {
          glfwPollEvents();
          ImGui_ImplVulkan_NewFrame();
          ImGui_ImplGlfw_NewFrame();
