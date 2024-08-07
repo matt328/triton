@@ -121,7 +121,7 @@ FetchContent_MakeAvailable(tracy)
 # vulkan-memory-allocator-hpp
 FetchContent_Declare(
   vulkan-memory-allocator-hpp
-  GIT_REPOSITORY https://github.com/YaaZ/VulkanMemoryAllocator-Hpp.git
-  GIT_TAG v3.1.0
+  GIT_REPOSITORY https://github.com/matt328/VulkanMemoryAllocator-Hpp.git
+  GIT_TAG master
 )
 FetchContent_MakeAvailable(vulkan-memory-allocator-hpp)
