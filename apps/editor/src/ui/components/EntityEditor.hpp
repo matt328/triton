@@ -3,6 +3,7 @@
 #include "tr/GameplayFacade.hpp"
 #include "data/DataFacade.hpp"
 #include <imgui.h>
+#include <misc/cpp/imgui_stdlib.h>
 
 // TODO tomorrow fire this back up
 // Add a way to create a static model entity by selecting a model

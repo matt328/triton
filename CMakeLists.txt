@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.11 FATAL_ERROR)
 
-set(CMAKE_TOOLCHAIN_FILE ./vcpkg/scripts/buildsystems/vcpkg.cmake)
-
 project(Triton)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/vendor/cmake-scripts;")
@@ -18,6 +16,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin/")
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/FetchContent.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/GetImGui.cmake)
 
 add_subdirectory(assets)
 add_subdirectory(libs/util-lib)

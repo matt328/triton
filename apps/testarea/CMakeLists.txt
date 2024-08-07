@@ -38,9 +38,6 @@ FetchContent_Declare(futures
 )
 FetchContent_MakeAvailable(futures)
 
-# Find required packages
-find_package(trompeloeil CONFIG REQUIRED)
-
 # Main target settings
 target_compile_definitions(${PROJECT_NAME} PRIVATE)
 target_precompile_headers(${PROJECT_NAME} PRIVATE <iostream> <chrono> <future>)
