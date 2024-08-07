@@ -3,11 +3,11 @@
 #include "Image.hpp"
 
 #include "GraphicsDevice.hpp"
-#include <vulkan-memory-allocator-hpp/vk_mem_alloc_enums.hpp>
+#include <vk_mem_alloc_enums.hpp>
 
 #define VMA_IMPLEMENTATION
 #include <vk_mem_alloc.h>
-#include <vulkan-memory-allocator-hpp/vk_mem_alloc.hpp>
+#include <vk_mem_alloc.hpp>
 
 namespace tr::gfx::mem {
 

@@ -6,8 +6,6 @@ set(assetlib_SRC
 
 add_library(${PROJECT_NAME} STATIC ${assetlib_SRC})
 
-find_path(TINYGLTF_INCLUDE_DIRS "tiny_gltf.h")
-
 target_compile_definitions(${PROJECT_NAME}
   PRIVATE
   TINYGLTF_NO_STB_IMAGE_WRITE
@@ -36,8 +34,8 @@ target_link_libraries(${PROJECT_NAME}
   cereal::cereal
   ozz_animation
   tinygltf
-  PRIVATE
   glm
+  PRIVATE
   util-lib
 )
 
@@ -45,7 +43,6 @@ target_include_directories(${PROJECT_NAME}
   PUBLIC
   include
   include/as
-  ${TINYGLTF_INCLUDE_DIRS}
   PRIVATE
   src
 )
@@ -75,8 +72,6 @@ target_precompile_headers(asset-lib-test
   <catch2/trompeloeil.hpp>
   <trompeloeil/mock.hpp>
 )
-
-find_package(trompeloeil CONFIG REQUIRED)
 
 target_link_libraries(asset-lib-test
   PRIVATE

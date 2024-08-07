@@ -2,7 +2,7 @@
 #include "helpers/Vulkan.hpp"
 #include "VkContext.hpp"
 #include "mem/Allocator.hpp"
-#include <vulkan-memory-allocator-hpp/vk_mem_alloc_structs.hpp>
+#include <vk_mem_alloc_structs.hpp>
 #include <vulkan/vulkan_core.h>
 
 namespace tr::gfx {
