@@ -23,8 +23,6 @@ IF (WIN32)
   )
 ENDIF (WIN32)
 
-find_package(Tracy CONFIG REQUIRED)
-
 target_compile_definitions(${PROJECT_NAME}
   PRIVATE
 )

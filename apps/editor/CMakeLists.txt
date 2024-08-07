@@ -9,6 +9,8 @@ set(editor_SRC
 
 add_executable(${PROJECT_NAME} ${editor_SRC})
 
+find_package(Vulkan REQUIRED)
+
 configure_file(src/config.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/config.h)
 
 target_compile_definitions(${PROJECT_NAME}
@@ -38,7 +40,6 @@ target_precompile_headers(${PROJECT_NAME}
   <fstream>
   <imgui.h>
   <imgui_internal.h>
-  <imgui_stdlib.h>
   "src/ui/ImGuiStyle.hpp"
   <stb_image.h>
   <glm/gtc/type_ptr.hpp>
@@ -67,6 +68,8 @@ target_link_libraries(${PROJECT_NAME}
   platform_folders
   spdlog::spdlog_header_only
   util-lib
+  imgui_custom
+  Vulkan::Vulkan
 )
 
 target_include_directories(${PROJECT_NAME}

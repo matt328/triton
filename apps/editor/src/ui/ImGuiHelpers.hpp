@@ -2,6 +2,8 @@
 
 #include "data/DataFacade.hpp"
 
+#include <misc/cpp/imgui_stdlib.h>
+
 namespace ed::ui::helpers {
 
    constexpr auto ButtonSize = ImVec2(95.f, 0.f);

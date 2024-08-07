@@ -8,11 +8,10 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(Catch2)
 
 # trompeloeil
-set(TINYGLTF_HEADER_ONLY ON)
 FetchContent_Declare(
   trompeloeil
-  GIT_REPOSITORY https://github.com/syoyo/tinygltf.git
-  GIT_TAG v2.9.2
+  GIT_REPOSITORY https://github.com/rollbear/trompeloeil.git
+  GIT_TAG v48
 )
 FetchContent_MakeAvailable(trompeloeil)
 
@@ -100,9 +99,29 @@ FetchContent_MakeAvailable(spdlog)
 
 # tinygltf
 set(TINYGLTF_HEADER_ONLY ON)
+set(TINYGLTF_BUILD_LOADER_EXAMPLE OFF)
+set(TINYGLTF_BUILD_GL_EXAMPLE OFF)
+set(TINYGLTF_BUILD_VALIDATOR_EXAMPLE OFF)
+set(TINYGLTF_BUILD_BUILDER_EXAMPLE OFF)
 FetchContent_Declare(
   tinygltf
   GIT_REPOSITORY https://github.com/syoyo/tinygltf.git
   GIT_TAG v2.9.2
 )
 FetchContent_MakeAvailable(tinygltf)
+
+# tracy
+FetchContent_Declare(
+  tracy
+  GIT_REPOSITORY https://github.com/wolfpld/tracy.git
+  GIT_TAG v0.10
+)
+FetchContent_MakeAvailable(tracy)
+
+# vulkan-memory-allocator-hpp
+FetchContent_Declare(
+  vulkan-memory-allocator-hpp
+  GIT_REPOSITORY https://github.com/YaaZ/VulkanMemoryAllocator-Hpp.git
+  GIT_TAG v3.1.0
+)
+FetchContent_MakeAvailable(vulkan-memory-allocator-hpp)

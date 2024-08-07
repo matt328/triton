@@ -41,12 +41,6 @@ FetchContent_Declare(futures
 )
 FetchContent_MakeAvailable(futures)
 
-find_package(imgui CONFIG REQUIRED)
-find_package(Vulkan REQUIRED)
-find_package(VulkanMemoryAllocator CONFIG REQUIRED)
-find_package(unofficial-vulkan-memory-allocator-hpp CONFIG REQUIRED)
-find_package(Tracy CONFIG REQUIRED)
-
 target_compile_definitions(${PROJECT_NAME}
   PRIVATE
   GLFW_EXPOSE_NATIVE_WIN32
@@ -64,6 +58,8 @@ target_precompile_headers(${PROJECT_NAME}
   <GLFW/glfw3.h>
   <imgui_impl_glfw.h>
   <imgui_impl_vulkan.h>
+  <vulkan/vulkan_raii.hpp>
+  <vk_mem_alloc.hpp>
   <futures/futures.hpp>
   PRIVATE
   <filesystem>
@@ -79,8 +75,6 @@ target_precompile_headers(${PROJECT_NAME}
   <queue>
   <set>
   <stb_image.h>
-  <vulkan/vulkan_raii.hpp>
-  <vulkan-memory-allocator-hpp/vk_mem_alloc.hpp>
   <tracy/Tracy.hpp>
   <tracy/TracyC.h>
   <tracy/TracyVulkan.hpp>
@@ -90,27 +84,26 @@ target_link_libraries(${PROJECT_NAME}
   PUBLIC
   asset-lib
   glfw # Get rid of glfw usage in graphics
-  imgui::imgui # Look into externalizing this code
+  imgui_custom
   futures::futures # Futures is part of Graphics' API it shares with Triton
+  ${Vulkan_LIBRARIES}
+  VulkanMemoryAllocator-Hpp
   PRIVATE
   util-lib
   common
   glslang
   glslang-default-resource-limits
   SPIRV
-  GPUOpen::VulkanMemoryAllocator
   libnoise
-  unofficial::VulkanMemoryAllocator-Hpp::VulkanMemoryAllocator-Hpp
   Tracy::TracyClient
-  ${Vulkan_LIBRARIES}
 )
 
 target_include_directories(${PROJECT_NAME}
   PUBLIC
   include
+  ${Vulkan_INCLUDE_DIRS}
   PRIVATE
   include
   include/gfx
   src
-  ${Vulkan_INCLUDE_DIRS}
 )
