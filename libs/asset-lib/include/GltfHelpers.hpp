@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Model.hpp"
-#include "tiny_gltf.h"
+#include <tiny_gltf.h>
 
 namespace tr::as::gltf::Helpers {
 
@@ -134,7 +134,8 @@ namespace tr::as::gltf::Helpers {
    }
 
    inline auto createTexture(const tinygltf::Model& model,
-                             const int textureIndex, Model& tritonModel) {
+                             const int textureIndex,
+                             Model& tritonModel) {
       if (textureIndex == -1) {
          tinygltf::Image image;
 
