@@ -6,7 +6,7 @@ project(Triton)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/vendor/cmake-scripts;")
 
-include(c++-standards)
+include(FetchContent)
 include(compiler-options)
 
 set(CMAKE_CXX_STANDARD 23)
@@ -16,6 +16,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin/")
+
+include(${CMAKE_CURRENT_SOURCE_DIR}/FetchContent.cmake)
 
 add_subdirectory(assets)
 add_subdirectory(libs/util-lib)

@@ -1,7 +1,7 @@
 #include "HeightField.hpp"
 
 #include <noise/noise.h>
-#include <noise/noiseutils.h>
+#include "NoiseUtils.hpp"
 
 namespace tr::ct {
 
