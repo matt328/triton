@@ -122,7 +122,8 @@
       "gui",
       "ci",
       "context",
-      "editor"
+      "editor",
+      "asset-lib"
    ],
    "git.ignoreLimitWarning": true,
    "workbench.colorCustomizations": {
