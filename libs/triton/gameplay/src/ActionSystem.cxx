@@ -9,12 +9,12 @@ namespace tr::gp {
    void ActionSystem::mapSource(Source source, const StateType sType, const ActionType aType) {
       std::visit(
           [&]<typename T>(T&& arg) {
-             using T = std::decay_t<T>;
-             if constexpr (std::is_same_v<T, cm::Key>) {
+             using U = std::decay_t<T>;
+             if constexpr (std::is_same_v<U, cm::Key>) {
                 keyActionMap.insert_or_assign(arg, Action{aType, sType});
-             } else if constexpr (std::is_same_v<T, cm::MouseInput>) {
+             } else if constexpr (std::is_same_v<U, cm::MouseInput>) {
                 mouseActionMap.insert_or_assign(arg, Action{aType, sType});
-             } else if constexpr (std::is_same_v<T, cm::GamepadInput>) {
+             } else if constexpr (std::is_same_v<U, cm::GamepadInput>) {
              }
           },
           source.src);
