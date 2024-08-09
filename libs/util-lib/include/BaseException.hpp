@@ -8,7 +8,7 @@ namespace tr {
       }
 
       explicit BaseException(const std::string& message, const std::exception& other)
-          : message(std::move(message + other.what())) {
+          : message(message + other.what()) {
       }
 
       [[nodiscard]] const char* what() const noexcept override {

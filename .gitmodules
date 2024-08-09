@@ -1,9 +1,0 @@
-[submodule "vcpkg"]
-	path = vcpkg
-	url = https://github.com/Microsoft/vcpkg.git
-[submodule "vendor/ozz-animation"]
-	path = vendor/ozz-animation
-	url = git@github.com:matt328/ozz-animation.git
-[submodule "vendor/cmake-scripts"]
-	path = vendor/cmake-scripts
-	url = git@github.com:StableCoder/cmake-scripts.git
