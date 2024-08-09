@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.11 FATAL_ERROR)
 
 project(Triton)
 
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/vendor/cmake-scripts;")
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake;")
 
 include(FetchContent)
 include(compiler-options)
@@ -10,13 +10,14 @@ include(compiler-options)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin/")
 
-include(${CMAKE_CURRENT_SOURCE_DIR}/FetchContent.cmake)
-include(${CMAKE_CURRENT_SOURCE_DIR}/GetImGui.cmake)
+include(dependencies)
+include(get-imgui)
 
 add_subdirectory(assets)
 add_subdirectory(libs/util-lib)
