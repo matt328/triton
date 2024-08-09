@@ -1,12 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 project("testarea" VERSION "0.0.1" LANGUAGES CXX)
 
-# Include code coverage module
-include(code-coverage)
-
-# Enable code coverage for all targets
-add_code_coverage_all_targets()
-
 # Source files for the main target
 set(testarea_SRC
    "src/main.cxx"

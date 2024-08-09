@@ -1,5 +1,7 @@
 #pragma once
 
+#include "tiny_gltf.h"
+
 class NodeNoTransforms : public tinygltf::Node {
  public:
    std::vector<double> matrix = {};

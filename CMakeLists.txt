@@ -16,6 +16,11 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin/")
 
+# Include code coverage module
+include(code-coverage)
+add_code_coverage_all_targets()
+include(CTest)
+
 include(dependencies)
 include(get-imgui)
 
@@ -26,5 +31,3 @@ add_subdirectory(apps/editor)
 add_subdirectory(apps/testarea)
 add_subdirectory(apps/assettool)
 add_subdirectory(libs/asset-lib)
-
-include(CTest)
