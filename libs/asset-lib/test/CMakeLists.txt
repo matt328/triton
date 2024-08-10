@@ -3,7 +3,7 @@ set(test_SRC
 )
 
 add_executable(asset-lib-test ${test_SRC})
-
+target_code_coverage(asset-lib-test AUTO ALL)
 target_precompile_headers(asset-lib-test
    PRIVATE
    <filesystem>
