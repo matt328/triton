@@ -18,11 +18,11 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin/")
 
 # Include code coverage module
 include(code-coverage)
-add_code_coverage_all_targets()
-include(CTest)
-
 include(dependencies)
 include(get-imgui)
+
+add_code_coverage_all_targets()
+include(CTest)
 
 add_subdirectory(assets)
 add_subdirectory(libs/util-lib)
