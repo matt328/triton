@@ -19,6 +19,7 @@ FetchContent_Declare(
    SYSTEM
 )
 FetchContent_MakeAvailable(trompeloeil)
+list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
 
 # Cereal
 set(JUST_INSTALL_CEREAL ON)

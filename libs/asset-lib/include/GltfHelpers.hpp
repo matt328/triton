@@ -39,7 +39,7 @@ namespace tr::as::gltf::Helpers {
    }
 
    /// Populate the indices and vertices in the tritonModel from the gltf model
-   inline auto createGeometry(const tinygltf::Model& model,
+   inline void createGeometry(const tinygltf::Model& model,
                               const tinygltf::Primitive& primitive,
                               const glm::mat4& transform,
                               Model& tritonModel) {

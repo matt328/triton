@@ -3,7 +3,6 @@ set(test_SRC
 )
 
 add_executable(asset-lib-test ${test_SRC})
-target_code_coverage(asset-lib-test AUTO ALL)
 target_precompile_headers(asset-lib-test
    PRIVATE
    <filesystem>
@@ -43,6 +42,17 @@ target_include_directories(asset-lib-test
    test
 )
 
+add_custom_target(run_coverage
+   COMMAND ${CMAKE_COMMAND} --build . --target ccov-all-export
+   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+   COMMENT "Running code coverage export"
+)
+
+# add_test(NAME CoverageExport
+# COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target ccov-all-export
+# )
 include(CTest)
 include(Catch)
 catch_discover_tests(asset-lib-test)
+
+target_code_coverage(asset-lib-test AUTO ALL)

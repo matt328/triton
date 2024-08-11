@@ -4,6 +4,8 @@ project(Triton)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake;")
 
+set(ENABLE_COVERAGE ON)
+
 include(FetchContent)
 include(compiler-options)
 
