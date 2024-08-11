@@ -19,6 +19,23 @@
             "panel": "dedicated",
             "showReuseMessage": false,
          }
+      },
+      {
+         "label": "Run Ninja ccov-asset-lib-test",
+         "type": "shell",
+         "command": "ninja",
+         "args": [
+            "ccov-asset-lib-test"
+         ],
+         "group": {
+            "kind": "build",
+            "isDefault": false
+         },
+         "options": {
+            "cwd": "${workspaceFolder}\\build"
+         },
+         "problemMatcher": [],
+         "detail": "Runs the Ninja target ccov-asset-lib-test."
       }
    ]
 }

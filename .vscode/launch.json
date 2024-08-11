@@ -5,14 +5,11 @@
    "version": "0.2.0",
    "configurations": [
       {
-         "type": "cppdbg",
+         "name": "Debug Catch2 Tests",
+         "type": "lldb",
          "request": "launch",
-         "name": "Launch(NatVis)",
-         "cwd": "${workspaceFolder}/bin",
-         "program": "${command:cmake.launchTargetPath}",
-         "showDisplayString": true,
-         "miDebuggerPath": "C:/Program Files/LLVM/bin/lldb.exe",
-         "MIMode": "lldb"
+         "program": "${workspaceFolder}/bin/asset-lib-test.exe", // Path to your test executable
+         "cwd": "${workspaceFolder}",
       }
    ]
 }
