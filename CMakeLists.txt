@@ -7,6 +7,9 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake;")
 set(ENABLE_COVERAGE ON)
 
 include(FetchContent)
+
+set(ENABLE_ALL_WARNINGS ON)
+set(ENABLE_EFFECTIVE_CXX ON)
 include(compiler-options)
 
 set(CMAKE_CXX_STANDARD 23)
