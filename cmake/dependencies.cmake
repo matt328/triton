@@ -2,6 +2,14 @@
 
 include(FetchContent)
 
+# Backup original flags
+set(old_cxx_flags "${CMAKE_CXX_FLAGS}")
+set(old_c_flags "${CMAKE_C_FLAGS}")
+
+# Suppress warnings globally
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
+
 # Catch2
 FetchContent_Declare(
   Catch2
@@ -168,3 +176,7 @@ FetchContent_Declare(
   SYSTEM
 )
 FetchContent_MakeAvailable(vulkan-memory-allocator-hpp)
+
+# Restore original flags
+set(CMAKE_CXX_FLAGS "${old_cxx_flags}")
+set(CMAKE_C_FLAGS "${old_c_flags}")
