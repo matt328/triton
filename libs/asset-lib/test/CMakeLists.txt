@@ -55,4 +55,8 @@ include(CTest)
 include(Catch)
 catch_discover_tests(asset-lib-test)
 
-target_code_coverage(asset-lib-test AUTO ALL)
+target_code_coverage(asset-lib-test
+   AUTO
+   ALL
+   EXCLUDE .*test.*
+)
