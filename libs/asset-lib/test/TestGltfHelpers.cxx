@@ -174,38 +174,19 @@ TEST_CASE("Gltf Conversion is tested", "[gltf]") {
       tinygltf::Model model;
       tinygltf::Primitive primitive;
 
-      // Create mock data for the model
-      tinygltf::Accessor vertexAccessor;
-      vertexAccessor.count = 3;
-      vertexAccessor.byteOffset = 0;
-      vertexAccessor.bufferView = 0;
-      vertexAccessor.componentType = TINYGLTF_PARAMETER_TYPE_FLOAT;
-      vertexAccessor.type = TINYGLTF_TYPE_VEC3;
-      std::cout << "model.accessors.size() " << model.accessors.size() << std::endl;
-      model.accessors.push_back(vertexAccessor);
-      std::cout << "model.accessors.size() " << model.accessors.size() << std::endl;
-      primitive.attributes["POSITION"] = 0;
+      int position = 0;
 
-      tinygltf::BufferView vertexBufferView;
-      vertexBufferView.byteOffset = 0;
-      vertexBufferView.buffer = 0;
-      model.bufferViews.push_back(vertexBufferView);
-
-      tinygltf::Buffer buffer;
-      buffer.data = {0,   0,  128, 63, 0,   0,  0, 64, 0,   0,  64, 64, 0, 0,  128, 64, 0,  0,
-                     160, 64, 0,   0,  192, 64, 0, 0,  224, 64, 0,  0,  0, 65, 0,   0,  16, 65};
-      model.buffers.push_back(buffer);
-
+      // Indices
       tinygltf::Accessor indexAccessor;
       indexAccessor.componentType = TINYGLTF_PARAMETER_TYPE_UNSIGNED_INT;
       indexAccessor.count = 3;
       indexAccessor.byteOffset = 0;
-      indexAccessor.bufferView = 1;
+      indexAccessor.bufferView = position;
       model.accessors.push_back(indexAccessor);
-      primitive.indices = 1;
+      primitive.indices = position;
 
       tinygltf::BufferView indexBufferView;
-      indexBufferView.buffer = 1;
+      indexBufferView.buffer = position;
       indexBufferView.byteOffset = 0;
       model.bufferViews.push_back(indexBufferView);
 
@@ -213,15 +194,89 @@ TEST_CASE("Gltf Conversion is tested", "[gltf]") {
       indexBuffer.data = {1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0};
       model.buffers.push_back(indexBuffer);
 
-      glm::mat4 transform = glm::mat4(1.0f);
+      ++position;
 
+      // Vertices Position Attribute
+      tinygltf::Accessor vertexAccessor;
+      vertexAccessor.count = 3;
+      vertexAccessor.byteOffset = 0;
+      vertexAccessor.bufferView = position;
+      vertexAccessor.componentType = TINYGLTF_PARAMETER_TYPE_FLOAT;
+      vertexAccessor.type = TINYGLTF_TYPE_VEC3;
+      model.accessors.push_back(vertexAccessor);
+      primitive.attributes["POSITION"] = position;
+
+      tinygltf::BufferView vertexBufferView;
+      vertexBufferView.byteOffset = 0;
+      vertexBufferView.buffer = position;
+      model.bufferViews.push_back(vertexBufferView);
+
+      tinygltf::Buffer buffer;
+      buffer.data = {0,   0,  128, 63, 0,   0,  0, 64, 0,   0,  64, 64, 0, 0,  128, 64, 0,  0,
+                     160, 64, 0,   0,  192, 64, 0, 0,  224, 64, 0,  0,  0, 65, 0,   0,  16, 65};
+      model.buffers.push_back(buffer);
+      ++position;
+
+      // Vertices Normals
+      tinygltf::Accessor normalAccessor;
+      normalAccessor.count = 3;
+      normalAccessor.byteOffset = 0;
+      normalAccessor.bufferView = position;
+      normalAccessor.componentType = TINYGLTF_PARAMETER_TYPE_FLOAT;
+      normalAccessor.type = TINYGLTF_TYPE_VEC3;
+      model.accessors.push_back(normalAccessor);
+      primitive.attributes["NORMAL"] = position;
+
+      tinygltf::BufferView normalBufferView;
+      normalBufferView.byteOffset = 0;
+      normalBufferView.buffer = position;
+      model.bufferViews.push_back(normalBufferView);
+
+      tinygltf::Buffer normalBuffer;
+      normalBuffer.data = {0,  0, 128, 63,  0,  0, 0, 64,  0,  0, 64, 64, 0,  0, 128, 64, 0, 0, 160,
+                           64, 0, 0,   192, 64, 0, 0, 224, 64, 0, 0,  0,  65, 0, 0,   16, 65};
+      model.buffers.push_back(normalBuffer);
+      position++;
+
+      // Vertices texCoord
+      tinygltf::Accessor texCoordAccessor;
+      texCoordAccessor.count = 3;
+      texCoordAccessor.byteOffset = 0;
+      texCoordAccessor.bufferView = position;
+      texCoordAccessor.componentType = TINYGLTF_PARAMETER_TYPE_FLOAT;
+      texCoordAccessor.type = TINYGLTF_TYPE_VEC2;
+      model.accessors.push_back(texCoordAccessor);
+      primitive.attributes["TEXCOORD_0"] = position;
+
+      tinygltf::BufferView texCoordBufferView;
+      texCoordBufferView.byteOffset = 0;
+      texCoordBufferView.buffer = position;
+      model.bufferViews.push_back(texCoordBufferView);
+
+      tinygltf::Buffer texCoordBuffer;
+      texCoordBuffer.data = {0, 0, 128, 63, 0, 0, 0,   64, 0, 0, 64,  64,
+                             0, 0, 128, 64, 0, 0, 160, 64, 0, 0, 192, 64};
+      model.buffers.push_back(texCoordBuffer);
+      position++;
+
+      auto transform = glm::mat4(1.0f);
       tr::as::Model tritonModel;
-
       tr::as::gltf::Helpers::createGeometry(model, primitive, transform, tritonModel);
 
+      // Check Vertices Position
       REQUIRE(tritonModel.vertices.size() == 3);
       REQUIRE(tritonModel.vertices[0].pos == glm::vec3(1.0f, 2.0f, 3.0f));
       REQUIRE(tritonModel.vertices[1].pos == glm::vec3(4.0f, 5.0f, 6.0f));
       REQUIRE(tritonModel.vertices[2].pos == glm::vec3(7.0f, 8.0f, 9.0f));
+
+      // Check Vertices Normal
+      REQUIRE(tritonModel.vertices[0].normal == glm::vec3(1.0f, 2.0f, 3.0f));
+      REQUIRE(tritonModel.vertices[1].normal == glm::vec3(4.0f, 5.0f, 6.0f));
+      REQUIRE(tritonModel.vertices[2].normal == glm::vec3(7.0f, 8.0f, 9.0f));
+
+      // Check TexCoord
+      REQUIRE(tritonModel.vertices[0].uv == glm::vec2(1.0f, 2.0f));
+      REQUIRE(tritonModel.vertices[1].uv == glm::vec2(3.0f, 4.0f));
+      REQUIRE(tritonModel.vertices[2].uv == glm::vec2(5.0f, 6.0f));
    }
 };
