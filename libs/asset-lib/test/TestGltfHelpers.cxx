@@ -12,7 +12,16 @@ namespace glm {
    }
 }
 
-TEST_CASE("Gltf Conversion is tested", "[gltf]") {
+class MockHelpers {
+ public:
+   MAKE_MOCK1(mockParseNodeTransform, glm::mat4(const tinygltf::Node&));
+   MAKE_MOCK4(
+       mockCreateGeometry,
+       void(const tinygltf::Model&, const tinygltf::Primitive&, const glm::mat4&, tr::as::Model&));
+   MAKE_MOCK3(mockCreateTexture, void(const tinygltf::Model&, const int, tr::as::Model&));
+};
+
+TEST_CASE("GltfHelpers is tested", "[gltf]") {
 
    const auto identity = glm::identity<glm::mat4>();
 
@@ -77,7 +86,7 @@ TEST_CASE("Gltf Conversion is tested", "[gltf]") {
       }
    }
 
-   SECTION("createGeometry processes data correctly", "[createGeometry]") {
+   SECTION("createGeometry processes index data correctly", "[createGeometry]") {
       tinygltf::Model model;
 
       tinygltf::BufferView bufferView;
@@ -169,8 +178,8 @@ TEST_CASE("Gltf Conversion is tested", "[gltf]") {
          }
       }
    }
-   SECTION("processes vertex attributes correctly", "[createGeometry]") {
-      // Arrange
+
+   SECTION("createGeometry processes vertex data correctly", "[createGeometry]") {
       tinygltf::Model model;
       tinygltf::Primitive primitive;
 
@@ -259,6 +268,46 @@ TEST_CASE("Gltf Conversion is tested", "[gltf]") {
       model.buffers.push_back(texCoordBuffer);
       position++;
 
+      // Vertices joints
+      tinygltf::Accessor jointsAccessor;
+      jointsAccessor.count = 3;
+      jointsAccessor.byteOffset = 0;
+      jointsAccessor.bufferView = position;
+      jointsAccessor.componentType = TINYGLTF_PARAMETER_TYPE_UNSIGNED_SHORT;
+      jointsAccessor.type = TINYGLTF_TYPE_VEC4;
+      model.accessors.push_back(jointsAccessor);
+      primitive.attributes["JOINTS_0"] = position;
+
+      tinygltf::BufferView jointsBufferView;
+      jointsBufferView.byteOffset = 0;
+      jointsBufferView.buffer = position;
+      model.bufferViews.push_back(jointsBufferView);
+
+      tinygltf::Buffer jointsBuffer;
+      jointsBuffer.data = {1, 2, 3, 4};
+      model.buffers.push_back(jointsBuffer);
+      position++;
+
+      // Vertices weights
+      tinygltf::Accessor weightsAccessor;
+      weightsAccessor.count = 3;
+      weightsAccessor.byteOffset = 0;
+      weightsAccessor.bufferView = position;
+      weightsAccessor.componentType = TINYGLTF_PARAMETER_TYPE_FLOAT;
+      weightsAccessor.type = TINYGLTF_TYPE_VEC4;
+      model.accessors.push_back(weightsAccessor);
+      primitive.attributes["WEIGHTS_0"] = position;
+
+      tinygltf::BufferView weightsBufferView;
+      weightsBufferView.byteOffset = 0;
+      weightsBufferView.buffer = position;
+      model.bufferViews.push_back(weightsBufferView);
+
+      tinygltf::Buffer weightsBuffer;
+      weightsBuffer.data = {0, 0, 128, 63, 0, 0, 0, 64, 0, 0, 64, 64, 0, 0, 128, 64};
+      model.buffers.push_back(weightsBuffer);
+      position++;
+
       auto transform = glm::mat4(1.0f);
       tr::as::Model tritonModel;
       tr::as::gltf::Helpers::createGeometry(model, primitive, transform, tritonModel);
@@ -278,5 +327,113 @@ TEST_CASE("Gltf Conversion is tested", "[gltf]") {
       REQUIRE(tritonModel.vertices[0].uv == glm::vec2(1.0f, 2.0f));
       REQUIRE(tritonModel.vertices[1].uv == glm::vec2(3.0f, 4.0f));
       REQUIRE(tritonModel.vertices[2].uv == glm::vec2(5.0f, 6.0f));
+
+      // Check joints
+      REQUIRE(tritonModel.vertices[0].joint0 == glm::u8vec4(1, 2, 3, 4));
+
+      // Check weights
+      REQUIRE(tritonModel.vertices[0].weight0 == glm::vec4(1.f, 2.f, 3.f, 4.f));
+   }
+
+   SECTION("createTexture populates imageData in given model", "[createTexture]") {
+
+      auto model = tinygltf::Model{};
+      auto tritonModel = tr::as::Model{};
+
+      SECTION("model without texture places empty white image in model") {
+         auto textureIndex = -1;
+         tr::as::gltf::Helpers::createTexture(model, textureIndex, tritonModel);
+
+         const auto& imageData = tritonModel.imageData.data;
+
+         REQUIRE(tritonModel.imageData.height == 1);
+         REQUIRE(tritonModel.imageData.width == 1);
+         REQUIRE(std::all_of(imageData.begin(), imageData.end(), [](auto i) { return i == 255; }));
+      }
+
+      SECTION("model with texture places texture data in model") {
+         auto image = tinygltf::Image{};
+         image.width = 1;
+         image.height = 1;
+         image.component = 4;
+         image.bits = 8;
+         image.pixel_type = TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE;
+
+         std::vector<unsigned char> imageData(image.width * image.height * image.component);
+         imageData[0] = 255; // Red
+         imageData[1] = 254; // Green
+         imageData[2] = 253; // Blue
+         imageData[3] = 252; // Alpha
+         image.image = std::move(imageData);
+
+         auto texture = tinygltf::Texture{};
+         texture.source = 0;
+         model.textures.push_back(texture);
+
+         auto textureIndex = 0;
+         model.images.push_back(image);
+
+         tr::as::gltf::Helpers::createTexture(model, textureIndex, tritonModel);
+
+         const auto [resultData, resultWidth, resultHeight, resultComponent] =
+             tritonModel.imageData;
+
+         REQUIRE(resultHeight == 1);
+         REQUIRE(resultWidth == 1);
+         REQUIRE(resultData[0] == 255);
+         REQUIRE(resultData[1] == 254);
+         REQUIRE(resultData[2] == 253);
+         REQUIRE(resultData[3] == 252);
+      }
+   }
+
+   SECTION("parseNode orchestrates the other functions", "[parseNode]") {
+      auto node = tinygltf::Node{};
+      auto model = tinygltf::Model{};
+      auto tritonModel = tr::as::Model{};
+
+      SECTION("nodes without a mesh nor children don't parseNode") {
+         node.mesh = -1;
+         MockHelpers mockHelpers;
+
+         using trompeloeil::_;
+
+         FORBID_CALL(mockHelpers, mockParseNodeTransform(_));
+         FORBID_CALL(mockHelpers, mockCreateGeometry(_, _, _, _));
+         FORBID_CALL(mockHelpers, mockCreateTexture(_, _, _));
+
+         tr::as::gltf::Helpers::parseNode(model, node, tritonModel);
+      }
+
+      SECTION("nodes with a mesh and texture call create*") {
+         node.mesh = 0;
+         auto primitive = tinygltf::Primitive{};
+         primitive.material = 0;
+
+         auto mesh = tinygltf::Mesh{};
+         mesh.primitives.push_back(primitive);
+
+         model.meshes.push_back(mesh);
+
+         auto baseColorTexture = tinygltf::TextureInfo{};
+         baseColorTexture.index = 0;
+
+         auto pbrMetallicRoughness = tinygltf::PbrMetallicRoughness{};
+         pbrMetallicRoughness.baseColorTexture = baseColorTexture;
+
+         auto material = tinygltf::Material{};
+         material.pbrMetallicRoughness = pbrMetallicRoughness;
+
+         model.materials.push_back(material);
+
+         MockHelpers mockHelpers;
+         using trompeloeil::_;
+
+         REQUIRE_CALL(mockHelpers, mockParseNodeTransform(_)).RETURN(glm::identity<glm::mat4>());
+         REQUIRE_CALL(mockHelpers, mockCreateGeometry(_, _, _, _));
+         REQUIRE_CALL(mockHelpers, mockCreateTexture(_, 0, _));
+
+         tr::as::gltf::Helpers::parseNode(model, node, tritonModel);
+      }
    }
 };

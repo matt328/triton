@@ -3,6 +3,25 @@
 #include "Model.hpp"
 #include <tiny_gltf.h>
 
+void quux() {
+}
+
+void baz() {
+}
+
+void bar() {
+}
+
+void foo(int selector) {
+   if (selector == 1) {
+      bar();
+   } else if (selector == 2) {
+      baz();
+   } else {
+      quux();
+   }
+}
+
 namespace tr::as::gltf::Helpers {
 
    inline auto parseNodeTransform(const tinygltf::Node& node) {
@@ -133,7 +152,7 @@ namespace tr::as::gltf::Helpers {
       }
    }
 
-   inline auto createTexture(const tinygltf::Model& model,
+   inline void createTexture(const tinygltf::Model& model,
                              const int textureIndex,
                              Model& tritonModel) {
       if (textureIndex == -1) {
@@ -165,8 +184,7 @@ namespace tr::as::gltf::Helpers {
                          Model& tritonModel) {
       if (node.mesh != -1) {
          const auto nodeTransform = parseNodeTransform(node);
-         const auto& mesh = model.meshes[node.mesh];
-         for (const auto& primitive : mesh.primitives) {
+         for (const auto& mesh = model.meshes[node.mesh]; const auto& primitive : mesh.primitives) {
 
             createGeometry(model, primitive, nodeTransform, tritonModel);
 
