@@ -1,4 +1,4 @@
-#include "GltfConverter.hpp"
+#include "gltf/GltfConverter.hpp"
 #include "GlmCereal.hpp"
 
 auto parseCommandLine(const int argc, char* argv[]) {
