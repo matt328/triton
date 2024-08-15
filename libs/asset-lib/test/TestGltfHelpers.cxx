@@ -1,6 +1,6 @@
 #include "MockTinyGltf.hpp"
 
-#include "GltfHelpers.hpp"
+#include "gltf/GltfHelpers.hpp"
 #include <catch2/catch_test_macros.hpp>
 
 #include "Model.hpp"

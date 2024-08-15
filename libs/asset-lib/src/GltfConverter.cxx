@@ -1,6 +1,6 @@
-#include "GltfConverter.hpp"
+#include "gltf/GltfConverter.hpp"
 
-#include "GltfHelpers.hpp"
+#include "gltf/GltfHelpers.hpp"
 
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
