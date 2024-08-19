@@ -1,5 +1,12 @@
-#include "gltf/GltfConverter.hpp"
-#include "GlmCereal.hpp"
+#include "as/Model.hpp"
+
+#include "as/ModelConverter.hpp"
+#include "as/gltf/GeometryExtractor.hpp"
+#include "as/gltf/ModelLoader.hpp"
+#include "as/gltf/SkeletonLoader.hpp"
+#include "as/gltf/SkinningDataExtractor.hpp"
+#include "as/gltf/TextureExtractor.hpp"
+#include "as/gltf/TransformParser.hpp"
 
 auto parseCommandLine(const int argc, char* argv[]) {
    auto options = std::unordered_map<std::string, std::string>{};
@@ -25,6 +32,7 @@ int main(int argc, char* argv[]) {
    Log.set_level(spdlog::level::trace);
 
    namespace fs = std::filesystem;
+   using namespace tr::as;
 
    if (auto options = parseCommandLine(argc, argv); options["mode"] == "gltf") {
       const auto gltfFileStr = options["f"];
@@ -48,9 +56,33 @@ int main(int argc, char* argv[]) {
                gltfFile.string(),
                skeletonFile.string());
 
+      std::unique_ptr<TransformParser> transformParser = std::make_unique<gltf::TransformParser>();
+
+      std::unique_ptr<GeometryExtractor> geometryExtractor =
+          std::make_unique<gltf::GeometryExtractor>();
+
+      std::unique_ptr<TextureExtractor> textureExtractor =
+          std::make_unique<gltf::TextureExtractor>();
+
+      std::unique_ptr<SkinningDataExtractor> skinningDataExtractor =
+          std::make_unique<gltf::SkinningDataExtractor>();
+
+      std::unique_ptr<ModelLoader> modelLoader = std::make_unique<gltf::ModelLoader>();
+
+      std::unique_ptr<SkeletonLoader> skeletonLoader = std::make_unique<gltf::SkeletonLoader>();
+
+      auto modelConverter = ModelConverter(std::move(transformParser),
+                                           std::move(geometryExtractor),
+                                           std::move(textureExtractor),
+                                           std::move(skinningDataExtractor),
+                                           std::move(modelLoader),
+                                           std::move(skeletonLoader));
+
       try {
          {
-            auto tritonModel = tr::as::gltf::Converter::convert(gltfFile, skeletonFile);
+            modelConverter.load(gltfFile, skeletonFile);
+            auto tritonModel = modelConverter.buildTritonModel();
+
             auto os = std::ofstream(outputFile, std::ios::binary);
             cereal::BinaryOutputArchive output(os);
             output(tritonModel);
