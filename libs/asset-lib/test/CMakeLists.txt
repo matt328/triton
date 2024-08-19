@@ -1,8 +1,15 @@
 set(test_SRC
   TestGltfHelpers.cxx
+  gltf/TestModelLoader.cxx
 )
 
 add_executable(asset-lib-test ${test_SRC})
+
+target_compile_definitions(asset-lib-test
+  PRIVATE
+  TINYGLTF_NO_STB_IMAGE_WRITE
+)
+
 target_precompile_headers(asset-lib-test
   PRIVATE
   <filesystem>
@@ -31,6 +38,7 @@ target_link_libraries(asset-lib-test
   Catch2::Catch2WithMain
   asset-lib
   util-lib
+  tinygltf
 )
 
 target_include_directories(asset-lib-test
