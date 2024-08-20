@@ -4,13 +4,12 @@ set(assetlib_SRC
   src/ModelConverter.cxx
   src/gltf/TransformParser.cxx
   src/gltf/GltfNodeParser.cxx
-  src/gltf/GeometryExtractor.cxx
+  include/as/gltf/GeometryExtractor.cxx
   src/gltf/TextureExtractor.cxx
   src/gltf/SkinningDataExtractor.cxx
   src/gltf/ModelLoader.cxx
   src/gltf/SkeletonLoader.cxx
   include/as/gltf/GltfLoaderImpl.cxx
-  include/as/gltf/GltfLoaderImpl.hpp
 )
 
 add_library(${PROJECT_NAME} STATIC ${assetlib_SRC})
