@@ -1,7 +1,7 @@
-#include "as/gltf/GeometryExtractor.hpp"
+#include "GeometryExtractor.hpp"
 
-#include "as/Vertex.hpp"
-#include "as/Model.hpp"
+#include "../Vertex.hpp"
+#include "../Model.hpp"
 
 namespace tr::as::gltf {
 
