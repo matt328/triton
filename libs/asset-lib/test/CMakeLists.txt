@@ -1,6 +1,7 @@
 set(test_SRC
   TestGltfHelpers.cxx
   gltf/TestModelLoader.cxx
+  gltf/TestGeometryExtractor.cxx
 )
 
 add_executable(asset-lib-test ${test_SRC})

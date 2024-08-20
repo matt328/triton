@@ -1,6 +1,5 @@
 # Source files for the test target
 set(test_SRC
-   "TestFactorial.cxx"
    "TestFactorial2.cxx"
 )
 
