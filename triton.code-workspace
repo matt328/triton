@@ -139,7 +139,8 @@
          "editor",
          "docs",
          "exp",
-         "resources"
+         "resources",
+         "asset-lib"
       ],
       "git.ignoreLimitWarning": true,
       "workbench.colorCustomizations": {
