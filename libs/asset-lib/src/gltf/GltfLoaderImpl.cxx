@@ -1,4 +1,4 @@
-#include "GltfLoaderImpl.hpp"
+#include "as/gltf/GltfLoaderImpl.hpp"
 
 namespace tr::as::gltf {
 
