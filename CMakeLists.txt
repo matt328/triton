@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.11 FATAL_ERROR)
 
 project(Triton)
 
+cmake_policy(SET CMP0077 NEW)
+
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake;")
 
 set(ENABLE_COVERAGE ON)
