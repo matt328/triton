@@ -13,21 +13,15 @@ More design details and planning stuff is in the [wiki](https://github.com/matt3
 
 This has recently been migrated to using CMake, and I use vscode primarily for development. So far everything works well on Windows as well as OS X ~~and Linux~~. Linux build is having some issues right now, and I don't have a Linux desktop environment configured at the moment but it'll be back someday.
 
-While my goal has been to leverage vcpkg and not have to struggle with dependencies, I'm still just installing the Vulkan SDK and setting the VULKAN_SDK env var and relying on CMake's `find_package()` to do the thing. This area admittedly needs a little more research and understanding to make locating the Vulkan headers and libraries a bit more consistent across machines and platforms as it can be a bit flaky at times.
+Dependency management has been migrated into vanilla CMake using FetchContent but the Vulkan SDK still needs installed manually.
 
 1. Install the [Vulkan SDK](https://vulkan.lunarg.com/) and make sure the env var `VULKAN_SDK` gets set appropriately on your system
 1. Clone the repo
-1. Init vcpkg:
-
-   ```PowerShell
-   git submodule init
-   git submodule update
-   .\vcpkg\bootstrap-vcpkg.(bat|sh)
-   ```
-
 1. `cmake -B build . -G "Ninja"`
 1. `cmake --build .\build --config Debug -j 18 --target editor`
 1. `./bin/editor[.exe]`
+
+## Testing
 
 ## C++ Compiler Notes
 
