@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 3.11 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.19 FATAL_ERROR)
 
-project(Triton)
+project(Triton LANGUAGES CXX)
 
 cmake_policy(SET CMP0077 NEW)
 

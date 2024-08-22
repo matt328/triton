@@ -23,6 +23,8 @@ Dependency management has been migrated into vanilla CMake using FetchContent bu
 
 ## Testing
 
+Testing is using Catch2, Trompeloeil for mocking, llvm-cov for coverage.
+
 ## C++ Compiler Notes
 
 Largely simplified thanks to using Ninja instead of make.  Ninja is cross platform, so no messing around with mingw32 builds, and seems to be a bit faster even with this tiny little project. Just install CMake, LLVM, and Ninja. These should be the same on all 3 platforms now.  The `Visual Studio 17 2022` should generate a valid project, there is a small issue with the assets being located relative to the executable when debugging, but that is currently being worked on. That being said I mostly use ninja, clang, and VSCode for development.

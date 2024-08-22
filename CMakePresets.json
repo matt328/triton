@@ -1,0 +1,38 @@
+{
+   "version": 8,
+   "$schema": "https://cmake.org/cmake/help/latest/_downloads/3e2d73bff478d88a7de0de736ba5e361/schema.json",
+   "configurePresets": [
+      {
+         "name": "debug",
+         "displayName": "Debug",
+         "description": "Standard Debug config for local development",
+         "generator": "Ninja",
+         "binaryDir": "build/debug",
+         "cacheVariables": {
+            "CMAKE_BUILD_TYPE": "Debug",
+            "CMAKE_C_COMPILER": "clang",
+            "CMAKE_CXX_COMPILER": "clang"
+         }
+      },
+      {
+         "name": "release",
+         "displayName": "Release",
+         "description": "Optimized Release",
+         "generator": "Ninja",
+         "binaryDir": "build/release",
+         "cacheVariables": {
+            "CMAKE_BUILD_TYPE": "Release",
+            "CMAKE_C_COMPILER": "clang",
+            "CMAKE_CXX_COMPILER": "clang"
+         }
+      }
+   ],
+   "buildPresets": [
+      {
+         "name": "editor-debug",
+         "displayName": "Editor Debug Build",
+         "configurePreset": "debug",
+         "configuration": "Debug"
+      }
+   ]
+}
