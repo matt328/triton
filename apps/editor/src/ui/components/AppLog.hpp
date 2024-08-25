@@ -21,6 +21,7 @@ namespace ed::ui::cmp {
       ImVector<int> LineOffsets;
       bool AutoScroll{true};
       ImFont* font{};
+      std::mutex mtx;
 
       AppLog() {
          Clear();
@@ -36,11 +37,15 @@ namespace ed::ui::cmp {
          int old_size = Buf.size();
          va_list args = nullptr;
          va_start(args, fmt);
-         Buf.appendfv(fmt, args);
-         va_end(args);
-         for (int new_size = Buf.size(); old_size < new_size; old_size++) {
-            if (Buf[old_size] == '\n') {
-               LineOffsets.push_back(old_size + 1);
+         {
+            std::lock_guard<std::mutex> lock(mtx);
+            Buf.appendfv(fmt, args);
+
+            va_end(args);
+            for (int new_size = Buf.size(); old_size < new_size; old_size++) {
+               if (Buf[old_size] == '\n') {
+                  LineOffsets.push_back(old_size + 1);
+               }
             }
          }
       }
@@ -84,38 +89,42 @@ namespace ed::ui::cmp {
             }
 
             ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 0));
-            const char* buf = Buf.begin();
-            const char* buf_end = Buf.end();
-            ImGui::PushFont(font);
-            if (Filter.IsActive()) {
-               for (int line_no = 0; line_no < LineOffsets.Size; line_no++) {
-                  const char* line_start = buf + LineOffsets[line_no];
-                  const char* line_end = (line_no + 1 < LineOffsets.Size)
-                                             ? (buf + LineOffsets[line_no + 1] - 1)
-                                             : buf_end;
 
-                  if (Filter.PassFilter(line_start, line_end)) {
-                     ImGui::TextUnformatted(line_start, line_end);
-                  }
-               }
-            } else {
-               ImGuiListClipper clipper;
-               clipper.Begin(LineOffsets.Size);
-               while (clipper.Step()) {
-                  for (int line_no = clipper.DisplayStart; line_no < clipper.DisplayEnd;
-                       line_no++) {
+            {
+               std::lock_guard<std::mutex> lock(mtx);
+               const char* buf = Buf.begin();
+               const char* buf_end = Buf.end();
+               ImGui::PushFont(font);
+               if (Filter.IsActive()) {
+                  for (int line_no = 0; line_no < LineOffsets.Size; line_no++) {
                      const char* line_start = buf + LineOffsets[line_no];
                      const char* line_end = (line_no + 1 < LineOffsets.Size)
                                                 ? (buf + LineOffsets[line_no + 1] - 1)
                                                 : buf_end;
-                     auto color = getColor(line_start, line_end);
 
-                     ImGui::PushStyleColor(ImGuiCol_Text, color);
-                     ImGui::TextUnformatted(line_start, line_end);
-                     ImGui::PopStyleColor();
+                     if (Filter.PassFilter(line_start, line_end)) {
+                        ImGui::TextUnformatted(line_start, line_end);
+                     }
                   }
+               } else {
+                  ImGuiListClipper clipper;
+                  clipper.Begin(LineOffsets.Size);
+                  while (clipper.Step()) {
+                     for (int line_no = clipper.DisplayStart; line_no < clipper.DisplayEnd;
+                          line_no++) {
+                        const char* line_start = buf + LineOffsets[line_no];
+                        const char* line_end = (line_no + 1 < LineOffsets.Size)
+                                                   ? (buf + LineOffsets[line_no + 1] - 1)
+                                                   : buf_end;
+                        auto color = getColor(line_start, line_end);
+
+                        ImGui::PushStyleColor(ImGuiCol_Text, color);
+                        ImGui::TextUnformatted(line_start, line_end);
+                        ImGui::PopStyleColor();
+                     }
+                  }
+                  clipper.End();
                }
-               clipper.End();
             }
             ImGui::PopFont();
             ImGui::PopStyleVar();

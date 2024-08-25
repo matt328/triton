@@ -8,8 +8,14 @@ set(old_c_flags "${CMAKE_C_FLAGS}")
 set(no_dev_warnings_backup "$CACHE{CMAKE_SUPPRESS_DEVELOPER_WARNINGS}")
 
 # Suppress warnings globally
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
+if (MSVC)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /w")
+else()
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
+endif()
+
 set(CMAKE_WARN_DEPRECATED OFF CACHE BOOL "" FORCE)
 set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS ON CACHE INTERNAL "" FORCE)
 
@@ -104,10 +110,13 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(nlohmann_json)
 
 # ozz-animation
+set(BUILD_SHARED_LIBS OFF)
+set(ozz_build_tools OFF)
 set(ozz_build_fbx OFF)
 set(ozz_build_samples OFF)
 set(ozz_build_howtos OFF)
 set(ozz_build_tests OFF)
+set(ozz_build_msvc_rt_dll ON)
 FetchContent_Declare(
    ozz-animation
    GIT_REPOSITORY https://github.com/guillaumeblanc/ozz-animation.git

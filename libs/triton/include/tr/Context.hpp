@@ -8,7 +8,7 @@ namespace tr::ctx {
 
    class Context {
     public:
-      explicit Context(void* nativeWindow, bool guiEnabled = false);
+      explicit Context(void* nativeWindow, bool guiEnabled = false, bool validationEnabled = false);
       ~Context();
 
       Context(const Context&) = delete;

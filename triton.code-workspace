@@ -149,13 +149,7 @@
       },
       "clangd.arguments": [
          "-background-index",
-         "-compile-commands-dir=build"
-      ],
-      "clangd.fallbackFlags": [
-         "-I${workspaceFolder}/src/core",
-         "-I${workspaceFolder}/src/game"
-      ],
-      "todo-tree.tree.showBadges": true,
-      "todo-tree.tree.disableCompactFolders": true
+         "-compile-commands-dir=build\\debug"
+      ]
    }
 }

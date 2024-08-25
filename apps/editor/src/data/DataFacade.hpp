@@ -52,12 +52,12 @@ namespace ed::data {
    };
 
    struct EntityData {
-      std::string name;
-      glm::vec3 position;
-      glm::quat rotation;
-      std::string modelName;
-      std::string skeleton;
-      std::vector<std::string> animations;
+      std::string name{};
+      glm::vec3 position{};
+      glm::quat rotation{};
+      std::string modelName{};
+      std::string skeleton{};
+      std::vector<std::string> animations{};
 
       template <class T>
       void serialize(T& archive) {
