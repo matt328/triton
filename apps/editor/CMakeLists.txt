@@ -48,7 +48,6 @@ target_precompile_headers(${PROJECT_NAME}
    <functional>
    <GLFW/glfw3.h>
    <nfd.hpp>
-   <nlohmann/json.hpp>
    <platform_folders.h>
    <sstream>
    <fstream>
@@ -78,7 +77,6 @@ target_link_libraries(${PROJECT_NAME}
    cereal::cereal
    triton
    nfd::nfd
-   nlohmann_json::nlohmann_json
    platform_folders
    spdlog::spdlog_header_only
    util-lib

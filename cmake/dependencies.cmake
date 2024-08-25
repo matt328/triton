@@ -8,12 +8,12 @@ set(old_c_flags "${CMAKE_C_FLAGS}")
 set(no_dev_warnings_backup "$CACHE{CMAKE_SUPPRESS_DEVELOPER_WARNINGS}")
 
 # Suppress warnings globally
-if (MSVC)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w")
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /w")
+if(MSVC)
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w")
+   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /w")
 else()
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
+   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
 endif()
 
 set(CMAKE_WARN_DEPRECATED OFF CACHE BOOL "" FORCE)
@@ -99,15 +99,6 @@ FetchContent_Declare(
    SYSTEM
 )
 FetchContent_MakeAvailable(nativefiledialog-extended)
-
-# nlohmann_json
-FetchContent_Declare(
-   nlohmann_json
-   GIT_REPOSITORY https://github.com/nlohmann/json.git
-   GIT_TAG ${NLOHMANN_JSON_VERSION}
-   SYSTEM
-)
-FetchContent_MakeAvailable(nlohmann_json)
 
 # ozz-animation
 set(BUILD_SHARED_LIBS OFF)

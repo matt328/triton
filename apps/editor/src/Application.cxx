@@ -38,7 +38,7 @@ namespace ed {
        : window(nullptr), context(nullptr), running(true) {
 
       const auto configDir = std::filesystem::path(sago::getConfigHome()) / "editor";
-      pr::Properties::getInstance().load(configDir / "config.json");
+      Properties::getInstance().load(configDir / "config.bin");
 
       glfwInit();
       glfwSetErrorCallback(errorCallback);

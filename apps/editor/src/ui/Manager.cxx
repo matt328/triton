@@ -187,14 +187,14 @@ namespace ed::ui {
                   const auto filePath = std::filesystem::path{inPath.get()};
                   dataFacade.load(filePath);
                   openFilePath = filePath;
-                  pr::Properties::getInstance().setRecentFilePath(filePath);
+                  Properties::getInstance().setRecentFile(filePath);
                } else {
                   Log.error("File Dialog Error: ", NFD::GetError());
                }
             }
 
             if (ImGui::BeginMenu("Open Recent")) {
-               if (const auto recentFile = pr::Properties::getInstance().getRecentFilePath();
+               if (const auto recentFile = Properties::getInstance().getRecentFile();
                    recentFile.has_value()) {
                   const auto nameOnly = recentFile.value().string();
                   if (ImGui::MenuItem(nameOnly.c_str())) {

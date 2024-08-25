@@ -1,9 +1,26 @@
 #pragma once
 
-#include <filesystem>
-namespace ed::pr {
-   using nlohmann::ordered_json;
-   using FsPath = std::filesystem::path;
+namespace cereal {
+   template <class Archive>
+   void serialize(Archive& ar, std::filesystem::path& path) {
+      std::string pathStr = path.string();
+      ar(pathStr);
+      if (Archive::is_loading::value) {
+         path = std::filesystem::path(pathStr);
+      }
+   }
+}
+
+namespace ed {
+
+   struct PropertiesData {
+      std::filesystem::path recentFile{};
+
+      template <class T>
+      void serialize(T& archive) {
+         archive(recentFile);
+      }
+   };
 
    class Properties {
     public:
@@ -18,61 +35,65 @@ namespace ed::pr {
       Properties& operator=(const Properties&) = delete;
       Properties& operator=(Properties&&) = delete;
 
-      [[nodiscard]] std::optional<std::filesystem::path> getRecentFilePath() const {
-         if (rootJson.contains("recentFile")) {
-            const std::string recentFile = rootJson["recentFile"];
-            return std::optional{std::filesystem::path{recentFile}};
+      [[nodiscard]] std::optional<std::filesystem::path> getRecentFile() const {
+         if (propertiesData.recentFile.empty()) {
+            return std::nullopt;
+         } else {
+            return std::optional{propertiesData.recentFile};
          }
-         return std::nullopt;
       }
 
-      void setRecentFilePath(const FsPath& fsPath) {
-         rootJson["recentFile"] = fsPath.string();
+      auto setRecentFile(const std::filesystem::path& value) {
+         auto lock = std::lock_guard(mtx);
+         propertiesData.recentFile = value;
          save();
       }
 
       void load(const std::filesystem::path& filePath) {
-         this->filePath = filePath;
+         if (loaded) {
+            return;
+         }
+         path = filePath;
 
          if (!exists(filePath.parent_path())) {
             create_directories(filePath.parent_path());
          }
 
+         // Create the file if it doesn't exist
          if (!exists(filePath)) {
-            using nlohmann::ordered_json;
-            ordered_json rootJson{};
-            rootJson["version"] = "0.0.1";
-
-            if (std::ofstream o{filePath}; o.is_open()) {
-               o << std::setw(2) << rootJson << std::endl;
-               o.close();
+            if (std::ofstream o{filePath, std::ios::binary}; o.is_open()) {
+               cereal::BinaryOutputArchive output(o);
+               output(propertiesData);
             } else {
-               Log.warn("Could not open config file for writing: {0}", filePath.string());
+               Log.warn("Failed to create properties file");
             }
          }
 
-         if (std::ifstream i{filePath}; i.is_open()) {
-            i >> rootJson;
-            i.close();
+         if (std::ifstream i{filePath, std::ios::binary}; i.is_open()) {
+            cereal::BinaryInputArchive input(i);
+            input(propertiesData);
+            loaded = true;
          } else {
-            Log.warn("Error opening application configuration file: {0}", filePath.string());
+            Log.warn("Error reading application configuration file: {0}", filePath.string());
          }
-         Log.info(rootJson.dump(2));
       }
 
     private:
       Properties() = default;
-
-      std::filesystem::path filePath;
-      ordered_json rootJson{};
+      PropertiesData propertiesData;
+      std::filesystem::path path;
+      std::mutex mtx;
+      bool loaded{};
 
       void save() const {
-         if (std::ofstream o{filePath}; o.is_open()) {
-            o << std::setw(2) << rootJson << std::endl;
-            o.close();
+         if (std::ofstream o{path, std::ios::binary}; o.is_open()) {
+            cereal::BinaryOutputArchive output{o};
+            output(propertiesData);
          } else {
-            Log.warn("Error saving application config file: {0}", filePath.string());
+            Log.warn("Error saving application configuration file: {0}", path.string());
          }
       }
    };
 }
+
+CEREAL_CLASS_VERSION(ed::PropertiesData, 1);
