@@ -28,6 +28,7 @@ if (ENABLE_ALL_WARNINGS)
     add_compile_options(-Wall -Wextra)
   elseif (MSVC)
     # MSVC
+    add_compile_options(/EHsc)
     add_compile_options(/W4)
   endif ()
 endif ()

@@ -1,5 +1,3 @@
-#include <utility>
-
 class BaseException : public std::exception {
  public:
    explicit BaseException(std::string message) : message(std::move(message)) {

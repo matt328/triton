@@ -8,6 +8,7 @@
 #include "Properties.hpp"
 #include "ui/Manager.hpp"
 #include "data/DataFacade.hpp"
+#include "IconData.hpp"
 
 #ifdef _WIN32
 #define GLFW_EXPOSE_NATIVE_WIN32
@@ -27,6 +28,12 @@ namespace ed {
 
    constexpr auto ImguiEnabled = true;
 
+#ifdef BUILD_TYPE_DEBUG
+   constexpr auto ValidationEnabled = true;
+#elif defined(BUILD_TYPE_RELEASE)
+   constexpr auto ValidationEnabled = false;
+#endif
+
    Application::Application(const int width, const int height, const std::string_view& windowTitle)
        : window(nullptr), context(nullptr), running(true) {
 
@@ -42,24 +49,20 @@ namespace ed {
 
 #ifdef _WIN32
 
-      auto iconPath = std::filesystem::current_path() / "assets" / "textures" / "icon.png";
-
-      int imageWidth{}, imageHeight{}, channels{};
-      unsigned char* iconData = stbi_load(iconPath.string().c_str(),
-                                          &imageWidth,
-                                          &imageHeight,
-                                          &channels,
-                                          STBI_rgb_alpha);
-      if (!iconData) {
-         std::cerr << "Failed to load icon image" << std::endl;
-         glfwTerminate();
-      }
-
+      int iconWidth, iconHeight, iconChannels;
+      const auto pixels = stbi_load_from_memory(IconPng.data(),
+                                                static_cast<int>(IconPng.size()),
+                                                &iconWidth,
+                                                &iconHeight,
+                                                &iconChannels,
+                                                4);
       GLFWimage icon;
-      icon.width = imageWidth;
-      icon.height = imageHeight;
-      icon.pixels = iconData;
+      icon.width = iconWidth;
+      icon.height = iconHeight;
+      icon.pixels = pixels;
       glfwSetWindowIcon(window.get(), 1, &icon);
+
+      stbi_image_free(pixels);
 
       auto hWnd = glfwGetWin32Window(window.get());
       // Paints the background of the window black
@@ -109,7 +112,7 @@ namespace ed {
       glfwSetMouseButtonCallback(window.get(), mouseButtonCallback);
       glfwSetWindowIconifyCallback(window.get(), windowIconifiedCallback);
 
-      context = std::make_unique<tr::ctx::Context>(window.get(), ImguiEnabled);
+      context = std::make_unique<tr::ctx::Context>(window.get(), ImguiEnabled, ValidationEnabled);
 
       dataFacade = std::make_unique<data::DataFacade>(context->getGameplayFacade());
 

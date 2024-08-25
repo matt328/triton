@@ -34,7 +34,9 @@ namespace tr::gfx {
 
    class RenderContext {
     public:
-      explicit RenderContext(GLFWwindow* window, bool guiEnabled = false);
+      explicit RenderContext(GLFWwindow* window,
+                             bool guiEnabled = false,
+                             bool validationEnabled = false);
       ~RenderContext();
 
       RenderContext(const RenderContext&) = delete;

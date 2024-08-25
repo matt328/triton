@@ -3,6 +3,16 @@
    "$schema": "https://cmake.org/cmake/help/latest/_downloads/3e2d73bff478d88a7de0de736ba5e361/schema.json",
    "configurePresets": [
       {
+         "name": "vs-debug",
+         "displayName": "VS Debug",
+         "description": "VS Standard Debug config for local development",
+         "generator": "Visual Studio 17 2022",
+         "binaryDir": "build/debug-vs",
+         "cacheVariables": {
+            "CMAKE_BUILD_TYPE": "Debug"
+         }
+      },
+      {
          "name": "debug",
          "displayName": "Debug",
          "description": "Standard Debug config for local development",
@@ -11,7 +21,41 @@
          "cacheVariables": {
             "CMAKE_BUILD_TYPE": "Debug",
             "CMAKE_C_COMPILER": "clang",
-            "CMAKE_CXX_COMPILER": "clang"
+            "CMAKE_CXX_COMPILER": "clang",
+            "CMAKE_CXX_FLAGS": "-Wall -Wextra -Weffc++ -std=c++23",
+            "CMAKE_C_FLAGS": "-Wall -Wextra -Weffc++ -std=c++23"
+         }
+      },
+      {
+         "name": "debug-asan",
+         "displayName": "Debug[ASAN]",
+         "description": "Debug Config using clang and asan (currently doesn't work)",
+         "generator": "Ninja",
+         "binaryDir": "build/debug-asan",
+         "cacheVariables": {
+            "CMAKE_BUILD_TYPE": "Debug",
+            "CMAKE_C_COMPILER": "clang",
+            "CMAKE_CXX_COMPILER": "clang",
+            "CMAKE_CXX_FLAGS": "-fsanitize=address -Wall -Wextra -Weffc++",
+            "CMAKE_C_FLAGS": "-fsanitize=address -Wall -Wextra -Weffc++",
+            "CMAKE_EXE_LINKER_FLAGS": "-fsanitize=address",
+            "CMAKE_SHARED_LINKER_FLAGS": "-fsanitize=address",
+            "CMAKE_MODULE_LINKER_FLAGS": "-fsanitize=address"
+         }
+      },
+      {
+         "name": "debug-asan-msvc",
+         "displayName": "Debug[ASAN MSVC]",
+         "description": "Debug config using msvc and asan",
+         "generator": "Visual Studio 17 2022",
+         "binaryDir": "build/debug-asan-msvc",
+         "cacheVariables": {
+            "CMAKE_BUILD_TYPE": "Debug",
+            "CMAKE_CXX_FLAGS": "/fsanitize=address",
+            "CMAKE_C_FLAGS": "/fsanitize=address",
+            "CMAKE_EXE_LINKER_FLAGS": "/fsanitize=address",
+            "CMAKE_SHARED_LINKER_FLAGS": "/fsanitize=address",
+            "CMAKE_MODULE_LINKER_FLAGS": "/fsanitize=address"
          }
       },
       {
@@ -36,7 +80,12 @@
          "cacheVariables": {
             "CMAKE_BUILD_TYPE": "Release",
             "CMAKE_C_COMPILER": "clang",
-            "CMAKE_CXX_COMPILER": "clang"
+            "CMAKE_CXX_COMPILER": "clang",
+            "CMAKE_CXX_FLAGS": "-O3 -flto -march=native",
+            "CMAKE_C_FLAGS": "-O3 -flto -march=native",
+            "CMAKE_EXE_LINKER_FLAGS": "-fuse-ld=lld -Wl -O1",
+            "CMAKE_SHARED_LINKER_FLAGS": "-fuse-ld=lld -Wl -O1",
+            "CMAKE_MODULE_LINKER_FLAGS": "-fuse-ld=lld -Wl -O1"
          }
       }
    ],
@@ -46,8 +95,38 @@
          "displayName": "Editor Debug Build",
          "configurePreset": "debug",
          "configuration": "Debug",
+         "jobs": 18,
          "targets": [
             "editor"
+         ]
+      },
+      {
+         "name": "editor-release",
+         "displayName": "Editor Release Build",
+         "configurePreset": "release",
+         "configuration": "Release",
+         "jobs": 18,
+         "targets": [
+            "editor"
+         ]
+      },
+      {
+         "name": "editor-asan",
+         "displayName": "Editor Address Sanitizer Build",
+         "configurePreset": "asan",
+         "configuration": "Debug",
+         "jobs": 18,
+         "targets": [
+            "editor"
+         ]
+      },
+      {
+         "name": "testarea",
+         "displayName": "TestArea build",
+         "configurePreset": "debug",
+         "configuration": "Debug",
+         "targets": [
+            "testarea"
          ]
       }
    ]
