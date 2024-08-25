@@ -14,10 +14,12 @@ namespace tr::ctx {
 
    class Context::Impl {
     public:
-      Impl(void* nativeWindow, bool guiEnabled) : timer{TARGET_FPS, MAX_UPDATES} {
+      Impl(void* nativeWindow, bool guiEnabled, bool validationEnabled)
+          : timer{TARGET_FPS, MAX_UPDATES} {
          renderContext =
              std::make_unique<gfx::RenderContext>(static_cast<GLFWwindow*>(nativeWindow),
-                                                  guiEnabled);
+                                                  guiEnabled,
+                                                  validationEnabled);
 
          gameplaySystem = std::make_unique<gp::GameplaySystem>();
 
@@ -106,8 +108,8 @@ namespace tr::ctx {
       std::unique_ptr<gfx::RenderContext> renderContext;
    };
 
-   Context::Context(void* nativeWindow, bool guiEnabled)
-       : impl(std::make_unique<Impl>(nativeWindow, guiEnabled)) {
+   Context::Context(void* nativeWindow, bool guiEnabled, bool validationEnabled)
+       : impl(std::make_unique<Impl>(nativeWindow, guiEnabled, validationEnabled)) {
    }
 
    // Since a default destructor doesn't have access to the complete definition of the forward

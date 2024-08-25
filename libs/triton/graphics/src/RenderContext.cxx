@@ -29,8 +29,8 @@ namespace tr::gfx {
 
    class RenderContext::Impl {
     public:
-      Impl(GLFWwindow* window, bool guiEnabled) {
-         graphicsDevice = std::make_unique<GraphicsDevice>(window, true);
+      Impl(GLFWwindow* window, bool guiEnabled, bool validationEnabled) {
+         graphicsDevice = std::make_unique<GraphicsDevice>(window, validationEnabled);
 
          layoutFactory = std::make_unique<ds::LayoutFactory>(*graphicsDevice);
 
@@ -546,7 +546,6 @@ namespace tr::gfx {
 
       static constexpr int FRAMES_IN_FLIGHT = 2;
 
-      bool guiEnabled{};
       bool debugRendering{false};
 
       std::unique_ptr<GraphicsDevice> graphicsDevice;
@@ -587,7 +586,6 @@ namespace tr::gfx {
                                      glm::identity<glm::mat4>()};
 
       uint32_t currentFrame = 0;
-      bool framebufferResized = false;
 
       std::function<void(std::pair<uint32_t, uint32_t>)> resizeFn;
 
@@ -597,8 +595,8 @@ namespace tr::gfx {
       cm::gpu::PushConstants pushConstants{};
    };
 
-   RenderContext::RenderContext(GLFWwindow* window, bool guiEnabled) {
-      impl = std::make_unique<Impl>(window, guiEnabled);
+   RenderContext::RenderContext(GLFWwindow* window, bool guiEnabled, bool validationEnabled) {
+      impl = std::make_unique<Impl>(window, guiEnabled, validationEnabled);
    }
 
    RenderContext::~RenderContext() {

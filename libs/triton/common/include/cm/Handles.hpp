@@ -1,6 +1,5 @@
 #pragma once
 
-#include <optional>
 namespace tr::cm {
    using TextureHandle = size_t;
    using MeshHandle = size_t;
@@ -13,18 +12,18 @@ namespace tr::cm {
    using AnimationHandle = uint64_t;
 
    struct LoadedModelData {
-      MeshHandle meshHandle;
-      TextureHandle textureHandle;
+      MeshHandle meshHandle{};
+      TextureHandle textureHandle{};
    };
 
    struct MeshData {
-      MeshHandle meshHandle;
-      TextureHandle textureHandle;
+      MeshHandle meshHandle{};
+      TextureHandle textureHandle{};
    };
 
    struct SkinData {
-      std::unordered_map<int, int> jointMap;
-      std::vector<glm::mat4> inverseBindMatrices;
+      std::unordered_map<int, int> jointMap{};
+      std::vector<glm::mat4> inverseBindMatrices{};
    };
 
    struct AnimationData {
@@ -34,7 +33,7 @@ namespace tr::cm {
 
    struct ModelData {
       MeshData meshData{};
-      std::optional<SkinData> skinData;
-      std::optional<AnimationData> animationData;
+      std::optional<SkinData> skinData{};
+      std::optional<AnimationData> animationData{};
    };
 }

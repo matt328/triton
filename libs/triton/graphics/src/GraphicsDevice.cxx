@@ -61,19 +61,21 @@ namespace tr::gfx {
 
       Log.trace("Created Instance");
 
-      const vk::DebugReportCallbackCreateInfoEXT ci = {
-          .pNext = nullptr,
-          .flags = vk::DebugReportFlagBitsEXT::eWarning |
-                   vk::DebugReportFlagBitsEXT::ePerformanceWarning |
-                   vk::DebugReportFlagBitsEXT::eError | vk::DebugReportFlagBitsEXT::eDebug,
-          .pfnCallback = &vulkanDebugReportCallback,
-          .pUserData = nullptr};
+      if (validationEnabled) {
+         const vk::DebugReportCallbackCreateInfoEXT ci = {
+             .pNext = nullptr,
+             .flags = vk::DebugReportFlagBitsEXT::eWarning |
+                      vk::DebugReportFlagBitsEXT::ePerformanceWarning |
+                      vk::DebugReportFlagBitsEXT::eError | vk::DebugReportFlagBitsEXT::eDebug,
+             .pfnCallback = &vulkanDebugReportCallback,
+             .pUserData = nullptr};
 
-      debugCallback = std::make_unique<vk::raii::DebugUtilsMessengerEXT>(
-          instance->createDebugUtilsMessengerEXT(debugCreateInfo));
+         debugCallback = std::make_unique<vk::raii::DebugUtilsMessengerEXT>(
+             instance->createDebugUtilsMessengerEXT(debugCreateInfo));
 
-      reportCallback = std::make_unique<vk::raii::DebugReportCallbackEXT>(
-          instance->createDebugReportCallbackEXT(ci));
+         reportCallback = std::make_unique<vk::raii::DebugReportCallbackEXT>(
+             instance->createDebugReportCallbackEXT(ci));
+      }
 
       VkSurfaceKHR tempSurface = nullptr;
       // TODO: register a callback to create a surface
@@ -103,19 +105,19 @@ namespace tr::gfx {
 
       Log.info("Using physical device: {0}", physicalDevice->getProperties().deviceName.data());
 
-      // Select and identify queues Queues
+      // Select and identify Queues
       auto queueFamilyIndices = Helpers::findQueueFamilies(*physicalDevice, *surface);
 
       std::vector<vk::DeviceQueueCreateInfo> queueCreateInfos;
       std::set uniqueQueueFamilies = {queueFamilyIndices.graphicsFamily.value(),
                                       queueFamilyIndices.presentFamily.value()};
 
-      float queuePriority = 1.f;
+      auto queuePriorities = std::array<float, 2>{0.5f, 0.5f};
 
       for (auto queueFamily : uniqueQueueFamilies) {
          vk::DeviceQueueCreateInfo queueCreateInfo{.queueFamilyIndex = queueFamily,
                                                    .queueCount = 2,
-                                                   .pQueuePriorities = &queuePriority};
+                                                   .pQueuePriorities = queuePriorities.data()};
          queueCreateInfos.push_back(queueCreateInfo);
       }
 

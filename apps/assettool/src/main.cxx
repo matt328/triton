@@ -11,6 +11,11 @@
 auto parseCommandLine(const int argc, char* argv[]) {
    auto options = std::unordered_map<std::string, std::string>{};
 
+   if (argc != 5) {
+      Log.error("Must pass 3 command line args");
+      throw std::runtime_error("Must pass at least 3 command line args");
+   }
+
    options["mode"] = argv[1];
 
    for (int i = 2; i < argc; ++i) {

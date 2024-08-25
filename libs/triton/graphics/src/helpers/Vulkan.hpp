@@ -101,8 +101,9 @@ namespace tr::gfx::Helpers {
       return queueFamilyIndices;
    }
 
-   inline bool checkDeviceExtensionSupport(const vk::raii::PhysicalDevice& possibleDevice,
-                                           const std::vector<const char*> desiredDeviceExtensions) {
+   inline bool checkDeviceExtensionSupport(
+       const vk::raii::PhysicalDevice& possibleDevice,
+       const std::vector<const char*>& desiredDeviceExtensions) {
       const auto availableExtensions = possibleDevice.enumerateDeviceExtensionProperties();
 
       std::set<std::string> requiredExtensions(desiredDeviceExtensions.begin(),
@@ -151,16 +152,23 @@ namespace tr::gfx::Helpers {
 
    template <typename T>
    void setObjectName(T const& handle,
-                             [[maybe_unused]] const vk::raii::Device& device,
-                             const std::string_view name) {
-      // NOLINTNEXTLINE this is just debug anyway
-      const auto debugHandle = reinterpret_cast<uint64_t>(static_cast<typename T::CType>(handle));
+                      [[maybe_unused]] const vk::raii::Device& device,
+                      const std::string_view name) {
+      auto fn =
+          (PFN_vkDebugMarkerSetObjectNameEXT)vkGetDeviceProcAddr(*device,
+                                                                 "vkDebugMarkerSetObjectNameEXT");
 
-      [[maybe_unused]] const auto debugNameInfo =
-          vk::DebugMarkerObjectNameInfoEXT{.objectType = handle.debugReportObjectType,
-                                           .object = debugHandle,
-                                           .pObjectName = name.data()};
-      device.debugMarkerSetObjectNameEXT(debugNameInfo);
+      if (fn != nullptr) {
+         // NOLINTNEXTLINE this is just debug anyway
+         const auto debugHandle =
+             reinterpret_cast<uint64_t>(static_cast<typename T::CType>(handle));
+
+         [[maybe_unused]] const auto debugNameInfo =
+             vk::DebugMarkerObjectNameInfoEXT{.objectType = handle.debugReportObjectType,
+                                              .object = debugHandle,
+                                              .pObjectName = name.data()};
+         device.debugMarkerSetObjectNameEXT(debugNameInfo);
+      }
    }
 
    inline vk::Format findSupportedFormat(const vk::raii::PhysicalDevice& physicalDevice,
