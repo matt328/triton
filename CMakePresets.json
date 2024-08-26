@@ -59,8 +59,8 @@
          }
       },
       {
-         "name": "test-coverage",
-         "displayName": "Test[Coverage]",
+         "name": "debug-coverage",
+         "displayName": "Debug[coverage]",
          "description": "Standard Debug config for local development, capturing test coverage info",
          "generator": "Ninja",
          "binaryDir": "build/debug-coverage",
@@ -68,6 +68,8 @@
             "CMAKE_BUILD_TYPE": "Debug",
             "CMAKE_C_COMPILER": "clang",
             "CMAKE_CXX_COMPILER": "clang",
+            "CMAKE_CXX_FLAGS": "-Wall -Wextra -Weffc++ -std=c++23",
+            "CMAKE_C_FLAGS": "-Wall -Wextra -Weffc++",
             "CODE_COVERAGE": "ON"
          }
       },
@@ -121,12 +123,12 @@
          ]
       },
       {
-         "name": "testarea",
-         "displayName": "TestArea build",
-         "configurePreset": "debug",
+         "name": "asset-lib-test",
+         "displayName": "Asset Lib Tests build",
+         "configurePreset": "debug-coverage",
          "configuration": "Debug",
          "targets": [
-            "testarea"
+            "asset-lib-test"
          ]
       }
    ]
