@@ -25,14 +25,14 @@
          "type": "shell",
          "command": "ninja",
          "args": [
-            "ccov-asset-lib-test"
+            "ccov-export-asset-lib-test"
          ],
          "group": {
             "kind": "build",
             "isDefault": false
          },
          "options": {
-            "cwd": "${workspaceFolder}\\build"
+            "cwd": "${workspaceFolder}\\build\\debug-coverage"
          },
          "problemMatcher": [],
          "detail": "Runs the Ninja target ccov-asset-lib-test."
