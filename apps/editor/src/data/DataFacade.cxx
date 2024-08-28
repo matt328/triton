@@ -2,6 +2,7 @@
 
 #include "FutureMonitor.hpp"
 #include "cm/EntitySystemTypes.hpp"
+#include "tr/TaskQueue.hpp"
 
 namespace ed::data {
 
@@ -99,6 +100,17 @@ namespace ed::data {
                   name);
       };
       engineBusy = true;
+
+      const auto task = gameplayFacade.getAnimatedModelEntityTask();
+
+      const auto taskFn = [task, modelFilename, skeletonFilename, animationFilename] {
+         task(modelFilename, skeletonFilename, animationFilename);
+      };
+
+      auto taskQueue = tr::util::TaskQueue{};
+      taskQueue.enqueue(task, modelFilename, skeletonFilename, animationFilename);
+      // or
+      taskQueue.enqueue(taskFn);
 
       futureMonitor->monitorFuture(gameplayFacade.createAnimatedModelEntity(modelFilename,
                                                                             skeletonFilename,

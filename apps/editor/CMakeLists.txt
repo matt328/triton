@@ -61,6 +61,7 @@ target_precompile_headers(${PROJECT_NAME}
    <spdlog/details/null_mutex.h>
    <spdlog/sinks/base_sink.h>
    <string>
+   <ranges>
 )
 
 if(WIN32)

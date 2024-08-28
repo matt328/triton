@@ -1,5 +1,7 @@
 #pragma once
 
+#include <ranges>
+
 #include "data/DataFacade.hpp"
 
 #include <misc/cpp/imgui_stdlib.h>

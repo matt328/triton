@@ -633,17 +633,17 @@ namespace tr::gfx {
       impl->setDebugRendering(wireframeEnabled);
    }
 
-   auto RenderContext::createTerrain(const uint32_t size) const -> futures::cfuture<cm::ModelData> {
+   auto RenderContext::createTerrain(const uint32_t size) const -> cm::ModelData {
       return impl->createTerrain(size);
    }
 
    auto RenderContext::createStaticModel(const std::filesystem::path& modelPath) const
-       -> futures::cfuture<cm::ModelData> {
+       -> cm::ModelData {
       return impl->createStaticModel(modelPath);
    }
 
    auto RenderContext::createSkinnedModel(const std::filesystem::path& modelPath) const
-       -> futures::cfuture<cm::ModelData> {
+       -> cm::ModelData {
       return impl->createSkinnedModel(modelPath);
    }
 

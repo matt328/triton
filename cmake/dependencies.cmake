@@ -47,13 +47,6 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(EnTT)
 
-# futures
-FetchContent_Declare(futures
-   GIT_REPOSITORY https://github.com/alandefreitas/futures
-   GIT_TAG ${FUTURES_VERSION}
-)
-FetchContent_MakeAvailable(futures)
-
 # glfw
 FetchContent_Declare(
    glfw3

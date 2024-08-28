@@ -17,7 +17,6 @@
 
 #include "mem/Allocator.hpp"
 #include "mem/Buffer.hpp"
-#include <stacktrace>
 
 namespace tr::gfx::tx {
    ResourceManager::ResourceManager(const GraphicsDevice& graphicsDevice)
@@ -43,62 +42,54 @@ namespace tr::gfx::tx {
       fn(renderData);
    }
 
-   auto ResourceManager::createTerrain(const uint32_t size) -> futures::cfuture<cm::ModelData> {
+   auto ResourceManager::createTerrain(const uint32_t size) -> cm::ModelData {
       ZoneNamedN(n, "ResourceManager::createTerrain", true);
 
-      const auto createFn = [this, size]() {
-         ZoneNamedN(z, "Creating Terrain", true);
-         const auto heightfield = ct::HeightField{static_cast<int>(size)};
+      ZoneNamedN(z, "Creating Terrain", true);
+      const auto heightfield = ct::HeightField{static_cast<int>(size)};
 
-         // change this to return
-         const auto dataHandle = geometryFactory->createGeometryFromHeightfield(heightfield);
+      // change this to return
+      const auto dataHandle = geometryFactory->createGeometryFromHeightfield(heightfield);
 
-         const auto pr = dataHandle.begin();
+      const auto pr = dataHandle.begin();
 
-         const auto modelHandle = uploadGeometry(pr->first, pr->second);
-         geometryFactory->unload(dataHandle);
-         return modelHandle;
-      };
-
-      return futures::async(createFn);
+      const auto modelHandle = uploadGeometry(pr->first, pr->second);
+      geometryFactory->unload(dataHandle);
+      return modelHandle;
    }
 
    auto ResourceManager::createModel(const std::filesystem::path& filename) noexcept
-       -> futures::cfuture<cm::ModelData> {
+       -> cm::ModelData {
       ZoneNamedN(n, "ResourceManager::loadModel", true);
 
-      const auto createFn = [this, filename]() -> cm::ModelData {
-         ZoneNamedN(z, "Loading Model", true);
+      ZoneNamedN(z, "Loading Model", true);
 
-         auto tritonModelData = [this, &filename]() {
-            try {
-               return geometryFactory->loadTrm(filename);
-            } catch (const BaseException& ex) {
-               throw ResourceCreateException("ResourceManager::createModel(): ", ex);
-            }
-         }();
-
-         // Upload Meshes and Textures and fill out handles in modelData
-         auto modelData = [this, &tritonModelData]() {
-            try {
-               return uploadGeometry(tritonModelData.getGeometryHandle(),
-                                     tritonModelData.getImageHandle());
-            } catch (BaseException& ex) {
-               ex << "ResourceManager::createModel(): ";
-               throw;
-            }
-         }();
-         geometryFactory->unload(
-             {{tritonModelData.getGeometryHandle(), tritonModelData.getImageHandle()}});
-
-         if (auto skinData = tritonModelData.getSkinData()) {
-            modelData.skinData = std::move(skinData);
+      auto tritonModelData = [this, &filename]() {
+         try {
+            return geometryFactory->loadTrm(filename);
+         } catch (const BaseException& ex) {
+            throw ResourceCreateException("ResourceManager::createModel(): ", ex);
          }
+      }();
 
-         return modelData;
-      };
+      // Upload Meshes and Textures and fill out handles in modelData
+      auto modelData = [this, &tritonModelData]() {
+         try {
+            return uploadGeometry(tritonModelData.getGeometryHandle(),
+                                  tritonModelData.getImageHandle());
+         } catch (BaseException& ex) {
+            ex << "ResourceManager::createModel(): ";
+            throw;
+         }
+      }();
+      geometryFactory->unload(
+          {{tritonModelData.getGeometryHandle(), tritonModelData.getImageHandle()}});
 
-      return futures::async(createFn);
+      if (auto skinData = tritonModelData.getSkinData()) {
+         modelData.skinData = std::move(skinData);
+      }
+
+      return modelData;
    }
 
    auto ResourceManager::uploadGeometry(const geo::GeometryHandle& geometryHandle,

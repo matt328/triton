@@ -1,5 +1,6 @@
 #include "tr/GameplayFacade.hpp"
 
+#include "cm/EntitySystemTypes.hpp"
 #include "cm/Handles.hpp"
 
 #include "gp/GameplaySystem.hpp"
@@ -15,41 +16,36 @@ namespace tr::ctx {
           : gameplaySystem{gameplaySystem}, renderer{renderer} {
       }
 
-      [[nodiscard]] auto createTerrain(const uint32_t size) const {
-         ZoneNamedN(n, "facade.createTerrain", true);
-         const auto createEntity = [this](const cm::ModelData& handle) {
-            return gameplaySystem.createTerrain(handle);
+      [[nodiscard]] auto getCreateTerrainFn() const -> std::function<cm::EntityType(uint32_t)> {
+         return [this](uint32_t size) -> cm::EntityType {
+            auto terrainResult = renderer.createTerrain(size);
+            return gameplaySystem.createTerrain(terrainResult);
          };
-         return renderer.createTerrain(size).then(createEntity);
       }
 
-      [[nodiscard]] auto createStaticModelEntity(const std::filesystem::path& modelPath) const noexcept
-          -> futures::cfuture<cm::EntityType> {
-
-         auto gpCreate = [this](const cm::ModelData& handles) {
-            return gameplaySystem.createStaticModel(handles);
+      [[nodiscard]] auto getStaticModelEntityTask() const noexcept
+          -> std::function<cm::EntityType(const std::filesystem::path&)> {
+         return [this](const std::filesystem::path& modelPath) -> cm::EntityType {
+            auto staticModelResult = renderer.createStaticModel(modelPath);
+            return gameplaySystem.createStaticModel(staticModelResult);
          };
-
-         auto createModel = renderer.createStaticModel(modelPath);
-         return createModel.then(gpCreate);
       }
 
-      [[nodiscard]] auto createAnimatedModelEntity(const std::filesystem::path& modelPath,
-                                                   const std::filesystem::path& skeletonPath,
-                                                   const std::filesystem::path& animationPath) const
-          -> futures::cfuture<cm::EntityType> {
-
-         auto gpCreate = [this, skeletonPath, animationPath](const cm::ModelData& modelData) {
-            return gameplaySystem.createAnimatedModel(modelData, skeletonPath, animationPath);
+      [[nodiscard]] auto getAnimatedModelEntityTask() const
+          -> std::function<cm::EntityType(const std::filesystem::path&,
+                                          const std::filesystem::path&,
+                                          const std::filesystem::path&)> {
+         return [this](const std::filesystem::path& modelPath,
+                       const std::filesystem::path& skeletonPath,
+                       const std::filesystem::path& animationPath) -> cm::EntityType {
+            try {
+               auto modelResult = renderer.createSkinnedModel(modelPath);
+               return gameplaySystem.createAnimatedModel(modelResult, skeletonPath, animationPath);
+            } catch (tr::BaseException& ex) {
+               ex << "CreateAnimatedModelEntityTask: ";
+               throw;
+            }
          };
-
-         try {
-            auto createModel = renderer.createSkinnedModel(modelPath);
-            return createModel.then(gpCreate);
-         } catch (tr::BaseException& ex) {
-            ex << "GameplayFacade::createAnimatedModelEntity(): ";
-            throw;
-         }
       }
 
       static void loadModelResources([[maybe_unused]] const std::filesystem::path& modelPath,
@@ -90,21 +86,20 @@ namespace tr::ctx {
    GameplayFacade::~GameplayFacade() { // NOLINT(*-use-equals-default)
    }
 
-   auto GameplayFacade::createStaticModelEntity(const std::filesystem::path& modelPath) const noexcept
-       -> futures::cfuture<cm::EntityType> {
-      return impl->createStaticModelEntity(modelPath);
+   auto GameplayFacade::getCreateTerrainFn() const -> std::function<cm::EntityType(uint32_t)> {
+      return impl->getCreateTerrainFn();
    }
 
-   auto GameplayFacade::createAnimatedModelEntity(const std::filesystem::path& modelPath,
-                                                  const std::filesystem::path& skeletonPath,
-                                                  const std::filesystem::path& animationPath) const
-       -> futures::cfuture<cm::EntityType> {
-      return impl->createAnimatedModelEntity(modelPath, skeletonPath, animationPath);
+   [[nodiscard]] auto GameplayFacade::getStaticModelEntityTask() const noexcept
+       -> std::function<cm::EntityType(const std::filesystem::path&)> {
+      return impl->getStaticModelEntityTask();
    }
 
-   auto GameplayFacade::createTerrain(const uint32_t size) const
-       -> futures::cfuture<cm::EntityType> {
-      return impl->createTerrain(size);
+   [[nodiscard]] auto GameplayFacade::getAnimatedModelEntityTask() const
+       -> std::function<cm::EntityType(const std::filesystem::path&,
+                                       const std::filesystem::path&,
+                                       const std::filesystem::path&)> {
+      return impl->getAnimatedModelEntityTask();
    }
 
    cm::EntityType GameplayFacade::createCamera(const uint32_t width,
