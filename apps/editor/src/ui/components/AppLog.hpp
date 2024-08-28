@@ -35,7 +35,7 @@ namespace ed::ui::cmp {
 
       void AddLog(const char* fmt, ...) IM_FMTARGS(2) {
          int old_size = Buf.size();
-         va_list args = nullptr;
+         va_list args = {};
          va_start(args, fmt);
          {
             std::lock_guard<std::mutex> lock(mtx);

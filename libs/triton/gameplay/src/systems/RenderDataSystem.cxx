@@ -61,7 +61,7 @@ namespace tr::gp::sys::RenderDataSystem {
 
          jointMatrices.resize(animationData.jointMap.size());
          int i = 0;
-         for (const auto [position, jointId] : animationData.jointMap) {
+         for (const auto& [position, jointId] : animationData.jointMap) {
             auto inverseBindMatrix = animationData.inverseBindMatrices[i];
             if (animationData.renderBindPose) {
                inverseBindMatrix = glm::identity<glm::mat4>();

@@ -2,6 +2,7 @@
 
 #include <entt/entt.hpp>
 
+#include "tr/TaskQueue.hpp"
 #include "cm/Handles.hpp"
 #include "data/DataFacade.hpp"
 #include "components/EntityEditor.hpp"
@@ -69,6 +70,8 @@ namespace ed::ui {
       ImFont* sauce = nullptr;
 
       std::unique_ptr<cmp::AppLog> appLog;
+
+      std::unique_ptr<tr::util::TaskQueue> taskQueue;
 
       void handleTerrainFutures();
       void handleSkinnedModelFutures();
