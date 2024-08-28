@@ -3,6 +3,7 @@
 #include "GlmCereal.hpp"
 #include "cm/EntitySystemTypes.hpp"
 #include "tr/GameplayFacade.hpp"
+#include "TaskQueue.hpp"
 
 /*
    Think of the editor as a tool for editing the project data nothing more.
@@ -170,7 +171,7 @@ namespace ed::data {
       bool engineBusy{};
       DataStore dataStore;
       tr::ctx::GameplayFacade& gameplayFacade;
-      std::unique_ptr<FutureMonitor> futureMonitor;
       std::unordered_map<std::string, tr::cm::EntityType> entityNameMap{};
+      std::unique_ptr<tr::util::TaskQueue> taskQueue;
    };
 }
