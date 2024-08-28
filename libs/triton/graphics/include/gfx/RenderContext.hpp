@@ -59,13 +59,11 @@ namespace tr::gfx {
       void setDebugRendering(bool wireframeEnabled) const;
 
       // Resource Creation
-      auto createStaticModel(const std::filesystem::path& modelPath) const
-          -> futures::cfuture<cm::ModelData>;
+      auto createStaticModel(const std::filesystem::path& modelPath) const -> cm::ModelData;
 
-      auto createTerrain(uint32_t size) const -> futures::cfuture<cm::ModelData>;
+      auto createTerrain(uint32_t size) const -> cm::ModelData;
 
-      auto createSkinnedModel(const std::filesystem::path& modelPath) const
-          -> futures::cfuture<cm::ModelData>;
+      auto createSkinnedModel(const std::filesystem::path& modelPath) const -> cm::ModelData;
 
     private:
       class Impl;

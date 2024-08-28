@@ -19,6 +19,11 @@ add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 
+if(APPLE)
+   add_compile_options(-stdlib=libc++)
+   add_link_options(-stdlib=libc++)
+endif()
+
 set(CATCH2_VERSION v3.6.0)
 set(CEREAL_VERSION v1.3.2)
 set(ENTT_VERSION v3.13.2)

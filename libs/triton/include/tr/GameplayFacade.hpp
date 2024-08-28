@@ -38,7 +38,7 @@ namespace tr::ctx {
       GameplayFacade& operator=(GameplayFacade&&) = delete;
 
       // Entity Creation Methods
-      [[nodiscard]] auto createTerrain(uint32_t size) const -> futures::cfuture<cm::EntityType>;
+      [[nodiscard]] auto getCreateTerrainFn() const -> std::function<cm::EntityType(uint32_t)>;
 
       [[nodiscard]] auto createCamera(uint32_t width,
                                       uint32_t height,
@@ -51,13 +51,13 @@ namespace tr::ctx {
 
       auto setCurrentCamera(cm::EntityType currentCamera) const -> void;
 
-      [[nodiscard]] auto createStaticModelEntity(const std::filesystem::path& modelPath)
-          const noexcept -> futures::cfuture<cm::EntityType>;
+      [[nodiscard]] auto getStaticModelEntityTask() const noexcept
+          -> std::function<cm::EntityType(const std::filesystem::path&)>;
 
-      [[nodiscard]] auto createAnimatedModelEntity(const std::filesystem::path& modelPath,
-                                                   const std::filesystem::path& skeletonPath,
-                                                   const std::filesystem::path& animationPath) const
-          -> futures::cfuture<cm::EntityType>;
+      [[nodiscard]] auto getAnimatedModelEntityTask() const
+          -> std::function<cm::EntityType(const std::filesystem::path& modelPath,
+                                          const std::filesystem::path& skeletonPath,
+                                          const std::filesystem::path& animationPath)>;
 
       auto clear() const -> void;
 

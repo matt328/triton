@@ -53,7 +53,6 @@ target_precompile_headers(${PROJECT_NAME}
    <imgui_impl_vulkan.h>
    <vulkan/vulkan_raii.hpp>
    <vk_mem_alloc.hpp>
-   <futures/futures.hpp>
    PRIVATE
    <filesystem>
    <fstream>
@@ -78,7 +77,6 @@ target_link_libraries(${PROJECT_NAME}
    asset-lib
    glfw # Get rid of glfw usage in graphics
    imgui_custom
-   futures::futures # Futures is part of Graphics' API it shares with Triton
    ${Vulkan_LIBRARIES}
    VulkanMemoryAllocator-Hpp
    PRIVATE

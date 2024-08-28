@@ -5,7 +5,6 @@
 #include "cm/Handles.hpp"
 #include "cm/RenderData.hpp"
 
-#include "futures/future.hpp"
 #include "geometry/Mesh.hpp"
 #include "textures/Texture.hpp"
 #include "geometry/GeometryHandles.hpp"
@@ -77,10 +76,9 @@ namespace tr::gfx::tx {
       ResourceManager& operator=(const ResourceManager&) = delete;
       ResourceManager& operator=(ResourceManager&&) = delete;
 
-      auto createTerrain(uint32_t size) -> futures::cfuture<cm::ModelData>;
+      auto createTerrain(uint32_t size) -> cm::ModelData;
 
-      auto createModel(const std::filesystem::path& filename) noexcept
-          -> futures::cfuture<cm::ModelData>;
+      auto createModel(const std::filesystem::path& filename) noexcept -> cm::ModelData;
 
       auto createStaticMesh(const geo::GeometryData& geometry) -> cm::MeshHandle;
 

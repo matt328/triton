@@ -37,6 +37,8 @@ I create a VSCode task to run the ninja target, and use `Coverage Gutters` in wa
 
 CMake Presets exist for clang and Visual Studio 17 2022.
 
+The project *should* explicitly link against libc++ when being compiled with clang. I think 'official' builds should be compiled with clang/libc++, MSVC STL could be used when trying to use address sanitizer, but those should be one-of scenarios used to find a particular bug.
+
 Largely simplified thanks to using Ninja instead of make.  Ninja is cross platform, so no messing around with mingw32 builds, and seems to be a bit faster even with this tiny little project. Just install CMake, LLVM, and Ninja. These should be the same on all 3 platforms now.  The `Visual Studio 17 2022` should generate a valid project, there is a small issue with the assets being located relative to the executable when debugging, but that is currently being worked on. That being said I mostly use ninja, clang, and VSCode for development.
 
 Install [CMake](https://cmake.org/download/).  Make sure `cmake` is on your path.
@@ -44,6 +46,8 @@ Install [CMake](https://cmake.org/download/).  Make sure `cmake` is on your path
 For Windows, install [LLVM](https://github.com/llvm/llvm-project/releases/)
 
 For Linux you can probably `sudo apt install llvm`.
+
+For MacOS, I install the latest version of LLVM using homebrew.
 
 Make sure `clang` and `clang++` are on your path.
 
