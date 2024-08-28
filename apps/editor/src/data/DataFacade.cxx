@@ -1,21 +1,20 @@
 #include "DataFacade.hpp"
 
-#include "FutureMonitor.hpp"
 #include "cm/EntitySystemTypes.hpp"
-#include "tr/TaskQueue.hpp"
+#include "TaskQueue.hpp"
 
 namespace ed::data {
 
    DataFacade::DataFacade(tr::ctx::GameplayFacade& gameplayFacade)
        : gameplayFacade{gameplayFacade} {
-      futureMonitor = std::make_unique<FutureMonitor>();
+      taskQueue = std::make_unique<tr::util::TaskQueue>(4);
    }
 
    DataFacade::~DataFacade() { // NOLINT(*-use-equals-default)
    }
 
    void DataFacade::update() const {
-      futureMonitor->update();
+      taskQueue->processCompleteTasks();
    }
 
    void DataFacade::clear() {
@@ -71,7 +70,8 @@ namespace ed::data {
 
       engineBusy = true;
 
-      futureMonitor->monitorFuture(gameplayFacade.createStaticModelEntity(modelFilename), fn);
+      const auto task = gameplayFacade.getStaticModelEntityTask();
+      const auto result = taskQueue->enqueue(task, fn, modelFilename);
    }
 
    void DataFacade::createAnimatedModel(const std::string_view& entityName,
@@ -93,6 +93,7 @@ namespace ed::data {
       const auto animationFilename = dataStore.animations.at(animationName.data()).filePath;
 
       std::function<void(tr::cm::EntityType)> fn = [this, name](tr::cm::EntityType entity) {
+         ZoneNamedN(z, "Create Entity", true);
          entityNameMap.insert({name, entity});
          engineBusy = false;
          Log.info("Finished creating entity: id: {0}, name: {1}",
@@ -102,20 +103,8 @@ namespace ed::data {
       engineBusy = true;
 
       const auto task = gameplayFacade.getAnimatedModelEntityTask();
-
-      const auto taskFn = [task, modelFilename, skeletonFilename, animationFilename] {
-         task(modelFilename, skeletonFilename, animationFilename);
-      };
-
-      auto taskQueue = tr::util::TaskQueue{};
-      taskQueue.enqueue(task, modelFilename, skeletonFilename, animationFilename);
-      // or
-      taskQueue.enqueue(taskFn);
-
-      futureMonitor->monitorFuture(gameplayFacade.createAnimatedModelEntity(modelFilename,
-                                                                            skeletonFilename,
-                                                                            animationFilename),
-                                   fn);
+      auto result =
+          taskQueue->enqueue(task, fn, modelFilename, skeletonFilename, animationFilename);
    }
 
    void DataFacade::addAnimationToEntity([[maybe_unused]] const std::string_view& entityName,

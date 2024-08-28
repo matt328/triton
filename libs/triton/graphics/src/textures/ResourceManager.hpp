@@ -9,8 +9,6 @@
 #include "textures/Texture.hpp"
 #include "geometry/GeometryHandles.hpp"
 
-#include "TaskQueue.hpp"
-
 namespace tr::gfx::mem {
    class Allocator;
    class Buffer;
@@ -96,7 +94,6 @@ namespace tr::gfx::tx {
       const GraphicsDevice& graphicsDevice;
 
       std::unique_ptr<geo::GeometryFactory> geometryFactory;
-      std::unique_ptr<util::TaskQueue> taskQueue;
       std::vector<geo::ImmutableMesh> meshList;
 
       mutable TracyLockable(std::mutex, textureListMutex);

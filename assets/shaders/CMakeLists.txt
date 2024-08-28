@@ -12,11 +12,11 @@ set(Shaders
 get_property(GENERATOR_IS_MULTI_CONFIG GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
 
 set(TO_COPY "${CMAKE_CURRENT_SOURCE_DIR}/$<JOIN:${Shaders},;${CMAKE_CURRENT_SOURCE_DIR}/>")
-set(COPY_TO "${CMAKE_BINARY_DIR}$<$<BOOL:${GENERATOR_IS_MULTI_CONFIG}>:$<CONFIG>>/assets/shaders")
+set(COPY_TO "${CMAKE_BINARY_DIR}$<$<BOOL:${GENERATOR_IS_MULTI_CONFIG}>:$<CONFIG>>/apps/editor/assets/shaders")
 
 set(OUTPUT_AND_DEPENDS "${COPY_TO}/$<JOIN:${Shaders},;${COPY_TO}/>")
 
-set(OUTPUT_DIR "${CMAKE_BINARY_DIR}assets/shaders")
+set(OUTPUT_DIR "${CMAKE_BINARY_DIR}/apps/editor/assets/shaders")
 
 add_custom_command(
    OUTPUT "${OUTPUT_DIR}"

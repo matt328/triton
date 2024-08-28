@@ -21,7 +21,6 @@
 namespace tr::gfx::tx {
    ResourceManager::ResourceManager(const GraphicsDevice& graphicsDevice)
        : graphicsDevice{graphicsDevice} {
-      taskQueue = std::make_unique<util::TaskQueue>();
       geometryFactory = std::make_unique<geo::GeometryFactory>();
    }
 
