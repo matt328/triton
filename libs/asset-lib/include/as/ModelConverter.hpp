@@ -32,7 +32,7 @@ namespace tr::as {
 
       void load(const std::filesystem::path& modelPath, const std::filesystem::path& skeletonPath);
 
-      auto buildTritonModel() const -> Model;
+      [[nodiscard]] auto buildTritonModel() const -> Model;
 
     private:
       tinygltf::Model model;

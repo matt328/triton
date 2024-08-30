@@ -129,7 +129,8 @@ namespace tr::gfx {
           VK_EXT_EXTENDED_DYNAMIC_STATE_3_EXTENSION_NAME,
           //  VK_EXT_DESCRIPTOR_BUFFER_EXTENSION_NAME,
           VK_KHR_DEVICE_GROUP_EXTENSION_NAME,
-          VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME};
+          VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME,
+          VK_EXT_EXTENDED_DYNAMIC_STATE_EXTENSION_NAME};
       std::vector<const char*> desiredValidationLayers = {"VK_LAYER_KHRONOS_validation"};
 
       std::unique_ptr<vk::raii::Context> context;
