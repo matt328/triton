@@ -4,6 +4,7 @@
 #include "mem/Allocator.hpp"
 #include <vk_mem_alloc_structs.hpp>
 #include <vulkan/vulkan_core.h>
+#include <vulkan/vulkan_structs.hpp>
 
 namespace tr::gfx {
 
@@ -107,18 +108,30 @@ namespace tr::gfx {
 
       // Select and identify Queues
       auto queueFamilyIndices = Helpers::findQueueFamilies(*physicalDevice, *surface);
-
       std::vector<vk::DeviceQueueCreateInfo> queueCreateInfos;
-      std::set uniqueQueueFamilies = {queueFamilyIndices.graphicsFamily.value(),
-                                      queueFamilyIndices.presentFamily.value()};
 
-      auto queuePriorities = std::array<float, 2>{0.5f, 0.5f};
+      // Graphics Queue(s)
+      if (queueFamilyIndices.graphicsFamily.has_value() &&
+          queueFamilyIndices.graphicsFamilyCount.has_value()) {
+         const auto graphicsFamilyCreateInfo = vk::DeviceQueueCreateInfo{
+             .queueFamilyIndex = queueFamilyIndices.graphicsFamily.value(),
+             .queueCount = queueFamilyIndices.graphicsFamilyCount.value(),
+             .pQueuePriorities = queueFamilyIndices.graphicsFamilyPriorities.data()};
+         queueCreateInfos.push_back(graphicsFamilyCreateInfo);
+      }
 
-      for (auto queueFamily : uniqueQueueFamilies) {
-         vk::DeviceQueueCreateInfo queueCreateInfo{.queueFamilyIndex = queueFamily,
-                                                   .queueCount = 2,
-                                                   .pQueuePriorities = queuePriorities.data()};
-         queueCreateInfos.push_back(queueCreateInfo);
+      // If present queue family is different from graphics
+      if (queueFamilyIndices.graphicsFamily.value() != queueFamilyIndices.presentFamily.value()) {
+         Log.trace("Device supports separate present queue");
+         // Present Queue(s)
+         if (queueFamilyIndices.presentFamily.has_value() &&
+             queueFamilyIndices.presentFamilyCount.has_value()) {
+            const auto presentFamilyCreateInfo = vk::DeviceQueueCreateInfo{
+                .queueFamilyIndex = queueFamilyIndices.presentFamily.value(),
+                .queueCount = queueFamilyIndices.presentFamilyCount.value(),
+                .pQueuePriorities = queueFamilyIndices.presentFamilyPriorities.data()};
+            queueCreateInfos.push_back(presentFamilyCreateInfo);
+         }
       }
 
       if (validationEnabled) {
@@ -170,6 +183,9 @@ namespace tr::gfx {
       // const auto dbFeatures =
       // vk::PhysicalDeviceDescriptorBufferFeaturesEXT{.descriptorBuffer = true};
 
+      const auto extendedDynamicStateFeatures =
+          vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT{.extendedDynamicState = true};
+
       constexpr auto bdaFeatures =
           vk::PhysicalDeviceBufferDeviceAddressFeaturesKHR{.bufferDeviceAddress = true};
 
@@ -179,6 +195,7 @@ namespace tr::gfx {
                                  indexingFeatures,
                                  drfs,
                                  // dbFeatures,
+                                 extendedDynamicStateFeatures,
                                  bdaFeatures};
 
       vulkanDevice =
@@ -216,7 +233,7 @@ namespace tr::gfx {
 
       asyncTransferContext = std::make_unique<VkContext>(*vulkanDevice,
                                                          *physicalDevice,
-                                                         1,
+                                                         0,
                                                          queueFamilyIndices.transferFamily.value(),
                                                          "Async Transfer Context");
 

@@ -6,12 +6,16 @@ namespace tr::gfx::Helpers {
    struct QueueFamilyIndices {
       std::optional<uint32_t> graphicsFamily;
       std::optional<uint32_t> graphicsFamilyCount;
+      std::vector<float> graphicsFamilyPriorities;
       std::optional<uint32_t> presentFamily;
       std::optional<uint32_t> presentFamilyCount;
+      std::vector<float> presentFamilyPriorities;
       std::optional<uint32_t> transferFamily;
       std::optional<uint32_t> transferFamilyCount;
+      std::vector<float> transferFamilyPriorities;
       std::optional<uint32_t> computeFamily;
       std::optional<uint32_t> computeFamilyCount;
+      std::vector<float> computeFamilyPriorities;
 
       [[nodiscard]] bool isComplete() const {
          return graphicsFamily.has_value() && presentFamily.has_value() &&
@@ -76,21 +80,29 @@ namespace tr::gfx::Helpers {
          if (queueFamily.queueFlags & vk::QueueFlagBits::eGraphics) {
             queueFamilyIndices.graphicsFamily = i;
             queueFamilyIndices.graphicsFamilyCount = queueFamily.queueCount;
+            queueFamilyIndices.graphicsFamilyPriorities.resize(queueFamily.queueCount, 0.f);
+            queueFamilyIndices.graphicsFamilyPriorities[0] = 1.f;
          }
 
          if (possibleDevice.getSurfaceSupportKHR(i, *surface)) {
             queueFamilyIndices.presentFamily = i;
             queueFamilyIndices.presentFamilyCount = queueFamily.queueCount;
+            queueFamilyIndices.presentFamilyPriorities.resize(queueFamily.queueCount, 0.f);
+            queueFamilyIndices.presentFamilyPriorities[0] = 1.f;
          }
 
          if (queueFamily.queueFlags & vk::QueueFlagBits::eTransfer) {
             queueFamilyIndices.transferFamily = i;
             queueFamilyIndices.transferFamilyCount = queueFamily.queueCount;
+            queueFamilyIndices.transferFamilyPriorities.resize(queueFamily.queueCount, 0.f);
+            queueFamilyIndices.transferFamilyPriorities[0] = 1.f;
          }
 
          if ((queueFamily.queueFlags & vk::QueueFlagBits::eCompute)) {
             queueFamilyIndices.computeFamily = i;
             queueFamilyIndices.computeFamilyCount = queueFamily.queueCount;
+            queueFamilyIndices.computeFamilyPriorities.resize(queueFamily.queueCount, 0.f);
+            queueFamilyIndices.computeFamilyPriorities[0] = 1.f;
          }
 
          if (queueFamilyIndices.isComplete()) {

@@ -5,6 +5,8 @@
 
 namespace tr::as {
 
+   constexpr uint32_t SERIAL_VERSION = 1;
+
    class SerializationException final : public BaseException {
       using BaseException::BaseException;
    };
@@ -48,4 +50,4 @@ namespace tr::as {
    };
 }
 
-CEREAL_CLASS_VERSION(tr::as::Model, 1);
+CEREAL_CLASS_VERSION(tr::as::Model, tr::as::SERIAL_VERSION);

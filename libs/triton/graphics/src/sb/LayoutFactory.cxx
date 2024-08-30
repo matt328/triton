@@ -3,6 +3,7 @@
 #include "GraphicsDevice.hpp"
 
 namespace tr::gfx::ds {
+   constexpr uint32_t MAX_TEXTURE_COUNT = 16;
    LayoutFactory::LayoutFactory(const GraphicsDevice& device, const bool useDescriptorBuffers)
        : useDescriptorBuffers{useDescriptorBuffers} {
       initBindlessLayout(device);
@@ -23,7 +24,7 @@ namespace tr::gfx::ds {
       constexpr auto binding = vk::DescriptorSetLayoutBinding{
           .binding = 3,
           .descriptorType = vk::DescriptorType::eCombinedImageSampler,
-          .descriptorCount = 128,
+          .descriptorCount = MAX_TEXTURE_COUNT,
           .stageFlags = vk::ShaderStageFlagBits::eAll};
 
       static constexpr vk::DescriptorBindingFlags bindlessFlags =
