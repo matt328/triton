@@ -99,7 +99,8 @@
          "configuration": "Debug",
          "jobs": 18,
          "targets": [
-            "editor"
+            "editor",
+            "assettool"
          ]
       },
       {

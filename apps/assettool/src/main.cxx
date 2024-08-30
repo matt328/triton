@@ -34,7 +34,7 @@ auto parseCommandLine(const int argc, char* argv[]) {
 int main(int argc, char* argv[]) {
 
    initLogger();
-   Log.set_level(spdlog::level::trace);
+   Log.set_level(spdlog::level::debug);
 
    namespace fs = std::filesystem;
    using namespace tr::as;
@@ -87,6 +87,8 @@ int main(int argc, char* argv[]) {
          {
             modelConverter.load(gltfFile, skeletonFile);
             auto tritonModel = modelConverter.buildTritonModel();
+
+            Log.info("Writing file with serialization version {0}", tr::as::SERIAL_VERSION);
 
             auto os = std::ofstream(outputFile, std::ios::binary);
             cereal::BinaryOutputArchive output(os);
