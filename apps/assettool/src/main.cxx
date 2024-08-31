@@ -90,11 +90,11 @@ int main(int argc, char* argv[]) {
 
             Log.info("Writing file with serialization version {0}", tr::as::SERIAL_VERSION);
 
-            auto os = std::ofstream(outputFile, std::ios::binary);
-            cereal::BinaryOutputArchive output(os);
-            output(tritonModel);
+            auto os = std::ofstream(outputFile);
+            cereal::JSONOutputArchive jsonOutput(os);
+            jsonOutput(tritonModel);
          }
-         Log.info("Wrote binary output file to {0}", outputFile.string());
+         Log.info("Wrote json output file to {0}", outputFile.string());
       } catch (const std::exception& ex) { Log.error(ex.what()); }
    } else {
       Log.error("First arg must be 'gltf' for now");
