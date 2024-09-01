@@ -1,27 +1,21 @@
 {
    "version": "2.0.0",
+   "inputs": [
+      {
+         "id": "assetOutputFile",
+         "type": "promptString",
+         "description": "Base filename to write out",
+         "default": "model.json"
+      },
+   ],
    "tasks": [
       {
          "type": "cmake",
          "label": "CMake: Build AssetTool",
          "command": "build",
          "preset": "editor-debug",
-         "problemMatcher": [],
          "detail": "CMake Build AssetTool",
          "targets": [
-            "assettool"
-         ]
-      },
-      {
-         "label": "Build AssetTool",
-         "detail": "Build AssetTool in Debug",
-         "type": "shell",
-         "command": "cmake",
-         "args": [
-            "--build",
-            "--preset",
-            "editor-debug",
-            "--target",
             "assettool"
          ],
          "problemMatcher": [
@@ -67,7 +61,8 @@
          }
       },
       {
-         "label": "AssetTool-Model",
+         "label": "AssetTool JSON",
+         "detail": "Run assettool with textured.gltf, skeleton.ozz, and output model.json",
          "dependsOn": "build-AssetTool",
          "type": "shell",
          "command": "${workspaceFolder}/build/debug/apps/assettool/assettool",
@@ -75,7 +70,7 @@
             "gltf",
             "-f=/Users/matt/Projects/game-assets/models/gltf-working/textured.gltf",
             "-s=/Users/matt/Projects/game-assets/models/gltf-working/skeleton.ozz",
-            "-o=/Users/matt/Projects/game-assets/models/gltf-working/model.json"
+            "-o=/Users/matt/Projects/game-assets/models/gltf-working/${input:assetOutputFile}"
          ],
          "group": {
             "kind": "build",
