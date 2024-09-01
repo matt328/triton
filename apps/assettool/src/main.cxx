@@ -7,6 +7,7 @@
 #include "as/gltf/SkinningDataExtractor.hpp"
 #include "as/gltf/TextureExtractor.hpp"
 #include "as/gltf/TransformParser.hpp"
+#include <cereal/archives/binary.hpp>
 
 auto parseCommandLine(const int argc, char* argv[]) {
    auto options = std::unordered_map<std::string, std::string>{};
@@ -90,9 +91,15 @@ int main(int argc, char* argv[]) {
 
             Log.info("Writing file with serialization version {0}", tr::as::SERIAL_VERSION);
 
-            auto os = std::ofstream(outputFile);
-            cereal::JSONOutputArchive jsonOutput(os);
-            jsonOutput(tritonModel);
+            if (outputFile.extension() == ".json") {
+               auto os = std::ofstream(outputFile);
+               cereal::JSONOutputArchive jsonOutput(os);
+               jsonOutput(tritonModel);
+            } else if (outputFile.extension() == ".trm") {
+               auto os = std::ofstream(outputFile);
+               cereal::BinaryOutputArchive binOutput(os);
+               binOutput(tritonModel);
+            }
          }
          Log.info("Wrote json output file to {0}", outputFile.string());
       } catch (const std::exception& ex) { Log.error(ex.what()); }
