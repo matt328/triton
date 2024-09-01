@@ -5,7 +5,19 @@
          "id": "assetOutputFile",
          "type": "promptString",
          "description": "Base filename to write out",
-         "default": "model.json"
+         "default": "/Users/matt/Projects/game-assets/models/gltf-working/model.json"
+      },
+      {
+         "id": "assetInputFile",
+         "type": "promptString",
+         "description": "glTF File to read",
+         "default": "/Users/matt/Projects/game-assets/models/gltf-working/textured.gltf"
+      },
+      {
+         "id": "assetSkeletonFile",
+         "type": "promptString",
+         "description": "skeleton file to read",
+         "default": "/Users/matt/Projects/game-assets/models/gltf-working/skeleton.ozz"
       },
    ],
    "tasks": [
@@ -62,15 +74,15 @@
       },
       {
          "label": "AssetTool JSON",
-         "detail": "Run assettool with textured.gltf, skeleton.ozz, and output model.json",
+         "detail": "Run assettool",
          "dependsOn": "build-AssetTool",
          "type": "shell",
          "command": "${workspaceFolder}/build/debug/apps/assettool/assettool",
          "args": [
             "gltf",
-            "-f=/Users/matt/Projects/game-assets/models/gltf-working/textured.gltf",
-            "-s=/Users/matt/Projects/game-assets/models/gltf-working/skeleton.ozz",
-            "-o=/Users/matt/Projects/game-assets/models/gltf-working/${input:assetOutputFile}"
+            "-f=${input:assetInputFile}",
+            "-s=${input:assetSkeletonFile}",
+            "-o=${input:assetOutputFile}"
          ],
          "group": {
             "kind": "build",
