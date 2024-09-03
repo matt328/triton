@@ -16,11 +16,21 @@ void operator delete(void* ptr) noexcept {
 }
 #endif
 
+#ifdef WIN32
+int WINAPI WinMain([[maybe_unused]] _In_ HINSTANCE hInstance,
+                   [[maybe_unused]] _In_opt_ HINSTANCE hPrevInstance,
+                   [[maybe_unused]] _In_ LPSTR lpCmdLine,
+                   [[maybe_unused]] _In_ int nShowCmd) {
+#else
 int main() {
-
+#endif
    initLogger();
 
+#ifdef _DEBUG
    Log.set_level(spdlog::level::trace);
+#else
+   Log.set_level(spdlog::level::warn);
+#endif
 
    Log.info("Hello from spdlog");
 

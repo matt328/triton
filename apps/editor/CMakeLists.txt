@@ -71,6 +71,7 @@ if(WIN32)
       dwmapi
       uxtheme
    )
+   set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,/subsystem:windows")
 endif()
 
 target_link_libraries(${PROJECT_NAME}
