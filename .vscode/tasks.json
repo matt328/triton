@@ -73,9 +73,9 @@
          }
       },
       {
-         "label": "AssetTool JSON",
+         "label": "Run AssetTool",
          "detail": "Run assettool",
-         "dependsOn": "build-AssetTool",
+         "dependsOn": "CMake: Build AssetTool",
          "type": "shell",
          "command": "${workspaceFolder}/build/debug/apps/assettool/assettool",
          "args": [

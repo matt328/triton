@@ -41,8 +41,9 @@ namespace tr::as {
       template <class Archive>
       void serialize(Archive& archive, std::uint32_t const version) {
          if (version != 1) {
-            auto msg =
-                fmt::format("Version mismatch in tr::as:Model, found {0}, expected 1", version);
+            auto msg = fmt::format("Version mismatch in tr::as:Model, found {0}, expected {1}",
+                                   version,
+                                   tr::as::SERIAL_VERSION);
             throw SerializationException(msg);
          }
          archive(vertices, indices, jointRemaps, inverseBindPoses, imageData);
