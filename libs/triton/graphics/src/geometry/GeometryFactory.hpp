@@ -77,6 +77,6 @@ namespace tr::gfx::geo {
 
       /// Loads a TRM file from the given path.
       /// @throws IOException if the file cannot be opened or parsed.
-      static auto loadTrmFile(const std::string& modelPath) -> as::Model;
+      static auto loadTrmFile(const std::filesystem::path& modelPath) -> as::Model;
    };
 }

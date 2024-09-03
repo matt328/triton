@@ -13,6 +13,7 @@ target_compile_definitions(${PROJECT_NAME}
 target_precompile_headers(${PROJECT_NAME}
    PRIVATE
    <cereal/archives/binary.hpp>
+   <cereal/archives/portable_binary.hpp>
    <cereal/archives/json.hpp>
    <fstream>
    <cstdint>

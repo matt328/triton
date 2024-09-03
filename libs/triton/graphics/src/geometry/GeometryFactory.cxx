@@ -6,7 +6,8 @@
 #include "GeometryData.hpp"
 #include "HeightField.hpp"
 #include "geometry/GeometryHandles.hpp"
-#include <cereal/archives/binary.hpp>
+#include <cereal/archives/portable_binary.hpp>
+#include <cereal/archives/json.hpp>
 
 namespace tr::gfx::geo {
 
@@ -56,22 +57,36 @@ namespace tr::gfx::geo {
       return TritonModelData{geometryHandle, imageHandle, skinData};
    }
 
-   auto GeometryFactory::loadTrmFile(const std::string& modelPath) -> as::Model {
+   auto GeometryFactory::loadTrmFile(const std::filesystem::path& modelPath) -> as::Model {
       try {
          ZoneNamedN(z, "Loading Model from Disk", true);
-         auto is = std::ifstream(modelPath, std::ios::binary);
-         if (!is) {
-            throw IOException("Failed to open file: " + modelPath);
-         }
+         if (modelPath.extension() == ".trm") {
+            auto is = std::ifstream(modelPath, std::ios::binary);
+            if (!is) {
+               throw IOException("Failed to open file: " + modelPath.string());
+            }
 
-         try {
-            cereal::BinaryInputArchive input(is);
-            auto tritonModel = as::Model{};
-
-            input(tritonModel);
-            return tritonModel;
-         } catch (const std::exception& ex) {
-            throw IOException("Error reading: " + modelPath + ": ", ex);
+            try {
+               cereal::PortableBinaryInputArchive input(is);
+               auto tritonModel = as::Model{};
+               input(tritonModel);
+               return tritonModel;
+            } catch (const std::exception& ex) {
+               throw IOException("Error reading: " + modelPath.string() + ": ", ex);
+            }
+         } else if (modelPath.extension() == ".json") {
+            auto is = std::ifstream(modelPath);
+            if (!is) {
+               throw IOException("Failed to open file: " + modelPath.string());
+            }
+            try {
+               cereal::JSONInputArchive input(is);
+               auto tritonModel = as::Model{};
+               input(tritonModel);
+               return tritonModel;
+            } catch (const std::exception& ex) {
+               throw IOException("Error reading: " + modelPath.string() + ": ", ex);
+            }
          }
       } catch (BaseException& ex) {
          ex << "GeometryFactory::loadTrmFile(): ";

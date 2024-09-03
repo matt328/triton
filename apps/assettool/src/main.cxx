@@ -7,7 +7,6 @@
 #include "as/gltf/SkinningDataExtractor.hpp"
 #include "as/gltf/TextureExtractor.hpp"
 #include "as/gltf/TransformParser.hpp"
-#include <cereal/archives/binary.hpp>
 
 auto parseCommandLine(const int argc, char* argv[]) {
    auto options = std::unordered_map<std::string, std::string>{};
@@ -95,13 +94,14 @@ int main(int argc, char* argv[]) {
                auto os = std::ofstream(outputFile);
                cereal::JSONOutputArchive jsonOutput(os);
                jsonOutput(tritonModel);
+               Log.info("Wrote json output file to {0}", outputFile.string());
             } else if (outputFile.extension() == ".trm") {
-               auto os = std::ofstream(outputFile);
-               cereal::BinaryOutputArchive binOutput(os);
+               auto os = std::ofstream(outputFile, std::ios::binary);
+               cereal::PortableBinaryOutputArchive binOutput(os);
                binOutput(tritonModel);
+               Log.info("Wrote binary output file to {0}", outputFile.string());
             }
          }
-         Log.info("Wrote json output file to {0}", outputFile.string());
       } catch (const std::exception& ex) { Log.error(ex.what()); }
    } else {
       Log.error("First arg must be 'gltf' for now");
