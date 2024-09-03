@@ -34,8 +34,8 @@ jobs:
         uses: seanmiddleditch/gha-setup-ninja@master
 
       - name: CMake Generate
-        run: cmake -B build -S . -G "Ninja"
+        run: cmake --preset release
 
       - name: Build
         working-directory: ${{github.workspace}}
-        run: cmake --build build --target=editor -j 18
+        run: cmake --build --preset editor-release
