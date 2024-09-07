@@ -48,6 +48,8 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(EnTT)
 
 # glfw
+set(GLFW_BUILD_WAYLAND OFF)
+set(GLFW_BUILD_X11 ON)
 FetchContent_Declare(
    glfw3
    GIT_REPOSITORY https://github.com/glfw/glfw.git

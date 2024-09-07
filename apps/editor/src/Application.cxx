@@ -40,8 +40,11 @@ namespace ed {
       const auto configDir = std::filesystem::path(sago::getConfigHome()) / "editor";
       Properties::getInstance().load(configDir / "config.bin");
 
-      glfwInit();
       glfwSetErrorCallback(errorCallback);
+
+      if (!glfwInit()) {
+         Log.error("Failed to initialize glfw");
+      }
       glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
       glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
