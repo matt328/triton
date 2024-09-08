@@ -53,6 +53,7 @@ namespace ed::ui {
 
    Manager::~Manager() {
       Log.sinks().clear();
+      ImGui_ImplVulkan_DestroyFontsTexture();
    }
 
    void Manager::render() {

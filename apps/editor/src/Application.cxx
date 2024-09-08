@@ -133,6 +133,11 @@ namespace ed {
    }
 
    Application::~Application() {
+      // ImGui_ImplVulkan_DestroyFontsTexture();
+      // ImGui_ImplVulkan_Shutdown();
+      // ImGui_ImplGlfw_Shutdown();
+      // ImGui::DestroyContext();
+      // ImGui::Shutdown();
       glfwTerminate();
    }
 

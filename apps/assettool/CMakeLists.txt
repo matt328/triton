@@ -42,6 +42,13 @@ target_link_libraries(${PROJECT_NAME}
    asset-lib
 )
 
+if(UNIX)
+   target_link_libraries(${PROJECT_NAME}
+      PRIVATE
+      m
+   )
+endif(UNIX)
+
 target_include_directories(${PROJECT_NAME}
    PUBLIC
    .
