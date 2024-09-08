@@ -16,7 +16,7 @@ configure_file(src/config.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/config.h)
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
    target_compile_definitions(${PROJECT_NAME}
       PUBLIC
-      TRACY_ENABLE
+
       BUILD_TYPE_DEBUG
    )
 endif()

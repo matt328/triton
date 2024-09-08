@@ -3,6 +3,8 @@
 
 #include "Logger2.hpp"
 
+#undef TRACY_ENABLE
+
 #if defined(TRACY_ENABLE)
 
 void* operator new(const std::size_t count) {
