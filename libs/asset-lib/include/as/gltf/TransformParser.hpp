@@ -4,7 +4,7 @@
 
 namespace tinygltf {
    class Node;
-}
+} // namespace tinygltf
 namespace tr::as::gltf {
 
    class TransformParser final : public as::TransformParser {
@@ -13,12 +13,12 @@ namespace tr::as::gltf {
       ~TransformParser() noexcept override;
 
       TransformParser(const TransformParser&) = delete;
-      TransformParser& operator=(const TransformParser&) = delete;
+      auto operator=(const TransformParser&) -> TransformParser& = delete;
 
       TransformParser(TransformParser&&) = delete;
-      TransformParser& operator=(TransformParser&&) = delete;
+      auto operator=(TransformParser&&) -> TransformParser& = delete;
 
-      [[nodiscard]] glm::mat4 execute(const tinygltf::Node& node) const override;
+      [[nodiscard]] auto execute(const tinygltf::Node& node) const -> glm::mat4 override;
    };
 
-}
+} // namespace tr::as::gltf

@@ -1,7 +1,9 @@
 #include "as/ModelConverter.hpp"
 
-#include "as/Model.hpp"
 #include "as/ConverterComponents.hpp"
+
+#include "as/Model.hpp"
+
 #include "as/gltf/GltfLoaderImpl.hpp"
 #include "as/gltf/GltfNodeParser.hpp"
 
@@ -19,13 +21,12 @@ namespace tr::as {
                                                           std::move(geometryExtractor),
                                                           std::move(textureExtractor));
    }
-   void ModelConverter::load(const std::filesystem::path& modelPath,
-                             const std::filesystem::path& skeletonPath) {
+   void ModelConverter::load(const ModelResources& resources) {
 
       std::unique_ptr<GltfFileLoader> loader = std::make_unique<gltf::GltfLoaderImpl>();
 
-      model = modelLoader->load(loader.get(), modelPath);
-      skeleton = skeletonLoader->load(skeletonPath);
+      model = modelLoader->load(loader.get(), resources.modelPath);
+      skeleton = skeletonLoader->load(resources.skeletonPath);
    }
 
    auto ModelConverter::buildTritonModel() const -> Model {
@@ -41,4 +42,4 @@ namespace tr::as {
 
       return tritonModel;
    }
-}
+} // namespace tr::as
