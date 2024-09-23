@@ -3,7 +3,7 @@
 
 #include "Logger2.hpp"
 
-#undef TRACY_ENABLE
+#include <sdf/DistanceField.hpp>
 
 #if defined(TRACY_ENABLE)
 
@@ -28,6 +28,8 @@ int main() {
 #endif
    initLogger();
 
+   Log.info("Console is now ready for logging!");
+
 #ifdef _DEBUG
    Log.set_level(spdlog::level::trace);
 #else
@@ -49,7 +51,6 @@ int main() {
    ss << PROJECT_NAME << " v" << PROJECT_VER;
 
 #ifdef _DEBUG
-
    ss << " - Debug Build";
 #else
    ss << " - Release Build";
@@ -59,7 +60,16 @@ int main() {
       const auto app = std::make_unique<ed::Application>(width, height, ss.str());
       Log.info("Initialized");
 
+      auto df = sdf::DistanceField{};
+      auto value = df.getValue(1.0, 2.0, 3.0);
+      Log.info("value at 1, 2, 3: {0}", value);
+
       app->run();
 
-   } catch (const std::exception& e) { Log.critical(e.what()); }
+   } catch (const std::exception& e) {
+      Log.critical(e.what());
+      return -1;
+   }
+
+   return 0;
 }
