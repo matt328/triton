@@ -1,12 +1,12 @@
 #include "as/gltf/GeometryExtractor.hpp"
 
-#include "as/Vertex.hpp"
 #include "as/Model.hpp"
+
+#include "as/Vertex.hpp"
 
 namespace tr::as::gltf {
 
-   GeometryExtractor::~GeometryExtractor() noexcept {
-   }
+   GeometryExtractor::~GeometryExtractor() noexcept = default;
 
    void GeometryExtractor::execute(const tinygltf::Model& model,
                                    const tinygltf::Primitive& primitive,
@@ -22,7 +22,7 @@ namespace tr::as::gltf {
          // glTF supports different component types of indices
          switch (accessor.componentType) {
             case TINYGLTF_PARAMETER_TYPE_UNSIGNED_INT: {
-               auto buf = reinterpret_cast<const uint32_t*>(
+               const auto* buf = reinterpret_cast<const uint32_t*>(
                    &buffer.data[accessor.byteOffset + bufferView.byteOffset]);
                for (size_t index = 0; index < accessor.count; index++) {
                   indices.push_back(buf[index]);
@@ -30,7 +30,7 @@ namespace tr::as::gltf {
                break;
             }
             case TINYGLTF_PARAMETER_TYPE_UNSIGNED_SHORT: {
-               auto buf = reinterpret_cast<const uint16_t*>(
+               const auto* buf = reinterpret_cast<const uint16_t*>(
                    &buffer.data[accessor.byteOffset + bufferView.byteOffset]);
                for (size_t index = 0; index < accessor.count; index++) {
                   indices.push_back(buf[index]);
@@ -38,7 +38,7 @@ namespace tr::as::gltf {
                break;
             }
             case TINYGLTF_PARAMETER_TYPE_UNSIGNED_BYTE: {
-               auto buf = &buffer.data[accessor.byteOffset + bufferView.byteOffset];
+               const auto* buf = &buffer.data[accessor.byteOffset + bufferView.byteOffset];
                for (size_t index = 0; index < accessor.count; index++) {
                   indices.push_back(buf[index]);
                }

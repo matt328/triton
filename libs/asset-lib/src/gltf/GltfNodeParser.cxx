@@ -13,8 +13,7 @@ namespace tr::as::gltf {
          textureExtractor{std::move(textureExtractor)} {
    }
 
-   GltfNodeParser::~GltfNodeParser() noexcept {
-   }
+   GltfNodeParser::~GltfNodeParser() noexcept = default;
 
    void GltfNodeParser::execute(const tinygltf::Model& model,
                                 const tinygltf::Node& node,
@@ -32,9 +31,9 @@ namespace tr::as::gltf {
             textureExtractor->execute(model, baseColorTextureIndex, tritonModel);
          }
       }
-      for (auto& child : node.children) {
-         auto& localNode = model.nodes[child];
+      for (const auto& child : node.children) {
+         const auto& localNode = model.nodes[child];
          execute(model, localNode, tritonModel);
       }
    }
-}
+} // namespace tr::as::gltf

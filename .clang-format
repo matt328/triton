@@ -1,6 +1,6 @@
 BasedOnStyle: Microsoft
 PointerAlignment: Left
-Standard: c++11
+Standard: c++17
 AlwaysBreakTemplateDeclarations: Yes
 NamespaceIndentation: All
 ForEachMacros: [TEST_CLASS, TEST_METHOD]

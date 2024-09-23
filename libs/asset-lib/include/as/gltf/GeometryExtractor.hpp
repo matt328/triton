@@ -9,10 +9,10 @@ namespace tr::as::gltf {
       ~GeometryExtractor() noexcept override;
 
       GeometryExtractor(const GeometryExtractor&) = delete;
-      GeometryExtractor& operator=(const GeometryExtractor&) = delete;
+      auto operator=(const GeometryExtractor&) -> GeometryExtractor& = delete;
 
       GeometryExtractor(GeometryExtractor&&) = delete;
-      GeometryExtractor& operator=(GeometryExtractor&&) = delete;
+      auto operator=(GeometryExtractor&&) -> GeometryExtractor& = delete;
 
       void execute(const tinygltf::Model& model,
                    const tinygltf::Primitive& primitive,
@@ -20,4 +20,4 @@ namespace tr::as::gltf {
                    Model& tritonModel) override;
    };
 
-}
+} // namespace tr::as::gltf

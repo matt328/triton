@@ -10,12 +10,13 @@ namespace tr::as::gltf {
       ~SkeletonLoader() noexcept override;
 
       SkeletonLoader(const SkeletonLoader&) = delete;
-      SkeletonLoader& operator=(const SkeletonLoader&) = delete;
+      auto operator=(const SkeletonLoader&) -> SkeletonLoader& = delete;
 
       SkeletonLoader(SkeletonLoader&&) = delete;
-      SkeletonLoader& operator=(SkeletonLoader&&) = delete;
+      auto operator=(SkeletonLoader&&) -> SkeletonLoader& = delete;
 
-      auto load(const std::filesystem::path& path) const -> ozz::animation::Skeleton override;
+      [[nodiscard]] auto load(const std::filesystem::path& path) const
+          -> ozz::animation::Skeleton override;
    };
 
-}
+} // namespace tr::as::gltf
