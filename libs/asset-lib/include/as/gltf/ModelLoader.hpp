@@ -10,13 +10,13 @@ namespace tr::as::gltf {
       ~ModelLoader() noexcept override;
 
       ModelLoader(const ModelLoader&) = delete;
-      ModelLoader& operator=(const ModelLoader&) = delete;
+      auto operator=(const ModelLoader&) -> ModelLoader& = delete;
 
       ModelLoader(ModelLoader&&) = delete;
-      ModelLoader& operator=(ModelLoader&&) = delete;
+      auto operator=(ModelLoader&&) -> ModelLoader& = delete;
 
       auto load(GltfFileLoader* loader, const std::filesystem::path& path) const
           -> tinygltf::Model override;
    };
 
-}
+} // namespace tr::as::gltf

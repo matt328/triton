@@ -1,5 +1,6 @@
 #pragma once
 
+#include <filesystem>
 #include <tiny_gltf.h>
 
 namespace tr::as {
@@ -13,6 +14,11 @@ namespace tr::as {
    class SkeletonLoader;
    struct Model;
 
+   struct ModelResources {
+      std::filesystem::path modelPath;
+      std::filesystem::path skeletonPath;
+   };
+
    class ModelConverter {
     public:
       ModelConverter(std::unique_ptr<TransformParser> transformParser,
@@ -25,12 +31,12 @@ namespace tr::as {
       ~ModelConverter() noexcept = default;
 
       ModelConverter(const ModelConverter&) = delete;
-      ModelConverter& operator=(const ModelConverter&) = delete;
+      auto operator=(const ModelConverter&) -> ModelConverter& = delete;
 
       ModelConverter(ModelConverter&&) = delete;
-      ModelConverter& operator=(ModelConverter&&) = delete;
+      auto operator=(ModelConverter&&) -> ModelConverter& = delete;
 
-      void load(const std::filesystem::path& modelPath, const std::filesystem::path& skeletonPath);
+      void load(const ModelResources& resources);
 
       [[nodiscard]] auto buildTritonModel() const -> Model;
 
@@ -44,4 +50,4 @@ namespace tr::as {
       std::unique_ptr<SkeletonLoader> skeletonLoader;
    };
 
-}
+} // namespace tr::as

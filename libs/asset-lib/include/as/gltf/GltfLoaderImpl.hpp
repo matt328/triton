@@ -10,15 +10,15 @@ namespace tr::as::gltf {
       ~GltfLoaderImpl() noexcept override;
 
       GltfLoaderImpl(const GltfLoaderImpl&) = delete;
-      GltfLoaderImpl& operator=(const GltfLoaderImpl&) = delete;
+      auto operator=(const GltfLoaderImpl&) -> GltfLoaderImpl& = delete;
 
       GltfLoaderImpl(GltfLoaderImpl&&) = delete;
-      GltfLoaderImpl& operator=(GltfLoaderImpl&&) = delete;
+      auto operator=(GltfLoaderImpl&&) -> GltfLoaderImpl& = delete;
 
-      bool loadFromFile(tinygltf::Model* model,
+      auto loadFromFile(tinygltf::Model* model,
                         std::string* err,
                         std::string* warn,
-                        const std::string& filename) override;
+                        const std::string& filename) -> bool override;
    };
 
-}
+} // namespace tr::as::gltf

@@ -10,14 +10,14 @@ namespace tr::as::gltf {
       ~SkinningDataExtractor() noexcept override;
 
       SkinningDataExtractor(const SkinningDataExtractor&) = delete;
-      SkinningDataExtractor& operator=(const SkinningDataExtractor&) = delete;
+      auto operator=(const SkinningDataExtractor&) -> SkinningDataExtractor& = delete;
 
       SkinningDataExtractor(SkinningDataExtractor&&) = delete;
-      SkinningDataExtractor& operator=(SkinningDataExtractor&&) = delete;
+      auto operator=(SkinningDataExtractor&&) -> SkinningDataExtractor& = delete;
 
       void execute(const tinygltf::Model& model,
                    const ozz::animation::Skeleton& skeleton,
                    Model& tritonModel) override;
    };
 
-}
+} // namespace tr::as::gltf

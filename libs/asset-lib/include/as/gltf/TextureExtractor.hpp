@@ -4,11 +4,11 @@
 
 namespace tr::as {
    struct Model;
-}
+} // namespace tr::as
 
 namespace tinygltf {
    class Model;
-}
+} // namespace tinygltf
 
 namespace tr::as::gltf {
 
@@ -18,12 +18,12 @@ namespace tr::as::gltf {
       ~TextureExtractor() noexcept override;
 
       TextureExtractor(const TextureExtractor&) = delete;
-      TextureExtractor& operator=(const TextureExtractor&) = delete;
+      auto operator=(const TextureExtractor&) -> TextureExtractor& = delete;
 
       TextureExtractor(TextureExtractor&&) = delete;
-      TextureExtractor& operator=(TextureExtractor&&) = delete;
+      auto operator=(TextureExtractor&&) -> TextureExtractor& = delete;
 
       void execute(const tinygltf::Model& model, int textureIndex, Model& tritonModel) override;
    };
 
-}
+} // namespace tr::as::gltf
