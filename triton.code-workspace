@@ -148,8 +148,8 @@
          "editor.wordHighlightStrongBackground": "#a72222a8"
       },
       "clangd.arguments": [
-         "-background-index",
-         "-compile-commands-dir=build/debug"
+         "--background-index",
+         "--compile-commands-dir=build/debug"
       ]
    }
 }

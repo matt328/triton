@@ -19,7 +19,17 @@ endif()
 set(CMAKE_WARN_DEPRECATED OFF CACHE BOOL "" FORCE)
 set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS ON CACHE INTERNAL "" FORCE)
 
+# voxel terrain
+FetchContent_Declare(
+   voxel-terrain
+   GIT_REPOSITORY https://github.com/matt328/voxel-terrain.git
+   GIT_TAG main
+   SYSTEM
+)
+FetchContent_MakeAvailable(voxel-terrain)
+
 # Catch2
+set(CATCH_INSTALL_DOCS OFF)
 FetchContent_Declare(
    Catch2
    GIT_REPOSITORY https://github.com/catchorg/Catch2.git
@@ -30,6 +40,8 @@ FetchContent_MakeAvailable(Catch2)
 
 # Cereal
 set(JUST_INSTALL_CEREAL ON)
+set(BUILD_DOC OFF)
+set(BUILD_SANDBOX OFF)
 FetchContent_Declare(
    Cereal
    GIT_REPOSITORY https://github.com/USCiLab/cereal.git
@@ -39,6 +51,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(Cereal)
 
 # EnTT
+set(ENTT_USE_LIBCPP ON)
 FetchContent_Declare(
    EnTT
    GIT_REPOSITORY https://github.com/skypjack/entt.git
@@ -50,6 +63,9 @@ FetchContent_MakeAvailable(EnTT)
 # glfw
 set(GLFW_BUILD_WAYLAND OFF)
 set(GLFW_BUILD_X11 ON)
+set(GLFW_BUILD_EXAMPLES OFF)
+set(GLFW_BUILD_TESTS OFF)
+set(GLFW_BUILD_DOCS OFF)
 FetchContent_Declare(
    glfw3
    GIT_REPOSITORY https://github.com/glfw/glfw.git

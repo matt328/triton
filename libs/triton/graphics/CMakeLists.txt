@@ -2,7 +2,6 @@ project("graphics")
 
 set(graphics_SRC
    "src/HeightField.cxx"
-   "src/NoiseUtils.cxx"
    "src/Frame.cxx"
    "src/GraphicsDevice.cxx"
    "src/PipelineBuilder.cxx"
@@ -77,6 +76,7 @@ target_link_libraries(${PROJECT_NAME}
    asset-lib
    glfw # Get rid of glfw usage in graphics
    imgui_custom
+   sdf
    ${Vulkan_LIBRARIES}
    VulkanMemoryAllocator-Hpp
    PRIVATE
