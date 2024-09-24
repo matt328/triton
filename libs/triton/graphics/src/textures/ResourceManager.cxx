@@ -34,34 +34,35 @@ namespace tr::gfx::tx {
       renderData = newRenderData;
    }
 
-   void ResourceManager::accessRenderData(const std::function<void(cm::gpu::RenderData&)>& fn) {
+   void ResourceManager::accessRenderData(
+       const std::function<void(cm::gpu::RenderData&)>& accessFn) {
       std::lock_guard lock(renderDataMutex);
       LockableName(renderDataMutex, "AccessRenderData", 16);
       LockMark(renderDataMutex);
-      fn(renderData);
+      accessFn(renderData);
    }
 
    auto ResourceManager::createTerrain(const uint32_t size) -> cm::ModelData {
-      ZoneNamedN(n, "ResourceManager::createTerrain", true);
+      ZoneNamedN(zn1, "ResourceManager::createTerrain", true);
 
-      ZoneNamedN(z, "Creating Terrain", true);
+      ZoneNamedN(zn2, "Creating Terrain", true);
       const auto heightfield = ct::HeightField{static_cast<int>(size)};
 
       // change this to return
       const auto dataHandle = geometryFactory->createGeometryFromHeightfield(heightfield);
 
-      const auto pr = dataHandle.begin();
+      const auto geometryData = dataHandle.begin();
 
-      const auto modelHandle = uploadGeometry(pr->first, pr->second);
+      const auto modelHandle = uploadGeometry(geometryData->first, geometryData->second);
       geometryFactory->unload(dataHandle);
       return modelHandle;
    }
 
    auto ResourceManager::createModel(const std::filesystem::path& filename) noexcept
        -> cm::ModelData {
-      ZoneNamedN(n, "ResourceManager::loadModel", true);
+      ZoneNamedN(zn1, "ResourceManager::loadModel", true);
 
-      ZoneNamedN(z, "Loading Model", true);
+      ZoneNamedN(zn2, "Loading Model", true);
 
       auto tritonModelData = [this, &filename]() {
          try {
@@ -93,8 +94,8 @@ namespace tr::gfx::tx {
 
    auto ResourceManager::uploadGeometry(const geo::GeometryHandle& geometryHandle,
                                         const geo::ImageHandle& imageHandle) -> cm::ModelData {
-      auto& allocator = graphicsDevice.getAllocator();
-      auto& context = graphicsDevice.getAsyncTransferContext();
+      const auto& allocator = graphicsDevice.getAllocator();
+      const auto& context = graphicsDevice.getAsyncTransferContext();
 
       auto geometryData = geo::GeometryData{};
       try {
@@ -117,7 +118,7 @@ namespace tr::gfx::tx {
          // Prepare Index Buffer
          const auto ibStagingBuffer = allocator.createStagingBuffer(ibSize, "Index Staging Buffer");
 
-         const auto data = allocator.mapMemory(*ibStagingBuffer);
+         auto* const data = allocator.mapMemory(*ibStagingBuffer);
          memcpy(data, geometryData.indices.data(), ibSize);
          allocator.unmapMemory(*ibStagingBuffer);
 
@@ -145,7 +146,7 @@ namespace tr::gfx::tx {
                                                  context));
 
          { // Only need to guard access to the textureInfoList
-            ZoneNamedN(c, "Update TextureInfoList", true);
+            ZoneNamedN(zn1, "Update TextureInfoList", true);
             std::lock_guard lock(textureListMutex);
             LockMark(textureListMutex);
             LockableName(textureListMutex, "Mutate", 6);
@@ -167,13 +168,13 @@ namespace tr::gfx::tx {
    }
 
    void ResourceManager::accessTextures(
-       const std::function<void(const std::vector<vk::DescriptorImageInfo>&)>& fn) const {
+       const std::function<void(const std::vector<vk::DescriptorImageInfo>&)>& accessFn) const {
       if (textureInfoList.empty()) {
          return;
       }
       std::lock_guard lock(textureListMutex);
       LockableName(textureListMutex, "Access", 6);
       LockMark(textureListMutex);
-      fn(textureInfoList);
+      accessFn(textureInfoList);
    }
-}
+} // namespace tr::gfx::tx

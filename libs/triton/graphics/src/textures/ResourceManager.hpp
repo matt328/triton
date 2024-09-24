@@ -45,7 +45,7 @@ namespace tr::gfx::tx {
                              .addressModeW = vk::SamplerAddressMode::eRepeat,
                              .mipLodBias = 0.f,
                              .anisotropyEnable = VK_TRUE,
-                             .maxAnisotropy = 1, // TODO: look this up
+                             .maxAnisotropy = 1, // TODO(Matt): look this up
                              .compareEnable = VK_FALSE,
                              .compareOp = vk::CompareOp::eAlways,
                              .minLod = 0.f,
@@ -80,7 +80,7 @@ namespace tr::gfx::tx {
 
       auto createStaticMesh(const geo::GeometryData& geometry) -> cm::MeshHandle;
 
-      auto& getMesh(const cm::MeshHandle meshHandle) {
+      auto getMesh(const cm::MeshHandle meshHandle) -> auto& {
          return meshList.at(meshHandle);
       }
 

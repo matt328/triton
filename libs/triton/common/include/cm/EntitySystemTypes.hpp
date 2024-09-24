@@ -4,4 +4,4 @@
 
 namespace tr::cm {
    using EntityType = entt::entity;
-}
+} // namespace tr::cm

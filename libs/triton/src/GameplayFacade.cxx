@@ -3,8 +3,9 @@
 #include "cm/EntitySystemTypes.hpp"
 #include "cm/Handles.hpp"
 
-#include "gp/GameplaySystem.hpp"
 #include "gfx/RenderContext.hpp"
+
+#include "gp/GameplaySystem.hpp"
 
 #include "BaseException.hpp"
 
@@ -121,4 +122,4 @@ namespace tr::ctx {
       impl->clear();
    }
 
-}
+} // namespace tr::ctx

@@ -7,9 +7,9 @@ namespace tr::gp {
       ~GameWorld();
 
       GameWorld(const GameWorld&) = default;
-      GameWorld& operator=(const GameWorld&) = default;
+      auto operator=(const GameWorld&) -> GameWorld& = default;
 
       GameWorld(GameWorld&&) = delete;
-      GameWorld& operator=(GameWorld&&) = delete;
+      auto operator=(GameWorld&&) -> GameWorld& = delete;
    };
-}
+} // namespace tr::gp

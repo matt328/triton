@@ -15,4 +15,4 @@ namespace tr::gp {
       StateType stateType{};
       std::variant<bool, float> value{};
    };
-}
+} // namespace tr::gp

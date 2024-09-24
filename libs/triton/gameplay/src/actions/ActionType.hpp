@@ -13,4 +13,4 @@ namespace tr::gp {
       Ok,
       Cancel
    };
-}
+} // namespace tr::gp

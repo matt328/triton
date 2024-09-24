@@ -299,18 +299,16 @@ namespace ed::ui {
    auto Manager::getSavePath() -> std::optional<std::filesystem::path> {
       auto outPath = NFD::UniquePath{};
 
-      if (const auto result =
-              SaveDialog(outPath, ProjectFileFilters.data(), ProjectFileFilters.size());
-          result == NFD_OKAY) {
+      const auto result = SaveDialog(outPath, ProjectFileFilters.data(), ProjectFileFilters.size());
+      if (result == NFD_OKAY) {
          Log.debug("Success: {0}", outPath.get());
          return std::optional{std::filesystem::path{outPath.get()}};
-      } else {
-         if (result == NFD_CANCEL) {
-            Log.debug("User pressed Cancel");
-            return std::nullopt;
-         }
-         Log.error("Error getting save path: {0}", NFD::GetError());
+      }
+      if (result == NFD_CANCEL) {
+         Log.debug("User pressed Cancel");
          return std::nullopt;
       }
+      Log.error("Error getting save path: {0}", NFD::GetError());
+      return std::nullopt;
    }
 }

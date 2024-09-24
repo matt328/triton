@@ -52,26 +52,25 @@ namespace ed::data {
                                       const std::string_view& modelName) noexcept {
       dataStore.scene.insert({entityName.data(),
                               EntityData{.name = entityName.data(),
-                                         .position = glm::vec3{0.f},
+                                         .position = glm::vec3{0.F},
                                          .rotation = glm::identity<glm::quat>(),
                                          .modelName = modelName.data()}});
       unsaved = true;
       const auto modelFilename = dataStore.models.at(modelName.data()).filePath;
 
-      const std::function<void(tr::cm::EntityType)> fn = [this,
-                                                          entityName](tr::cm::EntityType entity) {
-         const auto name = entityName.data();
+      const auto onComplete = [this, entityName](tr::cm::EntityType entity) {
+         const auto* const name = entityName.data();
          entityNameMap.insert({name, entity});
          engineBusy = false;
          Log.info("Finished creating entity: id: {0}, name: {1}",
-                  static_cast<long long>(entity),
+                  static_cast<int64_t>(entity),
                   name);
       };
 
       engineBusy = true;
 
       const auto task = gameplayFacade.getStaticModelEntityTask();
-      const auto result = taskQueue->enqueue(task, fn, modelFilename);
+      const auto result = taskQueue->enqueue(task, onComplete, modelFilename);
    }
 
    void DataFacade::createAnimatedModel(const std::string_view& entityName,

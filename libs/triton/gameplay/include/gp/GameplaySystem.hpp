@@ -1,25 +1,28 @@
 #pragma once
 
-#include "cm/Handles.hpp"
-#include "cm/Inputs.hpp"
-#include "cm/RenderData.hpp"
 #include "cm/EntitySystemTypes.hpp"
+
+#include "cm/Handles.hpp"
+
+#include "cm/Inputs.hpp"
+
+#include "cm/RenderData.hpp"
 
 namespace tr::cm {
    class Timer;
-}
+} // namespace tr::cm
 
 namespace tr::gfx {
    class RenderContext;
-}
+} // namespace tr::gfx
 
 namespace tr::gfx::tx {
    class ResourceManager;
-}
+} // namespace tr::gfx::tx
 
 namespace tr::ctx {
    class GameplayFacade;
-}
+} // namespace tr::ctx
 
 namespace tr::gp {
    using RenderDataProducer = entt::delegate<void(cm::gpu::RenderData&)>;
@@ -69,20 +72,22 @@ namespace tr::gp {
       [[nodiscard]] auto createTerrain(const cm::ModelData& handles) const -> cm::EntityType;
       [[nodiscard]] auto createStaticModel(const cm::ModelData& meshes) const -> cm::EntityType;
       [[nodiscard]] auto createAnimatedModel(cm::ModelData modelData,
-                               const std::filesystem::path& skeletonPath,
-                               const std::filesystem::path& animationPath) const -> cm::EntityType;
+                                             const std::filesystem::path& skeletonPath,
+                                             const std::filesystem::path& animationPath) const
+          -> cm::EntityType;
       [[nodiscard]] auto createCamera(uint32_t width,
-                        uint32_t height,
-                        float fov,
-                        float zNear,
-                        float zFar,
-                        const glm::vec3& position,
-                        const std::optional<std::string>& name) const -> cm::EntityType;
+                                      uint32_t height,
+                                      float fov,
+                                      float zNear,
+                                      float zFar,
+                                      const glm::vec3& position,
+                                      const std::optional<std::string>& name) const
+          -> cm::EntityType;
       void setCurrentCamera(cm::EntityType currentCamera) const;
       void clearEntities() const;
 
-      void setRenderDataFn(const RenderDataFn& fn) {
-         renderDataFn = fn;
+      void setRenderDataFn(const RenderDataFn& func) {
+         renderDataFn = func;
       }
 
     private:
@@ -96,4 +101,4 @@ namespace tr::gp {
 
       RenderDataFn renderDataFn{};
    };
-}
+} // namespace tr::gp

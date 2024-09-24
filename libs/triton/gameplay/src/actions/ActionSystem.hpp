@@ -45,4 +45,4 @@ namespace tr::gp {
       std::unordered_map<cm::Key, Action> keyActionMap{};
       std::unordered_map<cm::MouseInput, Action> mouseActionMap{};
    };
-}
+} // namespace tr::gp
