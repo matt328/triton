@@ -9,16 +9,17 @@ namespace tr::gp {
    };
 
    struct Source {
-      Source(cm::MouseInput me, const SourceType sType) : src{me}, sourceType{sType} {
+      Source(cm::MouseInput mouseInput, const SourceType sType)
+          : src{mouseInput}, sourceType{sType} {
       }
 
       Source(cm::Key key, const SourceType sType) : src{key}, sourceType{sType} {
       }
 
-      Source(cm::GamepadInput in, const SourceType sType) : src{in}, sourceType{sType} {
+      Source(cm::GamepadInput gpInput, const SourceType sType) : src{gpInput}, sourceType{sType} {
       }
 
       std::variant<cm::MouseInput, cm::Key, cm::GamepadInput> src{};
       SourceType sourceType{};
    };
-}
+} // namespace tr::gp

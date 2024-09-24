@@ -4,11 +4,11 @@
 
 namespace tr::gp {
    class GameplaySystem;
-}
+} // namespace tr::gp
 
 namespace tr::gfx {
    class RenderContext;
-}
+} // namespace tr::gfx
 
 namespace tr::ctx {
    template <typename T>
@@ -66,4 +66,4 @@ namespace tr::ctx {
       std::unique_ptr<Impl> impl;
    };
 
-}
+} // namespace tr::ctx
