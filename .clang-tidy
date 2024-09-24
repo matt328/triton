@@ -1,5 +1,5 @@
 ---
-Checks: "*,-llvmlibc-*, -fuchsia-*, -altera-*, -misc-no-recursion"
+Checks: "*,-llvmlibc-*, -fuchsia-*, -altera-*, -llvm-*, -misc-no-recursion -misc-include-cleaner"
 WarningsAsErrors: "true"
 HeaderFilterRegex: ""
 AnalyzeTemporaryDtors: false

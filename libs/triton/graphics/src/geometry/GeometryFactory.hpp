@@ -2,19 +2,20 @@
 
 #include "cm/Rando.hpp"
 
-#include "geometry/GeometryHandles.hpp"
 #include "HeightField.hpp"
+
+#include "geometry/GeometryHandles.hpp"
 
 #include <BaseException.hpp>
 
 namespace tr::as {
    struct Model;
    class ImageData;
-}
+} // namespace tr::as
 
 namespace tr::ct {
    class HeightField;
-}
+} // namespace tr::ct
 
 namespace tr::gfx::geo {
 
@@ -46,10 +47,10 @@ namespace tr::gfx::geo {
       ~GeometryFactory();
 
       GeometryFactory(const GeometryFactory&) = delete;
-      GeometryFactory& operator=(const GeometryFactory&) = delete;
+      auto operator=(const GeometryFactory&) -> GeometryFactory& = delete;
 
       GeometryFactory(GeometryFactory&&) = delete;
-      GeometryFactory& operator=(GeometryFactory&&) = delete;
+      auto operator=(GeometryFactory&&) -> GeometryFactory& = delete;
 
       auto createGeometryFromHeightfield(const ct::HeightField& heightField)
           -> TexturedGeometryHandle;
@@ -79,4 +80,4 @@ namespace tr::gfx::geo {
       /// @throws IOException if the file cannot be opened or parsed.
       static auto loadTrmFile(const std::filesystem::path& modelPath) -> as::Model;
    };
-}
+} // namespace tr::gfx::geo
