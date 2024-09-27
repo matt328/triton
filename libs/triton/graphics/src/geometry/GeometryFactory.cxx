@@ -138,13 +138,17 @@ namespace tr::gfx::geo {
             float t1 = u / 256.F;
 
             int index = -1;
+            // If cellCornderIndex1 is 7, that means there cannot be any previous cell
+            // And if the dirPrev (which comes from the tables) & this cube's direction mask is
+            // itself, that means the vertex in question could have already been generated, so we
+            // have to check.
             if (cellCornerIndex1 != 7 && (dirPrev & directionMask) == dirPrev) {
-               // This means the vertex in question was created in a previous cube and we should
-               // reuse it
+               // TODO:
             }
 
             if (index == -1) {
-               // Vertex was not created in a previous cube?
+               // The cube in dirPrev did not generate a vertex on the edge we are needing one
+               // so generate one.
             }
 
             if ((dirPrev & 8) != 0) {
