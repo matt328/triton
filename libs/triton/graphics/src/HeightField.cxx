@@ -1,6 +1,6 @@
 #include "HeightField.hpp"
 
-#include <sdf/FastNoiseLite.h>
+#include "cm/sdf/FastNoiseLite.h"
 
 namespace tr::ct {
 

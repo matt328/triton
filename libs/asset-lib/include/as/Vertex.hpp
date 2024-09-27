@@ -12,7 +12,7 @@ namespace tr::as {
       glm::vec4 weight0{};
       glm::vec4 tangent{};
 
-      bool operator==(const Vertex& other) const {
+      auto operator==(const Vertex& other) const -> bool {
          return pos == other.pos && normal == other.normal && uv == other.uv &&
                 color == other.color && joint0 == other.joint0 && weight0 == other.weight0 &&
                 tangent == other.tangent;
