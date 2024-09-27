@@ -81,15 +81,16 @@ namespace tr::gfx::geo {
          corner[currentCorner] = voxelData[voxelPosition.x][voxelPosition.y][voxelPosition.z];
       }
 
-      // bit twiddling 'trick' to determine the case index from the corners' values
-      // The corner value being 0 or positive means outside
-      // Corner value being negative means inside
-      // this bit twiddling packs all 8 corners' sign bits into a single 8 bit value which is used
-      // to index into the transvoxel tables to get the vertex configuration of this cube.
+      /// The corner value in the SDF being non-negative means outside, negative means inside
+      /// This code packs only the corner values' sign bits into a single 8 bit value which is how
+      /// Lengyel's CellClass and CellData tables are indexed.
       int8_t caseCode = ((corner[0] >> 7) & 0x01) | ((corner[1] >> 6) & 0x02) |
                         ((corner[2] >> 5) & 0x04) | ((corner[3] >> 4) & 0x08) |
                         ((corner[4] >> 3) & 0x10) | ((corner[5] >> 2) & 0x20) |
                         ((corner[6] >> 1) & 0x40) | (corner[7] & 0x80);
+
+      // can bail on the whole cell right here with this check
+      // 0 means the whole cube is either above or below, in either case, no verts are generated
 
       if ((caseCode ^ ((corner[7] >> 7) & 0xFF)) != 0) {
          Log.debug("Found Cell with non trivial triangulation: ({0}, {1}, {2})",
@@ -104,27 +105,28 @@ namespace tr::gfx::geo {
          const auto triangleCount = equivalenceClass.getTriangleCount();
          const auto vertexSequence = equivalenceClass.getVertexIndex();
 
-         auto vertexLocations = regularVertexData[caseCode];
+         const auto vertexLocations = regularVertexData[caseCode];
 
          for (const auto vertexLocation : vertexLocations) {
-            // Edge information is encoded in the high bits
+            /// Edge information is encoded in the high nibble of regularVertexData
             uint8_t edge = vertexLocation >> 8;
-            // Reuse information is in the low nibble, this is the index of the vertex in the
-            // preceeding cell (cube) to use
+            /// Reuse information from the low nibble, this is the index of the vertex in the
+            /// preceeding cell (cube) to use
             uint8_t reuseIndex = edge & 0xF;
+
             // Directions to the preceeding cell (cube) are in the high nibble.
             // bit value 1 = -x, bit value 2 = -y bit value 4 = -z bit value 8 means create new
             // vertex
             uint8_t dirPrev = edge >> 4;
 
-            uint8_t vIndex1 = vertexLocation & 0x0F;
-            uint8_t vIndex0 = (vertexLocation >> 4) & 0x0F;
+            uint8_t cellCornerIndex1 = vertexLocation & 0x0F;
+            uint8_t cellCornerIndex0 = (vertexLocation >> 4) & 0x0F;
 
-            int8_t distance0 = corner[vIndex0];
-            int8_t distance1 = corner[vIndex1];
+            int8_t distance0 = corner[cellCornerIndex0];
+            int8_t distance1 = corner[cellCornerIndex1];
 
-            // distance from distance1 that the sign change occurs, ie the surface exists, in the
-            // range of 0-256
+            // Calculate distance from distance1 that the sign change occurs, ie the surface exists,
+            // in the range of 0-256
             int32_t t = (distance1 << 8) / (distance1 - distance0);
             int32_t u = 0x0100 - t; // compliment of t
 
@@ -133,7 +135,7 @@ namespace tr::gfx::geo {
             float t1 = u / 256.F;
 
             int index = -1;
-            if (vIndex1 != 7 && (dirPrev & directionMask) == dirPrev) {
+            if (cellCornerIndex1 != 7 && (dirPrev & directionMask) == dirPrev) {
                // This means the vertex in question was created in a previous cube and we should
                // reuse it
             }
