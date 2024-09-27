@@ -71,6 +71,9 @@ namespace tr::gfx::geo {
 
       /// Encodes the direction (+/-) of x,z,y in the first 3 bits of this byte. If the direction
       /// bit is 1, that means a cell exists in that direction, and we can reuse its vertices.
+      /// 1110 -> xzy, 1010 -> xy only
+      /// TODO: The impl has the order x, z, y here, but the paper mentions x, y, z. I think the
+      /// paper uses a different coordinate system with z vertical.
       int8_t directionMask = (cellPosition.x > 0 ? 1 : 0) | ((cellPosition.z > 0 ? 1 : 0) << 1) |
                              ((cellPosition.y > 0 ? 1 : 0) << 2);
 
@@ -141,11 +144,11 @@ namespace tr::gfx::geo {
             }
 
             if (index == -1) {
-               // Generate a new vertex
+               // Vertex was not created in a previous cube?
             }
 
-            if ((dirPrev & 8) != 0) { // TODO: figure out what this means
-               // Set a reusable index in the cache
+            if ((dirPrev & 8) != 0) {
+               // dirPrev having bit 8 set means create a new vertex
             }
          }
       }
