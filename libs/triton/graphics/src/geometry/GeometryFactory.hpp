@@ -1,16 +1,15 @@
 #pragma once
 
 #include "cm/Rando.hpp"
-
 #include "HeightField.hpp"
-
 #include "geometry/GeometryHandles.hpp"
-
+#include "cm/sdf/DistanceField.hpp"
 #include <BaseException.hpp>
 
 namespace tr::as {
    struct Model;
    class ImageData;
+   struct Vertex;
 } // namespace tr::as
 
 namespace tr::ct {
@@ -41,6 +40,18 @@ namespace tr::gfx::geo {
 
    using GeometryDataRef = std::optional<std::reference_wrapper<GeometryData>>;
 
+   constexpr size_t Size = 16;
+   using VoxelArray = std::array<std::array<std::array<int8_t, Size>, Size>, Size>;
+
+   constexpr std::array<glm::vec3, 8> CornerIndex = {glm::vec3(0, 0, 0),
+                                                     glm::vec3(1, 0, 0),
+                                                     glm::vec3(0, 1, 0),
+                                                     glm::vec3(1, 1, 0),
+                                                     glm::vec3(0, 0, 1),
+                                                     glm::vec3(1, 0, 1),
+                                                     glm::vec3(0, 1, 1),
+                                                     glm::vec3(1, 1, 1)};
+
    class GeometryFactory {
     public:
       GeometryFactory();
@@ -51,6 +62,13 @@ namespace tr::gfx::geo {
 
       GeometryFactory(GeometryFactory&&) = delete;
       auto operator=(GeometryFactory&&) -> GeometryFactory& = delete;
+
+      auto createTerrain() -> TexturedGeometryHandle;
+      void polygonizeCell(glm::vec3& offsetPosition,
+                          glm::vec3& cellPosition,
+                          std::vector<as::Vertex>& vertices,
+                          std::vector<uint32_t>& indices,
+                          const VoxelArray& voxelData);
 
       auto createGeometryFromHeightfield(const ct::HeightField& heightField)
           -> TexturedGeometryHandle;
@@ -74,7 +92,8 @@ namespace tr::gfx::geo {
       std::unordered_map<GeometryHandle, GeometryData> geometryDataMap;
       std::unordered_map<ImageHandle, as::ImageData> imageDataMap;
 
-      static auto generateNormal(int x, int y, const ct::HeightField& heightField) -> glm::vec3;
+      static auto generateNormal(int xCoord, int yCoord, const ct::HeightField& heightField)
+          -> glm::vec3;
 
       /// Loads a TRM file from the given path.
       /// @throws IOException if the file cannot be opened or parsed.

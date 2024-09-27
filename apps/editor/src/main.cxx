@@ -3,8 +3,6 @@
 
 #include "Logger2.hpp"
 
-#include <sdf/DistanceField.hpp>
-
 #if defined(TRACY_ENABLE)
 
 void* operator new(const std::size_t count) {
@@ -59,10 +57,6 @@ int main() {
    try {
       const auto app = std::make_unique<ed::Application>(width, height, ss.str());
       Log.info("Initialized");
-
-      auto df = sdf::DistanceField{};
-      auto value = df.getValue(1.0, 2.0, 3.0);
-      Log.info("value at 1, 2, 3: {0}", value);
 
       app->run();
 

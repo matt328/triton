@@ -19,15 +19,6 @@ endif()
 set(CMAKE_WARN_DEPRECATED OFF CACHE BOOL "" FORCE)
 set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS ON CACHE INTERNAL "" FORCE)
 
-# voxel terrain
-FetchContent_Declare(
-   voxel-terrain
-   GIT_REPOSITORY https://github.com/matt328/voxel-terrain.git
-   GIT_TAG main
-   SYSTEM
-)
-FetchContent_MakeAvailable(voxel-terrain)
-
 # Catch2
 set(CATCH_INSTALL_DOCS OFF)
 FetchContent_Declare(

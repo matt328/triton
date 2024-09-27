@@ -24,7 +24,10 @@ namespace sdf {
       auto operator=(const DistanceField&) -> DistanceField& = delete;
       auto operator=(DistanceField&&) -> DistanceField& = delete;
 
-      auto getValue(float xCoord, float yCoord, float zCoord) -> float;
+      [[nodiscard]] auto getValue(float xCoord, float yCoord, float zCoord) const -> float;
+
+      [[nodiscard]] auto getSimplexValue(float xCoord, float yCoord, float zCoord, float div) const
+          -> int8_t;
 
     private:
       static constexpr double Frequency = 16.0;
@@ -35,10 +38,10 @@ namespace sdf {
       std::unique_ptr<FastNoiseLite> perlinNoise;
 
       /// Computes the gradient of the noise function using finite differences
-      auto computeGradient(float xCoord, float yCoord, float zCoord)
+      [[nodiscard]] auto computeGradient(float xCoord, float yCoord, float zCoord) const
           -> std::tuple<float, float, float>;
 
       /// Noise generation function
-      auto getNoiseValue(float xCoord, float yCoord, float zCoord) -> float;
+      [[nodiscard]] auto getNoiseValue(float xCoord, float yCoord, float zCoord) const -> float;
    };
 } // namespace sdf
