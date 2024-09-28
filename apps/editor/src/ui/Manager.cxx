@@ -163,7 +163,9 @@ namespace ed::ui {
       if (ImGui::BeginMainMenuBar()) {
          if (ImGui::BeginMenu("File")) {
 
-            if (ImGui::MenuItem("Create Terrain")) {}
+            if (ImGui::MenuItem("Create Terrain")) {
+               dataFacade.createTerrain("Test Terrain");
+            }
 
             if (ImGui::MenuItem("Import Skeleton")) {
                showPopup = true;

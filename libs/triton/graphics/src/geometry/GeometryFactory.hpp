@@ -1,9 +1,11 @@
 #pragma once
 
+#include "as/Vertex.hpp"
 #include "cm/Rando.hpp"
 #include "HeightField.hpp"
 #include "geometry/GeometryHandles.hpp"
 #include "cm/sdf/DistanceField.hpp"
+#include "geometry/Transvoxel.hpp"
 #include <BaseException.hpp>
 
 namespace tr::as {
@@ -43,14 +45,14 @@ namespace tr::gfx::geo {
    constexpr size_t Size = 16;
    using VoxelArray = std::array<std::array<std::array<int8_t, Size>, Size>, Size>;
 
-   constexpr std::array<glm::vec3, 8> CornerIndex = {glm::vec3(0, 0, 0),
-                                                     glm::vec3(1, 0, 0),
-                                                     glm::vec3(0, 1, 0),
-                                                     glm::vec3(1, 1, 0),
-                                                     glm::vec3(0, 0, 1),
-                                                     glm::vec3(1, 0, 1),
-                                                     glm::vec3(0, 1, 1),
-                                                     glm::vec3(1, 1, 1)};
+   constexpr std::array<glm::ivec3, 8> CornerIndex = {glm::vec3(0, 0, 0),
+                                                      glm::vec3(1, 0, 0),
+                                                      glm::vec3(0, 1, 0),
+                                                      glm::vec3(1, 1, 0),
+                                                      glm::vec3(0, 0, 1),
+                                                      glm::vec3(1, 0, 1),
+                                                      glm::vec3(0, 1, 1),
+                                                      glm::vec3(1, 1, 1)};
 
    class GeometryFactory {
     public:
@@ -64,11 +66,20 @@ namespace tr::gfx::geo {
       auto operator=(GeometryFactory&&) -> GeometryFactory& = delete;
 
       auto createTerrain() -> TexturedGeometryHandle;
-      void polygonizeCell(glm::vec3& offsetPosition,
-                          glm::vec3& cellPosition,
+      void polygonizeCell(glm::ivec3& offsetPosition,
+                          glm::ivec3& cellPosition,
                           std::vector<as::Vertex>& vertices,
                           std::vector<uint32_t>& indices,
                           const VoxelArray& voxelData);
+
+      auto generateVertex(std::vector<as::Vertex>& vertices,
+                          glm::ivec3& offsetPosition,
+                          glm::ivec3& cellPosition,
+                          float t,
+                          uint8_t corner0,
+                          uint8_t corner1,
+                          int8_t distance0,
+                          int8_t distance1) -> int;
 
       auto createGeometryFromHeightfield(const ct::HeightField& heightField)
           -> TexturedGeometryHandle;
@@ -86,6 +97,8 @@ namespace tr::gfx::geo {
       [[nodiscard]] auto getImageData(const ImageHandle& handle) -> as::ImageData&;
 
     private:
+      RegularCellCache cache{Size * 10};
+
       cm::MapKey geometryKey{};
       cm::MapKey imageKey{};
 

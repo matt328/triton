@@ -46,10 +46,9 @@ namespace tr::gfx::tx {
       ZoneNamedN(zn1, "ResourceManager::createTerrain", true);
 
       ZoneNamedN(zn2, "Creating Terrain", true);
-      const auto heightfield = ct::HeightField{static_cast<int>(size)};
 
       // change this to return
-      const auto dataHandle = geometryFactory->createGeometryFromHeightfield(heightfield);
+      const auto dataHandle = geometryFactory->createTerrain();
 
       const auto geometryData = dataHandle.begin();
 
