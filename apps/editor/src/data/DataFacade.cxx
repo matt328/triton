@@ -121,6 +121,14 @@ namespace ed::data {
    }
 
    void DataFacade::createTerrain([[maybe_unused]] const std::string_view& terrainName) {
+      const auto task = gameplayFacade.getCreateTerrainFn();
+
+      std::function<void(tr::cm::EntityType)> onComplete = [this](tr::cm::EntityType entity) {
+         engineBusy = false;
+      };
+
+      engineBusy = true;
+      auto result = taskQueue->enqueue(task, onComplete, 16);
    }
 
    void DataFacade::save(const std::filesystem::path& outputFile) {

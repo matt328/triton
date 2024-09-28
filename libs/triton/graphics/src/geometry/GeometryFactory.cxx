@@ -44,24 +44,31 @@ namespace tr::gfx::geo {
 
       // Min will always be zero for now. It's an offset into the array of chunks and we're starting
       // with just one chunk.
-      auto min = glm::zero<glm::vec3>();
+      auto min = glm::zero<glm::ivec3>();
 
       // For this algorithm, x is left/right, y is in/out, and z is up/down
       // The order has to be x, y, then z so these loops look backwards
       for (size_t zCoord = 0; zCoord < Size - 1; ++zCoord) {
          for (size_t yCoord = 0; yCoord < Size - 1; ++yCoord) {
             for (size_t xCoord = 0; xCoord < Size - 1; ++xCoord) {
-               auto position = glm::vec3(xCoord, yCoord, zCoord);
+               auto position = glm::ivec3(xCoord, yCoord, zCoord);
                polygonizeCell(min, position, vertices, indices, voxelData);
             }
          }
       }
 
-      return {{0, 0}};
+      const auto imageHandle = imageKey.getKey();
+      const auto data = std::vector<unsigned char>(4, 255);
+      imageDataMap.emplace(imageHandle, as::ImageData{data, 1, 1, 4});
+
+      const auto geometryHandle = geometryKey.getKey();
+      geometryDataMap.emplace(geometryHandle, GeometryData{vertices, indices});
+
+      return {{geometryHandle, imageHandle}};
    }
 
-   void GeometryFactory::polygonizeCell(glm::vec3& offsetPosition,
-                                        glm::vec3& cellPosition,
+   void GeometryFactory::polygonizeCell(glm::ivec3& offsetPosition,
+                                        glm::ivec3& cellPosition,
                                         std::vector<as::Vertex>& vertices,
                                         std::vector<uint32_t>& indices,
                                         const VoxelArray& voxelData) {
@@ -107,6 +114,7 @@ namespace tr::gfx::geo {
          const auto vertexCount = equivalenceClass.getVertexCount();
          const auto triangleCount = equivalenceClass.getTriangleCount();
          const auto vertexSequence = equivalenceClass.getVertexIndex();
+         auto mappedIndices = std::vector<uint16_t>{};
 
          const auto vertexLocations = regularVertexData[caseCode];
 
@@ -138,24 +146,62 @@ namespace tr::gfx::geo {
             float t1 = u / 256.F;
 
             int index = -1;
-            // If cellCornderIndex1 is 7, that means there cannot be any previous cell
-            // And if the dirPrev (which comes from the tables) & this cube's direction mask is
-            // itself, that means the vertex in question could have already been generated, so we
-            // have to check.
+            // If cellCornderIndex1 is 7, that means this cell does not own the vertex. And if the
+            // dirPrev (which comes from the tables) & this edge's direction mask is itself, that
+            // means the vertex in question could have already been generated, so we have to check.
             if (cellCornerIndex1 != 7 && (dirPrev & directionMask) == dirPrev) {
-               // TODO:
+               const auto reuseCell = cache.getReusedIndex(cellPosition, dirPrev);
+               index = reuseCell.vertices[reuseIndex];
             }
 
             if (index == -1) {
                // The cube in dirPrev did not generate a vertex on the edge we are needing one
                // so generate one.
+               index = generateVertex(vertices,
+                                      offsetPosition,
+                                      cellPosition,
+                                      t0,
+                                      cellCornerIndex0,
+                                      cellCornerIndex1,
+                                      distance0,
+                                      distance1);
             }
 
             if ((dirPrev & 8) != 0) {
                // dirPrev having bit 8 set means create a new vertex
+               uint16_t lastAddedVertexIndex = 0;
+               cache.setReusableIndex(cellPosition, reuseIndex, lastAddedVertexIndex);
+            }
+            mappedIndices.push_back(index);
+         }
+         for (int t = 0; t < triangleCount; t++) {
+            for (int i = 0; i < 3; ++i) {
+               indices.push_back(mappedIndices[vertexSequence[t * 3 + i]]);
             }
          }
       }
+   }
+
+   auto GeometryFactory::generateVertex(std::vector<as::Vertex>& vertices,
+                                        glm::ivec3& offsetPosition,
+                                        glm::ivec3& cellPosition,
+                                        float t,
+                                        uint8_t corner0,
+                                        uint8_t corner1,
+                                        int8_t distance0,
+                                        int8_t distance1) -> int {
+      auto iP0 = (offsetPosition + CornerIndex[corner0]);
+      auto P0 = glm::vec3(iP0);
+      auto iP1 = (offsetPosition + CornerIndex[corner1]);
+      auto P1 = glm::vec3(iP1);
+
+      auto result = glm::mix(P0, P1, t);
+      auto vertex = as::Vertex{};
+      vertex.pos = result;
+      auto size = vertices.size();
+      vertices.push_back(vertex);
+
+      return size;
    }
 
    void GeometryFactory::unload(const TexturedGeometryHandle& handle) {

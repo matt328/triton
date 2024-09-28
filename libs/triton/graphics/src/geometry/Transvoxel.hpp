@@ -1,6 +1,44 @@
 #pragma once
 
+#include <glm/detail/qualifier.hpp>
 namespace tr::gfx::geo {
+
+   struct ReuseCell {
+      std::vector<uint16_t> vertices;
+      explicit ReuseCell(size_t size) {
+         vertices.resize(size, -1);
+      }
+   };
+
+   class RegularCellCache {
+    public:
+      explicit RegularCellCache(size_t chunkSize) : chunkSize(chunkSize) {
+         cache = {std::vector<ReuseCell>{}, std::vector<ReuseCell>{}};
+         for (size_t size = 0; size < chunkSize * chunkSize; ++size) {
+            cache[0].emplace_back(4);
+            cache[1].emplace_back(4);
+         }
+      }
+
+      auto getReusedIndex(glm::ivec3 pos, int8_t dir) -> ReuseCell {
+         int rx = dir & 0x01;
+         int rz = (dir >> 1) & 0x01;
+         int ry = (dir >> 2) & 0x01;
+
+         int dx = pos.x - rx;
+         int dy = pos.y - ry;
+         int dz = pos.z - rz;
+         return cache[dx & 1][dy * chunkSize + dz];
+      }
+
+      void setReusableIndex(glm::ivec3 pos, int8_t reuseIndex, uint16_t p) {
+         cache[pos.x & 1][pos.y * chunkSize + pos.z].vertices[reuseIndex] = p;
+      }
+
+    private:
+      std::array<std::vector<ReuseCell>, 2> cache;
+      size_t chunkSize;
+   };
 
    struct RegularCellData {
     public:
