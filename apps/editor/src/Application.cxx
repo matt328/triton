@@ -115,7 +115,7 @@ namespace ed {
       glfwSetMouseButtonCallback(window.get(), mouseButtonCallback);
       glfwSetWindowIconifyCallback(window.get(), windowIconifiedCallback);
 
-      context = std::make_unique<tr::ctx::Context>(window.get(), ImguiEnabled, false);
+      context = std::make_unique<tr::ctx::Context>(window.get(), ImguiEnabled, ValidationEnabled);
 
       dataFacade = std::make_unique<data::DataFacade>(context->getGameplayFacade());
 
