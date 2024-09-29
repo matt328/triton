@@ -42,11 +42,11 @@ namespace tr::gfx::geo {
 
    struct RegularCellData {
     public:
-      static constexpr uint32_t MaxVertices = 15;
+      static constexpr uint8_t MaxVertices = 15;
       RegularCellData(uint8_t geometryCounts, std::array<uint8_t, MaxVertices> vertexIndex) noexcept
           : geometryCounts(geometryCounts), vertexIndex(vertexIndex) {
       }
-      [[nodiscard]] auto getVertexCount() const -> uint32_t {
+      [[nodiscard]] auto getVertexCount() const -> uint8_t {
          return (geometryCounts >> HighNibble);
       }
 

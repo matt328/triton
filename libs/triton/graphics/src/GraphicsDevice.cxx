@@ -4,6 +4,7 @@
 #include "mem/Allocator.hpp"
 #include <vk_mem_alloc_structs.hpp>
 #include <vulkan/vulkan_core.h>
+#include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_structs.hpp>
 
 namespace tr::gfx {
@@ -12,7 +13,11 @@ namespace tr::gfx {
 
    GraphicsDevice::GraphicsDevice(GLFWwindow* window, const bool validationEnabled)
        : validationEnabled(validationEnabled) {
-      context = std::make_unique<vk::raii::Context>();
+
+      {
+         ZoneNamedN(zCreateContext, "Create Context", true);
+         context = std::make_unique<vk::raii::Context>();
+      }
 
       // Log available extensions
       // const auto instanceExtensions = context->enumerateInstanceExtensionProperties();
@@ -44,9 +49,10 @@ namespace tr::gfx {
       }
 
       const auto debugCreateInfo = vk::DebugUtilsMessengerCreateInfoEXT{
-          .messageSeverity = vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
+          .messageSeverity = vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo |
+                             vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
                              vk::DebugUtilsMessageSeverityFlagBitsEXT::eError,
-          .messageType = vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral |
+          .messageType = vk::DebugUtilsMessageTypeFlagBitsEXT::eDeviceAddressBinding |
                          vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation |
                          vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance,
           .pfnUserCallback = debugCallbackFn};
@@ -58,7 +64,10 @@ namespace tr::gfx {
          instanceCreateInfo.pNext = &debugCreateInfo;
       }
 
-      instance = std::make_unique<vk::raii::Instance>(*context, instanceCreateInfo);
+      {
+         ZoneNamedN(zone, "Create Instance", true);
+         instance = std::make_unique<vk::raii::Instance>(*context, instanceCreateInfo);
+      }
 
       Log.trace("Created Instance");
 
@@ -250,7 +259,10 @@ namespace tr::gfx {
           .instance = **instance,
       };
 
-      raiillocator = std::make_unique<mem::Allocator>(allocatorCreateInfo, *vulkanDevice);
+      {
+         ZoneNamedN(zone, "Create Allocator", true);
+         raiillocator = std::make_unique<mem::Allocator>(allocatorCreateInfo, *vulkanDevice);
+      }
    }
 
    GraphicsDevice::~GraphicsDevice() {
@@ -429,7 +441,8 @@ namespace tr::gfx {
        [[maybe_unused]] VkDebugUtilsMessageTypeFlagsEXT messageType,
        [[maybe_unused]] const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
        [[maybe_unused]] void* pUserData) {
-      // Log::debug << "Validation Layer: " << pCallbackData->pMessage << std::endl;
+
+      Log.trace("Validation Layer: {0}", pCallbackData->pMessage);
       return VK_FALSE;
    }
 
@@ -442,9 +455,9 @@ namespace tr::gfx {
        const char* pLayerPrefix,
        const char* pMessage,
        [[maybe_unused]] void* userData) -> VkBool32 {
-      if (!strcmp(pLayerPrefix, "Loader Message")) {
-         return VK_FALSE;
-      }
+      // if (!strcmp(pLayerPrefix, "Loader Message")) {
+      //    return VK_FALSE;
+      // }
       Log.debug("Debug Callback ({0}): {1}", pLayerPrefix, pMessage);
       return VK_TRUE;
    }

@@ -37,7 +37,8 @@ namespace tr::gfx::geo {
          for (size_t yCoord = 0; yCoord < Size - 1; ++yCoord) {
             for (size_t xCoord = 0; xCoord < Size - 1; ++xCoord) {
                auto value = distanceField.getSimplexValue(xCoord, yCoord, zCoord, 16.F);
-               voxelData[xCoord][yCoord][zCoord] = static_cast<int8_t>(value);
+               Log.debug("value: {0}", value);
+               voxelData[xCoord][yCoord][zCoord] = value;
             }
          }
       }
@@ -73,8 +74,18 @@ namespace tr::gfx::geo {
                                         std::vector<uint32_t>& indices,
                                         const VoxelArray& voxelData) {
 
+      Log.debug("Working with cell offsetPosition: ({0}, {1}, {2})",
+                offsetPosition.x,
+                offsetPosition.y,
+                offsetPosition.z);
+
+      Log.debug("Working with cell cellPosition: ({0}, {1}, {2})",
+                cellPosition.x,
+                cellPosition.y,
+                cellPosition.z);
+
       /// The position of the current cube (cell) in world chunk space.
-      offsetPosition += cellPosition;
+      auto currentOffsetPosition = offsetPosition + cellPosition;
 
       /// Encodes the direction (+/-) of x,z,y in the first 3 bits of this byte. If the direction
       /// bit is 1, that means a cell exists in that direction, and we can reuse its vertices.
@@ -87,26 +98,30 @@ namespace tr::gfx::geo {
       /// The current cube's corner values from the sdf, as described by fig 3.7
       std::array<int8_t, 8> corner{};
       for (int8_t currentCorner = 0; currentCorner < 8; ++currentCorner) {
-         const auto voxelPosition = offsetPosition + CornerIndex[currentCorner];
+         const auto voxelPosition = currentOffsetPosition + CornerIndex[currentCorner];
+         Log.debug("Sampling Cube Corner from voxelPostion: ({0}, {1}, {2})",
+                   voxelPosition.x,
+                   voxelPosition.y,
+                   voxelPosition.z);
          corner[currentCorner] = voxelData[voxelPosition.x][voxelPosition.y][voxelPosition.z];
       }
 
       /// The corner value in the SDF being non-negative means outside, negative means inside
       /// This code packs only the corner values' sign bits into a single 8 bit value which is how
       /// Lengyel's CellClass and CellData tables are indexed.
-      int8_t caseCode = ((corner[0] >> 7) & 0x01) | ((corner[1] >> 6) & 0x02) |
-                        ((corner[2] >> 5) & 0x04) | ((corner[3] >> 4) & 0x08) |
-                        ((corner[4] >> 3) & 0x10) | ((corner[5] >> 2) & 0x20) |
-                        ((corner[6] >> 1) & 0x40) | (corner[7] & 0x80);
+      uint8_t caseCode = ((corner[0] >> 7) & 0x01) | ((corner[1] >> 6) & 0x02) |
+                         ((corner[2] >> 5) & 0x04) | ((corner[3] >> 4) & 0x08) |
+                         ((corner[4] >> 3) & 0x10) | ((corner[5] >> 2) & 0x20) |
+                         ((corner[6] >> 1) & 0x40) | (corner[7] & 0x80);
 
       // can bail on the whole cell right here with this check
       // 0 means the whole cube is either above or below, in either case, no verts are generated
 
       if ((caseCode ^ ((corner[7] >> 7) & 0xFF)) != 0) {
          Log.debug("Found Cell with non trivial triangulation: ({0}, {1}, {2})",
-                   offsetPosition.x,
-                   offsetPosition.y,
-                   offsetPosition.z);
+                   currentOffsetPosition.x,
+                   currentOffsetPosition.y,
+                   currentOffsetPosition.z);
 
          auto equivalenceClassIndex = regularCellClass[caseCode];
          auto equivalenceClass = regularCellData[equivalenceClassIndex];
@@ -118,7 +133,8 @@ namespace tr::gfx::geo {
 
          const auto vertexLocations = regularVertexData[caseCode];
 
-         for (const auto vertexLocation : vertexLocations) {
+         for (uint8_t vli = 0; vli < vertexCount; ++vli) {
+            auto vertexLocation = vertexLocations[vli];
             /// Edge information is encoded in the high nibble of regularVertexData
             uint8_t edge = vertexLocation >> 8;
             /// Reuse information from the low nibble, this is the index of the vertex in the
@@ -158,7 +174,7 @@ namespace tr::gfx::geo {
                // The cube in dirPrev did not generate a vertex on the edge we are needing one
                // so generate one.
                index = generateVertex(vertices,
-                                      offsetPosition,
+                                      currentOffsetPosition,
                                       cellPosition,
                                       t0,
                                       cellCornerIndex0,

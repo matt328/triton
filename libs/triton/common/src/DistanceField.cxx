@@ -19,10 +19,13 @@ namespace sdf {
       return static_cast<float>(value);
    }
 
-   auto DistanceField::getSimplexValue(float xCoord, float yCoord, float zCoord, float div) const
-       -> int8_t {
-      auto value = perlinNoise->GetNoise(xCoord / div, yCoord / div, zCoord / div) * 128.0;
-      return static_cast<int8_t>(value);
+   auto DistanceField::getSimplexValue(float xCoord,
+                                       float yCoord,
+                                       float zCoord,
+                                       float div) const -> int8_t {
+      auto value = perlinNoise->GetNoise(xCoord / div, yCoord / div, zCoord / div);
+      auto mappedValue = ((value + 1.0F) / 2.0F) * 255.F - 128.F;
+      return static_cast<int8_t>(mappedValue);
    }
 
    auto DistanceField::getValue(float xCoord, float yCoord, float zCoord) const -> float {
@@ -40,8 +43,9 @@ namespace sdf {
       return distanceToIsoSurface;
    }
 
-   auto DistanceField::computeGradient(float xCoord, float yCoord, float zCoord) const
-       -> std::tuple<float, float, float> {
+   auto DistanceField::computeGradient(float xCoord,
+                                       float yCoord,
+                                       float zCoord) const -> std::tuple<float, float, float> {
       constexpr float epsilon = 0.001F;
       return {(getNoiseValue(xCoord + epsilon, 0, 0) - getNoiseValue(xCoord - epsilon, 0, 0)) /
                   (2 * epsilon),
