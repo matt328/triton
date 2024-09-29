@@ -37,7 +37,6 @@ namespace tr::gfx::geo {
          for (size_t yCoord = 0; yCoord < Size - 1; ++yCoord) {
             for (size_t xCoord = 0; xCoord < Size - 1; ++xCoord) {
                auto value = distanceField.getSimplexValue(xCoord, yCoord, zCoord, 16.F);
-               Log.debug("value: {0}", value);
                voxelData[xCoord][yCoord][zCoord] = value;
             }
          }
@@ -74,16 +73,6 @@ namespace tr::gfx::geo {
                                         std::vector<uint32_t>& indices,
                                         const VoxelArray& voxelData) {
 
-      Log.debug("Working with cell offsetPosition: ({0}, {1}, {2})",
-                offsetPosition.x,
-                offsetPosition.y,
-                offsetPosition.z);
-
-      Log.debug("Working with cell cellPosition: ({0}, {1}, {2})",
-                cellPosition.x,
-                cellPosition.y,
-                cellPosition.z);
-
       /// The position of the current cube (cell) in world chunk space.
       auto currentOffsetPosition = offsetPosition + cellPosition;
 
@@ -99,10 +88,7 @@ namespace tr::gfx::geo {
       std::array<int8_t, 8> corner{};
       for (int8_t currentCorner = 0; currentCorner < 8; ++currentCorner) {
          const auto voxelPosition = currentOffsetPosition + CornerIndex[currentCorner];
-         Log.debug("Sampling Cube Corner from voxelPostion: ({0}, {1}, {2})",
-                   voxelPosition.x,
-                   voxelPosition.y,
-                   voxelPosition.z);
+
          corner[currentCorner] = voxelData[voxelPosition.x][voxelPosition.y][voxelPosition.z];
       }
 
@@ -117,12 +103,9 @@ namespace tr::gfx::geo {
       // can bail on the whole cell right here with this check
       // 0 means the whole cube is either above or below, in either case, no verts are generated
 
-      if ((caseCode ^ ((corner[7] >> 7) & 0xFF)) != 0) {
-         Log.debug("Found Cell with non trivial triangulation: ({0}, {1}, {2})",
-                   currentOffsetPosition.x,
-                   currentOffsetPosition.y,
-                   currentOffsetPosition.z);
+      auto validCell = (caseCode ^ ((corner[7] >> 7) & 0xFF)) != 0;
 
+      if (validCell) {
          auto equivalenceClassIndex = regularCellClass[caseCode];
          auto equivalenceClass = regularCellData[equivalenceClassIndex];
 
@@ -215,6 +198,7 @@ namespace tr::gfx::geo {
       auto vertex = as::Vertex{};
       vertex.pos = result;
       auto size = vertices.size();
+      Log.debug("Vertex: {0}", vertex);
       vertices.push_back(vertex);
 
       return size;

@@ -150,6 +150,7 @@
       "clangd.arguments": [
          "--background-index",
          "--compile-commands-dir=build/debug"
-      ]
+      ],
+      "lldb.library": "c:\\program files\\llvm\\bin\\liblldb.dll"
    }
 }
