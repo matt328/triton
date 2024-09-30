@@ -3,15 +3,6 @@
       {
          "path": "."
       },
-      {
-         "path": "../../AppData/Roaming/editor"
-      },
-      {
-         "path": "../triton.wiki"
-      },
-      {
-         "path": "../game-assets"
-      }
    ],
    "settings": {
       "files.associations": {
@@ -151,6 +142,6 @@
          "--background-index",
          "--compile-commands-dir=build/debug"
       ],
-      "lldb.library": "c:\\program files\\llvm\\bin\\liblldb.dll"
+      "lldb.library": "/usr/lib/liblldb.so"
    }
 }
