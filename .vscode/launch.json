@@ -5,6 +5,17 @@
    "version": "0.2.0",
    "configurations": [
       {
+         "name": "(Windows) Launch",
+         "type": "cppvsdbg",
+         "request": "launch",
+         "program": "${workspaceFolder}/build/debug/apps/editor/editor",
+         "args": [],
+         "cwd": "${workspaceFolder}",
+         "stopAtEntry": false,
+         "environment": [],
+         "visualizerFile": "${workspaceFolder}/.vscode/ufbx.natvis"
+      },
+      {
          "type": "lldb-dap",
          "request": "launch",
          "name": "(lldb) Launch",
