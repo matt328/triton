@@ -141,7 +141,6 @@
       "clangd.arguments": [
          "--background-index",
          "--compile-commands-dir=build/debug"
-      ],
-      "lldb.library": "/usr/lib/liblldb.so"
+      ]
    }
 }

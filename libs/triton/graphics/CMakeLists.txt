@@ -53,6 +53,7 @@ target_precompile_headers(${PROJECT_NAME}
    <vulkan/vulkan_raii.hpp>
    <vk_mem_alloc.hpp>
    PRIVATE
+   <bitset>
    <filesystem>
    <fstream>
    <future>
