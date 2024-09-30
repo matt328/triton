@@ -12,6 +12,7 @@
 #include <cereal/archives/json.hpp>
 #include <cstddef>
 #include <cstdint>
+#include <glm/gtx/string_cast.hpp>
 
 // NOLINTBEGIN
 
