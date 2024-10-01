@@ -27,17 +27,24 @@ namespace tr::gfx::geo {
    GeometryFactory::~GeometryFactory() { // NOLINT(*-use-equals-default)
    }
 
+   auto GeometryFactory::sdfPlane(const glm::vec3& point, const glm::ivec3& normal, float distance)
+       -> int8_t {
+      auto value = point.x * normal.x + point.y * normal.y + point.z * normal.z - distance;
+      float scaledValue = (value / 10) * 127.f;
+      int8_t result = static_cast<int8_t>(std::clamp(scaledValue, -128.f, 127.f));
+      return result;
+   }
+
    auto GeometryFactory::createTerrain() -> TexturedGeometryHandle {
       auto vertices = std::vector<as::Vertex>{};
       auto indices = std::vector<uint32_t>{};
-      const auto distanceField = sdf::DistanceField{};
 
-      auto voxelData = VoxelArray{{0, 0}};
+      auto voxelData = VoxelArray{{{}}};
 
       for (size_t zCoord = 0; zCoord < Size - 1; ++zCoord) {
          for (size_t yCoord = 0; yCoord < Size - 1; ++yCoord) {
             for (size_t xCoord = 0; xCoord < Size - 1; ++xCoord) {
-               auto value = distanceField.getSimplexValue(xCoord, yCoord, zCoord, 16.F);
+               auto value = sdfPlane(glm::ivec3(xCoord, yCoord, zCoord), glm::ivec3(0, 1, 0), 0.5);
                voxelData[xCoord][yCoord][zCoord] = value;
             }
          }

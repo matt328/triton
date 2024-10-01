@@ -42,7 +42,7 @@ namespace tr::gfx::geo {
 
    using GeometryDataRef = std::optional<std::reference_wrapper<GeometryData>>;
 
-   constexpr size_t Size = 16;
+   constexpr size_t Size = 4;
    using VoxelArray = std::array<std::array<std::array<int8_t, Size>, Size>, Size>;
 
    constexpr std::array<glm::ivec3, 8> CornerIndex = {glm::vec3(0, 0, 0),
@@ -64,6 +64,8 @@ namespace tr::gfx::geo {
 
       GeometryFactory(GeometryFactory&&) = delete;
       auto operator=(GeometryFactory&&) -> GeometryFactory& = delete;
+
+      auto sdfPlane(const glm::vec3& point, const glm::ivec3& normal, float distance) -> int8_t;
 
       auto createTerrain() -> TexturedGeometryHandle;
       void polygonizeCell(glm::ivec3& offsetPosition,

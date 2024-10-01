@@ -344,7 +344,7 @@ namespace tr::gfx {
       }
 
       void recordCommandBuffer(Frame& frame, const unsigned imageIndex) {
-         auto& cmd = frame.getCommandBuffer();
+         const auto& cmd = frame.getCommandBuffer();
 
          /*
             These buffers need to be updated at this point in time since we know they're not being
@@ -378,7 +378,7 @@ namespace tr::gfx {
 
             frame.updatePerFrameDataBuffer(&renderData.cameraData, sizeof(cm::gpu::CameraData));
 
-            // TODO Rename this AnimationData class
+            // TODO(Matt): Rename this AnimationData class
             frame.updateAnimationDataBuffer(renderData.animationData.data(),
                                             sizeof(cm::gpu::AnimationData) *
                                                 renderData.animationData.size());
@@ -397,7 +397,7 @@ namespace tr::gfx {
 
          resourceManager->accessTextures(
              [&frame](const std::vector<vk::DescriptorImageInfo>& imageInfoList) {
-                ZoneNamedN(a, "Updating Texture DB", true);
+                ZoneNamedN(zone, "Updating Texture DB", true);
                 frame.updateTextures(imageInfoList);
              });
 
