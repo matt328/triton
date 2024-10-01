@@ -99,10 +99,10 @@ namespace ed::data {
       ~DataFacade();
 
       DataFacade(const DataFacade&) = delete;
-      DataFacade& operator=(const DataFacade&) = delete;
+      auto operator=(const DataFacade&) -> DataFacade& = delete;
 
       DataFacade(DataFacade&&) = delete;
-      DataFacade& operator=(DataFacade&&) = delete;
+      auto operator=(DataFacade&&) -> DataFacade& = delete;
 
       void update() const;
 
@@ -174,4 +174,5 @@ namespace ed::data {
       std::unordered_map<std::string, tr::cm::EntityType> entityNameMap{};
       std::unique_ptr<tr::util::TaskQueue> taskQueue;
    };
-}
+
+} // namespace ed::data
