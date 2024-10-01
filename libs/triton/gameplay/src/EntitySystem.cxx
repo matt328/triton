@@ -69,9 +69,7 @@ namespace tr::gp {
 
       registry->emplace<cmp::Renderable>(e, renderable);
       registry->emplace<cmp::TerrainMarker>(e);
-      registry->emplace<cmp::Transform>(e,
-                                        glm::zero<glm::vec3>(),
-                                        glm::vec3(-550.f, -1000.f, -5700.f));
+      registry->emplace<cmp::Transform>(e, glm::zero<glm::vec3>(), glm::vec3(0.f, -5.f, -50.f));
 
       const auto debugConstants = registry->create();
       registry->emplace<cmp::Transform>(debugConstants,
