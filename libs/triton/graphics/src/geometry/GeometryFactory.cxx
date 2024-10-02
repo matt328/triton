@@ -13,6 +13,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <glm/gtx/string_cast.hpp>
+#include "cm/sdf/VoxelMetrics.hpp"
 
 // NOLINTBEGIN
 
@@ -114,6 +115,8 @@ namespace tr::gfx::geo {
       auto validCell = (caseCode ^ ((corner[7] >> 7) & 0xFF)) != 0;
 
       if (validCell) {
+         cm::sdf::VoxelDebugger::getInstance().addActiveCube(cellPosition, caseCode);
+
          auto equivalenceClassIndex = regularCellClass[caseCode];
          auto equivalenceClass = regularCellData[equivalenceClassIndex];
 
