@@ -101,13 +101,15 @@ namespace tr::gfx::geo {
          corner[currentCorner] = voxelData[voxelPosition.x][voxelPosition.y][voxelPosition.z];
       }
 
+      // TODO: given the sdf values at the corners, the case code is not being generated correctly
+
       /// The corner value in the SDF being non-negative means outside, negative means inside
       /// This code packs only the corner values' sign bits into a single 8 bit value which is how
       /// Lengyel's CellClass and CellData tables are indexed.
-      uint8_t caseCode = ((corner[0] >> 7) & 0x01) | ((corner[1] >> 6) & 0x02) |
-                         ((corner[2] >> 5) & 0x04) | ((corner[3] >> 4) & 0x08) |
-                         ((corner[4] >> 3) & 0x10) | ((corner[5] >> 2) & 0x20) |
-                         ((corner[6] >> 1) & 0x40) | (corner[7] & 0x80);
+      uint8_t caseCode = ((corner[0] >> 7) & 0x01) | ((corner[1] >> 7) & 0x01) << 1 |
+                         ((corner[2] >> 7) & 0x01) << 2 | ((corner[3] >> 7) & 0x01) << 3 |
+                         ((corner[4] >> 7) & 0x01) << 4 | ((corner[5] >> 7) & 0x01) << 5 |
+                         ((corner[6] >> 7) & 0x01) << 6 | ((corner[7] >> 7) & 0x01) << 7;
 
       // can bail on the whole cell right here with this check
       // 0 means the whole cube is either above or below, in either case, no verts are generated
@@ -115,10 +117,12 @@ namespace tr::gfx::geo {
       auto validCell = (caseCode ^ ((corner[7] >> 7) & 0xFF)) != 0;
 
       if (validCell) {
-         cm::sdf::VoxelDebugger::getInstance().addActiveCube(cellPosition, caseCode);
-
          auto equivalenceClassIndex = regularCellClass[caseCode];
          auto equivalenceClass = regularCellData[equivalenceClassIndex];
+
+         cm::sdf::VoxelDebugger::getInstance().addActiveCube(cellPosition,
+                                                             caseCode,
+                                                             equivalenceClassIndex);
 
          const auto vertexCount = equivalenceClass.getVertexCount();
          const auto triangleCount = equivalenceClass.getTriangleCount();
