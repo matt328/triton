@@ -129,18 +129,9 @@ namespace ed::data {
          engineBusy = false;
          const auto& cellData = tr::cm::sdf::VoxelDebugger::getInstance().getActiveCubePositions();
          for (const auto& cell : cellData) {
-            const auto& hex = fmt::format("{:02x}", cell.caseCode);
-            auto bitsetCaseCode = std::bitset<8>{cell.caseCode};
-            Log.debug("Cell Position: ({0}, {1}, {2}), Case Code {3} (0x{4}) {5}",
-                      cell.offset.x,
-                      cell.offset.y,
-                      cell.offset.z,
-                      cell.caseCode,
-                      hex,
-                      bitsetCaseCode.to_string());
+            Log.debug("{0}", cell.toString());
          }
       };
-
       engineBusy = true;
       auto result = taskQueue->enqueue(task, onComplete, 16);
    }

@@ -1,10 +1,28 @@
 #pragma once
 
+#include <bitset>
+
 namespace tr::cm::sdf {
 
    struct CellData {
       const glm::ivec3 offset;
       const uint8_t caseCode;
+      const int8_t equivalenceClassNumber;
+
+      [[nodiscard]] auto toString() const -> std::string {
+         const auto& hex = fmt::format("{:02x}", caseCode);
+         auto bitsetCaseCode = std::bitset<8>{caseCode};
+         auto str = fmt::format("Cell Position: ({0}, {1}, {2}), Case Code {3} (0x{4}) {5}, "
+                                "Equivalence Class Number: {6}",
+                                offset.x,
+                                offset.y,
+                                offset.z,
+                                caseCode,
+                                hex,
+                                bitsetCaseCode.to_string(),
+                                equivalenceClassNumber);
+         return str;
+      }
    };
 
    class VoxelDebugger {
@@ -35,4 +53,4 @@ namespace tr::cm::sdf {
       std::vector<CellData> activeCubes;
    };
 
-} // namespace tr::gfx
+} // namespace tr::cm::sdf
