@@ -1,5 +1,6 @@
 #include "Manager.hpp"
 
+#include "cm/sdf/VoxelMetrics.hpp"
 #include "tr/GameplayFacade.hpp"
 
 #include "Properties.hpp"
