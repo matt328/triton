@@ -2,6 +2,8 @@
 
 #include "cm/EntitySystemTypes.hpp"
 #include "TaskQueue.hpp"
+#include "cm/sdf/VoxelMetrics.hpp"
+#include <bitset>
 
 namespace ed::data {
 
@@ -121,10 +123,22 @@ namespace ed::data {
    }
 
    void DataFacade::createTerrain([[maybe_unused]] const std::string_view& terrainName) {
-      const auto task = gameplayFacade.getCreateTerrainFn();
+      auto task = gameplayFacade.getCreateTerrainFn();
 
       std::function<void(tr::cm::EntityType)> onComplete = [this](tr::cm::EntityType entity) {
          engineBusy = false;
+         const auto& cellData = tr::cm::sdf::VoxelDebugger::getInstance().getActiveCubePositions();
+         for (const auto& cell : cellData) {
+            const auto& hex = fmt::format("{:02x}", cell.caseCode);
+            auto bitsetCaseCode = std::bitset<8>{cell.caseCode};
+            Log.debug("Cell Position: ({0}, {1}, {2}), Case Code {3} (0x{4}) {5}",
+                      cell.offset.x,
+                      cell.offset.y,
+                      cell.offset.z,
+                      cell.caseCode,
+                      hex,
+                      bitsetCaseCode.to_string());
+         }
       };
 
       engineBusy = true;
