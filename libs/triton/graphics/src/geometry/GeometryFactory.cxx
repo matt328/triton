@@ -28,11 +28,18 @@ namespace tr::gfx::geo {
    GeometryFactory::~GeometryFactory() { // NOLINT(*-use-equals-default)
    }
 
-   auto GeometryFactory::sdfPlane(const glm::vec3& point, const glm::ivec3& normal, float distance)
+   auto GeometryFactory::sdfPlane(const glm::vec3& point, const glm::vec3& normal, float distance)
        -> int8_t {
-      auto value = point.x * normal.x + point.y * normal.y + point.z * normal.z - distance;
-      float scaledValue = (value / 10) * 127.f;
-      int8_t result = static_cast<int8_t>(std::clamp(scaledValue, -128.f, 127.f));
+
+      int8_t result = 0;
+
+      if (point.y > 1) {
+         result = 64;
+      } else if (point.y <= 1) {
+         result = -64;
+      }
+      assert(result != 0);
+
       return result;
    }
 
@@ -42,10 +49,11 @@ namespace tr::gfx::geo {
 
       auto voxelData = VoxelArray{{{}}};
 
-      for (size_t xCoord = 0; xCoord < Size - 1; ++xCoord) {
-         for (size_t yCoord = 0; yCoord < Size - 1; ++yCoord) {
-            for (size_t zCoord = 0; zCoord < Size - 1; ++zCoord) {
-               auto value = sdfPlane(glm::ivec3(xCoord, yCoord, zCoord), glm::ivec3(0, 1, 0), 0.5);
+      for (size_t xCoord = 0; xCoord < Size; ++xCoord) {
+         for (size_t yCoord = 0; yCoord < Size; ++yCoord) {
+            for (size_t zCoord = 0; zCoord < Size; ++zCoord) {
+               auto value = sdfPlane(glm::ivec3(xCoord, yCoord, zCoord), glm::ivec3(0, 1, 0), .5);
+               assert(value != 0);
                voxelData[xCoord][yCoord][zCoord] = value;
             }
          }
@@ -55,10 +63,9 @@ namespace tr::gfx::geo {
       // with just one chunk.
       auto min = glm::zero<glm::ivec3>();
 
-      // For this algorithm, x is left/right, y is in/out, and z is up/down
-      // The order has to be x, y, then z so these loops look backwards
-      for (size_t zCoord = 0; zCoord < Size - 1; ++zCoord) {
-         for (size_t yCoord = 0; yCoord < Size - 1; ++yCoord) {
+      // Visit cells in the xz plane first, then repeat 'up' the y direction
+      for (size_t yCoord = 0; yCoord < Size - 1; ++yCoord) {
+         for (size_t zCoord = 0; zCoord < Size - 1; ++zCoord) {
             for (size_t xCoord = 0; xCoord < Size - 1; ++xCoord) {
                auto position = glm::ivec3(xCoord, yCoord, zCoord);
                polygonizeCell(min, position, vertices, indices, voxelData);
@@ -97,7 +104,9 @@ namespace tr::gfx::geo {
       std::array<int8_t, 8> corner{};
       for (int8_t currentCorner = 0; currentCorner < 8; ++currentCorner) {
          const auto voxelPosition = currentOffsetPosition + CornerIndex[currentCorner];
-         corner[currentCorner] = voxelData[voxelPosition.x][voxelPosition.y][voxelPosition.z];
+         auto voxelValue = voxelData[voxelPosition.x][voxelPosition.y][voxelPosition.z];
+         assert(voxelValue != 0);
+         corner[currentCorner] = voxelValue;
          Log.debug("corner[{0}]: {1}", currentCorner, corner[currentCorner]);
       }
 
@@ -106,10 +115,14 @@ namespace tr::gfx::geo {
       /// The corner value in the SDF being non-negative means outside, negative means inside
       /// This code packs only the corner values' sign bits into a single 8 bit value which is how
       /// Lengyel's CellClass and CellData tables are indexed.
-      uint8_t caseCode = ((corner[0] >> 7) & 0x01) | ((corner[1] >> 7) & 0x01) << 1 |
-                         ((corner[2] >> 7) & 0x01) << 2 | ((corner[3] >> 7) & 0x01) << 3 |
-                         ((corner[4] >> 7) & 0x01) << 4 | ((corner[5] >> 7) & 0x01) << 5 |
-                         ((corner[6] >> 7) & 0x01) << 6 | ((corner[7] >> 7) & 0x01) << 7;
+      uint8_t caseCode = ((corner[0] >> 7) & 0x01) << 7 | // Corner 0
+                         ((corner[1] >> 7) & 0x01) << 6 | // Corner 1
+                         ((corner[2] >> 7) & 0x01) << 5 | // Corner 2
+                         ((corner[3] >> 7) & 0x01) << 4 | // Corner 3
+                         ((corner[4] >> 7) & 0x01) << 3 | // Corner 4
+                         ((corner[5] >> 7) & 0x01) << 2 | // Corner 5
+                         ((corner[6] >> 7) & 0x01) << 1 | // Corner 6
+                         ((corner[7] >> 7) & 0x01);       // Corner 7
 
       // can bail on the whole cell right here with this check
       // 0 means the whole cell is either above or below, in either case, no verts are generated
