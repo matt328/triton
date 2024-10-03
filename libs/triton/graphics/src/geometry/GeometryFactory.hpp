@@ -65,7 +65,7 @@ namespace tr::gfx::geo {
       GeometryFactory(GeometryFactory&&) = delete;
       auto operator=(GeometryFactory&&) -> GeometryFactory& = delete;
 
-      auto sdfPlane(const glm::vec3& point, const glm::ivec3& normal, float distance) -> int8_t;
+      auto sdfPlane(const glm::vec3& point, const glm::vec3& normal, float distance) -> int8_t;
 
       auto createTerrain() -> TexturedGeometryHandle;
       void polygonizeCell(glm::ivec3& offsetPosition,
