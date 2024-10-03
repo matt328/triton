@@ -43,14 +43,14 @@ namespace tr::gfx::geo {
    using GeometryDataRef = std::optional<std::reference_wrapper<GeometryData>>;
 
    constexpr size_t Size = 4;
-   using VoxelArray = std::array<std::array<std::array<int8_t, Size>, Size>, Size>;
+   using VoxelArray = std::array<std::array<std::array<float, Size>, Size>, Size>;
 
    constexpr std::array<glm::ivec3, 8> CornerIndex = {glm::vec3(0, 0, 0),
                                                       glm::vec3(1, 0, 0),
-                                                      glm::vec3(0, 1, 0),
-                                                      glm::vec3(1, 1, 0),
                                                       glm::vec3(0, 0, 1),
                                                       glm::vec3(1, 0, 1),
+                                                      glm::vec3(0, 1, 0),
+                                                      glm::vec3(1, 1, 0),
                                                       glm::vec3(0, 1, 1),
                                                       glm::vec3(1, 1, 1)};
 

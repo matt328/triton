@@ -42,9 +42,9 @@ namespace tr::gfx::geo {
 
       auto voxelData = VoxelArray{{{}}};
 
-      for (size_t zCoord = 0; zCoord < Size - 1; ++zCoord) {
+      for (size_t xCoord = 0; xCoord < Size - 1; ++xCoord) {
          for (size_t yCoord = 0; yCoord < Size - 1; ++yCoord) {
-            for (size_t xCoord = 0; xCoord < Size - 1; ++xCoord) {
+            for (size_t zCoord = 0; zCoord < Size - 1; ++zCoord) {
                auto value = sdfPlane(glm::ivec3(xCoord, yCoord, zCoord), glm::ivec3(0, 1, 0), 0.5);
                voxelData[xCoord][yCoord][zCoord] = value;
             }
@@ -97,8 +97,8 @@ namespace tr::gfx::geo {
       std::array<int8_t, 8> corner{};
       for (int8_t currentCorner = 0; currentCorner < 8; ++currentCorner) {
          const auto voxelPosition = currentOffsetPosition + CornerIndex[currentCorner];
-
          corner[currentCorner] = voxelData[voxelPosition.x][voxelPosition.y][voxelPosition.z];
+         Log.debug("corner[{0}]: {1}", currentCorner, corner[currentCorner]);
       }
 
       // TODO: given the sdf values at the corners, the case code is not being generated correctly
@@ -112,7 +112,7 @@ namespace tr::gfx::geo {
                          ((corner[6] >> 7) & 0x01) << 6 | ((corner[7] >> 7) & 0x01) << 7;
 
       // can bail on the whole cell right here with this check
-      // 0 means the whole cube is either above or below, in either case, no verts are generated
+      // 0 means the whole cell is either above or below, in either case, no verts are generated
 
       auto validCell = (caseCode ^ ((corner[7] >> 7) & 0xFF)) != 0;
 
