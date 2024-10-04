@@ -8,6 +8,7 @@ namespace tr::cm::sdf {
       const glm::ivec3 offset;
       const uint8_t caseCode;
       const int8_t equivalenceClassNumber;
+      const std::vector<glm::vec3> vertices;
 
       [[nodiscard]] auto toString() const -> std::string {
          const auto& hex = fmt::format("{:02x}", caseCode);
