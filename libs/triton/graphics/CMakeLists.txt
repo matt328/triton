@@ -1,27 +1,26 @@
 project("graphics")
 
 set(graphics_SRC
-   "src/HeightField.cxx"
-   "src/Frame.cxx"
-   "src/GraphicsDevice.cxx"
-   "src/PipelineBuilder.cxx"
-   "src/VkContext.cxx"
-   "src/RenderContext.cxx"
-   "src/geometry/Vertex.cxx"
-   "src/gui/ImguiHelper.cxx"
-   "src/helpers/SpirvHelper.cxx"
-   "src/textures/Texture.cxx"
-   "src/textures/ResourceManager.cxx"
-   "src/mem/Image.cxx"
-   "src/mem/Buffer.cxx"
-   "src/mem/Allocator.cxx"
-   "src/sb/DSShaderBinding.cxx"
-   "src/sb/ShaderBindingFactory.cxx"
-
-   "src/sb/LayoutFactory.cxx"
-   "src/sb/Layout.cxx"
-
-   "src/geometry/GeometryFactory.cxx"
+   src/HeightField.cxx
+   src/Frame.cxx
+   src/GraphicsDevice.cxx
+   src/PipelineBuilder.cxx
+   src/VkContext.cxx
+   src/RenderContext.cxx
+   src/geometry/Vertex.cxx
+   src/gui/ImguiHelper.cxx
+   src/helpers/SpirvHelper.cxx
+   src/textures/Texture.cxx
+   src/textures/ResourceManager.cxx
+   src/mem/Image.cxx
+   src/mem/Buffer.cxx
+   src/mem/Allocator.cxx
+   src/sb/DSShaderBinding.cxx
+   src/sb/ShaderBindingFactory.cxx
+   src/sb/LayoutFactory.cxx
+   src/sb/Layout.cxx
+   src/geometry/GeometryFactory.cxx
+   src/imdd.cxx
 )
 
 add_library(${PROJECT_NAME} STATIC ${graphics_SRC})

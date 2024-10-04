@@ -6,7 +6,12 @@
 #define VK_NO_PROTOTYPES
 #include <vulkan/vulkan_raii.hpp>
 
+#include "imdd/imdd_draw_vulkan.h"
+#include "imdd/imdd.h"
+
 struct GLFWwindow;
+
+struct imdd_shape_store_tag;
 
 namespace tr::gfx {
 
@@ -111,6 +116,8 @@ namespace tr::gfx {
       [[nodiscard]] std::pair<uint32_t, uint32_t> getCurrentSize() const;
 
       void recreateSwapchain();
+      imdd_shape_store_tag* store;
+      imdd_vulkan_context_t ctx;
 
     private:
       bool validationEnabled;

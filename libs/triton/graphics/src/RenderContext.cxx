@@ -371,7 +371,9 @@ namespace tr::gfx {
          terrainDataList.clear();
          skinnedModelList.clear();
 
-         resourceManager->accessRenderData([&frame, this](cm::gpu::RenderData& renderData) {
+         float* ptr;
+
+         resourceManager->accessRenderData([&frame, &ptr, this](cm::gpu::RenderData& renderData) {
             frame.updateObjectDataBuffer(renderData.objectData.data(),
                                          sizeof(cm::gpu::ObjectData) *
                                              renderData.objectData.size());
@@ -393,6 +395,8 @@ namespace tr::gfx {
             std::ranges::copy(renderData.skinnedMeshData, std::back_inserter(skinnedModelList));
 
             pushConstants = renderData.pushConstants;
+
+            ptr = glm::value_ptr(renderData.cameraData.proj);
          });
 
          resourceManager->accessTextures(
@@ -405,6 +409,30 @@ namespace tr::gfx {
              vk::CommandBufferBeginInfo{.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse});
          {
             frame.prepareFrame();
+
+            imdd_reset(graphicsDevice->store);
+
+            imdd_v4 const half_extents = imdd_v4_init_1f(1.f);
+            imdd_v4 const centre = imdd_v4_init_1f(0.f);
+
+            imdd_aabb(graphicsDevice->store,
+                      IMDD_STYLE_FILLED,
+                      IMDD_ZMODE_TEST,
+                      imdd_v4_sub(centre, half_extents),
+                      imdd_v4_add(centre, half_extents),
+                      0xff0000ffU);
+
+            imdd_shape_store_t const* draw_stores = graphicsDevice->store;
+            imdd_vulkan_update(&graphicsDevice->ctx,
+                               &draw_stores,
+                               1,
+                               *graphicsDevice->getVulkanDevice(),
+                               *frame.getCommandBuffer());
+
+            imdd_vulkan_draw(&graphicsDevice->ctx,
+                             ptr,
+                             *graphicsDevice->getVulkanDevice(),
+                             *frame.getCommandBuffer());
 
             // Static Models
             cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, **staticModelPipeline);

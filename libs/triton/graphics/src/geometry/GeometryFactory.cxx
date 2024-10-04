@@ -107,7 +107,6 @@ namespace tr::gfx::geo {
          auto voxelValue = voxelData[voxelPosition.x][voxelPosition.y][voxelPosition.z];
          assert(voxelValue != 0);
          corner[currentCorner] = voxelValue;
-         Log.debug("corner[{0}]: {1}", currentCorner, corner[currentCorner]);
       }
 
       // TODO: given the sdf values at the corners, the case code is not being generated correctly
