@@ -58,6 +58,7 @@ namespace tr::gfx {
 
          pb = std::make_unique<PipelineBuilder>(graphicsDevice->getVulkanDevice());
 
+         // Static Model Pipeline
          pb->setDefaultVertexAttributeDescriptions();
          pb->setVertexShaderStage(vsm);
          pb->setFragmentShaderStage(fsm);
@@ -80,6 +81,7 @@ namespace tr::gfx {
          auto terrainFragment = helper->createShaderModule(vk::ShaderStageFlagBits::eFragment,
                                                            util::Paths::SHADERS / "terrain.frag");
 
+         // Terrain Pipeline
          pb->clearShaderStages();
          pb->setVertexShaderStage(terrainVertex);
          pb->setFragmentShaderStage(terrainFragment);
@@ -93,6 +95,7 @@ namespace tr::gfx {
          auto debugFragment = helper->createShaderModule(vk::ShaderStageFlagBits::eFragment,
                                                          util::Paths::SHADERS / "debug.frag");
 
+         // Wireframe Pipeline
          pb->clearShaderStages();
          pb->setVertexShaderStage(debugVertex);
          pb->setFragmentShaderStage(debugFragment);
@@ -113,6 +116,7 @@ namespace tr::gfx {
                                 geo::VertexComponent::Joint0,
                                 geo::VertexComponent::Weight0};
 
+         // Skinned Model Pipeline
          pb->clearShaderStages();
          pb->setVertexShaderStage(skinnedVertex);
          pb->setFragmentShaderStage(skinnedFragment);
@@ -129,6 +133,8 @@ namespace tr::gfx {
              pb->buildPipelineLayout(skinnedSetLayouts, "Skinned Model Pipeline Layout");
          skinnedModelPipeline =
              pb->buildPipeline(*skinnedModelPipelineLayout, "Skinned Model Pipeline");
+
+         // Debug Rendering Pipeline(s)
 
          initDepthResources();
 
@@ -409,30 +415,6 @@ namespace tr::gfx {
              vk::CommandBufferBeginInfo{.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse});
          {
             frame.prepareFrame();
-
-            imdd_reset(graphicsDevice->store);
-
-            imdd_v4 const half_extents = imdd_v4_init_1f(1.f);
-            imdd_v4 const centre = imdd_v4_init_1f(0.f);
-
-            imdd_aabb(graphicsDevice->store,
-                      IMDD_STYLE_FILLED,
-                      IMDD_ZMODE_TEST,
-                      imdd_v4_sub(centre, half_extents),
-                      imdd_v4_add(centre, half_extents),
-                      0xff0000ffU);
-
-            imdd_shape_store_t const* draw_stores = graphicsDevice->store;
-            imdd_vulkan_update(&graphicsDevice->ctx,
-                               &draw_stores,
-                               1,
-                               *graphicsDevice->getVulkanDevice(),
-                               *frame.getCommandBuffer());
-
-            imdd_vulkan_draw(&graphicsDevice->ctx,
-                             ptr,
-                             *graphicsDevice->getVulkanDevice(),
-                             *frame.getCommandBuffer());
 
             // Static Models
             cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, **staticModelPipeline);
