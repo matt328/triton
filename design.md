@@ -1,5 +1,27 @@
 # Design Notes
 
+## Debug Renderer
+
+- Store/Cache to hold primitives and their descriptions
+- static access to add things to the store
+
+- init()
+  - shaders
+  - ShaderBindings
+  - pipelines
+  - Dynamic Vertex/Index Buffers
+  - Transform buffer
+  - Color buffer
+  - common uniform buffer
+
+- update()
+  - copy buffers
+
+- render()
+  - bind buffers
+  - draw indexed from the store
+
+
 ## Architecture Overview
 
 ### Triton (Engine Itself, static lib, `tr`)
