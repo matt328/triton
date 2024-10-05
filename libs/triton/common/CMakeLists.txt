@@ -41,6 +41,5 @@ target_include_directories(${PROJECT_NAME}
    include
    PRIVATE
    include/cm
-   include/cm/imdd
    src
 )

@@ -7,9 +7,6 @@
 #include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_structs.hpp>
 
-#include "imdd/imdd.h"
-#include "imdd/imdd_draw_vulkan.h"
-
 namespace tr::gfx {
 
    const std::vector DESIRED_VALIDATION_LAYERS = {"VK_LAYER_KHRONOS_validation"};
@@ -265,30 +262,6 @@ namespace tr::gfx {
       {
          ZoneNamedN(zone, "Create Allocator", true);
          raiillocator = std::make_unique<mem::Allocator>(allocatorCreateInfo, *vulkanDevice);
-      }
-
-      uint32_t const shape_count = 64 * 1024;
-      uint32_t const shape_mem_size = IMDD_APPROX_SHAPE_SIZE_IN_BYTES * shape_count;
-      store = imdd_init(malloc(shape_mem_size), shape_mem_size);
-
-      imdd_vulkan_verify_fn_t vk_verify = [](VkResult r) -> void {
-
-      };
-
-      {
-         imdd_vulkan_fp_t fp;
-         IMDD_VULKAN_SET_GLOBAL_FP(&fp);
-
-         imdd_vulkan_init(&ctx,
-                          shape_count,
-                          shape_count,
-                          shape_count,
-                          &fp,
-                          vk_verify,
-                          **physicalDevice,
-                          **vulkanDevice,
-                          0);
-         imdd_vulkan_create_pipelines(&ctx, **vulkanDevice, VK_SAMPLE_COUNT_1_BIT);
       }
    }
 
