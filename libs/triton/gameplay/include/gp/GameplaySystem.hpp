@@ -83,6 +83,20 @@ namespace tr::gp {
                                       const glm::vec3& position,
                                       const std::optional<std::string>& name) const
           -> cm::EntityType;
+
+      [[nodiscard]] auto createDebugAABB(const glm::vec3& min,
+                                         const glm::vec3& max) const -> cm::EntityType;
+      [[nodiscard]] auto createDebugTriangle(const std::array<glm::vec3, 3> vertices) const
+          -> cm::EntityType;
+      [[nodiscard]] auto createDebugLine(const glm::vec3& start,
+                                         const glm::vec3& end) const -> cm::EntityType;
+      [[nodiscard]] auto createDebugPoint(const glm::vec3& position) const -> cm::EntityType;
+
+      void hideEntity(const cm::EntityType);
+      void showEntity(const cm::EntityType);
+      void hideDebugEntities();
+      void showDebugEntities();
+
       void setCurrentCamera(cm::EntityType currentCamera) const;
       void clearEntities() const;
 
