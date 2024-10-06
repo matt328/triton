@@ -211,10 +211,7 @@ namespace tr::gfx {
           std::make_unique<vk::raii::Device>(physicalDevice->createDevice(c.get(), nullptr));
 
       // Just don't name this because a bug in vulkan keeps complaining it doesn't match but it does
-      // Helpers::setObjectName(**vulkanDevice,
-      //                        *vulkanDevice.get(),
-      //                        (**vulkanDevice).debugReportObjectType,
-      //                        "Primary Device");
+      // Helpers::setObjectName(**vulkanDevice, *vulkanDevice.get(), "Primary Device");
 
       Log.trace("Created Logical Device");
 

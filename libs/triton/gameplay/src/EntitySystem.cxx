@@ -11,6 +11,7 @@
 #include "components/Terrain.hpp"
 #include "components/Transform.hpp"
 #include "components/Camera.hpp"
+#include "components/DebugLine.hpp"
 
 #include "systems/CameraSystem.hpp"
 #include "systems/RenderDataSystem.hpp"
@@ -137,6 +138,26 @@ namespace tr::gp {
    void EntitySystem::setCurrentCamera(const cm::EntityType currentCamera) {
       auto lock = std::unique_lock{registryMutex};
       registry->ctx().insert_or_assign<cmp::CurrentCamera>(cmp::CurrentCamera{currentCamera});
+   }
+
+   [[nodiscard]] auto EntitySystem::createDebugAABB(const glm::vec3& min,
+                                                    const glm::vec3& max) const -> cm::EntityType {
+   }
+
+   [[nodiscard]] auto EntitySystem::createDebugTriangle(
+       const std::array<glm::vec3, 3> vertices) const -> cm::EntityType {
+   }
+
+   [[nodiscard]] auto EntitySystem::createDebugLine(const glm::vec3& start,
+                                                    const glm::vec3& end) -> cm::EntityType {
+      auto lock = std::unique_lock{registryMutex};
+      const auto lineEntity = registry->create();
+      registry->emplace<cmp::DebugLine>(lineEntity, start, end);
+      return lineEntity;
+   }
+
+   [[nodiscard]] auto EntitySystem::createDebugPoint(const glm::vec3& position) const
+       -> cm::EntityType {
    }
 
    void EntitySystem::removeAll() {

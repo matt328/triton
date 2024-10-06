@@ -155,4 +155,25 @@ namespace tr::gp {
    void GameplaySystem::clearEntities() const {
       entitySystem->removeAll();
    }
+
+   [[nodiscard]] auto GameplaySystem::createDebugAABB(const glm::vec3& min, const glm::vec3& max)
+       const -> cm::EntityType {
+      return entitySystem->createDebugAABB(min, max);
+   }
+
+   [[nodiscard]] auto GameplaySystem::createDebugTriangle(
+       const std::array<glm::vec3, 3> vertices) const -> cm::EntityType {
+      return entitySystem->createDebugTriangle(vertices);
+   }
+
+   [[nodiscard]] auto GameplaySystem::createDebugLine(const glm::vec3& start, const glm::vec3& end)
+       const -> cm::EntityType {
+      return entitySystem->createDebugLine(start, end);
+   }
+
+   [[nodiscard]] auto GameplaySystem::createDebugPoint(const glm::vec3& position) const
+       -> cm::EntityType {
+      return entitySystem->createDebugPoint(position);
+   }
+
 }
