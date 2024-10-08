@@ -11,4 +11,4 @@ namespace tr::gp::cmp {
       glm::vec3 end;
    };
 
-}
+} // namespace tr::gp::cmp

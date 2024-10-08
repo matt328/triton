@@ -5,6 +5,7 @@
 #include "cm/Handles.hpp"
 
 #include "components/Animation.hpp"
+#include "components/DebugAABB.hpp"
 #include "components/Resources.hpp"
 #include "components/DebugConstants.hpp"
 #include "components/Renderable.hpp"
@@ -140,16 +141,20 @@ namespace tr::gp {
       registry->ctx().insert_or_assign<cmp::CurrentCamera>(cmp::CurrentCamera{currentCamera});
    }
 
-   [[nodiscard]] auto EntitySystem::createDebugAABB(const glm::vec3& min,
-                                                    const glm::vec3& max) const -> cm::EntityType {
+   [[nodiscard]] auto EntitySystem::createDebugAABB(const glm::vec3& min, const glm::vec3& max)
+       -> cm::EntityType {
+      auto lock = std::unique_lock{registryMutex};
+      const auto boxEntity = registry->create();
+      registry->emplace<cmp::DebugAABB>(boxEntity, min, max);
+      return boxEntity;
    }
 
    [[nodiscard]] auto EntitySystem::createDebugTriangle(
        const std::array<glm::vec3, 3> vertices) const -> cm::EntityType {
    }
 
-   [[nodiscard]] auto EntitySystem::createDebugLine(const glm::vec3& start,
-                                                    const glm::vec3& end) -> cm::EntityType {
+   [[nodiscard]] auto EntitySystem::createDebugLine(const glm::vec3& start, const glm::vec3& end)
+       -> cm::EntityType {
       auto lock = std::unique_lock{registryMutex};
       const auto lineEntity = registry->create();
       registry->emplace<cmp::DebugLine>(lineEntity, start, end);

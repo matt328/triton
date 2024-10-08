@@ -26,7 +26,7 @@ namespace tr::ctx {
 
 namespace tr::gp {
    using RenderDataProducer = entt::delegate<void(cm::gpu::RenderData&)>;
-   using RenderDataFn = std::function<void(cm::gpu::RenderData&)>;
+   using RenderDataTransferHandler = std::function<void(cm::gpu::RenderData&)>;
 
    class AnimationFactory;
    class EntitySystem;
@@ -55,8 +55,8 @@ namespace tr::gp {
 
       GameplaySystem(const GameplaySystem&) = delete;
       GameplaySystem(GameplaySystem&&) = delete;
-      GameplaySystem& operator=(const GameplaySystem&) = delete;
-      GameplaySystem& operator=(GameplaySystem&&) = delete;
+      auto operator=(const GameplaySystem&) -> GameplaySystem& = delete;
+      auto operator=(GameplaySystem&&) -> GameplaySystem& = delete;
 
       void fixedUpdate(const cm::Timer& timer) const;
       void update(double blendingFactor);
@@ -84,24 +84,24 @@ namespace tr::gp {
                                       const std::optional<std::string>& name) const
           -> cm::EntityType;
 
-      [[nodiscard]] auto createDebugAABB(const glm::vec3& min,
-                                         const glm::vec3& max) const -> cm::EntityType;
+      [[nodiscard]] auto createDebugAABB(const glm::vec3& min, const glm::vec3& max) const
+          -> cm::EntityType;
       [[nodiscard]] auto createDebugTriangle(const std::array<glm::vec3, 3> vertices) const
           -> cm::EntityType;
-      [[nodiscard]] auto createDebugLine(const glm::vec3& start,
-                                         const glm::vec3& end) const -> cm::EntityType;
+      [[nodiscard]] auto createDebugLine(const glm::vec3& start, const glm::vec3& end) const
+          -> cm::EntityType;
       [[nodiscard]] auto createDebugPoint(const glm::vec3& position) const -> cm::EntityType;
 
-      void hideEntity(const cm::EntityType);
-      void showEntity(const cm::EntityType);
+      void hideEntity(cm::EntityType);
+      void showEntity(cm::EntityType);
       void hideDebugEntities();
       void showDebugEntities();
 
       void setCurrentCamera(cm::EntityType currentCamera) const;
       void clearEntities() const;
 
-      void setRenderDataFn(const RenderDataFn& func) {
-         renderDataFn = func;
+      void setRenderDataTransferHandler(const RenderDataTransferHandler& func) {
+         transferRenderData = func;
       }
 
     private:
@@ -113,6 +113,6 @@ namespace tr::gp {
       /// before the Renderer takes a copy of it
       cm::gpu::RenderData renderData{};
 
-      RenderDataFn renderDataFn{};
+      RenderDataTransferHandler transferRenderData{};
    };
 } // namespace tr::gp

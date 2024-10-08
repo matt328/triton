@@ -27,15 +27,16 @@ namespace tr::ctx {
             this->gameplaySystem->resize(size);
          });
 
-         gameplaySystem->setRenderDataFn([this](const cm::gpu::RenderData& renderData) {
-            renderContext->setRenderData(renderData);
-         });
+         gameplaySystem->setRenderDataTransferHandler(
+             [this](const cm::gpu::RenderData& renderData) {
+                renderContext->setRenderData(renderData);
+             });
 
          // Have the facade also take a reference to the resourceManager
          gameplayFacade = std::make_unique<GameplayFacade>(*gameplaySystem, *renderContext);
       }
 
-      [[nodiscard]] GameplayFacade& getGameplayFacade() const {
+      [[nodiscard]] auto getGameplayFacade() const -> GameplayFacade& {
          return *gameplayFacade;
       }
 
