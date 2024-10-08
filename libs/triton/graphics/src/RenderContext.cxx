@@ -379,7 +379,37 @@ namespace tr::gfx {
 
          float* ptr;
 
+         /*
+            After reviewing this code some time later, I'm not sure what this synchronization is
+            even doing. Yes, access to the list of 'handles' is synchronized, but once the list of
+            handles is read, and before the renderer actually uses the handles, something could
+            delete one of the resources referred to by the handle.
+
+            The system just doesn't handle deletes as of yet. The synchronization ensures that
+            resources referred to by handles in the renderdata have been uploaded to the GPU and are
+            available to be rendered.
+
+            Creating an object that encapsulates all of this and contains some synchronization and
+            logic to query whether it's resources have been uploaded or not may avoid the need for
+            this particular sync point, but I think there will be other reasons for needing a sync
+            point, if nothing else other than to make sure the renderer gets a snapshot of the world
+            data that is consistent, ie not halfway through updating
+
+            Maybe this could be simplified by using some other mechanism other than handles such
+            that whatever replaces handles can know whether it's valid or not or something.
+
+            Resist the urge to throw all of this away and start over with the renderer. Figure out
+            what the desired state is and then incrementally refactor to get there.
+
+            Maybe start simple with the debug rendering items and if they work out well, adapt the
+            rest of the renderer to use that pattern.
+         */
+
+         /// Locking access to renderdata in this manner assures that a complete consistent set of
+         /// RenderData is mapped onto the GPU. The lock is not released until this lambda
+         /// completes, ensuring no data can be updated until after this frame gets sent in flight.
          resourceManager->accessRenderData([&frame, &ptr, this](cm::gpu::RenderData& renderData) {
+            ZoneNamedN(zone, "Copying RenderData", true);
             frame.updateObjectDataBuffer(renderData.objectData.data(),
                                          sizeof(cm::gpu::ObjectData) *
                                              renderData.objectData.size());
@@ -414,28 +444,33 @@ namespace tr::gfx {
          cmd.begin(
              vk::CommandBufferBeginInfo{.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse});
          {
+            TracyVkZone(frame.getTracyContext(), *cmd, "Prep Frame");
             frame.prepareFrame();
 
-            // Static Models
-            cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, **staticModelPipeline);
+            {
+               ZoneNamedN(zone2, "Apply Shader Bindings", true);
+               // Static Models
+               cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, **staticModelPipeline);
 
-            // Bind ShaderBindings to Pipeline
-            frame.getTextureShaderBinding().bindToPipeline(cmd,
-                                                           vk::PipelineBindPoint::eGraphics,
-                                                           0,
-                                                           **staticModelPipelineLayout);
-            frame.getObjectDataShaderBinding().bindToPipeline(cmd,
+               // Bind ShaderBindings to Pipeline
+               frame.getTextureShaderBinding().bindToPipeline(cmd,
                                                               vk::PipelineBindPoint::eGraphics,
-                                                              1,
+                                                              0,
                                                               **staticModelPipelineLayout);
-            frame.getPerFrameShaderBinding().bindToPipeline(cmd,
-                                                            vk::PipelineBindPoint::eGraphics,
-                                                            2,
-                                                            **staticModelPipelineLayout);
+               frame.getObjectDataShaderBinding().bindToPipeline(cmd,
+                                                                 vk::PipelineBindPoint::eGraphics,
+                                                                 1,
+                                                                 **staticModelPipelineLayout);
+               frame.getPerFrameShaderBinding().bindToPipeline(cmd,
+                                                               vk::PipelineBindPoint::eGraphics,
+                                                               2,
+                                                               **staticModelPipelineLayout);
+            }
 
             cmd.setViewportWithCount(mainViewport);
             cmd.setScissorWithCount(mainScissor);
             {
+               ZoneNamedN(zone3, "Render Static Meshes", true);
                for (const auto& meshData : staticMeshDataList) {
                   const auto& mesh = resourceManager->getMesh(meshData.handle);
 
@@ -452,6 +487,7 @@ namespace tr::gfx {
             // Terrain
             cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, **terrainPipeline);
             {
+               ZoneNamedN(terrainZone, "Render Terrain", true);
                cmd.pushConstants<cm::gpu::PushConstants>(**terrainPipelineLayout,
                                                          vk::ShaderStageFlagBits::eVertex |
                                                              vk::ShaderStageFlagBits::eFragment,
@@ -472,6 +508,7 @@ namespace tr::gfx {
 
             cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, **skinnedModelPipeline);
             {
+               ZoneNamedN(skinnedMeshZone, "Render Skinned Meshes", true);
                frame.getAnimationShaderBinding().bindToPipeline(cmd,
                                                                 vk::PipelineBindPoint::eGraphics,
                                                                 3,
@@ -493,6 +530,7 @@ namespace tr::gfx {
             if (debugRendering) {
                cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, **debugPipeline);
                {
+                  ZoneNamedN(debugZone, "Render Wireframe Overlays", true);
                   for (const auto& meshData : terrainDataList) {
                      const auto& mesh = resourceManager->getMesh(meshData.handle);
 

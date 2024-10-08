@@ -92,7 +92,7 @@ namespace tr::gp {
 
       entitySystem->prepareRenderData(renderData);
 
-      renderDataFn(renderData);
+      transferRenderData(renderData);
    }
 
    void GameplaySystem::resize(const std::pair<uint32_t, uint32_t> size) const {
@@ -156,8 +156,9 @@ namespace tr::gp {
       entitySystem->removeAll();
    }
 
-   [[nodiscard]] auto GameplaySystem::createDebugAABB(const glm::vec3& min, const glm::vec3& max)
-       const -> cm::EntityType {
+   [[nodiscard]] auto GameplaySystem::createDebugAABB(const glm::vec3& min,
+                                                      const glm::vec3& max) const
+       -> cm::EntityType {
       return entitySystem->createDebugAABB(min, max);
    }
 
@@ -166,8 +167,9 @@ namespace tr::gp {
       return entitySystem->createDebugTriangle(vertices);
    }
 
-   [[nodiscard]] auto GameplaySystem::createDebugLine(const glm::vec3& start, const glm::vec3& end)
-       const -> cm::EntityType {
+   [[nodiscard]] auto GameplaySystem::createDebugLine(const glm::vec3& start,
+                                                      const glm::vec3& end) const
+       -> cm::EntityType {
       return entitySystem->createDebugLine(start, end);
    }
 

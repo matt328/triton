@@ -63,6 +63,7 @@ namespace tr::gfx::tx {
 
       ZoneNamedN(zn2, "Loading Model", true);
 
+      // Execute this as an anonymous lambda so we can translate the exception
       auto tritonModelData = [this, &filename]() {
          try {
             return geometryFactory->loadTrm(filename);
@@ -81,6 +82,7 @@ namespace tr::gfx::tx {
             throw;
          }
       }();
+
       geometryFactory->unload(
           {{tritonModelData.getGeometryHandle(), tritonModelData.getImageHandle()}});
 
