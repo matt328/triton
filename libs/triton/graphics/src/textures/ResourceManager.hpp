@@ -108,4 +108,4 @@ namespace tr::gfx::tx {
       auto uploadGeometry(const geo::GeometryHandle& geometryHandle,
                           const geo::ImageHandle& imageHandle) -> cm::ModelData;
    };
-}
+} // namespace tr::gfx::tx

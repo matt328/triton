@@ -28,8 +28,8 @@ namespace tr::gfx::geo {
       // Only allow move construction
       ImmutableMesh(const ImmutableMesh&) = delete;
       ImmutableMesh(ImmutableMesh&&) noexcept = default;
-      ImmutableMesh& operator=(ImmutableMesh&&) = delete;
-      ImmutableMesh& operator=(const ImmutableMesh&) = delete;
+      auto operator=(ImmutableMesh&&) -> ImmutableMesh& = delete;
+      auto operator=(const ImmutableMesh&) -> ImmutableMesh& = delete;
 
       ImmutableMesh(std::unique_ptr<mem::Buffer>&& vertexBuffer,
                     std::unique_ptr<mem::Buffer>&& indexBuffer,
@@ -39,15 +39,15 @@ namespace tr::gfx::geo {
             indicesCount(indicesCount) {
       }
 
-      [[nodiscard]] const std::unique_ptr<mem::Buffer>& getVertexBuffer() const {
+      [[nodiscard]] auto getVertexBuffer() const -> const std::unique_ptr<mem::Buffer>& {
          return vertexBuffer;
       }
 
-      [[nodiscard]] const std::unique_ptr<mem::Buffer>& getIndexBuffer() const {
+      [[nodiscard]] auto getIndexBuffer() const -> const std::unique_ptr<mem::Buffer>& {
          return indexBuffer;
       }
 
-      [[nodiscard]] uint32_t getIndicesCount() const {
+      [[nodiscard]] auto getIndicesCount() const -> uint32_t {
          return indicesCount;
       }
 
@@ -56,4 +56,4 @@ namespace tr::gfx::geo {
       std::unique_ptr<mem::Buffer> indexBuffer;
       uint32_t indicesCount;
    };
-}
+} // namespace tr::gfx::geo

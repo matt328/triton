@@ -2,8 +2,40 @@
 
 ## Debug Renderer
 
-- Store/Cache to hold primitives and their descriptions
-- static access to add things to the store
+Each debug rendered item is going to be an entity in the ECS. A vertex buffer will need to be updated as the entities are created and destroyed.
+
+Try out just encapsulating a buffer in an object that can have a smart pointer passed around instead of a handle. This object would be like a GeometryGroup that can encapsulate the creation and updating of a vertex buffer. It's api can handle adding new geometries, and removing them, internally tracking their elements in the buffer and indexing them by entity id.
+
+Look into having these geometry groups be able to render themselves, initially via a single bind and multiple draw calls.
+
+Multithreading concerns:
+The issue is we need a consistent copy of the data to be rendered and copying renderdata handles ensures that i think?
+
+Use these as an example of multiple types of things that need drawn so we can improve this process a bit.
+
+An entity can have multiple meshes, and also multiple instances of each mesh.
+
+GeometryGroup:
+
+- `addGeometry(vertexData, indexData, entityId) -> void`
+- `removeGeometry(entityId) -> void`
+- `render(vk::raii::CommandBuffer&)`
+- `std::unique_ptr<mem::Buffer> vertexBuffer`
+- `std::unique_ptr<mem::Buffer> indexBuffer`
+- `std::vector<MeshData>`
+- `std::unordered_map<EntityId, MeshDataId>`
+
+MeshData
+
+- `uint32_t indexCount`
+- `uint32_t firstIndex`
+- `int32_t vertexOffset`
+- `std::unordered_map<EntityId, std::vector<InstanceData>>`
+
+InstanceData
+
+- `uint32_t instanceId`
+-
 
 - init()
   - shaders
@@ -20,7 +52,6 @@
 - render()
   - bind buffers
   - draw indexed from the store
-
 
 ## Architecture Overview
 
@@ -152,11 +183,16 @@ Maybe have a EditorInfo component that only the editor uses to keep track of the
 
 #### TODO
 
-- Figure out a file picker for Imgui - none are great, but ImGuiFileBrowser sucks least.
 - Think about what an 'unloaded' state looks like. Should it be blank with just Imgui rendered, or should it start with a hardcoded scene like blender.
-- Option to load the last project on startup.
-  - Maybe if there is a 'recent' file stored, just load that, and if not, load a default scene?
 - Think about 'camera' more. Maybe the editor should always just supply a camera and don't bother writing it to the file, only reset its position when you load a different project.
   - Probably don't do too much with this until there's a need for multiple cameras, as it will change then anyway.
-- Would it be useful to view/edit an entity's json in the UI?
 - Handle errors instead of crashing.
+
+## Game World/Renderer Interaction
+
+- ECS' systems update data in components
+- GameplaySystem tells EntitySystem to collect all RenderData into a struct
+- Then calls the setRenderDataFn pointer which sets the renderData into the ResourceManager.
+  - Access to the renderData in the resource manager is guarded by a lock so that when the renderer reads it, it's guaranteed to have a complete, coherent version of the data.
+  - The handles in this data could however become invalid by the time the renderer decides to render
+  the data. To mitigate this, when an entity that maps to buffer resources is removed, the handles should be ensured to be removed from the renderdata before the resources are freed by the renderer

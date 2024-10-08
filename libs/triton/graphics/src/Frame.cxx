@@ -153,7 +153,6 @@ namespace tr::gfx {
    }
 
    void Frame::prepareFrame() const {
-      TracyVkZone(tracyContext, **commandBuffer, "render room");
 
       Helpers::transitionImage(*commandBuffer,
                                drawImage->getImage(),
@@ -214,6 +213,7 @@ namespace tr::gfx {
 
    void Frame::renderOverlay(const vk::raii::ImageView& swapchainImageView,
                              const vk::Extent2D& swapchainExtent) const {
+      ZoneNamedN(imguiZone, "Render ImGui", true);
       const auto colorAttachment = vk::RenderingAttachmentInfo{
           .imageView = *swapchainImageView,
           .imageLayout = vk::ImageLayout::eColorAttachmentOptimal,
@@ -244,7 +244,7 @@ namespace tr::gfx {
       TracyVkCollect(tracyContext, **commandBuffer);
    }
 
-   const vk::Image& Frame::getDrawImage() const {
+   auto Frame::getDrawImage() const -> const vk::Image& {
       return drawImage->getImage();
    }
 

@@ -42,12 +42,12 @@ namespace tr::gp {
                         const std::optional<std::string>& name) -> cm::EntityType;
       void setCurrentCamera(cm::EntityType);
 
-      [[nodiscard]] auto createDebugAABB(const glm::vec3& min,
-                                         const glm::vec3& max) const -> cm::EntityType;
+      [[nodiscard]] auto createDebugAABB(const glm::vec3& min, const glm::vec3& max)
+          -> cm::EntityType;
       [[nodiscard]] auto createDebugTriangle(const std::array<glm::vec3, 3> vertices) const
           -> cm::EntityType;
-      [[nodiscard]] auto createDebugLine(const glm::vec3& start,
-                                         const glm::vec3& end) -> cm::EntityType;
+      [[nodiscard]] auto createDebugLine(const glm::vec3& start, const glm::vec3& end)
+          -> cm::EntityType;
       [[nodiscard]] auto createDebugPoint(const glm::vec3& position) const -> cm::EntityType;
 
       void removeAll();

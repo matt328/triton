@@ -47,6 +47,7 @@ namespace tr::gfx {
    }
 
    void VkContext::submit(std::function<void(vk::raii::CommandBuffer& cmd)>&& fn) const {
+      ZoneNamedN(immediateContextZone, "Immediate Submit", true);
       constexpr vk::CommandBufferBeginInfo cmdBeginInfo{
           .flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit};
 

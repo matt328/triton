@@ -13,12 +13,12 @@
 
 namespace tr::gp::sys::RenderDataSystem {
 
-   glm::mat4 convertOzzToGlm(const ozz::math::Float4x4& ozzMatrix) {
+   auto convertOzzToGlm(const ozz::math::Float4x4& ozzMatrix) -> glm::mat4 {
       glm::mat4 glmMatrix{};
 
       for (int i = 0; i < 4; ++i) {
-         float temp[4];
-         ozz::math::StorePtrU(ozzMatrix.cols[i], temp);
+         std::array<float, 4> temp{};
+         ozz::math::StorePtrU(ozzMatrix.cols[i], temp.data());
          for (int j = 0; j < 4; ++j) {
             glmMatrix[i][j] = temp[j];
          }
@@ -57,8 +57,6 @@ namespace tr::gp::sys::RenderDataSystem {
       for (const auto& [entity, animationData, renderable, transform] : animationsView.each()) {
          auto jointMatrices = std::vector<glm::mat4>{};
 
-         // Jointmap only has 25 things in it while animationData.models has 27
-
          jointMatrices.resize(animationData.jointMap.size());
          int i = 0;
          for (const auto& [position, jointId] : animationData.jointMap) {
@@ -74,10 +72,6 @@ namespace tr::gp::sys::RenderDataSystem {
          for (const auto jointMatrix : jointMatrices) {
             renderData.animationData.push_back({jointMatrix});
          }
-
-         // renderData.animationData.insert(renderData.animationData.begin(),
-         //                                 jointMatrices.begin(),
-         //                                 jointMatrices.end());
 
          for (const auto& [meshHandle, textureHandle] : renderable.meshes) {
             const auto pos = renderData.objectData.size();
