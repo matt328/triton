@@ -480,6 +480,7 @@ namespace tr::gfx {
                                       vk::IndexType::eUint32);
 
                   // instanceId becomes gl_BaseInstance in the shader
+                  cmd.draw(3, 1, 0, 0);
                   cmd.drawIndexed(mesh.getIndicesCount(), 1, 0, 0, meshData.objectDataId);
                }
             }
