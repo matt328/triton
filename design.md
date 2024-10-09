@@ -14,28 +14,54 @@ The issue is we need a consistent copy of the data to be rendered and copying re
 Use these as an example of multiple types of things that need drawn so we can improve this process a bit.
 
 An entity can have multiple meshes, and also multiple instances of each mesh.
+Meshes instances can belong to multiple entities.
+
+GeometryGroup should also internally maintain an ObjectData buffer that contains a minimum a model matrix for the time being. This can help ensure that vertex/index buffers, transform data, instance data and the object data buffer all stay coherent.
+
+1 instance of a mesh.
+Only a vertex buffer, not indexed yet.
+
+addMeshInstance() - add vertex data and create an instance, returning both meshId and instanceId
+removeInstance() - removes the instance and vertex data
+
+render()
+
+- Get rid of this loop with drawIndirect
+- first just build the buffer on the CPU
+- eventually send this GeometryGroup data to a compute shader and have the compute shader fill in the buffer based on frustum culling, etc
+for ({id, meshData} : meshDataMap) {
+   first instance will always be 0, since there will be one ObjectData buffer per GeometryGroup
+   when drawing instanced, one draw call will cause the vertex shader to be called `instanceCount` times,
+   incrementing the gl_InstanceIndex variable each time
+
+   const auto vertexCount = meshData.vertexCount;
+   const auto instanceCount = meshData.instanceData.size();
+   const auto firstVertex = meshData.vertexOffset;
+   const auto firstInstance = 0;
+
+   cmd.draw(vertexCount, instanceCount, firstVertex, firstIndex);
+}
 
 GeometryGroup:
 
-- `addGeometry(vertexData, indexData, entityId) -> void`
-- `removeGeometry(entityId) -> void`
+- `addMeshInstance(entityId, vertexData) -> {meshId, instanceId}`
+- `removeInstance(entityId, instanceId) -> void`
+
 - `render(vk::raii::CommandBuffer&)`
+
 - `std::unique_ptr<mem::Buffer> vertexBuffer`
-- `std::unique_ptr<mem::Buffer> indexBuffer`
-- `std::vector<MeshData>`
-- `std::unordered_map<EntityId, MeshDataId>`
+- `std::unordered_map<EntityId, MeshData> meshDataMap`
 
 MeshData
 
-- `uint32_t indexCount`
-- `uint32_t firstIndex`
+- `uint32_t vertexCount`
 - `int32_t vertexOffset`
-- `std::unordered_map<EntityId, std::vector<InstanceData>>`
+- `std::vector<InstanceData> instanceData`
 
 InstanceData
 
 - `uint32_t instanceId`
--
+- `uint32_t instanceOffset`
 
 - init()
   - shaders
