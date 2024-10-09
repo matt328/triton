@@ -39,7 +39,7 @@ namespace tr::gfx::mem {
    }
 
    void Buffer::updateBufferValue(const void* data, const size_t dataSize) const {
-      const auto dst = allocator.mapMemory(allocation);
+      auto* const dst = allocator.mapMemory(allocation);
       memcpy(dst, data, dataSize);
       allocator.unmapMemory(allocation);
    }
@@ -48,4 +48,4 @@ namespace tr::gfx::mem {
       const auto bdai = vk::BufferDeviceAddressInfoKHR{.buffer = buffer};
       return device.getBufferAddress(bdai);
    }
-}
+} // namespace tr::gfx::mem
