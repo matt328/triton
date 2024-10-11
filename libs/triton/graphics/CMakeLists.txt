@@ -20,6 +20,7 @@ set(graphics_SRC
    src/sb/LayoutFactory.cxx
    src/sb/Layout.cxx
    src/geometry/GeometryFactory.cxx
+   src/geometry/GeometryGroup.cxx
 )
 
 add_library(${PROJECT_NAME} STATIC ${graphics_SRC})

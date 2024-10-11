@@ -3,8 +3,10 @@
 #include "BaseException.hpp"
 
 #include "cm/Handles.hpp"
+#include "cm/LockableResource.hpp"
 #include "cm/RenderData.hpp"
 
+#include "geometry/GeometryGroup.hpp"
 #include "geometry/Mesh.hpp"
 #include "textures/Texture.hpp"
 #include "geometry/GeometryHandles.hpp"
@@ -71,8 +73,8 @@ namespace tr::gfx::tx {
 
       ResourceManager(const ResourceManager&) = delete;
       ResourceManager(ResourceManager&&) = delete;
-      ResourceManager& operator=(const ResourceManager&) = delete;
-      ResourceManager& operator=(ResourceManager&&) = delete;
+      auto operator=(const ResourceManager&) -> ResourceManager& = delete;
+      auto operator=(ResourceManager&&) -> ResourceManager& = delete;
 
       auto createTerrain(uint32_t size) -> cm::ModelData;
 
@@ -84,11 +86,11 @@ namespace tr::gfx::tx {
          return meshList.at(meshHandle);
       }
 
-      void accessTextures(
-          const std::function<void(const std::vector<vk::DescriptorImageInfo>&)>& fn) const;
+      auto getTextures() const -> cm::LockableResource<const std::vector<vk::DescriptorImageInfo>>;
 
       void setRenderData(const cm::gpu::RenderData& newRenderData);
-      void accessRenderData(const std::function<void(cm::gpu::RenderData&)>& fn);
+
+      auto getRenderData() const -> cm::LockableResource<const cm::gpu::RenderData>;
 
     private:
       const GraphicsDevice& graphicsDevice;
@@ -102,6 +104,8 @@ namespace tr::gfx::tx {
 
       mutable TracyLockable(std::mutex, renderDataMutex);
       cm::gpu::RenderData renderData;
+
+      std::unique_ptr<geo::GeometryGroup> debugGroup;
 
       /// Uploads Geometry (and images) to the GPU
       /// @throws ResourceUploadException if there's an error uploading.

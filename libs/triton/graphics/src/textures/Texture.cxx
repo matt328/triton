@@ -14,11 +14,13 @@ namespace tr::gfx::Textures {
        : imageLayout{vk::ImageLayout::eShaderReadOnlyOptimal} {
       Log.debug("Creating Texture from file: {0}", filename.data());
 
-      int width = 0, height = 0, channels = 0;
+      int width = 0;
+      int height = 0;
+      int channels = 0;
 
       stbi_uc* pixels = stbi_load(filename.data(), &width, &height, &channels, STBI_rgb_alpha);
 
-      if (!pixels) {
+      if (pixels == nullptr) {
          throw std::runtime_error("Failed to load texture");
       }
 
@@ -64,7 +66,7 @@ namespace tr::gfx::Textures {
           allocator.createBuffer(&bufferCreateInfo, &allocationCreateInfo, textureName);
 
       // Copy the texture data into the staging buffer
-      const auto bufferData = allocator.mapMemory(*stagingBuffer);
+      auto* const bufferData = allocator.mapMemory(*stagingBuffer);
       memcpy(bufferData, data, textureSize);
       allocator.unmapMemory(*stagingBuffer);
 

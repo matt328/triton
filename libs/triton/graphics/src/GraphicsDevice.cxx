@@ -237,7 +237,7 @@ namespace tr::gfx {
 
       createSwapchain();
 
-      asyncTransferContext = std::make_unique<VkContext>(*vulkanDevice,
+      asyncTransferContext = std::make_shared<VkContext>(*vulkanDevice,
                                                          *physicalDevice,
                                                          0,
                                                          queueFamilyIndices.transferFamily.value(),

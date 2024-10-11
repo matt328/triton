@@ -1,6 +1,7 @@
 #include "textures/ResourceManager.hpp"
 
 #include "cm/Handles.hpp"
+#include "cm/LockableResource.hpp"
 #include "cm/RenderData.hpp"
 
 #include "as/Model.hpp"
@@ -8,6 +9,7 @@
 #include "HeightField.hpp"
 
 #include "geometry/GeometryFactory.hpp"
+#include "geometry/GeometryGroup.hpp"
 #include "geometry/GeometryHandles.hpp"
 
 #include "GraphicsDevice.hpp"
@@ -19,9 +21,14 @@
 #include "mem/Buffer.hpp"
 
 namespace tr::gfx::tx {
+   using cm::LockableResource;
+
    ResourceManager::ResourceManager(const GraphicsDevice& graphicsDevice)
        : graphicsDevice{graphicsDevice} {
       geometryFactory = std::make_unique<geo::GeometryFactory>();
+
+      debugGroup = std::make_unique<geo::GeometryGroup>(graphicsDevice.getAsyncTransferContext(),
+                                                        graphicsDevice.getAllocator());
    }
 
    ResourceManager::~ResourceManager() { // NOLINT(*-use-equals-default)
@@ -34,12 +41,13 @@ namespace tr::gfx::tx {
       renderData = newRenderData;
    }
 
-   void ResourceManager::accessRenderData(
-       const std::function<void(cm::gpu::RenderData&)>& accessFn) {
-      std::lock_guard lock(renderDataMutex);
-      LockableName(renderDataMutex, "AccessRenderData", 16);
-      LockMark(renderDataMutex);
-      accessFn(renderData);
+   auto ResourceManager::getTextures() const
+       -> cm::LockableResource<const std::vector<vk::DescriptorImageInfo>> {
+      return {textureInfoList, textureListMutex};
+   }
+
+   auto ResourceManager::getRenderData() const -> cm::LockableResource<const cm::gpu::RenderData> {
+      return {renderData, renderDataMutex};
    }
 
    auto ResourceManager::createTerrain(const uint32_t size) -> cm::ModelData {
@@ -95,8 +103,8 @@ namespace tr::gfx::tx {
 
    auto ResourceManager::uploadGeometry(const geo::GeometryHandle& geometryHandle,
                                         const geo::ImageHandle& imageHandle) -> cm::ModelData {
-      const auto& allocator = graphicsDevice.getAllocator();
-      const auto& context = graphicsDevice.getAsyncTransferContext();
+      auto allocator = graphicsDevice.getAllocator();
+      auto context = graphicsDevice.getAsyncTransferContext();
 
       auto geometryData = geo::GeometryData{};
       try {
@@ -111,24 +119,25 @@ namespace tr::gfx::tx {
 
       try {
          const auto vbStagingBuffer =
-             allocator.createStagingBuffer(vbSize, "Vertex Staging Buffer");
-         void* vbData = allocator.mapMemory(*vbStagingBuffer);
+             allocator->createStagingBuffer(vbSize, "Vertex Staging Buffer");
+         void* vbData = allocator->mapMemory(*vbStagingBuffer);
          memcpy(vbData, geometryData.vertices.data(), static_cast<size_t>(vbSize));
-         allocator.unmapMemory(*vbStagingBuffer);
+         allocator->unmapMemory(*vbStagingBuffer);
 
          // Prepare Index Buffer
-         const auto ibStagingBuffer = allocator.createStagingBuffer(ibSize, "Index Staging Buffer");
+         const auto ibStagingBuffer =
+             allocator->createStagingBuffer(ibSize, "Index Staging Buffer");
 
-         auto* const data = allocator.mapMemory(*ibStagingBuffer);
+         auto* const data = allocator->mapMemory(*ibStagingBuffer);
          memcpy(data, geometryData.indices.data(), ibSize);
-         allocator.unmapMemory(*ibStagingBuffer);
+         allocator->unmapMemory(*ibStagingBuffer);
 
-         auto vertexBuffer = allocator.createGpuVertexBuffer(vbSize, "GPU Vertex");
-         auto indexBuffer = allocator.createGpuIndexBuffer(ibSize, "GPU Index");
+         auto vertexBuffer = allocator->createGpuVertexBuffer(vbSize, "GPU Vertex");
+         auto indexBuffer = allocator->createGpuIndexBuffer(ibSize, "GPU Index");
          const auto indicesCount = geometryData.indices.size();
 
          // Upload Buffers
-         context.submit([&](const vk::raii::CommandBuffer& cmd) {
+         context->submit([&](const vk::raii::CommandBuffer& cmd) {
             const auto vbCopy = vk::BufferCopy{.srcOffset = 0, .dstOffset = 0, .size = vbSize};
             cmd.copyBuffer(vbStagingBuffer->getBuffer(), vertexBuffer->getBuffer(), vbCopy);
             const auto copy = vk::BufferCopy{.srcOffset = 0, .dstOffset = 0, .size = ibSize};
@@ -142,9 +151,9 @@ namespace tr::gfx::tx {
                                                  width,
                                                  height,
                                                  component,
-                                                 allocator,
+                                                 *allocator,
                                                  graphicsDevice.getVulkanDevice(),
-                                                 context));
+                                                 *context));
 
          { // Only need to guard access to the textureInfoList
             ZoneNamedN(zn1, "Update TextureInfoList", true);
@@ -168,14 +177,4 @@ namespace tr::gfx::tx {
       }
    }
 
-   void ResourceManager::accessTextures(
-       const std::function<void(const std::vector<vk::DescriptorImageInfo>&)>& accessFn) const {
-      if (textureInfoList.empty()) {
-         return;
-      }
-      std::lock_guard lock(textureListMutex);
-      LockableName(textureListMutex, "Access", 6);
-      LockMark(textureListMutex);
-      accessFn(textureInfoList);
-   }
 } // namespace tr::gfx::tx
