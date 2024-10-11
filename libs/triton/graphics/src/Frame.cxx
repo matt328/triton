@@ -56,9 +56,11 @@ namespace tr::gfx {
           vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eCpuToGpu,
                                     .requiredFlags = vk::MemoryPropertyFlagBits::eHostCoherent};
 
-      objectDataBuffer = graphicsDevice.getAllocator().createBuffer(&objectDataBufferCreateInfo,
-                                                                    &objectDataAllocationCreateInfo,
-                                                                    "Object Data Buffer");
+      auto allocator = graphicsDevice.getAllocator();
+
+      objectDataBuffer = allocator->createBuffer(&objectDataBufferCreateInfo,
+                                                 &objectDataAllocationCreateInfo,
+                                                 "Object Data Buffer");
       objectDataBuffer->mapBuffer();
 
       // create CameraData (PerFrame) buffer
@@ -71,9 +73,9 @@ namespace tr::gfx {
           vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eCpuToGpu,
                                     .requiredFlags = vk::MemoryPropertyFlagBits::eHostCoherent};
 
-      cameraDataBuffer = graphicsDevice.getAllocator().createBuffer(&cameraDataBufferCreateInfo,
-                                                                    &cameraDataAllocationCreateInfo,
-                                                                    "Camera Data Buffer");
+      cameraDataBuffer = allocator->createBuffer(&cameraDataBufferCreateInfo,
+                                                 &cameraDataAllocationCreateInfo,
+                                                 "Camera Data Buffer");
       cameraDataBuffer->mapBuffer();
 
       // Create AnimationDataBuffer
@@ -86,10 +88,9 @@ namespace tr::gfx {
           vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eCpuToGpu,
                                     .requiredFlags = vk::MemoryPropertyFlagBits::eHostCoherent};
 
-      animationDataBuffer =
-          graphicsDevice.getAllocator().createBuffer(&animationDataBufferCreateInfo,
-                                                     &animationDataAllocationCreateInfo,
-                                                     "Animation Data Buffer");
+      animationDataBuffer = allocator->createBuffer(&animationDataBufferCreateInfo,
+                                                    &animationDataAllocationCreateInfo,
+                                                    "Animation Data Buffer");
       animationDataBuffer->mapBuffer();
 
       // Create PerFrame ShaderBinding
@@ -131,9 +132,7 @@ namespace tr::gfx {
       constexpr auto imageAllocateCreateInfo =
           vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eGpuOnly,
                                     .requiredFlags = vk::MemoryPropertyFlagBits::eDeviceLocal};
-      drawImage = graphicsDevice.getAllocator().createImage(imageCreateInfo,
-                                                            imageAllocateCreateInfo,
-                                                            "Draw Image");
+      drawImage = allocator->createImage(imageCreateInfo, imageAllocateCreateInfo, "Draw Image");
 
       const auto imageViewCreateInfo =
           vk::ImageViewCreateInfo{.image = drawImage->getImage(),
