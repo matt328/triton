@@ -44,8 +44,8 @@ namespace tr::gfx::mem {
       allocator.unmapMemory(allocation);
    }
 
-   [[nodiscard]] uint64_t Buffer::getDeviceAddress() const {
+   [[nodiscard]] auto Buffer::getDeviceAddress() const -> uint64_t {
       const auto bdai = vk::BufferDeviceAddressInfoKHR{.buffer = buffer};
       return device.getBufferAddress(bdai);
    }
-} // namespace tr::gfx::mem
+}
