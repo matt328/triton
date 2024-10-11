@@ -1,5 +1,5 @@
 ---
-Checks: "*,-llvmlibc-*, -fuchsia-*, -altera-*, -llvm-*, -misc-no-recursion -misc-include-cleaner"
+Checks: "*,-llvmlibc-*, -fuchsia-*, -altera-*, -llvm-*, -google-readability-namespace-comments, -misc-no-recursion, -misc-include-cleaner, -hicpp-uppercase-literal-suffix, -readability-uppercase-literal-suffix"
 WarningsAsErrors: "true"
 HeaderFilterRegex: ""
 AnalyzeTemporaryDtors: false

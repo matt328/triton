@@ -397,4 +397,4 @@ namespace tr::gfx::geo {
         {0x6201, 0x3304, 0x5102},
         {}}};
 
-} // namespace tr::gfx::geo
+}

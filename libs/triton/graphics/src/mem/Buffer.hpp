@@ -13,10 +13,10 @@ namespace tr::gfx::mem {
       ~Buffer();
 
       Buffer(const Buffer&) = delete;
-      Buffer& operator=(const Buffer&) = delete;
+      auto operator=(const Buffer&) -> Buffer& = delete;
 
       Buffer(Buffer&&) = delete;
-      Buffer& operator=(Buffer&&) = delete;
+      auto operator=(Buffer&&) -> Buffer& = delete;
 
       /// Permanently maps the buffer, until either unmapBuffer() is called, or the object is
       /// destroyed.  Meant to be paired with updateMappedBufferValue()

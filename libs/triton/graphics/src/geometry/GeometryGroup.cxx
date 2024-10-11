@@ -16,9 +16,22 @@ namespace tr::gfx::geo {
       // what about removing?
    }
 
-   auto GeometryGroup::addMeshInstance(cm::EntityType entityId, std::vector<as::Vertex> vertexData)
-       -> std::tuple<size_t, size_t> {
-      return {0, 0};
+   auto GeometryGroup::addMesh(std::vector<as::Vertex> vertexData,
+                               const AddMeshCompleteFn& onComplete) {
+      auto hashValue = vertexListHash(vertexData);
+      auto vertexCount = static_cast<uint32_t>(vertexData.size());
+      if (meshDataMap.find(hashValue) != meshDataMap.end()) {
+         onComplete(hashValue);
+      } else {
+         vertexBuffer->addAndUploadData(
+             vertexData,
+             [this, hashValue, vertexCount, onComplete](uint32_t offset) {
+                meshDataMap[hashValue] = MeshData{vertexCount, offset, {}};
+                onComplete(hashValue);
+             });
+      }
+   }
+   auto addInstance(cm::EntityType entityId, size_t meshId) -> GroupInfo {
    }
 
    auto GeometryGroup::removeInstance(cm::EntityType entityId, size_t instanceId) -> void {

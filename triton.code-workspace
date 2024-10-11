@@ -140,7 +140,9 @@
       },
       "clangd.arguments": [
          "--background-index",
-         "--compile-commands-dir=build/debug"
-      ]
+         "--compile-commands-dir=build/debug",
+         "--clang-tidy"
+      ],
+      "workbench.tree.indent": 8
    }
 }
