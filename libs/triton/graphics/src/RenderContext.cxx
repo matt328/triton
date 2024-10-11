@@ -223,7 +223,7 @@ namespace tr::gfx {
              vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eGpuOnly};
 
          depthImage =
-             graphicsDevice->getAllocator().createImage(imageCreateInfo, allocationCreateInfo);
+             graphicsDevice->getAllocator()->createImage(imageCreateInfo, allocationCreateInfo);
 
          constexpr auto range =
              vk::ImageSubresourceRange{.aspectMask = vk::ImageAspectFlagBits::eDepth,
@@ -377,69 +377,41 @@ namespace tr::gfx {
          terrainDataList.clear();
          skinnedModelList.clear();
 
-         float* ptr;
-
-         /*
-            After reviewing this code some time later, I'm not sure what this synchronization is
-            even doing. Yes, access to the list of 'handles' is synchronized, but once the list of
-            handles is read, and before the renderer actually uses the handles, something could
-            delete one of the resources referred to by the handle.
-
-            The system just doesn't handle deletes as of yet. The synchronization ensures that
-            resources referred to by handles in the renderdata have been uploaded to the GPU and are
-            available to be rendered.
-
-            Creating an object that encapsulates all of this and contains some synchronization and
-            logic to query whether it's resources have been uploaded or not may avoid the need for
-            this particular sync point, but I think there will be other reasons for needing a sync
-            point, if nothing else other than to make sure the renderer gets a snapshot of the world
-            data that is consistent, ie not halfway through updating
-
-            Maybe this could be simplified by using some other mechanism other than handles such
-            that whatever replaces handles can know whether it's valid or not or something.
-
-            Resist the urge to throw all of this away and start over with the renderer. Figure out
-            what the desired state is and then incrementally refactor to get there.
-
-            Maybe start simple with the debug rendering items and if they work out well, adapt the
-            rest of the renderer to use that pattern.
-         */
-
-         /// Locking access to renderdata in this manner assures that a complete consistent set of
-         /// RenderData is mapped onto the GPU. The lock is not released until this lambda
-         /// completes, ensuring no data can be updated until after this frame gets sent in flight.
-         resourceManager->accessRenderData([&frame, &ptr, this](cm::gpu::RenderData& renderData) {
+         {
+            const auto renderData = resourceManager->getRenderData();
             ZoneNamedN(zone, "Copying RenderData", true);
-            frame.updateObjectDataBuffer(renderData.objectData.data(),
+            frame.updateObjectDataBuffer(renderData.get().objectData.data(),
                                          sizeof(cm::gpu::ObjectData) *
-                                             renderData.objectData.size());
+                                             renderData.get().objectData.size());
 
-            frame.updatePerFrameDataBuffer(&renderData.cameraData, sizeof(cm::gpu::CameraData));
+            frame.updatePerFrameDataBuffer(&renderData.get().cameraData,
+                                           sizeof(cm::gpu::CameraData));
 
             // TODO(Matt): Rename this AnimationData class
-            frame.updateAnimationDataBuffer(renderData.animationData.data(),
+            frame.updateAnimationDataBuffer(renderData.get().animationData.data(),
                                             sizeof(cm::gpu::AnimationData) *
-                                                renderData.animationData.size());
+                                                renderData.get().animationData.size());
 
-            staticMeshDataList.reserve(renderData.staticMeshData.size());
-            std::ranges::copy(renderData.staticMeshData, std::back_inserter(staticMeshDataList));
+            staticMeshDataList.reserve(renderData.get().staticMeshData.size());
+            std::ranges::copy(renderData.get().staticMeshData,
+                              std::back_inserter(staticMeshDataList));
 
-            terrainDataList.reserve(renderData.terrainMeshData.size());
-            std::ranges::copy(renderData.terrainMeshData, std::back_inserter(terrainDataList));
+            terrainDataList.reserve(renderData.get().terrainMeshData.size());
+            std::ranges::copy(renderData.get().terrainMeshData,
+                              std::back_inserter(terrainDataList));
 
-            skinnedModelList.reserve(renderData.skinnedMeshData.size());
-            std::ranges::copy(renderData.skinnedMeshData, std::back_inserter(skinnedModelList));
+            skinnedModelList.reserve(renderData.get().skinnedMeshData.size());
+            std::ranges::copy(renderData.get().skinnedMeshData,
+                              std::back_inserter(skinnedModelList));
 
-            pushConstants = renderData.pushConstants;
+            pushConstants = renderData.get().pushConstants;
+         }
 
-            ptr = glm::value_ptr(renderData.cameraData.proj);
-         });
-
-         resourceManager->accessTextures(
-             [&frame](const std::vector<vk::DescriptorImageInfo>& imageInfoList) {
-                ZoneNamedN(zone, "Updating Texture DB", true);
-                frame.updateTextures(imageInfoList);
-             });
+         {
+            const auto imageInfoList = resourceManager->getTextures();
+            ZoneNamedN(zone, "Updating Texture DB", true);
+            frame.updateTextures(imageInfoList.get());
+         }
 
          cmd.begin(
              vk::CommandBufferBeginInfo{.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse});

@@ -60,7 +60,7 @@ namespace tr::gfx {
          return swapchainImageFormat;
       }
 
-      [[nodiscard]] const vk::Extent2D getSwapchainExtent() const {
+      [[nodiscard]] vk::Extent2D getSwapchainExtent() const {
          return swapchainExtent;
       }
 
@@ -68,8 +68,8 @@ namespace tr::gfx {
          return *physicalDevice;
       }
 
-      [[nodiscard]] const mem::Allocator& getAllocator() const noexcept {
-         return *raiillocator;
+      [[nodiscard]] auto getAllocator() const noexcept -> std::shared_ptr<mem::Allocator> {
+         return raiillocator;
       }
 
       /// @brief Returns a const reference to the `vk::raii::Device`. This will only live as long as
@@ -100,8 +100,8 @@ namespace tr::gfx {
          return *swapchain;
       }
 
-      [[nodiscard]] const VkContext& getAsyncTransferContext() const noexcept {
-         return *asyncTransferContext;
+      [[nodiscard]] auto getAsyncTransferContext() const noexcept -> std::shared_ptr<VkContext> {
+         return asyncTransferContext;
       }
 
       [[nodiscard]] auto getDescriptorBufferProperties() const {
@@ -149,7 +149,7 @@ namespace tr::gfx {
       vk::Extent2D swapchainExtent;
 
       std::unique_ptr<vk::raii::CommandPool> commandPool;
-      std::unique_ptr<VkContext> asyncTransferContext;
+      std::shared_ptr<VkContext> asyncTransferContext;
 
       std::unique_ptr<vk::raii::DebugUtilsMessengerEXT> debugCallback;
       std::unique_ptr<vk::raii::DebugReportCallbackEXT> reportCallback;
@@ -159,7 +159,7 @@ namespace tr::gfx {
       std::shared_ptr<vk::raii::Queue> transferQueue;
       std::unique_ptr<vk::raii::Queue> computeQueue;
 
-      std::unique_ptr<mem::Allocator> raiillocator;
+      std::shared_ptr<mem::Allocator> raiillocator;
 
       void createSwapchain();
 
