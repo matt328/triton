@@ -34,8 +34,8 @@ namespace tr::ctx {
 
       GameplayFacade(const GameplayFacade&) = delete;
       GameplayFacade(GameplayFacade&&) = delete;
-      GameplayFacade& operator=(const GameplayFacade&) = delete;
-      GameplayFacade& operator=(GameplayFacade&&) = delete;
+      auto operator=(const GameplayFacade&) -> GameplayFacade& = delete;
+      auto operator=(GameplayFacade&&) -> GameplayFacade& = delete;
 
       // Entity Creation Methods
       [[nodiscard]] auto getCreateTerrainFn() const -> std::function<cm::EntityType(uint32_t)>;

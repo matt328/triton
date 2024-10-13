@@ -64,7 +64,7 @@ namespace tr::gfx {
 
       queue->submit(submitInfo, **fence);
 
-      if (const auto result = device.waitForFences(**fence, true, UINT64_MAX);
+      if (const auto result = device.waitForFences(**fence, 1u, UINT64_MAX);
           result != vk::Result::eSuccess) {
          Log.warn("Timeout waiting for fence during immediate submit");
       }
