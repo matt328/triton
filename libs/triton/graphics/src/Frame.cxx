@@ -12,25 +12,25 @@
 
 namespace tr::gfx {
 
-   // TODO: figure out a better way to handle the depth image.
+   // TODO(Matt): figure out a better way to handle the depth image.
    // which pipeline should own it, or should it be shared among them?
-   Frame::Frame(const GraphicsDevice& graphicsDevice,
+   Frame::Frame(std::shared_ptr<GraphicsDevice> graphicsDevice,
                 std::shared_ptr<vk::raii::ImageView> depthImageView,
-                sb::ShaderBindingFactory& shaderBindingFactory,
+                std::shared_ptr<sb::ShaderBindingFactory> shaderBindingFactory,
                 const std::string_view name)
-       : graphicsDevice{graphicsDevice.getVulkanDevice()},
+       : graphicsDevice2{graphicsDevice},
          combinedImageSamplerDescriptorSize{
-             graphicsDevice.getDescriptorBufferProperties().combinedImageSamplerDescriptorSize},
-         depthImageView{std::move(depthImageView)},
+             graphicsDevice->getDescriptorBufferProperties().combinedImageSamplerDescriptorSize},
+         depthImageView{depthImageView},
          shaderBindingFactory{shaderBindingFactory},
          drawExtent{GraphicsDevice::DrawImageExtent2D} {
 
-      createSwapchainResources(graphicsDevice);
+      createSwapchainResources();
 
       // NOLINTNEXTLINE I'd like to init this in the ctor init, but TracyVkContext is a macro
-      tracyContext = TracyVkContext(*graphicsDevice.getPhysicalDevice(),
-                                    *graphicsDevice.getVulkanDevice(),
-                                    *graphicsDevice.getGraphicsQueue(),
+      tracyContext = TracyVkContext(*graphicsDevice->getPhysicalDevice(),
+                                    *graphicsDevice->getVulkanDevice(),
+                                    *graphicsDevice->getGraphicsQueue(),
                                     **commandBuffer);
       TracyVkContextName(tracyContext, name.data(), name.length());
 
@@ -38,13 +38,13 @@ namespace tr::gfx {
       constexpr auto fenceCreateInfo =
           vk::FenceCreateInfo{.flags = vk::FenceCreateFlagBits::eSignaled};
       imageAvailableSemaphore =
-          std::make_unique<vk::raii::Semaphore>(graphicsDevice.getVulkanDevice(),
+          std::make_unique<vk::raii::Semaphore>(graphicsDevice->getVulkanDevice(),
                                                 semaphoreCreateInfo);
       renderFinishedSemaphore =
-          std::make_unique<vk::raii::Semaphore>(graphicsDevice.getVulkanDevice(),
+          std::make_unique<vk::raii::Semaphore>(graphicsDevice->getVulkanDevice(),
                                                 semaphoreCreateInfo);
       inFlightFence =
-          std::make_unique<vk::raii::Fence>(graphicsDevice.getVulkanDevice(), fenceCreateInfo);
+          std::make_unique<vk::raii::Fence>(graphicsDevice->getVulkanDevice(), fenceCreateInfo);
 
       // Create an ObjectData buffer
       constexpr auto objectDataBufferCreateInfo =
@@ -56,7 +56,7 @@ namespace tr::gfx {
           vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eCpuToGpu,
                                     .requiredFlags = vk::MemoryPropertyFlagBits::eHostCoherent};
 
-      auto allocator = graphicsDevice.getAllocator();
+      auto allocator = graphicsDevice->getAllocator();
 
       objectDataBuffer = allocator->createBuffer(&objectDataBufferCreateInfo,
                                                  &objectDataAllocationCreateInfo,
@@ -95,20 +95,20 @@ namespace tr::gfx {
 
       // Create PerFrame ShaderBinding
       perFrameShaderBinding =
-          shaderBindingFactory.createShaderBinding(sb::ShaderBindingHandle::PerFrame);
+          shaderBindingFactory->createShaderBinding(sb::ShaderBindingHandle::PerFrame);
       perFrameShaderBinding->bindBuffer(0, *cameraDataBuffer, sizeof(cm::gpu::CameraData));
 
       objectDataShaderBinding =
-          shaderBindingFactory.createShaderBinding(sb::ShaderBindingHandle::ObjectData);
+          shaderBindingFactory->createShaderBinding(sb::ShaderBindingHandle::ObjectData);
       objectDataShaderBinding->bindBuffer(0,
                                           *objectDataBuffer,
                                           sizeof(cm::gpu::ObjectData) * cm::gpu::MAX_OBJECTS);
 
       textureShaderBinding =
-          shaderBindingFactory.createShaderBinding(sb::ShaderBindingHandle::Bindless);
+          shaderBindingFactory->createShaderBinding(sb::ShaderBindingHandle::Bindless);
 
       animationDataShaderBinding =
-          shaderBindingFactory.createShaderBinding(sb::ShaderBindingHandle::AnimationData);
+          shaderBindingFactory->createShaderBinding(sb::ShaderBindingHandle::AnimationData);
       animationDataShaderBinding->bindBuffer(0,
                                              *animationDataBuffer,
                                              sizeof(cm::AnimationData) * cm::gpu::MAX_OBJECTS);
@@ -144,7 +144,23 @@ namespace tr::gfx {
                                       .layerCount = 1,
                                   }};
       drawImageView = std::make_unique<vk::raii::ImageView>(
-          graphicsDevice.getVulkanDevice().createImageView(imageViewCreateInfo));
+          graphicsDevice->getVulkanDevice().createImageView(imageViewCreateInfo));
+   }
+
+   void Frame::registerStorageBuffer(const std::string& name, size_t size) {
+      const auto objectDataBufferCreateInfo =
+          vk::BufferCreateInfo{.size = size,
+                               .usage = vk::BufferUsageFlagBits::eStorageBuffer |
+                                        vk::BufferUsageFlagBits::eShaderDeviceAddress};
+
+      constexpr auto objectDataAllocationCreateInfo =
+          vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eCpuToGpu,
+                                    .requiredFlags = vk::MemoryPropertyFlagBits::eHostCoherent};
+      auto allocator = graphicsDevice2->getAllocator();
+
+      buffers[name] = allocator->createBuffer(&objectDataBufferCreateInfo,
+                                              &objectDataAllocationCreateInfo,
+                                              name);
    }
 
    void Frame::updateTextures(const std::vector<vk::DescriptorImageInfo>& imageInfos) const {
@@ -264,12 +280,12 @@ namespace tr::gfx {
       commandBuffer.reset();
    }
 
-   void Frame::createSwapchainResources(const GraphicsDevice& graphicsDevice) {
+   void Frame::createSwapchainResources() {
       const auto allocInfo =
-          vk::CommandBufferAllocateInfo{.commandPool = *graphicsDevice.getCommandPool(),
+          vk::CommandBufferAllocateInfo{.commandPool = *graphicsDevice2->getCommandPool(),
                                         .level = vk::CommandBufferLevel::ePrimary,
                                         .commandBufferCount = 1};
-      auto commandBuffers = graphicsDevice.getVulkanDevice().allocateCommandBuffers(allocInfo);
+      auto commandBuffers = graphicsDevice2->getVulkanDevice().allocateCommandBuffers(allocInfo);
       commandBuffer = std::make_unique<vk::raii::CommandBuffer>(std::move(commandBuffers[0]));
    }
 

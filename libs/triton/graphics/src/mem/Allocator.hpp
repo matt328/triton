@@ -35,34 +35,34 @@ namespace tr::gfx::mem {
 
       /// Creates a Descriptor Buffer
       /// @throws AllocationException if there is an error allocating or naming the buffer.
-      [[nodiscard]] std::unique_ptr<Buffer> createDescriptorBuffer(
+      [[nodiscard]] auto createDescriptorBuffer(
           size_t size,
-          const std::string_view& name = "unnamed descriptor buffer") const;
+          const std::string_view& name = "unnamed descriptor buffer") const
+          -> std::unique_ptr<Buffer>;
 
       /// Creates a Staging Buffer
       /// @throws AllocationException if there is an error allocating or naming the buffer.
-      [[nodiscard]] std::unique_ptr<Buffer> createStagingBuffer(
-          size_t size,
-          const std::string_view& name = "unnamed buffer") const;
+      [[nodiscard]] auto createStagingBuffer(size_t size,
+                                             const std::string_view& name = "unnamed buffer") const
+          -> std::unique_ptr<Buffer>;
 
       /// Creates a GPU-Only Vertex Buffer
       /// @throws AllocationException if there is an error allocating or naming the buffer.
-      [[nodiscard]] std::unique_ptr<Buffer> createGpuVertexBuffer(
+      [[nodiscard]] auto createGpuVertexBuffer(
           size_t size,
-          const std::string_view& name = "unnamed buffer") const;
+          const std::string_view& name = "unnamed buffer") const -> std::unique_ptr<Buffer>;
 
       /// Creates an Image
       /// @throws AllocationException if there is an error allocating or naming the buffer.
-      [[nodiscard]] std::unique_ptr<Image> createImage(
-          const vk::ImageCreateInfo& imageCreateInfo,
-          const vma::AllocationCreateInfo& allocationCreateInfo,
-          const std::string_view& newName = "unnamed image") const;
+      [[nodiscard]] auto createImage(const vk::ImageCreateInfo& imageCreateInfo,
+                                     const vma::AllocationCreateInfo& allocationCreateInfo,
+                                     const std::string_view& newName = "unnamed image") const
+          -> std::unique_ptr<Image>;
 
       /// Creates a GPU-Only Index Buffer
       /// @throws AllocationException if there is an error allocating or naming the buffer.
-      [[nodiscard]] std::unique_ptr<Buffer> createGpuIndexBuffer(
-          size_t size,
-          const std::string_view& name) const;
+      [[nodiscard]] auto createGpuIndexBuffer(size_t size, const std::string_view& name) const
+          -> std::unique_ptr<Buffer>;
 
       /// Maps the memory used by the given buffer
       /// @returns A void pointer pointing to the memory
@@ -76,14 +76,18 @@ namespace tr::gfx::mem {
       /// Maps the memory used by the given Image
       /// @returns A void pointer pointing to the memory
       /// @throws AllocationException if there is an error mapping the memory
-      [[nodiscard]] void* mapMemory(const Image& Image) const;
+      [[nodiscard]] auto mapMemory(const Image& Image) const -> void*;
 
       /// Unmaps the memory used by the given image
       /// @throws AllocationException if there is an error mapping the memory
       void unmapMemory(const Image& Image) const;
 
+      auto getAllocator() {
+         return allocator;
+      }
+
     private:
       const vk::raii::Device& device;
-      vma::Allocator allocator;
+      std::shared_ptr<vma::Allocator> allocator;
    };
 }

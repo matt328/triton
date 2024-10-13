@@ -6,6 +6,7 @@
 #include "cm/Handles.hpp"
 #include "cm/ObjectData.hpp"
 #include "cm/RenderData.hpp"
+#include "geometry/RenderGroup.hpp"
 #include "sb/LayoutFactory.hpp"
 #include "geometry/Vertex.hpp"
 #include "gui/ImguiHelper.hpp"
@@ -30,11 +31,11 @@ namespace tr::gfx {
    class RenderContext::Impl {
     public:
       Impl(GLFWwindow* window, bool guiEnabled, bool validationEnabled) {
-         graphicsDevice = std::make_unique<GraphicsDevice>(window, validationEnabled);
+         graphicsDevice = std::make_shared<GraphicsDevice>(window, validationEnabled);
 
          layoutFactory = std::make_unique<ds::LayoutFactory>(*graphicsDevice);
 
-         sbFactory = std::make_unique<sb::ShaderBindingFactory>(*graphicsDevice, *layoutFactory);
+         sbFactory = std::make_shared<sb::ShaderBindingFactory>(*graphicsDevice, *layoutFactory);
 
          const auto viewportSize = graphicsDevice->getSwapchainExtent();
          mainViewport = vk::Viewport{.x = 0.f,
@@ -138,13 +139,13 @@ namespace tr::gfx {
 
          initDepthResources();
 
-         frames.reserve(FRAMES_IN_FLIGHT);
-         for (size_t i = 0; i < FRAMES_IN_FLIGHT; i++) {
-            auto name = std::stringstream{};
-            name << "Frame " << i;
-            frames.push_back(
-                std::make_unique<Frame>(*graphicsDevice, depthImageView, *sbFactory, name.str()));
-         }
+         frameManager = std::make_unique<FrameManager>(FRAMES_IN_FLIGHT,
+                                                       graphicsDevice,
+                                                       depthImageView,
+                                                       sbFactory);
+
+         debugGroup = std::make_unique<geo::RenderGroup>(graphicsDevice->getAsyncTransferContext(),
+                                                         graphicsDevice->getAllocator());
 
          if (guiEnabled) {
             imguiHelper = std::make_unique<Gui::ImGuiHelper>(*graphicsDevice, window);
@@ -168,7 +169,7 @@ namespace tr::gfx {
          renderObjects.push_back(std::move(renderObject));
       }
 
-      [[nodiscard]] auto& getResourceManager() const {
+      [[nodiscard]] auto getResourceManager() const -> auto& {
          return *resourceManager;
       }
 
@@ -240,9 +241,7 @@ namespace tr::gfx {
 
       void recreateSwapchain() {
          waitIdle();
-         for (const auto& fd : frames) {
-            fd->destroySwapchainResources();
-         }
+         frameManager->destroySwapchainResources();
 
          graphicsDevice->recreateSwapchain();
 
@@ -260,20 +259,18 @@ namespace tr::gfx {
 
          resizeFn(graphicsDevice->getCurrentSize());
 
-         for (const auto& fd : frames) {
-            fd->createSwapchainResources(*graphicsDevice);
-         }
+         frameManager->createSwapchainResources();
       }
 
       void drawFrame() {
          ZoneNamedN(render, "Render", true);
-         const auto& currentFrameData = frames[currentFrame];
+         auto& currentFrameData = frameManager->getCurrentFrame();
          // Wait for this frame's fence so we can be sure the gpu is finished with this frame's
          // command buffer.  Which it should be since it was submitted a frame or two ago.
          {
             ZoneNamedN(fences, "Awaiting Fences", true);
             if (const auto res = graphicsDevice->getVulkanDevice().waitForFences(
-                    *currentFrameData->getInFlightFence(),
+                    *currentFrameData.getInFlightFence(),
                     VK_TRUE,
                     UINT64_MAX);
                 res != vk::Result::eSuccess) {
@@ -289,7 +286,7 @@ namespace tr::gfx {
             ZoneNamedN(acquire, "Acquire Swapchain Image", true);
             std::tie(result, imageIndex) = graphicsDevice->getSwapchain().acquireNextImage(
                 UINT64_MAX,
-                *currentFrameData->getImageAvailableSemaphore(),
+                *currentFrameData.getImageAvailableSemaphore(),
                 nullptr);
          } catch (const std::exception& ex) {
             Log.warn("Swapchain needs resized: {0}", ex.what());
@@ -298,13 +295,13 @@ namespace tr::gfx {
          }
 
          // Reset this fence
-         graphicsDevice->getVulkanDevice().resetFences(*currentFrameData->getInFlightFence());
+         graphicsDevice->getVulkanDevice().resetFences(*currentFrameData.getInFlightFence());
 
          // Reset and record the current frame's command buffer.
-         currentFrameData->getCommandBuffer().reset();
+         currentFrameData.getCommandBuffer().reset();
          {
             ZoneNamedN(cmdBuffer, "Recording CommandBuffer", true);
-            recordCommandBuffer(*currentFrameData, imageIndex);
+            recordCommandBuffer(currentFrameData, imageIndex);
          }
 
          // Build out the struct and submit the command buffer, signaling the in flight fence when
@@ -313,19 +310,19 @@ namespace tr::gfx {
              vk::PipelineStageFlagBits::eColorAttachmentOutput};
 
          const auto renderFinishedSemaphores =
-             std::array<vk::Semaphore, 1>{*currentFrameData->getRenderFinishedSemaphore()};
+             std::array<vk::Semaphore, 1>{*currentFrameData.getRenderFinishedSemaphore()};
 
          const auto submitInfo =
              vk::SubmitInfo{.waitSemaphoreCount = 1,
-                            .pWaitSemaphores = &*currentFrameData->getImageAvailableSemaphore(),
+                            .pWaitSemaphores = &*currentFrameData.getImageAvailableSemaphore(),
                             .pWaitDstStageMask = waitStages.data(),
                             .commandBufferCount = 1,
-                            .pCommandBuffers = &*currentFrameData->getCommandBuffer(),
+                            .pCommandBuffers = &*currentFrameData.getCommandBuffer(),
                             .signalSemaphoreCount = 1,
                             .pSignalSemaphores = renderFinishedSemaphores.data()};
 
          graphicsDevice->getGraphicsQueue().submit(submitInfo,
-                                                   *currentFrameData->getInFlightFence());
+                                                   *currentFrameData.getInFlightFence());
 
          // Ask the GPU to present the image once the submit semaphore is signaled. Also trap errors
          // here and recreate (resize) the swapchain
@@ -569,7 +566,7 @@ namespace tr::gfx {
 
       bool debugRendering{false};
 
-      std::unique_ptr<GraphicsDevice> graphicsDevice;
+      std::shared_ptr<GraphicsDevice> graphicsDevice;
 
       std::unique_ptr<PipelineBuilder> pb;
 
@@ -592,9 +589,11 @@ namespace tr::gfx {
       std::shared_ptr<vk::raii::ImageView> depthImageView;
 
       std::unique_ptr<ds::LayoutFactory> layoutFactory;
-      std::unique_ptr<sb::ShaderBindingFactory> sbFactory;
+      std::shared_ptr<sb::ShaderBindingFactory> sbFactory;
 
-      std::vector<std::unique_ptr<Frame>> frames;
+      std::unique_ptr<FrameManager> frameManager;
+
+      std::unique_ptr<geo::RenderGroup> debugGroup;
 
       std::unique_ptr<Gui::ImGuiHelper> imguiHelper;
 

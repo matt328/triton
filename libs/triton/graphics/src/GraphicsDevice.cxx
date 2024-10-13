@@ -439,7 +439,7 @@ namespace tr::gfx {
        [[maybe_unused]] const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
        [[maybe_unused]] void* pUserData) {
 
-      Log.trace("Validation Layer: {0}", pCallbackData->pMessage);
+      // Log.trace("Validation Layer: {0}", pCallbackData->pMessage);
       return VK_FALSE;
    }
 
