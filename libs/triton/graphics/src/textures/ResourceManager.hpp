@@ -6,7 +6,7 @@
 #include "cm/LockableResource.hpp"
 #include "cm/RenderData.hpp"
 
-#include "geometry/GeometryGroup.hpp"
+#include "geometry/RenderGroup.hpp"
 #include "geometry/Mesh.hpp"
 #include "textures/Texture.hpp"
 #include "geometry/GeometryHandles.hpp"
@@ -105,7 +105,7 @@ namespace tr::gfx::tx {
       mutable TracyLockable(std::mutex, renderDataMutex);
       cm::gpu::RenderData renderData;
 
-      std::unique_ptr<geo::GeometryGroup> debugGroup;
+      std::unique_ptr<geo::RenderGroup> debugGroup;
 
       /// Uploads Geometry (and images) to the GPU
       /// @throws ResourceUploadException if there's an error uploading.

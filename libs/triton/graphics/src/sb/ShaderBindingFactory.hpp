@@ -17,6 +17,7 @@ namespace tr::gfx::sb {
       Bindless = 2,
       ObjectData = 3,
       AnimationData = 4,
+      // TODO(Matt): Add an additional one here for DebugGroup
    };
 
    class ShaderBindingFactory {
@@ -27,16 +28,16 @@ namespace tr::gfx::sb {
       ~ShaderBindingFactory();
 
       ShaderBindingFactory(const ShaderBindingFactory&) = delete;
-      ShaderBindingFactory& operator=(const ShaderBindingFactory&) = delete;
+      auto operator=(const ShaderBindingFactory&) -> ShaderBindingFactory& = delete;
 
       ShaderBindingFactory(ShaderBindingFactory&&) = delete;
-      ShaderBindingFactory& operator=(ShaderBindingFactory&&) = delete;
+      auto operator=(ShaderBindingFactory&&) -> ShaderBindingFactory& = delete;
 
       /// Allocates a new ShaderBinding
       [[nodiscard]] auto createShaderBinding(ShaderBindingHandle handle) const
           -> std::unique_ptr<ShaderBinding>;
 
-      [[nodiscard]] auto& getLayoutFactory() const {
+      [[nodiscard]] auto getLayoutFactory() const -> auto& {
          return layoutFactory;
       }
 

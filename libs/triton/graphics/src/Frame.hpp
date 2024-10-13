@@ -1,8 +1,12 @@
 #pragma once
 
+#include "GraphicsDevice.hpp"
 #include "cm/ObjectData.hpp"
+#include "mem/Allocator.hpp"
+#include "mem/Buffer.hpp"
 #include "sb/LayoutFactory.hpp"
 #include "sb/ShaderBindingFactory.hpp"
+#include <vulkan/vulkan_raii.hpp>
 
 namespace vk::raii {
    class DescriptorPool;
@@ -32,68 +36,68 @@ namespace tr::gfx {
 
    class Frame {
     public:
-      Frame(const GraphicsDevice& graphicsDevice,
+      Frame(std::shared_ptr<GraphicsDevice> graphicsDevice,
             std::shared_ptr<vk::raii::ImageView> depthImageView,
-            sb::ShaderBindingFactory& shaderBindingFactory,
+            std::shared_ptr<sb::ShaderBindingFactory> shaderBindingFactory,
             std::string_view name);
       ~Frame();
 
       Frame(const Frame&) = delete;
       Frame(Frame&&) = delete;
-      Frame& operator=(const Frame&) = delete;
-      Frame& operator=(Frame&&) = delete;
+      auto operator=(const Frame&) -> Frame& = delete;
+      auto operator=(Frame&&) -> Frame& = delete;
 
-      [[nodiscard]] const vk::raii::CommandBuffer& getCommandBuffer() const {
+      [[nodiscard]] auto getCommandBuffer() const -> const vk::raii::CommandBuffer& {
          return *commandBuffer;
       };
 
-      [[nodiscard]] const vk::raii::Semaphore& getImageAvailableSemaphore() const {
+      [[nodiscard]] auto getImageAvailableSemaphore() const -> const vk::raii::Semaphore& {
          return *imageAvailableSemaphore;
       };
 
-      [[nodiscard]] const vk::raii::Semaphore& getRenderFinishedSemaphore() const {
+      [[nodiscard]] auto getRenderFinishedSemaphore() const -> const vk::raii::Semaphore& {
          return *renderFinishedSemaphore;
       };
 
-      [[nodiscard]] const vk::raii::Fence& getInFlightFence() const {
+      [[nodiscard]] auto getInFlightFence() const -> const vk::raii::Fence& {
          return *inFlightFence;
       };
 
-      [[nodiscard]] tracy::VkCtx* getTracyContext() const {
+      [[nodiscard]] auto getTracyContext() const -> tracy::VkCtx* {
          return tracyContext;
       }
 
-      [[nodiscard]] const mem::Buffer& getCameraBuffer() const {
+      [[nodiscard]] auto getCameraBuffer() const -> const mem::Buffer& {
          return *cameraDataBuffer;
       }
 
-      [[nodiscard]] const mem::Buffer& getObjectDataBuffer() const {
+      [[nodiscard]] auto getObjectDataBuffer() const -> const mem::Buffer& {
          return *objectDataBuffer;
       }
 
-      [[nodiscard]] const mem::Buffer& getAnimationDataBuffer() const {
+      [[nodiscard]] auto getAnimationDataBuffer() const -> const mem::Buffer& {
          return *animationDataBuffer;
       }
 
-      [[nodiscard]] const vk::Image& getDrawImage() const;
+      [[nodiscard]] auto getDrawImage() const -> const vk::Image&;
 
-      [[nodiscard]] const vk::ImageView& getDrawImageView() const {
+      [[nodiscard]] auto getDrawImageView() const -> const vk::ImageView& {
          return **drawImageView;
       }
 
-      [[nodiscard]] const sb::ShaderBinding& getPerFrameShaderBinding() const {
+      [[nodiscard]] auto getPerFrameShaderBinding() const -> const sb::ShaderBinding& {
          return *perFrameShaderBinding;
       }
 
-      [[nodiscard]] const sb::ShaderBinding& getObjectDataShaderBinding() const {
+      [[nodiscard]] auto getObjectDataShaderBinding() const -> const sb::ShaderBinding& {
          return *objectDataShaderBinding;
       }
 
-      [[nodiscard]] const sb::ShaderBinding& getTextureShaderBinding() const {
+      [[nodiscard]] auto getTextureShaderBinding() const -> const sb::ShaderBinding& {
          return *textureShaderBinding;
       }
 
-      [[nodiscard]] const sb::ShaderBinding& getAnimationShaderBinding() const {
+      [[nodiscard]] auto getAnimationShaderBinding() const -> const sb::ShaderBinding& {
          return *animationDataShaderBinding;
       }
 
@@ -102,7 +106,7 @@ namespace tr::gfx {
       void updateAnimationDataBuffer(const cm::gpu::AnimationData* data, size_t size) const;
 
       void destroySwapchainResources();
-      void createSwapchainResources(const GraphicsDevice& graphicsDevice);
+      void createSwapchainResources();
 
       void updateTextures(const std::vector<vk::DescriptorImageInfo>& imageInfos) const;
 
@@ -114,8 +118,10 @@ namespace tr::gfx {
                          const vk::Extent2D& swapchainExtent) const;
       void endFrame(const vk::Image& swapchainImage) const;
 
+      void registerStorageBuffer(const std::string& name, size_t size);
+
     private:
-      const vk::raii::Device& graphicsDevice;
+      std::shared_ptr<GraphicsDevice> graphicsDevice2;
       size_t combinedImageSamplerDescriptorSize{};
       std::shared_ptr<vk::raii::ImageView> depthImageView;
       std::unique_ptr<vk::raii::CommandBuffer> commandBuffer;
@@ -123,7 +129,7 @@ namespace tr::gfx {
       std::unique_ptr<vk::raii::Semaphore> renderFinishedSemaphore;
       std::unique_ptr<vk::raii::Fence> inFlightFence;
 
-      sb::ShaderBindingFactory& shaderBindingFactory;
+      std::shared_ptr<sb::ShaderBindingFactory> shaderBindingFactory;
 
       std::unique_ptr<sb::ShaderBinding> perFrameShaderBinding;
       std::unique_ptr<sb::ShaderBinding> objectDataShaderBinding;
@@ -139,5 +145,54 @@ namespace tr::gfx {
       std::unique_ptr<mem::Image> drawImage;
       std::unique_ptr<vk::raii::ImageView> drawImageView;
       vk::Extent2D drawExtent;
+
+      std::unordered_map<std::string, std::unique_ptr<mem::Buffer>> buffers;
+   };
+
+   class FrameManager {
+    public:
+      explicit FrameManager(size_t numFrames,
+                            std::shared_ptr<GraphicsDevice> graphicsDevice,
+                            std::shared_ptr<vk::raii::ImageView> depthImageView,
+                            std::shared_ptr<sb::ShaderBindingFactory> sbFactory)
+          : numFrames(numFrames) {
+         for (size_t i = 0; i < numFrames; ++i) {
+            auto name = std::stringstream{};
+            name << "Frame " << i;
+            frames.push_back(
+                std::make_unique<Frame>(graphicsDevice, depthImageView, sbFactory, name.str()));
+         }
+      }
+
+      auto getCurrentFrame() -> Frame& {
+         return *frames[currentFrame];
+      }
+
+      void nextFrame() {
+         currentFrame = (currentFrame + 1) % numFrames;
+      }
+
+      void registerStorageBuffer(std::string& name, size_t size) {
+         for (auto& frame : frames) {
+            frame->registerStorageBuffer(name, size);
+         }
+      }
+
+      void destroySwapchainResources() {
+         for (const auto& frame : frames) {
+            frame->destroySwapchainResources();
+         }
+      }
+
+      void createSwapchainResources() {
+         for (const auto& frame : frames) {
+            frame->createSwapchainResources();
+         }
+      }
+
+    private:
+      size_t currentFrame = 0;
+      size_t numFrames;
+      std::vector<std::unique_ptr<Frame>> frames;
    };
 }

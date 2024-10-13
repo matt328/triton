@@ -13,23 +13,23 @@ namespace tr::gfx::mem {
 
    Allocator::Allocator(const vma::AllocatorCreateInfo& createInfo, const vk::raii::Device& device)
        : device{device} {
-      allocator = createAllocator(createInfo);
+      allocator = std::make_shared<vma::Allocator>(createAllocator(createInfo));
    }
 
    Allocator::~Allocator() {
       Log.debug("Destroying Allocator");
-      allocator.destroy();
+      allocator->destroy();
    }
 
-   std::unique_ptr<Buffer> Allocator::createBuffer(const vk::BufferCreateInfo* bci,
-                                                   const vma::AllocationCreateInfo* aci,
-                                                   const std::string_view& name) const {
+   auto Allocator::createBuffer(const vk::BufferCreateInfo* bci,
+                                const vma::AllocationCreateInfo* aci,
+                                const std::string_view& name) const -> std::unique_ptr<Buffer> {
 
       vma::AllocationInfo info{};
       try {
-         auto [buffer, allocation] = allocator.createBuffer(*bci, *aci, info);
-         allocator.setAllocationName(allocation, name.data());
-         return std::make_unique<Buffer>(allocator, buffer, bci->size, allocation, *device, info);
+         auto [buffer, allocation] = allocator->createBuffer(*bci, *aci, info);
+         allocator->setAllocationName(allocation, name.data());
+         return std::make_unique<Buffer>(*allocator, buffer, bci->size, allocation, *device, info);
       } catch (const std::exception& ex) {
          throw AllocationException(
              fmt::format("Error creating and/or naming Buffer: {0}, {1}", name, ex.what()));
@@ -66,8 +66,8 @@ namespace tr::gfx::mem {
       return createBuffer(&bufferCreateInfo, &allocationCreateInfo, name);
    }
 
-   std::unique_ptr<Buffer> Allocator::createGpuVertexBuffer(const size_t size,
-                                                            const std::string_view& name) const {
+   auto Allocator::createGpuVertexBuffer(const size_t size, const std::string_view& name) const
+       -> std::unique_ptr<Buffer> {
 
       const auto bufferCreateInfo = vk::BufferCreateInfo{
           .size = size,
@@ -85,17 +85,17 @@ namespace tr::gfx::mem {
        const std::string_view& newName) const {
 
       try {
-         auto [image, allocation] = allocator.createImage(imageCreateInfo, allocationCreateInfo);
-         allocator.setAllocationName(allocation, newName.data());
-         return std::make_unique<Image>(allocator, image, allocation);
+         auto [image, allocation] = allocator->createImage(imageCreateInfo, allocationCreateInfo);
+         allocator->setAllocationName(allocation, newName.data());
+         return std::make_unique<Image>(*allocator, image, allocation);
       } catch (const std::exception& ex) {
          throw AllocationException(
              fmt::format("Error creating and/or naming Image: {0}, {1}", newName, ex.what()));
       }
    }
 
-   std::unique_ptr<Buffer> Allocator::createGpuIndexBuffer(const size_t size,
-                                                           const std::string_view& name) const {
+   auto Allocator::createGpuIndexBuffer(const size_t size, const std::string_view& name) const
+       -> std::unique_ptr<Buffer> {
       const auto bufferCreateInfo = vk::BufferCreateInfo{
           .size = size,
           .usage = vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst,
@@ -106,9 +106,9 @@ namespace tr::gfx::mem {
       return createBuffer(&bufferCreateInfo, &allocationCreateInfo, name);
    }
 
-   void* Allocator::mapMemory(const Buffer& Buffer) const {
+   auto Allocator::mapMemory(const Buffer& Buffer) const -> void* {
       try {
-         return allocator.mapMemory(Buffer.getAllocation());
+         return allocator->mapMemory(Buffer.getAllocation());
       } catch (const std::exception& ex) {
          throw AllocationException(fmt::format("Error mapping buffer: {0}", ex.what()));
       }
@@ -116,15 +116,15 @@ namespace tr::gfx::mem {
 
    void Allocator::unmapMemory(const Buffer& Buffer) const {
       try {
-         return allocator.unmapMemory(Buffer.getAllocation());
+         return allocator->unmapMemory(Buffer.getAllocation());
       } catch (const std::exception& ex) {
          throw AllocationException(fmt::format("Error ummapping buffer: {0}", ex.what()));
       }
    }
 
-   void* Allocator::mapMemory(const Image& Image) const {
+   auto Allocator::mapMemory(const Image& Image) const -> void* {
       try {
-         return allocator.mapMemory(Image.getAllocation());
+         return allocator->mapMemory(Image.getAllocation());
       } catch (const std::exception& ex) {
          throw AllocationException(fmt::format("Error mapping Image: {0}", ex.what()));
       }
@@ -132,7 +132,7 @@ namespace tr::gfx::mem {
 
    void Allocator::unmapMemory(const Image& Image) const {
       try {
-         allocator.unmapMemory(Image.getAllocation());
+         allocator->unmapMemory(Image.getAllocation());
       } catch (const std::exception& ex) {
          throw AllocationException(fmt::format("Error unmapping Image: {0}", ex.what()));
       }

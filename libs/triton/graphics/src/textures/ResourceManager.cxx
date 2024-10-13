@@ -9,7 +9,7 @@
 #include "HeightField.hpp"
 
 #include "geometry/GeometryFactory.hpp"
-#include "geometry/GeometryGroup.hpp"
+#include "geometry/RenderGroup.hpp"
 #include "geometry/GeometryHandles.hpp"
 
 #include "GraphicsDevice.hpp"
@@ -26,9 +26,6 @@ namespace tr::gfx::tx {
    ResourceManager::ResourceManager(const GraphicsDevice& graphicsDevice)
        : graphicsDevice{graphicsDevice} {
       geometryFactory = std::make_unique<geo::GeometryFactory>();
-
-      debugGroup = std::make_unique<geo::GeometryGroup>(graphicsDevice.getAsyncTransferContext(),
-                                                        graphicsDevice.getAllocator());
    }
 
    ResourceManager::~ResourceManager() { // NOLINT(*-use-equals-default)
