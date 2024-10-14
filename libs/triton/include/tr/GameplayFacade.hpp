@@ -51,8 +51,8 @@ namespace tr::ctx {
 
       auto setCurrentCamera(cm::EntityType currentCamera) const -> void;
 
-      [[nodiscard]] auto getStaticModelEntityTask() const noexcept
-          -> std::function<cm::EntityType(const std::filesystem::path&)>;
+      [[nodiscard]] auto createStaticModelEntity(
+          const std::filesystem::path& modelPath) const noexcept -> cm::EntityType;
 
       [[nodiscard]] auto getAnimatedModelEntityTask() const
           -> std::function<cm::EntityType(const std::filesystem::path& modelPath,

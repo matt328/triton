@@ -71,8 +71,11 @@ namespace ed::data {
 
       engineBusy = true;
 
-      const auto task = gameplayFacade.getStaticModelEntityTask();
-      const auto result = taskQueue->enqueue(task, onComplete, modelFilename);
+      const auto task = [this, &modelFilename]() {
+         return gameplayFacade.createStaticModelEntity(modelFilename);
+      };
+
+      const auto result = taskQueue->enqueue(task, onComplete);
    }
 
    void DataFacade::createAnimatedModel(const std::string_view& entityName,
