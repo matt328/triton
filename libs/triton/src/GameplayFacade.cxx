@@ -24,12 +24,10 @@ namespace tr::ctx {
          };
       }
 
-      [[nodiscard]] auto getStaticModelEntityTask() const noexcept
-          -> std::function<cm::EntityType(const std::filesystem::path&)> {
-         return [this](const std::filesystem::path& modelPath) -> cm::EntityType {
-            auto staticModelResult = renderer.createStaticModel(modelPath);
-            return gameplaySystem.createStaticModel(staticModelResult);
-         };
+      [[nodiscard]] auto createStaticModelEntity(
+          const std::filesystem::path& modelPath) const noexcept -> cm::EntityType {
+         auto staticModelResult = renderer.createStaticModel(modelPath);
+         return gameplaySystem.createStaticModel(staticModelResult);
       }
 
       [[nodiscard]] auto getAnimatedModelEntityTask() const
@@ -91,9 +89,9 @@ namespace tr::ctx {
       return impl->getCreateTerrainFn();
    }
 
-   [[nodiscard]] auto GameplayFacade::getStaticModelEntityTask() const noexcept
-       -> std::function<cm::EntityType(const std::filesystem::path&)> {
-      return impl->getStaticModelEntityTask();
+   [[nodiscard]] auto GameplayFacade::createStaticModelEntity(
+       const std::filesystem::path& modelPath) const noexcept -> cm::EntityType {
+      return impl->createStaticModelEntity(modelPath);
    }
 
    [[nodiscard]] auto GameplayFacade::getAnimatedModelEntityTask() const
