@@ -27,7 +27,9 @@ namespace tr::gfx::geo {
       }
    }
 
-   auto RenderGroup::addInstance(cm::EntityType entityId, size_t meshId) -> GroupInfo {
+   auto RenderGroup::addInstance(cm::EntityType entityId,
+                                 size_t meshId,
+                                 glm::mat4 modelMatrix) -> GroupInfo {
       if (meshDataMap.find(meshId) != meshDataMap.end()) {}
    }
 
