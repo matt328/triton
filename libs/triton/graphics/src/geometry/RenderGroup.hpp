@@ -24,6 +24,11 @@ namespace tr::gfx::geo {
       glm::mat4 modelMatrix;
    };
 
+   struct GroupHandle {
+      size_t meshId;
+      size_t instanceId;
+   };
+
    using GroupInfo = std::tuple<size_t, size_t>;
    using AddMeshCompleteFn = std::function<void(size_t)>;
 

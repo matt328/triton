@@ -106,9 +106,12 @@ namespace ed::data {
       };
       engineBusy = true;
 
-      const auto task = gameplayFacade.getAnimatedModelEntityTask();
-      auto result =
-          taskQueue->enqueue(task, fn, modelFilename, skeletonFilename, animationFilename);
+      const auto task = [this, modelFilename, skeletonFilename, animationFilename]() {
+         return gameplayFacade.createAnimatedModelEntity(modelFilename,
+                                                         skeletonFilename,
+                                                         animationFilename);
+      };
+      auto result = taskQueue->enqueue(task, fn);
    }
 
    void DataFacade::addAnimationToEntity([[maybe_unused]] const std::string_view& entityName,

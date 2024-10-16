@@ -51,13 +51,16 @@ namespace tr::ctx {
 
       auto setCurrentCamera(cm::EntityType currentCamera) const -> void;
 
+      [[nodiscard]] auto createDebugAABB(const glm::vec3& min,
+                                         const glm::vec3& max) const -> cm::EntityType;
+
       [[nodiscard]] auto createStaticModelEntity(
           const std::filesystem::path& modelPath) const noexcept -> cm::EntityType;
 
-      [[nodiscard]] auto getAnimatedModelEntityTask() const
-          -> std::function<cm::EntityType(const std::filesystem::path& modelPath,
-                                          const std::filesystem::path& skeletonPath,
-                                          const std::filesystem::path& animationPath)>;
+      [[nodiscard]] auto createAnimatedModelEntity(const std::filesystem::path& modelPath,
+                                                   const std::filesystem::path& skeletonPath,
+                                                   const std::filesystem::path& animationPath) const
+          -> cm::EntityType;
 
       auto clear() const -> void;
 
@@ -66,4 +69,4 @@ namespace tr::ctx {
       std::unique_ptr<Impl> impl;
    };
 
-} // namespace tr::ctx
+}

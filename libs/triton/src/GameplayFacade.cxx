@@ -24,27 +24,28 @@ namespace tr::ctx {
          };
       }
 
+      [[nodiscard]] auto createDebugAABB(const glm::vec3& min,
+                                         const glm::vec3& max) const noexcept -> cm::EntityType {
+         // todo
+      }
+
       [[nodiscard]] auto createStaticModelEntity(
           const std::filesystem::path& modelPath) const noexcept -> cm::EntityType {
          auto staticModelResult = renderer.createStaticModel(modelPath);
          return gameplaySystem.createStaticModel(staticModelResult);
       }
 
-      [[nodiscard]] auto getAnimatedModelEntityTask() const
-          -> std::function<cm::EntityType(const std::filesystem::path&,
-                                          const std::filesystem::path&,
-                                          const std::filesystem::path&)> {
-         return [this](const std::filesystem::path& modelPath,
-                       const std::filesystem::path& skeletonPath,
-                       const std::filesystem::path& animationPath) -> cm::EntityType {
-            try {
-               auto modelResult = renderer.createSkinnedModel(modelPath);
-               return gameplaySystem.createAnimatedModel(modelResult, skeletonPath, animationPath);
-            } catch (tr::BaseException& ex) {
-               ex << "CreateAnimatedModelEntityTask: ";
-               throw;
-            }
-         };
+      [[nodiscard]] auto createAnimatedModelEntity(const std::filesystem::path& modelPath,
+                                                   const std::filesystem::path& skeletonPath,
+                                                   const std::filesystem::path& animationPath) const
+          -> cm::EntityType {
+         try {
+            auto modelResult = renderer.createSkinnedModel(modelPath);
+            return gameplaySystem.createAnimatedModel(modelResult, skeletonPath, animationPath);
+         } catch (tr::BaseException& ex) {
+            ex << "CreateAnimatedModelEntityTask: ";
+            throw;
+         }
       }
 
       static void loadModelResources([[maybe_unused]] const std::filesystem::path& modelPath,
@@ -89,16 +90,21 @@ namespace tr::ctx {
       return impl->getCreateTerrainFn();
    }
 
+   [[nodiscard]] auto GameplayFacade::createDebugAABB(const glm::vec3& min, const glm::vec3& max)
+       const -> cm::EntityType {
+      return impl->createDebugAABB(min, max);
+   }
+
    [[nodiscard]] auto GameplayFacade::createStaticModelEntity(
        const std::filesystem::path& modelPath) const noexcept -> cm::EntityType {
       return impl->createStaticModelEntity(modelPath);
    }
 
-   [[nodiscard]] auto GameplayFacade::getAnimatedModelEntityTask() const
-       -> std::function<cm::EntityType(const std::filesystem::path&,
-                                       const std::filesystem::path&,
-                                       const std::filesystem::path&)> {
-      return impl->getAnimatedModelEntityTask();
+   [[nodiscard]] auto GameplayFacade::createAnimatedModelEntity(
+       const std::filesystem::path& modelPath,
+       const std::filesystem::path& skeletonPath,
+       const std::filesystem::path& animationPath) const -> cm::EntityType {
+      return impl->createAnimatedModelEntity(modelPath, skeletonPath, animationPath);
    }
 
    cm::EntityType GameplayFacade::createCamera(const uint32_t width,
@@ -120,4 +126,4 @@ namespace tr::ctx {
       impl->clear();
    }
 
-} // namespace tr::ctx
+}
