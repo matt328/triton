@@ -10,4 +10,4 @@ namespace tr::gp::cmp {
       glm::vec3 max;
    };
 
-} // namespace tr::gp::cmp
+}
