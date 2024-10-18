@@ -667,4 +667,5 @@ namespace tr::gfx {
       return impl->createSkinnedModel(modelPath);
    }
 
+   auto RenderContext::createAABBGeometry(const glm::vec3& min, const glm::vec3& max) ->
 }

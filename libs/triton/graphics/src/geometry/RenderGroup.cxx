@@ -18,13 +18,10 @@ namespace tr::gfx::geo {
       if (meshDataMap.find(hashValue) != meshDataMap.end()) {
          onComplete(hashValue);
       } else {
-         vertexBuffer->addAndUploadData(
-             vertexData,
-             [this, hashValue, vertexCount, onComplete](uint32_t offset) {
-                meshDataMap[hashValue] = MeshData{offset, vertexCount, 0, 0};
-                onComplete(hashValue);
-             });
+         auto offset = vertexBuffer->addAndUploadData(vertexData);
+         meshDataMap[hashValue] = MeshData{offset, vertexCount, 0, 0};
       }
+      return hashValue;
    }
 
    auto RenderGroup::addInstance(cm::EntityType entityId,

@@ -22,8 +22,7 @@ namespace tr::gfx::mem {
    MultiBuffer::~MultiBuffer() {
    }
 
-   void MultiBuffer::addAndUploadData(const std::vector<tr::as::Vertex>& vertexData,
-                                      const std::function<void(uint32_t)>& onComplete) {
+   auto MultiBuffer::addAndUploadData(const std::vector<tr::as::Vertex>& vertexData) -> uint32_t {
 
       const auto size = sizeof(as::Vertex) * vertexData.size();
 
@@ -38,6 +37,6 @@ namespace tr::gfx::mem {
       bufferEntries.emplace_back(currentOffset, size);
 
       currentOffset = +size;
-      onComplete(currentOffset);
+      return currentOffset;
    }
 }
