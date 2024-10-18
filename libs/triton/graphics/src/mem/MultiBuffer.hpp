@@ -25,8 +25,7 @@ namespace tr::gfx::mem {
       auto operator=(MultiBuffer&&) -> MultiBuffer& = delete;
 
       /// Abstracts away uploading data.
-      void addAndUploadData(const std::vector<tr::as::Vertex>& vertexData,
-                            const std::function<void(uint32_t)>& onComplete);
+      auto addAndUploadData(const std::vector<tr::as::Vertex>& vertexData) -> uint32_t;
 
       [[nodiscard]] auto getEntries() const {
          return bufferEntries;

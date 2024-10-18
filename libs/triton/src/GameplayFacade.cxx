@@ -27,6 +27,7 @@ namespace tr::ctx {
       [[nodiscard]] auto createDebugAABB(const glm::vec3& min,
                                          const glm::vec3& max) const noexcept -> cm::EntityType {
          // todo
+         const auto aabbHandle = renderer->createAABBGeometry(min, max);
       }
 
       [[nodiscard]] auto createStaticModelEntity(
