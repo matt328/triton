@@ -20,8 +20,9 @@ namespace tr::gfx::geo {
       uint32_t firstInstance;
    };
 
-   struct GpuInstanceData {
+   struct alignas(16) GpuInstanceData {
       glm::mat4 modelMatrix;
+      alignas(4) uint32_t visible;
    };
 
    struct GroupHandle {
