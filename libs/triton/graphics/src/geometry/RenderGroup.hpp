@@ -25,11 +25,6 @@ namespace tr::gfx::geo {
       alignas(4) uint32_t visible;
    };
 
-   struct GroupHandle {
-      size_t meshId;
-      size_t instanceId;
-   };
-
    using GroupInfo = std::tuple<size_t, size_t>;
    using AddMeshCompleteFn = std::function<void(size_t)>;
 
@@ -45,10 +40,10 @@ namespace tr::gfx::geo {
       auto operator=(const RenderGroup&) -> RenderGroup& = delete;
       auto operator=(RenderGroup&&) -> RenderGroup& = delete;
 
-      auto addMesh(const std::vector<as::Vertex>& vertexData, const AddMeshCompleteFn& onComplete);
-      auto addInstance(cm::EntityType entityId, size_t meshId, glm::mat4 modelMatrix) -> GroupInfo;
+      auto addMesh(const std::vector<as::Vertex>& vertexData) -> size_t;
+      auto addInstance(size_t meshId, glm::mat4 modelMatrix) -> GroupInfo;
 
-      auto removeInstance(cm::EntityType entityId, size_t instanceId) -> void;
+      auto removeInstance(size_t instanceId) -> void;
       auto render(Frame& frame, vk::raii::CommandBuffer& commandBuffer) -> void;
 
     private:

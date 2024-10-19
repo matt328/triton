@@ -24,10 +24,10 @@ namespace tr::ctx {
          };
       }
 
-      [[nodiscard]] auto createDebugAABB(const glm::vec3& min,
-                                         const glm::vec3& max) const noexcept -> cm::EntityType {
+      [[nodiscard]] auto createDebugAABB(const glm::vec3& min, const glm::vec3& max) const noexcept
+          -> cm::EntityType {
          // todo
-         const auto aabbHandle = renderer->createAABBGeometry(min, max);
+         const auto aabbHandle = renderer.createAABBGeometry(min, max);
       }
 
       [[nodiscard]] auto createStaticModelEntity(
@@ -91,8 +91,9 @@ namespace tr::ctx {
       return impl->getCreateTerrainFn();
    }
 
-   [[nodiscard]] auto GameplayFacade::createDebugAABB(const glm::vec3& min, const glm::vec3& max)
-       const -> cm::EntityType {
+   [[nodiscard]] auto GameplayFacade::createDebugAABB(const glm::vec3& min,
+                                                      const glm::vec3& max) const
+       -> cm::EntityType {
       return impl->createDebugAABB(min, max);
    }
 

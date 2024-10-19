@@ -40,10 +40,10 @@ namespace tr::gfx {
       ~RenderContext();
 
       RenderContext(const RenderContext&) = delete;
-      RenderContext& operator=(const RenderContext&) = delete;
+      auto operator=(const RenderContext&) -> RenderContext& = delete;
 
       RenderContext(RenderContext&&) = delete;
-      RenderContext& operator=(RenderContext&&) = delete;
+      auto operator=(RenderContext&&) -> RenderContext& = delete;
 
       void render() const;
       void waitIdle() const;
@@ -59,11 +59,16 @@ namespace tr::gfx {
       void setDebugRendering(bool wireframeEnabled) const;
 
       // Resource Creation
-      auto createStaticModel(const std::filesystem::path& modelPath) const -> cm::ModelData;
+      [[nodiscard]] auto createStaticModel(const std::filesystem::path& modelPath) const
+          -> cm::ModelData;
 
-      auto createTerrain(uint32_t size) const -> cm::ModelData;
+      [[nodiscard]] auto createTerrain(uint32_t size) const -> cm::ModelData;
 
-      auto createSkinnedModel(const std::filesystem::path& modelPath) const -> cm::ModelData;
+      [[nodiscard]] auto createSkinnedModel(const std::filesystem::path& modelPath) const
+          -> cm::ModelData;
+
+      [[nodiscard]] auto createAABBGeometry(const glm::vec3& min, const glm::vec3& max)
+          -> cm::GroupHandle;
 
     private:
       class Impl;

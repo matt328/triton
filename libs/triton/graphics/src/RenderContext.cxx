@@ -202,6 +202,15 @@ namespace tr::gfx {
          return resourceManager->createModel(modelPath);
       }
 
+      [[nodiscard]] auto createAABBGeometry(const glm::vec3& min,
+                                            const glm::vec3& max) const noexcept
+          -> cm::GroupHandle {
+         auto verts = getAABBVerts(min, max);
+         auto meshId = debugGroup->addMesh(verts);
+         auto instanceId = debugGroup->addInstance(meshId, glm::identity<glm::mat4>());
+         return {meshId, instanceId};
+      }
+
     private:
       void initDepthResources() {
          const auto depthFormat = Helpers::findDepthFormat(graphicsDevice->getPhysicalDevice());
@@ -667,5 +676,8 @@ namespace tr::gfx {
       return impl->createSkinnedModel(modelPath);
    }
 
-   auto RenderContext::createAABBGeometry(const glm::vec3& min, const glm::vec3& max) ->
+   auto RenderContext::createAABBGeometry(const glm::vec3& min, const glm::vec3& max)
+       -> cm::GroupHandle {
+      return impl->createAABBGeometry(min, max);
+   }
 }
