@@ -36,4 +36,9 @@ namespace tr::cm {
       std::optional<SkinData> skinData{};
       std::optional<AnimationData> animationData{};
    };
+
+   struct GroupHandle {
+      size_t meshId;
+      size_t instanceId;
+   };
 }

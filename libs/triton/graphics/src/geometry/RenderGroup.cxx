@@ -8,29 +8,22 @@ namespace tr::gfx::geo {
        : transferContext(context), allocator(allocator) {
    }
 
-   auto RenderGroup::addMesh(const std::vector<as::Vertex>& vertexData,
-                             const AddMeshCompleteFn& onComplete) {
+   auto RenderGroup::addMesh(const std::vector<as::Vertex>& vertexData) -> size_t {
+      const auto hashValue = vertexListHash(vertexData);
 
-      auto hashValue = vertexListHash(vertexData);
-
-      auto vertexCount = static_cast<uint32_t>(vertexData.size());
-
-      if (meshDataMap.find(hashValue) != meshDataMap.end()) {
-         onComplete(hashValue);
-      } else {
-         auto offset = vertexBuffer->addAndUploadData(vertexData);
+      if (meshDataMap.find(hashValue) == meshDataMap.end()) {
+         const auto offset = vertexBuffer->addAndUploadData(vertexData);
+         const auto vertexCount = static_cast<uint32_t>(vertexData.size());
          meshDataMap[hashValue] = MeshData{offset, vertexCount, 0, 0};
       }
       return hashValue;
    }
 
-   auto RenderGroup::addInstance(cm::EntityType entityId,
-                                 size_t meshId,
-                                 glm::mat4 modelMatrix) -> GroupInfo {
+   auto RenderGroup::addInstance(size_t meshId, glm::mat4 modelMatrix) -> GroupInfo {
       if (meshDataMap.find(meshId) != meshDataMap.end()) {}
    }
 
-   auto RenderGroup::removeInstance(cm::EntityType entityId, size_t instanceId) -> void {
+   auto RenderGroup::removeInstance(size_t instanceId) -> void {
    }
 
    auto RenderGroup::render(Frame& frame, vk::raii::CommandBuffer& commandBuffer) -> void {
