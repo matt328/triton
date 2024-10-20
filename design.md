@@ -222,3 +222,35 @@ Maybe have a EditorInfo component that only the editor uses to keep track of the
   - Access to the renderData in the resource manager is guarded by a lock so that when the renderer reads it, it's guaranteed to have a complete, coherent version of the data.
   - The handles in this data could however become invalid by the time the renderer decides to render
   the data. To mitigate this, when an entity that maps to buffer resources is removed, the handles should be ensured to be removed from the renderdata before the resources are freed by the renderer
+
+```mermaid
+sequenceDiagram
+   box GameWorld
+   participant Editor
+   participant GameplayFacade
+   participant GameplaySystem
+   participant EntitySystem
+   end
+   box Renderer
+   participant RenderContext
+   participant ResourceManager
+   participant GeometryFactory
+   end
+
+   Editor->>GameplayFacade: createStaticModel()
+
+   activate GameplayFacade
+   GameplayFacade->>RenderContext: createResource()
+   RenderContext->>ResourceManager: createResource()
+   ResourceManager->>GeometryFactory: createGeometry()
+   GeometryFactory->>ResourceManager: geometryHandle
+   ResourceManager->>RenderContext: resourceHandle
+   RenderContext->>GameplayFacade: resourceHandle
+   
+   GameplayFacade->>GameplaySystem: createEntity(resourceHandle)
+   GameplaySystem->>EntitySystem: createEntity(resourceHandle)
+   EntitySystem->>GameplaySystem: entityId
+   GameplaySystem->>GameplayFacade: entityId
+   GameplayFacade->>Editor: entityId
+   deactivate GameplayFacade
+```
