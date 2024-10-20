@@ -109,13 +109,14 @@ namespace tr::ctx {
       return impl->createAnimatedModelEntity(modelPath, skeletonPath, animationPath);
    }
 
-   cm::EntityType GameplayFacade::createCamera(const uint32_t width,
-                                               const uint32_t height,
-                                               const float fov,
-                                               const float zNear,
-                                               const float zFar,
-                                               const glm::vec3& position,
-                                               const std::optional<std::string>& name) const {
+   auto GameplayFacade::createCamera(const uint32_t width,
+                                     const uint32_t height,
+                                     const float fov,
+                                     const float zNear,
+                                     const float zFar,
+                                     const glm::vec3& position,
+                                     const std::optional<std::string>& name) const
+       -> cm::EntityType {
 
       return impl->createCamera(width, height, fov, zNear, zFar, position, name);
    }

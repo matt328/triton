@@ -225,18 +225,20 @@ Maybe have a EditorInfo component that only the editor uses to keep track of the
 
 ```mermaid
 sequenceDiagram
-   box GameWorld
+   box rgba(0, 255, 0, 0.2) GameWorld
    participant Editor
    participant GameplayFacade
+   participant Context
    participant GameplaySystem
    participant EntitySystem
    end
-   box Renderer
+   box rgba(0, 0, 255, 0.2) Renderer
    participant RenderContext
    participant ResourceManager
    participant GeometryFactory
    end
 
+   rect rgba(0, 0, 0, 0.3)
    Editor->>GameplayFacade: createStaticModel()
 
    activate GameplayFacade
@@ -253,4 +255,39 @@ sequenceDiagram
    GameplaySystem->>GameplayFacade: entityId
    GameplayFacade->>Editor: entityId
    deactivate GameplayFacade
+   end
+
+   rect rgba(0, 0, 0, 0.3) 
+   loop 60 fps
+   loop As many times as possible
+   Context->>GameplaySystem: fixedUpdate()
+   activate Context
+
+   GameplaySystem->>EntitySystem: fixedUpdate()
+   
+   activate EntitySystem
+   EntitySystem->>EntitySystem: Update All Entities
+   EntitySystem->>GameplaySystem: fixedUpdateComplete
+   deactivate EntitySystem
+
+   GameplaySystem->>Context: fixedUpdateComplete
+   end
+
+   Context->>GameplaySystem: update()
+
+   GameplaySystem->>EntitySystem: update()
+   activate EntitySystem
+   EntitySystem->>EntitySystem: Extract RenderData
+   EntitySystem->>GameplaySystem: renderData
+   deactivate EntitySystem
+
+   GameplaySystem->>RenderContext: setRenderData()
+   RenderContext->>ResourceManager: setRenderData()
+   ResourceManager->>RenderContext: renderDataRecieved
+   RenderContext->>GameplaySystem: renderDataRecieved
+   Context->>RenderContext: render()
+   deactivate Context
+   end
+   end
+
 ```
