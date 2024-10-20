@@ -119,6 +119,7 @@ namespace tr::gfx {
       void endFrame(const vk::Image& swapchainImage) const;
 
       void registerStorageBuffer(const std::string& name, size_t size);
+      void updateStorageBuffer(const std::string& name, const void* data, size_t size) const;
 
     private:
       std::shared_ptr<GraphicsDevice> graphicsDevice2;
@@ -172,7 +173,7 @@ namespace tr::gfx {
          currentFrame = (currentFrame + 1) % numFrames;
       }
 
-      void registerStorageBuffer(std::string& name, size_t size) {
+      void registerStorageBuffer(const std::string& name, size_t size) const {
          for (auto& frame : frames) {
             frame->registerStorageBuffer(name, size);
          }

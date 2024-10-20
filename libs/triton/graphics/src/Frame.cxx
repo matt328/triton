@@ -276,6 +276,13 @@ namespace tr::gfx {
       this->animationDataBuffer->updateMappedBufferValue(data, size);
    }
 
+   void Frame::updateStorageBuffer(const std::string& name,
+                                   const void* data,
+                                   const size_t size) const {
+      assert(buffers.find(name) != buffers.end());
+      buffers.at(name)->updateMappedBufferValue(data, size);
+   }
+
    void Frame::destroySwapchainResources() {
       commandBuffer.reset();
    }
