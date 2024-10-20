@@ -3,6 +3,7 @@
 #include "GraphicsDevice.hpp"
 #include "RenderObject.hpp"
 
+#include "as/Vertex.hpp"
 #include "cm/Handles.hpp"
 #include "cm/ObjectData.hpp"
 #include "cm/RenderData.hpp"
@@ -21,6 +22,7 @@
 #include "PipelineBuilder.hpp"
 #include "mem/Allocator.hpp"
 #include "sb/ShaderBinding.hpp"
+#include "geometry/GeometryTransforms.hpp"
 
 namespace tr::gfx {
 
@@ -147,6 +149,8 @@ namespace tr::gfx {
          debugGroup = std::make_unique<geo::RenderGroup>(graphicsDevice->getAsyncTransferContext(),
                                                          graphicsDevice->getAllocator());
 
+         debugGroup.registerFrameData(frameManager);
+
          if (guiEnabled) {
             imguiHelper = std::make_unique<Gui::ImGuiHelper>(*graphicsDevice, window);
          }
@@ -202,13 +206,12 @@ namespace tr::gfx {
          return resourceManager->createModel(modelPath);
       }
 
-      [[nodiscard]] auto createAABBGeometry(const glm::vec3& min,
-                                            const glm::vec3& max) const noexcept
-          -> cm::GroupHandle {
-         auto verts = getAABBVerts(min, max);
-         auto meshId = debugGroup->addMesh(verts);
-         auto instanceId = debugGroup->addInstance(meshId, glm::identity<glm::mat4>());
-         return {meshId, instanceId};
+      [[nodiscard]] auto createAABBGeometry(const glm::vec3& min, const glm::vec3& max)
+          const noexcept -> cm::GroupHandle {
+
+         auto meshId = debugGroup->addMesh(geo::CubeVerts);
+         const auto transform = geo::computeAABBTransform(min, max);
+         return debugGroup->addInstance(meshId, transform);
       }
 
     private:
@@ -458,7 +461,6 @@ namespace tr::gfx {
                                       vk::IndexType::eUint32);
 
                   // instanceId becomes gl_BaseInstance in the shader
-                  cmd.draw(3, 1, 0, 0);
                   cmd.drawIndexed(mesh.getIndicesCount(), 1, 0, 0, meshData.objectDataId);
                }
             }
@@ -676,8 +678,8 @@ namespace tr::gfx {
       return impl->createSkinnedModel(modelPath);
    }
 
-   auto RenderContext::createAABBGeometry(const glm::vec3& min, const glm::vec3& max)
-       -> cm::GroupHandle {
+   auto RenderContext::createAABBGeometry(const glm::vec3& min,
+                                          const glm::vec3& max) -> cm::GroupHandle {
       return impl->createAABBGeometry(min, max);
    }
 }

@@ -107,7 +107,9 @@ namespace std {
       }
    };
 }
-inline auto vertexListHash(const std::vector<tr::as::Vertex>& vertices) -> std::size_t {
+
+template <typename T>
+inline auto vertexListHash(const T& vertices) -> std::size_t {
    std::size_t seed = 0;
    for (const auto& vertex : vertices) {
       hash_combine(seed, std::hash<tr::as::Vertex>{}(vertex));
