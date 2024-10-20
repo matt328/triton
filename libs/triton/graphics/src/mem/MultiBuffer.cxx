@@ -21,22 +21,4 @@ namespace tr::gfx::mem {
 
    MultiBuffer::~MultiBuffer() {
    }
-
-   auto MultiBuffer::addAndUploadData(const std::vector<tr::as::Vertex>& vertexData) -> uint32_t {
-
-      const auto size = sizeof(as::Vertex) * vertexData.size();
-
-      stagingBuffer->updateMappedBufferValue(vertexData.data(), size);
-
-      transferContext->submit([&](const vk::raii::CommandBuffer& cmd) {
-         const auto vbCopy =
-             vk::BufferCopy{.srcOffset = 0, .dstOffset = currentOffset, .size = size};
-         cmd.copyBuffer(stagingBuffer->getBuffer(), buffer->getBuffer(), vbCopy);
-      });
-
-      bufferEntries.emplace_back(currentOffset, size);
-
-      currentOffset = +size;
-      return currentOffset;
-   }
 }

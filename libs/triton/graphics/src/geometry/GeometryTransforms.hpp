@@ -1,6 +1,17 @@
 #pragma once
 
+#include "as/Vertex.hpp"
+
 namespace tr::gfx::geo {
+
+   static constexpr auto CubeVerts = std::array<as::Vertex, 24>{
+       {{{0.f, 0.f, 0.f}}, {{1.f, 0.f, 0.f}}, {{0.f, 0.f, 0.f}}, {{0.f, 0.f, 1.f}},
+        {{0.f, 0.f, 0.f}}, {{0.f, 1.f, 0.f}}, {{1.f, 0.f, 0.f}}, {{1.f, 0.f, 1.f}},
+        {{1.f, 0.f, 0.f}}, {{1.f, 1.f, 0.f}}, {{0.f, 0.f, 1.f}}, {{0.f, 1.f, 1.f}},
+        {{0.f, 0.f, 1.f}}, {{1.f, 0.f, 1.f}}, {{1.f, 0.f, 1.f}}, {{1.f, 1.f, 1.f}},
+        {{0.f, 1.f, 0.f}}, {{0.f, 1.f, 1.f}}, {{0.f, 1.f, 0.f}}, {{1.f, 1.f, 0.f}},
+        {{1.f, 1.f, 0.f}}, {{1.f, 1.f, 1.f}}, {{0.f, 1.f, 1.f}}, {{1.f, 1.f, 1.f}}}};
+
    inline auto transformUnitTriangleToPoints(const glm::vec3& point0,
                                              const glm::vec3& point1,
                                              const glm::vec3& point2) -> glm::mat4 {
@@ -30,5 +41,13 @@ namespace tr::gfx::geo {
       glm::mat4 transform = translationMatrix * rotationScalingMatrix;
 
       return transform;
+   }
+
+   inline auto computeAABBTransform(const glm::vec3& min, const glm::vec3& max) -> glm::mat4 {
+      glm::vec3 scaleFactors = max - min;
+      glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), scaleFactors);
+      glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), min);
+      glm::mat4 transformMatrix = translationMatrix * scaleMatrix;
+      return transformMatrix;
    }
 }

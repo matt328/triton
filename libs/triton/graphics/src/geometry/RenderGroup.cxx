@@ -1,4 +1,6 @@
 #include "RenderGroup.hpp"
+#include "cm/Handles.hpp"
+#include "Frame.hpp"
 
 namespace tr::gfx::geo {
 
@@ -8,25 +10,23 @@ namespace tr::gfx::geo {
        : transferContext(context), allocator(allocator) {
    }
 
-   auto RenderGroup::addMesh(const std::vector<as::Vertex>& vertexData) -> size_t {
-      const auto hashValue = vertexListHash(vertexData);
-
-      if (meshDataMap.find(hashValue) == meshDataMap.end()) {
-         const auto offset = vertexBuffer->addAndUploadData(vertexData);
-         const auto vertexCount = static_cast<uint32_t>(vertexData.size());
-         meshDataMap[hashValue] = MeshData{offset, vertexCount, 0, 0};
-      }
-      return hashValue;
+   void RenderGroup::registerFrameData(const FrameManager& frameManager) const {
+      frameManager.registerStorageBuffer("buffer", 512);
    }
 
-   auto RenderGroup::addInstance(size_t meshId, glm::mat4 modelMatrix) -> GroupInfo {
-      if (meshDataMap.find(meshId) != meshDataMap.end()) {}
+   auto RenderGroup::addInstance(size_t meshId, glm::mat4 modelMatrix) -> cm::GroupHandle {
+      assert(meshDataMap.find(meshId) != meshDataMap.end());
+      const auto instanceId = instanceDataList.size();
+      instanceDataList.emplace_back(modelMatrix, true);
+      return {meshId, instanceId};
    }
 
    auto RenderGroup::removeInstance(size_t instanceId) -> void {
    }
 
    auto RenderGroup::render(Frame& frame, vk::raii::CommandBuffer& commandBuffer) -> void {
+
+      frame.updateStorageBuffer("buffer", data);
 
       // frame.updateObjectDataBuffer(nullptr, 0);
       // commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline);
