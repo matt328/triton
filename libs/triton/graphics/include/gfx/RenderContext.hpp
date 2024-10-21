@@ -48,9 +48,7 @@ namespace tr::gfx {
       void render() const;
       void waitIdle() const;
 
-      void enqueueRenderObject(RenderObject renderObject) const;
-
-      void setCurrentCameraData(cm::gpu::CameraData&& cameraData) const;
+      void setCurrentCameraData(cm::gpu::CameraData& cameraData) const;
 
       void setResizeListener(const std::function<void(std::pair<uint32_t, uint32_t>)>& fn) const;
 

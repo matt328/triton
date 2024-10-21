@@ -168,16 +168,11 @@ namespace tr::gfx {
          graphicsDevice->getVulkanDevice().waitIdle();
       }
 
-      void enqueueRenderObject(RenderObject renderObject) {
-         objectDataList.emplace_back(renderObject.modelMatrix, renderObject.textureId);
-         renderObjects.push_back(std::move(renderObject));
-      }
-
       [[nodiscard]] auto getResourceManager() const -> auto& {
          return *resourceManager;
       }
 
-      void setCurrentCameraData(cm::gpu::CameraData&& cameraData) {
+      void setCurrentCameraData(cm::gpu::CameraData& cameraData) {
          this->cameraData = cameraData;
       }
 
@@ -648,13 +643,8 @@ namespace tr::gfx {
       impl->waitIdle();
    }
 
-   void RenderContext::enqueueRenderObject(RenderObject renderObject) const {
-      impl->enqueueRenderObject(std::move(renderObject));
-   }
-
-   // TODO: Profile this and see if we can eliminate this move here
-   void RenderContext::setCurrentCameraData(cm::gpu::CameraData&& cameraData) const {
-      impl->setCurrentCameraData(std::move(cameraData));
+   void RenderContext::setCurrentCameraData(cm::gpu::CameraData& cameraData) const {
+      impl->setCurrentCameraData(cameraData);
    }
 
    void RenderContext::setRenderData(const cm::gpu::RenderData& renderData) const {
