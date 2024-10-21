@@ -26,7 +26,7 @@ namespace tr::gfx::geo {
 
    auto RenderGroup::render(Frame& frame, vk::raii::CommandBuffer& commandBuffer) -> void {
 
-      frame.updateStorageBuffer("buffer", data);
+      // frame.updateStorageBuffer("buffer", data);
 
       // frame.updateObjectDataBuffer(nullptr, 0);
       // commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline);
