@@ -216,12 +216,67 @@ Maybe have a EditorInfo component that only the editor uses to keep track of the
 
 ## Game World/Renderer Interaction
 
-- ECS' systems update data in components
-- GameplaySystem tells EntitySystem to collect all RenderData into a struct
-- Then calls the setRenderDataFn pointer which sets the renderData into the ResourceManager.
-  - Access to the renderData in the resource manager is guarded by a lock so that when the renderer reads it, it's guaranteed to have a complete, coherent version of the data.
-  - The handles in this data could however become invalid by the time the renderer decides to render
-  the data. To mitigate this, when an entity that maps to buffer resources is removed, the handles should be ensured to be removed from the renderdata before the resources are freed by the renderer
+```mermaid
+---
+title: Game World Classes
+---
+classDiagram
+namespace ctx {
+   class Context{
+      +std::unique_ptr~GameplayFacade~ gameplayFacade
+      +std::unique_ptr~GameplaySystem~ gameplaySystem
+      +std::unique_ptr~RenderContext~ renderContext
+      start() void
+   }
+}
+
+namespace gp {
+   class GameplayFacade{
+      +GameplaySystem& gameplaySystem
+      +RenderContext& renderer
+      create*Entity() cm::EntityType
+      setCurrentCamera() void
+   }
+
+   class GameplaySystem {
+      +std::unique_ptr~EntitySystem~ entitySystem
+      +std::unique_ptr~ActionSystem~ actionSystem
+      +std::unique_ptr~AnimationFactory~ animationFactory
+      create*Entity() cm::EntityType
+      fixedUpdate() void
+      update() void
+   }
+}
+namespace gfx {
+   class RenderContext {
+      +std::unique_ptr~FrameManager~ frameManager
+      +std::unique_ptr~RenderGroup~ debugGroup
+      +std::unique_ptr~ResourceManager~ resourceManager
+   }
+
+   class ResourceManager {
+      +std::unique_ptr~GeometryFactory~ geometryFactory
+      +std::vector~ImmutableMesh~ meshList
+      +std::vector~Textures::Texture~ textureList
+      getMesh(cm::MeshHandle) ImmutableMesh&
+      getTextures() cm::LockableResource~std::vector~vk::DescriptorImageInfo~~
+      createModel(const std::filesystem::path&) cm::ModelData
+      createStaticMesh(const geo::GeometryData& geometry) cm::MeshHandle
+   }
+}
+Context --* GameplayFacade
+Context --* GameplaySystem
+Context --* RenderContext
+GameplayFacade --> GameplaySystem
+GameplayFacade --> RenderContext
+GameplaySystem --* EntitySystem
+GameplaySystem --* ActionSystem
+GameplaySystem --* AnimationFactory
+RenderContext --* FrameManager
+RenderContext --* debugGroup
+RenderContext --* ResourceManager
+ResourceManager --* GeometryFactory
+```
 
 ```mermaid
 sequenceDiagram
@@ -245,21 +300,21 @@ sequenceDiagram
    GameplayFacade->>RenderContext: createResource()
    RenderContext->>ResourceManager: createResource()
    ResourceManager->>GeometryFactory: createGeometry()
-   GeometryFactory->>ResourceManager: geometryHandle
-   ResourceManager->>RenderContext: resourceHandle
-   RenderContext->>GameplayFacade: resourceHandle
+   GeometryFactory-->>ResourceManager: geometryHandle
+   ResourceManager-->>RenderContext: resourceHandle
+   RenderContext-->>GameplayFacade: resourceHandle
    
    GameplayFacade->>GameplaySystem: createEntity(resourceHandle)
    GameplaySystem->>EntitySystem: createEntity(resourceHandle)
-   EntitySystem->>GameplaySystem: entityId
-   GameplaySystem->>GameplayFacade: entityId
-   GameplayFacade->>Editor: entityId
+   EntitySystem-->>GameplaySystem: entityId
+   GameplaySystem-->>GameplayFacade: entityId
+   GameplayFacade-->>Editor: entityId
    deactivate GameplayFacade
    end
 
    rect rgba(0, 0, 0, 0.3) 
-   loop 60 fps
-   loop As many times as possible
+   loop Main
+   loop Physics Updates
    Context->>GameplaySystem: fixedUpdate()
    activate Context
 
@@ -267,10 +322,10 @@ sequenceDiagram
    
    activate EntitySystem
    EntitySystem->>EntitySystem: Update All Entities
-   EntitySystem->>GameplaySystem: fixedUpdateComplete
+   EntitySystem-->>GameplaySystem: fixedUpdateComplete
    deactivate EntitySystem
 
-   GameplaySystem->>Context: fixedUpdateComplete
+   GameplaySystem-->>Context: fixedUpdateComplete
    end
 
    Context->>GameplaySystem: update()
@@ -278,13 +333,13 @@ sequenceDiagram
    GameplaySystem->>EntitySystem: update()
    activate EntitySystem
    EntitySystem->>EntitySystem: Extract RenderData
-   EntitySystem->>GameplaySystem: renderData
+   EntitySystem-->>GameplaySystem: renderData
    deactivate EntitySystem
 
    GameplaySystem->>RenderContext: setRenderData()
    RenderContext->>ResourceManager: setRenderData()
-   ResourceManager->>RenderContext: renderDataRecieved
-   RenderContext->>GameplaySystem: renderDataRecieved
+   ResourceManager-->>RenderContext: renderDataRecieved
+   RenderContext-->>GameplaySystem: renderDataRecieved
    Context->>RenderContext: render()
    deactivate Context
    end
