@@ -3,6 +3,7 @@
 #include "Frame.hpp"
 #include "VkContext.hpp"
 #include "as/Vertex.hpp"
+#include "cm/RenderData.hpp"
 #include "mem/Allocator.hpp"
 #include "mem/MultiBuffer.hpp"
 
@@ -19,11 +20,6 @@ namespace tr::gfx::geo {
       uint32_t instanceCount;
       uint32_t firstInstance;
       std::vector<size_t> instanceDataList;
-   };
-
-   struct alignas(16) GpuInstanceData {
-      glm::mat4 modelMatrix;
-      alignas(4) uint32_t visible;
    };
 
    class RenderGroup {
@@ -49,18 +45,19 @@ namespace tr::gfx::geo {
          return hashValue;
       }
 
-      auto addInstance(size_t meshId, glm::mat4 modelMatrix) -> cm::GroupHandle;
-
+      auto addInstance(size_t meshId) -> void;
       auto removeInstance(size_t instanceId) -> void;
       auto render(Frame& frame, vk::raii::CommandBuffer& commandBuffer) -> void;
 
       void registerFrameData(const FrameManager& frameManager) const;
 
+      void updateFrameData(const FrameManager& frameManager,
+                           const cm::gpu::RenderData& renderData) const;
+
     private:
       std::unique_ptr<mem::MultiBuffer> vertexBuffer;
 
       std::unordered_map<size_t, MeshData> meshDataMap;
-      std::vector<InstanceData> instanceDataList;
 
       std::shared_ptr<VkContext> transferContext;
       std::shared_ptr<mem::Allocator> allocator;
