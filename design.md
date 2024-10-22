@@ -228,15 +228,16 @@ namespace ctx {
       +std::unique_ptr~RenderContext~ renderContext
       start() void
    }
-}
 
-namespace gp {
    class GameplayFacade{
       +GameplaySystem& gameplaySystem
       +RenderContext& renderer
       create*Entity() cm::EntityType
       setCurrentCamera() void
    }
+}
+
+namespace gp {
 
    class GameplaySystem {
       +std::unique_ptr~EntitySystem~ entitySystem
@@ -245,6 +246,18 @@ namespace gp {
       create*Entity() cm::EntityType
       fixedUpdate() void
       update() void
+   }
+
+   class EntitySystem {
+
+   }
+
+   class ActionSystem {
+
+   }
+
+   class AnimationFactory {
+
    }
 }
 namespace gfx {
@@ -263,6 +276,18 @@ namespace gfx {
       createModel(const std::filesystem::path&) cm::ModelData
       createStaticMesh(const geo::GeometryData& geometry) cm::MeshHandle
    }
+
+   class FrameManager {
+
+   }
+
+   class GeometryFactory {
+
+   }
+
+   class RenderGroup {
+
+   }
 }
 Context --* GameplayFacade
 Context --* GameplaySystem
@@ -273,7 +298,7 @@ GameplaySystem --* EntitySystem
 GameplaySystem --* ActionSystem
 GameplaySystem --* AnimationFactory
 RenderContext --* FrameManager
-RenderContext --* debugGroup
+RenderContext --* RenderGroup
 RenderContext --* ResourceManager
 ResourceManager --* GeometryFactory
 ```
@@ -346,3 +371,55 @@ sequenceDiagram
    end
 
 ```
+
+```mermaid
+---
+title: RenderGroup
+---
+classDiagram
+
+class RenderGroup {
+   addMesh(std::vector~as::Vertex~) size_t
+   addInstance(size_t meshId) void
+   render() void
+   +std::vector~MeshData~ meshList
+   +std::shared_ptr~MultiBuffer~
+}
+
+class MeshData {
+   +uint32_t vertexOffset
+   +uint32_t vertexCount
+   +uint32_t firstInstance
+   +uint32_t instanceCount
+}
+
+class MultiBuffer {
+   +std::unique_ptr~mem::Buffer~~ buffer
+}
+
+RenderGroup --* MeshData
+RenderGroup --* MultiBuffer
+   
+```
+
+RenderGroup::render()
+
+The components in the ECS will hold the game world data for the transform and visibility of each instance.
+
+```mermaid
+classDiagram
+class RenderGroupComponent {
+   +size_t meshId
+   +size_t instanceId
+   +glm::mat4 transform
+   +bool visible
+}
+```
+
+Preparing render data should put instance data into a
+
+```c
+std::unordered_map<meshId, std::unordered_map<instanceId, InstanceData>>
+```
+
+so that the RenderGroup can construct a single storage buffer containing the InstanceData, corresponding to the order of the meshes and instances. I don't think the order of the instances matters, so long as each bucket of instance data matches the correct mesh.

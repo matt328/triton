@@ -165,7 +165,7 @@ namespace tr::gfx {
          }
       }
 
-      auto getCurrentFrame() -> Frame& {
+      auto getCurrentFrame() const -> Frame& {
          return *frames[currentFrame];
       }
 
@@ -174,7 +174,7 @@ namespace tr::gfx {
       }
 
       void registerStorageBuffer(const std::string& name, size_t size) const {
-         for (auto& frame : frames) {
+         for (const auto& frame : frames) {
             frame->registerStorageBuffer(name, size);
          }
       }
