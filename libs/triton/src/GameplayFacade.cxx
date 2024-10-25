@@ -26,14 +26,13 @@ namespace tr::ctx {
 
       [[nodiscard]] auto createDebugAABB(const glm::vec3& min, const glm::vec3& max) const noexcept
           -> cm::EntityType {
-         // todo
          const auto aabbHandle = renderer.createAABBGeometry(min, max);
       }
 
       [[nodiscard]] auto createStaticModelEntity(
           const std::filesystem::path& modelPath) const noexcept -> cm::EntityType {
-         auto staticModelResult = renderer.createStaticModel(modelPath);
-         return gameplaySystem.createStaticModel(staticModelResult);
+         auto modelData = renderer.createStaticModel(modelPath);
+         return gameplaySystem.createStaticModel(modelData);
       }
 
       [[nodiscard]] auto createAnimatedModelEntity(const std::filesystem::path& modelPath,

@@ -1,8 +1,5 @@
 #include "RenderGroup.hpp"
-#include "cm/Handles.hpp"
 #include "Frame.hpp"
-#include <basetsd.h>
-#include <unordered_map>
 
 namespace tr::gfx::geo {
 
@@ -14,30 +11,32 @@ namespace tr::gfx::geo {
        : transferContext(context), allocator(allocator) {
    }
 
-   void RenderGroup::registerFrameData(const FrameManager& frameManager) const {
+   void RenderGroup::registerFrameData(const FrameManager& frameManager) {
       frameManager.registerStorageBuffer(INSTANCE_DATA, 512);
    }
 
-   auto RenderGroup::addInstance(size_t meshId, glm::mat4 modelMatrix) -> cm::GroupHandle {
-      assert(meshDataMap.find(meshId) != meshDataMap.end());
+   auto RenderGroup::addInstance(const size_t meshId) -> void {
+      assert(meshDataMap.contains(meshId));
       meshDataMap.at(meshId).instanceCount++;
    }
 
-   auto RenderGroup::removeInstance(size_t instanceId) -> void {
+   auto RenderGroup::removeInstance(const size_t meshId) -> void {
+      assert(meshDataMap.contains(meshId));
+      meshDataMap.at(meshId).instanceCount--;
    }
 
    auto RenderGroup::updateFrameData(const FrameManager& frameManager,
-                                     const cm::gpu::RenderData& renderData) const -> void {
+                                     const cm::gpu::RenderData& renderData) -> void {
       size_t totalSize = 0;
-      for (const auto& pair : renderData.instanceData) {
-         totalSize += pair.second.size();
+      for (const auto& instanceDataList : renderData.instanceData | std::views::values) {
+         totalSize += instanceDataList.size();
       }
 
       auto allInstanceData = std::vector<cm::gpu::GpuInstanceData>{};
       allInstanceData.reserve(totalSize);
 
-      for (const auto& meshData : renderData.instanceData) {
-         std::ranges::copy(meshData.second, std::back_inserter(allInstanceData));
+      for (const auto& instanceData : renderData.instanceData | std::views::values) {
+         std::ranges::copy(instanceData, std::back_inserter(allInstanceData));
       }
 
       frameManager.getCurrentFrame().updateStorageBuffer(INSTANCE_DATA,
@@ -57,9 +56,7 @@ namespace tr::gfx::geo {
 
       // vertexBuffer.bind(commandBuffer);
 
-      for (const auto& [key, meshData] : meshDataMap) {
-         meshData.
-      }
+      // for (const auto& [key, meshData] : meshDataMap) {}
 
       /*
          for(auto mesh : meshes) {

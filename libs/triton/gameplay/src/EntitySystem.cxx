@@ -95,10 +95,10 @@ namespace tr::gp {
 
    auto EntitySystem::createAnimatedModel(const cm::ModelData& modelData) -> cm::EntityType {
       auto lock = std::unique_lock{registryMutex};
-      const auto e = registry->create();
+      const auto modelEntity = registry->create();
 
       if (!modelData.animationData) {
-         // TODO Better Exceptions here
+         // TODO(matt) Better Exceptions here
          throw std::runtime_error("Animated Model created without animation data");
       }
 
@@ -106,19 +106,19 @@ namespace tr::gp {
          throw std::runtime_error("Animated Model created without skin data");
       }
 
-      registry->emplace<cmp::Animation>(e,
+      registry->emplace<cmp::Animation>(modelEntity,
                                         modelData.animationData->animationHandle,
                                         modelData.animationData->skeletonHandle,
                                         modelData.skinData->jointMap,
                                         modelData.skinData->inverseBindMatrices);
-      registry->emplace<cmp::Transform>(e);
+      registry->emplace<cmp::Transform>(modelEntity);
 
       const auto meshes = std::unordered_map<cm::MeshHandle, cm::TextureHandle>{
           {modelData.meshData.meshHandle, modelData.meshData.textureHandle}};
 
-      registry->emplace<cmp::Renderable>(e, meshes);
+      registry->emplace<cmp::Renderable>(modelEntity, meshes);
 
-      return e;
+      return modelEntity;
    }
 
    auto EntitySystem::createCamera(uint32_t width,
