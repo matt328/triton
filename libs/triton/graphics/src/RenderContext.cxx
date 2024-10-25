@@ -205,9 +205,10 @@ namespace tr::gfx {
                                             const glm::vec3& max) const noexcept
           -> cm::GroupHandle {
 
-         auto meshId = debugGroup->addMesh(geo::CubeVerts);
+         const auto meshId = debugGroup->addMesh(geo::CubeVerts);
          const auto transform = geo::computeAABBTransform(min, max);
-         return debugGroup->addInstance(meshId, transform);
+         debugGroup->addInstance(meshId);
+         return {0, 0};
       }
 
     private:

@@ -37,7 +37,7 @@ namespace tr::gfx::geo {
       auto addMesh(const mem::HasDataAndSize auto& vertexData) -> size_t {
          const auto hashValue = vertexListHash(vertexData);
 
-         if (meshDataMap.find(hashValue) == meshDataMap.end()) {
+         if (!meshDataMap.contains(hashValue)) {
             const auto offset = vertexBuffer->addAndUploadData(vertexData);
             const auto vertexCount = static_cast<uint32_t>(vertexData.size());
             meshDataMap[hashValue] = MeshData{offset, vertexCount, 0, 0};
@@ -46,13 +46,13 @@ namespace tr::gfx::geo {
       }
 
       auto addInstance(size_t meshId) -> void;
-      auto removeInstance(size_t instanceId) -> void;
-      auto render(Frame& frame, vk::raii::CommandBuffer& commandBuffer) -> void;
+      auto removeInstance(size_t meshId) -> void;
+      static auto render(Frame& frame, vk::raii::CommandBuffer& commandBuffer) -> void;
 
-      void registerFrameData(const FrameManager& frameManager) const;
+      static void registerFrameData(const FrameManager& frameManager);
 
-      void updateFrameData(const FrameManager& frameManager,
-                           const cm::gpu::RenderData& renderData) const;
+      static void updateFrameData(const FrameManager& frameManager,
+                                  const cm::gpu::RenderData& renderData);
 
     private:
       std::unique_ptr<mem::MultiBuffer> vertexBuffer;
