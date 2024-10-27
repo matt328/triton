@@ -64,12 +64,9 @@ namespace tr::gp {
       ZoneNamedN(n, "entitySystem.createTerrain", true);
       auto lock = std::unique_lock{registryMutex};
 
-      auto renderable = std::unordered_map<cm::MeshHandle, cm::TextureHandle>{
-          {handles.meshData.meshHandle, handles.meshData.textureHandle}};
-
       const auto e = registry->create();
 
-      registry->emplace<cmp::Renderable>(e, renderable);
+      registry->emplace<cmp::Renderable>(e, std::vector{handles.meshData});
       registry->emplace<cmp::TerrainMarker>(e);
       registry->emplace<cmp::Transform>(e, glm::zero<glm::vec3>(), glm::vec3(0.f, -5.f, -50.f));
 
@@ -83,12 +80,8 @@ namespace tr::gp {
 
    auto EntitySystem::createStaticModel(const cm::ModelData& handles) -> cm::EntityType {
       auto lock = std::unique_lock{registryMutex};
-
-      auto renderable = std::unordered_map<cm::MeshHandle, cm::TextureHandle>{
-          {handles.meshData.meshHandle, handles.meshData.textureHandle}};
-
       const auto e = registry->create();
-      registry->emplace<cmp::Renderable>(e, renderable);
+      registry->emplace<cmp::Renderable>(e, std::vector{handles.meshData});
       registry->emplace<cmp::Transform>(e);
       return e;
    }
@@ -113,10 +106,7 @@ namespace tr::gp {
                                         modelData.skinData->inverseBindMatrices);
       registry->emplace<cmp::Transform>(modelEntity);
 
-      const auto meshes = std::unordered_map<cm::MeshHandle, cm::TextureHandle>{
-          {modelData.meshData.meshHandle, modelData.meshData.textureHandle}};
-
-      registry->emplace<cmp::Renderable>(modelEntity, meshes);
+      registry->emplace<cmp::Renderable>(modelEntity, std::vector{modelData.meshData});
 
       return modelEntity;
    }
@@ -144,6 +134,11 @@ namespace tr::gp {
    [[nodiscard]] auto EntitySystem::createDebugAABB(const glm::vec3& min, const glm::vec3& max)
        -> cm::EntityType {
       auto lock = std::unique_lock{registryMutex};
+      // TODO(matt) hook this up tomorrow.
+      /*
+         create the AABB geometry, add it as a renderable with the line list topology and that
+         should do it
+      */
       const auto boxEntity = registry->create();
       registry->emplace<cmp::DebugAABB>(boxEntity, min, max);
       return boxEntity;

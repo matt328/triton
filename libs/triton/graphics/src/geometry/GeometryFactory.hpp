@@ -92,6 +92,8 @@ namespace tr::gfx::geo {
 
       void unload(const TexturedGeometryHandle& handle);
 
+      auto generateAABB(const glm::vec3& min, const glm::vec3& max) -> GeometryHandle;
+
       /// Gets the GeometryData from the internal cache
       /// @throws GeometryDataNotFoundException if no data in the cache matches the given handle.
       [[nodiscard]] auto getGeometryData(const GeometryHandle& handle) -> GeometryData;

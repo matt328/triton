@@ -57,7 +57,8 @@ namespace tr::gfx::tx {
 
       const auto geometryData = dataHandle.begin();
 
-      const auto modelHandle = uploadGeometry(geometryData->first, geometryData->second);
+      const auto modelHandle =
+          uploadGeometry(geometryData->first, cm::Topology::Triangles, geometryData->second);
       geometryFactory->unload(dataHandle);
       return modelHandle;
    }
@@ -81,6 +82,7 @@ namespace tr::gfx::tx {
       auto modelData = [this, &tritonModelData]() {
          try {
             return uploadGeometry(tritonModelData.getGeometryHandle(),
+                                  cm::Topology::Triangles,
                                   tritonModelData.getImageHandle());
          } catch (BaseException& ex) {
             ex << "ResourceManager::createModel(): ";
@@ -98,8 +100,16 @@ namespace tr::gfx::tx {
       return modelData;
    }
 
+   auto ResourceManager::createAABB(const glm::vec3& min, const glm::vec3& max) noexcept
+       -> cm::ModelData {
+      auto data = geometryFactory->generateAABB(min, max);
+      return uploadGeometry(data, cm::Topology::LineList);
+   }
+
    auto ResourceManager::uploadGeometry(const geo::GeometryHandle& geometryHandle,
-                                        const geo::ImageHandle& imageHandle) -> cm::ModelData {
+                                        cm::Topology topology,
+                                        std::optional<geo::ImageHandle> imageHandle)
+       -> cm::ModelData {
       auto allocator = graphicsDevice.getAllocator();
       auto context = graphicsDevice.getAsyncTransferContext();
 
@@ -140,36 +150,39 @@ namespace tr::gfx::tx {
             const auto copy = vk::BufferCopy{.srcOffset = 0, .dstOffset = 0, .size = ibSize};
             cmd.copyBuffer(ibStagingBuffer->getBuffer(), indexBuffer->getBuffer(), copy);
          });
+         size_t textureHandle = 0;
+         if (imageHandle) {
+            auto [imageData, width, height, component] =
+                geometryFactory->getImageData(imageHandle.value());
+            textureHandle = textureList.size();
+            textureList.push_back(
+                std::make_unique<Textures::Texture>(static_cast<void*>(imageData.data()),
+                                                    width,
+                                                    height,
+                                                    component,
+                                                    *allocator,
+                                                    graphicsDevice.getVulkanDevice(),
+                                                    *context));
 
-         auto [imageData, width, height, component] = geometryFactory->getImageData(imageHandle);
-         const auto textureHandle = textureList.size();
-         textureList.push_back(
-             std::make_unique<Textures::Texture>(static_cast<void*>(imageData.data()),
-                                                 width,
-                                                 height,
-                                                 component,
-                                                 *allocator,
-                                                 graphicsDevice.getVulkanDevice(),
-                                                 *context));
-
-         { // Only need to guard access to the textureInfoList
-            ZoneNamedN(zn1, "Update TextureInfoList", true);
-            std::lock_guard lock(textureListMutex);
-            LockMark(textureListMutex);
-            LockableName(textureListMutex, "Mutate", 6);
-            textureInfoList.emplace_back(textureList[textureHandle]->getImageInfo());
+            { // Only need to guard access to the textureInfoList
+               ZoneNamedN(zn1, "Update TextureInfoList", true);
+               std::lock_guard lock(textureListMutex);
+               LockMark(textureListMutex);
+               LockableName(textureListMutex, "Mutate", 6);
+               textureInfoList.emplace_back(textureList[textureHandle]->getImageInfo());
+            }
          }
 
          const auto meshHandle = meshList.size();
          meshList.emplace_back(std::move(vertexBuffer), std::move(indexBuffer), indicesCount);
 
-         return cm::ModelData{.meshData = {meshHandle, textureHandle}};
+         return cm::ModelData{.meshData = {meshHandle, topology, textureHandle}};
 
       } catch (const mem::AllocationException& ex) {
          throw ResourceUploadException(
              fmt::format("Error allocating resources for geometry: {0} and image: {1}, {2}",
                          geometryHandle,
-                         imageHandle,
+                         imageHandle.value(),
                          ex.what()));
       }
    }

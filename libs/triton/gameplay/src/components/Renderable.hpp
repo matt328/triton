@@ -4,6 +4,6 @@
 
 namespace tr::gp::cmp {
    struct Renderable {
-      std::unordered_map<cm::MeshHandle, cm::TextureHandle> meshes;
+      std::vector<cm::MeshData> meshData;
    };
 }

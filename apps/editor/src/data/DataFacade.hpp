@@ -132,6 +132,7 @@ namespace ed::data {
                              const std::string_view& skeletonName);
 
       void createTerrain(const std::string_view& terrainName);
+      void createAABB();
 
       void save(const std::filesystem::path& outputFile);
       void load(const std::filesystem::path& inputFile);

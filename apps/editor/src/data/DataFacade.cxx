@@ -26,6 +26,10 @@ namespace ed::data {
       dataStore.scene.clear();
    }
 
+   void DataFacade::createAABB() {
+      gameplayFacade.createDebugAABB(glm::vec3{0.f, 0.f, 0.f}, glm::vec3{5.f, 5.f, 5.f});
+   }
+
    void DataFacade::addSkeleton(const std::string_view& name, const std::filesystem::path& path) {
       dataStore.skeletons.insert({name.data(), SkeletonData{name.data(), path.string()}});
       unsaved = true;

@@ -168,6 +168,10 @@ namespace ed::ui {
                dataFacade.createTerrain("Test Terrain");
             }
 
+            if (ImGui::MenuItem("Create Box")) {
+               dataFacade.createAABB();
+            }
+
             if (ImGui::MenuItem("Import Skeleton")) {
                showPopup = true;
             }

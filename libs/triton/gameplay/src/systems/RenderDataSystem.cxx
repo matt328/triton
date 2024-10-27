@@ -1,5 +1,6 @@
 #include "RenderDataSystem.hpp"
 
+#include "cm/Handles.hpp"
 #include "cm/ObjectData.hpp"
 #include "cm/RenderData.hpp"
 
@@ -35,28 +36,32 @@ namespace tr::gp::sys::RenderDataSystem {
       renderData.cameraData =
           cm::gpu::CameraData{cam.view, cam.projection, cam.view * cam.projection};
 
+      // Static Models and Terrain
       for (const auto view =
                registry.view<cmp::Renderable, cmp::Transform>(entt::exclude<cmp::Animation>);
            const auto& [entity, renderable, transform] : view.each()) {
 
          const auto isTerrainEntity = registry.any_of<cmp::TerrainMarker>(entity);
 
-         for (const auto& [meshHandle, textureHandle] : renderable.meshes) {
-            const auto pos = renderData.objectData.size();
+         for (const auto& [meshHandle, topology, textureHandle] : renderable.meshData) {
+            const auto objectDataPosition = renderData.objectData.size();
             if (isTerrainEntity) {
-               renderData.terrainMeshData.emplace_back(meshHandle, pos);
+               renderData.terrainMeshData.emplace_back(meshHandle,
+                                                       cm::Topology::Triangles,
+                                                       objectDataPosition);
             } else {
-               renderData.staticMeshData.emplace_back(meshHandle, pos);
+               renderData.staticMeshData.emplace_back(meshHandle, topology, objectDataPosition);
             }
             renderData.objectData.emplace_back(transform.transformation, textureHandle);
          }
       }
 
+      // Animated Models
       const auto animationsView = registry.view<cmp::Animation, cmp::Renderable, cmp::Transform>();
       uint32_t jointMatricesIndex = 0;
       for (const auto& [entity, animationData, renderable, transform] : animationsView.each()) {
+         // Convert the jointMap into a list of join matrices the gpu needs
          auto jointMatrices = std::vector<glm::mat4>{};
-
          jointMatrices.resize(animationData.jointMap.size());
          int index = 0;
          for (const auto& [position, jointId] : animationData.jointMap) {
@@ -73,9 +78,10 @@ namespace tr::gp::sys::RenderDataSystem {
             renderData.animationData.push_back({jointMatrix});
          }
 
-         for (const auto& [meshHandle, textureHandle] : renderable.meshes) {
-            const auto pos = renderData.objectData.size();
-            renderData.skinnedMeshData.emplace_back(meshHandle, pos);
+         // Add everything to the RenderData struct
+         for (const auto& [meshHandle, topology, textureHandle] : renderable.meshData) {
+            const auto objectDataPosition = renderData.objectData.size();
+            renderData.skinnedMeshData.emplace_back(meshHandle, topology, objectDataPosition);
             renderData.objectData.emplace_back(transform.transformation,
                                                textureHandle,
                                                jointMatricesIndex);
