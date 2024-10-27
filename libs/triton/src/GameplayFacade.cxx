@@ -27,6 +27,7 @@ namespace tr::ctx {
       [[nodiscard]] auto createDebugAABB(const glm::vec3& min, const glm::vec3& max) const noexcept
           -> cm::EntityType {
          const auto aabbHandle = renderer.createAABBGeometry(min, max);
+         return gameplaySystem.createStaticModel(aabbHandle);
       }
 
       [[nodiscard]] auto createStaticModelEntity(

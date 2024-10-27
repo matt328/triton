@@ -10,6 +10,9 @@
 #include "geometry/Mesh.hpp"
 #include "textures/Texture.hpp"
 #include "geometry/GeometryHandles.hpp"
+#include <optional>
+#include <vulkan/vulkan_enums.hpp>
+#include <vulkan/vulkan_handles.hpp>
 
 namespace tr::gfx::mem {
    class Allocator;
@@ -80,6 +83,8 @@ namespace tr::gfx::tx {
 
       auto createModel(const std::filesystem::path& filename) noexcept -> cm::ModelData;
 
+      auto createAABB(const glm::vec3& min, const glm::vec3& max) noexcept -> cm::ModelData;
+
       auto createStaticMesh(const geo::GeometryData& geometry) -> cm::MeshHandle;
 
       auto getMesh(const cm::MeshHandle meshHandle) -> auto& {
@@ -110,6 +115,8 @@ namespace tr::gfx::tx {
       /// Uploads Geometry (and images) to the GPU
       /// @throws ResourceUploadException if there's an error uploading.
       auto uploadGeometry(const geo::GeometryHandle& geometryHandle,
-                          const geo::ImageHandle& imageHandle) -> cm::ModelData;
+                          cm::Topology topology = cm::Topology::Triangles,
+                          std::optional<geo::ImageHandle> imageHandle = std::nullopt)
+          -> cm::ModelData;
    };
 } // namespace tr::gfx::tx

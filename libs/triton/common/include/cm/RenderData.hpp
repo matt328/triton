@@ -1,12 +1,21 @@
 #pragma once
 
+#include "Handles.hpp"
 #include "cm/ObjectData.hpp"
 
 namespace tr::cm::gpu {
 
    struct MeshData {
-      MeshHandle handle;
-      size_t objectDataId;
+      MeshHandle handle{};
+      cm::Topology topology{cm::Topology::Triangles};
+      size_t objectDataId{};
+
+      friend void swap(MeshData& first, MeshData& second) noexcept {
+         using std::swap;
+         swap(first.handle, second.handle);
+         swap(first.topology, second.topology);
+         swap(first.objectDataId, second.objectDataId);
+      }
    };
 
    struct alignas(16) GpuInstanceData {

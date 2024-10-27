@@ -16,8 +16,14 @@ namespace tr::cm {
       TextureHandle textureHandle{};
    };
 
+   enum class Topology : uint8_t {
+      Triangles = 0,
+      LineList = 1
+   };
+
    struct MeshData {
       MeshHandle meshHandle{};
+      Topology topology{Topology::Triangles};
       TextureHandle textureHandle{};
    };
 

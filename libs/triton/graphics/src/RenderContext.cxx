@@ -23,6 +23,7 @@
 #include "mem/Allocator.hpp"
 #include "sb/ShaderBinding.hpp"
 #include "geometry/GeometryTransforms.hpp"
+#include <vulkan/vulkan_enums.hpp>
 
 namespace tr::gfx {
 
@@ -106,6 +107,11 @@ namespace tr::gfx {
 
          debugPipelineLayout = pb->buildPipelineLayout(setLayouts, "Debug Pipeline Layout");
          debugPipeline = pb->buildPipeline(*debugPipelineLayout, "Debug Pipeline");
+
+         // Line Pipeline is the same as debug except using LineList primitive topology
+         pb->setInputTopology(vk::PrimitiveTopology::eLineList);
+         linePipelineLayout = pb->buildPipelineLayout(setLayouts, "Line Pipeline Layout");
+         linePipeline = pb->buildPipeline(*linePipelineLayout, "Line Pipeline");
 
          auto skinnedVertex = helper->createShaderModule(vk::ShaderStageFlagBits::eVertex,
                                                          util::Paths::SHADERS / "skinned.vert");
@@ -202,13 +208,9 @@ namespace tr::gfx {
       }
 
       [[nodiscard]] auto createAABBGeometry(const glm::vec3& min,
-                                            const glm::vec3& max) const noexcept
-          -> cm::GroupHandle {
+                                            const glm::vec3& max) const noexcept {
 
-         const auto meshId = debugGroup->addMesh(geo::CubeVerts);
-         const auto transform = geo::computeAABBTransform(min, max);
-         debugGroup->addInstance(meshId);
-         return {0, 0};
+         return resourceManager->createAABB(min, max);
       }
 
     private:
@@ -380,11 +382,12 @@ namespace tr::gfx {
             it into the current frame's buffers, then release the lock.
          */
          staticMeshDataList.clear();
+         lineDataList.clear();
          terrainDataList.clear();
          skinnedModelList.clear();
 
          {
-            const auto renderData = resourceManager->getRenderData();
+            auto renderData = resourceManager->getRenderData();
             ZoneNamedN(zone, "Copying RenderData", true);
             frame.updateObjectDataBuffer(renderData.get().objectData.data(),
                                          sizeof(cm::gpu::ObjectData) *
@@ -398,9 +401,13 @@ namespace tr::gfx {
                                             sizeof(cm::gpu::AnimationData) *
                                                 renderData.get().animationData.size());
 
-            staticMeshDataList.reserve(renderData.get().staticMeshData.size());
-            std::ranges::copy(renderData.get().staticMeshData,
-                              std::back_inserter(staticMeshDataList));
+            auto meshData = renderData.get().staticMeshData;
+
+            auto it = std::partition(meshData.begin(), meshData.end(), [](auto& meshData) {
+               return meshData.topology == cm::Topology::Triangles;
+            });
+            staticMeshDataList.assign(meshData.begin(), it);
+            lineDataList.assign(it, meshData.end());
 
             terrainDataList.reserve(renderData.get().terrainMeshData.size());
             std::ranges::copy(renderData.get().terrainMeshData,
@@ -459,6 +466,20 @@ namespace tr::gfx {
 
                   // instanceId becomes gl_BaseInstance in the shader
                   cmd.drawIndexed(mesh.getIndicesCount(), 1, 0, 0, meshData.objectDataId);
+               }
+            }
+
+            // LineData
+            cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, **linePipeline);
+            {
+               ZoneNamedN(lineZone, "Render Line Data", true);
+               for (const auto& lineData : lineDataList) {
+                  const auto& mesh = resourceManager->getMesh(lineData.handle);
+                  cmd.bindVertexBuffers(0, mesh.getVertexBuffer()->getBuffer(), {0});
+                  cmd.bindIndexBuffer(mesh.getIndexBuffer()->getBuffer(),
+                                      0,
+                                      vk::IndexType::eUint32);
+                  cmd.drawIndexed(mesh.getIndicesCount(), 1, 0, 0, lineData.objectDataId);
                }
             }
 
@@ -581,6 +602,9 @@ namespace tr::gfx {
       vk::Viewport mainViewport;
       vk::Rect2D mainScissor;
 
+      std::unique_ptr<vk::raii::Pipeline> linePipeline;
+      std::unique_ptr<vk::raii::PipelineLayout> linePipelineLayout;
+
       std::unique_ptr<vk::raii::Pipeline> staticModelPipeline;
       std::unique_ptr<vk::raii::PipelineLayout> staticModelPipelineLayout;
 
@@ -618,6 +642,7 @@ namespace tr::gfx {
       std::function<void(std::pair<uint32_t, uint32_t>)> resizeFn;
 
       std::vector<cm::gpu::MeshData> staticMeshDataList;
+      std::vector<cm::gpu::MeshData> lineDataList;
       std::vector<cm::gpu::MeshData> terrainDataList;
       std::vector<cm::gpu::MeshData> skinnedModelList;
       cm::gpu::PushConstants pushConstants{};
@@ -671,7 +696,7 @@ namespace tr::gfx {
    }
 
    auto RenderContext::createAABBGeometry(const glm::vec3& min, const glm::vec3& max)
-       -> cm::GroupHandle {
+       -> cm::ModelData {
       return impl->createAABBGeometry(min, max);
    }
 }
