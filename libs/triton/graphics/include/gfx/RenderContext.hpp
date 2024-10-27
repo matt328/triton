@@ -66,7 +66,7 @@ namespace tr::gfx {
           -> cm::ModelData;
 
       [[nodiscard]] auto createAABBGeometry(const glm::vec3& min, const glm::vec3& max)
-          -> cm::GroupHandle;
+          -> cm::ModelData;
 
     private:
       class Impl;

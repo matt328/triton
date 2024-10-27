@@ -381,6 +381,28 @@ namespace tr::gfx::geo {
       return normalize(glm::vec3(-dx, NormalY, dy));
    }
 
+   auto GeometryFactory::generateAABB(const glm::vec3& min, const glm::vec3& max)
+       -> GeometryHandle {
+
+      auto vertices = std::vector<as::Vertex>{{
+          {{min.x, min.y, min.z}}, // 0: Bottom-left-back
+          {{max.x, min.y, min.z}}, // 1: Bottom-right-back
+          {{max.x, max.y, min.z}}, // 2: Top-right-back
+          {{min.x, max.y, min.z}}, // 3: Top-left-back
+          {{min.x, min.y, max.z}}, // 4: Bottom-left-front
+          {{max.x, min.y, max.z}}, // 5: Bottom-right-front
+          {{max.x, max.y, max.z}}, // 6: Top-right-front
+          {{min.x, max.y, max.z}}  // 7: Top-left-front
+      }};
+
+      std::vector<uint32_t> indices = {0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 6,
+                                       6, 7, 7, 4, 0, 4, 1, 5, 2, 6, 3, 7};
+
+      const auto geometryHandle = geometryKey.getKey();
+      geometryDataMap.emplace(geometryHandle, GeometryData{vertices, indices});
+      return geometryHandle;
+   }
+
    [[nodiscard]] auto GeometryFactory::getGeometryData(const GeometryHandle& handle)
        -> GeometryData {
       if (const auto it = geometryDataMap.find(handle); it != geometryDataMap.end()) {

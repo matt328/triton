@@ -14,8 +14,8 @@ namespace tr::gfx {
       // Avoid accidentally copying this because lots of these are moved around during the rendering
       // loop so always std::move() this when passing it around.
       RenderObject(const RenderObject&) = delete;
-      RenderObject& operator=(const RenderObject&) = delete;
-      RenderObject& operator=(RenderObject&&) = delete;
+      auto operator=(const RenderObject&) -> RenderObject& = delete;
+      auto operator=(RenderObject&&) -> RenderObject& = delete;
       ~RenderObject() = default;
 
       cm::MeshHandle meshId;
