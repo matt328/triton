@@ -10,7 +10,7 @@
 namespace tr::ctx {
    constexpr auto SleepMillis = 100;
    static constexpr int TARGET_FPS = 60;
-   static constexpr int MAX_UPDATES = 4;
+   static constexpr int MAX_UPDATES = 3;
 
    class Context::Impl {
     public:
@@ -45,21 +45,52 @@ namespace tr::ctx {
       }
 
       void start(const std::function<void()>& pollFn) {
+         using Clock = std::chrono::steady_clock;
+         using namespace std::literals;
+         auto constexpr dt = std::chrono::duration<long long, std::ratio<1, 90>>{1};
+         using duration = decltype(Clock::duration{} + dt);
+         using time_point = std::chrono::time_point<Clock, duration>;
+
+         time_point t{};
+
+         time_point currentTime = Clock::now();
+         duration accumulator = 0s;
+
          while (running) {
+
+            time_point newTime = Clock::now();
+            auto frameTime = newTime - currentTime;
+            if (frameTime > 250ms) {
+               frameTime = 250ms;
+            }
+            currentTime = newTime;
+
+            accumulator += frameTime;
 
             {
                ZoneNamedN(poll, "Poll", true);
                pollFn();
             }
+
             if (this->paused) {
                std::this_thread::sleep_for(std::chrono::milliseconds(SleepMillis));
                continue;
             }
 
-            {
-               ZoneNamedN(fixedUpdate, "Gameplay FixedUpdate", true);
-               timer.tick([&] { gameplaySystem->fixedUpdate(timer); });
+            while (accumulator >= dt) {
+               gameplaySystem->fixedUpdate(timer);
+               t += dt;
+               accumulator -= dt;
             }
+
+            const double alpha = accumulator / dt;
+
+            TracyPlot("alpha", alpha);
+
+            // {
+            //    ZoneNamedN(fixedUpdate, "Gameplay FixedUpdate", true);
+            //    timer.tick([&] { gameplaySystem->fixedUpdate(timer); });
+            // }
 
             {
                ZoneNamedN(z, "Gameplay Update", true);

@@ -473,6 +473,7 @@ namespace tr::gfx {
             cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, **linePipeline);
             {
                ZoneNamedN(lineZone, "Render Line Data", true);
+               size_t size = lineDataList.size();
                for (const auto& lineData : lineDataList) {
                   const auto& mesh = resourceManager->getMesh(lineData.handle);
                   cmd.bindVertexBuffers(0, mesh.getVertexBuffer()->getBuffer(), {0});

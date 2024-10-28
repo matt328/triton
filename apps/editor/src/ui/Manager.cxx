@@ -11,6 +11,7 @@
 #include "ImGuiHelpers.hpp"
 #include "components/AppLog.hpp"
 #include "ImGuiSink.hpp"
+#include "ui/components/ModalDialog.hpp"
 
 namespace ed::ui {
    Manager::Manager(tr::ctx::GameplayFacade& facade, data::DataFacade& dataFacade)
@@ -161,8 +162,17 @@ namespace ed::ui {
       auto showAnimation = false;
       static auto show = false;
 
+      auto dialog = cmp::ModalDialog{"Test Modal"};
+      dialog.addInput("Name", std::string("Default Name"));
+      dialog.addInput("Age", 25);
+      dialog.addInput("Height", 5.9f);
+
       if (ImGui::BeginMainMenuBar()) {
          if (ImGui::BeginMenu("File")) {
+
+            if (ImGui::MenuItem("Test Dialog")) {
+               dialog.open();
+            }
 
             if (ImGui::MenuItem("Create Terrain")) {
                dataFacade.createTerrain("Test Terrain");
@@ -258,6 +268,15 @@ namespace ed::ui {
             ImGui::EndMenu();
          }
          ImGui::EndMainMenuBar();
+      }
+
+      auto result = dialog.show();
+      if (result) {
+         for (const auto& [name, value] : result.value()) {
+            std::visit(
+                [&name](auto&& val) { Log.debug("Input: name: {0}, value: {1}", name, val); },
+                value);
+         }
       }
 
       if (showPopup) {
