@@ -4,6 +4,7 @@
 #include "TaskQueue.hpp"
 #include "cm/sdf/VoxelMetrics.hpp"
 #include <bitset>
+#include <random>
 
 namespace ed::data {
 
@@ -27,7 +28,15 @@ namespace ed::data {
    }
 
    void DataFacade::createAABB() {
-      gameplayFacade.createDebugAABB(glm::vec3{0.f, 0.f, 0.f}, glm::vec3{5.f, 5.f, 5.f});
+      std::random_device rd;
+      std::mt19937 gen(rd());
+      std::uniform_real_distribution<float> dis(-50.f, 50.f);
+
+      for (int i = 0; i < 50; ++i) {
+         const auto min = glm::vec3{dis(gen), dis(gen), dis(gen)};
+         const auto max = min + glm::vec3{5.f, 1.f, 1.f};
+         gameplayFacade.createDebugAABB(min, max);
+      }
    }
 
    void DataFacade::addSkeleton(const std::string_view& name, const std::filesystem::path& path) {

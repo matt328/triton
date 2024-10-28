@@ -30,9 +30,20 @@ namespace tr::gp {
    void EntitySystem::fixedUpdate([[maybe_unused]] const cm::Timer& timer,
                                   const AnimationFactory& animationFactory) {
       std::unique_lock lock{registryMutex};
-      sys::CameraSystem::fixedUpdate(*registry);
-      sys::TransformSystem::update(*registry);
-      sys::AnimationSystem::update(*registry, animationFactory);
+      {
+         ZoneNamedN(camZone, "CameraSystem", true);
+         sys::CameraSystem::fixedUpdate(*registry);
+      }
+
+      {
+         ZoneNamedN(xformZone, "TransformSystem", true);
+         sys::TransformSystem::update(*registry);
+      }
+
+      {
+         ZoneNamedN(animationZone, "AnimationSystem", true);
+         sys::AnimationSystem::update(*registry, animationFactory);
+      }
    }
 
    void EntitySystem::prepareRenderData(cm::gpu::RenderData& renderData) {

@@ -433,11 +433,11 @@ namespace tr::gfx {
       return std::make_pair(extensions, portabilityPresent);
    }
 
-   VkBool32 GraphicsDevice::debugCallbackFn(
+   auto GraphicsDevice::debugCallbackFn(
        [[maybe_unused]] VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
        [[maybe_unused]] VkDebugUtilsMessageTypeFlagsEXT messageType,
        [[maybe_unused]] const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
-       [[maybe_unused]] void* pUserData) {
+       [[maybe_unused]] void* pUserData) -> VkBool32 {
 
       // Log.trace("Validation Layer: {0}", pCallbackData->pMessage);
       return VK_FALSE;

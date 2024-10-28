@@ -63,6 +63,7 @@ target_precompile_headers(${PROJECT_NAME}
    <spdlog/sinks/base_sink.h>
    <string>
    <ranges>
+   <variant>
 )
 
 if(WIN32)
