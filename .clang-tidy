@@ -2,7 +2,6 @@
 Checks: "*,-llvmlibc-*, -fuchsia-*, -altera-*, -llvm-*, -google-readability-namespace-comments, -misc-no-recursion, -misc-include-cleaner, -hicpp-uppercase-literal-suffix, -readability-uppercase-literal-suffix"
 WarningsAsErrors: "true"
 HeaderFilterRegex: ""
-AnalyzeTemporaryDtors: false
 FormatStyle: google
 CheckOptions:
   - key: google-readability-braces-around-statements.ShortStatementLines

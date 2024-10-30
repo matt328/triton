@@ -1,6 +1,7 @@
 #pragma once
 
 #include <any>
+#include <optional>
 #include <utility>
 
 namespace ed::ui::cmp {
@@ -20,6 +21,8 @@ namespace ed::ui::cmp {
 
    template <typename T>
    class TypedControl : public ControlBase {
+      static constexpr auto SkeletonFilters = std::array{nfdfilteritem_t{"Ozz Skeleton", "ozz"}};
+
     public:
       TypedControl(std::string label, T initialValue)
           : label(std::move(label)), value(initialValue) {
@@ -34,6 +37,24 @@ namespace ed::ui::cmp {
             ImGui::InputFloat(label.c_str(), &value);
          } else if constexpr (std::is_same_v<T, glm::vec3>) {
             ImGui::SliderFloat3(label.c_str(), (float*)&value, -5.f, 5.f);
+         } else if constexpr (std::is_same_v<T, std::filesystem::path>) {
+            std::string valueStr = value.string();
+            ImGui::InputText("##label", &valueStr);
+            ImGui::SameLine();
+            if (ImGui::Button("...")) {
+               auto inPath = NFD::UniquePath{};
+               if (const auto result =
+                       OpenDialog(inPath, SkeletonFilters.data(), SkeletonFilters.size());
+                   result == NFD_OKAY) {
+                  value = std::filesystem::path{std::string{inPath.get()}};
+               } else if (result == NFD_CANCEL) {
+                  Log.info("User pressed cancel");
+               } else {
+                  Log.error("Error selecting skeleton file: {0}", NFD::GetError());
+               }
+            }
+            ImGui::SameLine();
+            ImGui::Text(label.c_str());
          }
       }
 
@@ -51,9 +72,19 @@ namespace ed::ui::cmp {
       Cancel
    };
 
+   class ModalDialog;
+
+   using OkFunction = std::function<void(const ModalDialog&)>;
+   using CancelFunction = std::function<void(void)>;
+
    class ModalDialog {
     public:
-      explicit ModalDialog(std::string title) : title(std::move(title)) {
+      explicit ModalDialog(std::string title,
+                           const OkFunction& okFunction,
+                           const CancelFunction& cancelFunction)
+          : title(std::move(title)),
+            onOk{std::make_optional(okFunction)},
+            onCancel{std::make_optional(cancelFunction)} {
       }
 
       template <typename T>
@@ -74,10 +105,9 @@ namespace ed::ui::cmp {
          return std::nullopt;
       }
 
-      [[nodiscard]] auto render() -> DialogResult {
-
+      void render() {
          if (!isOpen) {
-            return DialogResult::Cancel;
+            return;
          }
 
          bool shouldOk{};
@@ -101,15 +131,18 @@ namespace ed::ui::cmp {
          if (shouldOk) {
             ImGui::CloseCurrentPopup();
             isOpen = false;
-            return DialogResult::Ok;
+            if (onOk.has_value()) {
+               onOk.value()(*this);
+            }
          }
 
          if (shouldCancel) {
             ImGui::CloseCurrentPopup();
             isOpen = false;
-            return DialogResult::Cancel;
+            if (onCancel.has_value()) {
+               onCancel.value()();
+            }
          }
-         return DialogResult::Cancel;
       }
 
       void setOpen() {
@@ -126,6 +159,8 @@ namespace ed::ui::cmp {
       bool isOpen{};
       std::string title{};
       std::map<std::string, std::unique_ptr<ControlBase>> controls;
+      std::optional<OkFunction> onOk;
+      std::optional<CancelFunction> onCancel;
    };
 
 };

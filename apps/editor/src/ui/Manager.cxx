@@ -56,11 +56,23 @@ namespace ed::ui {
 
       Log.sinks().push_back(std::make_shared<my_sink_mt>(logFn));
 
-      dialog = std::make_unique<cmp::ModalDialog>("Test Modal");
+      dialog = std::make_unique<cmp::ModalDialog>(
+          "Test Modal",
+          [](const cmp::ModalDialog& dialog) {
+             Log.debug("name: {0}, age: {1}, height: {2}, vector3: {3}, file: {4}",
+                       dialog.getValue<std::string>("name").value(),
+                       dialog.getValue<int>("age").value(),
+                       dialog.getValue<float>("height").value(),
+                       dialog.getValue<glm::vec3>("vector3").value(),
+                       dialog.getValue<std::filesystem::path>("filename").value().string());
+          },
+          []() { Log.debug("Cancelled Dialog with no input"); });
+
       dialog->addControl("name", "Name", std::string("Default Name"));
       dialog->addControl("age", "Age", 25);
       dialog->addControl("height", "Height", 5.9f);
       dialog->addControl("vector3", "Vector3", glm::vec3{0.f, 0.f, 0.f});
+      dialog->addControl("filename", "Skeleton File", std::filesystem::path{});
    }
 
    Manager::~Manager() {
@@ -84,6 +96,8 @@ namespace ed::ui {
 
       appLog->font = sauce;
       appLog->Draw("Log");
+
+      dialog->render();
 
       helpers::renderImportSkeletonModal(dataFacade);
       helpers::renderImportAnimationModal(dataFacade);
@@ -172,16 +186,6 @@ namespace ed::ui {
       auto showPopup = false;
       auto showAnimation = false;
       static auto show = false;
-
-      // if (dialog->render() == cmp::DialogResult::Ok) {
-      //    auto name = dialog->getValue<std::string>("name").value();
-
-      //    Log.debug("name: {0}, age: {1}, height: {2}, vector3: {3}",
-      //              dialog->getValue<std::string>("name").value(),
-      //              dialog->getValue<int>("age").value(),
-      //              dialog->getValue<float>("height").value(),
-      //              dialog->getValue<glm::vec3>("vector3").value());
-      // };
 
       if (ImGui::BeginMainMenuBar()) {
          if (ImGui::BeginMenu("File")) {

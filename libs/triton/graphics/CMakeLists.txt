@@ -65,6 +65,7 @@ target_precompile_headers(${PROJECT_NAME}
    <SPIRV/GlslangToSpv.h>
    <imgui.h>
    <queue>
+   <ranges>
    <set>
    <stb_image.h>
    <tracy/Tracy.hpp>

@@ -141,7 +141,7 @@
    "editor.guides.indentation": true, // shows vertical lines
    "clangd.arguments": [
       "-background-index",
-      "-compile-commands-dir=build"
+      "-compile-commands-dir=build/debug"
    ],
    "clangd.fallbackFlags": [
       "-I${workspaceFolder}/src/core",
