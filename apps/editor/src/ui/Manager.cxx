@@ -1,6 +1,5 @@
 #include "Manager.hpp"
 
-#include "cm/sdf/VoxelMetrics.hpp"
 #include "tr/GameplayFacade.hpp"
 
 #include "Properties.hpp"
@@ -11,32 +10,37 @@
 #include "ImGuiHelpers.hpp"
 #include "components/AppLog.hpp"
 #include "ImGuiSink.hpp"
-#include "ui/components/ModalDialog.hpp"
+#include "cm/GlmToString.hpp"
+
+// NOLINTBEGIN(cppcoreguidelines-pro-type-vararg,
+// hicpp-vararg,readability-function-cognitive-complexity,hicpp-no-array-decay,hicpp-no-pointer-decay,cppcoreguidelines-pro-bounds-array-to-pointer-decay,hicpp-signed-bitwise)
 
 namespace ed::ui {
+
+   static constexpr float FontSize = 18.f;
+
    Manager::Manager(tr::ctx::GameplayFacade& facade, data::DataFacade& dataFacade)
        : facade{facade}, dataFacade{dataFacade} {
       ImGuiEx::setupImGuiStyle2();
       ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
       const auto& io = ImGui::GetIO();
-      const auto fontAtlas = io.Fonts;
-      const auto ranges = io.Fonts->GetGlyphRangesDefault();
+      auto* const fontAtlas = io.Fonts;
+      const auto* const ranges = io.Fonts->GetGlyphRangesDefault();
 
       auto config = ImFontConfig{};
       config.FontDataOwnedByAtlas = false;
       fontAtlas->AddFontFromMemoryTTF(Roboto_Regular_ttf,
-                                      Roboto_Regular_ttf_len, // NOLINT(*-narrowing-conversions)
-                                      18.f,
+                                      Roboto_Regular_ttf_len,
+                                      FontSize,
                                       &config,
                                       ranges);
 
-      sauce = fontAtlas->AddFontFromMemoryTTF(
-          SourceCodePro_Regular_ttf,
-          SourceCodePro_Regular_ttf_len, // NOLINT(*-narrowing-conversions)
-          18.f,
-          &config,
-          ranges);
+      sauce = fontAtlas->AddFontFromMemoryTTF(SourceCodePro_Regular_ttf,
+                                              SourceCodePro_Regular_ttf_len,
+                                              FontSize,
+                                              &config,
+                                              ranges);
 
       if (!ImGui_ImplVulkan_CreateFontsTexture()) {
          Log.warn("Error creating Fonts Texture");
@@ -51,6 +55,12 @@ namespace ed::ui {
       };
 
       Log.sinks().push_back(std::make_shared<my_sink_mt>(logFn));
+
+      dialog = std::make_unique<cmp::ModalDialog>("Test Modal");
+      dialog->addControl("name", "Name", std::string("Default Name"));
+      dialog->addControl("age", "Age", 25);
+      dialog->addControl("height", "Height", 5.9f);
+      dialog->addControl("vector3", "Vector3", glm::vec3{0.f, 0.f, 0.f});
    }
 
    Manager::~Manager() {
@@ -100,6 +110,7 @@ namespace ed::ui {
 
    void Manager::renderDockSpace() {
       static ImGuiDockNodeFlags dockspaceFlags = ImGuiDockNodeFlags_PassthruCentralNode;
+
       ImGuiWindowFlags windowFlags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
 
       const ImGuiViewport* viewport = ImGui::GetMainViewport();
@@ -112,7 +123,7 @@ namespace ed::ui {
                      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
       windowFlags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
 
-      if (dockspaceFlags & ImGuiDockNodeFlags_PassthruCentralNode) {
+      if ((dockspaceFlags & ImGuiDockNodeFlags_PassthruCentralNode) != 0) {
          windowFlags |= ImGuiWindowFlags_NoBackground;
       }
 
@@ -156,22 +167,27 @@ namespace ed::ui {
       ImGui::End(); // Dockspace
    }
 
-   void Manager::renderMenuBar() {
+   void Manager::renderMenuBar() { // NOLINT(readability-function-cognitive-complexity)
       auto b = false;
       auto showPopup = false;
       auto showAnimation = false;
       static auto show = false;
 
-      auto dialog = cmp::ModalDialog{"Test Modal"};
-      dialog.addInput("Name", std::string("Default Name"));
-      dialog.addInput("Age", 25);
-      dialog.addInput("Height", 5.9f);
+      // if (dialog->render() == cmp::DialogResult::Ok) {
+      //    auto name = dialog->getValue<std::string>("name").value();
+
+      //    Log.debug("name: {0}, age: {1}, height: {2}, vector3: {3}",
+      //              dialog->getValue<std::string>("name").value(),
+      //              dialog->getValue<int>("age").value(),
+      //              dialog->getValue<float>("height").value(),
+      //              dialog->getValue<glm::vec3>("vector3").value());
+      // };
 
       if (ImGui::BeginMainMenuBar()) {
          if (ImGui::BeginMenu("File")) {
 
             if (ImGui::MenuItem("Test Dialog")) {
-               dialog.open();
+               dialog->setOpen();
             }
 
             if (ImGui::MenuItem("Create Terrain")) {
@@ -270,14 +286,7 @@ namespace ed::ui {
          ImGui::EndMainMenuBar();
       }
 
-      auto result = dialog.show();
-      if (result) {
-         for (const auto& [name, value] : result.value()) {
-            std::visit(
-                [&name](auto&& val) { Log.debug("Input: name: {0}, value: {1}", name, val); },
-                value);
-         }
-      }
+      dialog->checkShouldOpen();
 
       if (showPopup) {
          ImGui::OpenPopup("Import Skeleton");
@@ -338,3 +347,6 @@ namespace ed::ui {
       return std::nullopt;
    }
 }
+
+// NOLINTEND(cppcoreguidelines-pro-type-vararg,
+// hicpp-vararg,readability-function-cognitive-complexity,hicpp-no-array-decay,hicpp-no-pointer-decay,cppcoreguidelines-pro-bounds-array-to-pointer-decay,hicpp-signed-bitwise)

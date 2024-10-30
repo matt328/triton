@@ -5,6 +5,7 @@
 #include "cm/Handles.hpp"
 #include "data/DataFacade.hpp"
 #include "components/EntityEditor.hpp"
+#include "ui/components/ModalDialog.hpp"
 
 namespace ed {
    class Application;
@@ -25,8 +26,8 @@ namespace ed::ui {
 
       Manager(const Manager&) = delete;
       Manager(Manager&&) = delete;
-      Manager& operator=(const Manager&) = delete;
-      Manager& operator=(Manager&&) = delete;
+      auto operator=(const Manager&) -> Manager& = delete;
+      auto operator=(Manager&&) -> Manager& = delete;
 
       void render();
 
@@ -46,6 +47,8 @@ namespace ed::ui {
     private:
       static constexpr auto ProjectFileFilters =
           std::array{nfdfilteritem_t{"Triton Project", "trp"}};
+
+      std::unique_ptr<cmp::ModalDialog> dialog;
 
       tr::ctx::GameplayFacade& facade;
       data::DataFacade& dataFacade;

@@ -455,7 +455,7 @@ namespace tr::gfx {
       // if (!strcmp(pLayerPrefix, "Loader Message")) {
       //    return VK_FALSE;
       // }
-      Log.debug("Debug Callback ({0}): {1}", pLayerPrefix, pMessage);
+      // Log.debug("Debug Callback ({0}): {1}", pLayerPrefix, pMessage);
       return VK_TRUE;
    }
 }
