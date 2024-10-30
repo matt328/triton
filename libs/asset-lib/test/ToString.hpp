@@ -1,6 +1,6 @@
 #pragma once
 
-inline std::ostream& operator<<(std::ostream& os, glm::mat4 const& value) {
+inline auto operator<<(std::ostream& os, glm::mat4 const& value) -> std::ostream& {
    os << to_string(value);
    return os;
 }

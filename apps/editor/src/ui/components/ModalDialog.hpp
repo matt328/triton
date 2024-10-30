@@ -1,95 +1,131 @@
-#include <utility>
-
 #pragma once
+
+#include <any>
+#include <utility>
 
 namespace ed::ui::cmp {
 
+   class ControlBase {
+    public:
+      ControlBase() = default;
+      ControlBase(const ControlBase&) = default;
+      ControlBase(ControlBase&&) = delete;
+      auto operator=(const ControlBase&) -> ControlBase& = default;
+      auto operator=(ControlBase&&) -> ControlBase& = delete;
+
+      virtual ~ControlBase() = default;
+      virtual void render() = 0;
+      [[nodiscard]] virtual auto getValue() const -> std::any = 0;
+   };
+
+   template <typename T>
+   class TypedControl : public ControlBase {
+    public:
+      TypedControl(std::string label, T initialValue)
+          : label(std::move(label)), value(initialValue) {
+      }
+
+      void render() override {
+         if constexpr (std::is_same_v<T, std::string>) {
+            ImGui::InputText(label.c_str(), &value);
+         } else if constexpr (std::is_same_v<T, int>) {
+            ImGui::InputInt(label.c_str(), &value);
+         } else if constexpr (std::is_same_v<T, float>) {
+            ImGui::InputFloat(label.c_str(), &value);
+         } else if constexpr (std::is_same_v<T, glm::vec3>) {
+            ImGui::SliderFloat3(label.c_str(), (float*)&value, -5.f, 5.f);
+         }
+      }
+
+      [[nodiscard]] auto getValue() const -> std::any override {
+         return value;
+      }
+
+    private:
+      std::string label;
+      T value;
+   };
+
+   enum class DialogResult : uint8_t {
+      Ok = 1,
+      Cancel
+   };
+
    class ModalDialog {
     public:
-      // Supported input types
-      using InputType = std::variant<int, float, std::string>;
-
-      // Constructor with the name of the modal
       explicit ModalDialog(std::string title) : title(std::move(title)) {
       }
 
-      // Add an input field to the dialog
-      void addInput(const std::string& name, InputType defaultValue) {
-         inputs[name] = std::move(defaultValue);
+      template <typename T>
+      void addControl(const std::string& name, const std::string& label, T initialValue) {
+         controls[name] = std::make_unique<TypedControl<T>>(label, initialValue);
       }
 
-      // Show the modal dialog
-      auto show() -> std::optional<std::unordered_map<std::string, InputType>> {
-         if (isOpen) {
-            ImGui::OpenPopup(title.c_str());
-            isOpen = false;
+      template <typename T>
+      auto getValue(const std::string& name) const -> std::optional<T> {
+         if (controls.contains(name)) {
+            auto it = controls.find(name);
+            try {
+               return std::any_cast<T>(it->second->getValue());
+            } catch (const std::bad_any_cast& bac) {
+               Log.warn("Not what you were expecting, hmm? Fat Lemongrab!");
+            }
+         }
+         return std::nullopt;
+      }
+
+      [[nodiscard]] auto render() -> DialogResult {
+
+         if (!isOpen) {
+            return DialogResult::Cancel;
          }
 
-         std::optional<std::unordered_map<std::string, InputType>> result;
+         bool shouldOk{};
+         bool shouldCancel{};
 
          if (ImGui::BeginPopupModal(title.c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
-            // Render inputs
-            for (auto& [name, value] : inputs) {
-               std::visit(
-                   [&name](auto&& val) {
-                      using T = std::decay_t<decltype(val)>;
-                      if constexpr (std::is_same_v<T, int>) {
-                         ImGui::InputInt(name.c_str(), &val);
-                      } else if constexpr (std::is_same_v<T, float>) {
-                         ImGui::InputFloat(name.c_str(), &val);
-                      } else if constexpr (std::is_same_v<T, std::string>) {
-                         char buffer[256];
-                         std::strncpy(buffer, val.c_str(), sizeof(buffer));
-                         if (ImGui::InputText(name.c_str(), buffer, sizeof(buffer))) {
-                            val = buffer;
-                         }
-                      }
-                   },
-                   value);
+            for (auto& [name, control] : controls) {
+               control->render();
             }
-
-            // OK and Cancel buttons
             if (ImGui::Button("OK")) {
-               isOkPressed = true;
-               ImGui::CloseCurrentPopup();
+               shouldOk = true;
             }
             ImGui::SameLine();
             if (ImGui::Button("Cancel")) {
-               isCancelPressed = true;
-               ImGui::CloseCurrentPopup();
+               shouldCancel = true;
             }
 
             ImGui::EndPopup();
          }
 
-         // Return results if OK or Cancel was pressed
-         if (isOkPressed) {
-            result = inputs;
-            resetDialogState();
-         } else if (isCancelPressed) {
-            result = std::nullopt;
-            resetDialogState();
+         if (shouldOk) {
+            ImGui::CloseCurrentPopup();
+            isOpen = false;
+            return DialogResult::Ok;
          }
 
-         return result;
+         if (shouldCancel) {
+            ImGui::CloseCurrentPopup();
+            isOpen = false;
+            return DialogResult::Cancel;
+         }
+         return DialogResult::Cancel;
       }
 
-      // Open the dialog
-      void open() {
+      void setOpen() {
          isOpen = true;
       }
 
-    private:
-      std::string title;
-      std::unordered_map<std::string, InputType> inputs;
-      bool isOpen{};
-      bool isOkPressed{};
-      bool isCancelPressed{};
-
-      void resetDialogState() {
-         isOkPressed = false;
-         isCancelPressed = false;
+      void checkShouldOpen() {
+         if (isOpen) {
+            ImGui::OpenPopup(title.c_str());
+         }
       }
+
+    private:
+      bool isOpen{};
+      std::string title{};
+      std::map<std::string, std::unique_ptr<ControlBase>> controls;
    };
 
 };
