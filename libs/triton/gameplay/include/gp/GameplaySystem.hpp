@@ -69,7 +69,8 @@ namespace tr::gp {
       void setMouseState(bool captured) const;
 
       // Gameworld State Methods
-      [[nodiscard]] auto createTerrain(const cm::ModelData& handles) const -> cm::EntityType;
+      [[nodiscard]] auto createTerrain(const std::vector<cm::ModelData>& handles) const
+          -> cm::EntityType;
       [[nodiscard]] auto createStaticModel(const cm::ModelData& meshes) const -> cm::EntityType;
       [[nodiscard]] auto createAnimatedModel(cm::ModelData modelData,
                                              const std::filesystem::path& skeletonPath,
@@ -84,12 +85,12 @@ namespace tr::gp {
                                       const std::optional<std::string>& name) const
           -> cm::EntityType;
 
-      [[nodiscard]] auto createDebugAABB(const glm::vec3& min, const glm::vec3& max) const
-          -> cm::EntityType;
+      [[nodiscard]] auto createDebugAABB(const glm::vec3& min,
+                                         const glm::vec3& max) const -> cm::EntityType;
       [[nodiscard]] auto createDebugTriangle(const std::array<glm::vec3, 3> vertices) const
           -> cm::EntityType;
-      [[nodiscard]] auto createDebugLine(const glm::vec3& start, const glm::vec3& end) const
-          -> cm::EntityType;
+      [[nodiscard]] auto createDebugLine(const glm::vec3& start,
+                                         const glm::vec3& end) const -> cm::EntityType;
       [[nodiscard]] auto createDebugPoint(const glm::vec3& position) const -> cm::EntityType;
 
       void hideEntity(cm::EntityType);

@@ -6,7 +6,7 @@
    "configurations": [
       {
          "name": "(Windows) Launch",
-         "type": "cppvsdbg",
+         "type": "cppdbg",
          "request": "launch",
          "program": "${workspaceFolder}/build/debug/apps/editor/editor",
          "args": [],
