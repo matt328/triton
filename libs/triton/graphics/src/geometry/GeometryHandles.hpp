@@ -4,7 +4,11 @@
 
 namespace tr::gfx::geo {
 
-   using GeometryHandle = size_t;
+   struct GeometryHandle {
+      size_t handle;
+      cm::Topology topology;
+   };
+
    using ImageHandle = size_t;
    using TexturedGeometryHandle = std::unordered_map<GeometryHandle, ImageHandle>;
 

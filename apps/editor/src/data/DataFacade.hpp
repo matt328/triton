@@ -163,7 +163,7 @@ namespace ed::data {
          return dataStore.models;
       }
 
-      [[nodiscard]] const auto& getScene() const {
+      [[nodiscard]] auto getScene() const -> const auto& {
          return dataStore.scene;
       }
 

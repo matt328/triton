@@ -1,7 +1,6 @@
 #pragma once
 
-#include <ranges>
-#include <utility>
+#include "as/Vertex.hpp"
 namespace tr::cm::sdf {
 
    static constexpr uint8_t BitCount = 8;
@@ -10,7 +9,7 @@ namespace tr::cm::sdf {
       const glm::ivec3 offset;
       const uint8_t caseCode;
       const int8_t equivalenceClassNumber;
-      const std::vector<glm::vec3> vertices;
+      const std::vector<as::Vertex> vertices;
 
       [[nodiscard]] auto toString() const -> std::string {
          const auto& hex = std::format("{:02x}", caseCode);
@@ -18,14 +17,15 @@ namespace tr::cm::sdf {
          auto bitsetCaseCode = std::bitset<BitCount>{caseCode};
 
          auto str = std::format("Cell Position: ({0}, {1}, {2}), Case Code {3} (0x{4}) {5}, "
-                                "Equivalence Class Number: {6}",
+                                "Equivalence Class Number: {6}, vertices size: {7}",
                                 offset.x,
                                 offset.y,
                                 offset.z,
                                 caseCode,
                                 hex,
                                 bitsetCaseCode.to_string(),
-                                equivalenceClassNumber);
+                                equivalenceClassNumber,
+                                vertices.size());
          return str;
       }
    };
@@ -55,8 +55,7 @@ namespace tr::cm::sdf {
                              std::forward_as_tuple(std::forward<Args>(args)...));
       }
 
-      [[nodiscard]] auto getActiveCubePositions() const
-          -> const std::unordered_map<std::string, CellData>& {
+      [[nodiscard]] auto getActiveCubePositions() const -> const std::map<std::string, CellData>& {
          return activeCubes;
       }
 
@@ -64,7 +63,7 @@ namespace tr::cm::sdf {
       VoxelDebugger() = default;
       ~VoxelDebugger() = default;
 
-      std::unordered_map<std::string, CellData> activeCubes;
+      std::map<std::string, CellData> activeCubes;
    };
 
 } // namespace tr::cm::sdf

@@ -104,7 +104,7 @@ namespace ed {
 
       glfwSetWindowSizeLimits(window.get(), MinWidth, MinHeight, GLFW_DONT_CARE, GLFW_DONT_CARE);
 
-      if (glfwRawMouseMotionSupported()) {
+      if (glfwRawMouseMotionSupported() != 0) {
          glfwSetInputMode(window.get(), GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
       }
 
@@ -161,14 +161,14 @@ namespace ed {
    }
 
    void Application::windowIconifiedCallback(GLFWwindow* window, const int iconified) {
-      const auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
+      auto* const app = static_cast<Application*>(glfwGetWindowUserPointer(window));
       // Just stop crashing for now.
       app->context->pause(iconified);
       app->paused = iconified;
    }
 
    void Application::windowCloseCallback(GLFWwindow* window) {
-      const auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
+      auto* const app = static_cast<Application*>(glfwGetWindowUserPointer(window));
       app->running = false;
       app->context->hostWindowClosed();
    }
@@ -181,7 +181,7 @@ namespace ed {
       if (ImGui::GetIO().WantCaptureKeyboard || ImGui::GetIO().WantTextInput) {
          return;
       }
-      const auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
+      auto* const app = static_cast<Application*>(glfwGetWindowUserPointer(window));
       if (key == GLFW_KEY_ENTER && mods == GLFW_MOD_ALT && action == GLFW_RELEASE) {
          toggleFullscreen(*app);
       } else {
@@ -195,7 +195,7 @@ namespace ed {
    }
 
    void Application::toggleFullscreen(Application& app) {
-      const auto window = app.window.get();
+      auto* const window = app.window.get();
       if (app.fullscreen) {
          glfwSetWindowMonitor(window,
                               nullptr,
@@ -206,8 +206,8 @@ namespace ed {
                               0);
          app.fullscreen = !app.fullscreen;
       } else {
-         const auto currentMonitor = glfwGetPrimaryMonitor();
-         const auto mode = glfwGetVideoMode(currentMonitor);
+         auto* const currentMonitor = glfwGetPrimaryMonitor();
+         const auto* const mode = glfwGetVideoMode(currentMonitor);
          glfwGetWindowPos(window, &app.prevXPos, &app.prevYPos);
          glfwGetWindowSize(window, &app.prevWidth, &app.prevHeight);
          glfwSetWindowMonitor(window,
@@ -222,7 +222,7 @@ namespace ed {
    }
 
    void Application::cursorPosCallback(GLFWwindow* window, const double xpos, const double ypos) {
-      if (const auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
+      if (auto* const app = static_cast<Application*>(glfwGetWindowUserPointer(window));
           app->mouseCaptured) {
          app->context->cursorPosCallback(xpos, ypos);
       }
@@ -232,7 +232,7 @@ namespace ed {
                                          const int button,
                                          const int action,
                                          const int mods) {
-      const auto app = static_cast<Application*>(glfwGetWindowUserPointer(window));
+      auto* const app = static_cast<Application*>(glfwGetWindowUserPointer(window));
       if (ImGui::GetIO().WantCaptureMouse && !app->mouseCaptured) {
          return;
       }

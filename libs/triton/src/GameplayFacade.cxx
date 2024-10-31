@@ -18,12 +18,12 @@ namespace tr::ctx {
       }
 
       [[nodiscard]] auto createTerrain() const -> cm::EntityType {
-         auto terrainResult = renderer.createTerrain();
-         return gameplaySystem.createTerrain(terrainResult);
+         auto modelDatas = renderer.createTerrain();
+         return gameplaySystem.createTerrain(modelDatas);
       }
 
-      [[nodiscard]] auto createDebugAABB(const glm::vec3& min, const glm::vec3& max) const noexcept
-          -> cm::EntityType {
+      [[nodiscard]] auto createDebugAABB(const glm::vec3& min,
+                                         const glm::vec3& max) const noexcept -> cm::EntityType {
          const auto aabbHandle = renderer.createAABBGeometry(min, max);
          return gameplaySystem.createStaticModel(aabbHandle);
       }
@@ -89,9 +89,8 @@ namespace tr::ctx {
       return impl->createTerrain();
    }
 
-   [[nodiscard]] auto GameplayFacade::createDebugAABB(const glm::vec3& min,
-                                                      const glm::vec3& max) const
-       -> cm::EntityType {
+   [[nodiscard]] auto GameplayFacade::createDebugAABB(const glm::vec3& min, const glm::vec3& max)
+       const -> cm::EntityType {
       return impl->createDebugAABB(min, max);
    }
 

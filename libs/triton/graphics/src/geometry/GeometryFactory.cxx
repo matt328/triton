@@ -15,6 +15,8 @@
 #include <glm/gtx/string_cast.hpp>
 #include "cm/sdf/VoxelMetrics.hpp"
 
+#include "GlmCereal.hpp"
+
 // NOLINTBEGIN
 
 namespace tr::gfx::geo {
@@ -30,8 +32,9 @@ namespace tr::gfx::geo {
    GeometryFactory::~GeometryFactory() { // NOLINT(*-use-equals-default)
    }
 
-   auto GeometryFactory::sdfPlane(const glm::vec3& point, const glm::vec3& normal, float distance)
-       -> int8_t {
+   auto GeometryFactory::sdfPlane(const glm::vec3& point,
+                                  const glm::vec3& normal,
+                                  float distance) -> int8_t {
 
       int8_t result = 0;
 
@@ -75,6 +78,10 @@ namespace tr::gfx::geo {
                polygonizeCell(min, position, vertices, indices, voxelData);
             }
          }
+      }
+
+      for (const auto& index : indices) {
+         Log.debug("Index: {0}", index);
       }
 
       const auto imageHandle = imageKey.getKey();
@@ -136,14 +143,14 @@ namespace tr::gfx::geo {
          auto equivalenceClassIndex = regularCellClass[caseCode];
          auto equivalenceClass = regularCellData[equivalenceClassIndex];
 
-         VoxelDebugger::getInstance().addActiveCube(cellPosition, caseCode, equivalenceClassIndex);
-
          const auto vertexCount = equivalenceClass.getVertexCount();
          const auto triangleCount = equivalenceClass.getTriangleCount();
          const auto vertexSequence = equivalenceClass.getVertexIndex();
          auto mappedIndices = std::vector<uint16_t>{};
 
          const auto vertexLocations = regularVertexData[caseCode];
+
+         auto cellVertices = std::vector<as::Vertex>{};
 
          for (uint8_t vli = 0; vli < vertexCount; ++vli) {
             auto vertexLocation = vertexLocations[vli];
@@ -186,6 +193,7 @@ namespace tr::gfx::geo {
                // The cube in dirPrev did not generate a vertex on the edge we are needing one
                // so generate one.
                index = generateVertex(vertices,
+                                      cellVertices,
                                       currentOffsetPosition,
                                       cellPosition,
                                       t0,
@@ -202,6 +210,10 @@ namespace tr::gfx::geo {
             }
             mappedIndices.push_back(index);
          }
+         VoxelDebugger::getInstance().addActiveCube(cellPosition,
+                                                    caseCode,
+                                                    equivalenceClassIndex,
+                                                    cellVertices);
          for (uint32_t t = 0; t < triangleCount; t++) {
             for (int i = 0; i < 3; ++i) {
                indices.push_back(mappedIndices[vertexSequence[t * 3 + i]]);
@@ -211,6 +223,7 @@ namespace tr::gfx::geo {
    }
 
    auto GeometryFactory::generateVertex(std::vector<as::Vertex>& vertices,
+                                        std::vector<as::Vertex>& cellVertices,
                                         glm::ivec3& offsetPosition,
                                         glm::ivec3& cellPosition,
                                         float t,
@@ -229,6 +242,8 @@ namespace tr::gfx::geo {
       auto size = vertices.size();
       Log.debug("Vertex: {0}", vertex);
       vertices.push_back(vertex);
+
+      cellVertices.push_back(vertex);
 
       return size;
    }
@@ -383,8 +398,8 @@ namespace tr::gfx::geo {
       return normalize(glm::vec3(-dx, NormalY, dy));
    }
 
-   auto GeometryFactory::generateAABB(const glm::vec3& min, const glm::vec3& max)
-       -> GeometryHandle {
+   auto GeometryFactory::generateAABB(const glm::vec3& min,
+                                      const glm::vec3& max) -> GeometryHandle {
 
       auto vertices = std::vector<as::Vertex>{{
           {{min.x, min.y, min.z}}, // 0: Bottom-left-back
