@@ -47,7 +47,6 @@ namespace ed::ui {
       }
 
       guard = std::make_unique<NFD::Guard>();
-
       appLog = std::make_unique<cmp::AppLog>();
 
       const auto logFn = [this](const std::string& message) {
@@ -56,7 +55,7 @@ namespace ed::ui {
 
       Log.sinks().push_back(std::make_shared<my_sink_mt>(logFn));
 
-      dialog = std::make_unique<cmp::ModalDialog>(
+      auto dialog = std::make_unique<cmp::ModalDialog>(
           "Test Modal",
           [](const cmp::ModalDialog& dialog) {
              Log.debug("name: {0}, age: {1}, height: {2}, vector3: {3}, file: {4}",
@@ -73,6 +72,8 @@ namespace ed::ui {
       dialog->addControl("height", "Height", 5.9f);
       dialog->addControl("vector3", "Vector3", glm::vec3{0.f, 0.f, 0.f});
       dialog->addControl("filename", "Skeleton File", std::filesystem::path{});
+
+      dialogMap["Test Dialog"] = std::move(dialog);
    }
 
    Manager::~Manager() {
@@ -97,7 +98,9 @@ namespace ed::ui {
       appLog->font = sauce;
       appLog->Draw("Log");
 
-      dialog->render();
+      for (const auto& [name, dialog] : dialogMap) {
+         dialog->render();
+      }
 
       helpers::renderImportSkeletonModal(dataFacade);
       helpers::renderImportAnimationModal(dataFacade);
@@ -191,7 +194,7 @@ namespace ed::ui {
          if (ImGui::BeginMenu("File")) {
 
             if (ImGui::MenuItem("Test Dialog")) {
-               dialog->setOpen();
+               dialogMap.at("Test Dialog")->setOpen();
             }
 
             if (ImGui::MenuItem("Create Terrain")) {
@@ -290,7 +293,9 @@ namespace ed::ui {
          ImGui::EndMainMenuBar();
       }
 
-      dialog->checkShouldOpen();
+      for (const auto& [name, dialog] : dialogMap) {
+         dialog->checkShouldOpen();
+      }
 
       if (showPopup) {
          ImGui::OpenPopup("Import Skeleton");

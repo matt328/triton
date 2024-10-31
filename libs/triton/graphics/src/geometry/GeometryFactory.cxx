@@ -19,6 +19,8 @@
 
 namespace tr::gfx::geo {
 
+   using cm::sdf::VoxelDebugger;
+
    GeometryFactory::GeometryFactory() {
       constexpr auto imageHandle = 0;
       const auto data = std::vector<unsigned char>(4, 255);
@@ -43,6 +45,8 @@ namespace tr::gfx::geo {
       return result;
    }
 
+   // TODO: Move this algorithm out into the application so we can create an ImGui tool
+   // to step through and debug it.
    auto GeometryFactory::createTerrain() -> TexturedGeometryHandle {
       auto vertices = std::vector<as::Vertex>{};
       auto indices = std::vector<uint32_t>{};
@@ -132,9 +136,7 @@ namespace tr::gfx::geo {
          auto equivalenceClassIndex = regularCellClass[caseCode];
          auto equivalenceClass = regularCellData[equivalenceClassIndex];
 
-         cm::sdf::VoxelDebugger::getInstance().addActiveCube(cellPosition,
-                                                             caseCode,
-                                                             equivalenceClassIndex);
+         VoxelDebugger::getInstance().addActiveCube(cellPosition, caseCode, equivalenceClassIndex);
 
          const auto vertexCount = equivalenceClass.getVertexCount();
          const auto triangleCount = equivalenceClass.getTriangleCount();
@@ -200,7 +202,7 @@ namespace tr::gfx::geo {
             }
             mappedIndices.push_back(index);
          }
-         for (int t = 0; t < triangleCount; t++) {
+         for (uint32_t t = 0; t < triangleCount; t++) {
             for (int i = 0; i < 3; ++i) {
                indices.push_back(mappedIndices[vertexSequence[t * 3 + i]]);
             }

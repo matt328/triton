@@ -22,6 +22,8 @@ target_precompile_headers(${PROJECT_NAME}
    <functional>
    <glm/glm.hpp>
    <random>
+   <bitset>
+   <format>
    PRIVATE
    <ctime>
    <cstdint>

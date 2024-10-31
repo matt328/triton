@@ -48,7 +48,7 @@ namespace ed::ui {
       static constexpr auto ProjectFileFilters =
           std::array{nfdfilteritem_t{"Triton Project", "trp"}};
 
-      std::unique_ptr<cmp::ModalDialog> dialog;
+      std::unordered_map<std::string, std::unique_ptr<cmp::ModalDialog>> dialogMap;
 
       tr::ctx::GameplayFacade& facade;
       data::DataFacade& dataFacade;

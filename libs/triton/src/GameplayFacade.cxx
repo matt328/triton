@@ -17,11 +17,9 @@ namespace tr::ctx {
           : gameplaySystem{gameplaySystem}, renderer{renderer} {
       }
 
-      [[nodiscard]] auto getCreateTerrainFn() const -> std::function<cm::EntityType(uint32_t)> {
-         return [this](uint32_t size) -> cm::EntityType {
-            auto terrainResult = renderer.createTerrain(size);
-            return gameplaySystem.createTerrain(terrainResult);
-         };
+      [[nodiscard]] auto createTerrain() const -> cm::EntityType {
+         auto terrainResult = renderer.createTerrain();
+         return gameplaySystem.createTerrain(terrainResult);
       }
 
       [[nodiscard]] auto createDebugAABB(const glm::vec3& min, const glm::vec3& max) const noexcept
@@ -87,8 +85,8 @@ namespace tr::ctx {
    GameplayFacade::~GameplayFacade() { // NOLINT(*-use-equals-default)
    }
 
-   auto GameplayFacade::getCreateTerrainFn() const -> std::function<cm::EntityType(uint32_t)> {
-      return impl->getCreateTerrainFn();
+   auto GameplayFacade::createTerrain() const -> cm::EntityType {
+      return impl->createTerrain();
    }
 
    [[nodiscard]] auto GameplayFacade::createDebugAABB(const glm::vec3& min,
