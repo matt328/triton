@@ -117,7 +117,8 @@ namespace tr::gp {
       actionSystem->setMouseState(captured);
    }
 
-   auto GameplaySystem::createTerrain(const cm::ModelData& handles) const -> cm::EntityType {
+   auto GameplaySystem::createTerrain(const std::vector<cm::ModelData>& handles) const
+       -> cm::EntityType {
       ZoneNamedN(n, "gameplaySystem.createTerrain", true);
       return entitySystem->createTerrain(handles);
    }
@@ -156,9 +157,8 @@ namespace tr::gp {
       entitySystem->removeAll();
    }
 
-   [[nodiscard]] auto GameplaySystem::createDebugAABB(const glm::vec3& min,
-                                                      const glm::vec3& max) const
-       -> cm::EntityType {
+   [[nodiscard]] auto GameplaySystem::createDebugAABB(const glm::vec3& min, const glm::vec3& max)
+       const -> cm::EntityType {
       return entitySystem->createDebugAABB(min, max);
    }
 
@@ -167,9 +167,8 @@ namespace tr::gp {
       return entitySystem->createDebugTriangle(vertices);
    }
 
-   [[nodiscard]] auto GameplaySystem::createDebugLine(const glm::vec3& start,
-                                                      const glm::vec3& end) const
-       -> cm::EntityType {
+   [[nodiscard]] auto GameplaySystem::createDebugLine(const glm::vec3& start, const glm::vec3& end)
+       const -> cm::EntityType {
       return entitySystem->createDebugLine(start, end);
    }
 

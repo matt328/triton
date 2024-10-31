@@ -681,7 +681,7 @@ namespace tr::gfx {
       impl->setDebugRendering(wireframeEnabled);
    }
 
-   auto RenderContext::createTerrain() const -> cm::ModelData {
+   auto RenderContext::createTerrain() const -> std::vector<cm::ModelData> {
       return impl->createTerrain();
    }
 
@@ -695,8 +695,8 @@ namespace tr::gfx {
       return impl->createSkinnedModel(modelPath);
    }
 
-   auto RenderContext::createAABBGeometry(const glm::vec3& min, const glm::vec3& max)
-       -> cm::ModelData {
+   auto RenderContext::createAABBGeometry(const glm::vec3& min,
+                                          const glm::vec3& max) -> cm::ModelData {
       return impl->createAABBGeometry(min, max);
    }
 }

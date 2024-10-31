@@ -11,6 +11,7 @@
 #include "components/AppLog.hpp"
 #include "ImGuiSink.hpp"
 #include "cm/GlmToString.hpp"
+#include "ui/components/TerrainDebugger.hpp"
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-vararg,
 // hicpp-vararg,readability-function-cognitive-complexity,hicpp-no-array-decay,hicpp-no-pointer-decay,cppcoreguidelines-pro-bounds-array-to-pointer-decay,hicpp-signed-bitwise)
@@ -94,6 +95,8 @@ namespace ed::ui {
       renderMenuBar();
       TracyMessageL("After renderMenuBar");
       entityEditor.render(facade, dataFacade);
+
+      components::TerrainDebugger::render();
 
       appLog->font = sauce;
       appLog->Draw("Log");

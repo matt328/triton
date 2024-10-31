@@ -60,13 +60,13 @@ namespace tr::gfx {
       [[nodiscard]] auto createStaticModel(const std::filesystem::path& modelPath) const
           -> cm::ModelData;
 
-      [[nodiscard]] auto createTerrain() const -> cm::ModelData;
+      [[nodiscard]] auto createTerrain() const -> std::vector<cm::ModelData>;
 
       [[nodiscard]] auto createSkinnedModel(const std::filesystem::path& modelPath) const
           -> cm::ModelData;
 
-      [[nodiscard]] auto createAABBGeometry(const glm::vec3& min, const glm::vec3& max)
-          -> cm::ModelData;
+      [[nodiscard]] auto createAABBGeometry(const glm::vec3& min,
+                                            const glm::vec3& max) -> cm::ModelData;
 
     private:
       class Impl;

@@ -47,20 +47,25 @@ namespace tr::gfx::tx {
       return {renderData, renderDataMutex};
    }
 
-   auto ResourceManager::createTerrain() -> cm::ModelData {
+   auto ResourceManager::createTerrain() -> std::vector<cm::ModelData> {
       ZoneNamedN(zn1, "ResourceManager::createTerrain", true);
 
       ZoneNamedN(zn2, "Creating Terrain", true);
 
       // change this to return
       const auto dataHandle = geometryFactory->createTerrain();
+      auto modelHandles = std::vector<cm::ModelData>{};
 
-      const auto geometryData = dataHandle.begin();
+      for (const auto& [geometryHandle, imageHandle] : dataHandle) {
+         // TODO(matt) Encode the desired topology in geometryHandle somehow
+         const auto modelHandle =
+             uploadGeometry(geometryHandle, cm::Topology::Triangles, imageHandle);
 
-      const auto modelHandle =
-          uploadGeometry(geometryData->first, cm::Topology::Triangles, geometryData->second);
-      geometryFactory->unload(dataHandle);
-      return modelHandle;
+         geometryFactory->unload(dataHandle);
+         modelHandles.push_back(modelHandle);
+      }
+
+      return modelHandles;
    }
 
    auto ResourceManager::createModel(const std::filesystem::path& filename) noexcept
@@ -100,8 +105,8 @@ namespace tr::gfx::tx {
       return modelData;
    }
 
-   auto ResourceManager::createAABB(const glm::vec3& min, const glm::vec3& max) noexcept
-       -> cm::ModelData {
+   auto ResourceManager::createAABB(const glm::vec3& min,
+                                    const glm::vec3& max) noexcept -> cm::ModelData {
       auto data = geometryFactory->generateAABB(min, max);
       return uploadGeometry(data, cm::Topology::LineList);
    }

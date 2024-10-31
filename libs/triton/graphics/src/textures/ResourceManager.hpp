@@ -79,7 +79,7 @@ namespace tr::gfx::tx {
       auto operator=(const ResourceManager&) -> ResourceManager& = delete;
       auto operator=(ResourceManager&&) -> ResourceManager& = delete;
 
-      auto createTerrain() -> cm::ModelData;
+      auto createTerrain() -> std::vector<cm::ModelData>;
 
       auto createModel(const std::filesystem::path& filename) noexcept -> cm::ModelData;
 

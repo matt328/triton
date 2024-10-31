@@ -3,7 +3,6 @@
 #include "cm/EntitySystemTypes.hpp"
 #include "TaskQueue.hpp"
 #include "cm/sdf/VoxelMetrics.hpp"
-#include <bitset>
 #include <random>
 
 namespace ed::data {

@@ -71,15 +71,20 @@ namespace tr::gp {
           cmp::WindowDimensions{static_cast<int>(size.first), static_cast<int>(size.second)});
    }
 
-   auto EntitySystem::createTerrain(const cm::ModelData& handles) -> cm::EntityType {
+   auto EntitySystem::createTerrain(const std::vector<cm::ModelData>& handles) -> cm::EntityType {
       ZoneNamedN(n, "entitySystem.createTerrain", true);
       auto lock = std::unique_lock{registryMutex};
 
       const auto e = registry->create();
 
-      registry->emplace<cmp::Renderable>(e, std::vector{handles.meshData});
+      auto meshDatas = std::vector<cm::MeshData>{};
+      for (const auto& handle : handles) {
+         meshDatas.push_back(handle.meshData);
+      }
+
+      registry->emplace<cmp::Renderable>(e, meshDatas);
       registry->emplace<cmp::TerrainMarker>(e);
-      registry->emplace<cmp::Transform>(e, glm::zero<glm::vec3>(), glm::vec3(0.f, -5.f, -50.f));
+      registry->emplace<cmp::Transform>(e, glm::zero<glm::vec3>(), glm::vec3(0.f, -3.f, -5.f));
 
       const auto debugConstants = registry->create();
       registry->emplace<cmp::Transform>(debugConstants,
@@ -142,8 +147,8 @@ namespace tr::gp {
       registry->ctx().insert_or_assign<cmp::CurrentCamera>(cmp::CurrentCamera{currentCamera});
    }
 
-   [[nodiscard]] auto EntitySystem::createDebugAABB(const glm::vec3& min, const glm::vec3& max)
-       -> cm::EntityType {
+   [[nodiscard]] auto EntitySystem::createDebugAABB(const glm::vec3& min,
+                                                    const glm::vec3& max) -> cm::EntityType {
       auto lock = std::unique_lock{registryMutex};
       // TODO(matt) hook this up tomorrow.
       /*
@@ -159,8 +164,8 @@ namespace tr::gp {
        const std::array<glm::vec3, 3> vertices) const -> cm::EntityType {
    }
 
-   [[nodiscard]] auto EntitySystem::createDebugLine(const glm::vec3& start, const glm::vec3& end)
-       -> cm::EntityType {
+   [[nodiscard]] auto EntitySystem::createDebugLine(const glm::vec3& start,
+                                                    const glm::vec3& end) -> cm::EntityType {
       auto lock = std::unique_lock{registryMutex};
       const auto lineEntity = registry->create();
       registry->emplace<cmp::DebugLine>(lineEntity, start, end);
