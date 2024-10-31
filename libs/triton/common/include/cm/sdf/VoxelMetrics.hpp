@@ -1,8 +1,10 @@
 #pragma once
 
-#include <bitset>
-
+#include <ranges>
+#include <utility>
 namespace tr::cm::sdf {
+
+   static constexpr uint8_t BitCount = 8;
 
    struct CellData {
       const glm::ivec3 offset;
@@ -11,9 +13,11 @@ namespace tr::cm::sdf {
       const std::vector<glm::vec3> vertices;
 
       [[nodiscard]] auto toString() const -> std::string {
-         const auto& hex = fmt::format("{:02x}", caseCode);
-         auto bitsetCaseCode = std::bitset<8>{caseCode};
-         auto str = fmt::format("Cell Position: ({0}, {1}, {2}), Case Code {3} (0x{4}) {5}, "
+         const auto& hex = std::format("{:02x}", caseCode);
+
+         auto bitsetCaseCode = std::bitset<BitCount>{caseCode};
+
+         auto str = std::format("Cell Position: ({0}, {1}, {2}), Case Code {3} (0x{4}) {5}, "
                                 "Equivalence Class Number: {6}",
                                 offset.x,
                                 offset.y,
@@ -40,10 +44,19 @@ namespace tr::cm::sdf {
 
       template <typename... Args>
       void addActiveCube(Args&&... args) {
-         activeCubes.emplace_back(std::forward<Args>(args)...);
+         auto argsTuple = std::make_tuple(std::forward<Args>(args)...);
+         const auto cellPosition = std::get<0>(argsTuple);
+
+         const auto cellName =
+             std::format("[{0}, {1}, {2}]", cellPosition.x, cellPosition.y, cellPosition.z);
+
+         activeCubes.emplace(std::piecewise_construct,
+                             std::forward_as_tuple(cellName),
+                             std::forward_as_tuple(std::forward<Args>(args)...));
       }
 
-      [[nodiscard]] auto getActiveCubePositions() const -> const std::vector<CellData>& {
+      [[nodiscard]] auto getActiveCubePositions() const
+          -> const std::unordered_map<std::string, CellData>& {
          return activeCubes;
       }
 
@@ -51,7 +64,7 @@ namespace tr::cm::sdf {
       VoxelDebugger() = default;
       ~VoxelDebugger() = default;
 
-      std::vector<CellData> activeCubes;
+      std::unordered_map<std::string, CellData> activeCubes;
    };
 
 } // namespace tr::cm::sdf

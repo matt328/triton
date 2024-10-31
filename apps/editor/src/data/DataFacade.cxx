@@ -8,6 +8,8 @@
 
 namespace ed::data {
 
+   using tr::cm::sdf::VoxelDebugger;
+
    DataFacade::DataFacade(tr::ctx::GameplayFacade& gameplayFacade)
        : gameplayFacade{gameplayFacade} {
       taskQueue = std::make_unique<tr::util::TaskQueue>(4);
@@ -35,7 +37,7 @@ namespace ed::data {
       for (int i = 0; i < 50; ++i) {
          const auto min = glm::vec3{dis(gen), dis(gen), dis(gen)};
          const auto max = min + glm::vec3{5.f, 1.f, 1.f};
-         gameplayFacade.createDebugAABB(min, max);
+         [[maybe_unused]] auto entityId = gameplayFacade.createDebugAABB(min, max);
       }
    }
 
@@ -142,17 +144,18 @@ namespace ed::data {
    }
 
    void DataFacade::createTerrain([[maybe_unused]] const std::string_view& terrainName) {
-      auto task = gameplayFacade.getCreateTerrainFn();
+      const auto task = [&]() { return gameplayFacade.createTerrain(); };
 
-      std::function<void(tr::cm::EntityType)> onComplete = [this](tr::cm::EntityType entity) {
-         engineBusy = false;
-         const auto& cellData = tr::cm::sdf::VoxelDebugger::getInstance().getActiveCubePositions();
-         for (const auto& cell : cellData) {
-            Log.debug("{0}", cell.toString());
-         }
-      };
+      std::function<void(tr::cm::EntityType)> onComplete =
+          [this]([[maybe_unused]] tr::cm::EntityType entity) {
+             engineBusy = false;
+             const auto& cellData = VoxelDebugger::getInstance().getActiveCubePositions();
+             for (const auto& cell : cellData | std::views::values) {
+                Log.debug("{0}", cell.toString());
+             }
+          };
       engineBusy = true;
-      auto result = taskQueue->enqueue(task, onComplete, 16);
+      auto result = taskQueue->enqueue(task, onComplete);
    }
 
    void DataFacade::save(const std::filesystem::path& outputFile) {

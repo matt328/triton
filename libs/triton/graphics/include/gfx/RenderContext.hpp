@@ -60,7 +60,7 @@ namespace tr::gfx {
       [[nodiscard]] auto createStaticModel(const std::filesystem::path& modelPath) const
           -> cm::ModelData;
 
-      [[nodiscard]] auto createTerrain(uint32_t size) const -> cm::ModelData;
+      [[nodiscard]] auto createTerrain() const -> cm::ModelData;
 
       [[nodiscard]] auto createSkinnedModel(const std::filesystem::path& modelPath) const
           -> cm::ModelData;
