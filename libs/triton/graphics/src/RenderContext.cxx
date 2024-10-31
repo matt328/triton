@@ -199,8 +199,8 @@ namespace tr::gfx {
          return resourceManager->createModel(modelPath);
       }
 
-      [[nodiscard]] auto createTerrain(const uint32_t size) const {
-         return resourceManager->createTerrain(size);
+      [[nodiscard]] auto createTerrain() const {
+         return resourceManager->createTerrain();
       }
 
       [[nodiscard]] auto createSkinnedModel(const std::filesystem::path& modelPath) const noexcept {
@@ -473,7 +473,6 @@ namespace tr::gfx {
             cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, **linePipeline);
             {
                ZoneNamedN(lineZone, "Render Line Data", true);
-               size_t size = lineDataList.size();
                for (const auto& lineData : lineDataList) {
                   const auto& mesh = resourceManager->getMesh(lineData.handle);
                   cmd.bindVertexBuffers(0, mesh.getVertexBuffer()->getBuffer(), {0});
@@ -682,8 +681,8 @@ namespace tr::gfx {
       impl->setDebugRendering(wireframeEnabled);
    }
 
-   auto RenderContext::createTerrain(const uint32_t size) const -> cm::ModelData {
-      return impl->createTerrain(size);
+   auto RenderContext::createTerrain() const -> cm::ModelData {
+      return impl->createTerrain();
    }
 
    auto RenderContext::createStaticModel(const std::filesystem::path& modelPath) const

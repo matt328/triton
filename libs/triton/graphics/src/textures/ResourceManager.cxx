@@ -47,7 +47,7 @@ namespace tr::gfx::tx {
       return {renderData, renderDataMutex};
    }
 
-   auto ResourceManager::createTerrain(const uint32_t size) -> cm::ModelData {
+   auto ResourceManager::createTerrain() -> cm::ModelData {
       ZoneNamedN(zn1, "ResourceManager::createTerrain", true);
 
       ZoneNamedN(zn2, "Creating Terrain", true);

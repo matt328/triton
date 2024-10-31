@@ -38,7 +38,7 @@ namespace tr::ctx {
       auto operator=(GameplayFacade&&) -> GameplayFacade& = delete;
 
       // Entity Creation Methods
-      [[nodiscard]] auto getCreateTerrainFn() const -> std::function<cm::EntityType(uint32_t)>;
+      [[nodiscard]] auto createTerrain() const -> cm::EntityType;
 
       [[nodiscard]] auto createCamera(uint32_t width,
                                       uint32_t height,
@@ -51,8 +51,8 @@ namespace tr::ctx {
 
       auto setCurrentCamera(cm::EntityType currentCamera) const -> void;
 
-      [[nodiscard]] auto createDebugAABB(const glm::vec3& min,
-                                         const glm::vec3& max) const -> cm::EntityType;
+      [[nodiscard]] auto createDebugAABB(const glm::vec3& min, const glm::vec3& max) const
+          -> cm::EntityType;
 
       [[nodiscard]] auto createStaticModelEntity(
           const std::filesystem::path& modelPath) const noexcept -> cm::EntityType;

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "imgui.h"
 #include <any>
 #include <optional>
 #include <utility>
@@ -38,10 +39,20 @@ namespace ed::ui::cmp {
          } else if constexpr (std::is_same_v<T, glm::vec3>) {
             ImGui::SliderFloat3(label.c_str(), (float*)&value, -5.f, 5.f);
          } else if constexpr (std::is_same_v<T, std::filesystem::path>) {
+
+            float totalWidth = ImGui::CalcItemWidth();
+            float buttonWidth = ImGui::GetFrameHeight();
+            float textFieldWidth = totalWidth - buttonWidth - ImGui::GetStyle().ItemInnerSpacing.x;
+            float buttonSize = ImGui::GetFrameHeight();
+
             std::string valueStr = value.string();
+
+            ImGui::PushItemWidth(textFieldWidth);
             ImGui::InputText("##label", &valueStr);
-            ImGui::SameLine();
-            if (ImGui::Button("...")) {
+            ImGui::PopItemWidth();
+
+            ImGui::SameLine(0.f, 4.f); // Standard spacing
+            if (ImGui::Button("...", ImVec2(buttonSize, buttonSize))) {
                auto inPath = NFD::UniquePath{};
                if (const auto result =
                        OpenDialog(inPath, SkeletonFilters.data(), SkeletonFilters.size());
@@ -54,7 +65,7 @@ namespace ed::ui::cmp {
                }
             }
             ImGui::SameLine();
-            ImGui::Text(label.c_str());
+            ImGui::Text("%s", label.c_str());
          }
       }
 
