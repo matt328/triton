@@ -72,7 +72,8 @@ namespace tr::gfx::geo {
                           glm::ivec3& cellPosition,
                           std::vector<as::Vertex>& vertices,
                           std::vector<uint32_t>& indices,
-                          const VoxelArray& voxelData);
+                          const VoxelArray& voxelData,
+                          std::vector<GeometryHandle>& boxes);
 
       auto generateVertex(std::vector<as::Vertex>& vertices,
                           std::vector<as::Vertex>& cellVertices,
@@ -110,9 +111,8 @@ namespace tr::gfx::geo {
       std::unordered_map<GeometryHandle, GeometryData> geometryDataMap;
       std::unordered_map<ImageHandle, as::ImageData> imageDataMap;
 
-      static auto generateNormal(int xCoord,
-                                 int yCoord,
-                                 const ct::HeightField& heightField) -> glm::vec3;
+      static auto generateNormal(int xCoord, int yCoord, const ct::HeightField& heightField)
+          -> glm::vec3;
 
       /// Loads a TRM file from the given path.
       /// @throws IOException if the file cannot be opened or parsed.

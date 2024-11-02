@@ -17,13 +17,13 @@ namespace tr::ctx {
           : gameplaySystem{gameplaySystem}, renderer{renderer} {
       }
 
-      [[nodiscard]] auto createTerrain() const -> cm::EntityType {
+      void createTerrain() const {
          auto modelDatas = renderer.createTerrain();
-         return gameplaySystem.createTerrain(modelDatas);
+         gameplaySystem.createTerrain(modelDatas);
       }
 
-      [[nodiscard]] auto createDebugAABB(const glm::vec3& min,
-                                         const glm::vec3& max) const noexcept -> cm::EntityType {
+      [[nodiscard]] auto createDebugAABB(const glm::vec3& min, const glm::vec3& max) const noexcept
+          -> cm::EntityType {
          const auto aabbHandle = renderer.createAABBGeometry(min, max);
          return gameplaySystem.createStaticModel(aabbHandle);
       }
@@ -72,6 +72,10 @@ namespace tr::ctx {
          gameplaySystem.clearEntities();
       }
 
+      void addTerrainCreatedListener(const cm::TerrainCreatedFn& func) {
+         gameplaySystem.addTerrainCreatedListener(func);
+      }
+
     private:
       gp::GameplaySystem& gameplaySystem;
       gfx::RenderContext& renderer;
@@ -85,12 +89,13 @@ namespace tr::ctx {
    GameplayFacade::~GameplayFacade() { // NOLINT(*-use-equals-default)
    }
 
-   auto GameplayFacade::createTerrain() const -> cm::EntityType {
-      return impl->createTerrain();
+   void GameplayFacade::createTerrain() const {
+      impl->createTerrain();
    }
 
-   [[nodiscard]] auto GameplayFacade::createDebugAABB(const glm::vec3& min, const glm::vec3& max)
-       const -> cm::EntityType {
+   [[nodiscard]] auto GameplayFacade::createDebugAABB(const glm::vec3& min,
+                                                      const glm::vec3& max) const
+       -> cm::EntityType {
       return impl->createDebugAABB(min, max);
    }
 
@@ -124,6 +129,10 @@ namespace tr::ctx {
 
    void GameplayFacade::clear() const {
       impl->clear();
+   }
+
+   void GameplayFacade::addTerrainCreatedListener(const cm::TerrainCreatedFn& func) {
+      impl->addTerrainCreatedListener(func);
    }
 
 }

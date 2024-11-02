@@ -1,15 +1,14 @@
-#include "EntitySystem.hpp"
+#include "BehaviorSystem.hpp"
 
 #include <entt/entity/fwd.hpp>
 
+#include "behavior/commands/CreateTerrain.hpp"
 #include "cm/Handles.hpp"
 
 #include "components/Animation.hpp"
 #include "components/DebugAABB.hpp"
 #include "components/Resources.hpp"
-#include "components/DebugConstants.hpp"
 #include "components/Renderable.hpp"
-#include "components/Terrain.hpp"
 #include "components/Transform.hpp"
 #include "components/Camera.hpp"
 #include "components/DebugLine.hpp"
@@ -20,16 +19,18 @@
 #include "systems/AnimationSystem.hpp"
 
 namespace tr::gp {
-   EntitySystem::EntitySystem() {
+   BehaviorSystem::BehaviorSystem() {
       registry = std::make_unique<entt::registry>();
+      commandQueue = std::make_unique<CommandQueue>();
    }
 
-   EntitySystem::~EntitySystem() {
+   BehaviorSystem::~BehaviorSystem() {
    }
 
-   void EntitySystem::fixedUpdate([[maybe_unused]] const cm::Timer& timer,
-                                  const AnimationFactory& animationFactory) {
+   void BehaviorSystem::fixedUpdate([[maybe_unused]] const cm::Timer& timer,
+                                    const AnimationFactory& animationFactory) {
       std::unique_lock lock{registryMutex};
+      commandQueue->processCommands(*registry);
       {
          ZoneNamedN(camZone, "CameraSystem", true);
          sys::CameraSystem::fixedUpdate(*registry);
@@ -46,17 +47,17 @@ namespace tr::gp {
       }
    }
 
-   void EntitySystem::prepareRenderData(cm::gpu::RenderData& renderData) {
+   void BehaviorSystem::prepareRenderData(cm::gpu::RenderData& renderData) {
       auto lock = std::shared_lock{registryMutex};
       sys::RenderDataSystem::update(*registry, renderData);
    }
 
-   void EntitySystem::writeCameras(const std::function<void(entt::entity, cmp::Camera)>& fn) {
+   void BehaviorSystem::writeCameras(const std::function<void(entt::entity, cmp::Camera)>& fn) {
       auto lock = std::unique_lock{registryMutex};
       registry->view<cmp::Camera>().each(fn);
    }
 
-   void EntitySystem::writeCameras(
+   void BehaviorSystem::writeCameras(
        std::function<void(entt::entity, cmp::Camera, uint32_t width, uint32_t height)> fn) {
 
       auto lock = std::unique_lock{registryMutex};
@@ -65,36 +66,18 @@ namespace tr::gp {
           [&width, &height, &fn](auto entity, auto cam) { fn(entity, cam, width, height); });
    }
 
-   void EntitySystem::writeWindowDimensions(const std::pair<uint32_t, uint32_t> size) {
+   void BehaviorSystem::writeWindowDimensions(const std::pair<uint32_t, uint32_t> size) {
       auto lock = std::unique_lock{registryMutex};
       registry->ctx().insert_or_assign<cmp::WindowDimensions>(
           cmp::WindowDimensions{static_cast<int>(size.first), static_cast<int>(size.second)});
    }
 
-   auto EntitySystem::createTerrain(const std::vector<cm::ModelData>& handles) -> cm::EntityType {
-      ZoneNamedN(n, "entitySystem.createTerrain", true);
-      auto lock = std::unique_lock{registryMutex};
-
-      const auto e = registry->create();
-
-      auto meshDatas = std::vector<cm::MeshData>{};
-      for (const auto& handle : handles) {
-         meshDatas.push_back(handle.meshData);
-      }
-
-      registry->emplace<cmp::Renderable>(e, meshDatas);
-      registry->emplace<cmp::TerrainMarker>(e);
-      registry->emplace<cmp::Transform>(e, glm::zero<glm::vec3>(), glm::vec3(0.f, -3.f, -5.f));
-
-      const auto debugConstants = registry->create();
-      registry->emplace<cmp::Transform>(debugConstants,
-                                        glm::zero<glm::vec3>(),
-                                        glm::vec3(200.f, 1000.f, 200.f));
-      registry->emplace<cmp::DebugConstants>(debugConstants, 16.f);
-      return e;
+   void BehaviorSystem::createTerrain(const std::vector<cm::ModelData>& handles) {
+      commandQueue->enqueue(
+          std::make_unique<CreateTerrainCommand>(handles, terrainCreatedListeners));
    }
 
-   auto EntitySystem::createStaticModel(const cm::ModelData& handles) -> cm::EntityType {
+   auto BehaviorSystem::createStaticModel(const cm::ModelData& handles) -> cm::EntityType {
       auto lock = std::unique_lock{registryMutex};
       const auto e = registry->create();
       registry->emplace<cmp::Renderable>(e, std::vector{handles.meshData});
@@ -102,7 +85,7 @@ namespace tr::gp {
       return e;
    }
 
-   auto EntitySystem::createAnimatedModel(const cm::ModelData& modelData) -> cm::EntityType {
+   auto BehaviorSystem::createAnimatedModel(const cm::ModelData& modelData) -> cm::EntityType {
       auto lock = std::unique_lock{registryMutex};
       const auto modelEntity = registry->create();
 
@@ -127,13 +110,13 @@ namespace tr::gp {
       return modelEntity;
    }
 
-   auto EntitySystem::createCamera(uint32_t width,
-                                   uint32_t height,
-                                   float fov,
-                                   float zNear,
-                                   float zFar,
-                                   glm::vec3 position,
-                                   [[maybe_unused]] const std::optional<std::string>& name)
+   auto BehaviorSystem::createCamera(uint32_t width,
+                                     uint32_t height,
+                                     float fov,
+                                     float zNear,
+                                     float zFar,
+                                     glm::vec3 position,
+                                     [[maybe_unused]] const std::optional<std::string>& name)
        -> cm::EntityType {
 
       auto lock = std::unique_lock{registryMutex};
@@ -142,13 +125,13 @@ namespace tr::gp {
       return camera;
    }
 
-   void EntitySystem::setCurrentCamera(const cm::EntityType currentCamera) {
+   void BehaviorSystem::setCurrentCamera(const cm::EntityType currentCamera) {
       auto lock = std::unique_lock{registryMutex};
       registry->ctx().insert_or_assign<cmp::CurrentCamera>(cmp::CurrentCamera{currentCamera});
    }
 
-   [[nodiscard]] auto EntitySystem::createDebugAABB(const glm::vec3& min,
-                                                    const glm::vec3& max) -> cm::EntityType {
+   [[nodiscard]] auto BehaviorSystem::createDebugAABB(const glm::vec3& min, const glm::vec3& max)
+       -> cm::EntityType {
       auto lock = std::unique_lock{registryMutex};
       // TODO(matt) hook this up tomorrow.
       /*
@@ -160,23 +143,23 @@ namespace tr::gp {
       return boxEntity;
    }
 
-   [[nodiscard]] auto EntitySystem::createDebugTriangle(
+   [[nodiscard]] auto BehaviorSystem::createDebugTriangle(
        const std::array<glm::vec3, 3> vertices) const -> cm::EntityType {
    }
 
-   [[nodiscard]] auto EntitySystem::createDebugLine(const glm::vec3& start,
-                                                    const glm::vec3& end) -> cm::EntityType {
+   [[nodiscard]] auto BehaviorSystem::createDebugLine(const glm::vec3& start, const glm::vec3& end)
+       -> cm::EntityType {
       auto lock = std::unique_lock{registryMutex};
       const auto lineEntity = registry->create();
       registry->emplace<cmp::DebugLine>(lineEntity, start, end);
       return lineEntity;
    }
 
-   [[nodiscard]] auto EntitySystem::createDebugPoint(const glm::vec3& position) const
+   [[nodiscard]] auto BehaviorSystem::createDebugPoint(const glm::vec3& position) const
        -> cm::EntityType {
    }
 
-   void EntitySystem::removeAll() {
+   void BehaviorSystem::removeAll() {
       auto lock = std::unique_lock{registryMutex};
       registry->clear();
       registry->ctx().erase<cmp::CurrentCamera>();

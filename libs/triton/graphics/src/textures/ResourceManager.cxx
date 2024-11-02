@@ -52,19 +52,15 @@ namespace tr::gfx::tx {
 
       ZoneNamedN(zn2, "Creating Terrain", true);
 
-      // change this to return
       const auto dataHandle = geometryFactory->createTerrain();
       auto modelHandles = std::vector<cm::ModelData>{};
 
       for (const auto& [geometryHandle, imageHandle] : dataHandle) {
-         // TODO(matt) Encode the desired topology in geometryHandle somehow
          const auto modelHandle =
-             uploadGeometry(geometryHandle, cm::Topology::Triangles, imageHandle);
-
-         geometryFactory->unload(dataHandle);
+             uploadGeometry(geometryHandle, geometryHandle.topology, imageHandle);
          modelHandles.push_back(modelHandle);
       }
-
+      geometryFactory->unload(dataHandle);
       return modelHandles;
    }
 
@@ -105,8 +101,8 @@ namespace tr::gfx::tx {
       return modelData;
    }
 
-   auto ResourceManager::createAABB(const glm::vec3& min,
-                                    const glm::vec3& max) noexcept -> cm::ModelData {
+   auto ResourceManager::createAABB(const glm::vec3& min, const glm::vec3& max) noexcept
+       -> cm::ModelData {
       auto data = geometryFactory->generateAABB(min, max);
       return uploadGeometry(data, cm::Topology::LineList);
    }
@@ -186,7 +182,7 @@ namespace tr::gfx::tx {
       } catch (const mem::AllocationException& ex) {
          throw ResourceUploadException(
              fmt::format("Error allocating resources for geometry: {0} and image: {1}, {2}",
-                         geometryHandle,
+                         geometryHandle.handle,
                          imageHandle.value(),
                          ex.what()));
       }

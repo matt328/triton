@@ -46,13 +46,18 @@ namespace tr::gp::sys::RenderDataSystem {
          for (const auto& [meshHandle, topology, textureHandle] : renderable.meshData) {
             const auto objectDataPosition = renderData.objectData.size();
             if (isTerrainEntity) {
-               renderData.terrainMeshData.emplace_back(meshHandle,
-                                                       cm::Topology::Triangles,
-                                                       objectDataPosition);
+               if (topology == cm::Topology::Triangles) {
+                  renderData.terrainMeshData.emplace_back(meshHandle,
+                                                          cm::Topology::Triangles,
+                                                          objectDataPosition);
+               } else if (topology == cm::Topology::LineList) {
+                  renderData.staticMeshData.emplace_back(meshHandle, topology, objectDataPosition);
+                  renderData.objectData.emplace_back(transform.transformation, textureHandle);
+               }
             } else {
                renderData.staticMeshData.emplace_back(meshHandle, topology, objectDataPosition);
+               renderData.objectData.emplace_back(transform.transformation, textureHandle);
             }
-            renderData.objectData.emplace_back(transform.transformation, textureHandle);
          }
       }
 

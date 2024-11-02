@@ -12,6 +12,10 @@ namespace ed::data {
    DataFacade::DataFacade(tr::ctx::GameplayFacade& gameplayFacade)
        : gameplayFacade{gameplayFacade} {
       taskQueue = std::make_unique<tr::util::TaskQueue>(4);
+
+      gameplayFacade.addTerrainCreatedListener([](tr::cm::EntityType entity) {
+         Log.debug("Entity Created: {0}", static_cast<long>(entity));
+      });
    }
 
    DataFacade::~DataFacade() { // NOLINT(*-use-equals-default)
@@ -143,16 +147,15 @@ namespace ed::data {
    }
 
    void DataFacade::createTerrain([[maybe_unused]] const std::string_view& terrainName) {
-      const auto task = [&]() { return gameplayFacade.createTerrain(); };
+      const auto task = [&]() { gameplayFacade.createTerrain(); };
 
-      std::function<void(tr::cm::EntityType)> onComplete =
-          [this]([[maybe_unused]] tr::cm::EntityType entity) {
-             engineBusy = false;
-             const auto& cellData = VoxelDebugger::getInstance().getActiveCubePositions();
-             for (const auto& cell : cellData | std::views::values) {
-                Log.debug("{0}", cell.toString());
-             }
-          };
+      std::function<void()> onComplete = [this]() {
+         engineBusy = false;
+         const auto& cellData = VoxelDebugger::getInstance().getActiveCubePositions();
+         for (const auto& cell : cellData | std::views::values) {
+            Log.debug("{0}", cell.toString());
+         }
+      };
       engineBusy = true;
       auto result = taskQueue->enqueue(task, onComplete);
    }

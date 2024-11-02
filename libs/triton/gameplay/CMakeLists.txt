@@ -3,10 +3,10 @@ project("gameplay")
 set(gameplay_SRC
    "src/GameWorld.cxx"
    "src/GameplaySystem.cxx"
-   "src/EntitySystem.cxx"
    "src/AnimationFactory.cxx"
    "src/ActionSystem.cxx"
-   "src/EntitySystem.cxx"
+
+   "src/behavior/BehaviorSystem.cxx"
 
    "src/systems/AnimationSystem.cxx"
    "src/systems/CameraSystem.cxx"
@@ -43,6 +43,7 @@ target_precompile_headers(${PROJECT_NAME}
    <ozz/base/span.h>
    <ozz/base/io/archive.h>
    <ozz/base/io/stream.h>
+   <queue>
    <shared_mutex>
    <tracy/Tracy.hpp>
    <tracy/TracyC.h>
