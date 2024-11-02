@@ -20,13 +20,12 @@ namespace tr::util {
 
       TaskQueue(const TaskQueue&) = delete;
       TaskQueue(TaskQueue&&) = delete;
-      TaskQueue& operator=(const TaskQueue&) = delete;
-      TaskQueue& operator=(TaskQueue&&) = delete;
+      auto operator=(const TaskQueue&) -> TaskQueue& = delete;
+      auto operator=(TaskQueue&&) -> TaskQueue& = delete;
 
       template <class F, class... Args, class OnComplete>
-      auto enqueue(F&& f,
-                   OnComplete&& onComplete,
-                   Args&&... args) -> std::future<std::invoke_result_t<F&&, Args&&...>> {
+      auto enqueue(F&& f, OnComplete&& onComplete, Args&&... args)
+          -> std::future<std::invoke_result_t<F&&, Args&&...>> {
          using ReturnType = std::invoke_result_t<F&&, Args&&...>;
 
          auto task = std::make_shared<std::packaged_task<ReturnType()>>(

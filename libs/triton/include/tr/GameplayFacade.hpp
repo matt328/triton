@@ -38,7 +38,7 @@ namespace tr::ctx {
       auto operator=(GameplayFacade&&) -> GameplayFacade& = delete;
 
       // Entity Creation Methods
-      [[nodiscard]] auto createTerrain() const -> cm::EntityType;
+      void createTerrain() const;
 
       [[nodiscard]] auto createCamera(uint32_t width,
                                       uint32_t height,
@@ -63,6 +63,8 @@ namespace tr::ctx {
           -> cm::EntityType;
 
       auto clear() const -> void;
+
+      void addTerrainCreatedListener(const cm::TerrainCreatedFn& func);
 
     private:
       class Impl;

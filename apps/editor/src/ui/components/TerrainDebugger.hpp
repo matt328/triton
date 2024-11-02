@@ -18,8 +18,17 @@ namespace ed::ui::components {
                names.push_back(name.c_str());
             }
 
-            static int item_current = 0;
-            ImGui::Combo("Cube", &item_current, names.data(), static_cast<int>(names.size()));
+            static int item_current = -1;
+            if (ImGui::Combo("Cube", &item_current, names.data(), static_cast<int>(names.size()))) {
+               Log.debug("Item Selected: {0}", names[item_current]);
+            }
+
+            if (item_current != -1) {
+               auto selectedCube = cubes.at(names[item_current]);
+               for (auto vertex : selectedCube.vertices) {
+                  ImGui::DragFloat3("Vertex", glm::value_ptr(vertex.pos));
+               }
+            }
          }
          ImGui::End();
       };

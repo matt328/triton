@@ -3,7 +3,7 @@
 #include "cm/Handles.hpp"
 #include "cm/Inputs.hpp"
 
-#include "EntitySystem.hpp"
+#include "behavior/BehaviorSystem.hpp"
 #include "AnimationFactory.hpp"
 
 #include "actions/ActionType.hpp"
@@ -23,7 +23,7 @@ namespace tr::gp {
 
    GameplaySystem::GameplaySystem() {
 
-      entitySystem = std::make_unique<EntitySystem>();
+      behaviorSystem = std::make_unique<BehaviorSystem>();
       actionSystem = std::make_unique<ActionSystem>();
       animationFactory = std::make_unique<AnimationFactory>();
 
@@ -31,7 +31,7 @@ namespace tr::gp {
 
       // TODO: synchronization isn't applied correctly (at all) here.
       actionSystem->getDelegate().connect<&sys::CameraSystem::handleAction>(
-          *entitySystem->getRegistry());
+          *behaviorSystem->getRegistry());
 
       // Forward
       actionSystem->mapSource(Source{cm::Key::Up, SourceType::Boolean},
@@ -77,7 +77,7 @@ namespace tr::gp {
 
    void GameplaySystem::fixedUpdate(const cm::Timer& timer) const {
       ZoneNamedN(upd, "FixedUpdate", true);
-      entitySystem->fixedUpdate(timer, *animationFactory);
+      behaviorSystem->fixedUpdate(timer, *animationFactory);
    }
 
    void GameplaySystem::update(const double blendingFactor) {
@@ -90,13 +90,13 @@ namespace tr::gp {
       renderData.skinnedMeshData.clear();
       renderData.animationData.clear();
 
-      entitySystem->prepareRenderData(renderData);
+      behaviorSystem->prepareRenderData(renderData);
 
       transferRenderData(renderData);
    }
 
    void GameplaySystem::resize(const std::pair<uint32_t, uint32_t> size) const {
-      entitySystem->writeWindowDimensions(size);
+      behaviorSystem->writeWindowDimensions(size);
    }
 
    void GameplaySystem::keyCallback(const cm::Key key, const cm::ButtonState buttonState) const {
@@ -117,14 +117,13 @@ namespace tr::gp {
       actionSystem->setMouseState(captured);
    }
 
-   auto GameplaySystem::createTerrain(const std::vector<cm::ModelData>& handles) const
-       -> cm::EntityType {
+   void GameplaySystem::createTerrain(const std::vector<cm::ModelData>& handles) const {
       ZoneNamedN(n, "gameplaySystem.createTerrain", true);
-      return entitySystem->createTerrain(handles);
+      behaviorSystem->createTerrain(handles);
    }
 
    auto GameplaySystem::createStaticModel(const cm::ModelData& meshes) const -> cm::EntityType {
-      return entitySystem->createStaticModel(meshes);
+      return behaviorSystem->createStaticModel(meshes);
    }
 
    auto GameplaySystem::createAnimatedModel(cm::ModelData modelData,
@@ -135,7 +134,7 @@ namespace tr::gp {
           cm::AnimationData{.skeletonHandle = animationFactory->loadSkeleton(skeletonPath),
                             .animationHandle = animationFactory->loadAnimation(animationPath)};
 
-      return entitySystem->createAnimatedModel(modelData);
+      return behaviorSystem->createAnimatedModel(modelData);
    }
 
    auto GameplaySystem::createCamera(const uint32_t width,
@@ -146,35 +145,41 @@ namespace tr::gp {
                                      const glm::vec3& position,
                                      const std::optional<std::string>& name) const
        -> cm::EntityType {
-      return entitySystem->createCamera(width, height, fov, zNear, zFar, position, name);
+      return behaviorSystem->createCamera(width, height, fov, zNear, zFar, position, name);
    }
 
    void GameplaySystem::setCurrentCamera(const cm::EntityType currentCamera) const {
-      entitySystem->setCurrentCamera(currentCamera);
+      behaviorSystem->setCurrentCamera(currentCamera);
    }
 
    void GameplaySystem::clearEntities() const {
-      entitySystem->removeAll();
+      behaviorSystem->removeAll();
    }
 
-   [[nodiscard]] auto GameplaySystem::createDebugAABB(const glm::vec3& min, const glm::vec3& max)
-       const -> cm::EntityType {
-      return entitySystem->createDebugAABB(min, max);
+   [[nodiscard]] auto GameplaySystem::createDebugAABB(const glm::vec3& min,
+                                                      const glm::vec3& max) const
+       -> cm::EntityType {
+      return behaviorSystem->createDebugAABB(min, max);
    }
 
    [[nodiscard]] auto GameplaySystem::createDebugTriangle(
        const std::array<glm::vec3, 3> vertices) const -> cm::EntityType {
-      return entitySystem->createDebugTriangle(vertices);
+      return behaviorSystem->createDebugTriangle(vertices);
    }
 
-   [[nodiscard]] auto GameplaySystem::createDebugLine(const glm::vec3& start, const glm::vec3& end)
-       const -> cm::EntityType {
-      return entitySystem->createDebugLine(start, end);
+   [[nodiscard]] auto GameplaySystem::createDebugLine(const glm::vec3& start,
+                                                      const glm::vec3& end) const
+       -> cm::EntityType {
+      return behaviorSystem->createDebugLine(start, end);
    }
 
    [[nodiscard]] auto GameplaySystem::createDebugPoint(const glm::vec3& position) const
        -> cm::EntityType {
-      return entitySystem->createDebugPoint(position);
+      return behaviorSystem->createDebugPoint(position);
+   }
+
+   void GameplaySystem::addTerrainCreatedListener(const cm::TerrainCreatedFn& func) {
+      behaviorSystem->addTerrainCreatedListener(func);
    }
 
 }

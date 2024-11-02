@@ -29,22 +29,22 @@ namespace tr::gp {
    using RenderDataTransferHandler = std::function<void(cm::gpu::RenderData&)>;
 
    class AnimationFactory;
-   class EntitySystem;
+   class BehaviorSystem;
    class ActionSystem;
 
    /*
       This class serves as the API of the gp module of the engine.
       It recieves update and resize and input information from the app module.
-      It owns the EntitySystem, ActionSystem, and also for some reason the AnimationFactory.
+      It owns the behaviorSystem, ActionSystem, and also for some reason the AnimationFactory.
 
-      The whole point of the gp module is to operate on the EntitySystem. The gfx module then
+      The whole point of the gp module is to operate on the behaviorSystem. The gfx module then
       queries the gp module at the sync point to determine what to render.
 
       For now, the Editor directly drives the gp module by creating Entities and setting their
       properties and the gfx module renders them.
 
       At some point a layer in the gp module will drive itself via properties set on the Entities in
-      the EntitySystem, these will be entity controllers in the form of Behaviors, Scripts, etc
+      the behaviorSystem, these will be entity controllers in the form of Behaviors, Scripts, etc
       The Editor will then only create entities, set properties, and then be able to start, stop,
       and reset the timestep.
    */
@@ -69,8 +69,7 @@ namespace tr::gp {
       void setMouseState(bool captured) const;
 
       // Gameworld State Methods
-      [[nodiscard]] auto createTerrain(const std::vector<cm::ModelData>& handles) const
-          -> cm::EntityType;
+      void createTerrain(const std::vector<cm::ModelData>& handles) const;
       [[nodiscard]] auto createStaticModel(const cm::ModelData& meshes) const -> cm::EntityType;
       [[nodiscard]] auto createAnimatedModel(cm::ModelData modelData,
                                              const std::filesystem::path& skeletonPath,
@@ -85,12 +84,12 @@ namespace tr::gp {
                                       const std::optional<std::string>& name) const
           -> cm::EntityType;
 
-      [[nodiscard]] auto createDebugAABB(const glm::vec3& min,
-                                         const glm::vec3& max) const -> cm::EntityType;
+      [[nodiscard]] auto createDebugAABB(const glm::vec3& min, const glm::vec3& max) const
+          -> cm::EntityType;
       [[nodiscard]] auto createDebugTriangle(const std::array<glm::vec3, 3> vertices) const
           -> cm::EntityType;
-      [[nodiscard]] auto createDebugLine(const glm::vec3& start,
-                                         const glm::vec3& end) const -> cm::EntityType;
+      [[nodiscard]] auto createDebugLine(const glm::vec3& start, const glm::vec3& end) const
+          -> cm::EntityType;
       [[nodiscard]] auto createDebugPoint(const glm::vec3& position) const -> cm::EntityType;
 
       void hideEntity(cm::EntityType);
@@ -105,8 +104,10 @@ namespace tr::gp {
          transferRenderData = func;
       }
 
+      void addTerrainCreatedListener(const cm::TerrainCreatedFn& func);
+
     private:
-      std::unique_ptr<EntitySystem> entitySystem;
+      std::unique_ptr<BehaviorSystem> behaviorSystem;
       std::unique_ptr<ActionSystem> actionSystem;
       std::unique_ptr<AnimationFactory> animationFactory;
 
@@ -116,4 +117,4 @@ namespace tr::gp {
 
       RenderDataTransferHandler transferRenderData{};
    };
-} // namespace tr::gp
+}

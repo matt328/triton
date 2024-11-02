@@ -8,7 +8,7 @@
 
 namespace tr::gp::sys::CameraSystem {
 
-   constexpr auto CameraSpeed = .005f;
+   constexpr auto CameraSpeed = .010f;
    constexpr auto MouseSensitivity = 0.025f;
    constexpr auto PitchExtent = 89.f;
 
