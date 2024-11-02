@@ -23,7 +23,9 @@ target_precompile_headers(${PROJECT_NAME}
    <glm/glm.hpp>
    <random>
    <bitset>
+   <map>
    <format>
+   <filesystem>
    PRIVATE
    <ctime>
    <cstdint>

@@ -5,6 +5,7 @@
 
 #include "GeometryData.hpp"
 #include "HeightField.hpp"
+#include "cm/Handles.hpp"
 #include "geometry/GeometryHandles.hpp"
 #include "geometry/Transvoxel.hpp"
 
@@ -32,9 +33,8 @@ namespace tr::gfx::geo {
    GeometryFactory::~GeometryFactory() { // NOLINT(*-use-equals-default)
    }
 
-   auto GeometryFactory::sdfPlane(const glm::vec3& point,
-                                  const glm::vec3& normal,
-                                  float distance) -> int8_t {
+   auto GeometryFactory::sdfPlane(const glm::vec3& point, const glm::vec3& normal, float distance)
+       -> int8_t {
 
       int8_t result = 0;
 
@@ -71,11 +71,12 @@ namespace tr::gfx::geo {
       auto min = glm::zero<glm::ivec3>();
 
       // Visit cells in the xz plane first, then repeat 'up' the y direction
+      auto boxes = std::vector<GeometryHandle>{};
       for (size_t yCoord = 0; yCoord < Size - 1; ++yCoord) {
          for (size_t zCoord = 0; zCoord < Size - 1; ++zCoord) {
             for (size_t xCoord = 0; xCoord < Size - 1; ++xCoord) {
                auto position = glm::ivec3(xCoord, yCoord, zCoord);
-               polygonizeCell(min, position, vertices, indices, voxelData);
+               polygonizeCell(min, position, vertices, indices, voxelData, boxes);
             }
          }
       }
@@ -88,17 +89,23 @@ namespace tr::gfx::geo {
       const auto data = std::vector<unsigned char>(4, 255);
       imageDataMap.emplace(imageHandle, as::ImageData{data, 1, 1, 4});
 
-      const auto geometryHandle = geometryKey.getKey();
+      const auto key = geometryKey.getKey();
+      const auto geometryHandle = GeometryHandle{key, cm::Topology::Triangles};
       geometryDataMap.emplace(geometryHandle, GeometryData{vertices, indices});
 
-      return {{geometryHandle, imageHandle}};
+      auto val = TexturedGeometryHandle{{geometryHandle, imageHandle}};
+      for (const auto& box : boxes) {
+         val[box] = imageHandle;
+      }
+      return val;
    }
 
    void GeometryFactory::polygonizeCell(glm::ivec3& offsetPosition,
                                         glm::ivec3& cellPosition,
                                         std::vector<as::Vertex>& vertices,
                                         std::vector<uint32_t>& indices,
-                                        const VoxelArray& voxelData) {
+                                        const VoxelArray& voxelData,
+                                        std::vector<GeometryHandle>& boxes) {
 
       /// The position of the current cube (cell) in world chunk space.
       auto currentOffsetPosition = offsetPosition + cellPosition;
@@ -140,6 +147,8 @@ namespace tr::gfx::geo {
       auto validCell = (caseCode ^ ((corner[7] >> 7) & 0xFF)) != 0;
 
       if (validCell) {
+         const auto maxPosition = cellPosition + glm::ivec3(1, 1, 1);
+         boxes.push_back(generateAABB(cellPosition, maxPosition));
          auto equivalenceClassIndex = regularCellClass[caseCode];
          auto equivalenceClass = regularCellData[equivalenceClassIndex];
 
@@ -273,7 +282,8 @@ namespace tr::gfx::geo {
       const auto imageHandle = imageKey.getKey();
       imageDataMap.emplace(imageHandle, tritonModel.imageData);
 
-      const auto geometryHandle = geometryKey.getKey();
+      const auto key = geometryKey.getKey();
+      const auto geometryHandle = GeometryHandle{key, cm::Topology::Triangles};
       geometryDataMap.emplace(geometryHandle,
                               GeometryData{tritonModel.vertices, tritonModel.indices});
 
@@ -377,7 +387,8 @@ namespace tr::gfx::geo {
       const auto data = std::vector<unsigned char>(4, 255);
       imageDataMap.emplace(imageHandle, as::ImageData{data, 1, 1, 4});
 
-      const auto geometryHandle = geometryKey.getKey();
+      const auto key = geometryKey.getKey();
+      const auto geometryHandle = GeometryHandle{key, cm::Topology::Triangles};
       geometryDataMap.emplace(geometryHandle, GeometryData{vertices, indices});
 
       return {{geometryHandle, imageHandle}};
@@ -398,8 +409,8 @@ namespace tr::gfx::geo {
       return normalize(glm::vec3(-dx, NormalY, dy));
    }
 
-   auto GeometryFactory::generateAABB(const glm::vec3& min,
-                                      const glm::vec3& max) -> GeometryHandle {
+   auto GeometryFactory::generateAABB(const glm::vec3& min, const glm::vec3& max)
+       -> GeometryHandle {
 
       auto vertices = std::vector<as::Vertex>{{
           {{min.x, min.y, min.z}}, // 0: Bottom-left-back
@@ -415,7 +426,8 @@ namespace tr::gfx::geo {
       std::vector<uint32_t> indices = {0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 6,
                                        6, 7, 7, 4, 0, 4, 1, 5, 2, 6, 3, 7};
 
-      const auto geometryHandle = geometryKey.getKey();
+      const auto key = geometryKey.getKey();
+      auto geometryHandle = GeometryHandle{key, cm::Topology::LineList};
       geometryDataMap.emplace(geometryHandle, GeometryData{vertices, indices});
       return geometryHandle;
    }
@@ -426,7 +438,7 @@ namespace tr::gfx::geo {
          return geometryDataMap.at(handle);
       }
       throw GeometryDataNotFoundException(
-          fmt::format("Geometry Data with handle {0} was not found", handle));
+          fmt::format("Geometry Data with handle {0} was not found", handle.handle));
    }
 
    [[nodiscard]] auto GeometryFactory::getImageData(const ImageHandle& handle) -> as::ImageData& {
