@@ -20,10 +20,10 @@ namespace tr::gp {
 
       ActionSystem(const ActionSystem&) = default;
       ActionSystem(ActionSystem&&) noexcept = default;
-      ActionSystem& operator=(const ActionSystem&) = delete;
-      ActionSystem& operator=(ActionSystem&&) = delete;
+      auto operator=(const ActionSystem&) -> ActionSystem& = delete;
+      auto operator=(ActionSystem&&) -> ActionSystem& = delete;
 
-      [[nodiscard]] auto& getDelegate() {
+      [[nodiscard]] auto getDelegate() -> auto& {
          return actionDelegate;
       }
 

@@ -1,7 +1,9 @@
 #pragma once
 
 #include <entt/entity/fwd.hpp>
+
 namespace tr::gp {
+   template <typename T>
    class ICommand {
     public:
       ICommand() = default;
@@ -11,20 +13,21 @@ namespace tr::gp {
       auto operator=(ICommand&&) -> ICommand& = delete;
 
       virtual ~ICommand() = default;
-      virtual void execute(entt::registry& registry) const = 0;
+      virtual void execute(T& thing) const = 0;
    };
 
+   template <typename T>
    class CommandQueue {
-      std::queue<std::unique_ptr<ICommand>> commands;
+      std::queue<std::unique_ptr<ICommand<T>>> commands;
 
     public:
-      void enqueue(std::unique_ptr<ICommand> command) {
+      void enqueue(std::unique_ptr<ICommand<T>> command) {
          commands.push(std::move(command));
       }
 
-      void processCommands(entt::registry& registry) {
+      void processCommands(T& thing) {
          while (!commands.empty()) {
-            commands.front()->execute(registry);
+            commands.front()->execute(thing);
             commands.pop();
          }
       }
