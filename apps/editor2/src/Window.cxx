@@ -43,6 +43,10 @@ namespace ed {
       }
    }
 
+   auto Window::getNativeWindow() -> void* {
+      return this->window;
+   }
+
    void Window::pollEvents() {
       glfwPollEvents();
    }
