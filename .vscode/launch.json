@@ -19,7 +19,7 @@
          "type": "lldb-dap",
          "request": "launch",
          "name": "(lldb) Launch",
-         "program": "${workspaceFolder}/build/debug/apps/editor/editor",
+         "program": "${workspaceFolder}/build/debug/apps/editor2/editor2",
          "args": [],
          "cwd": "${workspaceFolder}",
          "initCommands": [

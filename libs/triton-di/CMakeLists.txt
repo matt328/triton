@@ -3,7 +3,10 @@ project("triton-di")
 set(common_SRC
    modules/common/src/Timer.cxx
    modules/gameplay/src/GameplaySystem.cxx
+   modules/gameplay/src/ActionSystem.cxx
    modules/graphics/src/Renderer.cxx
+   modules/graphics/src/VkGraphicsDevice.cxx
+   modules/graphics/src/VkContext.cxx
 )
 
 add_library(${PROJECT_NAME} STATIC ${common_SRC})
@@ -17,6 +20,14 @@ ENDIF(WIN32)
 
 target_compile_definitions(${PROJECT_NAME}
    PRIVATE
+   GLFW_EXPOSE_NATIVE_WIN32
+   GLFW_INCLUDE_VULKAN=1
+   VULKAN_HPP_NO_CONSTRUCTORS
+   GLM_FORCE_RADIANS
+   GLM_FORCE_DEPTH_ZERO_TO_ONE
+   GLM_ENABLE_EXPERIMENTAL
+   NOMINMAX
+   VULKAN_HPP_NO_STRUCT_CONSTRUCTORS
 )
 
 target_precompile_headers(${PROJECT_NAME}
@@ -28,11 +39,18 @@ target_precompile_headers(${PROJECT_NAME}
    <map>
    <format>
    <filesystem>
+   <set>
    <thread>
    <tracy/Tracy.hpp>
    <tracy/TracyC.h>
    <typeindex>
    <variant>
+   <GLFW/glfw3.h>
+   <imgui_impl_glfw.h>
+   <imgui_impl_vulkan.h>
+   <vulkan/vulkan_raii.hpp>
+   <vk_mem_alloc.hpp>
+   <tracy/TracyVulkan.hpp>
    PRIVATE
    <ctime>
    <cstdint>
@@ -42,11 +60,19 @@ target_precompile_headers(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
    PUBLIC
-   glm
    EnTT
+   glfw
+   glm
+   imgui_custom
    Tracy::TracyClient
    util-lib
+   ${Vulkan_LIBRARIES}
+   VulkanMemoryAllocator-Hpp
    PRIVATE
+   glslang
+   glslang-default-resource-limits
+   libnoise
+   SPIRV
 )
 
 target_include_directories(${PROJECT_NAME}

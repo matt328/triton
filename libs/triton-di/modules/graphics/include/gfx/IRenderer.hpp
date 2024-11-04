@@ -3,9 +3,10 @@
 namespace tr::gfx {
    class IRenderer {
     public:
-      IRenderer() = default;
+      explicit IRenderer() = default;
       virtual ~IRenderer() = default;
 
       virtual void render() = 0;
+      virtual void waitIdle() = 0;
    };
 }

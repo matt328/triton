@@ -8,5 +8,7 @@ namespace tr::cm {
       virtual ~IWindow() = default;
 
       virtual void pollEvents() = 0;
+
+      virtual auto getNativeWindow() -> void* = 0;
    };
 }

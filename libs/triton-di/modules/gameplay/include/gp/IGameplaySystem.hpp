@@ -3,7 +3,7 @@
 namespace tr::gp {
    class IGameplaySystem {
     public:
-      IGameplaySystem() = default;
+      explicit IGameplaySystem() = default;
       virtual ~IGameplaySystem() = default;
 
       virtual void update() = 0;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "cm/Inputs.hpp"
+#include "Actions.hpp"
 
 namespace tr::cm::evt {
 
@@ -51,6 +52,7 @@ namespace tr::cm::evt {
                                      MouseButton,
                                      Fullscreen,
                                      MouseCaptured,
+                                     Action,
                                      PlayerMoved,
                                      PlayerScored>;
 
