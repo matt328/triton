@@ -21,7 +21,7 @@
 namespace tr::gp {
    BehaviorSystem::BehaviorSystem() {
       registry = std::make_unique<entt::registry>();
-      commandQueue = std::make_unique<CommandQueue>();
+      commandQueue = std::make_unique<CommandQueue<entt::registry>>();
    }
 
    BehaviorSystem::~BehaviorSystem() {

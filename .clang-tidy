@@ -1,5 +1,5 @@
 ---
-Checks: "*,-llvmlibc-*, -fuchsia-*, -altera-*, -llvm-*, -google-readability-namespace-comments, -misc-no-recursion, -misc-include-cleaner, -hicpp-uppercase-literal-suffix, -readability-uppercase-literal-suffix"
+Checks: "*,-llvmlibc-*, -fuchsia-*, -altera-*, -llvm-*, -google-readability-namespace-comments, -misc-no-recursion, -misc-include-cleaner, -hicpp-uppercase-literal-suffix, -readability-uppercase-literal-suffix, -readability-identifier-length"
 WarningsAsErrors: "true"
 HeaderFilterRegex: ""
 FormatStyle: google

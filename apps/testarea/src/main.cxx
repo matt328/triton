@@ -1,59 +1,51 @@
-class BaseException : public std::exception {
+#include "di.hpp"
+
+#include "View.hpp"
+
+namespace di = boost::di;
+
+struct Renderer {
+   explicit Renderer(int device) : device(device) {
+   }
+   int device;
+};
+
+class Model {};
+
+class Controller {
  public:
-   explicit BaseException(std::string message) : message(std::move(message)) {
+   Controller(Model& model, IView& view) : view{view} {
    }
-
-   explicit BaseException(const std::string& message, const BaseException& other)
-       : message(message + other.what()) {
-   }
-
-   [[nodiscard]] const char* what() const noexcept override {
-      return message.c_str();
-   }
-
-   BaseException& operator<<(const std::string& additionalInfo) {
-      message = additionalInfo + message;
-      return *this;
+   void sayHello() {
+      view.update();
+      std::cout << "Hello from Controller " << '\n';
    }
 
  private:
-   std::string message;
+   IView& view;
 };
 
-class MyException final : public BaseException {
+class User {};
+
+class App {
  public:
-   using BaseException::BaseException;
-};
-
-class MyOtherException final : public BaseException {
- public:
-   using BaseException::BaseException;
-};
-
-void foo() {
-   throw MyException("foo(): something broke");
-}
-
-void bar() {
-   try {
-      foo();
-   } catch (MyException& ex) {
-      ex << "bar(): ";
-      throw;
+   App(Controller& controller, User& user) : controller{controller} {
    }
-}
 
-void baz() {
-   try {
-      bar();
-   } catch (BaseException& ex) { throw MyOtherException("baz(): ", ex); }
-}
+   void doSomething() {
+      controller.sayHello();
+   }
 
-int main() {
+ private:
+   Controller& controller;
+};
 
-   try {
-      baz();
-   } catch (const MyOtherException& ex) { std::cout << ex.what(); }
+auto main() -> int {
+   auto injector =
+       di::make_injector(di::bind<IView>.to<GuiView>(), di::bind<std::string>.to("Bound String"));
+   auto app = injector.create<App>();
+
+   app.doSomething();
 
    return 0;
 }

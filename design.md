@@ -248,7 +248,7 @@ namespace gp {
       update() void
    }
 
-   class EntitySystem {
+   class BehaviorSystem {
 
    }
 
