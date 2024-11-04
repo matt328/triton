@@ -10,7 +10,7 @@
 
 namespace tr::gp {
 
-   class CreateTerrainCommand : public ICommand {
+   class CreateTerrainCommand : public ICommand<entt::registry> {
     private:
       std::vector<cm::ModelData> modelDataList;
       std::vector<cm::TerrainCreatedFn> callbacks;
