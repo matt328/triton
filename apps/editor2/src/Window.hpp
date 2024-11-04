@@ -17,6 +17,8 @@ namespace ed {
              std::shared_ptr<tr::cm::evt::EventBus>& eventBus);
       ~Window() override;
 
+      auto getNativeWindow() -> void* override;
+
     private:
       GLFWwindow* window;
       std::shared_ptr<tr::cm::evt::EventBus> eventBus;

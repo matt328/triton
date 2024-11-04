@@ -1,6 +1,6 @@
 #pragma once
 
-namespace tr::gp {
+namespace tr::cm::evt {
    enum class ActionType : uint32_t {
       MoveForward = 0,
       MoveBackward,
@@ -13,4 +13,16 @@ namespace tr::gp {
       Ok,
       Cancel
    };
-} // namespace tr::gp
+
+   enum class StateType : uint32_t {
+      Action = 0,
+      State,
+      Range
+   };
+
+   struct Action {
+      ActionType actionType{};
+      StateType stateType{};
+      std::variant<bool, float> value{};
+   };
+}

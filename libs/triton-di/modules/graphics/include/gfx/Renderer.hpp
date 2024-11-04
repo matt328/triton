@@ -5,9 +5,10 @@
 namespace tr::gfx {
    class Renderer : public IRenderer {
     public:
-      Renderer() = default;
-      ~Renderer() = default;
+      explicit Renderer();
+      ~Renderer() override = default;
 
       void render() override;
+      void waitIdle() override;
    };
 }
