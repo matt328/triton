@@ -8,6 +8,7 @@ namespace tr::gfx {
 
    namespace sb {
       class LayoutFactory;
+      class ShaderBindingFactory;
    }
 
    class Renderer : public IRenderer {
@@ -20,5 +21,6 @@ namespace tr::gfx {
 
     private:
       std::shared_ptr<sb::LayoutFactory> layoutFactory;
+      std::shared_ptr<sb::ShaderBindingFactory> shaderBindingFactory;
    };
 }

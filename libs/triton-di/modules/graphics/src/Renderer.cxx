@@ -1,5 +1,6 @@
 #include "Renderer.hpp"
 #include "sb/LayoutFactory.hpp"
+#include "sb/ShaderBindingFactory.hpp"
 
 namespace tr::gfx {
 
@@ -8,7 +9,13 @@ namespace tr::gfx {
           .useDescriptorBuffers = true,
           .maxTextures = 16,
       };
+
       layoutFactory = std::make_shared<sb::LayoutFactory>(graphicsDevice, config);
+
+      shaderBindingFactory =
+          std::make_shared<sb::ShaderBindingFactory>(graphicsDevice,
+                                                     layoutFactory,
+                                                     config.useDescriptorBuffers);
    }
 
    void Renderer::render() {

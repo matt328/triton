@@ -10,6 +10,8 @@ set(common_SRC
 
    modules/graphics/src/sb/LayoutFactory.cxx
    modules/graphics/src/sb/Layout.cxx
+   modules/graphics/src/sb/ShaderBindingFactory.cxx
+   modules/graphics/src/sb/DSShaderBinding.cxx
 
    modules/graphics/src/mem/Allocator.cxx
    modules/graphics/src/mem/Buffer.cxx

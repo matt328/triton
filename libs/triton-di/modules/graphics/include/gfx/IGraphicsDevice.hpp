@@ -9,6 +9,6 @@ namespace tr::gfx {
       virtual auto getDescriptorBufferProperties()
           -> vk::PhysicalDeviceDescriptorBufferPropertiesEXT = 0;
 
-      [[nodiscard]] virtual auto getVulkanDevice() const -> const vk::raii::Device& = 0;
+      [[nodiscard]] virtual auto getVulkanDevice() const -> std::shared_ptr<vk::raii::Device> = 0;
    };
 }

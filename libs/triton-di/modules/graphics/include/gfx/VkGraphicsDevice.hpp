@@ -24,8 +24,8 @@ namespace tr::gfx {
       auto getDescriptorBufferProperties()
           -> vk::PhysicalDeviceDescriptorBufferPropertiesEXT override;
 
-      [[nodiscard]] auto getVulkanDevice() const -> const vk::raii::Device& override {
-         return *vulkanDevice;
+      [[nodiscard]] auto getVulkanDevice() const -> std::shared_ptr<vk::raii::Device> override {
+         return vulkanDevice;
       }
 
     private:
@@ -72,7 +72,7 @@ namespace tr::gfx {
       std::unique_ptr<vk::raii::Instance> instance;
       std::unique_ptr<vk::raii::SurfaceKHR> surface;
       std::unique_ptr<vk::raii::PhysicalDevice> physicalDevice;
-      std::unique_ptr<vk::raii::Device> vulkanDevice;
+      std::shared_ptr<vk::raii::Device> vulkanDevice;
 
       std::unique_ptr<vk::raii::Queue> graphicsQueue;
       std::unique_ptr<vk::raii::Queue> presentQueue;
