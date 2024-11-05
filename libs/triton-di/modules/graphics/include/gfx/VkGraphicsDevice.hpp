@@ -1,17 +1,35 @@
 #pragma once
 
 #include "IGraphicsDevice.hpp"
-#include "IWindow.hpp"
-#include "VkContext.hpp"
-#include "mem/Allocator.hpp"
+#include "cm/IWindow.hpp"
 
 namespace tr::gfx {
+
+   class VkContext;
+
+   namespace mem {
+      class Allocator;
+   }
+
    class VkGraphicsDevice : public IGraphicsDevice {
     public:
-      VkGraphicsDevice(const std::shared_ptr<cm::IWindow>& window, bool validationEnabled);
-      ~VkGraphicsDevice() = default;
+      struct Config {
+         std::vector<const char*> validationLayers;
+         bool validationEnabled;
+      };
+
+      VkGraphicsDevice(const std::shared_ptr<cm::IWindow>& window, Config config);
+      ~VkGraphicsDevice() override = default;
+
+      auto getDescriptorBufferProperties()
+          -> vk::PhysicalDeviceDescriptorBufferPropertiesEXT override;
+
+      [[nodiscard]] auto getVulkanDevice() const -> const vk::raii::Device& override {
+         return *vulkanDevice;
+      }
 
     private:
+      Config config;
       [[nodiscard]] auto checkValidationLayerSupport() const -> bool;
       [[nodiscard]] auto getRequiredExtensions() const -> std::pair<std::vector<const char*>, bool>;
       [[nodiscard]] auto enumeratePhysicalDevices() const -> std::vector<vk::raii::PhysicalDevice>;
@@ -50,8 +68,6 @@ namespace tr::gfx {
                                 const char* pMessage,
                                 void* userData) -> VkBool32;
 
-      bool validationEnabled;
-
       std::unique_ptr<vk::raii::Context> context;
       std::unique_ptr<vk::raii::Instance> instance;
       std::unique_ptr<vk::raii::SurfaceKHR> surface;
@@ -76,7 +92,6 @@ namespace tr::gfx {
       std::unique_ptr<vk::raii::DebugReportCallbackEXT> reportCallback;
 
       vk::PhysicalDeviceDescriptorBufferPropertiesEXT descriptorBufferProperties;
-      std::vector<const char*> desiredValidationLayers = {"VK_LAYER_KHRONOS_validation"};
 
       std::shared_ptr<VkContext> asyncTransferContext;
       std::shared_ptr<mem::Allocator> raiillocator;
