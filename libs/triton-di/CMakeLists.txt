@@ -7,6 +7,13 @@ set(common_SRC
    modules/graphics/src/Renderer.cxx
    modules/graphics/src/VkGraphicsDevice.cxx
    modules/graphics/src/VkContext.cxx
+
+   modules/graphics/src/sb/LayoutFactory.cxx
+   modules/graphics/src/sb/Layout.cxx
+
+   modules/graphics/src/mem/Allocator.cxx
+   modules/graphics/src/mem/Buffer.cxx
+   modules/graphics/src/mem/Image.cxx
 )
 
 add_library(${PROJECT_NAME} STATIC ${common_SRC})

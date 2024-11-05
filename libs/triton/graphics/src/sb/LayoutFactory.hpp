@@ -4,7 +4,7 @@ namespace tr::gfx {
    class GraphicsDevice;
 }
 
-namespace tr::gfx::ds {
+namespace tr::gfx::sb {
 
    class Layout;
 

@@ -153,9 +153,9 @@ namespace tr::gfx {
    class FrameManager {
     public:
       explicit FrameManager(size_t numFrames,
-                            std::shared_ptr<GraphicsDevice> graphicsDevice,
-                            std::shared_ptr<vk::raii::ImageView> depthImageView,
-                            std::shared_ptr<sb::ShaderBindingFactory> sbFactory)
+                            const std::shared_ptr<GraphicsDevice>& graphicsDevice,
+                            const std::shared_ptr<vk::raii::ImageView>& depthImageView,
+                            const std::shared_ptr<sb::ShaderBindingFactory>& sbFactory)
           : numFrames(numFrames) {
          for (size_t i = 0; i < numFrames; ++i) {
             auto name = std::stringstream{};
@@ -165,7 +165,7 @@ namespace tr::gfx {
          }
       }
 
-      auto getCurrentFrame() const -> Frame& {
+      [[nodiscard]] auto getCurrentFrame() const -> Frame& {
          return *frames[currentFrame];
       }
 
