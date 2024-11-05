@@ -50,6 +50,9 @@ namespace tr::gfx {
 
          mainScissor = vk::Rect2D{.offset = {0, 0}, .extent = viewportSize};
 
+         // Create a pipeline factory that just has methods that produce each
+         // pipeline/pipelinelayout
+
          auto helper = std::make_unique<Helpers::SpirvHelper>(graphicsDevice->getVulkanDevice());
 
          auto vsm = helper->createShaderModule(vk::ShaderStageFlagBits::eVertex,
