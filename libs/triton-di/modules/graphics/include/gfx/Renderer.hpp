@@ -3,12 +3,22 @@
 #include "IRenderer.hpp"
 
 namespace tr::gfx {
+
+   class IGraphicsDevice;
+
+   namespace sb {
+      class LayoutFactory;
+   }
+
    class Renderer : public IRenderer {
     public:
-      explicit Renderer();
+      explicit Renderer(std::shared_ptr<IGraphicsDevice> graphicsDevice);
       ~Renderer() override = default;
 
       void render() override;
       void waitIdle() override;
+
+    private:
+      std::shared_ptr<sb::LayoutFactory> layoutFactory;
    };
 }

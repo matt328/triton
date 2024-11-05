@@ -1,13 +1,13 @@
 #include "VkGraphicsDevice.hpp"
 #include "Vulkan.hpp"
+#include "VkContext.hpp"
+#include "mem/Allocator.hpp"
 
 namespace tr::gfx {
 
-   const std::vector DESIRED_VALIDATION_LAYERS = {"VK_LAYER_KHRONOS_validation"};
-
-   VkGraphicsDevice::VkGraphicsDevice(const std::shared_ptr<cm::IWindow>& window,
-                                      const bool validationEnabled)
-       : validationEnabled{validationEnabled} {
+   VkGraphicsDevice::VkGraphicsDevice(const std::shared_ptr<cm::IWindow>& window, Config config)
+       : config{std::move(config)} {
+      Log.debug("Created graphics device, validation enabled: {0}", config.validationEnabled);
 
       {
          ZoneNamedN(zCreateContext, "Create Context", true);
@@ -17,7 +17,7 @@ namespace tr::gfx {
       // Log available extensions
       // const auto instanceExtensions = context->enumerateInstanceExtensionProperties();
 
-      if (validationEnabled && !checkValidationLayerSupport()) {
+      if (config.validationEnabled && !checkValidationLayerSupport()) {
          throw std::runtime_error("Validation layers requested but not available");
       }
 
@@ -52,10 +52,10 @@ namespace tr::gfx {
                          vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance,
           .pfnUserCallback = debugCallbackFn};
 
-      if (validationEnabled) {
+      if (config.validationEnabled) {
          instanceCreateInfo.enabledLayerCount =
-             static_cast<uint32_t>(DESIRED_VALIDATION_LAYERS.size());
-         instanceCreateInfo.ppEnabledLayerNames = DESIRED_VALIDATION_LAYERS.data();
+             static_cast<uint32_t>(config.validationLayers.size());
+         instanceCreateInfo.ppEnabledLayerNames = config.validationLayers.data();
          instanceCreateInfo.pNext = &debugCreateInfo;
       }
 
@@ -66,7 +66,7 @@ namespace tr::gfx {
 
       Log.trace("Created Instance");
 
-      if (validationEnabled) {
+      if (config.validationEnabled) {
          const vk::DebugReportCallbackCreateInfoEXT ci = {
              .pNext = nullptr,
              .flags = vk::DebugReportFlagBitsEXT::eWarning |
@@ -83,9 +83,6 @@ namespace tr::gfx {
       }
 
       VkSurfaceKHR tempSurface = nullptr;
-      // TODO: register a callback to create a surface
-      // std::function<std::unique_ptr<vk::raii::SurfaceKHR>(const vk::raii::Instance&)>
-      // Should try to remove any glfw from triton, keep all of that in the 'clients'
 
       auto* glfwWindow = static_cast<GLFWwindow*>(window->getNativeWindow());
       glfwCreateWindowSurface(**instance, glfwWindow, nullptr, &tempSurface);
@@ -141,10 +138,6 @@ namespace tr::gfx {
          }
       }
 
-      if (validationEnabled) {
-         desiredDeviceExtensions.push_back(VK_EXT_DEBUG_MARKER_EXTENSION_NAME);
-      }
-
       auto deviceProperties =
           physicalDevice->getProperties2KHR<vk::PhysicalDeviceProperties2KHR,
                                             vk::PhysicalDeviceDescriptorBufferPropertiesEXT>();
@@ -182,9 +175,9 @@ namespace tr::gfx {
           .enabledExtensionCount = static_cast<uint32_t>(desiredDeviceExtensions.size()),
           .ppEnabledExtensionNames = desiredDeviceExtensions.data()};
 
-      if (validationEnabled) {
-         createInfo.enabledLayerCount = static_cast<uint32_t>(desiredValidationLayers.size());
-         createInfo.ppEnabledLayerNames = desiredValidationLayers.data();
+      if (config.validationEnabled) {
+         createInfo.enabledLayerCount = static_cast<uint32_t>(config.validationLayers.size());
+         createInfo.ppEnabledLayerNames = config.validationLayers.data();
       }
 
       // const auto dbFeatures =
@@ -260,10 +253,15 @@ namespace tr::gfx {
       }
    }
 
-   bool VkGraphicsDevice::checkValidationLayerSupport() const {
+   auto VkGraphicsDevice::getDescriptorBufferProperties()
+       -> vk::PhysicalDeviceDescriptorBufferPropertiesEXT {
+      return descriptorBufferProperties;
+   }
+
+   auto VkGraphicsDevice::checkValidationLayerSupport() const -> bool {
       const auto availableLayers = context->enumerateInstanceLayerProperties();
 
-      for (const auto layerName : DESIRED_VALIDATION_LAYERS) {
+      for (const auto* const layerName : config.validationLayers) {
          bool layerFound = false;
          for (const auto& layerProperties : availableLayers) {
             if (strcmp(layerName, layerProperties.layerName) == 0) {
@@ -281,14 +279,14 @@ namespace tr::gfx {
    auto VkGraphicsDevice::getRequiredExtensions() const
        -> std::pair<std::vector<const char*>, bool> {
       uint32_t glfwExtensionCount = 0;
-      const auto glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+      auto* const glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
       // NOLINTNEXTLINE This is ok because glfw's C api sucks.
       std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
 
       extensions.push_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
 
-      if (validationEnabled) {
+      if (config.validationEnabled) {
          extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
          extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
       }
@@ -345,7 +343,8 @@ namespace tr::gfx {
       return VK_TRUE;
    }
 
-   std::vector<vk::raii::PhysicalDevice> VkGraphicsDevice::enumeratePhysicalDevices() const {
+   auto VkGraphicsDevice::enumeratePhysicalDevices() const
+       -> std::vector<vk::raii::PhysicalDevice> {
       return instance->enumeratePhysicalDevices();
    }
 

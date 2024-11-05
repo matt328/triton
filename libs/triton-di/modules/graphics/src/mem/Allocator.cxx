@@ -2,7 +2,6 @@
 #include "Buffer.hpp"
 #include "Image.hpp"
 
-#include "GraphicsDevice.hpp"
 #include <vk_mem_alloc_enums.hpp>
 
 #define VMA_IMPLEMENTATION

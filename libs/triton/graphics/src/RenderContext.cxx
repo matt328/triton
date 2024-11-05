@@ -47,6 +47,7 @@ namespace tr::gfx {
                                      .height = static_cast<float>(viewportSize.height),
                                      .minDepth = 0.f,
                                      .maxDepth = 1.f};
+
          mainScissor = vk::Rect2D{.offset = {0, 0}, .extent = viewportSize};
 
          auto helper = std::make_unique<Helpers::SpirvHelper>(graphicsDevice->getVulkanDevice());
@@ -695,8 +696,8 @@ namespace tr::gfx {
       return impl->createSkinnedModel(modelPath);
    }
 
-   auto RenderContext::createAABBGeometry(const glm::vec3& min,
-                                          const glm::vec3& max) -> cm::ModelData {
+   auto RenderContext::createAABBGeometry(const glm::vec3& min, const glm::vec3& max)
+       -> cm::ModelData {
       return impl->createAABBGeometry(min, max);
    }
 }
