@@ -11,6 +11,7 @@
 
 #include "cm/services/Composition.hpp"
 #include "cm/services/IService.hpp"
+#include "cm/services/IBus.hpp"
 
 namespace di = boost::di;
 
@@ -70,7 +71,7 @@ auto main() -> int {
 
    try {
 
-      auto myThing = []() { return std::make_shared<MyThing>(); };
+      auto myThing = [](const std::shared_ptr<IBus>&) { return std::make_shared<MyThing>(); };
 
       auto applicationModule = [&windowTitle, &propertiesPath, &myThing] {
          return di::make_injector(di::bind<IService>.to([&]() { return createService(myThing); }),
