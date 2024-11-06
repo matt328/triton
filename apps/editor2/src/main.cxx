@@ -8,6 +8,9 @@
 #include "Properties.hpp"
 #include "cm/FrameworkConfig.hpp"
 
+#include "cm/services/Composition.hpp"
+#include "cm/services/IService.hpp"
+
 namespace di = boost::di;
 
 #if defined(TRACY_ENABLE)
@@ -67,7 +70,8 @@ auto main() -> int {
    try {
 
       auto applicationModule = [&windowTitle, &propertiesPath] {
-         return di::make_injector(di::bind<tr::cm::IWindow>.to<ed::Window>().in(di::singleton),
+         return di::make_injector(di::bind<IService>.to([]() { return createService(); }),
+                                  di::bind<tr::cm::IWindow>.to<ed::Window>().in(di::singleton),
                                   di::bind<glm::ivec2>.to<>(glm::ivec2{width, height}),
                                   di::bind<std::string>.to<>(windowTitle.str()),
                                   di::bind<std::filesystem::path>.to<>(propertiesPath));
