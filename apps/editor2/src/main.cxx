@@ -1,3 +1,4 @@
+#include "MyThing.hpp"
 #include "config.h"
 #include "Application.hpp"
 
@@ -69,8 +70,10 @@ auto main() -> int {
 
    try {
 
-      auto applicationModule = [&windowTitle, &propertiesPath] {
-         return di::make_injector(di::bind<IService>.to([]() { return createService(); }),
+      auto myThing = []() { return std::make_shared<MyThing>(); };
+
+      auto applicationModule = [&windowTitle, &propertiesPath, &myThing] {
+         return di::make_injector(di::bind<IService>.to([&]() { return createService(myThing); }),
                                   di::bind<tr::cm::IWindow>.to<ed::Window>().in(di::singleton),
                                   di::bind<glm::ivec2>.to<>(glm::ivec2{width, height}),
                                   di::bind<std::string>.to<>(windowTitle.str()),
