@@ -1,15 +1,13 @@
 #pragma once
 
-#include "cm/IWindow.hpp"
-#include "cm/event/IEventBus.hpp"
+#include "tr/IWindow.hpp"
+#include "tr/IEventBus.hpp"
 
 namespace ed {
 
-   class Window : public tr::cm::IWindow {
+   class Window : public tr::IWindow {
     public:
-      Window(const glm::ivec2& dimensions,
-             const std::string& windowTitle,
-             const std::shared_ptr<tr::cm::evt::IEventBus>& eventBus);
+      Window(const glm::ivec2& dimensions, const std::string& windowTitle);
       ~Window() override;
 
       Window(const Window&) = default;
@@ -19,9 +17,11 @@ namespace ed {
 
       auto getNativeWindow() -> void* override;
 
+      void registerEventBus(std::shared_ptr<tr::IEventBus> newEventBus) override;
+
     private:
       GLFWwindow* window;
-      std::shared_ptr<tr::cm::evt::IEventBus> eventBus;
+      std::shared_ptr<tr::IEventBus> eventBus;
 
       bool isFullscreen{};
       bool isMouseCaptured{};

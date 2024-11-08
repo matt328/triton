@@ -1,12 +1,12 @@
+#include "Window.hpp"
 #include "config.h"
 #include "Application.hpp"
 
 #include "Logger2.hpp"
-#include "cm/di.hpp"
-#include "Window.hpp"
 #include "Properties.hpp"
-#include "cm/FrameworkConfig.hpp"
+#include "tr/ComponentFactory.hpp"
 
+#include <di.hpp>
 namespace di = boost::di;
 
 #if defined(TRACY_ENABLE)
@@ -65,20 +65,14 @@ auto main() -> int {
 
    try {
 
-      auto applicationModule = [&windowTitle, &propertiesPath] {
-         return di::make_injector(di::bind<tr::cm::IWindow>.to<ed::Window>().in(di::singleton),
-                                  di::bind<glm::ivec2>.to<>(glm::ivec2{width, height}),
-                                  di::bind<std::string>.to<>(windowTitle.str()),
-                                  di::bind<std::filesystem::path>.to<>(propertiesPath));
-      };
+      auto context = tr::ComponentFactory::getContext();
 
-      const auto injector = di::make_injector(applicationModule(), tr::cm::engineModule());
+      const auto injector = di::make_injector(di::bind<tr::IWindow>.to<ed::Window>(),
+                                              di::bind<tr::IContext>.to(context));
 
-      auto app = injector.create<std::shared_ptr<ed::Application>>();
+      auto application = injector.create<std::shared_ptr<ed::Application>>();
 
       Log.info("Initialized");
-
-      app->run();
 
    } catch (const std::exception& e) {
       Log.critical(e.what());
