@@ -3,7 +3,9 @@ project("testarea" VERSION "0.0.1" LANGUAGES CXX)
 
 # Source files for the main target
 set(testarea_SRC
-   "src/main.cxx"
+   src/main.cxx
+   src/Application.cxx
+   src/DefaultWindow.cxx
 )
 
 # Main executable target
@@ -15,6 +17,8 @@ target_code_coverage(${PROJECT_NAME} AUTO ALL)
 target_link_libraries(${PROJECT_NAME}
    PRIVATE
    BoostDI
+   util-lib
+   m
 )
 
 # Main target settings
