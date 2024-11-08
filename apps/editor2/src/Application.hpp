@@ -1,8 +1,6 @@
 #pragma once
 
-namespace tr::cm {
-   class Timer;
-}
+#include "tr/IContext.hpp"
 
 namespace ed {
 
@@ -10,7 +8,9 @@ namespace ed {
 
    class Application {
     public:
-      Application(std::shared_ptr<Properties> properties, std::shared_ptr<tr::cm::Timer> timer);
+      Application(std::shared_ptr<Properties> properties,
+                  std::shared_ptr<tr::IWindow> newWindow,
+                  std::shared_ptr<tr::IContext> newContext);
       ~Application();
 
       Application(const Application&) = default;
@@ -22,6 +22,7 @@ namespace ed {
 
     private:
       std::shared_ptr<Properties> properties;
-      std::shared_ptr<tr::cm::Timer> timer;
+      std::shared_ptr<tr::IWindow> window;
+      std::shared_ptr<tr::IContext> context;
    };
 }

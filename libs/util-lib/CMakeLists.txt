@@ -3,9 +3,6 @@ project("util-lib")
 set(utillib_SRC
    src/Thing.cxx
    src/Logger2.cxx
-   src/ContextFactory.cxx
-   src/DefaultContext.cxx
-   src/DefaultEventBus.cxx
 )
 
 add_library(${PROJECT_NAME} STATIC ${utillib_SRC})

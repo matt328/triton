@@ -1,6 +1,10 @@
 project("triton-di")
 
 set(common_SRC
+
+   modules/triton/src/ComponentFactory.cxx
+   modules/triton/src/DefaultContext.cxx
+
    modules/common/src/Timer.cxx
    modules/gameplay/src/GameplaySystem.cxx
    modules/gameplay/src/ActionSystem.cxx
@@ -78,6 +82,7 @@ target_link_libraries(${PROJECT_NAME}
    ${Vulkan_LIBRARIES}
    VulkanMemoryAllocator-Hpp
    PRIVATE
+   BoostDI
    glslang
    glslang-default-resource-limits
    libnoise
@@ -86,9 +91,7 @@ target_link_libraries(${PROJECT_NAME}
 
 target_include_directories(${PROJECT_NAME}
    PUBLIC
-   modules/common/include
-   modules/gameplay/include
-   modules/graphics/include
+   modules/triton/include
    PRIVATE
    modules/common/include/cm
    modules/common/src
@@ -96,4 +99,6 @@ target_include_directories(${PROJECT_NAME}
    modules/gameplay/src
    modules/graphics/include/gfx
    modules/graphics/src
+   modules/triton/include/tr
+   modules/triton/src
 )
