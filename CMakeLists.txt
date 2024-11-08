@@ -49,6 +49,7 @@ set(VULKAN_MEMORY_ALLOCATOR_HPP_VERSION master)
 include(code-coverage)
 include(dependencies)
 include(get-imgui)
+include(get-boost-di)
 
 add_code_coverage_all_targets()
 include(CTest)

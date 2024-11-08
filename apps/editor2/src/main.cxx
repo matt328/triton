@@ -1,17 +1,11 @@
-#include "MyThing.hpp"
 #include "config.h"
 #include "Application.hpp"
 
 #include "Logger2.hpp"
 #include "cm/di.hpp"
-#include "cm/IWindow.hpp"
 #include "Window.hpp"
 #include "Properties.hpp"
 #include "cm/FrameworkConfig.hpp"
-
-#include "cm/services/Composition.hpp"
-#include "cm/services/IService.hpp"
-#include "cm/services/IBus.hpp"
 
 namespace di = boost::di;
 
@@ -71,11 +65,8 @@ auto main() -> int {
 
    try {
 
-      auto myThing = [](const std::shared_ptr<IBus>&) { return std::make_shared<MyThing>(); };
-
-      auto applicationModule = [&windowTitle, &propertiesPath, &myThing] {
-         return di::make_injector(di::bind<IService>.to([&]() { return createService(myThing); }),
-                                  di::bind<tr::cm::IWindow>.to<ed::Window>().in(di::singleton),
+      auto applicationModule = [&windowTitle, &propertiesPath] {
+         return di::make_injector(di::bind<tr::cm::IWindow>.to<ed::Window>().in(di::singleton),
                                   di::bind<glm::ivec2>.to<>(glm::ivec2{width, height}),
                                   di::bind<std::string>.to<>(windowTitle.str()),
                                   di::bind<std::filesystem::path>.to<>(propertiesPath));
