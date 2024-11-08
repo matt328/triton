@@ -8,7 +8,12 @@ namespace tr::gp {
    class ActionSystem : public IActionSystem {
     public:
       explicit ActionSystem(const std::shared_ptr<tr::IEventBus>& eventBus);
-      virtual ~ActionSystem();
+      ~ActionSystem() override;
+
+      ActionSystem(const ActionSystem&) = default;
+      ActionSystem(ActionSystem&&) = delete;
+      auto operator=(const ActionSystem&) -> ActionSystem& = default;
+      auto operator=(ActionSystem&&) -> ActionSystem& = delete;
 
       void mapSource(Source source, tr::StateType sType, tr::ActionType aType) override;
 
