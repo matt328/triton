@@ -1,81 +1,23 @@
 #pragma once
 
-#include "cm/Inputs.hpp"
-#include "Actions.hpp"
+#include "IEventBus.hpp"
 
 namespace tr::cm::evt {
 
-   struct WindowIconified {
-      int iconified;
-   };
-
-   struct WindowClosed {};
-
-   struct Key {
-      cm::Key key;
-      cm::ButtonState buttonState;
-   };
-
-   struct MouseMoved {
-      double x;
-      double y;
-   };
-
-   struct Fullscreen {
-      bool isFullscreen;
-   };
-
-   struct MouseCaptured {
-      bool isMouseCaptured;
-   };
-
-   struct MouseButton {
-      int button;
-      int action;
-      int mods;
-   };
-
-   struct PlayerMoved {
-      int playerId;
-      float x, y;
-   };
-
-   struct PlayerScored {
-      int playerId;
-      int score;
-   };
-
-   using EventVariant = std::variant<WindowIconified,
-                                     WindowClosed,
-                                     Key,
-                                     MouseMoved,
-                                     MouseButton,
-                                     Fullscreen,
-                                     MouseCaptured,
-                                     Action,
-                                     PlayerMoved,
-                                     PlayerScored>;
-
-   class EventBus {
+   class EventBus : public IEventBus {
     public:
       EventBus() = default;
 
-      template <typename T>
-      void subscribe(std::function<void(const T&)> listener) {
-         auto& listeners = listenersMap[typeid(T)];
-         listeners.push_back([listener](const EventVariant& event) {
-            if (const T* typedEvent = std::get_if<T>(&event)) {
-               listener(*typedEvent);
-            }
-         });
+      void subscribe(std::type_index type,
+                     std::function<void(const EventVariant&)> listener) override {
+         listenersMap[type].push_back(listener);
       }
 
-      template <typename T>
-      void emit(const T& event) {
-         auto it = listenersMap.find(typeid(T));
+      void emit(std::type_index type, const EventVariant& event) override {
+         auto it = listenersMap.find(type);
          if (it != listenersMap.end()) {
             for (auto& listener : it->second) {
-               listener(event);
+               listener(event); // Call each listener with the event
             }
          }
       }

@@ -1,11 +1,11 @@
 #include "action/ActionSystem.hpp"
-#include "event/EventBus.hpp"
+#include "event/IEventBus.hpp"
 
 namespace tr::gp {
 
    namespace evt = cm::evt;
 
-   ActionSystem::ActionSystem(const std::shared_ptr<cm::evt::EventBus>& eventBus) {
+   ActionSystem::ActionSystem(const std::shared_ptr<cm::evt::IEventBus>& eventBus) {
 
       Log.debug("Creating ActionSystem");
 

@@ -1,11 +1,10 @@
 #pragma once
 
-#include "gfx/IGraphicsDevice.hpp"
+#include "event/EventBus.hpp"
+#include "gp/GameplaySystem.hpp"
 #include "gfx/VkGraphicsDevice.hpp"
 #include "gp/action/ActionSystem.hpp"
-#include "gp/action/IActionSystem.hpp"
 #include "gfx/Renderer.hpp"
-#include "gp/GameplaySystem.hpp"
 #include "di.hpp"
 #include "cm/Timer.hpp"
 
@@ -22,7 +21,8 @@ namespace tr::cm {
                                di::bind<gfx::IGraphicsDevice>.to<gfx::VkGraphicsDevice>(),
                                di::bind<gfx::VkGraphicsDevice::Config>.to(config),
                                di::bind<gfx::IRenderer>.to<gfx::Renderer>(),
-                               di::bind<gp::IActionSystem>.to<gp::ActionSystem>());
+                               di::bind<gp::IActionSystem>.to<gp::ActionSystem>(),
+                               di::bind<cm::evt::IEventBus>.to<cm::evt::EventBus>());
    };
 
 }
