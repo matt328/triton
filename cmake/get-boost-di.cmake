@@ -1,6 +1,6 @@
 include(FetchContent)
 
-set(BOOSTDI_SRC_DIR ${CMAKE_BINARY_DIR}/_deps/boost-di)
+set(BOOSTDI_INCLUDE_DIR ${CMAKE_BINARY_DIR}/_deps/boost-di)
 
 FetchContent_Declare(
    boost-di-header
@@ -10,11 +10,12 @@ FetchContent_Declare(
 
 FetchContent_Populate(boost-di-header)
 
-variable_watch(boost-di-header_SOURCE_DIR)
+file(MAKE_DIRECTORY ${BOOSTDI_INCLUDE_DIR})
+file(RENAME ${boost-di-header_SOURCE_DIR}/di.hpp ${BOOSTDI_INCLUDE_DIR}/di.hpp)
 
 add_library(BoostDI INTERFACE)
 
 target_include_directories(BoostDI
    INTERFACE
-   boost-di-header_SOURCE_DIR
+   ${CMAKE_BINARY_DIR}/_deps/boost-di
 )
