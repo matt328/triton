@@ -1,19 +1,14 @@
 #include "Window.hpp"
-#include "cm/event/IEventBus.hpp"
 #include <GLFW/glfw3.h>
-#include "cm/Inputs.hpp"
+#include "tr/Events.hpp"
 #include "KeyMap.hpp"
 
 namespace ed {
 
-   namespace evt = tr::cm::evt;
    constexpr int MinWidth = 320;
    constexpr int MinHeight = 200;
 
-   Window::Window(const glm::ivec2& dimensions,
-                  const std::string& windowTitle,
-                  const std::shared_ptr<tr::cm::evt::IEventBus>& newEventBus)
-       : eventBus{newEventBus} {
+   Window::Window(const glm::ivec2& dimensions, const std::string& windowTitle) {
       Log.debug("Creating Window");
 
       glfwSetErrorCallback(errorCallback);
@@ -51,6 +46,10 @@ namespace ed {
       glfwPollEvents();
    }
 
+   void Window::registerEventBus(std::shared_ptr<tr::IEventBus> newEventBus) {
+      eventBus = std::move(newEventBus);
+   }
+
    void Window::errorCallback(int code, const char* description) {
       Log.critical("GLFW Error Code: {}, description: {}", code, description);
       throw std::runtime_error("GLFW Error. See log output for details");
@@ -58,12 +57,12 @@ namespace ed {
 
    void Window::windowIconifiedCallback(GLFWwindow* window, const int iconified) {
       auto* const thisWindow = static_cast<Window*>(glfwGetWindowUserPointer(window));
-      thisWindow->eventBus->emit(evt::WindowIconified{iconified});
+      thisWindow->eventBus->emit(tr::WindowIconified{iconified});
    }
 
    void Window::windowCloseCallback(GLFWwindow* window) {
       auto* const thisWindow = static_cast<Window*>(glfwGetWindowUserPointer(window));
-      thisWindow->eventBus->emit(evt::WindowClosed{});
+      thisWindow->eventBus->emit(tr::WindowClosed{});
    }
 
    void Window::keyCallback(GLFWwindow* window,
@@ -82,23 +81,23 @@ namespace ed {
       // Capture Alt+Enter to toggle fullscreen and 'consume' the keystrokes.
       if (key == GLFW_KEY_ENTER && mods == GLFW_MOD_ALT && action == GLFW_RELEASE) {
          thisWindow->toggleFullscreen();
-         thisWindow->eventBus->emit(evt::Fullscreen{thisWindow->isFullscreen});
+         thisWindow->eventBus->emit(tr::Fullscreen{thisWindow->isFullscreen});
          return;
       }
 
       // Otherwise, translate and emit the key event
       const auto mappedKey = tr::gp::keyMap.at(key);
-      auto buttonState = tr::cm::ButtonState::Pressed;
+      auto buttonState = tr::ButtonState::Pressed;
       if (action == GLFW_RELEASE) {
-         buttonState = tr::cm::ButtonState::Released;
+         buttonState = tr::ButtonState::Released;
       }
-      thisWindow->eventBus->emit(evt::Key{mappedKey, buttonState});
+      thisWindow->eventBus->emit(tr::KeyEvent{mappedKey, buttonState});
    }
 
    void Window::cursorPosCallback(GLFWwindow* window, const double xpos, const double ypos) {
       if (auto* const thisWindow = static_cast<Window*>(glfwGetWindowUserPointer(window));
           thisWindow->isMouseCaptured) {
-         thisWindow->eventBus->emit(evt::MouseMoved{xpos, ypos});
+         thisWindow->eventBus->emit(tr::MouseMoved{xpos, ypos});
       }
    }
 
@@ -119,9 +118,9 @@ namespace ed {
             ImGui::GetIO().ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
          }
          thisWindow->isMouseCaptured = !thisWindow->isMouseCaptured;
-         thisWindow->eventBus->emit(evt::MouseCaptured{thisWindow->isMouseCaptured});
+         thisWindow->eventBus->emit(tr::MouseCaptured{thisWindow->isMouseCaptured});
       }
-      thisWindow->eventBus->emit(evt::MouseButton{button, action, mods});
+      thisWindow->eventBus->emit(tr::MouseButton{button, action, mods});
    }
 
    void Window::toggleFullscreen() {
