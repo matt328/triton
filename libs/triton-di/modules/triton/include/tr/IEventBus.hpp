@@ -6,7 +6,13 @@ namespace tr {
 
    class IEventBus {
     public:
+      IEventBus() = default;
       virtual ~IEventBus() = default;
+
+      IEventBus(const IEventBus&) = default;
+      IEventBus(IEventBus&&) = delete;
+      auto operator=(const IEventBus&) -> IEventBus& = default;
+      auto operator=(IEventBus&&) -> IEventBus& = delete;
 
       virtual void subscribe(std::type_index type,
                              std::function<void(const EventVariant&)> listener) = 0;

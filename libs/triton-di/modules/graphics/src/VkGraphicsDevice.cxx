@@ -333,8 +333,8 @@ namespace tr::gfx {
        [[maybe_unused]] uint64_t object,
        [[maybe_unused]] size_t location,
        [[maybe_unused]] int32_t messageCode,
-       const char* pLayerPrefix,
-       const char* pMessage,
+       [[maybe_unused]] const char* pLayerPrefix,
+       [[maybe_unused]] const char* pMessage,
        [[maybe_unused]] void* userData) -> VkBool32 {
       // if (!strcmp(pLayerPrefix, "Loader Message")) {
       //    return VK_FALSE;

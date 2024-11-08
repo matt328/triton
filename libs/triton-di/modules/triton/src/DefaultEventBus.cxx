@@ -2,7 +2,7 @@
 
 namespace tr {
    DefaultEventBus::DefaultEventBus() {
-      std::cout << "Constructing EventBus" << '\n';
+      Log.trace("Constructing DefaultEventBus");
    }
 
 }
