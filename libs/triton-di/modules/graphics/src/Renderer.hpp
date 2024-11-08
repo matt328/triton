@@ -1,6 +1,6 @@
 #pragma once
 
-#include "IRenderer.hpp"
+#include "gfx/IRenderer.hpp"
 
 namespace tr::gfx {
 

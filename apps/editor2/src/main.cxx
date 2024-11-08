@@ -68,7 +68,10 @@ auto main() -> int {
       auto context = tr::ComponentFactory::getContext();
 
       const auto injector = di::make_injector(di::bind<tr::IWindow>.to<ed::Window>(),
-                                              di::bind<tr::IContext>.to(context));
+                                              di::bind<tr::IContext>.to(context),
+                                              di::bind<glm::ivec2>.to<>(glm::ivec2{width, height}),
+                                              di::bind<std::string>.to<>(windowTitle.str()),
+                                              di::bind<std::filesystem::path>.to<>(propertiesPath));
 
       auto application = injector.create<std::shared_ptr<ed::Application>>();
 

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "IGameplaySystem.hpp"
-#include "action/IActionSystem.hpp"
+#include "gp/IGameplaySystem.hpp"
+#include "gp/action/IActionSystem.hpp"
 
 namespace tr::gp {
    class GameplaySystem : public IGameplaySystem {

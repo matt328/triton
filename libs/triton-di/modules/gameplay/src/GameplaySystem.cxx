@@ -5,49 +5,46 @@ namespace tr::gp {
    GameplaySystem::GameplaySystem(const std::shared_ptr<IActionSystem>& actionSystem) {
       Log.debug("Creating Gameplay System");
 
-      using cm::Key;
-      namespace evt = cm::evt;
-
       // TODO(matt): synchronization isn't applied correctly (at all) here.
       // actionSystem->getDelegate().connect<&sys::CameraSystem::handleAction>(
       //     *behaviorSystem->getRegistry());
 
       // Forward
       actionSystem->mapSource(Source{cm::Key::Up, SourceType::Boolean},
-                              evt::StateType::State,
-                              evt::ActionType::MoveForward);
+                              tr::StateType::State,
+                              tr::ActionType::MoveForward);
       actionSystem->mapSource(Source{cm::Key::W, SourceType::Boolean},
-                              evt::StateType::State,
-                              evt::ActionType::MoveForward);
+                              tr::StateType::State,
+                              tr::ActionType::MoveForward);
 
       // Backward
       actionSystem->mapSource(Source{cm::Key::Down, SourceType::Boolean},
-                              evt::StateType::State,
-                              evt::ActionType::MoveBackward);
+                              tr::StateType::State,
+                              tr::ActionType::MoveBackward);
       actionSystem->mapSource(Source{cm::Key::S, SourceType::Boolean},
-                              evt::StateType::State,
-                              evt::ActionType::MoveBackward);
+                              tr::StateType::State,
+                              tr::ActionType::MoveBackward);
       // Left
       actionSystem->mapSource(Source{cm::Key::Left, SourceType::Boolean},
-                              evt::StateType::State,
-                              evt::ActionType::StrafeLeft);
+                              tr::StateType::State,
+                              tr::ActionType::StrafeLeft);
       actionSystem->mapSource(Source{cm::Key::A, SourceType::Boolean},
-                              evt::StateType::State,
-                              evt::ActionType::StrafeLeft);
+                              tr::StateType::State,
+                              tr::ActionType::StrafeLeft);
       // Right
       actionSystem->mapSource(Source{cm::Key::Right, SourceType::Boolean},
-                              evt::StateType::State,
-                              evt::ActionType::StrafeRight);
+                              tr::StateType::State,
+                              tr::ActionType::StrafeRight);
       actionSystem->mapSource(Source{cm::Key::D, SourceType::Boolean},
-                              evt::StateType::State,
-                              evt::ActionType::StrafeRight);
+                              tr::StateType::State,
+                              tr::ActionType::StrafeRight);
       // Look
       actionSystem->mapSource(Source{cm::MouseInput::MOVE_X, SourceType::Float},
-                              evt::StateType::Range,
-                              evt::ActionType::LookHorizontal);
+                              tr::StateType::Range,
+                              tr::ActionType::LookHorizontal);
       actionSystem->mapSource(Source{cm::MouseInput::MOVE_Y, SourceType::Float},
-                              evt::StateType::Range,
-                              evt::ActionType::LookVertical);
+                              tr::StateType::Range,
+                              tr::ActionType::LookVertical);
    }
 
    void GameplaySystem::update() {
