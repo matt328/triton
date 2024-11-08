@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.19 FATAL_ERROR)
 
+if(POLICY CMP0019)
+   cmake_policy(SET CMP0019 NEW)
+endif()
+
 project(Triton LANGUAGES CXX)
 
 cmake_policy(SET CMP0077 NEW)
@@ -45,7 +49,6 @@ set(TRACY_VERSION v0.11.1)
 set(TROMPELOEIL_VERSION v48)
 set(VULKAN_MEMORY_ALLOCATOR_HPP_VERSION master)
 
-# Include code coverage module
 include(code-coverage)
 include(dependencies)
 include(get-imgui)
