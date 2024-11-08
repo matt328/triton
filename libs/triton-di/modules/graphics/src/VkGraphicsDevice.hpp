@@ -1,7 +1,7 @@
 #pragma once
 
-#include "IGraphicsDevice.hpp"
-#include "cm/IWindow.hpp"
+#include "gfx/IGraphicsDevice.hpp"
+#include "tr/IWindow.hpp"
 
 namespace tr::gfx {
 
@@ -18,7 +18,7 @@ namespace tr::gfx {
          bool validationEnabled;
       };
 
-      VkGraphicsDevice(const std::shared_ptr<cm::IWindow>& window, Config config);
+      VkGraphicsDevice(const std::shared_ptr<tr::IWindow>& window, Config config);
       ~VkGraphicsDevice() override = default;
 
       auto getDescriptorBufferProperties()

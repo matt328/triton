@@ -1,11 +1,19 @@
 #pragma once
 
-#include "IContext.hpp"
-#include "IEventBus.hpp"
+#include "tr/IContext.hpp"
 
 namespace tr {
 
    class IWindow;
+   class IEventBus;
+
+   namespace gp {
+      class IGameplaySystem;
+   }
+
+   namespace gfx {
+      class IRenderer;
+   }
 
    class DefaultContext : public IContext {
     public:
@@ -14,7 +22,11 @@ namespace tr {
       void run() override;
 
     private:
+      bool paused{};
+      bool running{true};
       std::shared_ptr<IEventBus> eventBus;
       std::shared_ptr<IWindow> window;
+      std::shared_ptr<gp::IGameplaySystem> gameplaySystem;
+      std::shared_ptr<gfx::IRenderer> renderer;
    };
 }
