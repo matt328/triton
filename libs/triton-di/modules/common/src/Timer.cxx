@@ -12,7 +12,7 @@ namespace tr::cm {
    Timer::Timer(std::shared_ptr<IWindow> window,
                 std::shared_ptr<gp::IGameplaySystem> gameplaySystem,
                 std::shared_ptr<gfx::IRenderer> renderer,
-                const std::shared_ptr<evt::EventBus>& newEventBus)
+                const std::shared_ptr<evt::IEventBus>& newEventBus)
        : window{std::move(window)},
          gameplaySystem{std::move(gameplaySystem)},
          renderer{std::move(renderer)} {

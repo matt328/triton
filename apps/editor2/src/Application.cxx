@@ -1,18 +1,12 @@
 #include "Application.hpp"
 #include "Properties.hpp"
 #include "cm/Timer.hpp"
-#include "cm/event/EventBus.hpp"
-#include "cm/IWindow.hpp"
 
 namespace ed {
 
-   Application::Application(std::shared_ptr<tr::cm::IWindow> newWindow,
-                            std::shared_ptr<Properties> newProperties,
-                            [[maybe_unused]] tr::cm::evt::EventBus& eventBus,
+   Application::Application(std::shared_ptr<Properties> newProperties,
                             std::shared_ptr<tr::cm::Timer> newTimer)
-       : window(std::move(newWindow)),
-         properties{std::move(newProperties)},
-         timer{std::move(newTimer)} {
+       : properties{std::move(newProperties)}, timer{std::move(newTimer)} {
 
       Log.debug("Created Application");
 

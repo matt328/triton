@@ -1,5 +1,5 @@
 #include "Window.hpp"
-#include "cm/event/EventBus.hpp"
+#include "cm/event/IEventBus.hpp"
 #include <GLFW/glfw3.h>
 #include "cm/Inputs.hpp"
 #include "KeyMap.hpp"
@@ -12,7 +12,7 @@ namespace ed {
 
    Window::Window(const glm::ivec2& dimensions,
                   const std::string& windowTitle,
-                  std::shared_ptr<tr::cm::evt::EventBus>& newEventBus)
+                  const std::shared_ptr<tr::cm::evt::IEventBus>& newEventBus)
        : eventBus{newEventBus} {
       Log.debug("Creating Window");
 

@@ -13,7 +13,7 @@ namespace tr::cm {
    class IWindow;
 
    namespace evt {
-      class EventBus;
+      class IEventBus;
    }
 
    class Timer {
@@ -21,7 +21,7 @@ namespace tr::cm {
       Timer(std::shared_ptr<IWindow> window,
             std::shared_ptr<gp::IGameplaySystem> gameplaySystem,
             std::shared_ptr<gfx::IRenderer> renderer,
-            const std::shared_ptr<evt::EventBus>& newEventBus);
+            const std::shared_ptr<evt::IEventBus>& newEventBus);
       ~Timer() = default;
 
       Timer(const Timer&) = default;
