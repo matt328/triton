@@ -1,10 +1,12 @@
 #include "tr/ComponentFactory.hpp"
+#include "tr/IContext.hpp"
+
+#include "gp/action/ActionSystem.hpp"
+
 #include "DefaultEventBus.hpp"
 #include "GameplaySystem.hpp"
 #include "VkGraphicsDevice.hpp"
 #include "Renderer.hpp"
-#include "gp/action/ActionSystem.hpp"
-#include "tr/IContext.hpp"
 #include "DefaultContext.hpp"
 
 #include <di.hpp>

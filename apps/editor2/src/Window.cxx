@@ -47,6 +47,7 @@ namespace ed {
    }
 
    void Window::registerEventBus(std::shared_ptr<tr::IEventBus> newEventBus) {
+      Log.trace("Window registering EventBus");
       eventBus = std::move(newEventBus);
    }
 

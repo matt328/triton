@@ -22,4 +22,4 @@ namespace tr::gp {
       std::variant<cm::MouseInput, cm::Key, cm::GamepadInput> src{};
       SourceType sourceType{};
    };
-} // namespace tr::gp
+}

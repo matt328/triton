@@ -6,6 +6,11 @@ namespace tr::gfx {
       IGraphicsDevice() = default;
       virtual ~IGraphicsDevice() = default;
 
+      IGraphicsDevice(const IGraphicsDevice&) = default;
+      IGraphicsDevice(IGraphicsDevice&&) = delete;
+      auto operator=(const IGraphicsDevice&) -> IGraphicsDevice& = default;
+      auto operator=(IGraphicsDevice&&) -> IGraphicsDevice& = delete;
+
       virtual auto getDescriptorBufferProperties()
           -> vk::PhysicalDeviceDescriptorBufferPropertiesEXT = 0;
 

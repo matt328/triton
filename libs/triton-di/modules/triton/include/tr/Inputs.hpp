@@ -16,7 +16,7 @@ namespace tr {
       Button_B,
       LeftJoystickAxisX,
       LeftJoystickAxisY
-      // TODO The rest of Gamepad Inputs
+      // TODO(matt) The rest of Gamepad Inputs
    };
 
    enum class MouseInput {
