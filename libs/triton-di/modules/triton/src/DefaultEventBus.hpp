@@ -1,6 +1,6 @@
 #pragma once
 
-#include "IEventBus.hpp"
+#include "tr/IEventBus.hpp"
 
 namespace tr {
 

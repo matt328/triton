@@ -4,8 +4,8 @@ set(common_SRC
 
    modules/triton/src/ComponentFactory.cxx
    modules/triton/src/DefaultContext.cxx
+   modules/triton/src/DefaultEventBus.cxx
 
-   modules/common/src/Timer.cxx
    modules/gameplay/src/GameplaySystem.cxx
    modules/gameplay/src/ActionSystem.cxx
    modules/graphics/src/Renderer.cxx
@@ -93,12 +93,12 @@ target_include_directories(${PROJECT_NAME}
    PUBLIC
    modules/triton/include
    PRIVATE
-   modules/common/include/cm
+   modules/common/include
    modules/common/src
-   modules/gameplay/include/gp
+   modules/gameplay/include
    modules/gameplay/src
-   modules/graphics/include/gfx
+   modules/graphics/include
    modules/graphics/src
-   modules/triton/include/tr
+   modules/triton/include
    modules/triton/src
 )

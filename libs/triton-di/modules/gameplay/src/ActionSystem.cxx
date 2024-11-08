@@ -1,22 +1,20 @@
-#include "action/ActionSystem.hpp"
-#include "event/IEventBus.hpp"
+#include "gp/action/ActionSystem.hpp"
+#include "tr/IEventBus.hpp"
 
 namespace tr::gp {
 
-   namespace evt = cm::evt;
-
-   ActionSystem::ActionSystem(const std::shared_ptr<cm::evt::IEventBus>& eventBus) {
+   ActionSystem::ActionSystem(const std::shared_ptr<tr::IEventBus>& eventBus) {
 
       Log.debug("Creating ActionSystem");
 
-      eventBus->subscribe<cm::evt::MouseCaptured>([&](const cm::evt::MouseCaptured& event) {
+      eventBus->subscribe<tr::MouseCaptured>([&](const tr::MouseCaptured& event) {
          Log.debug("Mouse Capture, captured: {0}", event.isMouseCaptured);
          if (event.isMouseCaptured) {
             firstMouse = true;
          }
       });
 
-      eventBus->subscribe<cm::evt::MouseMoved>([&](const cm::evt::MouseMoved& event) {
+      eventBus->subscribe<tr::MouseMoved>([&](const tr::MouseMoved& event) {
          Log.debug("Mouse Move, position: ({0}, {1})", event.x, event.y);
          const auto deltaX = static_cast<float>(prevX - event.x);
          const auto deltaY = static_cast<float>(prevY - event.y);
@@ -32,14 +30,14 @@ namespace tr::gp {
          if (deltaX != 0) {
             if (const auto xit = mouseActionMap.find(cm::MouseInput::MOVE_X);
                 xit != mouseActionMap.end()) {
-               eventBus->emit(evt::Action{xit->second.actionType, xit->second.stateType, deltaX});
+               eventBus->emit(tr::Action{xit->second.actionType, xit->second.stateType, deltaX});
             }
          }
 
          if (deltaY != 0) {
             if (const auto yit = mouseActionMap.find(cm::MouseInput::MOVE_Y);
                 yit != mouseActionMap.end()) {
-               eventBus->emit(evt::Action{yit->second.actionType, yit->second.stateType, deltaY});
+               eventBus->emit(tr::Action{yit->second.actionType, yit->second.stateType, deltaY});
             }
          }
       });
@@ -50,15 +48,15 @@ namespace tr::gp {
       mouseActionMap.clear();
    }
 
-   void ActionSystem::mapSource(Source source, evt::StateType sType, evt::ActionType aType) {
+   void ActionSystem::mapSource(Source source, tr::StateType sType, tr::ActionType aType) {
       std::visit(
           [&]<typename T>(T&& arg) {
              using U = std::decay_t<T>;
-             if constexpr (std::is_same_v<U, cm::Key>) {
-                keyActionMap.insert_or_assign(arg, evt::Action{aType, sType});
-             } else if constexpr (std::is_same_v<U, cm::MouseInput>) {
-                mouseActionMap.insert_or_assign(arg, evt::Action{aType, sType});
-             } else if constexpr (std::is_same_v<U, cm::GamepadInput>) {
+             if constexpr (std::is_same_v<U, tr::KeyEvent>) {
+                keyActionMap.insert_or_assign(arg, tr::Action{aType, sType});
+             } else if constexpr (std::is_same_v<U, tr::MouseInput>) {
+                mouseActionMap.insert_or_assign(arg, tr::Action{aType, sType});
+             } else if constexpr (std::is_same_v<U, tr::GamepadInput>) {
              }
           },
           source.src);
