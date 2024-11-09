@@ -12,6 +12,8 @@ set(common_SRC
    modules/graphics/src/VkGraphicsDevice.cxx
    modules/graphics/src/VkContext.cxx
 
+   modules/graphics/src/Window.cxx
+
    modules/graphics/src/sb/LayoutFactory.cxx
    modules/graphics/src/sb/Layout.cxx
    modules/graphics/src/sb/ShaderBindingFactory.cxx

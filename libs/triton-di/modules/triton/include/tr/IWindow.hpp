@@ -15,6 +15,5 @@ namespace tr {
 
       virtual auto getNativeWindow() -> void* = 0;
       virtual void pollEvents() = 0;
-      virtual void registerEventBus(std::shared_ptr<IEventBus> newEventBus) = 0;
    };
 }

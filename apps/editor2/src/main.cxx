@@ -1,4 +1,3 @@
-#include "Window.hpp"
 #include "config.h"
 #include "Application.hpp"
 
@@ -65,17 +64,19 @@ auto main() -> int {
 
    try {
 
-      auto context = tr::ComponentFactory::getContext();
+      const auto frameworkConfig = tr::FrameworkConfig{.initialWindowSize = glm::ivec2(1920, 1080),
+                                                       .windowTitle = windowTitle.str()};
 
-      const auto injector = di::make_injector(di::bind<tr::IWindow>.to<ed::Window>(),
-                                              di::bind<tr::IContext>.to(context),
-                                              di::bind<glm::ivec2>.to<>(glm::ivec2{width, height}),
-                                              di::bind<std::string>.to<>(windowTitle.str()),
+      auto context = tr::ComponentFactory::getContext(frameworkConfig);
+
+      const auto injector = di::make_injector(di::bind<tr::IContext>.to(context),
                                               di::bind<std::filesystem::path>.to<>(propertiesPath));
 
       auto application = injector.create<std::shared_ptr<ed::Application>>();
 
       Log.info("Initialized");
+
+      application->run();
 
    } catch (const std::exception& e) {
       Log.critical(e.what());

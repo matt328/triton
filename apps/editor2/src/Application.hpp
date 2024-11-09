@@ -8,9 +8,7 @@ namespace ed {
 
    class Application {
     public:
-      Application(std::shared_ptr<Properties> properties,
-                  std::shared_ptr<tr::IWindow> newWindow,
-                  std::shared_ptr<tr::IContext> newContext);
+      Application(std::shared_ptr<Properties> properties, std::shared_ptr<tr::IContext> newContext);
       ~Application();
 
       Application(const Application&) = default;
@@ -22,7 +20,6 @@ namespace ed {
 
     private:
       std::shared_ptr<Properties> properties;
-      std::shared_ptr<tr::IWindow> window;
       std::shared_ptr<tr::IContext> context;
    };
 }

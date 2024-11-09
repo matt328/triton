@@ -1,15 +1,18 @@
 #include "Window.hpp"
 #include <GLFW/glfw3.h>
 #include "tr/Events.hpp"
-#include "KeyMap.hpp"
+#include "tr/KeyMap.hpp"
 
-namespace ed {
+namespace tr::gfx {
 
    constexpr int MinWidth = 320;
    constexpr int MinHeight = 200;
 
-   Window::Window(const glm::ivec2& dimensions, const std::string& windowTitle) {
-      Log.debug("Creating Window");
+   Window::Window(std::shared_ptr<IEventBus> newEventBus,
+                  const glm::ivec2& dimensions,
+                  const std::string& windowTitle)
+       : eventBus{std::move(newEventBus)} {
+      Log.trace("Constructing Window");
 
       glfwSetErrorCallback(errorCallback);
 
@@ -44,11 +47,6 @@ namespace ed {
 
    void Window::pollEvents() {
       glfwPollEvents();
-   }
-
-   void Window::registerEventBus(std::shared_ptr<tr::IEventBus> newEventBus) {
-      Log.trace("Window registering EventBus");
-      eventBus = std::move(newEventBus);
    }
 
    void Window::errorCallback(int code, const char* description) {
@@ -87,7 +85,7 @@ namespace ed {
       }
 
       // Otherwise, translate and emit the key event
-      const auto mappedKey = tr::gp::keyMap.at(key);
+      const auto mappedKey = tr::keyMap.at(key);
       auto buttonState = tr::ButtonState::Pressed;
       if (action == GLFW_RELEASE) {
          buttonState = tr::ButtonState::Released;

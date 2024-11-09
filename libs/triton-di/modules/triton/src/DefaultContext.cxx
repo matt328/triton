@@ -1,5 +1,6 @@
 #include "DefaultContext.hpp"
 
+#include "gfx/IGraphicsDevice.hpp"
 #include "tr/IWindow.hpp"
 #include "tr/IEventBus.hpp"
 
@@ -10,15 +11,17 @@ namespace tr {
 
    constexpr auto SleepMillis = 100;
 
-   DefaultContext::DefaultContext(std::shared_ptr<IEventBus> newEventBus)
-       : eventBus{std::move(newEventBus)} {
+   DefaultContext::DefaultContext(std::shared_ptr<IEventBus> newEventBus,
+                                  std::shared_ptr<gp::IGameplaySystem> newGameplaySystem,
+                                  std::shared_ptr<gfx::IRenderer> newRenderer,
+                                  std::shared_ptr<gfx::IGraphicsDevice> newGraphicsDevice,
+                                  std::shared_ptr<tr::IWindow> newWindow)
+       : eventBus{std::move(newEventBus)},
+         gameplaySystem{std::move(newGameplaySystem)},
+         renderer{std::move(newRenderer)},
+         graphicsDevice{std::move(newGraphicsDevice)},
+         window{std::move(newWindow)} {
       Log.trace("Constructing Default Context");
-   }
-
-   void DefaultContext::setWindow(std::shared_ptr<IWindow> newWindow) {
-      Log.trace("DefaultContext::setWindow");
-      window = std::move(newWindow);
-      window->registerEventBus(eventBus);
 
       eventBus->subscribe<tr::WindowClosed>(
           [&]([[maybe_unused]] const tr::WindowClosed& event) { running = false; });

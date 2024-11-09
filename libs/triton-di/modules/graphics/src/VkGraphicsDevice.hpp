@@ -18,8 +18,13 @@ namespace tr::gfx {
          bool validationEnabled;
       };
 
-      VkGraphicsDevice(const std::shared_ptr<tr::IWindow>& window, Config config);
+      explicit VkGraphicsDevice(Config config, std::shared_ptr<tr::IWindow> newWindow);
       ~VkGraphicsDevice() override = default;
+
+      VkGraphicsDevice(const VkGraphicsDevice&) = delete;
+      VkGraphicsDevice(VkGraphicsDevice&&) = delete;
+      auto operator=(const VkGraphicsDevice&) -> VkGraphicsDevice& = delete;
+      auto operator=(VkGraphicsDevice&&) -> VkGraphicsDevice& = delete;
 
       auto getDescriptorBufferProperties()
           -> vk::PhysicalDeviceDescriptorBufferPropertiesEXT override;
@@ -67,6 +72,8 @@ namespace tr::gfx {
                                 const char* pLayerPrefix,
                                 const char* pMessage,
                                 void* userData) -> VkBool32;
+
+      std::shared_ptr<tr::IWindow> window;
 
       std::unique_ptr<vk::raii::Context> context;
       std::unique_ptr<vk::raii::Instance> instance;

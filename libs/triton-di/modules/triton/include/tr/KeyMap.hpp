@@ -2,7 +2,7 @@
 
 #include "tr/Inputs.hpp"
 
-namespace tr::gp {
+namespace tr {
    inline const static std::unordered_map<int, tr::Key> keyMap = {
        {GLFW_KEY_COMMA, tr::Key::Comma},
        {GLFW_KEY_DOWN, tr::Key::Down},
