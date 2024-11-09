@@ -1,6 +1,6 @@
 #pragma once
 
-namespace tr::cm {
+namespace tr::gfx {
 
    class IWindow {
     public:

@@ -3,11 +3,13 @@
 #include "tr/IWindow.hpp"
 #include "tr/IEventBus.hpp"
 
-namespace ed {
+namespace tr::gfx {
 
    class Window : public tr::IWindow {
     public:
-      Window(const glm::ivec2& dimensions, const std::string& windowTitle);
+      Window(std::shared_ptr<IEventBus> newEventBus,
+             const glm::ivec2& dimensions,
+             const std::string& windowTitle);
       ~Window() override;
 
       Window(const Window&) = default;
@@ -16,8 +18,6 @@ namespace ed {
       auto operator=(Window&&) -> Window& = delete;
 
       auto getNativeWindow() -> void* override;
-
-      void registerEventBus(std::shared_ptr<tr::IEventBus> newEventBus) override;
 
     private:
       GLFWwindow* window;

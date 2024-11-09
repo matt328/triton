@@ -3,7 +3,6 @@ project("editor2" VERSION "0.0.1" LANGUAGES CXX)
 set(editor_SRC
    "src/main.cxx"
    "src/Application.cxx"
-   "src/Window.cxx"
 )
 
 add_executable(${PROJECT_NAME} ${editor_SRC})

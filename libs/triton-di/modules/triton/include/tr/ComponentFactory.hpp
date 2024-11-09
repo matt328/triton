@@ -3,9 +3,14 @@
 namespace tr {
    class IContext;
 
+   struct FrameworkConfig {
+      glm::ivec2 initialWindowSize;
+      std::string windowTitle;
+   };
+
    class ComponentFactory {
     public:
-      static auto getContext() -> std::shared_ptr<IContext>;
+      static auto getContext(const FrameworkConfig& config) -> std::shared_ptr<IContext>;
    };
 
 }

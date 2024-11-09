@@ -20,7 +20,7 @@ namespace tr::gfx::sb {
       return layoutCache.at(handle)->getVkLayout();
    }
 
-   void LayoutFactory::initBindlessLayout(const std::shared_ptr<IGraphicsDevice>& graphicsDevice) {
+   void LayoutFactory::initBindlessLayout(std::shared_ptr<IGraphicsDevice> graphicsDevice) {
       constexpr auto binding = vk::DescriptorSetLayoutBinding{
           .binding = 3,
           .descriptorType = vk::DescriptorType::eCombinedImageSampler,
@@ -48,7 +48,7 @@ namespace tr::gfx::sb {
           std::make_unique<Layout>(graphicsDevice, dslCreateInfo, "Bindless DS Layout");
    }
 
-   void LayoutFactory::initPerFrameLayout(const std::shared_ptr<IGraphicsDevice>& graphicsDevice) {
+   void LayoutFactory::initPerFrameLayout(std::shared_ptr<IGraphicsDevice> graphicsDevice) {
       constexpr auto binding =
           vk::DescriptorSetLayoutBinding{.binding = 0,
                                          .descriptorType = vk::DescriptorType::eUniformBuffer,
@@ -68,8 +68,7 @@ namespace tr::gfx::sb {
           std::make_unique<Layout>(graphicsDevice, createInfo, "Per Frame DS Layout");
    }
 
-   void LayoutFactory::initObjectDataLayout(
-       const std::shared_ptr<IGraphicsDevice>& graphicsDevice) {
+   void LayoutFactory::initObjectDataLayout(std::shared_ptr<IGraphicsDevice> graphicsDevice) {
       constexpr auto binding =
           vk::DescriptorSetLayoutBinding{.binding = 0,
                                          .descriptorType = vk::DescriptorType::eStorageBuffer,
@@ -89,8 +88,7 @@ namespace tr::gfx::sb {
           std::make_unique<Layout>(graphicsDevice, createInfo, "Object Data DS Layout");
    }
 
-   void LayoutFactory::initAnimationDataLayout(
-       const std::shared_ptr<IGraphicsDevice>& graphicsDevice) {
+   void LayoutFactory::initAnimationDataLayout(std::shared_ptr<IGraphicsDevice> graphicsDevice) {
       constexpr auto binding =
           vk::DescriptorSetLayoutBinding{.binding = 0,
                                          .descriptorType = vk::DescriptorType::eStorageBuffer,

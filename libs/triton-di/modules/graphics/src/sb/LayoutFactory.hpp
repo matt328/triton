@@ -43,10 +43,10 @@ namespace tr::gfx::sb {
     private:
       Config config;
 
-      void initBindlessLayout(const std::shared_ptr<gfx::IGraphicsDevice>& graphicsDevice);
-      void initPerFrameLayout(const std::shared_ptr<gfx::IGraphicsDevice>& graphicsDevice);
-      void initObjectDataLayout(const std::shared_ptr<gfx::IGraphicsDevice>& graphicsDevice);
-      void initAnimationDataLayout(const std::shared_ptr<gfx::IGraphicsDevice>& graphicsDevice);
+      void initBindlessLayout(std::shared_ptr<gfx::IGraphicsDevice> graphicsDevice);
+      void initPerFrameLayout(std::shared_ptr<gfx::IGraphicsDevice> graphicsDevice);
+      void initObjectDataLayout(std::shared_ptr<gfx::IGraphicsDevice> graphicsDevice);
+      void initAnimationDataLayout(std::shared_ptr<gfx::IGraphicsDevice> graphicsDevice);
 
       std::unordered_map<LayoutHandle, std::unique_ptr<Layout>> layoutCache;
    };
