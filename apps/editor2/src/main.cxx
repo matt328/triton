@@ -1,25 +1,11 @@
 #include "config.h"
 #include "Application.hpp"
 
-#include "Logger2.hpp"
-#include "Properties.hpp"
 #include "tr/ComponentFactory.hpp"
+#include "Properties.hpp"
+#include "TracyDefines.hpp"
 
-#include <di.hpp>
 namespace di = boost::di;
-
-#if defined(TRACY_ENABLE)
-
-auto operator new(const std::size_t count) -> void* {
-   const auto ptr = malloc(count);
-   TracyAllocS(ptr, count, 32);
-   return ptr;
-}
-void operator delete(void* ptr) noexcept {
-   TracyFreeS(ptr, 32);
-   free(ptr);
-}
-#endif
 
 // #ifdef WIN32
 // int WINAPI WinMain([[maybe_unused]] _In_ HINSTANCE hInstance,
@@ -29,26 +15,12 @@ void operator delete(void* ptr) noexcept {
 // #else
 auto main() -> int {
    // #endif
-   initLogger();
+   initLogger(spdlog::level::trace, spdlog::level::warn);
 
    Log.info("Console is now ready for logging!");
 
-#ifdef _DEBUG
-   Log.set_level(spdlog::level::trace);
-#else
-   Log.set_level(spdlog::level::warn);
-#endif
-
-   Log.info("Hello from spdlog");
-
    static constexpr int width = 1920;
    static constexpr int height = 1080;
-
-#ifdef _DEBUG
-   Log.info("Debug Build");
-#else
-   Log.info("Release Build");
-#endif
 
    auto windowTitle = std::stringstream{};
    windowTitle << PROJECT_NAME << " v" << PROJECT_VER;
@@ -64,8 +36,9 @@ auto main() -> int {
 
    try {
 
-      const auto frameworkConfig = tr::FrameworkConfig{.initialWindowSize = glm::ivec2(1920, 1080),
-                                                       .windowTitle = windowTitle.str()};
+      const auto frameworkConfig =
+          tr::FrameworkConfig{.initialWindowSize = glm::ivec2(width, height),
+                              .windowTitle = windowTitle.str()};
 
       auto context = tr::ComponentFactory::getContext(frameworkConfig);
 
