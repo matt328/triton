@@ -5,6 +5,7 @@
 namespace tr::gfx {
 
    Renderer::Renderer(std::shared_ptr<IGraphicsDevice> graphicsDevice) {
+      Log.trace("Constructing Renderer");
       const auto config = sb::Config{
           .useDescriptorBuffers = true,
           .maxTextures = 16,

@@ -5,8 +5,9 @@
 
 namespace tr::gfx {
 
-   VkGraphicsDevice::VkGraphicsDevice(const std::shared_ptr<tr::IWindow>& window, Config config)
-       : config{std::move(config)} {
+   VkGraphicsDevice::VkGraphicsDevice(Config config, std::shared_ptr<tr::IWindow> newWindow)
+       : config{std::move(config)}, window{std::move(newWindow)} {
+
       Log.debug("Created graphics device, validation enabled: {0}", config.validationEnabled);
 
       {
