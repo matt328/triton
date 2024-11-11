@@ -2,6 +2,9 @@
 #include "Vulkan.hpp"
 #include "VkContext.hpp"
 #include "mem/Allocator.hpp"
+#include "mem/Image.hpp"
+#include <vulkan/vulkan_core.h>
+#include <vulkan/vulkan_raii.hpp>
 
 namespace tr::gfx {
 
@@ -250,8 +253,48 @@ namespace tr::gfx {
 
       {
          ZoneNamedN(zone, "Create Allocator", true);
-         raiillocator = std::make_unique<mem::Allocator>(allocatorCreateInfo, *vulkanDevice);
+         allocator = std::make_unique<mem::Allocator>(allocatorCreateInfo, *vulkanDevice);
       }
+   }
+
+   [[nodiscard]] auto VkGraphicsDevice::createPipelineLayout(
+       const vk::PipelineLayoutCreateInfo& createInfo,
+       const std::string& name) -> std::unique_ptr<vk::raii::PipelineLayout> {
+      auto layout = std::make_unique<vk::raii::PipelineLayout>(*vulkanDevice, createInfo);
+      setObjectName(**layout, name);
+      return layout;
+   }
+
+   [[nodiscard]] auto VkGraphicsDevice::createPipeline(
+       const vk::GraphicsPipelineCreateInfo& createInfo,
+       const std::string& name) -> std::unique_ptr<vk::raii::Pipeline> {
+
+      auto pipeline =
+          std::make_unique<vk::raii::Pipeline>(*vulkanDevice, VK_NULL_HANDLE, createInfo);
+
+      setObjectName(**pipeline, name);
+
+      return pipeline;
+   }
+
+   [[nodiscard]] auto VkGraphicsDevice::createImage(
+       const vk::ImageCreateInfo& imageCreateInfo,
+       const vma::AllocationCreateInfo& allocationCreateInfo,
+       const std::string_view& newName) const -> std::unique_ptr<mem::Image> {
+      return allocator->createImage(imageCreateInfo, allocationCreateInfo, newName);
+   }
+
+   [[nodiscard]] auto VkGraphicsDevice::findDepthFormat() -> vk::Format {
+      const auto candidates = std::array<vk::Format, 3>{
+          {vk::Format::eD32Sfloat, vk::Format::eD32SfloatS8Uint, vk::Format::eD24UnormS8Uint}};
+      for (const auto format : candidates) {
+         auto props = physicalDevice->getFormatProperties(format);
+         if ((props.linearTilingFeatures | props.optimalTilingFeatures) &
+             vk::FormatFeatureFlagBits::eDepthStencilAttachment) {
+            return format;
+         }
+      }
+      throw std::runtime_error("Failed to find supported format");
    }
 
    auto VkGraphicsDevice::getDescriptorBufferProperties()
@@ -446,5 +489,9 @@ namespace tr::gfx {
    auto VkGraphicsDevice::getCurrentSize() const -> std::pair<uint32_t, uint32_t> {
       const auto surfaceCaps = physicalDevice->getSurfaceCapabilitiesKHR(**surface);
       return std::make_pair(surfaceCaps.currentExtent.width, surfaceCaps.currentExtent.height);
+   }
+
+   [[nodiscard]] auto VkGraphicsDevice::getSwapchainExtent() -> vk::Extent2D {
+      return swapchainExtent;
    }
 }

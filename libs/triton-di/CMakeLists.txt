@@ -8,11 +8,14 @@ set(common_SRC
 
    modules/gameplay/src/GameplaySystem.cxx
    modules/gameplay/src/ActionSystem.cxx
-   modules/graphics/src/Renderer.cxx
+
+   modules/graphics/src/DefaultRenderContext.cxx
    modules/graphics/src/VkGraphicsDevice.cxx
    modules/graphics/src/VkContext.cxx
-
    modules/graphics/src/Window.cxx
+   modules/graphics/src/DepthResources.cxx
+   modules/graphics/src/FrameManager.cxx
+   modules/graphics/src/Frame.cxx
 
    modules/graphics/src/sb/LayoutFactory.cxx
    modules/graphics/src/sb/Layout.cxx
@@ -22,6 +25,14 @@ set(common_SRC
    modules/graphics/src/mem/Allocator.cxx
    modules/graphics/src/mem/Buffer.cxx
    modules/graphics/src/mem/Image.cxx
+
+   modules/graphics/src/pipeline/SpirvShaderCompiler.cxx
+   modules/graphics/src/pipeline/StaticModelPipeline.cxx
+
+   modules/graphics/src/renderer/DefaultRenderer.cxx
+   modules/graphics/src/renderer/RendererFactory.cxx
+
+   modules/graphics/src/geo/VertexAttributes.cxx
 )
 
 add_library(${PROJECT_NAME} STATIC ${common_SRC})
@@ -75,6 +86,7 @@ target_precompile_headers(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
    PUBLIC
+   asset-lib
    EnTT
    glfw
    glm

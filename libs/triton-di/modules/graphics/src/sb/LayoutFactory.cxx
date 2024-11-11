@@ -4,8 +4,9 @@
 namespace tr::gfx::sb {
    constexpr uint32_t MAX_TEXTURE_COUNT = 16;
    LayoutFactory::LayoutFactory(const std::shared_ptr<gfx::IGraphicsDevice>& graphicsDevice,
-                                Config config)
+                                RenderContextConfig config)
        : config{config} {
+      Log.trace("Constructing LayoutFactory");
       initBindlessLayout(graphicsDevice);
       initPerFrameLayout(graphicsDevice);
       initObjectDataLayout(graphicsDevice);

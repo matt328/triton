@@ -5,8 +5,8 @@ namespace tr::gfx::mem {
     public:
       Image(const Image&) = default;
       Image(Image&&) = delete;
-      Image& operator=(const Image&) = default;
-      Image& operator=(Image&&) = delete;
+      auto operator=(const Image&) -> Image& = default;
+      auto operator=(Image&&) -> Image& = delete;
 
       Image(const vma::Allocator& newAllocator, vk::Image newImage, vma::Allocation newAllocation);
 
