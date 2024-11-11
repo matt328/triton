@@ -33,15 +33,15 @@ namespace tr::gfx::mem {
       /// Maps, memcpy's and then unmaps the buffer
       void updateBufferValue(const void* data, size_t dataSize) const;
 
-      [[nodiscard]] const vk::Buffer& getBuffer() const {
+      [[nodiscard]] auto getBuffer() const -> const vk::Buffer& {
          return buffer;
       }
 
-      [[nodiscard]] const vma::Allocation& getAllocation() const {
+      [[nodiscard]] auto getAllocation() const -> const vma::Allocation& {
          return allocation;
       }
 
-      [[nodiscard]] vk::DescriptorBufferInfo* getBufferInfo() {
+      [[nodiscard]] auto getBufferInfo() -> vk::DescriptorBufferInfo* {
          return &bufferInfo;
       }
 
@@ -49,7 +49,7 @@ namespace tr::gfx::mem {
          return allocationInfo.pMappedData;
       }
 
-      [[nodiscard]] uint64_t getDeviceAddress() const;
+      [[nodiscard]] auto getDeviceAddress() const -> uint64_t;
 
     private:
       const vk::Device& device;

@@ -1,0 +1,24 @@
+#pragma once
+
+#include <vulkan/vulkan_structs.hpp>
+namespace tr::gfx {
+
+   struct RenderContextConfig {
+      bool useDescriptorBuffers;
+      uint16_t maxTextures;
+   };
+
+   class IRenderContext {
+    public:
+      explicit IRenderContext() = default;
+      virtual ~IRenderContext() = default;
+
+      IRenderContext(const IRenderContext&) = default;
+      IRenderContext(IRenderContext&&) = delete;
+      auto operator=(const IRenderContext&) -> IRenderContext& = default;
+      auto operator=(IRenderContext&&) -> IRenderContext& = delete;
+
+      virtual void render() = 0;
+      virtual void waitIdle() = 0;
+   };
+}

@@ -8,11 +8,15 @@
 namespace tr::gfx::sb {
    ShaderBindingFactory::ShaderBindingFactory(std::shared_ptr<IGraphicsDevice> newGraphicsDevice,
                                               std::shared_ptr<LayoutFactory> newLayoutFactory,
-                                              const bool useDescriptorBuffers)
-       : graphicsDevice{std::move(newGraphicsDevice)},
-         layoutFactory{std::move(newLayoutFactory)},
-         useDescriptorBuffers{useDescriptorBuffers} {
-      if (!useDescriptorBuffers) {
+                                              RenderContextConfig rendererConfig)
+       : config{rendererConfig},
+         graphicsDevice{std::move(newGraphicsDevice)},
+         layoutFactory{std::move(newLayoutFactory)} {
+
+      Log.debug("Constructing ShaderBindingFactory, useDescriptorBuffers: {0}",
+                rendererConfig.useDescriptorBuffers);
+
+      if (!rendererConfig.useDescriptorBuffers) {
          constexpr auto poolSize = std::array{
              vk::DescriptorPoolSize{.type = vk::DescriptorType::eUniformBuffer,
                                     .descriptorCount = 3 * 10},

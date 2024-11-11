@@ -1,29 +1,28 @@
-#include "SpirvHelper.hpp"
+#include "SpirvShaderCompiler.hpp"
 
-namespace tr::gfx::Helpers {
+#include <SPIRV/GlslangToSpv.h>
+#include <fstream>
 
-   SpirvHelper::SpirvHelper(const vk::raii::Device& device) : device{device} {
-      glslang::InitializeProcess();
+namespace tr::gfx::pipe {
+
+   SpirvShaderCompiler::SpirvShaderCompiler(std::shared_ptr<IGraphicsDevice> newGraphicsDevice)
+       : graphicsDevice{std::move(newGraphicsDevice)} {
+      Log.trace("Constructed SpirvShaderCompiler");
    }
 
-   SpirvHelper::~SpirvHelper() {
-      glslang::FinalizeProcess();
-   }
-
-   auto SpirvHelper::createShaderModule(const vk::ShaderStageFlagBits shaderType,
-                                        const std::filesystem::path& filename) const
-       -> vk::raii::ShaderModule {
-
+   [[nodiscard]] auto SpirvShaderCompiler::createShaderModule(
+       vk::ShaderStageFlagBits shaderType,
+       const std::filesystem::path& filename) const -> vk::raii::ShaderModule {
       const auto vertexSpirv = compileShader(shaderType, readShaderFile(filename).data());
 
       const auto vertexShaderCreateInfo =
           vk::ShaderModuleCreateInfo{.codeSize = 4 * vertexSpirv.size(),
                                      .pCode = vertexSpirv.data()};
 
-      return device.createShaderModule(vertexShaderCreateInfo);
+      return graphicsDevice->getVulkanDevice()->createShaderModule(vertexShaderCreateInfo);
    }
 
-   auto SpirvHelper::readShaderFile(const std::filesystem::path& filename) -> std::string {
+   auto SpirvShaderCompiler::readShaderFile(const std::filesystem::path& filename) -> std::string {
       if (std::ifstream file(filename.string().data(), std::ios::binary); file.is_open()) {
          file.seekg(0, std::ios::end);
 
@@ -43,8 +42,8 @@ namespace tr::gfx::Helpers {
       throw std::runtime_error(ss.str());
    }
 
-   auto SpirvHelper::compileShader(const vk::ShaderStageFlagBits shaderType, const char* shaderCode)
-       -> std::vector<uint32_t> {
+   auto SpirvShaderCompiler::compileShader(const vk::ShaderStageFlagBits shaderType,
+                                           const char* shaderCode) -> std::vector<uint32_t> {
       const EShLanguage stage = findLanguage(shaderType);
 
       glslang::TShader shader(stage);
@@ -77,7 +76,7 @@ namespace tr::gfx::Helpers {
       return spirv;
    }
 
-   TBuiltInResource SpirvHelper::initResources() {
+   auto SpirvShaderCompiler::initResources() -> TBuiltInResource {
       TBuiltInResource resources{};
       resources.maxLights = 32;
       resources.maxClipPlanes = 6;
@@ -183,7 +182,7 @@ namespace tr::gfx::Helpers {
       return resources;
    }
 
-   EShLanguage SpirvHelper::findLanguage(const vk::ShaderStageFlagBits shaderType) {
+   auto SpirvShaderCompiler::findLanguage(const vk::ShaderStageFlagBits shaderType) -> EShLanguage {
       switch (shaderType) {
          case vk::ShaderStageFlagBits::eVertex:
             return EShLangVertex;
@@ -201,4 +200,5 @@ namespace tr::gfx::Helpers {
             return EShLangVertex;
       }
    }
+
 }

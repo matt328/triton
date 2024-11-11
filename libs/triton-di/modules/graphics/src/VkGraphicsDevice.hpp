@@ -33,6 +33,23 @@ namespace tr::gfx {
          return vulkanDevice;
       }
 
+      [[nodiscard]] auto getSwapchainExtent() -> vk::Extent2D override;
+
+      [[nodiscard]] auto createPipelineLayout(const vk::PipelineLayoutCreateInfo& createInfo,
+                                              const std::string& name)
+          -> std::unique_ptr<vk::raii::PipelineLayout> override;
+
+      [[nodiscard]] auto createPipeline(const vk::GraphicsPipelineCreateInfo& createInfo,
+                                        const std::string& name)
+          -> std::unique_ptr<vk::raii::Pipeline> override;
+
+      [[nodiscard]] auto createImage(const vk::ImageCreateInfo& imageCreateInfo,
+                                     const vma::AllocationCreateInfo& allocationCreateInfo,
+                                     const std::string_view& newName) const
+          -> std::unique_ptr<mem::Image> override;
+
+      [[nodiscard]] auto findDepthFormat() -> vk::Format override;
+
     private:
       Config config;
       [[nodiscard]] auto checkValidationLayerSupport() const -> bool;
@@ -41,6 +58,25 @@ namespace tr::gfx {
       [[nodiscard]] auto getCurrentSize() const -> std::pair<uint32_t, uint32_t>;
 
       void createSwapchain();
+
+      template <typename T>
+      void setObjectName(T const& handle, const std::string_view name) {
+         auto fn = (PFN_vkDebugMarkerSetObjectNameEXT)vkGetDeviceProcAddr(
+             **vulkanDevice,
+             "vkDebugMarkerSetObjectNameEXT");
+
+         if (fn != nullptr) {
+            // NOLINTNEXTLINE this is just debug anyway
+            const auto debugHandle =
+                reinterpret_cast<uint64_t>(static_cast<typename T::CType>(handle));
+
+            [[maybe_unused]] const auto debugNameInfo =
+                vk::DebugMarkerObjectNameInfoEXT{.objectType = handle.debugReportObjectType,
+                                                 .object = debugHandle,
+                                                 .pObjectName = name.data()};
+            vulkanDevice->debugMarkerSetObjectNameEXT(debugNameInfo);
+         }
+      }
 
       std::vector<const char*> desiredDeviceExtensions = {
           VK_KHR_SWAPCHAIN_EXTENSION_NAME,
@@ -101,6 +137,6 @@ namespace tr::gfx {
       vk::PhysicalDeviceDescriptorBufferPropertiesEXT descriptorBufferProperties;
 
       std::shared_ptr<VkContext> asyncTransferContext;
-      std::shared_ptr<mem::Allocator> raiillocator;
+      std::shared_ptr<mem::Allocator> allocator;
    };
 }

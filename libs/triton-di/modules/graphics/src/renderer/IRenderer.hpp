@@ -1,17 +1,14 @@
 #pragma once
 
-namespace tr::gfx {
+namespace tr::gfx::rd {
    class IRenderer {
     public:
-      explicit IRenderer() = default;
+      IRenderer() = default;
       virtual ~IRenderer() = default;
 
       IRenderer(const IRenderer&) = default;
       IRenderer(IRenderer&&) = delete;
       auto operator=(const IRenderer&) -> IRenderer& = default;
       auto operator=(IRenderer&&) -> IRenderer& = delete;
-
-      virtual void render() = 0;
-      virtual void waitIdle() = 0;
    };
 }

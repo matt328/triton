@@ -1,47 +1,35 @@
 #pragma once
 
+#include "gfx/IRenderContext.hpp"
+#include "sb/ILayoutFactory.hpp"
+
 namespace tr::gfx {
    class IGraphicsDevice;
 }
 
 namespace tr::gfx::sb {
 
-   class Layout;
-
-   enum class LayoutHandle : uint32_t {
-      Invalid = 0,
-      PerFrame = 1,
-      Bindless = 2,
-      ObjectData = 3,
-      AnimationData = 4,
-   };
-
-   struct Config {
-      bool useDescriptorBuffers;
-      uint16_t maxTextures;
-   };
-
-   class LayoutFactory {
+   class LayoutFactory : public ILayoutFactory {
 
     public:
-      explicit LayoutFactory(const std::shared_ptr<gfx::IGraphicsDevice>& graphicsDevice,
-                             Config config);
-      ~LayoutFactory();
+      LayoutFactory(const std::shared_ptr<gfx::IGraphicsDevice>& graphicsDevice,
+                    RenderContextConfig config);
+      ~LayoutFactory() override;
 
       LayoutFactory(const LayoutFactory&) = delete;
       auto operator=(const LayoutFactory&) -> LayoutFactory& = delete;
-
       LayoutFactory(LayoutFactory&&) = delete;
       auto operator=(LayoutFactory&&) -> LayoutFactory& = delete;
 
-      [[nodiscard]] auto getLayout(const LayoutHandle handle) const -> const Layout& {
+      [[nodiscard]] auto getLayout(const LayoutHandle handle) const -> const Layout& override {
          return *layoutCache.at(handle);
       }
 
-      [[nodiscard]] auto getVkLayout(LayoutHandle handle) const -> const vk::DescriptorSetLayout&;
+      [[nodiscard]] auto getVkLayout(LayoutHandle handle) const
+          -> const vk::DescriptorSetLayout& override;
 
     private:
-      Config config;
+      RenderContextConfig config;
 
       void initBindlessLayout(std::shared_ptr<gfx::IGraphicsDevice> graphicsDevice);
       void initPerFrameLayout(std::shared_ptr<gfx::IGraphicsDevice> graphicsDevice);

@@ -1,5 +1,9 @@
 #pragma once
 
+#include "IShaderBindingFactory.hpp"
+#include "gfx/IRenderContext.hpp"
+#include "sb/IShaderBindingFactory.hpp"
+
 namespace tr::gfx {
    class IGraphicsDevice;
    namespace sb {
@@ -9,22 +13,11 @@ namespace tr::gfx {
 
 namespace tr::gfx::sb {
 
-   class ShaderBinding;
-
-   enum class ShaderBindingHandle : uint32_t {
-      Invalid = 0,
-      PerFrame = 1,
-      Bindless = 2,
-      ObjectData = 3,
-      AnimationData = 4,
-      // TODO(Matt): Add an additional one here for DebugGroup
-   };
-
-   class ShaderBindingFactory {
+   class ShaderBindingFactory : public IShaderBindingFactory {
     public:
       ShaderBindingFactory(std::shared_ptr<IGraphicsDevice> newGraphicsDevice,
                            std::shared_ptr<LayoutFactory> layoutFactory,
-                           bool useDescriptorBuffers = false);
+                           RenderContextConfig rendererConfig);
       ~ShaderBindingFactory();
 
       ShaderBindingFactory(const ShaderBindingFactory&) = delete;
@@ -35,16 +28,12 @@ namespace tr::gfx::sb {
 
       /// Allocates a new ShaderBinding
       [[nodiscard]] auto createShaderBinding(ShaderBindingHandle handle) const
-          -> std::unique_ptr<ShaderBinding>;
-
-      [[nodiscard]] auto getLayoutFactory() const -> auto& {
-         return *layoutFactory;
-      }
+          -> std::unique_ptr<ShaderBinding> override;
 
     private:
+      RenderContextConfig config;
       std::shared_ptr<IGraphicsDevice> graphicsDevice;
       std::shared_ptr<LayoutFactory> layoutFactory;
-      bool useDescriptorBuffers{};
 
       std::unique_ptr<vk::raii::DescriptorPool> permanentPool;
    };

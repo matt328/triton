@@ -11,11 +11,11 @@ namespace tr::gfx::Helpers {
 
       SpirvHelper(const SpirvHelper&) = default;
       SpirvHelper(SpirvHelper&&) = delete;
-      SpirvHelper& operator=(const SpirvHelper&) = delete;
-      SpirvHelper& operator=(SpirvHelper&&) = delete;
+      auto operator=(const SpirvHelper&) -> SpirvHelper& = delete;
+      auto operator=(SpirvHelper&&) -> SpirvHelper& = delete;
 
-      static std::vector<uint32_t> compileShader(vk::ShaderStageFlagBits shaderType,
-                                                 const char* shaderCode);
+      static auto compileShader(vk::ShaderStageFlagBits shaderType, const char* shaderCode)
+          -> std::vector<uint32_t>;
 
       static auto readShaderFile(const std::filesystem::path& filename) -> std::string;
 
@@ -25,8 +25,8 @@ namespace tr::gfx::Helpers {
 
     private:
       const vk::raii::Device& device;
-      static TBuiltInResource initResources();
+      static auto initResources() -> TBuiltInResource;
 
-      static EShLanguage findLanguage(vk::ShaderStageFlagBits shaderType);
+      static auto findLanguage(vk::ShaderStageFlagBits shaderType) -> EShLanguage;
    };
 }
