@@ -22,16 +22,17 @@ namespace tr::gfx::mem {
       ~Allocator();
 
       Allocator(const Allocator&) = delete;
-      Allocator& operator=(const Allocator&) = delete;
+      auto operator=(const Allocator&) -> Allocator& = delete;
 
       Allocator(Allocator&&) = delete;
-      Allocator& operator=(Allocator&&) = delete;
+      auto operator=(Allocator&&) -> Allocator& = delete;
 
       /// Creates a Buffer
       /// @throws AllocationException if there is an error allocating or naming the buffer.
-      std::unique_ptr<Buffer> createBuffer(const vk::BufferCreateInfo* bci,
-                                           const vma::AllocationCreateInfo* aci,
-                                           const std::string_view& name = "unnamed buffer") const;
+      auto createBuffer(const vk::BufferCreateInfo* bci,
+                        const vma::AllocationCreateInfo* aci,
+                        const std::string_view& name = "unnamed buffer") const
+          -> std::unique_ptr<Buffer>;
 
       /// Creates a Descriptor Buffer
       /// @throws AllocationException if there is an error allocating or naming the buffer.

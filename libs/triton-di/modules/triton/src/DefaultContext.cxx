@@ -4,7 +4,7 @@
 #include "tr/IWindow.hpp"
 #include "tr/IEventBus.hpp"
 
-#include "gfx/IRenderer.hpp"
+#include "gfx/IRenderContext.hpp"
 #include "gp/IGameplaySystem.hpp"
 
 namespace tr {
@@ -13,14 +13,15 @@ namespace tr {
 
    DefaultContext::DefaultContext(std::shared_ptr<IEventBus> newEventBus,
                                   std::shared_ptr<gp::IGameplaySystem> newGameplaySystem,
-                                  std::shared_ptr<gfx::IRenderer> newRenderer,
+                                  std::shared_ptr<gfx::IRenderContext> newRenderContext,
                                   std::shared_ptr<gfx::IGraphicsDevice> newGraphicsDevice,
                                   std::shared_ptr<tr::IWindow> newWindow)
        : eventBus{std::move(newEventBus)},
          gameplaySystem{std::move(newGameplaySystem)},
-         renderer{std::move(newRenderer)},
+         renderContext{std::move(newRenderContext)},
          graphicsDevice{std::move(newGraphicsDevice)},
          window{std::move(newWindow)} {
+
       Log.trace("Constructing Default Context");
 
       eventBus->subscribe<tr::WindowClosed>(
@@ -75,7 +76,7 @@ namespace tr {
 
          {
             ZoneNamedN(z, "RenderContext Render", true);
-            renderer->render();
+            renderContext->render();
          }
          FrameMark;
       }

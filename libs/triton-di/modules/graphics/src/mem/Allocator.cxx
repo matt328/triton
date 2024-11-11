@@ -35,8 +35,8 @@ namespace tr::gfx::mem {
       }
    }
 
-   std::unique_ptr<Buffer> Allocator::createDescriptorBuffer(const size_t size,
-                                                             const std::string_view& name) const {
+   auto Allocator::createDescriptorBuffer(const size_t size, const std::string_view& name) const
+       -> std::unique_ptr<Buffer> {
       const auto bci =
           vk::BufferCreateInfo{.size = size,
                                .usage = vk::BufferUsageFlagBits::eResourceDescriptorBufferEXT |
@@ -50,8 +50,8 @@ namespace tr::gfx::mem {
       return createBuffer(&bci, &aci, name);
    }
 
-   std::unique_ptr<Buffer> Allocator::createStagingBuffer(const size_t size,
-                                                          const std::string_view& name) const {
+   auto Allocator::createStagingBuffer(const size_t size, const std::string_view& name) const
+       -> std::unique_ptr<Buffer> {
 
       const auto bufferCreateInfo =
           vk::BufferCreateInfo{.size = size,
@@ -78,10 +78,9 @@ namespace tr::gfx::mem {
       return createBuffer(&bufferCreateInfo, &allocationCreateInfo, name);
    }
 
-   std::unique_ptr<Image> Allocator::createImage(
-       const vk::ImageCreateInfo& imageCreateInfo,
-       const vma::AllocationCreateInfo& allocationCreateInfo,
-       const std::string_view& newName) const {
+   auto Allocator::createImage(const vk::ImageCreateInfo& imageCreateInfo,
+                               const vma::AllocationCreateInfo& allocationCreateInfo,
+                               const std::string_view& newName) const -> std::unique_ptr<Image> {
 
       try {
          auto [image, allocation] = allocator->createImage(imageCreateInfo, allocationCreateInfo);
