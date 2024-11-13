@@ -49,7 +49,7 @@ namespace tr::gfx {
       std::shared_ptr<rd::RendererFactory> rendererFactory;
       std::shared_ptr<gp::IGameplaySystem> gameplaySystem;
 
-      std::vector<std::shared_ptr<rd::IRenderer>> rendererList;
+      std::shared_ptr<rd::IRenderer> defaultRenderer;
 
       std::shared_ptr<DepthResources> depthResources;
 

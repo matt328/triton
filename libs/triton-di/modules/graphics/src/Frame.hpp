@@ -25,7 +25,7 @@ namespace tr::gfx {
    class Frame {
     public:
       Frame(std::shared_ptr<IGraphicsDevice> graphicsDevice,
-            std::shared_ptr<vk::raii::ImageView> depthImageView,
+            std::shared_ptr<vk::raii::ImageView> newDepthImageView,
             std::shared_ptr<sb::IShaderBindingFactory> shaderBindingFactory,
             std::string_view name);
       ~Frame();
@@ -44,7 +44,7 @@ namespace tr::gfx {
       void resetInFlightFence();
 
       void applyRenderData(const cm::gpu::RenderData& renderData);
-      void render(std::span<std::shared_ptr<rd::IRenderer>> renderers);
+      void render(std::shared_ptr<rd::IRenderer> renderers);
       void present();
 
     private:
@@ -66,6 +66,12 @@ namespace tr::gfx {
       std::unique_ptr<mem::Buffer> objectDataBuffer;
       std::unique_ptr<mem::Buffer> cameraDataBuffer;
       std::unique_ptr<mem::Buffer> animationDataBuffer;
+
+      std::unique_ptr<mem::Image> drawImage;
+      std::unique_ptr<vk::raii::ImageView> drawImageView;
+      vk::Extent2D drawExtent;
+
+      std::shared_ptr<vk::raii::ImageView> depthImageView;
 
       void updateObjectDataBuffer(const cm::gpu::ObjectData* data, size_t size) const;
       void updatePerFrameDataBuffer(const cm::gpu::CameraData* data, size_t size) const;

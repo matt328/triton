@@ -285,6 +285,45 @@ namespace tr::gfx {
       return allocator->createImage(imageCreateInfo, allocationCreateInfo, newName);
    }
 
+   auto VkGraphicsDevice::createDrawImage(std::string_view newName) const
+       -> std::pair<std::unique_ptr<mem::Image>, std::unique_ptr<vk::raii::ImageView>> {
+      constexpr auto drawImageFormat = vk::Format::eR16G16B16A16Sfloat;
+      const auto [width, height] = IGraphicsDevice::DrawImageExtent2D;
+
+      const auto imageCreateInfo = vk::ImageCreateInfo{
+          .imageType = vk::ImageType::e2D,
+          .format = drawImageFormat,
+          .extent = vk::Extent3D{width, height, 1},
+          .mipLevels = 1,
+          .arrayLayers = 1,
+          .samples = vk::SampleCountFlagBits::e1,
+          .tiling = vk::ImageTiling::eOptimal,
+          .usage = vk::ImageUsageFlagBits::eTransferSrc | vk::ImageUsageFlagBits::eTransferDst |
+                   vk::ImageUsageFlagBits::eStorage | vk::ImageUsageFlagBits::eColorAttachment,
+          .sharingMode = vk::SharingMode::eExclusive,
+          .initialLayout = vk::ImageLayout::eUndefined};
+
+      constexpr auto imageAllocateCreateInfo =
+          vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eGpuOnly,
+                                    .requiredFlags = vk::MemoryPropertyFlagBits::eDeviceLocal};
+      auto drawImage =
+          allocator->createImage(imageCreateInfo, imageAllocateCreateInfo, "Draw Image");
+
+      const auto imageViewCreateInfo =
+          vk::ImageViewCreateInfo{.image = drawImage->getImage(),
+                                  .viewType = vk::ImageViewType::e2D,
+                                  .format = drawImageFormat,
+                                  .subresourceRange = {
+                                      .aspectMask = vk::ImageAspectFlagBits::eColor,
+                                      .levelCount = 1,
+                                      .layerCount = 1,
+                                  }};
+      auto drawImageView =
+          std::make_unique<vk::raii::ImageView>(vulkanDevice->createImageView(imageViewCreateInfo));
+
+      return std::make_pair(std::move(drawImage), std::move(drawImageView));
+   }
+
    auto VkGraphicsDevice::createStorageBuffer(vk::DeviceSize size, const std::string& name)
        -> std::unique_ptr<mem::Buffer> {
       const auto bufferCreateInfo =
