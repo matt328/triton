@@ -27,7 +27,10 @@ namespace tr::gfx::pipe {
       auto operator=(StaticModelPipeline&&) -> StaticModelPipeline& = delete;
 
       void bind(const vk::raii::CommandBuffer& cmd) override;
-      void applyShaderBinding(const sb::ShaderBinding& binding) override;
+      void applyShaderBinding(
+          const sb::ShaderBinding& binding,
+          uint32_t setIndex,
+          const std::unique_ptr<vk::raii::CommandBuffer>& commandBuffer) override;
 
     private:
       std::unique_ptr<vk::raii::PipelineLayout> pipelineLayout;

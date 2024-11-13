@@ -2,8 +2,6 @@
 
 #include "cm/RenderData.hpp"
 #include "gfx/IGraphicsDevice.hpp"
-#include "gp/IGameplaySystem.hpp"
-#include <vulkan/vulkan_raii.hpp>
 
 namespace tr::gfx {
 
@@ -20,6 +18,7 @@ namespace tr::gfx {
 
    namespace sb {
       class IShaderBindingFactory;
+      class ShaderBinding;
    }
 
    class Frame {
@@ -44,7 +43,8 @@ namespace tr::gfx {
       void resetInFlightFence();
 
       void applyRenderData(const cm::gpu::RenderData& renderData);
-      void render(std::shared_ptr<rd::IRenderer> renderers);
+      void render(const std::shared_ptr<rd::IRenderer>& renderer,
+                  const std::tuple<vk::Viewport, vk::Rect2D>& vpScissor);
       void present();
 
     private:
@@ -73,9 +73,19 @@ namespace tr::gfx {
 
       std::shared_ptr<vk::raii::ImageView> depthImageView;
 
+      std::unique_ptr<sb::ShaderBinding> perFrameShaderBinding;
+      std::unique_ptr<sb::ShaderBinding> objectDataShaderBinding;
+      std::unique_ptr<sb::ShaderBinding> textureShaderBinding;
+      std::unique_ptr<sb::ShaderBinding> animationDataShaderBinding;
+
       void updateObjectDataBuffer(const cm::gpu::ObjectData* data, size_t size) const;
       void updatePerFrameDataBuffer(const cm::gpu::CameraData* data, size_t size) const;
       void updateAnimationDataBuffer(const cm::gpu::AnimationData* data, size_t size) const;
       void prepareFrame();
+
+      static void transitionImage(const vk::raii::CommandBuffer& cmd,
+                                  const vk::Image& image,
+                                  vk::ImageLayout currentLayout,
+                                  vk::ImageLayout newLayout);
    };
 }

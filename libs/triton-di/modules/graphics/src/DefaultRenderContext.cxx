@@ -74,7 +74,13 @@ namespace tr::gfx {
          currentFrame.applyRenderData(renderData);
       }
 
-      currentFrame.render(defaultRenderer);
+      // TODO(matt) resource manager
+      // how to look up meshes from renderers
+
+      const auto imageInfoList = resourceManager->getTextures();
+      currentFrame.applyTextures(imageInfoList);
+
+      currentFrame.render(defaultRenderer, getViewportAndScissor());
 
       currentFrame.present();
 

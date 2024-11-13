@@ -1,4 +1,5 @@
 #include "DefaultRenderer.hpp"
+#include "cm/RenderData.hpp"
 #include "gfx/IGraphicsDevice.hpp"
 #include "pipeline/StaticModelPipeline.hpp"
 
@@ -9,5 +10,39 @@ namespace tr::gfx::rd {
       Log.trace("Constructing DefaultRenderer");
       pipeline =
           std::make_shared<pipe::StaticModelPipeline>(graphicsDevice, shaderCompiler, config);
+   }
+
+   void DefaultRenderer::bindPipeline(
+       const std::unique_ptr<vk::raii::CommandBuffer>& commandBuffer) {
+      pipeline->bind(*commandBuffer);
+   }
+
+   void DefaultRenderer::applyShaderBinding(
+       const std::unique_ptr<sb::ShaderBinding>& binding,
+       uint32_t setIndex,
+       const std::unique_ptr<vk::raii::CommandBuffer>& commandBuffer) {
+      pipeline->applyShaderBinding(*binding, setIndex, commandBuffer);
+   }
+
+   void DefaultRenderer::render(const std::unique_ptr<vk::raii::CommandBuffer>& commandBuffer,
+                                std::span<cm::gpu::MeshData> meshDataList,
+                                const std::tuple<vk::Viewport, vk::Rect2D>& vpScissor) {
+      const auto [vp, scissor] = vpScissor;
+      commandBuffer->setViewportWithCount(vp);
+      commandBuffer->setScissorWithCount(scissor);
+      {
+         ZoneNamedN(zone3, "Render Static Meshes", true);
+         for (const auto& meshData : meshDataList) {
+            const auto& mesh = resourceManager->getMesh(meshData.handle);
+
+            commandBuffer->bindVertexBuffers(0, mesh.getVertexBuffer()->getBuffer(), {0});
+            commandBuffer->bindIndexBuffer(mesh.getIndexBuffer()->getBuffer(),
+                                           0,
+                                           vk::IndexType::eUint32);
+
+            // instanceId becomes gl_BaseInstance in the shader
+            commandBuffer->drawIndexed(mesh.getIndicesCount(), 1, 0, 0, meshData.objectDataId);
+         }
+      }
    }
 }
