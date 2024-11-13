@@ -1,6 +1,7 @@
 #include "VkGraphicsDevice.hpp"
 #include "Vulkan.hpp"
 #include "VkContext.hpp"
+#include "gfx/IGraphicsDevice.hpp"
 #include "mem/Allocator.hpp"
 #include "mem/Image.hpp"
 #include <vulkan/vulkan_core.h>
@@ -257,17 +258,17 @@ namespace tr::gfx {
       }
    }
 
-   [[nodiscard]] auto VkGraphicsDevice::createPipelineLayout(
-       const vk::PipelineLayoutCreateInfo& createInfo,
-       const std::string& name) -> std::unique_ptr<vk::raii::PipelineLayout> {
+   auto VkGraphicsDevice::createPipelineLayout(const vk::PipelineLayoutCreateInfo& createInfo,
+                                               const std::string& name)
+       -> std::unique_ptr<vk::raii::PipelineLayout> {
       auto layout = std::make_unique<vk::raii::PipelineLayout>(*vulkanDevice, createInfo);
       setObjectName(**layout, name);
       return layout;
    }
 
-   [[nodiscard]] auto VkGraphicsDevice::createPipeline(
-       const vk::GraphicsPipelineCreateInfo& createInfo,
-       const std::string& name) -> std::unique_ptr<vk::raii::Pipeline> {
+   auto VkGraphicsDevice::createPipeline(const vk::GraphicsPipelineCreateInfo& createInfo,
+                                         const std::string& name)
+       -> std::unique_ptr<vk::raii::Pipeline> {
 
       auto pipeline =
           std::make_unique<vk::raii::Pipeline>(*vulkanDevice, VK_NULL_HANDLE, createInfo);
@@ -277,14 +278,83 @@ namespace tr::gfx {
       return pipeline;
    }
 
-   [[nodiscard]] auto VkGraphicsDevice::createImage(
-       const vk::ImageCreateInfo& imageCreateInfo,
-       const vma::AllocationCreateInfo& allocationCreateInfo,
-       const std::string_view& newName) const -> std::unique_ptr<mem::Image> {
+   auto VkGraphicsDevice::createImage(const vk::ImageCreateInfo& imageCreateInfo,
+                                      const vma::AllocationCreateInfo& allocationCreateInfo,
+                                      const std::string_view& newName) const
+       -> std::unique_ptr<mem::Image> {
       return allocator->createImage(imageCreateInfo, allocationCreateInfo, newName);
    }
 
-   [[nodiscard]] auto VkGraphicsDevice::findDepthFormat() -> vk::Format {
+   auto VkGraphicsDevice::createStorageBuffer(vk::DeviceSize size, const std::string& name)
+       -> std::unique_ptr<mem::Buffer> {
+      const auto bufferCreateInfo =
+          vk::BufferCreateInfo{.size = size,
+                               .usage = vk::BufferUsageFlagBits::eStorageBuffer |
+                                        vk::BufferUsageFlagBits::eShaderDeviceAddress};
+
+      constexpr auto allocationCreateInfo =
+          vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eCpuToGpu,
+                                    .requiredFlags = vk::MemoryPropertyFlagBits::eHostCoherent};
+
+      return allocator->createBuffer(&bufferCreateInfo, &allocationCreateInfo, name);
+   }
+
+   auto VkGraphicsDevice::createUniformBuffer(vk::DeviceSize size, const std::string& name)
+       -> std::unique_ptr<mem::Buffer> {
+      const auto bufferCreateInfo =
+          vk::BufferCreateInfo{.size = size,
+                               .usage = vk::BufferUsageFlagBits::eUniformBuffer |
+                                        vk::BufferUsageFlagBits::eShaderDeviceAddress};
+
+      constexpr auto allocationCreateInfo =
+          vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eCpuToGpu,
+                                    .requiredFlags = vk::MemoryPropertyFlagBits::eHostCoherent};
+
+      return allocator->createBuffer(&bufferCreateInfo, &allocationCreateInfo, name);
+   }
+
+   auto VkGraphicsDevice::createCommandBuffer() -> std::unique_ptr<vk::raii::CommandBuffer> {
+      const auto allocInfo =
+          vk::CommandBufferAllocateInfo{.commandPool = *commandPool,
+                                        .level = vk::CommandBufferLevel::ePrimary,
+                                        .commandBufferCount = 1};
+      auto commandBuffers = vulkanDevice->allocateCommandBuffers(allocInfo);
+      return std::make_unique<vk::raii::CommandBuffer>(std::move(commandBuffers[0]));
+   }
+
+   auto VkGraphicsDevice::createTracyContext(std::string_view name,
+                                             const vk::raii::CommandBuffer& commandBuffer)
+       -> TracyContextPtr {
+      auto ctx = TracyContextPtr{tracy::CreateVkContext(**physicalDevice,
+                                                        **vulkanDevice,
+                                                        **graphicsQueue,
+                                                        *commandBuffer,
+                                                        nullptr,
+                                                        nullptr),
+                                 tracy::DestroyVkContext};
+      ctx->Name(name.data(), name.length());
+      return ctx;
+   }
+
+   auto VkGraphicsDevice::acquireNextSwapchainImage(vk::Semaphore semaphore)
+       -> std::variant<uint32_t, AcquireResult> {
+      try {
+         ZoneNamedN(acquire, "Acquire Swapchain Image", true);
+         auto [result, imageIndex] = swapchain->acquireNextImage(UINT64_MAX, semaphore, nullptr);
+         if (result == vk::Result::eSuccess) {
+            return imageIndex;
+         }
+         if (result == vk::Result::eSuboptimalKHR || result == vk::Result::eErrorOutOfDateKHR) {
+            return AcquireResult::NeedsResize;
+         }
+         return AcquireResult::Error;
+      } catch (const std::exception& ex) {
+         Log.warn("Swapchain needs resized: {0}", ex.what());
+         return AcquireResult::NeedsResize;
+      }
+   }
+
+   auto VkGraphicsDevice::findDepthFormat() -> vk::Format {
       const auto candidates = std::array<vk::Format, 3>{
           {vk::Format::eD32Sfloat, vk::Format::eD32SfloatS8Uint, vk::Format::eD24UnormS8Uint}};
       for (const auto format : candidates) {

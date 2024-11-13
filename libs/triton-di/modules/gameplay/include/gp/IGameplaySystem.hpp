@@ -1,6 +1,11 @@
 #pragma once
 
+#include "cm/RenderData.hpp"
+
 namespace tr::gp {
+
+   using RenderDataTransferHandler = std::function<void(cm::gpu::RenderData&)>;
+
    class IGameplaySystem {
     public:
       explicit IGameplaySystem() = default;
@@ -13,5 +18,7 @@ namespace tr::gp {
 
       virtual void update() = 0;
       virtual void fixedUpdate() = 0;
+
+      virtual void setRenderDataTransferHandler(const RenderDataTransferHandler& handler) = 0;
    };
 }
