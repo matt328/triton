@@ -2,6 +2,7 @@
 
 #include "cm/RenderData.hpp"
 #include "gfx/IGraphicsDevice.hpp"
+#include "mem/Image.hpp"
 #include "renderer/IRenderer.hpp"
 #include "mem/Buffer.hpp"
 #include <vulkan/vulkan_enums.hpp>
@@ -9,12 +10,13 @@
 
 namespace tr::gfx {
    Frame::Frame(std::shared_ptr<IGraphicsDevice> newGraphicsDevice,
-                std::shared_ptr<vk::raii::ImageView> depthImageView,
+                std::shared_ptr<vk::raii::ImageView> newDepthImageView,
                 std::shared_ptr<sb::IShaderBindingFactory> shaderBindingFactory,
                 std::string_view name)
        : commandBuffer{newGraphicsDevice->createCommandBuffer()},
          tracyContext{newGraphicsDevice->createTracyContext(name, *commandBuffer)},
-         graphicsDevice{std::move(newGraphicsDevice)} {
+         graphicsDevice{std::move(newGraphicsDevice)},
+         depthImageView{std::move(newDepthImageView)} {
 
       constexpr auto fenceCreateInfo =
           vk::FenceCreateInfo{.flags = vk::FenceCreateFlagBits::eSignaled};
@@ -35,6 +37,8 @@ namespace tr::gfx {
       animationDataBuffer =
           graphicsDevice->createStorageBuffer(sizeof(cm::AnimationData) * cm::gpu::MAX_OBJECTS,
                                               "Animation Data");
+
+      std::tie(drawImage, drawImageView) = graphicsDevice->createDrawImage("Draw Image");
    }
 
    Frame::~Frame() {
@@ -118,7 +122,7 @@ namespace tr::gfx {
       }
    }
 
-   void Frame::render(std::span<std::shared_ptr<rd::IRenderer>> renderers) {
+   void Frame::render(std::shared_ptr<rd::IRenderer> renderer) {
       commandBuffer->begin(
           vk::CommandBufferBeginInfo{.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse});
       {
@@ -146,51 +150,51 @@ namespace tr::gfx {
                                                             **staticModelPipelineLayout);
          }
       }
-
-      void Frame::prepareFrame() {
-         Helpers::transitionImage(*commandBuffer,
-                                  drawImage->getImage(),
-                                  vk::ImageLayout::eUndefined,
-                                  vk::ImageLayout::eColorAttachmentOptimal);
-
-         const auto colorAttachmentInfo = vk::RenderingAttachmentInfo{
-             .imageView = **drawImageView,
-             .imageLayout = vk::ImageLayout::eColorAttachmentOptimal,
-             .loadOp = vk::AttachmentLoadOp::eClear,
-             .storeOp = vk::AttachmentStoreOp::eStore,
-             .clearValue = vk::ClearValue{.color = vk::ClearColorValue{std::array<float, 4>(
-                                              {{0.39f, 0.58f, 0.93f, 1.f}})}},
-         };
-
-         const auto depthAttachmentInfo = vk::RenderingAttachmentInfo{
-             .imageView = **depthImageView,
-             .imageLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal,
-             .loadOp = vk::AttachmentLoadOp::eClear,
-             .storeOp = vk::AttachmentStoreOp::eStore,
-             .clearValue = vk::ClearValue{.depthStencil = vk::ClearDepthStencilValue{.depth = 1.f,
-                                                                                     .stencil = 0}},
-         };
-
-         const auto renderingInfo =
-             vk::RenderingInfo{.renderArea = vk::Rect2D{.offset = {0, 0}, .extent = drawExtent},
-                               .layerCount = 1,
-                               .colorAttachmentCount = 1,
-                               .pColorAttachments = &colorAttachmentInfo,
-                               .pDepthAttachment = &depthAttachmentInfo};
-
-         commandBuffer->beginRendering(renderingInfo);
-      }
-
-      void Frame::present() {
-      }
-
-      void Frame::updateObjectDataBuffer(const cm::gpu::ObjectData* data, size_t size) const {
-         objectDataBuffer->updateMappedBufferValue(data, size);
-      }
-      void Frame::updatePerFrameDataBuffer(const cm::gpu::CameraData* data, size_t size) const {
-         cameraDataBuffer->updateMappedBufferValue(data, size);
-      }
-      void Frame::updateAnimationDataBuffer(const cm::gpu::AnimationData* data, size_t size) const {
-         animationDataBuffer->updateMappedBufferValue(data, size);
-      }
    }
+   void Frame::prepareFrame() {
+      Helpers::transitionImage(*commandBuffer,
+                               drawImage->getImage(),
+                               vk::ImageLayout::eUndefined,
+                               vk::ImageLayout::eColorAttachmentOptimal);
+
+      const auto colorAttachmentInfo = vk::RenderingAttachmentInfo{
+          .imageView = **drawImageView,
+          .imageLayout = vk::ImageLayout::eColorAttachmentOptimal,
+          .loadOp = vk::AttachmentLoadOp::eClear,
+          .storeOp = vk::AttachmentStoreOp::eStore,
+          .clearValue = vk::ClearValue{.color = vk::ClearColorValue{std::array<float, 4>(
+                                           {{0.39f, 0.58f, 0.93f, 1.f}})}},
+      };
+
+      const auto depthAttachmentInfo = vk::RenderingAttachmentInfo{
+          .imageView = **depthImageView,
+          .imageLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal,
+          .loadOp = vk::AttachmentLoadOp::eClear,
+          .storeOp = vk::AttachmentStoreOp::eStore,
+          .clearValue = vk::ClearValue{.depthStencil =
+                                           vk::ClearDepthStencilValue{.depth = 1.f, .stencil = 0}},
+      };
+
+      const auto renderingInfo =
+          vk::RenderingInfo{.renderArea = vk::Rect2D{.offset = {0, 0}, .extent = drawExtent},
+                            .layerCount = 1,
+                            .colorAttachmentCount = 1,
+                            .pColorAttachments = &colorAttachmentInfo,
+                            .pDepthAttachment = &depthAttachmentInfo};
+
+      commandBuffer->beginRendering(renderingInfo);
+   }
+
+   void Frame::present() {
+   }
+
+   void Frame::updateObjectDataBuffer(const cm::gpu::ObjectData* data, size_t size) const {
+      objectDataBuffer->updateMappedBufferValue(data, size);
+   }
+   void Frame::updatePerFrameDataBuffer(const cm::gpu::CameraData* data, size_t size) const {
+      cameraDataBuffer->updateMappedBufferValue(data, size);
+   }
+   void Frame::updateAnimationDataBuffer(const cm::gpu::AnimationData* data, size_t size) const {
+      animationDataBuffer->updateMappedBufferValue(data, size);
+   }
+}

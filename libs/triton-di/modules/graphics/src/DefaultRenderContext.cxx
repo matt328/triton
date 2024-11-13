@@ -34,10 +34,10 @@ namespace tr::gfx {
       const auto defaultSetLayouts = std::vector<vk::DescriptorSetLayout>{};
       const auto defaultVertexComponents = std::vector<geo::VertexComponent>{};
 
-      rendererList.push_back(rendererFactory->createRenderer(
+      defaultRenderer = rendererFactory->createRenderer(
           rd::RendererConfig{.rendererType = rd::RendererType::StaticModel,
                              .setLayouts = defaultSetLayouts,
-                             .vertexComponents = defaultVertexComponents}));
+                             .vertexComponents = defaultVertexComponents});
 
       // TODO(matt): other renderers
 
@@ -74,7 +74,7 @@ namespace tr::gfx {
          currentFrame.applyRenderData(renderData);
       }
 
-      currentFrame.render(std::span{rendererList});
+      currentFrame.render(defaultRenderer);
 
       currentFrame.present();
 
