@@ -1,12 +1,18 @@
 #include "DefaultRenderContext.hpp"
 #include "DepthResources.hpp"
 #include "geo/VertexAttributes.hpp"
+#include "gp/IGameplaySystem.hpp"
 #include "pipeline/StaticModelPipeline.hpp"
 #include "renderer/RendererFactory.hpp"
 #include "sb/ILayoutFactory.hpp"
 #include "sb/IShaderBindingFactory.hpp"
 #include "gfx/IGraphicsDevice.hpp"
 #include "FrameManager.hpp"
+#include "Frame.hpp"
+#include "renderer/IRenderer.hpp"
+#include <cstdint>
+#include <mutex>
+#include <variant>
 
 namespace tr::gfx {
 
@@ -15,21 +21,23 @@ namespace tr::gfx {
        std::shared_ptr<sb::ILayoutFactory> newLayoutFactory,
        std::shared_ptr<sb::IShaderBindingFactory> newShaderBindingFactory,
        std::shared_ptr<pipe::IShaderCompiler> newShaderCompiler,
-       std::shared_ptr<rd::RendererFactory> newRendererFactory)
+       std::shared_ptr<rd::RendererFactory> newRendererFactory,
+       std::shared_ptr<gp::IGameplaySystem> newGameplaySystem)
        : graphicsDevice{std::move(graphicsDevice)},
          layoutFactory{std::move(newLayoutFactory)},
          shaderBindingFactory{std::move(newShaderBindingFactory)},
          shaderCompiler{std::move(newShaderCompiler)},
-         rendererFactory{std::move(newRendererFactory)} {
+         rendererFactory{std::move(newRendererFactory)},
+         gameplaySystem{std::move(newGameplaySystem)} {
       Log.trace("Constructing DefaultRenderContext");
 
       const auto defaultSetLayouts = std::vector<vk::DescriptorSetLayout>{};
       const auto defaultVertexComponents = std::vector<geo::VertexComponent>{};
 
-      defaultRenderer = rendererFactory->createRenderer(
+      rendererList.push_back(rendererFactory->createRenderer(
           rd::RendererConfig{.rendererType = rd::RendererType::StaticModel,
                              .setLayouts = defaultSetLayouts,
-                             .vertexComponents = defaultVertexComponents});
+                             .vertexComponents = defaultVertexComponents}));
 
       // TODO(matt): other renderers
 
@@ -42,9 +50,48 @@ namespace tr::gfx {
    }
 
    void DefaultRenderContext::render() {
+      auto& currentFrame = frameManager->getCurrentFrame();
+
+      currentFrame.awaitInFlightFence();
+
+      const auto status = currentFrame.acquireSwapchainImage();
+
+      if (status == AcquireResult::NeedsResize) {
+         resizeSwapchain();
+         return;
+      }
+      if (status == AcquireResult::Error) {
+         Log.error("Error acquiring next image");
+         return;
+      }
+
+      currentFrame.resetInFlightFence();
+
+      {
+         auto lock = std::lock_guard{renderDataMutex};
+         LockableName(renderDataMutex, "SetRenderData", 13);
+         LockMark(renderDataMutex);
+         currentFrame.applyRenderData(renderData);
+      }
+
+      currentFrame.render(std::span{rendererList});
+
+      currentFrame.present();
+
+      frameManager->nextFrame();
+   }
+
+   void DefaultRenderContext::resizeSwapchain() {
    }
 
    void DefaultRenderContext::waitIdle() {
+   }
+
+   void DefaultRenderContext::setRenderData(const cm::gpu::RenderData& newRenderData) {
+      auto lock = std::lock_guard{renderDataMutex};
+      LockableName(renderDataMutex, "SetRenderData", 13);
+      LockMark(renderDataMutex);
+      renderData = newRenderData;
    }
 
    [[nodiscard]] auto DefaultRenderContext::getViewportAndScissor()

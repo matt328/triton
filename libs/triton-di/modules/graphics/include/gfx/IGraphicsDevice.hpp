@@ -1,10 +1,19 @@
 #pragma once
 
+#include "mem/Buffer.hpp"
 namespace tr::gfx {
 
    namespace mem {
       class Image;
    }
+
+   enum class AcquireResult {
+      Success,
+      NeedsResize,
+      Error
+   };
+
+   using TracyContextPtr = std::unique_ptr<tracy::VkCtx, void (*)(tracy::VkCtx*)>;
 
    class IGraphicsDevice {
     public:
@@ -38,6 +47,22 @@ namespace tr::gfx {
                                              const std::string_view& newName) const
           -> std::unique_ptr<mem::Image> = 0;
 
+      [[nodiscard]] virtual auto createStorageBuffer(vk::DeviceSize size, const std::string& name)
+          -> std::unique_ptr<mem::Buffer> = 0;
+
+      [[nodiscard]] virtual auto createUniformBuffer(vk::DeviceSize size, const std::string& name)
+          -> std::unique_ptr<mem::Buffer> = 0;
+
+      [[nodiscard]] virtual auto createCommandBuffer()
+          -> std::unique_ptr<vk::raii::CommandBuffer> = 0;
+
+      [[nodiscard]] virtual auto createTracyContext(std::string_view name,
+                                                    const vk::raii::CommandBuffer& commandBuffer)
+          -> TracyContextPtr = 0;
+
       [[nodiscard]] virtual auto findDepthFormat() -> vk::Format = 0;
+
+      [[nodiscard]] virtual auto acquireNextSwapchainImage(vk::Semaphore)
+          -> std::variant<uint32_t, AcquireResult> = 0;
    };
 }

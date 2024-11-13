@@ -29,18 +29,17 @@ namespace tr::gfx {
       auto getDescriptorBufferProperties()
           -> vk::PhysicalDeviceDescriptorBufferPropertiesEXT override;
 
-      [[nodiscard]] auto getVulkanDevice() const -> std::shared_ptr<vk::raii::Device> override {
+      auto getVulkanDevice() const -> std::shared_ptr<vk::raii::Device> override {
          return vulkanDevice;
       }
 
-      [[nodiscard]] auto getSwapchainExtent() -> vk::Extent2D override;
+      auto getSwapchainExtent() -> vk::Extent2D override;
 
-      [[nodiscard]] auto createPipelineLayout(const vk::PipelineLayoutCreateInfo& createInfo,
-                                              const std::string& name)
+      auto createPipelineLayout(const vk::PipelineLayoutCreateInfo& createInfo,
+                                const std::string& name)
           -> std::unique_ptr<vk::raii::PipelineLayout> override;
 
-      [[nodiscard]] auto createPipeline(const vk::GraphicsPipelineCreateInfo& createInfo,
-                                        const std::string& name)
+      auto createPipeline(const vk::GraphicsPipelineCreateInfo& createInfo, const std::string& name)
           -> std::unique_ptr<vk::raii::Pipeline> override;
 
       [[nodiscard]] auto createImage(const vk::ImageCreateInfo& imageCreateInfo,
@@ -48,7 +47,20 @@ namespace tr::gfx {
                                      const std::string_view& newName) const
           -> std::unique_ptr<mem::Image> override;
 
+      auto createStorageBuffer(vk::DeviceSize size, const std::string& name)
+          -> std::unique_ptr<mem::Buffer> override;
+
+      auto createUniformBuffer(vk::DeviceSize size, const std::string& name)
+          -> std::unique_ptr<mem::Buffer> override;
+
+      auto createCommandBuffer() -> std::unique_ptr<vk::raii::CommandBuffer> override;
+
+      auto createTracyContext(std::string_view name, const vk::raii::CommandBuffer& commandBuffer)
+          -> TracyContextPtr override;
+
       [[nodiscard]] auto findDepthFormat() -> vk::Format override;
+      [[nodiscard]] auto acquireNextSwapchainImage(vk::Semaphore semaphore)
+          -> std::variant<uint32_t, AcquireResult> override;
 
     private:
       Config config;

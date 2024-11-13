@@ -391,6 +391,7 @@ namespace tr::gfx {
          skinnedModelList.clear();
 
          {
+            // RenderData holds a lock until it goes out of scope.
             auto renderData = resourceManager->getRenderData();
             ZoneNamedN(zone, "Copying RenderData", true);
             frame.updateObjectDataBuffer(renderData.get().objectData.data(),
