@@ -35,6 +35,15 @@ namespace tr::gfx::tx {
       std::lock_guard lock(renderDataMutex);
       LockableName(renderDataMutex, "SetRenderData", 13);
       LockMark(renderDataMutex);
+      // Deep copy happens here. Every time the game world finishes producing a complete copy of the
+      // game world state, it gets copied over to the renderer here. even though it might be
+      // produced again before the renderer uses it. But we don't want the renderer to ever wait
+      // for the game world to finish the current calculation. Profile and see how often this
+      // happens. I don't think this potentially unused copy is avoidable, the game world data is
+      // essentially double buffered so we don't end up rendering a game world state that's half
+      // done being updated. This might be the 'state' the fixed timestep uses. The renderer itself
+      // would need to be able to keep the old state and the 'next' state, and interpolate between
+      // the two given the blend factor from the timer.
       renderData = newRenderData;
    }
 
@@ -188,4 +197,4 @@ namespace tr::gfx::tx {
       }
    }
 
-} // namespace tr::gfx::tx
+}

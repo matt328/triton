@@ -2,10 +2,13 @@
 
 #include "DepthResources.hpp"
 #include "gfx/IRenderContext.hpp"
+#include "gp/IGameplaySystem.hpp"
 #include "pipeline/IShaderCompiler.hpp"
 #include "sb/ILayoutFactory.hpp"
 #include "sb/IShaderBindingFactory.hpp"
 #include "renderer/RendererFactory.hpp"
+
+#include "cm/RenderData.hpp"
 
 namespace tr::gfx {
 
@@ -25,16 +28,18 @@ namespace tr::gfx {
           std::shared_ptr<sb::ILayoutFactory> newLayoutFactory,
           std::shared_ptr<sb::IShaderBindingFactory> newShaderBindingFactory,
           std::shared_ptr<pipe::IShaderCompiler> newShaderCompiler,
-          std::shared_ptr<rd::RendererFactory> newRendererFactory);
+          std::shared_ptr<rd::RendererFactory> newRendererFactory,
+          std::shared_ptr<gp::IGameplaySystem> newGameplaySystem);
       ~DefaultRenderContext() override = default;
 
-      DefaultRenderContext(const DefaultRenderContext&) = default;
+      DefaultRenderContext(const DefaultRenderContext&) = delete;
       DefaultRenderContext(DefaultRenderContext&&) = delete;
-      auto operator=(const DefaultRenderContext&) -> DefaultRenderContext& = default;
+      auto operator=(const DefaultRenderContext&) -> DefaultRenderContext& = delete;
       auto operator=(DefaultRenderContext&&) -> DefaultRenderContext& = delete;
 
       void render() override;
       void waitIdle() override;
+      void setRenderData(const cm::gpu::RenderData& renderData) override;
 
     private:
       std::shared_ptr<IGraphicsDevice> graphicsDevice;
@@ -42,13 +47,18 @@ namespace tr::gfx {
       std::shared_ptr<sb::IShaderBindingFactory> shaderBindingFactory;
       std::shared_ptr<pipe::IShaderCompiler> shaderCompiler;
       std::shared_ptr<rd::RendererFactory> rendererFactory;
+      std::shared_ptr<gp::IGameplaySystem> gameplaySystem;
 
-      std::shared_ptr<rd::IRenderer> defaultRenderer;
+      std::vector<std::shared_ptr<rd::IRenderer>> rendererList;
 
       std::shared_ptr<DepthResources> depthResources;
 
       std::shared_ptr<FrameManager> frameManager;
 
+      mutable TracyLockable(std::mutex, renderDataMutex);
+      cm::gpu::RenderData renderData;
+
       [[nodiscard]] auto getViewportAndScissor() -> std::tuple<vk::Viewport, vk::Rect2D>;
+      void resizeSwapchain();
    };
 }

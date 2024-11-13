@@ -1,6 +1,7 @@
 #pragma once
 
-#include <vulkan/vulkan_structs.hpp>
+#include "cm/RenderData.hpp"
+
 namespace tr::gfx {
 
    struct RenderContextConfig {
@@ -20,5 +21,7 @@ namespace tr::gfx {
 
       virtual void render() = 0;
       virtual void waitIdle() = 0;
+
+      virtual void setRenderData(const cm::gpu::RenderData& renderData) = 0;
    };
 }

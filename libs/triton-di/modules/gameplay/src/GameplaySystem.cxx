@@ -1,4 +1,6 @@
 #include "GameplaySystem.hpp"
+#include "cm/RenderData.hpp"
+#include "gp/IGameplaySystem.hpp"
 
 namespace tr::gp {
 
@@ -51,5 +53,9 @@ namespace tr::gp {
    }
 
    void GameplaySystem::fixedUpdate() {
+   }
+
+   void GameplaySystem::setRenderDataTransferHandler(const RenderDataTransferHandler& handler) {
+      this->transferHandler = handler;
    }
 }

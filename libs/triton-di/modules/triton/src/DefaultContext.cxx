@@ -26,6 +26,10 @@ namespace tr {
 
       eventBus->subscribe<tr::WindowClosed>(
           [&]([[maybe_unused]] const tr::WindowClosed& event) { running = false; });
+
+      // Wire together game world to render world
+      gameplaySystem->setRenderDataTransferHandler(
+          [&](cm::gpu::RenderData& renderData) { renderContext->setRenderData(renderData); });
    }
 
    void DefaultContext::run() {

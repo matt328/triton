@@ -58,6 +58,7 @@ target_compile_definitions(${PROJECT_NAME}
 
 target_precompile_headers(${PROJECT_NAME}
    PUBLIC
+   <cstdint>
    <functional>
    <glm/glm.hpp>
    <random>
@@ -74,6 +75,7 @@ target_precompile_headers(${PROJECT_NAME}
    <GLFW/glfw3.h>
    <imgui_impl_glfw.h>
    <imgui_impl_vulkan.h>
+   <variant>
    <vulkan/vulkan_raii.hpp>
    <vk_mem_alloc.hpp>
    <tracy/TracyVulkan.hpp>

@@ -16,5 +16,10 @@ namespace tr::gp {
 
       void update() override;
       void fixedUpdate() override;
+
+      void setRenderDataTransferHandler(const RenderDataTransferHandler& handler) override;
+
+    private:
+      RenderDataTransferHandler transferHandler;
    };
 }
