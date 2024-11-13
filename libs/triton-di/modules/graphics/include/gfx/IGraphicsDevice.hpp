@@ -47,6 +47,9 @@ namespace tr::gfx {
                                              const std::string_view& newName) const
           -> std::unique_ptr<mem::Image> = 0;
 
+      [[nodiscard]] virtual auto createDrawImage(std::string_view newName) const
+          -> std::pair<std::unique_ptr<mem::Image>, std::unique_ptr<vk::raii::ImageView>> = 0;
+
       [[nodiscard]] virtual auto createStorageBuffer(vk::DeviceSize size, const std::string& name)
           -> std::unique_ptr<mem::Buffer> = 0;
 
