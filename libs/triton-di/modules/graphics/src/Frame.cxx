@@ -5,8 +5,8 @@
 #include "mem/Image.hpp"
 #include "renderer/IRenderer.hpp"
 #include "mem/Buffer.hpp"
-#include <vulkan/vulkan_enums.hpp>
-#include <vulkan/vulkan_structs.hpp>
+#include "sb/IShaderBindingFactory.hpp"
+#include "sb/ShaderBinding.hpp"
 
 namespace tr::gfx {
    Frame::Frame(std::shared_ptr<IGraphicsDevice> newGraphicsDevice,
@@ -39,6 +39,25 @@ namespace tr::gfx {
                                               "Animation Data");
 
       std::tie(drawImage, drawImageView) = graphicsDevice->createDrawImage("Draw Image");
+
+      perFrameShaderBinding =
+          shaderBindingFactory->createShaderBinding(sb::ShaderBindingHandle::PerFrame);
+      perFrameShaderBinding->bindBuffer(0, *cameraDataBuffer, sizeof(cm::gpu::CameraData));
+
+      objectDataShaderBinding =
+          shaderBindingFactory->createShaderBinding(sb::ShaderBindingHandle::ObjectData);
+      objectDataShaderBinding->bindBuffer(0,
+                                          *objectDataBuffer,
+                                          sizeof(cm::gpu::ObjectData) * cm::gpu::MAX_OBJECTS);
+
+      textureShaderBinding =
+          shaderBindingFactory->createShaderBinding(sb::ShaderBindingHandle::Bindless);
+
+      animationDataShaderBinding =
+          shaderBindingFactory->createShaderBinding(sb::ShaderBindingHandle::AnimationData);
+      animationDataShaderBinding->bindBuffer(0,
+                                             *animationDataBuffer,
+                                             sizeof(cm::AnimationData) * cm::gpu::MAX_OBJECTS);
    }
 
    Frame::~Frame() {
@@ -114,15 +133,10 @@ namespace tr::gfx {
 
          pushConstants = renderData.pushConstants;
       }
-
-      {
-         const auto imageInfoList = resourceManager->getTextures();
-         ZoneNamedN(zone, "Updating Texture DB", true);
-         updateTextures(imageInfoList.get());
-      }
    }
 
-   void Frame::render(std::shared_ptr<rd::IRenderer> renderer) {
+   void Frame::render(const std::shared_ptr<rd::IRenderer>& renderer,
+                      const std::tuple<vk::Viewport, vk::Rect2D>& vpScissor) {
       commandBuffer->begin(
           vk::CommandBufferBeginInfo{.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse});
       {
@@ -131,31 +145,19 @@ namespace tr::gfx {
 
          {
             ZoneNamedN(zone2, "Apply Shader Bindings", true);
-            // Static Models
-
-            commandBuffer->bindPipeline(vk::PipelineBindPoint::eGraphics, **staticModelPipeline);
-
-            // Bind ShaderBindings to Pipeline
-            frame.getTextureShaderBinding().bindToPipeline(cmd,
-                                                           vk::PipelineBindPoint::eGraphics,
-                                                           0,
-                                                           **staticModelPipelineLayout);
-            frame.getObjectDataShaderBinding().bindToPipeline(cmd,
-                                                              vk::PipelineBindPoint::eGraphics,
-                                                              1,
-                                                              **staticModelPipelineLayout);
-            frame.getPerFrameShaderBinding().bindToPipeline(cmd,
-                                                            vk::PipelineBindPoint::eGraphics,
-                                                            2,
-                                                            **staticModelPipelineLayout);
+            renderer->bindPipeline(commandBuffer);
+            renderer->applyShaderBinding(textureShaderBinding, 0, commandBuffer);
+            renderer->applyShaderBinding(objectDataShaderBinding, 1, commandBuffer);
+            renderer->applyShaderBinding(perFrameShaderBinding, 2, commandBuffer);
          }
+         renderer->render(commandBuffer, staticMeshDataList, vpScissor);
       }
    }
    void Frame::prepareFrame() {
-      Helpers::transitionImage(*commandBuffer,
-                               drawImage->getImage(),
-                               vk::ImageLayout::eUndefined,
-                               vk::ImageLayout::eColorAttachmentOptimal);
+      Frame::transitionImage(*commandBuffer,
+                             drawImage->getImage(),
+                             vk::ImageLayout::eUndefined,
+                             vk::ImageLayout::eColorAttachmentOptimal);
 
       const auto colorAttachmentInfo = vk::RenderingAttachmentInfo{
           .imageView = **drawImageView,
@@ -196,5 +198,27 @@ namespace tr::gfx {
    }
    void Frame::updateAnimationDataBuffer(const cm::gpu::AnimationData* data, size_t size) const {
       animationDataBuffer->updateMappedBufferValue(data, size);
+   }
+
+   void Frame::transitionImage(const vk::raii::CommandBuffer& cmd,
+                               const vk::Image& image,
+                               const vk::ImageLayout currentLayout,
+                               const vk::ImageLayout newLayout) {
+      const auto barrier = vk::ImageMemoryBarrier{
+          .srcAccessMask = vk::AccessFlagBits::eMemoryWrite,
+          .dstAccessMask = vk::AccessFlagBits::eMemoryWrite | vk::AccessFlagBits::eMemoryRead,
+          .oldLayout = currentLayout,
+          .newLayout = newLayout,
+          .image = image,
+          .subresourceRange = {.aspectMask = vk::ImageAspectFlagBits::eColor,
+                               .levelCount = 1,
+                               .layerCount = 1}};
+
+      cmd.pipelineBarrier(vk::PipelineStageFlagBits::eAllCommands,
+                          vk::PipelineStageFlagBits::eAllCommands,
+                          vk::DependencyFlagBits{}, // None
+                          {},
+                          {},
+                          barrier);
    }
 }
