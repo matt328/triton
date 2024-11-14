@@ -1,5 +1,6 @@
 #pragma once
 
+#include "cm/Handles.hpp"
 #include "mem/Buffer.hpp"
 namespace tr::gfx {
 
@@ -12,6 +13,10 @@ namespace tr::gfx {
       NeedsResize,
       Error
    };
+
+   namespace geo {
+      class GeometryData;
+   }
 
    using TracyContextPtr = std::unique_ptr<tracy::VkCtx, void (*)(tracy::VkCtx*)>;
 
@@ -62,6 +67,13 @@ namespace tr::gfx {
       [[nodiscard]] virtual auto createTracyContext(std::string_view name,
                                                     const vk::raii::CommandBuffer& commandBuffer)
           -> TracyContextPtr = 0;
+
+      // TODO(tomorrow) build out this and uploadTextureData
+      [[nodiscard]] virtual auto uploadVertexData(const geo::GeometryData& geometryData)
+          -> cm::MeshHandle = 0;
+
+      [[nodiscard]] virtual auto uploadImageData(const as::ImageData& imageData)
+          -> cm::TextureHandle = 0;
 
       [[nodiscard]] virtual auto findDepthFormat() -> vk::Format = 0;
 
