@@ -2,20 +2,20 @@
 
 #include "as/Vertex.hpp"
 #include "cm/Rando.hpp"
-#include "geo/GeometryHandles.hpp"
+#include "GeometryHandles.hpp"
 #include "cm/sdf/DistanceField.hpp"
-#include "geo/Transvoxel.hpp"
+#include "Transvoxel.hpp"
 #include <BaseException.hpp>
 
 namespace tr::as {
    struct Model;
    class ImageData;
    struct Vertex;
-} // namespace tr::as
+}
 
 namespace tr::ct {
    class HeightField;
-} // namespace tr::ct
+}
 
 namespace tr::gfx::geo {
 
@@ -110,11 +110,12 @@ namespace tr::gfx::geo {
       std::unordered_map<GeometryHandle, GeometryData> geometryDataMap;
       std::unordered_map<ImageHandle, as::ImageData> imageDataMap;
 
-      static auto generateNormal(int xCoord, int yCoord, const ct::HeightField& heightField)
-          -> glm::vec3;
+      static auto generateNormal(int xCoord,
+                                 int yCoord,
+                                 const ct::HeightField& heightField) -> glm::vec3;
 
       /// Loads a TRM file from the given path.
       /// @throws IOException if the file cannot be opened or parsed.
       static auto loadTrmFile(const std::filesystem::path& modelPath) -> as::Model;
    };
-} // namespace tr::gfx::geo
+}
