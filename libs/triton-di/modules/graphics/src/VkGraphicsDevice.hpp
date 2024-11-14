@@ -1,11 +1,16 @@
 #pragma once
 
+#include "geo/Mesh.hpp"
 #include "gfx/IGraphicsDevice.hpp"
 #include "tr/IWindow.hpp"
 
 namespace tr::gfx {
 
    class VkContext;
+
+   namespace geo {
+      class ImmutableMesh;
+   }
 
    namespace mem {
       class Allocator;
@@ -60,6 +65,8 @@ namespace tr::gfx {
 
       auto createTracyContext(std::string_view name, const vk::raii::CommandBuffer& commandBuffer)
           -> TracyContextPtr override;
+
+      auto uploadVertexData(const geo::GeometryData& geometryData) -> cm::MeshHandle override;
 
       [[nodiscard]] auto findDepthFormat() -> vk::Format override;
       [[nodiscard]] auto acquireNextSwapchainImage(vk::Semaphore semaphore)
@@ -153,5 +160,7 @@ namespace tr::gfx {
 
       std::shared_ptr<VkContext> asyncTransferContext;
       std::shared_ptr<mem::Allocator> allocator;
+
+      std::vector<geo::ImmutableMesh> meshList;
    };
 }

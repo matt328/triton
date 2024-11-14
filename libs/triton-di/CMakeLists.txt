@@ -16,6 +16,7 @@ set(common_SRC
    modules/graphics/src/DepthResources.cxx
    modules/graphics/src/FrameManager.cxx
    modules/graphics/src/Frame.cxx
+   modules/graphics/src/ResourceManager.cxx
 
    modules/graphics/src/sb/LayoutFactory.cxx
    modules/graphics/src/sb/Layout.cxx
@@ -33,6 +34,10 @@ set(common_SRC
    modules/graphics/src/renderer/RendererFactory.cxx
 
    modules/graphics/src/geo/VertexAttributes.cxx
+   modules/graphics/src/geo/GeometryFactory.cxx
+   modules/graphics/src/geo/Heightfield.cxx
+
+   modules/graphics/src/tex/Texture.cxx
 )
 
 add_library(${PROJECT_NAME} STATIC ${common_SRC})
@@ -75,6 +80,7 @@ target_precompile_headers(${PROJECT_NAME}
    <GLFW/glfw3.h>
    <imgui_impl_glfw.h>
    <imgui_impl_vulkan.h>
+   <stb_image.h>
    <variant>
    <vulkan/vulkan_raii.hpp>
    <vk_mem_alloc.hpp>

@@ -4,15 +4,11 @@
 
 #include "cm/Handles.hpp"
 #include "cm/LockableResource.hpp"
-#include "cm/RenderData.hpp"
 
-#include "geometry/RenderGroup.hpp"
-#include "geometry/Mesh.hpp"
-#include "textures/Texture.hpp"
-#include "geometry/GeometryHandles.hpp"
+#include "geo/Mesh.hpp"
+#include "tex/Texture.hpp"
+#include "geo/GeometryHandles.hpp"
 #include <optional>
-#include <vulkan/vulkan_enums.hpp>
-#include <vulkan/vulkan_handles.hpp>
 
 namespace tr::gfx::mem {
    class Allocator;
@@ -21,8 +17,7 @@ namespace tr::gfx::mem {
 }
 
 namespace tr::gfx {
-   class VkContext;
-   class GraphicsDevice;
+   class IGraphicsDevice;
 }
 
 namespace tr::gfx::geo {
@@ -30,7 +25,7 @@ namespace tr::gfx::geo {
    class GeometryFactory;
 }
 
-namespace tr::gfx::tx {
+namespace tr::gfx {
 
    constexpr uint32_t MaxImageSize = 1024 * 1024 * 8;
 
@@ -58,17 +53,6 @@ namespace tr::gfx::tx {
                              .borderColor = vk::BorderColor::eIntOpaqueBlack,
                              .unnormalizedCoordinates = VK_FALSE};
 
-   /// Exception thrown when an error occurs uploading a resource to the GPU
-   class ResourceUploadException final : public BaseException {
-    public:
-      using BaseException::BaseException;
-   };
-
-   class ResourceCreateException final : public tr::BaseException {
-    public:
-      using BaseException::BaseException;
-   };
-
    class ResourceManager {
     public:
       explicit ResourceManager(std::shared_ptr<IGraphicsDevice> newGraphicsDevice);
@@ -93,24 +77,15 @@ namespace tr::gfx::tx {
 
       auto getTextures() const -> cm::LockableResource<const std::vector<vk::DescriptorImageInfo>>;
 
-      void setRenderData(const cm::gpu::RenderData& newRenderData);
-
-      auto getRenderData() const -> cm::LockableResource<const cm::gpu::RenderData>;
-
     private:
-      const GraphicsDevice& graphicsDevice;
+      std::shared_ptr<IGraphicsDevice> graphicsDevice;
 
       std::unique_ptr<geo::GeometryFactory> geometryFactory;
       std::vector<geo::ImmutableMesh> meshList;
 
       mutable TracyLockable(std::mutex, textureListMutex);
       std::vector<vk::DescriptorImageInfo> textureInfoList;
-      std::vector<std::unique_ptr<Textures::Texture>> textureList;
-
-      mutable TracyLockable(std::mutex, renderDataMutex);
-      cm::gpu::RenderData renderData;
-
-      std::unique_ptr<geo::RenderGroup> debugGroup;
+      std::vector<std::unique_ptr<tex::Texture>> textureList;
 
       /// Uploads Geometry (and images) to the GPU
       /// @throws ResourceUploadException if there's an error uploading.
@@ -119,4 +94,4 @@ namespace tr::gfx::tx {
                           std::optional<geo::ImageHandle> imageHandle = std::nullopt)
           -> cm::ModelData;
    };
-} // namespace tr::gfx::tx
+}

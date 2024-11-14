@@ -16,7 +16,7 @@ namespace tr::gfx::tex {
    class Texture final {
     public:
       explicit Texture(const std::string_view& filename,
-                       const mem::Allocator& raiillocator,
+                       const mem::Allocator& allocator,
                        const vk::raii::Device& device,
                        const VkContext& transferContext);
 
@@ -24,7 +24,7 @@ namespace tr::gfx::tex {
                        uint32_t width,
                        uint32_t height,
                        uint32_t channels,
-                       const mem::Allocator& raiillocator,
+                       const mem::Allocator& allocator,
                        const vk::raii::Device& device,
                        const VkContext& transferContext);
 
@@ -35,11 +35,11 @@ namespace tr::gfx::tex {
       auto operator=(const Texture&) -> Texture& = delete;
       auto operator=(Texture&&) -> Texture& = delete;
 
-      [[nodiscard]] vk::DescriptorImageInfo getImageInfo() const {
+      [[nodiscard]] auto getImageInfo() const -> vk::DescriptorImageInfo {
          return imageInfo;
       }
 
-      [[nodiscard]] vk::DescriptorImageInfo& getImageInfoRef() {
+      [[nodiscard]] auto getImageInfoRef() -> vk::DescriptorImageInfo& {
          return imageInfo;
       }
 
@@ -55,7 +55,7 @@ namespace tr::gfx::tex {
                       uint32_t width,
                       uint32_t height,
                       uint32_t channels,
-                      const mem::Allocator& raiillocator,
+                      const mem::Allocator& allocator,
                       const vk::raii::Device& device,
                       const VkContext& transferContext,
                       const std::string_view& textureName = "unnamed texture");
