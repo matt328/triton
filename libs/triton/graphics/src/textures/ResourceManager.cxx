@@ -76,9 +76,6 @@ namespace tr::gfx::tx {
    auto ResourceManager::createModel(const std::filesystem::path& filename) noexcept
        -> cm::ModelData {
       ZoneNamedN(zn1, "ResourceManager::loadModel", true);
-
-      ZoneNamedN(zn2, "Loading Model", true);
-
       // Execute this as an anonymous lambda so we can translate the exception
       auto tritonModelData = [this, &filename]() {
          try {
@@ -91,9 +88,12 @@ namespace tr::gfx::tx {
       // Upload Meshes and Textures and fill out handles in modelData
       auto modelData = [this, &tritonModelData]() {
          try {
-            return uploadGeometry(tritonModelData.getGeometryHandle(),
-                                  cm::Topology::Triangles,
-                                  tritonModelData.getImageHandle());
+
+            const auto meshData = graphicsDevice->
+
+                                  return uploadGeometry(tritonModelData.getGeometryHandle(),
+                                                        cm::Topology::Triangles,
+                                                        tritonModelData.getImageHandle());
          } catch (BaseException& ex) {
             ex << "ResourceManager::createModel(): ";
             throw;
@@ -110,15 +110,15 @@ namespace tr::gfx::tx {
       return modelData;
    }
 
-   auto ResourceManager::createAABB(const glm::vec3& min, const glm::vec3& max) noexcept
-       -> cm::ModelData {
+   auto ResourceManager::createAABB(const glm::vec3& min,
+                                    const glm::vec3& max) noexcept -> cm::ModelData {
       auto data = geometryFactory->generateAABB(min, max);
       return uploadGeometry(data, cm::Topology::LineList);
    }
 
-   auto ResourceManager::uploadGeometry(const geo::GeometryHandle& geometryHandle,
-                                        cm::Topology topology,
-                                        std::optional<geo::ImageHandle> imageHandle)
+   auto ResourceManager::uploadGeometry2(const geo::GeometryHandle& geometryHandle,
+                                         cm::Topology topology,
+                                         std::optional<geo::ImageHandle> imageHandle)
        -> cm::ModelData {
       auto allocator = graphicsDevice.getAllocator();
       auto context = graphicsDevice.getAsyncTransferContext();
