@@ -114,9 +114,9 @@ namespace tr::gfx::tx {
 
       /// Uploads Geometry (and images) to the GPU
       /// @throws ResourceUploadException if there's an error uploading.
-      auto uploadGeometry(const geo::GeometryHandle& geometryHandle,
-                          cm::Topology topology = cm::Topology::Triangles,
-                          std::optional<geo::ImageHandle> imageHandle = std::nullopt)
+      auto uploadGeometry2(const geo::GeometryHandle& geometryHandle,
+                           cm::Topology topology = cm::Topology::Triangles,
+                           std::optional<geo::ImageHandle> imageHandle = std::nullopt)
           -> cm::ModelData;
    };
 } // namespace tr::gfx::tx

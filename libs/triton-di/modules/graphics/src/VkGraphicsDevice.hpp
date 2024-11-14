@@ -16,6 +16,10 @@ namespace tr::gfx {
       class Allocator;
    }
 
+   namespace tex {
+      class Texture;
+   }
+
    class VkGraphicsDevice : public IGraphicsDevice {
     public:
       struct Config {
@@ -44,8 +48,8 @@ namespace tr::gfx {
                                 const std::string& name)
           -> std::unique_ptr<vk::raii::PipelineLayout> override;
 
-      auto createPipeline(const vk::GraphicsPipelineCreateInfo& createInfo, const std::string& name)
-          -> std::unique_ptr<vk::raii::Pipeline> override;
+      auto createPipeline(const vk::GraphicsPipelineCreateInfo& createInfo,
+                          const std::string& name) -> std::unique_ptr<vk::raii::Pipeline> override;
 
       [[nodiscard]] auto createImage(const vk::ImageCreateInfo& imageCreateInfo,
                                      const vma::AllocationCreateInfo& allocationCreateInfo,
@@ -55,11 +59,11 @@ namespace tr::gfx {
       [[nodiscard]] auto createDrawImage(std::string_view newName) const
           -> std::pair<std::unique_ptr<mem::Image>, std::unique_ptr<vk::raii::ImageView>> override;
 
-      auto createStorageBuffer(vk::DeviceSize size, const std::string& name)
-          -> std::unique_ptr<mem::Buffer> override;
+      auto createStorageBuffer(vk::DeviceSize size,
+                               const std::string& name) -> std::unique_ptr<mem::Buffer> override;
 
-      auto createUniformBuffer(vk::DeviceSize size, const std::string& name)
-          -> std::unique_ptr<mem::Buffer> override;
+      auto createUniformBuffer(vk::DeviceSize size,
+                               const std::string& name) -> std::unique_ptr<mem::Buffer> override;
 
       auto createCommandBuffer() -> std::unique_ptr<vk::raii::CommandBuffer> override;
 
@@ -67,6 +71,8 @@ namespace tr::gfx {
           -> TracyContextPtr override;
 
       auto uploadVertexData(const geo::GeometryData& geometryData) -> cm::MeshHandle override;
+
+      auto uploadImageData(const as::ImageData& imageData) -> cm::TextureHandle override;
 
       [[nodiscard]] auto findDepthFormat() -> vk::Format override;
       [[nodiscard]] auto acquireNextSwapchainImage(vk::Semaphore semaphore)
@@ -162,5 +168,9 @@ namespace tr::gfx {
       std::shared_ptr<mem::Allocator> allocator;
 
       std::vector<geo::ImmutableMesh> meshList;
+
+      mutable TracyLockable(std::mutex, textureListMutex);
+      std::vector<vk::DescriptorImageInfo> textureInfoList;
+      std::vector<std::unique_ptr<tex::Texture>> textureList;
    };
 }

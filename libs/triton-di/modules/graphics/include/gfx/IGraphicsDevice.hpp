@@ -2,6 +2,11 @@
 
 #include "cm/Handles.hpp"
 #include "mem/Buffer.hpp"
+
+namespace tr::as {
+   class ImageData;
+}
+
 namespace tr::gfx {
 
    namespace mem {

@@ -35,7 +35,7 @@ set(common_SRC
 
    modules/graphics/src/geo/VertexAttributes.cxx
    modules/graphics/src/geo/GeometryFactory.cxx
-   modules/graphics/src/geo/Heightfield.cxx
+   modules/graphics/src/geo/HeightField.cxx
 
    modules/graphics/src/tex/Texture.cxx
 )

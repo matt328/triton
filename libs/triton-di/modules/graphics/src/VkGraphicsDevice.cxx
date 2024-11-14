@@ -439,6 +439,9 @@ namespace tr::gfx {
       }
    }
 
+   auto VkGraphicsDevice::uploadImageData(const as::ImageData& imageData) -> cm::TextureHandle {
+   }
+
    // Utility Functions
 
    auto VkGraphicsDevice::findDepthFormat() -> vk::Format {
