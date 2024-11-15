@@ -2,6 +2,7 @@
 
 #include "cm/RenderData.hpp"
 #include "gfx/IGraphicsDevice.hpp"
+#include <vulkan/vulkan_structs.hpp>
 
 namespace tr::gfx {
 
@@ -43,9 +44,10 @@ namespace tr::gfx {
       void resetInFlightFence();
 
       void applyRenderData(const cm::gpu::RenderData& renderData);
+      void applyTextures(const std::vector<vk::DescriptorImageInfo>& imageInfo);
       void render(const std::shared_ptr<rd::IRenderer>& renderer,
                   const std::tuple<vk::Viewport, vk::Rect2D>& vpScissor);
-      void present();
+      auto present() -> bool;
 
     private:
       std::unique_ptr<vk::raii::CommandBuffer> commandBuffer;
@@ -56,6 +58,7 @@ namespace tr::gfx {
 
       std::unique_ptr<vk::raii::Fence> inFlightFence;
       std::unique_ptr<vk::raii::Semaphore> imageAvailableSemaphore;
+      std::unique_ptr<vk::raii::Semaphore> renderFinishedSemaphore;
 
       std::vector<cm::gpu::MeshData> staticMeshDataList;
       std::vector<cm::gpu::MeshData> lineDataList;

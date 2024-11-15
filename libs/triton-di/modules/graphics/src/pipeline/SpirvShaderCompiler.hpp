@@ -9,6 +9,12 @@ namespace tr::gfx::pipe {
    class SpirvShaderCompiler : public IShaderCompiler {
     public:
       explicit SpirvShaderCompiler(std::shared_ptr<IGraphicsDevice> newGraphicsDevice);
+      ~SpirvShaderCompiler();
+
+      SpirvShaderCompiler(const SpirvShaderCompiler&) = default;
+      SpirvShaderCompiler(SpirvShaderCompiler&&) = delete;
+      auto operator=(const SpirvShaderCompiler&) -> SpirvShaderCompiler& = default;
+      auto operator=(SpirvShaderCompiler&&) -> SpirvShaderCompiler& = delete;
 
       [[nodiscard]] auto createShaderModule(vk::ShaderStageFlagBits shaderType,
                                             const std::filesystem::path& filename) const

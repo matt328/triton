@@ -23,7 +23,7 @@ namespace tr {
    auto ComponentFactory::getContext(const FrameworkConfig& config) -> std::shared_ptr<IContext> {
 
       const auto rendererConfig = gfx::RenderContextConfig{
-          .useDescriptorBuffers = true,
+          .useDescriptorBuffers = false,
           .maxTextures = 16,
       };
 
