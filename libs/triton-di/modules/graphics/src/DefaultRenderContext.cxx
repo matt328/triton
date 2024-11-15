@@ -10,20 +10,18 @@
 #include "FrameManager.hpp"
 #include "Frame.hpp"
 #include "renderer/IRenderer.hpp"
-#include <cstdint>
 #include <mutex>
-#include <variant>
 
 namespace tr::gfx {
 
    DefaultRenderContext::DefaultRenderContext(
-       std::shared_ptr<IGraphicsDevice> graphicsDevice,
+       std::shared_ptr<IGraphicsDevice> newGraphicsDevice,
        std::shared_ptr<sb::ILayoutFactory> newLayoutFactory,
        std::shared_ptr<sb::IShaderBindingFactory> newShaderBindingFactory,
        std::shared_ptr<pipe::IShaderCompiler> newShaderCompiler,
        std::shared_ptr<rd::RendererFactory> newRendererFactory,
        std::shared_ptr<gp::IGameplaySystem> newGameplaySystem)
-       : graphicsDevice{std::move(graphicsDevice)},
+       : graphicsDevice{std::move(newGraphicsDevice)},
          layoutFactory{std::move(newLayoutFactory)},
          shaderBindingFactory{std::move(newShaderBindingFactory)},
          shaderCompiler{std::move(newShaderCompiler)},
@@ -39,14 +37,12 @@ namespace tr::gfx {
                              .setLayouts = defaultSetLayouts,
                              .vertexComponents = defaultVertexComponents});
 
-      // TODO(matt): other renderers
-
       depthResources = std::make_shared<DepthResources>(graphicsDevice);
 
       frameManager = std::make_shared<FrameManager>(2,
                                                     graphicsDevice,
                                                     depthResources->getImageView(),
-                                                    newShaderBindingFactory);
+                                                    shaderBindingFactory);
    }
 
    void DefaultRenderContext::render() {
@@ -74,15 +70,16 @@ namespace tr::gfx {
          currentFrame.applyRenderData(renderData);
       }
 
-      // TODO(matt) resource manager
-      // how to look up meshes from renderers
-
-      const auto imageInfoList = resourceManager->getTextures();
-      currentFrame.applyTextures(imageInfoList);
+      {
+         const auto imageInfoList = graphicsDevice->getTextures();
+         currentFrame.applyTextures(imageInfoList.get());
+      }
 
       currentFrame.render(defaultRenderer, getViewportAndScissor());
 
-      currentFrame.present();
+      if (currentFrame.present()) {
+         resizeSwapchain();
+      }
 
       frameManager->nextFrame();
    }

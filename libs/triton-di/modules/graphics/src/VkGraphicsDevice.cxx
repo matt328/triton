@@ -1,12 +1,15 @@
 #include "VkGraphicsDevice.hpp"
 #include "Vulkan.hpp"
 #include "VkContext.hpp"
+#include "as/Model.hpp"
 #include "cm/Handles.hpp"
 #include "geo/GeometryData.hpp"
 #include "gfx/IGraphicsDevice.hpp"
 #include "mem/Allocator.hpp"
 #include "mem/Image.hpp"
 #include "ResourceExceptions.hpp"
+#include "tex/Texture.hpp"
+#include <vulkan/vulkan_structs.hpp>
 
 namespace tr::gfx {
 
@@ -259,6 +262,21 @@ namespace tr::gfx {
       }
    }
 
+   auto VkGraphicsDevice::submit(const vk::SubmitInfo& submitInfo,
+                                 const std::unique_ptr<vk::raii::Fence>& fence) -> void {
+      graphicsQueue->submit(submitInfo, **fence);
+   }
+
+   auto VkGraphicsDevice::present(const std::unique_ptr<vk::raii::Semaphore>& semaphore,
+                                  uint32_t imageIndex) -> vk::Result {
+      const auto sphore = std::array<vk::Semaphore, 1>{*semaphore};
+      return graphicsQueue->presentKHR(vk::PresentInfoKHR{.waitSemaphoreCount = 1,
+                                                          .pWaitSemaphores = sphore.data(),
+                                                          .swapchainCount = 1,
+                                                          .pSwapchains = &**swapchain,
+                                                          .pImageIndices = &imageIndex});
+   }
+
    auto VkGraphicsDevice::createPipelineLayout(const vk::PipelineLayoutCreateInfo& createInfo,
                                                const std::string& name)
        -> std::unique_ptr<vk::raii::PipelineLayout> {
@@ -307,8 +325,7 @@ namespace tr::gfx {
       constexpr auto imageAllocateCreateInfo =
           vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eGpuOnly,
                                     .requiredFlags = vk::MemoryPropertyFlagBits::eDeviceLocal};
-      auto drawImage =
-          allocator->createImage(imageCreateInfo, imageAllocateCreateInfo, "Draw Image");
+      auto drawImage = allocator->createImage(imageCreateInfo, imageAllocateCreateInfo, newName);
 
       const auto imageViewCreateInfo =
           vk::ImageViewCreateInfo{.image = drawImage->getImage(),
@@ -440,6 +457,33 @@ namespace tr::gfx {
    }
 
    auto VkGraphicsDevice::uploadImageData(const as::ImageData& imageData) -> cm::TextureHandle {
+      const auto textureHandle = textureList.size();
+      textureList.push_back(
+          std::make_unique<tex::Texture>(static_cast<const void*>(imageData.data.data()),
+                                         imageData.width,
+                                         imageData.height,
+                                         imageData.component,
+                                         *allocator,
+                                         *vulkanDevice,
+                                         *asyncTransferContext));
+
+      {
+         ZoneNamedN(zn1, "Update TextureInfoList", true);
+         std::lock_guard lock(textureListMutex);
+         LockMark(textureListMutex);
+         LockableName(textureListMutex, "Mutate", 6);
+         textureInfoList.emplace_back(textureList[textureHandle]->getImageInfo());
+      }
+      return textureHandle;
+   }
+
+   auto VkGraphicsDevice::getTextures() const
+       -> cm::LockableResource<const std::vector<vk::DescriptorImageInfo>> {
+      return {textureInfoList, textureListMutex};
+   }
+
+   auto VkGraphicsDevice::getMesh(cm::MeshHandle meshHandle) -> geo::ImmutableMesh& {
+      return meshList.at(meshHandle);
    }
 
    // Utility Functions
@@ -527,7 +571,7 @@ namespace tr::gfx {
        [[maybe_unused]] const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
        [[maybe_unused]] void* pUserData) -> VkBool32 {
 
-      // Log.trace("Validation Layer: {0}", pCallbackData->pMessage);
+      Log.trace("Validation Layer: {0}", pCallbackData->pMessage);
       return VK_FALSE;
    }
 
@@ -543,7 +587,7 @@ namespace tr::gfx {
       // if (!strcmp(pLayerPrefix, "Loader Message")) {
       //    return VK_FALSE;
       // }
-      // Log.debug("Debug Callback ({0}): {1}", pLayerPrefix, pMessage);
+      Log.debug("Debug Callback ({0}): {1}", pLayerPrefix, pMessage);
       return VK_TRUE;
    }
 

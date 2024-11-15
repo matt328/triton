@@ -24,6 +24,19 @@ namespace tr::gfx {
           vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eGpuOnly};
 
       depthImage = graphicsDevice->createImage(imageCreateInfo, allocationCreateInfo, "Depth");
+
+      constexpr auto range =
+          vk::ImageSubresourceRange{.aspectMask = vk::ImageAspectFlagBits::eDepth,
+                                    .levelCount = 1,
+                                    .layerCount = 1};
+
+      const auto viewInfo = vk::ImageViewCreateInfo{.image = depthImage->getImage(),
+                                                    .viewType = vk::ImageViewType::e2D,
+                                                    .format = depthFormat,
+                                                    .subresourceRange = range};
+      // TODO(matt) finish abstracting away vulkan device behind graphicsDevice
+      depthImageView = std::make_shared<vk::raii::ImageView>(
+          graphicsDevice->getVulkanDevice()->createImageView(viewInfo));
    }
 
 }

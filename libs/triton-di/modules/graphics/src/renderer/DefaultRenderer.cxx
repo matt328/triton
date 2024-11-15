@@ -5,8 +5,9 @@
 
 namespace tr::gfx::rd {
    DefaultRenderer::DefaultRenderer(const RendererConfig& config,
-                                    const std::shared_ptr<IGraphicsDevice>& graphicsDevice,
-                                    const std::shared_ptr<pipe::IShaderCompiler>& shaderCompiler) {
+                                    std::shared_ptr<IGraphicsDevice> newGraphicsDevice,
+                                    const std::shared_ptr<pipe::IShaderCompiler>& shaderCompiler)
+       : graphicsDevice{std::move(newGraphicsDevice)} {
       Log.trace("Constructing DefaultRenderer");
       pipeline =
           std::make_shared<pipe::StaticModelPipeline>(graphicsDevice, shaderCompiler, config);
@@ -33,7 +34,7 @@ namespace tr::gfx::rd {
       {
          ZoneNamedN(zone3, "Render Static Meshes", true);
          for (const auto& meshData : meshDataList) {
-            const auto& mesh = resourceManager->getMesh(meshData.handle);
+            const auto& mesh = graphicsDevice->getMesh(meshData.handle);
 
             commandBuffer->bindVertexBuffers(0, mesh.getVertexBuffer()->getBuffer(), {0});
             commandBuffer->bindIndexBuffer(mesh.getIndexBuffer()->getBuffer(),

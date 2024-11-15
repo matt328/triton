@@ -27,7 +27,7 @@ namespace tr::gfx::tex {
       initialize(pixels, width, height, STBI_rgb_alpha, allocator, device, transferContext);
    }
 
-   Texture::Texture(void* data,
+   Texture::Texture(const void* data,
                     const uint32_t width,
                     const uint32_t height,
                     const uint32_t channels,
@@ -41,7 +41,7 @@ namespace tr::gfx::tex {
    Texture::~Texture() { // NOLINT(*-use-equals-default)
    }
 
-   void Texture::initialize(void* data,
+   void Texture::initialize(const void* data,
                             uint32_t width,
                             uint32_t height,
                             uint32_t channels,

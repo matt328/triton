@@ -5,7 +5,7 @@ namespace tr::gfx::sb {
 }
 
 namespace tr::cm::gpu {
-   class MeshData;
+   struct MeshData;
 }
 
 namespace tr::gfx::rd {

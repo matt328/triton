@@ -2,12 +2,18 @@
 
 #include <SPIRV/GlslangToSpv.h>
 #include <fstream>
+#include <glslang/Public/ShaderLang.h>
 
 namespace tr::gfx::pipe {
 
    SpirvShaderCompiler::SpirvShaderCompiler(std::shared_ptr<IGraphicsDevice> newGraphicsDevice)
        : graphicsDevice{std::move(newGraphicsDevice)} {
       Log.trace("Constructed SpirvShaderCompiler");
+      glslang::InitializeProcess();
+   }
+
+   SpirvShaderCompiler::~SpirvShaderCompiler() {
+      glslang::FinalizeProcess();
    }
 
    [[nodiscard]] auto SpirvShaderCompiler::createShaderModule(

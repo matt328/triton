@@ -89,11 +89,9 @@ namespace tr::gfx {
       const auto result = graphicsDevice->acquireNextSwapchainImage(*imageAvailableSemaphore);
       if (std::holds_alternative<uint32_t>(result)) {
          swapchainImageIndex = std::get<uint32_t>(result);
-      } else {
-         return std::get<AcquireResult>(result);
+         return AcquireResult::Success;
       }
-
-      return AcquireResult::Error;
+      return std::get<AcquireResult>(result);
    }
 
    void Frame::resetInFlightFence() {
@@ -133,6 +131,10 @@ namespace tr::gfx {
 
          pushConstants = renderData.pushConstants;
       }
+   }
+
+   void Frame::applyTextures(const std::vector<vk::DescriptorImageInfo>& imageInfo) {
+      textureShaderBinding->bindImageSamplers(3, imageInfo);
    }
 
    void Frame::render(const std::shared_ptr<rd::IRenderer>& renderer,
@@ -187,16 +189,45 @@ namespace tr::gfx {
       commandBuffer->beginRendering(renderingInfo);
    }
 
-   void Frame::present() {
+   auto Frame::present() -> bool {
+      bool recreateSwapchain{};
+      constexpr auto waitStages =
+          std::array<vk::PipelineStageFlags, 1>{vk::PipelineStageFlagBits::eColorAttachmentOutput};
+
+      const auto renderFinishedSemaphores = std::array<vk::Semaphore, 1>{*renderFinishedSemaphore};
+
+      const auto submitInfo = vk::SubmitInfo{.waitSemaphoreCount = 1,
+                                             .pWaitSemaphores = &**imageAvailableSemaphore,
+                                             .pWaitDstStageMask = waitStages.data(),
+                                             .commandBufferCount = 1,
+                                             .pCommandBuffers = &**commandBuffer,
+                                             .signalSemaphoreCount = 1,
+                                             .pSignalSemaphores = renderFinishedSemaphores.data()};
+
+      graphicsDevice->submit(submitInfo, inFlightFence);
+
+      try {
+         if (const auto result2 =
+                 graphicsDevice->present(renderFinishedSemaphore, swapchainImageIndex);
+             result2 == vk::Result::eSuboptimalKHR) {
+            recreateSwapchain = true;
+         }
+      } catch (const std::exception& ex) {
+         Log.info("Swapchain needs recreated: {0}", ex.what());
+         recreateSwapchain = true;
+      }
+      return recreateSwapchain;
    }
 
    void Frame::updateObjectDataBuffer(const cm::gpu::ObjectData* data, size_t size) const {
       objectDataBuffer->updateMappedBufferValue(data, size);
    }
    void Frame::updatePerFrameDataBuffer(const cm::gpu::CameraData* data, size_t size) const {
+      cameraDataBuffer->mapBuffer();
       cameraDataBuffer->updateMappedBufferValue(data, size);
    }
    void Frame::updateAnimationDataBuffer(const cm::gpu::AnimationData* data, size_t size) const {
+      animationDataBuffer->mapBuffer();
       animationDataBuffer->updateMappedBufferValue(data, size);
    }
 
