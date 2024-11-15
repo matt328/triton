@@ -36,9 +36,10 @@ auto main() -> int {
 
    try {
 
-      const auto frameworkConfig =
-          tr::FrameworkConfig{.initialWindowSize = glm::ivec2(width, height),
-                              .windowTitle = windowTitle.str()};
+      const auto frameworkConfig = tr::FrameworkConfig{
+          .initialWindowSize = glm::ivec2(width, height),
+          .windowTitle = windowTitle.str(),
+      };
 
       auto context = tr::ComponentFactory::getContext(frameworkConfig);
 
