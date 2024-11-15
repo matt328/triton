@@ -4,7 +4,6 @@
 #include "gfx/IGraphicsDevice.hpp"
 #include "pipeline/IShaderCompiler.hpp"
 #include "renderer/RendererConfig.hpp"
-#include <vulkan/vulkan_raii.hpp>
 
 namespace tr::gfx {
    class IGraphicsDevice;
