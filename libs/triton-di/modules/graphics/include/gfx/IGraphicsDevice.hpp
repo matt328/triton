@@ -1,7 +1,11 @@
 #pragma once
 
 #include "cm/Handles.hpp"
+#include "cm/LockableResource.hpp"
+#include "geo/Mesh.hpp"
 #include "mem/Buffer.hpp"
+#include <vulkan/vulkan_raii.hpp>
+#include <vulkan/vulkan_structs.hpp>
 
 namespace tr::as {
    class ImageData;
@@ -42,6 +46,12 @@ namespace tr::gfx {
 
       [[nodiscard]] virtual auto getVulkanDevice() const -> std::shared_ptr<vk::raii::Device> = 0;
 
+      virtual auto submit(const vk::SubmitInfo& submitInfo,
+                          const std::unique_ptr<vk::raii::Fence>& fence) -> void = 0;
+
+      [[nodiscard]] virtual auto present(const std::unique_ptr<vk::raii::Semaphore>& semaphore,
+                                         uint32_t imageIndex) -> vk::Result = 0;
+
       [[nodiscard]] virtual auto getSwapchainExtent() -> vk::Extent2D = 0;
 
       [[nodiscard]] virtual auto createPipelineLayout(
@@ -73,7 +83,6 @@ namespace tr::gfx {
                                                     const vk::raii::CommandBuffer& commandBuffer)
           -> TracyContextPtr = 0;
 
-      // TODO(tomorrow) build out this and uploadTextureData
       [[nodiscard]] virtual auto uploadVertexData(const geo::GeometryData& geometryData)
           -> cm::MeshHandle = 0;
 
@@ -84,5 +93,10 @@ namespace tr::gfx {
 
       [[nodiscard]] virtual auto acquireNextSwapchainImage(vk::Semaphore)
           -> std::variant<uint32_t, AcquireResult> = 0;
+
+      [[nodiscard]] virtual auto getTextures() const
+          -> cm::LockableResource<const std::vector<vk::DescriptorImageInfo>> = 0;
+
+      [[nodiscard]] virtual auto getMesh(cm::MeshHandle meshHandle) -> geo::ImmutableMesh& = 0;
    };
 }

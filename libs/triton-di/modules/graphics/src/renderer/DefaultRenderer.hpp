@@ -17,7 +17,7 @@ namespace tr::gfx::rd {
    class DefaultRenderer : public IRenderer {
     public:
       explicit DefaultRenderer(const RendererConfig& config,
-                               const std::shared_ptr<IGraphicsDevice>& graphicsDevice,
+                               std::shared_ptr<IGraphicsDevice> graphicsDevice,
                                const std::shared_ptr<pipe::IShaderCompiler>& shaderCompiler);
       ~DefaultRenderer() override = default;
 
@@ -38,6 +38,7 @@ namespace tr::gfx::rd {
                   const std::tuple<vk::Viewport, vk::Rect2D>& vpScissor) override;
 
     private:
+      std::shared_ptr<IGraphicsDevice> graphicsDevice;
       std::shared_ptr<pipe::IPipeline> pipeline;
    };
 }

@@ -3,6 +3,7 @@
 #include "geo/Mesh.hpp"
 #include "gfx/IGraphicsDevice.hpp"
 #include "tr/IWindow.hpp"
+#include "tex/Texture.hpp"
 
 namespace tr::gfx {
 
@@ -14,10 +15,6 @@ namespace tr::gfx {
 
    namespace mem {
       class Allocator;
-   }
-
-   namespace tex {
-      class Texture;
    }
 
    class VkGraphicsDevice : public IGraphicsDevice {
@@ -42,14 +39,20 @@ namespace tr::gfx {
          return vulkanDevice;
       }
 
+      auto submit(const vk::SubmitInfo& submitInfo, const std::unique_ptr<vk::raii::Fence>& fence)
+          -> void override;
+
+      auto present(const std::unique_ptr<vk::raii::Semaphore>& semaphore, uint32_t imageIndex)
+          -> vk::Result override;
+
       auto getSwapchainExtent() -> vk::Extent2D override;
 
       auto createPipelineLayout(const vk::PipelineLayoutCreateInfo& createInfo,
                                 const std::string& name)
           -> std::unique_ptr<vk::raii::PipelineLayout> override;
 
-      auto createPipeline(const vk::GraphicsPipelineCreateInfo& createInfo,
-                          const std::string& name) -> std::unique_ptr<vk::raii::Pipeline> override;
+      auto createPipeline(const vk::GraphicsPipelineCreateInfo& createInfo, const std::string& name)
+          -> std::unique_ptr<vk::raii::Pipeline> override;
 
       [[nodiscard]] auto createImage(const vk::ImageCreateInfo& imageCreateInfo,
                                      const vma::AllocationCreateInfo& allocationCreateInfo,
@@ -59,11 +62,11 @@ namespace tr::gfx {
       [[nodiscard]] auto createDrawImage(std::string_view newName) const
           -> std::pair<std::unique_ptr<mem::Image>, std::unique_ptr<vk::raii::ImageView>> override;
 
-      auto createStorageBuffer(vk::DeviceSize size,
-                               const std::string& name) -> std::unique_ptr<mem::Buffer> override;
+      auto createStorageBuffer(vk::DeviceSize size, const std::string& name)
+          -> std::unique_ptr<mem::Buffer> override;
 
-      auto createUniformBuffer(vk::DeviceSize size,
-                               const std::string& name) -> std::unique_ptr<mem::Buffer> override;
+      auto createUniformBuffer(vk::DeviceSize size, const std::string& name)
+          -> std::unique_ptr<mem::Buffer> override;
 
       auto createCommandBuffer() -> std::unique_ptr<vk::raii::CommandBuffer> override;
 
@@ -73,6 +76,11 @@ namespace tr::gfx {
       auto uploadVertexData(const geo::GeometryData& geometryData) -> cm::MeshHandle override;
 
       auto uploadImageData(const as::ImageData& imageData) -> cm::TextureHandle override;
+
+      auto getTextures() const
+          -> cm::LockableResource<const std::vector<vk::DescriptorImageInfo>> override;
+
+      auto getMesh(cm::MeshHandle meshHandle) -> geo::ImmutableMesh& override;
 
       [[nodiscard]] auto findDepthFormat() -> vk::Format override;
       [[nodiscard]] auto acquireNextSwapchainImage(vk::Semaphore semaphore)

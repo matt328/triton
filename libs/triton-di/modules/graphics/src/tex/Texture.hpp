@@ -20,7 +20,7 @@ namespace tr::gfx::tex {
                        const vk::raii::Device& device,
                        const VkContext& transferContext);
 
-      explicit Texture(void* data,
+      explicit Texture(const void* data,
                        uint32_t width,
                        uint32_t height,
                        uint32_t channels,
@@ -51,7 +51,7 @@ namespace tr::gfx::tex {
       vk::ImageLayout imageLayout;
       vk::DescriptorImageInfo imageInfo;
 
-      void initialize(void* data,
+      void initialize(const void* data,
                       uint32_t width,
                       uint32_t height,
                       uint32_t channels,
