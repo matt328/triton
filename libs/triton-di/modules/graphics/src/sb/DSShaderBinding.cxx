@@ -53,7 +53,7 @@ namespace tr::gfx::sb {
                                         const vk::PipelineBindPoint bindPoint,
                                         const uint32_t setIndex,
                                         const vk::PipelineLayout& layout) const {
-      cmd.bindDescriptorSets(bindPoint, layout, setIndex, **vkDescriptorSet, nullptr);
+      cmd.bindDescriptorSets(bindPoint, layout, setIndex, **vkDescriptorSet, {});
    }
 
 }

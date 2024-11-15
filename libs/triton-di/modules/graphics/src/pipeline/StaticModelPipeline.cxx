@@ -1,7 +1,6 @@
 #include "StaticModelPipeline.hpp"
 #include "geo/VertexAttributes.hpp"
 #include "renderer/RendererConfig.hpp"
-#include <vulkan/vulkan_enums.hpp>
 
 namespace tr::gfx::pipe {
    StaticModelPipeline::StaticModelPipeline(const std::shared_ptr<IGraphicsDevice>& graphicsDevice,
@@ -126,6 +125,7 @@ namespace tr::gfx::pipe {
    }
 
    void StaticModelPipeline::bind(const vk::raii::CommandBuffer& cmd) {
+      cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, **pipeline);
    }
 
    void StaticModelPipeline::applyShaderBinding(

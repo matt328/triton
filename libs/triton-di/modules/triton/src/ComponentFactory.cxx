@@ -27,8 +27,13 @@ namespace tr {
           .maxTextures = 16,
       };
 
+      const auto deviceConfig =
+          gfx::VkGraphicsDevice::Config{.validationLayers = {"VK_LAYER_KHRONOS_validation"},
+                                        .validationEnabled = true};
+
       const auto injector = di::make_injector(
           di::bind<gfx::RenderContextConfig>.to(rendererConfig),
+          di::bind<gfx::VkGraphicsDevice::Config>.to(deviceConfig),
           di::bind<tr::IWindow>.to<gfx::Window>(),
           di::bind<IEventBus>.to<DefaultEventBus>(),
           di::bind<gp::IGameplaySystem>.to<gp::GameplaySystem>(),

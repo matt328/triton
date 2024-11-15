@@ -58,6 +58,7 @@ namespace tr::gfx {
       animationDataShaderBinding->bindBuffer(0,
                                              *animationDataBuffer,
                                              sizeof(cm::AnimationData) * cm::gpu::MAX_OBJECTS);
+      createSwapchainResources();
    }
 
    Frame::~Frame() {

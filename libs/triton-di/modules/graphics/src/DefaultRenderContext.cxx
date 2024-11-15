@@ -29,6 +29,7 @@ namespace tr::gfx {
          gameplaySystem{std::move(newGameplaySystem)} {
       Log.trace("Constructing DefaultRenderContext");
 
+      // TODO(matt) These shouldn't be empty
       const auto defaultSetLayouts = std::vector<vk::DescriptorSetLayout>{};
       const auto defaultVertexComponents = std::vector<geo::VertexComponent>{};
 
