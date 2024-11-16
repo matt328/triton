@@ -69,6 +69,7 @@ target_precompile_headers(${PROJECT_NAME}
    <random>
    <bitset>
    <map>
+   <mutex>
    <format>
    <filesystem>
    <set>

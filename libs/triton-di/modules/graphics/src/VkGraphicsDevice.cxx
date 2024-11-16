@@ -385,14 +385,14 @@ namespace tr::gfx {
 
    auto VkGraphicsDevice::createTracyContext(std::string_view name,
                                              const vk::raii::CommandBuffer& commandBuffer)
-       -> TracyContextPtr {
-      auto ctx = TracyContextPtr{tracy::CreateVkContext(**physicalDevice,
-                                                        **vulkanDevice,
-                                                        **graphicsQueue,
-                                                        *commandBuffer,
-                                                        nullptr,
-                                                        nullptr),
-                                 tracy::DestroyVkContext};
+       -> cm::TracyContextPtr {
+      auto ctx = cm::TracyContextPtr{tracy::CreateVkContext(**physicalDevice,
+                                                            **vulkanDevice,
+                                                            **graphicsQueue,
+                                                            *commandBuffer,
+                                                            nullptr,
+                                                            nullptr),
+                                     tracy::DestroyVkContext};
       ctx->Name(name.data(), name.length());
       return ctx;
    }

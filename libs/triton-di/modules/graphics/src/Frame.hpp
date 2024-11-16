@@ -1,16 +1,17 @@
 #pragma once
 
 #include "cm/RenderData.hpp"
-#include "gfx/IGraphicsDevice.hpp"
-#include <vulkan/vulkan_structs.hpp>
+#include "cm/TracyDefs.hpp"
 
 namespace tr::gfx {
 
    class IGraphicsDevice;
+
    enum class AcquireResult;
 
    namespace mem {
       class Buffer;
+      class Image;
    }
 
    namespace rd {
@@ -26,7 +27,7 @@ namespace tr::gfx {
     public:
       Frame(std::shared_ptr<IGraphicsDevice> graphicsDevice,
             std::shared_ptr<vk::raii::ImageView> newDepthImageView,
-            std::shared_ptr<sb::IShaderBindingFactory> shaderBindingFactory,
+            const std::shared_ptr<sb::IShaderBindingFactory>& shaderBindingFactory,
             std::string_view name);
       ~Frame();
 
@@ -50,11 +51,13 @@ namespace tr::gfx {
       auto present() -> bool;
 
     private:
+      std::string frameName;
       std::unique_ptr<vk::raii::CommandBuffer> commandBuffer;
-      TracyContextPtr tracyContext;
+      cm::TracyContextPtr tracyContext;
+      std::shared_ptr<IGraphicsDevice> graphicsDevice;
+      std::shared_ptr<vk::raii::ImageView> depthImageView;
 
       uint32_t swapchainImageIndex{};
-      std::shared_ptr<IGraphicsDevice> graphicsDevice;
 
       std::unique_ptr<vk::raii::Fence> inFlightFence;
       std::unique_ptr<vk::raii::Semaphore> imageAvailableSemaphore;
@@ -72,8 +75,6 @@ namespace tr::gfx {
 
       std::unique_ptr<mem::Image> drawImage;
       std::unique_ptr<vk::raii::ImageView> drawImageView;
-
-      std::shared_ptr<vk::raii::ImageView> depthImageView;
 
       std::unique_ptr<sb::ShaderBinding> perFrameShaderBinding;
       std::unique_ptr<sb::ShaderBinding> objectDataShaderBinding;

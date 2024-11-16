@@ -34,8 +34,9 @@ namespace tr::gfx::geo {
    GeometryFactory::~GeometryFactory() { // NOLINT(*-use-equals-default)
    }
 
-   auto GeometryFactory::sdfPlane(const glm::vec3& point, const glm::vec3& normal, float distance)
-       -> int8_t {
+   auto GeometryFactory::sdfPlane(const glm::vec3& point,
+                                  [[maybe_unused]] const glm::vec3& normal,
+                                  [[maybe_unused]] float distance) -> int8_t {
 
       int8_t result = 0;
 
@@ -187,8 +188,8 @@ namespace tr::gfx::geo {
             int32_t u = 0x0100 - t; // compliment of t
 
             // scale each value into [0,1]
-            float t0 = t / 256.F;
-            float t1 = u / 256.F;
+            [[maybe_unused]] float t0 = t / 256.F;
+            [[maybe_unused]] float t1 = u / 256.F;
 
             int index = -1;
             // If cellCornderIndex1 is 7, that means this cell does not own the vertex. And if the
@@ -234,13 +235,13 @@ namespace tr::gfx::geo {
 
    auto GeometryFactory::generateVertex(std::vector<as::Vertex>& vertices,
                                         std::vector<as::Vertex>& cellVertices,
-                                        glm::ivec3& offsetPosition,
-                                        glm::ivec3& cellPosition,
+                                        [[maybe_unused]] glm::ivec3& offsetPosition,
+                                        [[maybe_unused]] glm::ivec3& cellPosition,
                                         float t,
                                         uint8_t corner0,
                                         uint8_t corner1,
-                                        int8_t distance0,
-                                        int8_t distance1) -> int {
+                                        [[maybe_unused]] int8_t distance0,
+                                        [[maybe_unused]] int8_t distance1) -> int {
       auto iP0 = (offsetPosition + CornerIndex[corner0]);
       auto P0 = glm::vec3(iP0);
       auto iP1 = (offsetPosition + CornerIndex[corner1]);
@@ -331,6 +332,8 @@ namespace tr::gfx::geo {
          ex << "GeometryFactory::loadTrmFile(): ";
          throw;
       }
+      Log.warn("loadTrmFile returning empty model");
+      return {};
    }
 
    auto GeometryFactory::createGeometryFromHeightfield(const ct::HeightField& heightField)

@@ -11,9 +11,10 @@
 namespace tr::gfx {
    Frame::Frame(std::shared_ptr<IGraphicsDevice> newGraphicsDevice,
                 std::shared_ptr<vk::raii::ImageView> newDepthImageView,
-                std::shared_ptr<sb::IShaderBindingFactory> shaderBindingFactory,
+                const std::shared_ptr<sb::IShaderBindingFactory>& shaderBindingFactory,
                 std::string_view name)
-       : commandBuffer{newGraphicsDevice->createCommandBuffer()},
+       : frameName{name},
+         commandBuffer{newGraphicsDevice->createCommandBuffer()},
          tracyContext{newGraphicsDevice->createTracyContext(name, *commandBuffer)},
          graphicsDevice{std::move(newGraphicsDevice)},
          depthImageView{std::move(newDepthImageView)} {
@@ -32,16 +33,16 @@ namespace tr::gfx {
 
       objectDataBuffer =
           graphicsDevice->createStorageBuffer(sizeof(cm::gpu::ObjectData) * cm::gpu::MAX_OBJECTS,
-                                              "Object Data");
+                                              frameName + " Object Data");
       objectDataBuffer->mapBuffer();
 
-      cameraDataBuffer =
-          graphicsDevice->createUniformBuffer(sizeof(cm::gpu::CameraData), "Camera Data");
+      cameraDataBuffer = graphicsDevice->createUniformBuffer(sizeof(cm::gpu::CameraData),
+                                                             frameName + " Camera Data");
       cameraDataBuffer->mapBuffer();
 
       animationDataBuffer =
           graphicsDevice->createStorageBuffer(sizeof(cm::AnimationData) * cm::gpu::MAX_OBJECTS,
-                                              "Animation Data");
+                                              frameName + " Animation Data");
       animationDataBuffer->mapBuffer();
 
       std::tie(drawImage, drawImageView) = graphicsDevice->createDrawImage("Draw Image");
@@ -68,10 +69,11 @@ namespace tr::gfx {
    }
 
    Frame::~Frame() {
-      Log.trace("Destroying Frame");
+      Log.trace("Destroying {0}", frameName);
    }
 
-   void Frame::registerStorageBuffer(const std::string& name, size_t size) {
+   void Frame::registerStorageBuffer([[maybe_unused]] const std::string& name,
+                                     [[maybe_unused]] size_t size) {
    }
 
    void Frame::destroySwapchainResources() {

@@ -2,10 +2,9 @@
 
 #include "cm/Handles.hpp"
 #include "cm/LockableResource.hpp"
+#include "cm/TracyDefs.hpp"
 #include "geo/Mesh.hpp"
 #include "mem/Buffer.hpp"
-#include <vulkan/vulkan_raii.hpp>
-#include <vulkan/vulkan_structs.hpp>
 
 namespace tr::as {
    class ImageData;
@@ -26,8 +25,6 @@ namespace tr::gfx {
    namespace geo {
       class GeometryData;
    }
-
-   using TracyContextPtr = std::unique_ptr<tracy::VkCtx, void (*)(tracy::VkCtx*)>;
 
    class IGraphicsDevice {
     public:
@@ -84,7 +81,7 @@ namespace tr::gfx {
 
       [[nodiscard]] virtual auto createTracyContext(std::string_view name,
                                                     const vk::raii::CommandBuffer& commandBuffer)
-          -> TracyContextPtr = 0;
+          -> cm::TracyContextPtr = 0;
 
       [[nodiscard]] virtual auto uploadVertexData(const geo::GeometryData& geometryData)
           -> cm::MeshHandle = 0;

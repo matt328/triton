@@ -15,5 +15,6 @@ namespace tr::gfx::rd {
       if (config.rendererType == RendererType::StaticModel) {
          return std::make_shared<DefaultRenderer>(config, graphicsDevice, shaderCompiler);
       }
+      return nullptr;
    }
 }
