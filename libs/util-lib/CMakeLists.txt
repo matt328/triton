@@ -14,12 +14,15 @@ target_compile_definitions(${PROJECT_NAME}
 target_precompile_headers(${PROJECT_NAME}
    PUBLIC
    <chrono>
+   <exception>
    <functional>
    <iomanip>
    <iostream>
    <string_view>
    <spdlog/spdlog.h>
    <spdlog/sinks/stdout_color_sinks.h>
+   <string>
+   <BaseException.hpp>
    <Logger2.hpp>
 )
 

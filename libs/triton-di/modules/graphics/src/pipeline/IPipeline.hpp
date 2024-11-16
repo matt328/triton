@@ -1,6 +1,8 @@
 #pragma once
 
-#include "sb/ShaderBinding.hpp"
+namespace tr::gfx::sb {
+   class ShaderBinding;
+}
 
 namespace tr::gfx::pipe {
 

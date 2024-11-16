@@ -1,5 +1,4 @@
 #include "Window.hpp"
-#include <GLFW/glfw3.h>
 #include "tr/Events.hpp"
 #include "tr/KeyMap.hpp"
 

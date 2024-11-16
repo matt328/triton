@@ -1,7 +1,5 @@
 #pragma once
 
-#include "IEventBus.hpp"
-
 namespace tr {
    class IWindow {
     public:
