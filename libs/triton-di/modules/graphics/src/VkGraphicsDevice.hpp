@@ -73,7 +73,7 @@ namespace tr::gfx {
       auto createCommandBuffer() -> std::unique_ptr<vk::raii::CommandBuffer> override;
 
       auto createTracyContext(std::string_view name, const vk::raii::CommandBuffer& commandBuffer)
-          -> TracyContextPtr override;
+          -> cm::TracyContextPtr override;
 
       auto uploadVertexData(const geo::GeometryData& geometryData) -> cm::MeshHandle override;
 
