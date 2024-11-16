@@ -1,7 +1,7 @@
 #pragma once
 
 #include "gfx/IRenderContext.hpp"
-#include "gp/IGameplaySystem.hpp"
+#include "tr/IGameplaySystem.hpp"
 #include "pipeline/IShaderCompiler.hpp"
 #include "renderer/RendererFactory.hpp"
 #include "sb/ILayoutFactory.hpp"

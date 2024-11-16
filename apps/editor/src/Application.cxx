@@ -163,8 +163,8 @@ namespace ed {
    void Application::windowIconifiedCallback(GLFWwindow* window, const int iconified) {
       auto* const app = static_cast<Application*>(glfwGetWindowUserPointer(window));
       // Just stop crashing for now.
-      app->context->pause(iconified);
-      app->paused = iconified;
+      app->context->pause(iconified != 0);
+      app->paused = (iconified != 0);
    }
 
    void Application::windowCloseCallback(GLFWwindow* window) {

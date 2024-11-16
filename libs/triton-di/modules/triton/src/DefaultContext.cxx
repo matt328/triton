@@ -5,7 +5,7 @@
 #include "tr/IEventBus.hpp"
 
 #include "gfx/IRenderContext.hpp"
-#include "gp/IGameplaySystem.hpp"
+#include "tr/IGameplaySystem.hpp"
 
 namespace tr {
 
@@ -85,5 +85,9 @@ namespace tr {
          FrameMark;
       }
       Log.debug("Main Loop Finished");
+   }
+
+   auto DefaultContext::getGameplaySystem() -> std::shared_ptr<gp::IGameplaySystem> {
+      return gameplaySystem;
    }
 }

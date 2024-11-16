@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gp/IGameplaySystem.hpp"
+#include "tr/IGameplaySystem.hpp"
 #include "gp/action/IActionSystem.hpp"
 
 namespace tr::gp {
