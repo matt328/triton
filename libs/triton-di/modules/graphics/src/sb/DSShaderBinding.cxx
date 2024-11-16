@@ -8,8 +8,8 @@ namespace tr::gfx::sb {
                                     const vk::DescriptorPool& pool,
                                     const vk::DescriptorType descriptorType,
                                     const vk::DescriptorSetLayout layout,
-                                    const std::string_view name)
-       : device{std::move(newDevice)}, descriptorType{descriptorType} {
+                                    const std::string_view newName)
+       : name{newName}, device{std::move(newDevice)}, descriptorType{descriptorType} {
 
       const auto allocInfo = vk::DescriptorSetAllocateInfo{.descriptorPool = pool,
                                                            .descriptorSetCount = 1,
@@ -20,6 +20,10 @@ namespace tr::gfx::sb {
              std::move(device->allocateDescriptorSets(allocInfo).front()));
       } catch (const vk::SystemError& e) { Log.warn("Descriptor Pool is full: {0}", e.what()); }
       Helpers::setObjectName(**vkDescriptorSet, *device, name);
+   }
+
+   DSShaderBinding::~DSShaderBinding() {
+      Log.trace("Destroying ShaderBinding: {0}", name);
    }
 
    void DSShaderBinding::bindBuffer(const uint32_t binding,

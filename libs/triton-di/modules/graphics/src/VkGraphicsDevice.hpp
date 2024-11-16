@@ -25,7 +25,7 @@ namespace tr::gfx {
       };
 
       explicit VkGraphicsDevice(Config config, std::shared_ptr<tr::IWindow> newWindow);
-      ~VkGraphicsDevice() override = default;
+      ~VkGraphicsDevice() override;
 
       VkGraphicsDevice(const VkGraphicsDevice&) = delete;
       VkGraphicsDevice(VkGraphicsDevice&&) = delete;
@@ -46,6 +46,8 @@ namespace tr::gfx {
           -> vk::Result override;
 
       auto getSwapchainExtent() -> vk::Extent2D override;
+
+      auto getSwapchainImage(uint32_t swapchainImageIndex) -> const vk::Image& override;
 
       auto createPipelineLayout(const vk::PipelineLayoutCreateInfo& createInfo,
                                 const std::string& name)
@@ -83,8 +85,18 @@ namespace tr::gfx {
       auto getMesh(cm::MeshHandle meshHandle) -> geo::ImmutableMesh& override;
 
       [[nodiscard]] auto findDepthFormat() -> vk::Format override;
-      [[nodiscard]] auto acquireNextSwapchainImage(vk::Semaphore semaphore)
+      [[nodiscard]] auto acquireNextSwapchainImage(const vk::Semaphore& semaphore)
           -> std::variant<uint32_t, AcquireResult> override;
+
+      void transitionImage(const vk::raii::CommandBuffer& cmd,
+                           const vk::Image& image,
+                           const vk::ImageLayout& currentLayout,
+                           const vk::ImageLayout& newLayout) override;
+      void copyImageToImage(const vk::raii::CommandBuffer& cmd,
+                            const vk::Image& source,
+                            const vk::Image& destination,
+                            const vk::Extent2D& srcSize,
+                            const vk::Extent2D& dstSize) override;
 
     private:
       Config config;

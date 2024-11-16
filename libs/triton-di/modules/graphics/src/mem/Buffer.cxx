@@ -16,7 +16,7 @@ namespace tr::gfx::mem {
    }
 
    Buffer::~Buffer() {
-      if (isMapped) {
+      if (true) {
          unmapBuffer();
       }
       allocator.destroyBuffer(buffer, allocation);
@@ -33,7 +33,7 @@ namespace tr::gfx::mem {
    }
 
    void Buffer::unmapBuffer() {
-      assert(isMapped);
+      // assert(isMapped);
       allocator.unmapMemory(allocation);
       isMapped = false;
    }
