@@ -17,6 +17,7 @@ namespace tr::gfx {
    }
 
    FrameManager::~FrameManager() {
+      Log.trace("Destroying FrameManager");
    }
 
    [[nodiscard]] auto FrameManager::getCurrentFrame() const -> Frame& {

@@ -11,6 +11,8 @@ namespace tr::gfx::sb {
                       vk::DescriptorSetLayout layout,
                       std::string_view name = "Unnamed DescriptorSet");
 
+      ~DSShaderBinding() override;
+
       void bindBuffer(uint32_t binding, const mem::Buffer& buffer, size_t size) override;
 
       void bindImageSamplers(uint32_t binding,
@@ -24,6 +26,7 @@ namespace tr::gfx::sb {
                           const vk::PipelineLayout& layout) const override;
 
     private:
+      std::string name;
       std::shared_ptr<vk::raii::Device> device;
       std::unique_ptr<vk::raii::DescriptorSet> vkDescriptorSet;
       vk::DescriptorType descriptorType;

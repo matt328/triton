@@ -72,7 +72,6 @@ namespace tr::gfx {
 
       std::unique_ptr<mem::Image> drawImage;
       std::unique_ptr<vk::raii::ImageView> drawImageView;
-      vk::Extent2D drawExtent;
 
       std::shared_ptr<vk::raii::ImageView> depthImageView;
 

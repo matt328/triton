@@ -26,6 +26,10 @@ namespace tr::gfx {
           std::make_unique<vk::raii::Semaphore>(*graphicsDevice->getVulkanDevice(),
                                                 vk::SemaphoreCreateInfo{});
 
+      renderFinishedSemaphore =
+          std::make_unique<vk::raii::Semaphore>(*graphicsDevice->getVulkanDevice(),
+                                                vk::SemaphoreCreateInfo{});
+
       objectDataBuffer =
           graphicsDevice->createStorageBuffer(sizeof(cm::gpu::ObjectData) * cm::gpu::MAX_OBJECTS,
                                               "Object Data");
@@ -33,10 +37,12 @@ namespace tr::gfx {
 
       cameraDataBuffer =
           graphicsDevice->createUniformBuffer(sizeof(cm::gpu::CameraData), "Camera Data");
+      cameraDataBuffer->mapBuffer();
 
       animationDataBuffer =
           graphicsDevice->createStorageBuffer(sizeof(cm::AnimationData) * cm::gpu::MAX_OBJECTS,
                                               "Animation Data");
+      animationDataBuffer->mapBuffer();
 
       std::tie(drawImage, drawImageView) = graphicsDevice->createDrawImage("Draw Image");
 
@@ -62,7 +68,7 @@ namespace tr::gfx {
    }
 
    Frame::~Frame() {
-      objectDataBuffer->unmapBuffer();
+      Log.trace("Destroying Frame");
    }
 
    void Frame::registerStorageBuffer(const std::string& name, size_t size) {
@@ -135,7 +141,9 @@ namespace tr::gfx {
    }
 
    void Frame::applyTextures(const std::vector<vk::DescriptorImageInfo>& imageInfo) {
-      textureShaderBinding->bindImageSamplers(3, imageInfo);
+      if (!imageInfo.empty()) {
+         textureShaderBinding->bindImageSamplers(3, imageInfo);
+      }
    }
 
    void Frame::render(const std::shared_ptr<rd::IRenderer>& renderer,
@@ -180,17 +188,51 @@ namespace tr::gfx {
                                            vk::ClearDepthStencilValue{.depth = 1.f, .stencil = 0}},
       };
 
-      const auto renderingInfo =
-          vk::RenderingInfo{.renderArea = vk::Rect2D{.offset = {0, 0}, .extent = drawExtent},
-                            .layerCount = 1,
-                            .colorAttachmentCount = 1,
-                            .pColorAttachments = &colorAttachmentInfo,
-                            .pDepthAttachment = &depthAttachmentInfo};
+      const auto renderingInfo = vk::RenderingInfo{
+          .renderArea = vk::Rect2D{.offset = {0, 0}, .extent = IGraphicsDevice::DrawImageExtent2D},
+          .layerCount = 1,
+          .colorAttachmentCount = 1,
+          .pColorAttachments = &colorAttachmentInfo,
+          .pDepthAttachment = &depthAttachmentInfo};
 
       commandBuffer->beginRendering(renderingInfo);
    }
 
    auto Frame::present() -> bool {
+      commandBuffer->endRendering();
+
+      const auto& swapchainImage = graphicsDevice->getSwapchainImage(swapchainImageIndex);
+      const auto& swapchainExtent = graphicsDevice->getSwapchainExtent();
+
+      graphicsDevice->transitionImage(*commandBuffer,
+                                      drawImage->getImage(),
+                                      vk::ImageLayout::eColorAttachmentOptimal,
+                                      vk::ImageLayout::eTransferSrcOptimal);
+      graphicsDevice->transitionImage(*commandBuffer,
+                                      swapchainImage,
+                                      vk::ImageLayout::eUndefined,
+                                      vk::ImageLayout::eTransferDstOptimal);
+
+      graphicsDevice->copyImageToImage(*commandBuffer,
+                                       drawImage->getImage(),
+                                       swapchainImage,
+                                       IGraphicsDevice::DrawImageExtent2D,
+                                       swapchainExtent);
+
+      graphicsDevice->transitionImage(*commandBuffer,
+                                      swapchainImage,
+                                      vk::ImageLayout::eTransferDstOptimal,
+                                      vk::ImageLayout::eColorAttachmentOptimal);
+
+      transitionImage(*commandBuffer,
+                      swapchainImage,
+                      vk::ImageLayout::eColorAttachmentOptimal,
+                      vk::ImageLayout::ePresentSrcKHR);
+
+      TracyVkCollect(tracyContext, **commandBuffer);
+
+      commandBuffer->end();
+
       bool recreateSwapchain{};
       constexpr auto waitStages =
           std::array<vk::PipelineStageFlags, 1>{vk::PipelineStageFlagBits::eColorAttachmentOutput};
@@ -224,11 +266,9 @@ namespace tr::gfx {
       objectDataBuffer->updateMappedBufferValue(data, size);
    }
    void Frame::updatePerFrameDataBuffer(const cm::gpu::CameraData* data, size_t size) const {
-      cameraDataBuffer->mapBuffer();
       cameraDataBuffer->updateMappedBufferValue(data, size);
    }
    void Frame::updateAnimationDataBuffer(const cm::gpu::AnimationData* data, size_t size) const {
-      animationDataBuffer->mapBuffer();
       animationDataBuffer->updateMappedBufferValue(data, size);
    }
 

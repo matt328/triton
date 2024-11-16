@@ -30,13 +30,20 @@ namespace tr::gfx {
       Log.trace("Constructing DefaultRenderContext");
 
       // TODO(matt) These shouldn't be empty
-      const auto defaultSetLayouts = std::vector<vk::DescriptorSetLayout>{};
-      const auto defaultVertexComponents = std::vector<geo::VertexComponent>{};
+      auto defaultSetLayouts = std::vector<vk::DescriptorSetLayout>{};
+      defaultSetLayouts.push_back(layoutFactory->getVkLayout(sb::LayoutHandle::Bindless));
+      defaultSetLayouts.push_back(layoutFactory->getVkLayout(sb::LayoutHandle::ObjectData));
+      defaultSetLayouts.push_back(layoutFactory->getVkLayout(sb::LayoutHandle::PerFrame));
+
+      auto vec = std::vector{geo::VertexComponent::Position,
+                             geo::VertexComponent::Color,
+                             geo::VertexComponent::UV,
+                             geo::VertexComponent::Normal};
 
       defaultRenderer = rendererFactory->createRenderer(
           rd::RendererConfig{.rendererType = rd::RendererType::StaticModel,
                              .setLayouts = defaultSetLayouts,
-                             .vertexComponents = defaultVertexComponents});
+                             .vertexComponents = vec});
 
       depthResources = std::make_shared<DepthResources>(graphicsDevice);
 
@@ -44,6 +51,11 @@ namespace tr::gfx {
                                                     graphicsDevice,
                                                     depthResources->getImageView(),
                                                     shaderBindingFactory);
+   }
+
+   DefaultRenderContext::~DefaultRenderContext() {
+      Log.trace("Destroying DefaultRenderContext");
+      waitIdle();
    }
 
    void DefaultRenderContext::render() {
@@ -89,6 +101,7 @@ namespace tr::gfx {
    }
 
    void DefaultRenderContext::waitIdle() {
+      graphicsDevice->getVulkanDevice()->waitIdle();
    }
 
    void DefaultRenderContext::setRenderData(const cm::gpu::RenderData& newRenderData) {

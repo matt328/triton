@@ -11,7 +11,7 @@ namespace tr::gfx {
    class DepthResources {
     public:
       explicit DepthResources(const std::shared_ptr<IGraphicsDevice>& graphicsDevice);
-      ~DepthResources() = default;
+      ~DepthResources();
 
       DepthResources(const DepthResources&) = default;
       DepthResources(DepthResources&&) = delete;
