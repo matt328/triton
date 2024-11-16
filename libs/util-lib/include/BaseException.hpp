@@ -11,11 +11,11 @@ namespace tr {
           : message(message + other.what()) {
       }
 
-      [[nodiscard]] const char* what() const noexcept override {
+      [[nodiscard]] auto what() const noexcept -> const char* override {
          return message.c_str();
       }
 
-      BaseException& operator<<(const std::string& additionalInfo) {
+      auto operator<<(const std::string& additionalInfo) -> BaseException& {
          message = additionalInfo + message;
          return *this;
       }

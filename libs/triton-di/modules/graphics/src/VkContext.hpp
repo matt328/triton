@@ -1,5 +1,8 @@
 #pragma once
 
+// TODO(matt) Update this to just hold a shared_ptr<IGraphicsDevice> and abstract
+// anything it needs
+
 namespace vk::raii {
    class Device;
    class CommandBuffer;
@@ -37,8 +40,5 @@ namespace tr::gfx {
       std::unique_ptr<vk::raii::Fence> fence = nullptr;
       std::unique_ptr<vk::raii::CommandPool> commandPool = nullptr;
       std::unique_ptr<vk::raii::CommandBuffer> commandBuffer = nullptr;
-
-      // It's fine because GraphicsContext will surely outlive VkContext.  It's understood
-      // that ImmediateContexts are not utility classes to be used wherever.
    };
 }

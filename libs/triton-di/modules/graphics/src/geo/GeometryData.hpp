@@ -1,6 +1,7 @@
 #pragma once
 
 #include "as/Vertex.hpp"
+
 namespace tr::gfx::geo {
 
    class GeometryData {

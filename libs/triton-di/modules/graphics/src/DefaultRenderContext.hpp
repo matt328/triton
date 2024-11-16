@@ -1,12 +1,11 @@
 #pragma once
 
-#include "DepthResources.hpp"
 #include "gfx/IRenderContext.hpp"
 #include "gp/IGameplaySystem.hpp"
 #include "pipeline/IShaderCompiler.hpp"
+#include "renderer/RendererFactory.hpp"
 #include "sb/ILayoutFactory.hpp"
 #include "sb/IShaderBindingFactory.hpp"
-#include "renderer/RendererFactory.hpp"
 
 #include "cm/RenderData.hpp"
 
@@ -16,9 +15,8 @@ namespace tr::gfx {
    class DepthResources;
    class FrameManager;
 
-   namespace sb {
-      class LayoutFactory;
-      class ShaderBindingFactory;
+   namespace rd {
+      class RendererFactory;
    }
 
    class DefaultRenderContext : public IRenderContext {

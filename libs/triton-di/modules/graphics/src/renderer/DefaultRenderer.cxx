@@ -2,6 +2,7 @@
 #include "cm/RenderData.hpp"
 #include "gfx/IGraphicsDevice.hpp"
 #include "pipeline/StaticModelPipeline.hpp"
+#include "geo/Mesh.hpp"
 
 namespace tr::gfx::rd {
    DefaultRenderer::DefaultRenderer(const RendererConfig& config,

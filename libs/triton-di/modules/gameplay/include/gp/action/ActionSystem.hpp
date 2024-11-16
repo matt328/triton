@@ -1,7 +1,10 @@
 #pragma once
 
 #include "gp/action/IActionSystem.hpp"
-#include "tr/IEventBus.hpp"
+
+namespace tr {
+   class IEventBus;
+}
 
 namespace tr::gp {
 

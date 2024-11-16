@@ -1,6 +1,10 @@
 #include "StaticModelPipeline.hpp"
+
+#include "gfx/IGraphicsDevice.hpp"
+#include "IShaderCompiler.hpp"
 #include "geo/VertexAttributes.hpp"
 #include "renderer/RendererConfig.hpp"
+#include "sb/ShaderBinding.hpp"
 
 namespace tr::gfx::pipe {
    StaticModelPipeline::StaticModelPipeline(const std::shared_ptr<IGraphicsDevice>& graphicsDevice,

@@ -1,6 +1,8 @@
 #include "ShaderBindingFactory.hpp"
-#include "DSShaderBinding.hpp"
 
+#include "gfx/IGraphicsDevice.hpp"
+
+#include "DSShaderBinding.hpp"
 #include "ShaderBinding.hpp"
 #include "LayoutFactory.hpp"
 #include "Layout.hpp"

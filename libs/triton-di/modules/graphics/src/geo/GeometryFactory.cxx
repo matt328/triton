@@ -9,12 +9,6 @@
 #include "geo/GeometryHandles.hpp"
 #include "geo/Transvoxel.hpp"
 
-#include <cereal/archives/portable_binary.hpp>
-#include <cereal/archives/json.hpp>
-#include <cstddef>
-#include <cstdint>
-#include <glm/gtx/string_cast.hpp>
-#include <fstream>
 #include "cm/sdf/VoxelMetrics.hpp"
 
 #include "GlmCereal.hpp"

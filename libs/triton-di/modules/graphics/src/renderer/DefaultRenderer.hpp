@@ -1,7 +1,4 @@
 #include "IRenderer.hpp"
-#include "gfx/IGraphicsDevice.hpp"
-#include "pipeline/IPipeline.hpp"
-#include "pipeline/IShaderCompiler.hpp"
 #include "renderer/RendererConfig.hpp"
 
 namespace tr::gfx {
@@ -9,6 +6,7 @@ namespace tr::gfx {
 }
 
 namespace tr::gfx::pipe {
+   class IPipeline;
    class IShaderCompiler;
 }
 

@@ -1,8 +1,6 @@
 #pragma once
 
 #include "IPipeline.hpp"
-#include "gfx/IGraphicsDevice.hpp"
-#include "pipeline/IShaderCompiler.hpp"
 #include "renderer/RendererConfig.hpp"
 
 namespace tr::gfx {

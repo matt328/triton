@@ -1,6 +1,5 @@
 #pragma once
 
-#include <glm/detail/qualifier.hpp>
 namespace tr::gfx::geo {
 
    struct ReuseCell {

@@ -9,7 +9,7 @@
 #include "mem/Image.hpp"
 #include "ResourceExceptions.hpp"
 #include "tex/Texture.hpp"
-#include <vulkan/vulkan_structs.hpp>
+#include "geo/Mesh.hpp"
 
 namespace tr::gfx {
 

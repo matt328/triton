@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cm/RenderData.hpp"
+#include "cm/RenderData.hpp" // All types involved in di::bind must be fully defined.
 
 namespace tr::gfx {
 
