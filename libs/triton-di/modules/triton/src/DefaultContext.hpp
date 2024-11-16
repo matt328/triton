@@ -21,6 +21,7 @@ namespace tr {
                               std::shared_ptr<gfx::IGraphicsDevice> graphicsDevice,
                               std::shared_ptr<tr::IWindow> newWindow);
       void run() override;
+      auto getGameplaySystem() -> std::shared_ptr<gp::IGameplaySystem> override;
 
     private:
       bool paused{};

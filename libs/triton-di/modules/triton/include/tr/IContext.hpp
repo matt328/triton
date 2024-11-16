@@ -2,6 +2,10 @@
 
 namespace tr {
 
+   namespace gp {
+      class IGameplaySystem;
+   }
+
    class IContext {
     public:
       IContext() = default;
@@ -13,5 +17,7 @@ namespace tr {
       auto operator=(IContext&&) -> IContext& = delete;
 
       virtual void run() = 0;
+
+      virtual auto getGameplaySystem() -> std::shared_ptr<gp::IGameplaySystem> = 0;
    };
 }
