@@ -2,8 +2,6 @@
 #include "Buffer.hpp"
 #include "Image.hpp"
 
-#include <vk_mem_alloc_enums.hpp>
-
 #define VMA_IMPLEMENTATION
 #include <vk_mem_alloc.h>
 #include <vk_mem_alloc.hpp>

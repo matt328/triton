@@ -1,7 +1,6 @@
 #include "SpirvShaderCompiler.hpp"
 
 #include <SPIRV/GlslangToSpv.h>
-#include <fstream>
 #include <glslang/Public/ShaderLang.h>
 
 namespace tr::gfx::pipe {

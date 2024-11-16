@@ -63,28 +63,32 @@ target_compile_definitions(${PROJECT_NAME}
 
 target_precompile_headers(${PROJECT_NAME}
    PUBLIC
-   <cstdint>
+   <GLFW/glfw3.h>
+   <bitset>
+   <cereal/archives/json.hpp>
+   <cereal/archives/portable_binary.hpp>
+   <cstddef>
+   <filesystem>
+   <fstream>
+   <format>
    <functional>
    <glm/glm.hpp>
-   <random>
-   <bitset>
+   <glm/gtx/string_cast.hpp>
+   <glm/detail/qualifier.hpp>
+   <imgui_impl_glfw.h>
+   <imgui_impl_vulkan.h>
    <map>
    <mutex>
-   <format>
-   <filesystem>
+   <random>
    <set>
+   <stb_image.h>
    <thread>
    <tracy/Tracy.hpp>
    <tracy/TracyC.h>
    <typeindex>
    <variant>
-   <GLFW/glfw3.h>
-   <imgui_impl_glfw.h>
-   <imgui_impl_vulkan.h>
-   <stb_image.h>
-   <variant>
-   <vulkan/vulkan_raii.hpp>
    <vk_mem_alloc.hpp>
+   <vulkan/vulkan_raii.hpp>
    <tracy/TracyVulkan.hpp>
    PRIVATE
    <ctime>

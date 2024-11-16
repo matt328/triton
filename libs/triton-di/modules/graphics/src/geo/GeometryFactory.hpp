@@ -1,11 +1,11 @@
 #pragma once
 
+#include "Transvoxel.hpp"
+#include "GeometryHandles.hpp"
+
 #include "as/Vertex.hpp"
 #include "cm/Rando.hpp"
-#include "GeometryHandles.hpp"
 #include "cm/sdf/DistanceField.hpp"
-#include "Transvoxel.hpp"
-#include <BaseException.hpp>
 
 namespace tr::as {
    struct Model;
@@ -110,9 +110,8 @@ namespace tr::gfx::geo {
       std::unordered_map<GeometryHandle, GeometryData> geometryDataMap;
       std::unordered_map<ImageHandle, as::ImageData> imageDataMap;
 
-      static auto generateNormal(int xCoord,
-                                 int yCoord,
-                                 const ct::HeightField& heightField) -> glm::vec3;
+      static auto generateNormal(int xCoord, int yCoord, const ct::HeightField& heightField)
+          -> glm::vec3;
 
       /// Loads a TRM file from the given path.
       /// @throws IOException if the file cannot be opened or parsed.

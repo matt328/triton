@@ -3,8 +3,6 @@
 #include "cm/Handles.hpp"
 #include "cm/LockableResource.hpp"
 #include "cm/TracyDefs.hpp"
-#include "geo/Mesh.hpp"
-#include "mem/Buffer.hpp"
 
 namespace tr::as {
    class ImageData;
@@ -14,6 +12,7 @@ namespace tr::gfx {
 
    namespace mem {
       class Image;
+      class Buffer;
    }
 
    enum class AcquireResult {
@@ -24,6 +23,7 @@ namespace tr::gfx {
 
    namespace geo {
       class GeometryData;
+      class ImmutableMesh;
    }
 
    class IGraphicsDevice {

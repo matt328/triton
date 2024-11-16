@@ -1,9 +1,7 @@
 #pragma once
 
-#include "geo/Mesh.hpp"
 #include "gfx/IGraphicsDevice.hpp"
 #include "tr/IWindow.hpp"
-#include "tex/Texture.hpp"
 
 namespace tr::gfx {
 
@@ -15,6 +13,10 @@ namespace tr::gfx {
 
    namespace mem {
       class Allocator;
+   }
+
+   namespace tex {
+      class Texture;
    }
 
    class VkGraphicsDevice : public IGraphicsDevice {

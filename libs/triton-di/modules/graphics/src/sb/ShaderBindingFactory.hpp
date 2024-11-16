@@ -2,7 +2,6 @@
 
 #include "IShaderBindingFactory.hpp"
 #include "gfx/IRenderContext.hpp"
-#include "sb/IShaderBindingFactory.hpp"
 
 namespace tr::gfx {
    class IGraphicsDevice;

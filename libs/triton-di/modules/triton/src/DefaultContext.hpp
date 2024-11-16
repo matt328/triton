@@ -2,7 +2,6 @@
 
 #include "gfx/IGraphicsDevice.hpp"
 #include "gfx/IRenderContext.hpp"
-#include "gp/IGameplaySystem.hpp"
 #include "tr/IContext.hpp"
 
 namespace tr {
@@ -12,10 +11,6 @@ namespace tr {
 
    namespace gp {
       class IGameplaySystem;
-   }
-
-   namespace gfx {
-      class IRenderer;
    }
 
    class DefaultContext : public IContext {
