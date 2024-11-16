@@ -39,4 +39,8 @@ namespace tr::gfx {
           graphicsDevice->getVulkanDevice()->createImageView(viewInfo));
    }
 
+   DepthResources::~DepthResources() {
+      Log.trace("Destroying DepthResources");
+   }
+
 }

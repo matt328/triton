@@ -30,7 +30,7 @@ namespace tr::gfx {
           std::shared_ptr<pipe::IShaderCompiler> newShaderCompiler,
           std::shared_ptr<rd::RendererFactory> newRendererFactory,
           std::shared_ptr<gp::IGameplaySystem> newGameplaySystem);
-      ~DefaultRenderContext() override = default;
+      ~DefaultRenderContext() override;
 
       DefaultRenderContext(const DefaultRenderContext&) = delete;
       DefaultRenderContext(DefaultRenderContext&&) = delete;
@@ -49,11 +49,11 @@ namespace tr::gfx {
       std::shared_ptr<rd::RendererFactory> rendererFactory;
       std::shared_ptr<gp::IGameplaySystem> gameplaySystem;
 
+      std::shared_ptr<FrameManager> frameManager;
+
       std::shared_ptr<rd::IRenderer> defaultRenderer;
 
       std::shared_ptr<DepthResources> depthResources;
-
-      std::shared_ptr<FrameManager> frameManager;
 
       mutable TracyLockable(std::mutex, renderDataMutex);
       cm::gpu::RenderData renderData;

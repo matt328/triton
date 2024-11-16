@@ -54,6 +54,9 @@ namespace tr::gfx {
 
       [[nodiscard]] virtual auto getSwapchainExtent() -> vk::Extent2D = 0;
 
+      [[nodiscard]] virtual auto getSwapchainImage(uint32_t swapchainImageIndex)
+          -> const vk::Image& = 0;
+
       [[nodiscard]] virtual auto createPipelineLayout(
           const vk::PipelineLayoutCreateInfo& createInfo,
           const std::string& name) -> std::unique_ptr<vk::raii::PipelineLayout> = 0;
@@ -91,12 +94,23 @@ namespace tr::gfx {
 
       [[nodiscard]] virtual auto findDepthFormat() -> vk::Format = 0;
 
-      [[nodiscard]] virtual auto acquireNextSwapchainImage(vk::Semaphore)
+      [[nodiscard]] virtual auto acquireNextSwapchainImage(const vk::Semaphore& semaphore)
           -> std::variant<uint32_t, AcquireResult> = 0;
 
       [[nodiscard]] virtual auto getTextures() const
           -> cm::LockableResource<const std::vector<vk::DescriptorImageInfo>> = 0;
 
       [[nodiscard]] virtual auto getMesh(cm::MeshHandle meshHandle) -> geo::ImmutableMesh& = 0;
+
+      virtual void transitionImage(const vk::raii::CommandBuffer& cmd,
+                                   const vk::Image& image,
+                                   const vk::ImageLayout& currentLayout,
+                                   const vk::ImageLayout& newLayout) = 0;
+
+      virtual void copyImageToImage(const vk::raii::CommandBuffer& cmd,
+                                    const vk::Image& source,
+                                    const vk::Image& destination,
+                                    const vk::Extent2D& srcSize,
+                                    const vk::Extent2D& dstSize) = 0;
    };
 }
