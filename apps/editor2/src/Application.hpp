@@ -8,7 +8,9 @@ namespace ed {
 
    class Application {
     public:
-      Application(std::shared_ptr<Properties> properties, std::shared_ptr<tr::IContext> newContext);
+      Application(std::shared_ptr<Properties> properties,
+                  std::shared_ptr<tr::IContext> newContext,
+                  std::shared_ptr<tr::gp::IGameplaySystem> newGameplaySystem);
       ~Application();
 
       Application(const Application&) = default;
@@ -21,5 +23,6 @@ namespace ed {
     private:
       std::shared_ptr<Properties> properties;
       std::shared_ptr<tr::IContext> context;
+      std::shared_ptr<tr::gp::IGameplaySystem> gameplaySystem;
    };
 }

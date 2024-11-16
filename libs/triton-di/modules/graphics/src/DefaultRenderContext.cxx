@@ -1,7 +1,7 @@
 #include "DefaultRenderContext.hpp"
 #include "DepthResources.hpp"
 #include "geo/VertexAttributes.hpp"
-#include "gp/IGameplaySystem.hpp"
+#include "tr/IGameplaySystem.hpp"
 #include "pipeline/StaticModelPipeline.hpp"
 #include "renderer/RendererFactory.hpp"
 #include "sb/ILayoutFactory.hpp"
@@ -10,7 +10,6 @@
 #include "FrameManager.hpp"
 #include "Frame.hpp"
 #include "renderer/IRenderer.hpp"
-#include <mutex>
 
 namespace tr::gfx {
 

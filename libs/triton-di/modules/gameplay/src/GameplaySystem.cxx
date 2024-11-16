@@ -1,6 +1,6 @@
 #include "GameplaySystem.hpp"
 #include "cm/RenderData.hpp"
-#include "gp/IGameplaySystem.hpp"
+#include "tr/IGameplaySystem.hpp"
 
 namespace tr::gp {
 

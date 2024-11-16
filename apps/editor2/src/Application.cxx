@@ -5,8 +5,11 @@
 namespace ed {
 
    Application::Application(std::shared_ptr<Properties> newProperties,
-                            std::shared_ptr<tr::IContext> newContext)
-       : properties{std::move(newProperties)}, context{std::move(newContext)} {
+                            std::shared_ptr<tr::IContext> newContext,
+                            std::shared_ptr<tr::gp::IGameplaySystem> newGameplaySystem)
+       : properties{std::move(newProperties)},
+         context{std::move(newContext)},
+         gameplaySystem{std::move(newGameplaySystem)} {
 
       Log.debug("Created Application");
 
