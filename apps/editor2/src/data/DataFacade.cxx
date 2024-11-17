@@ -2,20 +2,16 @@
 
 #include "cm/EntitySystemTypes.hpp"
 #include "TaskQueue.hpp"
-#include "cm/sdf/VoxelMetrics.hpp"
-#include <random>
+
+#include "tr/IGameplaySystem.hpp"
 
 namespace ed::data {
 
-   using tr::cm::sdf::VoxelDebugger;
+   namespace cm = ::tr::cm;
 
-   DataFacade::DataFacade(tr::ctx::GameplayFacade& gameplayFacade)
-       : gameplayFacade{gameplayFacade} {
-      taskQueue = std::make_unique<tr::util::TaskQueue>(4);
-
-      gameplayFacade.addTerrainCreatedListener([](tr::cm::EntityType entity) {
-         Log.debug("Entity Created: {0}", static_cast<long>(entity));
-      });
+   DataFacade::DataFacade(std::shared_ptr<tr::gp::IGameplaySystem> newGameplaySystem,
+                          std::shared_ptr<TaskQueue> newTaskQueue)
+       : gameplaySystem{std::move(newGameplaySystem)}, taskQueue{std::move(newTaskQueue)} {
    }
 
    DataFacade::~DataFacade() { // NOLINT(*-use-equals-default)
@@ -40,7 +36,7 @@ namespace ed::data {
       for (int i = 0; i < 50; ++i) {
          const auto min = glm::vec3{dis(gen), dis(gen), dis(gen)};
          const auto max = min + glm::vec3{5.f, 1.f, 1.f};
-         [[maybe_unused]] auto entityId = gameplayFacade.createDebugAABB(min, max);
+         //[[maybe_unused]] auto entityId = gameplayFacade.createDebugAABB(min, max);
       }
    }
 
@@ -78,7 +74,7 @@ namespace ed::data {
       unsaved = true;
       const auto modelFilename = dataStore.models.at(modelName.data()).filePath;
 
-      const auto onComplete = [this, entityName](tr::cm::EntityType entity) {
+      const auto onComplete = [this, entityName](cm::EntityType entity) {
          const auto* const name = entityName.data();
          entityNameMap.insert({name, entity});
          engineBusy = false;
@@ -90,7 +86,7 @@ namespace ed::data {
       engineBusy = true;
 
       const auto task = [this, &modelFilename]() {
-         return gameplayFacade.createStaticModelEntity(modelFilename);
+         return gameplaySystem->createStaticModelEntity(modelFilename);
       };
 
       const auto result = taskQueue->enqueue(task, onComplete);
@@ -114,7 +110,7 @@ namespace ed::data {
       const auto skeletonFilename = dataStore.skeletons.at(skeletonName.data()).filePath;
       const auto animationFilename = dataStore.animations.at(animationName.data()).filePath;
 
-      std::function<void(tr::cm::EntityType)> fn = [this, name](tr::cm::EntityType entity) {
+      std::function<void(cm::EntityType)> fn = [this, name](cm::EntityType entity) {
          ZoneNamedN(z, "Create Entity", true);
          entityNameMap.insert({name, entity});
          engineBusy = false;
@@ -125,9 +121,9 @@ namespace ed::data {
       engineBusy = true;
 
       const auto task = [this, modelFilename, skeletonFilename, animationFilename]() {
-         return gameplayFacade.createAnimatedModelEntity(modelFilename,
-                                                         skeletonFilename,
-                                                         animationFilename);
+         return gameplaySystem->createAnimatedModelEntity(modelFilename,
+                                                          skeletonFilename,
+                                                          animationFilename);
       };
       auto result = taskQueue->enqueue(task, fn);
    }
@@ -147,15 +143,9 @@ namespace ed::data {
    }
 
    void DataFacade::createTerrain([[maybe_unused]] const std::string_view& terrainName) {
-      const auto task = [&]() { gameplayFacade.createTerrain(); };
+      const auto task = [&]() { gameplaySystem->createTerrain(); };
 
-      std::function<void()> onComplete = [this]() {
-         engineBusy = false;
-         const auto& cellData = VoxelDebugger::getInstance().getActiveCubePositions();
-         for (const auto& cell : cellData | std::views::values) {
-            Log.debug("{0}", cell.toString());
-         }
-      };
+      std::function<void()> onComplete = [this]() { engineBusy = false; };
       engineBusy = true;
       auto result = taskQueue->enqueue(task, onComplete);
    }

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace tr::util {
+namespace ed {
 
    constexpr size_t DefaultMaxQueueSize = 10;
 

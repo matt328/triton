@@ -1,5 +1,6 @@
 #pragma once
 
+#include "cm/EntitySystemTypes.hpp"
 #include "cm/RenderData.hpp"
 
 namespace tr::gp {
@@ -20,5 +21,11 @@ namespace tr::gp {
       virtual void fixedUpdate() = 0;
 
       virtual void setRenderDataTransferHandler(const RenderDataTransferHandler& handler) = 0;
+
+      virtual auto createStaticModelEntity(std::string filename) -> cm::EntityType = 0;
+      virtual auto createAnimatedModelEntity(std::string modelFilename,
+                                             std::string skeletonFilename,
+                                             std::string animationFilename) -> cm::EntityType = 0;
+      virtual auto createTerrain() -> cm::EntityType = 0;
    };
 }
