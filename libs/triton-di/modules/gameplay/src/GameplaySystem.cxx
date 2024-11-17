@@ -58,4 +58,18 @@ namespace tr::gp {
    void GameplaySystem::setRenderDataTransferHandler(const RenderDataTransferHandler& handler) {
       this->transferHandler = handler;
    }
+
+   auto GameplaySystem::createStaticModelEntity(std::string filename) -> cm::EntityType {
+      return static_cast<cm::EntityType>(1);
+   }
+
+   auto GameplaySystem::createAnimatedModelEntity(std::string modelFilename,
+                                                  std::string skeletonFilename,
+                                                  std::string animationFilename) -> cm::EntityType {
+      return static_cast<cm::EntityType>(1);
+   }
+
+   auto GameplaySystem::createTerrain() -> cm::EntityType {
+      return static_cast<cm::EntityType>(1);
+   }
 }
