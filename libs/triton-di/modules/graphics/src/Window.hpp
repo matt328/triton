@@ -1,5 +1,6 @@
 #pragma once
 
+#include "tr/IGuiAdapter.hpp"
 #include "tr/IWindow.hpp"
 #include "tr/IEventBus.hpp"
 
@@ -8,6 +9,7 @@ namespace tr::gfx {
    class Window : public tr::IWindow {
     public:
       Window(std::shared_ptr<IEventBus> newEventBus,
+             std::shared_ptr<IGuiAdapter> newGuiAdapter,
              const glm::ivec2& dimensions,
              const std::string& windowTitle);
       ~Window() override;
@@ -22,6 +24,7 @@ namespace tr::gfx {
     private:
       GLFWwindow* window;
       std::shared_ptr<tr::IEventBus> eventBus;
+      std::shared_ptr<tr::IGuiAdapter> guiAdapter;
 
       bool isFullscreen{};
       bool isMouseCaptured{};

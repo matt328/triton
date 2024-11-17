@@ -41,6 +41,18 @@ namespace tr::gfx {
          return vulkanDevice;
       }
 
+      auto getVulkanInstance() const -> std::shared_ptr<vk::raii::Instance> override {
+         return instance;
+      };
+
+      auto getGraphicsQueue() const -> std::shared_ptr<vk::raii::Queue> override {
+         return graphicsQueue;
+      };
+
+      auto getPhysicalDevice() const -> std::shared_ptr<vk::raii::PhysicalDevice> override {
+         return physicalDevice;
+      }
+
       auto submit(const vk::SubmitInfo& submitInfo, const std::unique_ptr<vk::raii::Fence>& fence)
           -> void override;
 
@@ -49,7 +61,14 @@ namespace tr::gfx {
 
       auto getSwapchainExtent() -> vk::Extent2D override;
 
+      auto getSwapchainFormat() -> vk::Format override {
+         return swapchainImageFormat;
+      }
+
       auto getSwapchainImage(uint32_t swapchainImageIndex) -> const vk::Image& override;
+
+      auto getSwapchainImageView(uint32_t swapchainImageIndex)
+          -> const vk::raii::ImageView& override;
 
       auto createPipelineLayout(const vk::PipelineLayoutCreateInfo& createInfo,
                                 const std::string& name)
@@ -162,12 +181,12 @@ namespace tr::gfx {
       std::shared_ptr<tr::IWindow> window;
 
       std::unique_ptr<vk::raii::Context> context;
-      std::unique_ptr<vk::raii::Instance> instance;
+      std::shared_ptr<vk::raii::Instance> instance;
       std::unique_ptr<vk::raii::SurfaceKHR> surface;
-      std::unique_ptr<vk::raii::PhysicalDevice> physicalDevice;
+      std::shared_ptr<vk::raii::PhysicalDevice> physicalDevice;
       std::shared_ptr<vk::raii::Device> vulkanDevice;
 
-      std::unique_ptr<vk::raii::Queue> graphicsQueue;
+      std::shared_ptr<vk::raii::Queue> graphicsQueue;
       std::unique_ptr<vk::raii::Queue> presentQueue;
       std::shared_ptr<vk::raii::Queue> transferQueue;
       std::unique_ptr<vk::raii::Queue> computeQueue;
