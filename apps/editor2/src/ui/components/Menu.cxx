@@ -118,8 +118,6 @@ namespace ed::ui::cmp {
          ImGui::EndMainMenuBar();
       }
 
-      dialogManager->update();
-
       if (showPopup) {
          ImGui::OpenPopup("Import Skeleton");
       }

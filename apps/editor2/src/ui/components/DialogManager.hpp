@@ -16,6 +16,7 @@ namespace ed::ui::cmp {
       auto operator=(const DialogManager&) -> DialogManager& = default;
       auto operator=(DialogManager&&) -> DialogManager& = delete;
 
+      void render();
       void addDialog(const std::string& dialogName, std::unique_ptr<ModalDialog> dialog);
       void setOpen(const std::string& dialogName);
       void update();

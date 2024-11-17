@@ -5,13 +5,19 @@
 #include "assets/SourceCodePro.h"
 
 #include "ui/components/AppLog.hpp"
+#include "ui/components/AssetViewer.hpp"
 #include "ui/components/ImGuiSink.hpp"
 #include "ui/components/Dock.hpp"
 
 namespace ed::ui {
    static constexpr float FontSize = 18.f;
 
-   Manager::Manager(std::shared_ptr<cmp::Menu> newAppMenu) : appMenu{std::move(newAppMenu)} {
+   Manager::Manager(std::shared_ptr<cmp::Menu> newAppMenu,
+                    std::shared_ptr<cmp::AssetViewer> newAssetViewer,
+                    std::shared_ptr<cmp::DialogManager> newDialogManager)
+       : appMenu{std::move(newAppMenu)},
+         assetViewer{std::move(newAssetViewer)},
+         dialogManager{std::move(newDialogManager)} {
       Log.trace("Constructing Manager");
       ImGuiEx::setupImGuiStyle();
       ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
@@ -40,7 +46,12 @@ namespace ed::ui {
       appLog->font = sauce;
       appLog->Draw("Log");
 
+      dialogManager->render();
+
       appMenu->render();
+      assetViewer->render();
+
+      dialogManager->update();
    }
 
    auto Manager::setupFonts() -> void {

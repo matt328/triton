@@ -12,9 +12,11 @@ namespace ed::data {
    DataFacade::DataFacade(std::shared_ptr<tr::gp::IGameplaySystem> newGameplaySystem,
                           std::shared_ptr<TaskQueue> newTaskQueue)
        : gameplaySystem{std::move(newGameplaySystem)}, taskQueue{std::move(newTaskQueue)} {
+      Log.trace("Creating DataFacade");
    }
 
-   DataFacade::~DataFacade() { // NOLINT(*-use-equals-default)
+   DataFacade::~DataFacade() {
+      Log.trace("Destroying DataFacade");
    }
 
    void DataFacade::update() const {
