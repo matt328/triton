@@ -1,13 +1,17 @@
 #pragma once
 
 #include "components/AppLog.hpp"
+#include "ui/components/AssetViewer.hpp"
+#include "ui/components/DialogManager.hpp"
 #include "ui/components/Menu.hpp"
 
 namespace ed::ui {
 
    class Manager {
     public:
-      explicit Manager(std::shared_ptr<cmp::Menu> newAppMenu);
+      explicit Manager(std::shared_ptr<cmp::Menu> newAppMenu,
+                       std::shared_ptr<cmp::AssetViewer> newAssetViewer,
+                       std::shared_ptr<cmp::DialogManager> newDialogManager);
       ~Manager();
 
       Manager(const Manager&) = delete;
@@ -21,6 +25,8 @@ namespace ed::ui {
       ImFont* sauce = nullptr;
       std::shared_ptr<cmp::AppLog> appLog;
       std::shared_ptr<cmp::Menu> appMenu;
+      std::shared_ptr<cmp::AssetViewer> assetViewer;
+      std::shared_ptr<cmp::DialogManager> dialogManager;
 
       auto setupFonts() -> void;
    };

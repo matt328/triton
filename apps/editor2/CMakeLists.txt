@@ -8,6 +8,7 @@ set(editor_SRC
 
    src/ui/components/Menu.cxx
    src/ui/components/DialogManager.cxx
+   src/ui/components/AssetViewer.cxx
 
    src/data/DataFacade.cxx
 )
