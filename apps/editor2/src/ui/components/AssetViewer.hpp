@@ -23,6 +23,8 @@ namespace ed::ui::cmp {
       std::shared_ptr<DialogManager> dialogManager;
 
       void createSkeletonDialog();
+      void createAnimationDialog();
+      void createModelDialog();
    };
 
 }

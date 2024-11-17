@@ -43,6 +43,7 @@ target_compile_definitions(${PROJECT_NAME}
 
 target_precompile_headers(${PROJECT_NAME}
    PRIVATE
+   <any>
    <di.hpp>
    <functional>
    <cereal/archives/binary.hpp>
@@ -55,7 +56,10 @@ target_precompile_headers(${PROJECT_NAME}
    <future>
    <functional>
    <GLFW/glfw3.h>
+   <imgui.h>
+   <misc/cpp/imgui_stdlib.h>
    <nfd.hpp>
+   <optional>
    <platform_folders.h>
    <sstream>
    <fstream>
@@ -70,6 +74,7 @@ target_precompile_headers(${PROJECT_NAME}
    <spdlog/sinks/base_sink.h>
    <string>
    <ranges>
+   <utility>
    <variant>
 )
 

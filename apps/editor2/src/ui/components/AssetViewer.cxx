@@ -7,6 +7,8 @@ namespace ed::ui::cmp {
        : dataFacade{std::move(newDataFacade)}, dialogManager{std::move(newDialogManager)} {
       Log.trace("Constructing AssetViewer");
       createSkeletonDialog();
+      createAnimationDialog();
+      createModelDialog();
    }
 
    AssetViewer::~AssetViewer() {
@@ -23,10 +25,10 @@ namespace ed::ui::cmp {
                   dialogManager->setOpen("Skeleton");
                }
                if (ImGui::MenuItem("Animation...")) {
-                  // openAnimation = true;
+                  dialogManager->setOpen("Animation");
                }
                if (ImGui::MenuItem("Model...")) {
-                  // openModel = true;
+                  dialogManager->setOpen("Model");
                }
                ImGui::EndMenu();
             }
@@ -89,10 +91,13 @@ namespace ed::ui::cmp {
    void AssetViewer::createSkeletonDialog() {
       auto dialog = std::make_unique<cmp::ModalDialog>(
           "Skeleton",
-          [](const cmp::ModalDialog& dialog) {
+          [&](const cmp::ModalDialog& dialog) {
              Log.trace("name: {0}, file: {1}",
                        dialog.getValue<std::string>("name").value(),
                        dialog.getValue<std::filesystem::path>("filename").value().string());
+             dataFacade->addSkeleton(
+                 dialog.getValue<std::string>("name").value(),
+                 dialog.getValue<std::filesystem::path>("filename").value().string());
           },
           []() { Log.debug("Cancelled Dialog with no input"); });
 
@@ -100,5 +105,43 @@ namespace ed::ui::cmp {
       dialog->addControl("filename", "Skeleton File", std::filesystem::path{});
 
       dialogManager->addDialog("Skeleton", std::move(dialog));
+   }
+
+   void AssetViewer::createAnimationDialog() {
+      auto dialog = std::make_unique<cmp::ModalDialog>(
+          "Animation",
+          [&](const cmp::ModalDialog& dialog) {
+             Log.trace("name: {0}, file: {1}",
+                       dialog.getValue<std::string>("name").value(),
+                       dialog.getValue<std::filesystem::path>("filename").value().string());
+             dataFacade->addAnimation(
+                 dialog.getValue<std::string>("name").value(),
+                 dialog.getValue<std::filesystem::path>("filename").value().string());
+          },
+          []() { Log.debug("Cancelled Dialog with no input"); });
+
+      dialog->addControl("name", "Animation Name", std::string("Unnamed Animation"));
+      dialog->addControl("filename", "Animation File", std::filesystem::path{});
+
+      dialogManager->addDialog("Animation", std::move(dialog));
+   }
+
+   void AssetViewer::createModelDialog() {
+      auto dialog = std::make_unique<cmp::ModalDialog>(
+          "Model",
+          [&](const cmp::ModalDialog& dialog) {
+             Log.trace("name: {0}, file: {1}",
+                       dialog.getValue<std::string>("name").value(),
+                       dialog.getValue<std::filesystem::path>("filename").value().string());
+             dataFacade->addModel(
+                 dialog.getValue<std::string>("name").value(),
+                 dialog.getValue<std::filesystem::path>("filename").value().string());
+          },
+          []() { Log.debug("Cancelled Dialog with no input"); });
+
+      dialog->addControl("name", "Model Name", std::string("Unnamed Model"));
+      dialog->addControl("filename", "Model File", std::filesystem::path{});
+
+      dialogManager->addDialog("Model", std::move(dialog));
    }
 }
