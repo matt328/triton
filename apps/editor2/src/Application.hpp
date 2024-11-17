@@ -1,6 +1,8 @@
 #pragma once
 
 #include "tr/IContext.hpp"
+#include "tr/IGuiSystem.hpp"
+#include "ui/Manager.hpp"
 
 namespace ed {
 
@@ -11,7 +13,8 @@ namespace ed {
       Application(std::shared_ptr<Properties> properties,
                   std::shared_ptr<tr::IContext> newContext,
                   std::shared_ptr<tr::gp::IGameplaySystem> newGameplaySystem,
-                  std::shared_ptr<tr::IGuiSystem> newGuiSystem);
+                  std::shared_ptr<tr::IGuiSystem> newGuiSystem,
+                  std::shared_ptr<ui::Manager> newManager);
       ~Application();
 
       Application(const Application&) = default;
@@ -25,5 +28,7 @@ namespace ed {
       std::shared_ptr<Properties> properties;
       std::shared_ptr<tr::IContext> context;
       std::shared_ptr<tr::gp::IGameplaySystem> gameplaySystem;
+      std::shared_ptr<tr::IGuiSystem> guiSystem;
+      std::shared_ptr<ui::Manager> manager;
    };
 }
