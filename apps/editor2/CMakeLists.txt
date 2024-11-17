@@ -1,8 +1,9 @@
 project("editor2" VERSION "0.0.1" LANGUAGES CXX)
 
 set(editor_SRC
-   "src/main.cxx"
-   "src/Application.cxx"
+   src/main.cxx
+   src/Application.cxx
+   src/ui/Manager.cxx
 )
 
 add_executable(${PROJECT_NAME} ${editor_SRC})
@@ -57,6 +58,7 @@ target_precompile_headers(${PROJECT_NAME}
    <glm/gtc/type_ptr.hpp>
    <glm/gtx/string_cast.hpp>
    <mutex>
+   <queue>
    <spdlog/details/null_mutex.h>
    <spdlog/sinks/base_sink.h>
    <string>
