@@ -1,5 +1,6 @@
 #pragma once
 
+#include "tr/IGuiSystem.hpp"
 #include "cm/RenderData.hpp"
 #include "cm/TracyDefs.hpp"
 
@@ -48,6 +49,8 @@ namespace tr::gfx {
       void applyTextures(const std::vector<vk::DescriptorImageInfo>& imageInfo);
       void render(const std::shared_ptr<rd::IRenderer>& renderer,
                   const std::tuple<vk::Viewport, vk::Rect2D>& vpScissor);
+      auto end3d() -> void;
+      auto renderGuiSystem(const std::shared_ptr<IGuiSystem>& guiSystem) -> void;
       auto present() -> bool;
 
     private:

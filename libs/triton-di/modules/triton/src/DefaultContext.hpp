@@ -1,5 +1,6 @@
 #pragma once
 
+#include "tr/IGuiSystem.hpp"
 #include "gfx/IGraphicsDevice.hpp"
 #include "gfx/IRenderContext.hpp"
 #include "tr/IContext.hpp"
@@ -19,9 +20,11 @@ namespace tr {
                               std::shared_ptr<gp::IGameplaySystem> newGameplaySystem,
                               std::shared_ptr<gfx::IRenderContext> newRenderContext,
                               std::shared_ptr<gfx::IGraphicsDevice> graphicsDevice,
-                              std::shared_ptr<tr::IWindow> newWindow);
+                              std::shared_ptr<tr::IWindow> newWindow,
+                              std::shared_ptr<tr::IGuiSystem> newGuiSystem);
       void run() override;
       auto getGameplaySystem() -> std::shared_ptr<gp::IGameplaySystem> override;
+      auto getGuiSystem() -> std::shared_ptr<tr::IGuiSystem> override;
 
     private:
       bool paused{};
@@ -31,5 +34,6 @@ namespace tr {
       std::shared_ptr<gfx::IRenderContext> renderContext;
       std::shared_ptr<gfx::IGraphicsDevice> graphicsDevice;
       std::shared_ptr<IWindow> window;
+      std::shared_ptr<tr::IGuiSystem> guiSystem;
    };
 }

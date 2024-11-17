@@ -19,13 +19,15 @@ namespace tr::gfx {
        std::shared_ptr<sb::IShaderBindingFactory> newShaderBindingFactory,
        std::shared_ptr<pipe::IShaderCompiler> newShaderCompiler,
        std::shared_ptr<rd::RendererFactory> newRendererFactory,
-       std::shared_ptr<gp::IGameplaySystem> newGameplaySystem)
+       std::shared_ptr<gp::IGameplaySystem> newGameplaySystem,
+       std::shared_ptr<IGuiSystem> newGuiSystem)
        : graphicsDevice{std::move(newGraphicsDevice)},
          layoutFactory{std::move(newLayoutFactory)},
          shaderBindingFactory{std::move(newShaderBindingFactory)},
          shaderCompiler{std::move(newShaderCompiler)},
          rendererFactory{std::move(newRendererFactory)},
-         gameplaySystem{std::move(newGameplaySystem)} {
+         gameplaySystem{std::move(newGameplaySystem)},
+         guiSystem{std::move(newGuiSystem)} {
       Log.trace("Constructing DefaultRenderContext");
 
       // TODO(matt) These shouldn't be empty
@@ -88,6 +90,10 @@ namespace tr::gfx {
       }
 
       currentFrame.render(defaultRenderer, getViewportAndScissor());
+
+      currentFrame.end3d();
+
+      currentFrame.renderGuiSystem(guiSystem);
 
       if (currentFrame.present()) {
          resizeSwapchain();

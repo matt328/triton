@@ -2,6 +2,8 @@
 
 namespace tr {
 
+   class IGuiSystem;
+
    namespace gp {
       class IGameplaySystem;
    }
@@ -19,5 +21,6 @@ namespace tr {
       virtual void run() = 0;
 
       virtual auto getGameplaySystem() -> std::shared_ptr<gp::IGameplaySystem> = 0;
+      virtual auto getGuiSystem() -> std::shared_ptr<IGuiSystem> = 0;
    };
 }

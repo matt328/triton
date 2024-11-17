@@ -1,5 +1,6 @@
 #include "DefaultContext.hpp"
 
+#include "tr/IGuiSystem.hpp"
 #include "gfx/IGraphicsDevice.hpp"
 #include "tr/IWindow.hpp"
 #include "tr/IEventBus.hpp"
@@ -15,12 +16,14 @@ namespace tr {
                                   std::shared_ptr<gp::IGameplaySystem> newGameplaySystem,
                                   std::shared_ptr<gfx::IRenderContext> newRenderContext,
                                   std::shared_ptr<gfx::IGraphicsDevice> newGraphicsDevice,
-                                  std::shared_ptr<tr::IWindow> newWindow)
+                                  std::shared_ptr<tr::IWindow> newWindow,
+                                  std::shared_ptr<IGuiSystem> newGuiSystem)
        : eventBus{std::move(newEventBus)},
          gameplaySystem{std::move(newGameplaySystem)},
          renderContext{std::move(newRenderContext)},
          graphicsDevice{std::move(newGraphicsDevice)},
-         window{std::move(newWindow)} {
+         window{std::move(newWindow)},
+         guiSystem{std::move(newGuiSystem)} {
 
       Log.trace("Constructing Default Context");
 
@@ -89,5 +92,9 @@ namespace tr {
 
    auto DefaultContext::getGameplaySystem() -> std::shared_ptr<gp::IGameplaySystem> {
       return gameplaySystem;
+   }
+
+   auto DefaultContext::getGuiSystem() -> std::shared_ptr<IGuiSystem> {
+      return guiSystem;
    }
 }
