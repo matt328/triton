@@ -3,6 +3,7 @@
 #include "cm/Handles.hpp"
 #include "cm/LockableResource.hpp"
 #include "cm/TracyDefs.hpp"
+#include <vulkan/vulkan_raii.hpp>
 
 namespace tr::as {
    class ImageData;
@@ -41,7 +42,13 @@ namespace tr::gfx {
       virtual auto getDescriptorBufferProperties()
           -> vk::PhysicalDeviceDescriptorBufferPropertiesEXT = 0;
 
+      // Escape Hatches
       [[nodiscard]] virtual auto getVulkanDevice() const -> std::shared_ptr<vk::raii::Device> = 0;
+      [[nodiscard]] virtual auto getVulkanInstance() const
+          -> std::shared_ptr<vk::raii::Instance> = 0;
+      [[nodiscard]] virtual auto getGraphicsQueue() const -> std::shared_ptr<vk::raii::Queue> = 0;
+      [[nodiscard]] virtual auto getPhysicalDevice() const
+          -> std::shared_ptr<vk::raii::PhysicalDevice> = 0;
 
       virtual auto submit(const vk::SubmitInfo& submitInfo,
                           const std::unique_ptr<vk::raii::Fence>& fence) -> void = 0;
@@ -50,9 +57,11 @@ namespace tr::gfx {
                                          uint32_t imageIndex) -> vk::Result = 0;
 
       [[nodiscard]] virtual auto getSwapchainExtent() -> vk::Extent2D = 0;
-
+      [[nodiscard]] virtual auto getSwapchainFormat() -> vk::Format = 0;
       [[nodiscard]] virtual auto getSwapchainImage(uint32_t swapchainImageIndex)
           -> const vk::Image& = 0;
+      [[nodiscard]] virtual auto getSwapchainImageView(uint32_t swapchainImageIndex)
+          -> const vk::raii::ImageView& = 0;
 
       [[nodiscard]] virtual auto createPipelineLayout(
           const vk::PipelineLayoutCreateInfo& createInfo,

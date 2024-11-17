@@ -1,21 +1,34 @@
 #pragma once
 
-#include "IGuiSystem.hpp"
+#include "tr/IGuiSystem.hpp"
+
+namespace tr::gfx {
+   class IGraphicsDevice;
+}
+
+namespace tr {
+   class IWindow;
+}
 
 namespace tr::cm {
    class ImGuiSystem : public IGuiSystem {
     public:
-      ImGuiSystem() = default;
-      ~ImGuiSystem() override = default;
+      ImGuiSystem(const std::shared_ptr<gfx::IGraphicsDevice>& graphicsDevice,
+                  const std::shared_ptr<IWindow>& window);
+      ~ImGuiSystem() override;
 
-      ImGuiSystem(const ImGuiSystem&) = default;
+      ImGuiSystem(const ImGuiSystem&) = delete;
       ImGuiSystem(ImGuiSystem&&) = delete;
-      auto operator=(const ImGuiSystem&) -> ImGuiSystem& = default;
+      auto operator=(const ImGuiSystem&) -> ImGuiSystem& = delete;
       auto operator=(ImGuiSystem&&) -> ImGuiSystem& = delete;
 
-      void initialize() override;
+      auto setRenderCallback(std::function<void(void)> newRenderFn) -> void override;
+      auto render(const std::unique_ptr<vk::raii::CommandBuffer>& commandBuffer,
+                  const vk::raii::ImageView& swapchainImageView,
+                  const vk::Extent2D& swapchainExtent) -> void override;
 
     private:
-      bool isInitialized{};
+      std::unique_ptr<vk::raii::DescriptorPool> descriptorPool;
+      std::function<void(void)> renderFn;
    };
 }

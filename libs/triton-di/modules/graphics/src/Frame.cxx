@@ -200,7 +200,13 @@ namespace tr::gfx {
       commandBuffer->beginRendering(renderingInfo);
    }
 
-   auto Frame::present() -> bool {
+   auto Frame::renderGuiSystem(const std::shared_ptr<IGuiSystem>& guiSystem) -> void {
+      guiSystem->render(commandBuffer,
+                        graphicsDevice->getSwapchainImageView(swapchainImageIndex),
+                        graphicsDevice->getSwapchainExtent());
+   }
+
+   auto Frame::end3d() -> void {
       commandBuffer->endRendering();
 
       const auto& swapchainImage = graphicsDevice->getSwapchainImage(swapchainImageIndex);
@@ -232,6 +238,9 @@ namespace tr::gfx {
                       vk::ImageLayout::ePresentSrcKHR);
 
       TracyVkCollect(tracyContext, **commandBuffer);
+   }
+
+   auto Frame::present() -> bool {
 
       commandBuffer->end();
 

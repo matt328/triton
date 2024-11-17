@@ -1,5 +1,6 @@
 #include "Window.hpp"
 #include "tr/Events.hpp"
+#include "tr/IGuiAdapter.hpp"
 #include "tr/KeyMap.hpp"
 
 namespace tr::gfx {
@@ -8,9 +9,10 @@ namespace tr::gfx {
    constexpr int MinHeight = 200;
 
    Window::Window(std::shared_ptr<IEventBus> newEventBus,
+                  std::shared_ptr<tr::IGuiAdapter> newGuiAdapter,
                   const glm::ivec2& dimensions,
                   const std::string& windowTitle)
-       : eventBus{std::move(newEventBus)} {
+       : eventBus{std::move(newEventBus)}, guiAdapter{std::move(newGuiAdapter)} {
       Log.trace("Constructing Window");
 
       glfwSetErrorCallback(errorCallback);
@@ -69,12 +71,11 @@ namespace tr::gfx {
                             [[maybe_unused]] const int action,
                             const int mods) {
 
-      // Allow ImGui to take over the keyboard if it thinks it needs it.
-      if (ImGui::GetIO().WantCaptureKeyboard || ImGui::GetIO().WantTextInput) {
+      auto* const thisWindow = static_cast<Window*>(glfwGetWindowUserPointer(window));
+
+      if (thisWindow->guiAdapter->needsKeyboard()) {
          return;
       }
-
-      auto* const thisWindow = static_cast<Window*>(glfwGetWindowUserPointer(window));
 
       // Capture Alt+Enter to toggle fullscreen and 'consume' the keystrokes.
       if (key == GLFW_KEY_ENTER && mods == GLFW_MOD_ALT && action == GLFW_RELEASE) {
@@ -104,16 +105,16 @@ namespace tr::gfx {
                                     const int action,
                                     const int mods) {
       auto* const thisWindow = static_cast<Window*>(glfwGetWindowUserPointer(window));
-      if (ImGui::GetIO().WantCaptureMouse && !thisWindow->isMouseCaptured) {
+      if (thisWindow->guiAdapter->needsMouse() && !thisWindow->isMouseCaptured) {
          return;
       }
       if (button == GLFW_MOUSE_BUTTON_1 && action == GLFW_RELEASE) {
          if (!thisWindow->isMouseCaptured) {
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-            ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NoMouse;
+            thisWindow->guiAdapter->disableMouse();
          } else {
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-            ImGui::GetIO().ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
+            thisWindow->guiAdapter->enableMouse();
          }
          thisWindow->isMouseCaptured = !thisWindow->isMouseCaptured;
          thisWindow->eventBus->emit(tr::MouseCaptured{thisWindow->isMouseCaptured});

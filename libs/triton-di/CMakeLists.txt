@@ -2,6 +2,9 @@ project("triton-di")
 
 set(common_SRC
 
+   modules/common/src/ImGuiSystem.cxx
+   modules/common/src/ImGuiAdapter.cxx
+
    modules/triton/src/ComponentFactory.cxx
    modules/triton/src/DefaultContext.cxx
    modules/triton/src/DefaultEventBus.cxx

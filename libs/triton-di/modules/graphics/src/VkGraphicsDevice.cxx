@@ -70,7 +70,7 @@ namespace tr::gfx {
 
       {
          ZoneNamedN(zone, "Create Instance", true);
-         instance = std::make_unique<vk::raii::Instance>(*context, instanceCreateInfo);
+         instance = std::make_shared<vk::raii::Instance>(*context, instanceCreateInfo);
       }
 
       Log.trace("Created Instance");
@@ -108,7 +108,7 @@ namespace tr::gfx {
 
       for (const auto& possibleDevice : physicalDevices) {
          if (Helpers::isDeviceSuitable(possibleDevice, *surface, desiredDeviceExtensions)) {
-            physicalDevice = std::make_unique<vk::raii::PhysicalDevice>(possibleDevice);
+            physicalDevice = std::make_shared<vk::raii::PhysicalDevice>(possibleDevice);
             break;
          }
       }
@@ -215,7 +215,7 @@ namespace tr::gfx {
 
       Log.trace("Created Logical Device");
 
-      graphicsQueue = std::make_unique<vk::raii::Queue>(
+      graphicsQueue = std::make_shared<vk::raii::Queue>(
           vulkanDevice->getQueue(queueFamilyIndices.graphicsFamily.value(), 0));
       Helpers::setObjectName(**graphicsQueue, *vulkanDevice, "Graphics Queue");
       Log.trace("Created Graphics Queue");
@@ -705,6 +705,11 @@ namespace tr::gfx {
 
    auto VkGraphicsDevice::getSwapchainImage(uint32_t swapchainImageIndex) -> const vk::Image& {
       return swapchainImages[swapchainImageIndex];
+   }
+
+   auto VkGraphicsDevice::getSwapchainImageView(uint32_t swapchainImageIndex)
+       -> const vk::raii::ImageView& {
+      return swapchainImageViews[swapchainImageIndex];
    }
 
    void VkGraphicsDevice::transitionImage(const vk::raii::CommandBuffer& cmd,

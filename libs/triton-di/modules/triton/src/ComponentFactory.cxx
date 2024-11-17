@@ -1,5 +1,9 @@
 #include "tr/ComponentFactory.hpp"
 #include "Window.hpp"
+#include "cm/ImGuiAdapter.hpp"
+#include "tr/IGuiAdapter.hpp"
+#include "tr/IGuiSystem.hpp"
+#include "cm/ImGuiSystem.hpp"
 #include "gfx/IRenderContext.hpp"
 #include "pipeline/IShaderCompiler.hpp"
 #include "pipeline/SpirvShaderCompiler.hpp"
@@ -34,10 +38,12 @@ namespace tr {
       const auto injector = di::make_injector(
           di::bind<gfx::RenderContextConfig>.to(rendererConfig),
           di::bind<gfx::VkGraphicsDevice::Config>.to(deviceConfig),
-          di::bind<tr::IWindow>.to<gfx::Window>(),
-          di::bind<IEventBus>.to<DefaultEventBus>(),
           di::bind<gp::IGameplaySystem>.to<gp::GameplaySystem>(),
           di::bind<gfx::IGraphicsDevice>.to<gfx::VkGraphicsDevice>(),
+          di::bind<IGuiSystem>.to<cm::ImGuiSystem>(),
+          di::bind<IGuiAdapter>.to<cm::ImGuiAdapter>(),
+          di::bind<tr::IWindow>.to<gfx::Window>(),
+          di::bind<IEventBus>.to<DefaultEventBus>(),
           di::bind<gfx::IRenderContext>.to<gfx::DefaultRenderContext>(),
           di::bind<gfx::sb::ILayoutFactory>.to<gfx::sb::LayoutFactory>(),
           di::bind<gfx::sb::IShaderBindingFactory>.to<gfx::sb::ShaderBindingFactory>(),

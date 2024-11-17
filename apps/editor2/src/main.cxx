@@ -43,9 +43,11 @@ auto main() -> int {
 
       auto context = tr::ComponentFactory::getContext(frameworkConfig);
       auto gameplaySystem = context->getGameplaySystem();
+      auto guiSystem = context->getGuiSystem();
 
       const auto injector =
           di::make_injector(di::bind<tr::IContext>.to(context),
+                            di::bind<tr::IGuiSystem>.to(guiSystem),
                             di::bind<tr::gp::IGameplaySystem>.to<>(gameplaySystem),
                             di::bind<std::filesystem::path>.to<>(propertiesPath));
 
