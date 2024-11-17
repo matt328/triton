@@ -122,8 +122,8 @@ target_link_libraries(${PROJECT_NAME}
 target_include_directories(${PROJECT_NAME}
    PUBLIC
    modules/triton/include
-   PRIVATE
    modules/common/include
+   PRIVATE
    modules/common/src
    modules/gameplay/include
    modules/gameplay/src

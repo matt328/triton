@@ -2,7 +2,6 @@
 
 #include "GlmCereal.hpp"
 #include "cm/EntitySystemTypes.hpp"
-#include "tr/GameplayFacade.hpp"
 #include "TaskQueue.hpp"
 
 /*
@@ -19,6 +18,14 @@
 
    Will need a way to start, stop, and reset the 'time' of the game from the editor.
 */
+
+namespace ed {
+   class TaskQueue;
+}
+
+namespace tr::gp {
+   class IGameplaySystem;
+}
 
 namespace ed::data {
 
@@ -95,7 +102,8 @@ namespace ed::data {
 
    class DataFacade {
     public:
-      explicit DataFacade(tr::ctx::GameplayFacade& gameplayFacade);
+      explicit DataFacade(std::shared_ptr<tr::gp::IGameplaySystem> newGameplaySystem,
+                          std::shared_ptr<TaskQueue> newTaskQueue);
       ~DataFacade();
 
       DataFacade(const DataFacade&) = delete;
@@ -139,7 +147,7 @@ namespace ed::data {
 
       void setEntityPosition(const std::string_view& name, const glm::vec3& newPosition);
 
-      [[nodiscard]] EntityData getEntityData(const std::string_view& name) const {
+      [[nodiscard]] auto getEntityData(const std::string_view& name) const -> EntityData {
          return dataStore.scene.at(name.data());
       }
 
@@ -168,12 +176,13 @@ namespace ed::data {
       }
 
     private:
+      std::shared_ptr<tr::gp::IGameplaySystem> gameplaySystem;
+      std::shared_ptr<TaskQueue> taskQueue;
+
       bool unsaved{};
       bool engineBusy{};
       DataStore dataStore;
-      tr::ctx::GameplayFacade& gameplayFacade;
-      std::unordered_map<std::string, tr::cm::EntityType> entityNameMap{};
-      std::unique_ptr<tr::util::TaskQueue> taskQueue;
+      std::unordered_map<std::string, ::tr::cm::EntityType> entityNameMap{};
    };
 
 } // namespace ed::data

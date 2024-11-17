@@ -3,6 +3,7 @@
 
 #include "tr/ComponentFactory.hpp"
 #include "Properties.hpp"
+#include "TaskQueue.hpp"
 #include "TracyDefines.hpp"
 
 namespace di = boost::di;

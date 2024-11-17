@@ -19,6 +19,12 @@ namespace tr::gp {
 
       void setRenderDataTransferHandler(const RenderDataTransferHandler& handler) override;
 
+      auto createStaticModelEntity(std::string filename) -> cm::EntityType override;
+      auto createAnimatedModelEntity(std::string modelFilename,
+                                     std::string skeletonFilename,
+                                     std::string animationFilename) -> cm::EntityType override;
+      auto createTerrain() -> cm::EntityType override;
+
     private:
       RenderDataTransferHandler transferHandler;
    };

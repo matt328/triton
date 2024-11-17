@@ -3,7 +3,13 @@ project("editor2" VERSION "0.0.1" LANGUAGES CXX)
 set(editor_SRC
    src/main.cxx
    src/Application.cxx
+
    src/ui/Manager.cxx
+
+   src/ui/components/Menu.cxx
+   src/ui/components/DialogManager.cxx
+
+   src/data/DataFacade.cxx
 )
 
 add_executable(${PROJECT_NAME} ${editor_SRC})
