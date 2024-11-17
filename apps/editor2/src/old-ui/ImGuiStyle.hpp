@@ -1,6 +1,6 @@
 #pragma once
 namespace ImGuiEx {
-   inline void setupImGuiStyle() {
+   inline void setupImGuiStyle2() {
       // Fork of Visual Studio style from ImThemes
       ImGuiStyle& style = ImGui::GetStyle();
 
