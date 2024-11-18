@@ -25,6 +25,7 @@ namespace tr {
       void run() override;
       auto getGameplaySystem() -> std::shared_ptr<gp::IGameplaySystem> override;
       auto getGuiSystem() -> std::shared_ptr<tr::IGuiSystem> override;
+      auto getEventSystem() -> std::shared_ptr<IEventBus> override;
 
     private:
       bool paused{};

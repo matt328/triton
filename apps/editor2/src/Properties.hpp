@@ -1,3 +1,5 @@
+#include <utility>
+
 #pragma once
 
 namespace cereal {
@@ -24,14 +26,14 @@ namespace ed {
 
    class Properties {
     public:
-      explicit Properties(const std::filesystem::path& filePath) {
-         if (!exists(filePath.parent_path())) {
-            create_directories(filePath.parent_path());
+      explicit Properties(const std::filesystem::path& filePath) : path(filePath) {
+         if (!exists(path.parent_path())) {
+            create_directories(path.parent_path());
          }
 
          // Create the file if it doesn't exist
-         if (!exists(filePath)) {
-            if (std::ofstream o{filePath, std::ios::binary}; o.is_open()) {
+         if (!exists(path)) {
+            if (std::ofstream o{path, std::ios::binary}; o.is_open()) {
                cereal::BinaryOutputArchive output(o);
                output(propertiesData);
             } else {
@@ -39,12 +41,12 @@ namespace ed {
             }
          }
 
-         if (std::ifstream i{filePath, std::ios::binary}; i.is_open()) {
+         if (std::ifstream i{path, std::ios::binary}; i.is_open()) {
             cereal::BinaryInputArchive input(i);
             input(propertiesData);
             loaded = true;
          } else {
-            Log.warn("Error reading application configuration file: {0}", filePath.string());
+            Log.warn("Error reading application configuration file: {0}", path.string());
          }
          Log.debug("Loaded properties");
       }
