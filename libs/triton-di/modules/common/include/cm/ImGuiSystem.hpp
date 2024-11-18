@@ -23,6 +23,7 @@ namespace tr::cm {
       auto operator=(ImGuiSystem&&) -> ImGuiSystem& = delete;
 
       auto setRenderCallback(std::function<void(void)> newRenderFn) -> void override;
+      auto clearRenderCallback() -> void override;
       auto render(const std::unique_ptr<vk::raii::CommandBuffer>& commandBuffer,
                   const vk::raii::ImageView& swapchainImageView,
                   const vk::Extent2D& swapchainExtent) -> void override;

@@ -97,4 +97,8 @@ namespace tr {
    auto DefaultContext::getGuiSystem() -> std::shared_ptr<IGuiSystem> {
       return guiSystem;
    }
+
+   auto DefaultContext::getEventSystem() -> std::shared_ptr<IEventBus> {
+      return eventBus;
+   }
 }
