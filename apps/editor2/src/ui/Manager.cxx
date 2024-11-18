@@ -14,10 +14,12 @@ namespace ed::ui {
 
    Manager::Manager(std::shared_ptr<cmp::Menu> newAppMenu,
                     std::shared_ptr<cmp::AssetViewer> newAssetViewer,
-                    std::shared_ptr<cmp::DialogManager> newDialogManager)
+                    std::shared_ptr<cmp::DialogManager> newDialogManager,
+                    std::shared_ptr<cmp::EntityEditor> newEntityEditor)
        : appMenu{std::move(newAppMenu)},
          assetViewer{std::move(newAssetViewer)},
-         dialogManager{std::move(newDialogManager)} {
+         dialogManager{std::move(newDialogManager)},
+         entityEditor{std::move(newEntityEditor)} {
       Log.trace("Constructing Manager");
       ImGuiEx::setupImGuiStyle();
       ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
@@ -49,6 +51,7 @@ namespace ed::ui {
       dialogManager->render();
 
       appMenu->render();
+      entityEditor->render();
       assetViewer->render();
 
       dialogManager->update();
