@@ -1,3 +1,6 @@
+#include <optional>
+#include <utility>
+
 #pragma once
 
 namespace ed::ui::cmp {
@@ -15,18 +18,40 @@ namespace ed::ui::cmp {
       [[nodiscard]] virtual auto getValue() const -> std::any = 0;
    };
 
+   using ValueProvider = std::function<std::vector<std::string>(void)>;
+
    template <typename T>
    class TypedControl : public ControlBase {
       static constexpr auto SkeletonFilters = std::array{nfdfilteritem_t{"Ozz Skeleton", "ozz"}};
 
     public:
-      TypedControl(std::string label, T initialValue)
-          : label(std::move(label)), value(initialValue) {
+      TypedControl(std::string label,
+                   T initialValue,
+                   std::optional<ValueProvider> newValueProvider = std::nullopt)
+          : label(std::move(label)),
+            value(initialValue),
+            valueProvider{std::move(newValueProvider)} {
       }
 
       void render() override {
          if constexpr (std::is_same_v<T, std::string>) {
-            ImGui::InputText(label.c_str(), &value);
+            if (valueProvider.has_value()) {
+               // Render combobox if options are provided
+               if (ImGui::BeginCombo(label.c_str(), value.c_str())) {
+                  for (const auto& option : valueProvider.value()()) {
+                     bool isSelected = (value == option);
+                     if (ImGui::Selectable(option.c_str(), isSelected)) {
+                        value = option;
+                     }
+                     if (isSelected) {
+                        ImGui::SetItemDefaultFocus();
+                     }
+                  }
+                  ImGui::EndCombo();
+               }
+            } else {
+               ImGui::InputText(label.c_str(), &value);
+            }
          } else if constexpr (std::is_same_v<T, int>) {
             ImGui::InputInt(label.c_str(), &value);
          } else if constexpr (std::is_same_v<T, float>) {
@@ -71,6 +96,7 @@ namespace ed::ui::cmp {
     private:
       std::string label;
       T value;
+      std::optional<ValueProvider> valueProvider;
    };
 
    enum class DialogResult : uint8_t {
@@ -94,8 +120,11 @@ namespace ed::ui::cmp {
       }
 
       template <typename T>
-      void addControl(const std::string& name, const std::string& label, T initialValue) {
-         controls[name] = std::make_unique<TypedControl<T>>(label, initialValue);
+      void addControl(const std::string& name,
+                      const std::string& label,
+                      T initialValue,
+                      std::optional<ValueProvider> valueProvider = std::nullopt) {
+         controls[name] = std::make_unique<TypedControl<T>>(label, initialValue, valueProvider);
       }
 
       template <typename T>
