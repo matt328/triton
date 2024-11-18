@@ -4,10 +4,16 @@
 namespace ed::ui::cmp {
    Menu::Menu(std::shared_ptr<data::DataFacade> newDataFacade,
               std::shared_ptr<Properties> newProperties,
-              std::shared_ptr<DialogManager> newDialogManager)
+              std::shared_ptr<DialogManager> newDialogManager,
+              std::shared_ptr<tr::IEventBus> newEventBus)
        : dataFacade{std::move(newDataFacade)},
          properties{std::move(newProperties)},
-         dialogManager{std::move(newDialogManager)} {
+         dialogManager{std::move(newDialogManager)},
+         eventBus{std::move(newEventBus)} {
+   }
+
+   Menu::~Menu() {
+      Log.trace("Destroying Menu");
    }
 
    void Menu::render() {
@@ -98,7 +104,7 @@ namespace ed::ui::cmp {
             ImGui::Separator();
 
             if (ImGui::MenuItem("Exit", "Alt+F4")) {
-               quitFn();
+               eventBus->emit(tr::WindowClosed{});
             }
             ImGui::EndMenu();
          }

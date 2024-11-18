@@ -68,13 +68,19 @@ namespace tr::cm {
       renderFn = newRenderFn;
    }
 
+   auto ImGuiSystem::clearRenderCallback() -> void {
+      renderFn = nullptr;
+   }
+
    auto ImGuiSystem::render(const std::unique_ptr<vk::raii::CommandBuffer>& commandBuffer,
                             const vk::raii::ImageView& swapchainImageView,
                             const vk::Extent2D& swapchainExtent) -> void {
       ImGui_ImplVulkan_NewFrame();
       ImGui_ImplGlfw_NewFrame();
       ImGui::NewFrame();
-      renderFn();
+      if (renderFn != nullptr) {
+         renderFn();
+      }
       ImGui::Render();
 
       ZoneNamedN(imguiZone, "Render ImGui", true);

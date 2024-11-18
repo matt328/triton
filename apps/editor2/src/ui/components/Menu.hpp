@@ -2,6 +2,7 @@
 
 #include "Properties.hpp"
 #include "data/DataFacade.hpp"
+#include "tr/IEventBus.hpp"
 #include "ui/components/DialogManager.hpp"
 
 namespace ed::ui::cmp {
@@ -10,8 +11,9 @@ namespace ed::ui::cmp {
     public:
       explicit Menu(std::shared_ptr<data::DataFacade> newDataFacade,
                     std::shared_ptr<Properties> newProperties,
-                    std::shared_ptr<DialogManager> newDialogManager);
-      ~Menu() = default;
+                    std::shared_ptr<DialogManager> newDialogManager,
+                    std::shared_ptr<tr::IEventBus> newEventBus);
+      ~Menu();
 
       Menu(const Menu&) = default;
       Menu(Menu&&) = delete;
@@ -32,6 +34,7 @@ namespace ed::ui::cmp {
       std::shared_ptr<data::DataFacade> dataFacade;
       std::shared_ptr<Properties> properties;
       std::shared_ptr<DialogManager> dialogManager;
+      std::shared_ptr<tr::IEventBus> eventBus;
 
       std::optional<std::filesystem::path> openFilePath{};
       bool fullscreen{};

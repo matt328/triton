@@ -23,7 +23,11 @@ namespace ed {
          Log.debug("recentfile from properties: {0}", recentFile.value().string());
       }
 
-      guiSystem->setRenderCallback([&]() { manager->render(); });
+      guiSystem->setRenderCallback([&]() {
+         if (manager != nullptr) {
+            manager->render();
+         }
+      });
    }
 
    Application::~Application() {
