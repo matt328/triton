@@ -139,8 +139,16 @@ namespace ed::ui::cmp {
           },
           []() { Log.debug("Cancelled Dialog with no input"); });
 
+      const auto provider = []() -> std::vector<std::string> {
+         return {"Unnamed Model", "Model #1", "Model #2"};
+      };
+
       dialog->addControl("name", "Model Name", std::string("Unnamed Model"));
       dialog->addControl("filename", "Model File", std::filesystem::path{});
+      dialog->addControl("name",
+                         "Model Name",
+                         std::string("Unnamed Model"),
+                         std::make_optional(provider));
 
       dialogManager->addDialog("Model", std::move(dialog));
    }

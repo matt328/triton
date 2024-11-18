@@ -3,6 +3,7 @@
 #include "components/AppLog.hpp"
 #include "ui/components/AssetViewer.hpp"
 #include "ui/components/DialogManager.hpp"
+#include "ui/components/EntityEditor.hpp"
 #include "ui/components/Menu.hpp"
 
 namespace ed::ui {
@@ -11,7 +12,8 @@ namespace ed::ui {
     public:
       explicit Manager(std::shared_ptr<cmp::Menu> newAppMenu,
                        std::shared_ptr<cmp::AssetViewer> newAssetViewer,
-                       std::shared_ptr<cmp::DialogManager> newDialogManager);
+                       std::shared_ptr<cmp::DialogManager> newDialogManager,
+                       std::shared_ptr<cmp::EntityEditor> newEntityEditor);
       ~Manager();
 
       Manager(const Manager&) = delete;
@@ -27,6 +29,7 @@ namespace ed::ui {
       std::shared_ptr<cmp::Menu> appMenu;
       std::shared_ptr<cmp::AssetViewer> assetViewer;
       std::shared_ptr<cmp::DialogManager> dialogManager;
+      std::shared_ptr<cmp::EntityEditor> entityEditor;
 
       auto setupFonts() -> void;
    };
