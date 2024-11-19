@@ -1,6 +1,8 @@
 #pragma once
 
+#include "TaskQueue.hpp"
 #include "components/AppLog.hpp"
+#include "data/DataFacade.hpp"
 #include "ui/components/AssetViewer.hpp"
 #include "ui/components/DialogManager.hpp"
 #include "ui/components/EntityEditor.hpp"
@@ -13,7 +15,8 @@ namespace ed::ui {
       explicit Manager(std::shared_ptr<cmp::Menu> newAppMenu,
                        std::shared_ptr<cmp::AssetViewer> newAssetViewer,
                        std::shared_ptr<cmp::DialogManager> newDialogManager,
-                       std::shared_ptr<cmp::EntityEditor> newEntityEditor);
+                       std::shared_ptr<cmp::EntityEditor> newEntityEditor,
+                       std::shared_ptr<TaskQueue> newTaskQueue);
       ~Manager();
 
       Manager(const Manager&) = delete;
@@ -30,6 +33,7 @@ namespace ed::ui {
       std::shared_ptr<cmp::AssetViewer> assetViewer;
       std::shared_ptr<cmp::DialogManager> dialogManager;
       std::shared_ptr<cmp::EntityEditor> entityEditor;
+      std::shared_ptr<TaskQueue> taskQueue;
 
       auto setupFonts() -> void;
    };

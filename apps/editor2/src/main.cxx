@@ -43,6 +43,8 @@ auto main() -> int {
           .windowTitle = windowTitle.str(),
       };
 
+      const auto taskQueueConfig = ed::TaskQueueConfig{.maxQueueSize = 3};
+
       auto context = tr::ComponentFactory::getContext(frameworkConfig);
       auto gameplaySystem = context->getGameplaySystem();
       auto guiSystem = context->getGuiSystem();
@@ -53,7 +55,8 @@ auto main() -> int {
                             di::bind<tr::IGuiSystem>.to(guiSystem),
                             di::bind<tr::IEventBus>.to(eventSystem),
                             di::bind<tr::gp::IGameplaySystem>.to<>(gameplaySystem),
-                            di::bind<std::filesystem::path>.to<>(propertiesPath));
+                            di::bind<std::filesystem::path>.to<>(propertiesPath),
+                            di::bind<ed::TaskQueueConfig>.to(taskQueueConfig));
 
       auto application = injector.create<std::shared_ptr<ed::Application>>();
 

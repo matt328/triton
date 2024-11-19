@@ -15,11 +15,14 @@ namespace ed::ui {
    Manager::Manager(std::shared_ptr<cmp::Menu> newAppMenu,
                     std::shared_ptr<cmp::AssetViewer> newAssetViewer,
                     std::shared_ptr<cmp::DialogManager> newDialogManager,
-                    std::shared_ptr<cmp::EntityEditor> newEntityEditor)
+                    std::shared_ptr<cmp::EntityEditor> newEntityEditor,
+                    std::shared_ptr<TaskQueue> newTaskQueue)
        : appMenu{std::move(newAppMenu)},
          assetViewer{std::move(newAssetViewer)},
          dialogManager{std::move(newDialogManager)},
-         entityEditor{std::move(newEntityEditor)} {
+         entityEditor{std::move(newEntityEditor)},
+         taskQueue{std::move(newTaskQueue)} {
+
       Log.trace("Constructing Manager");
       ImGuiEx::setupImGuiStyle();
       ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
@@ -43,6 +46,7 @@ namespace ed::ui {
 
    void Manager::render() {
       ZoneNamedN(guiRender, "Gui Render", true);
+      taskQueue->processCompleteTasks();
       cmp::Dock::render();
 
       appLog->font = sauce;

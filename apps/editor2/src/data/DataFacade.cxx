@@ -42,32 +42,32 @@ namespace ed::data {
       }
    }
 
-   void DataFacade::addSkeleton(const std::string_view& name, const std::filesystem::path& path) {
+   void DataFacade::addSkeleton(std::string_view name, const std::filesystem::path& path) {
       dataStore.skeletons.insert({name.data(), SkeletonData{name.data(), path.string()}});
       unsaved = true;
    }
 
-   void DataFacade::removeSkeleton([[maybe_unused]] const std::string_view& name) {
+   void DataFacade::removeSkeleton([[maybe_unused]] std::string_view name) {
    }
 
-   void DataFacade::addAnimation(const std::string_view& name, const std::filesystem::path& path) {
+   void DataFacade::addAnimation(std::string_view name, const std::filesystem::path& path) {
       dataStore.animations.insert({name.data(), AnimationData{name.data(), path.string()}});
       unsaved = true;
    }
 
-   void DataFacade::removeAnimation([[maybe_unused]] const std::string_view& name) {
+   void DataFacade::removeAnimation([[maybe_unused]] std::string_view name) {
    }
 
-   void DataFacade::addModel(const std::string_view& name, const std::filesystem::path& path) {
+   void DataFacade::addModel(std::string_view name, const std::filesystem::path& path) {
       dataStore.models.insert({name.data(), ModelData{name.data(), path.string()}});
       unsaved = true;
    }
 
-   void DataFacade::removeModel([[maybe_unused]] const std::string_view& name) {
+   void DataFacade::removeModel([[maybe_unused]] std::string_view name) {
    }
 
-   void DataFacade::createStaticModel(const std::string_view& entityName,
-                                      const std::string_view& modelName) noexcept {
+   void DataFacade::createStaticModel(std::string_view entityName,
+                                      std::string_view modelName) noexcept {
       dataStore.scene.insert({entityName.data(),
                               EntityData{.name = entityName.data(),
                                          .position = glm::vec3{0.F},
@@ -94,57 +94,51 @@ namespace ed::data {
       const auto result = taskQueue->enqueue(task, onComplete);
    }
 
-   void DataFacade::createAnimatedModel(const std::string_view& entityName,
-                                        const std::string_view& modelName,
-                                        const std::string_view& skeletonName,
-                                        const std::string_view& animationName) {
-      auto name = std::string{entityName.data()};
-      auto entityData = EntityData{.name = name,
-                                   .position = glm::vec3{0.f},
-                                   .rotation = glm::identity<glm::quat>(),
-                                   .modelName = modelName.data(),
-                                   .skeleton = skeletonName.data()};
-      entityData.animations = std::vector<std::string>{animationName.data()};
-      dataStore.scene.insert({name, entityData});
+   void DataFacade::createAnimatedModel(const EntityData& entityData) {
+      dataStore.scene.insert({entityData.name, entityData});
       unsaved = true;
 
-      const auto modelFilename = dataStore.models.at(modelName.data()).filePath;
-      const auto skeletonFilename = dataStore.skeletons.at(skeletonName.data()).filePath;
-      const auto animationFilename = dataStore.animations.at(animationName.data()).filePath;
-
-      std::function<void(cm::EntityType)> fn = [this, name](cm::EntityType entity) {
+      const auto modelFilename = dataStore.models.at(entityData.modelName).filePath;
+      const auto skeletonFilename = dataStore.skeletons.at(entityData.skeleton).filePath;
+      const auto animationFilename = dataStore.animations.at(entityData.animations[0]).filePath;
+      const auto entityName = entityData.name;
+      std::function<void(cm::EntityType)> fn = [this, entityName](cm::EntityType entity) {
          ZoneNamedN(z, "Create Entity", true);
-         entityNameMap.insert({name, entity});
+         entityNameMap.insert({entityName, entity});
          engineBusy = false;
          Log.info("Finished creating entity: id: {0}, name: {1}",
                   static_cast<long long>(entity),
-                  name);
+                  entityName);
       };
       engineBusy = true;
 
-      const auto task = [this, modelFilename, skeletonFilename, animationFilename]() {
-         return gameplaySystem->createAnimatedModelEntity(modelFilename,
-                                                          skeletonFilename,
-                                                          animationFilename);
+      const auto animatedEntityData =
+          tr::gp::AnimatedModelData{.modelFilename = modelFilename,
+                                    .skeletonFilename = skeletonFilename,
+                                    .animationFilename = animationFilename};
+
+      const auto task = [this, animatedEntityData]() {
+         return gameplaySystem->createAnimatedModelEntity(animatedEntityData);
       };
+
       auto result = taskQueue->enqueue(task, fn);
    }
 
-   void DataFacade::addAnimationToEntity([[maybe_unused]] const std::string_view& entityName,
-                                         [[maybe_unused]] const std::string_view& animationName) {
+   void DataFacade::addAnimationToEntity([[maybe_unused]] std::string_view entityName,
+                                         [[maybe_unused]] std::string_view animationName) {
       auto& entityData = dataStore.scene.at(entityName.data());
       entityData.animations.emplace_back(animationName.data());
       unsaved = true;
    }
 
-   void DataFacade::setEntitySkeleton([[maybe_unused]] const std::string_view& entityName,
-                                      [[maybe_unused]] const std::string_view& skeletonName) {
+   void DataFacade::setEntitySkeleton([[maybe_unused]] std::string_view entityName,
+                                      [[maybe_unused]] std::string_view skeletonName) {
       auto& entityData = dataStore.scene.at(entityName.data());
       entityData.skeleton = skeletonName.data();
       unsaved = true;
    }
 
-   void DataFacade::createTerrain([[maybe_unused]] const std::string_view& terrainName) {
+   void DataFacade::createTerrain([[maybe_unused]] std::string_view terrainName) {
       const auto task = [&]() { gameplaySystem->createTerrain(); };
 
       std::function<void()> onComplete = [this]() { engineBusy = false; };
@@ -185,10 +179,7 @@ namespace ed::data {
             if (entityData.animations.empty()) {
                createStaticModel(entityData.name, entityData.modelName);
             } else {
-               createAnimatedModel(entityData.name,
-                                   entityData.modelName,
-                                   entityData.skeleton,
-                                   entityData.animations[0]);
+               createAnimatedModel(entityData);
             }
          }
 
@@ -196,7 +187,7 @@ namespace ed::data {
       } catch (const std::exception& ex) { Log.error(ex.what()); }
    }
 
-   void DataFacade::setEntityPosition(const std::string_view& name, const glm::vec3& newPosition) {
+   void DataFacade::setEntityPosition(std::string_view name, const glm::vec3& newPosition) {
       auto& [name2, position, rotation, modelName, skeleton, animations] =
           dataStore.scene.at(name.data());
       position = newPosition;

@@ -122,15 +122,19 @@ namespace ed::ui::cmp {
          return animationNames;
       };
 
-      auto dialog = std::make_unique<ModalDialog>(
-          DialogName,
-          [&](const cmp::ModalDialog& dialog) {
-             Log.trace("Model: {0}, Skeleton: {1}, Animation: {2}",
-                       dialog.getValue<std::string>("model").value(),
-                       dialog.getValue<std::string>("skeleton").value(),
-                       dialog.getValue<std::string>("animation").value());
-          },
-          []() { Log.debug("Cancelled Dialog with no input"); });
+      const auto onOk = [&](const cmp::ModalDialog& dialog) {
+         dataFacade->createAnimatedModel(
+             data::EntityData{.name = dialog.getValue<std::string>("name").value(),
+                              .modelName = dialog.getValue<std::string>("model").value(),
+                              .skeleton = dialog.getValue<std::string>("skeleton").value(),
+                              .animations = {dialog.getValue<std::string>("animation").value()}});
+      };
+
+      const auto onCancel = []() { Log.debug("Cancelled Dialog with no input"); };
+
+      auto dialog = std::make_unique<ModalDialog>(DialogName, onOk, onCancel);
+
+      dialog->addControl("name", "Entity Name", std::string{"Unnamed Entity"});
 
       dialog->addControl("model", "Model Name", std::string{"Unnamed Model"}, modelProvider);
 

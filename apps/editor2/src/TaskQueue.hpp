@@ -2,11 +2,15 @@
 
 namespace ed {
 
-   constexpr size_t DefaultMaxQueueSize = 10;
+   constexpr size_t DefaultMaxQueueSize = 2;
+
+   struct TaskQueueConfig {
+      size_t maxQueueSize = 2;
+   };
 
    class TaskQueue {
     public:
-      explicit TaskQueue(size_t maxQueueSize = DefaultMaxQueueSize) : maxQueueSize{maxQueueSize} {
+      explicit TaskQueue(const TaskQueueConfig& config) : maxQueueSize{config.maxQueueSize} {
          thread = std::thread([this]() { this->worker(); });
       }
 
