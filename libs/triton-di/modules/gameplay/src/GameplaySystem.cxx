@@ -63,9 +63,9 @@ namespace tr::gp {
       return static_cast<cm::EntityType>(1);
    }
 
-   auto GameplaySystem::createAnimatedModelEntity(std::string modelFilename,
-                                                  std::string skeletonFilename,
-                                                  std::string animationFilename) -> cm::EntityType {
+   auto GameplaySystem::createAnimatedModelEntity(const AnimatedModelData& modelData)
+       -> cm::EntityType {
+      Log.trace("gameplaySystem createAnimatedModelEntity: {0}", modelData);
       return static_cast<cm::EntityType>(1);
    }
 
