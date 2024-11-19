@@ -3,6 +3,7 @@
 #include "GlmCereal.hpp"
 #include "cm/EntitySystemTypes.hpp"
 #include "TaskQueue.hpp"
+#include "tr/IGameplaySystem.hpp"
 
 /*
    Think of the editor as a tool for editing the project data nothing more.
@@ -61,8 +62,8 @@ namespace ed::data {
 
    struct EntityData {
       std::string name{};
-      glm::vec3 position{};
-      glm::quat rotation{};
+      glm::vec3 position{glm::zero<glm::vec3>()};
+      glm::quat rotation{glm::identity<glm::quat>()};
       std::string modelName{};
       std::string skeleton{};
       std::vector<std::string> animations{};
@@ -116,38 +117,32 @@ namespace ed::data {
 
       void clear();
 
-      void addSkeleton(const std::string_view& name, const std::filesystem::path& path);
-      void removeSkeleton(const std::string_view& name);
+      void addSkeleton(std::string_view name, const std::filesystem::path& path);
+      void removeSkeleton(std::string_view name);
 
-      void addAnimation(const std::string_view& name, const std::filesystem::path& path);
-      void removeAnimation(const std::string_view& name);
+      void addAnimation(std::string_view name, const std::filesystem::path& path);
+      void removeAnimation(std::string_view name);
 
-      void addModel(const std::string_view& name, const std::filesystem::path& path);
-      void removeModel(const std::string_view& name);
+      void addModel(std::string_view name, const std::filesystem::path& path);
+      void removeModel(std::string_view name);
 
-      void createStaticModel(const std::string_view& entityName,
-                             const std::string_view& modelName) noexcept;
+      void createStaticModel(std::string_view entityName, std::string_view modelName) noexcept;
 
-      void createAnimatedModel(const std::string_view& entityName,
-                               const std::string_view& modelName,
-                               const std::string_view& skeletonName,
-                               const std::string_view& animationName);
+      void createAnimatedModel(const EntityData& entityData);
 
-      void addAnimationToEntity(const std::string_view& entityName,
-                                const std::string_view& animationName);
+      void addAnimationToEntity(std::string_view entityName, std::string_view animationName);
 
-      void setEntitySkeleton(const std::string_view& entityName,
-                             const std::string_view& skeletonName);
+      void setEntitySkeleton(std::string_view entityName, std::string_view skeletonName);
 
-      void createTerrain(const std::string_view& terrainName);
+      void createTerrain(std::string_view terrainName);
       void createAABB();
 
       void save(const std::filesystem::path& outputFile);
       void load(const std::filesystem::path& inputFile);
 
-      void setEntityPosition(const std::string_view& name, const glm::vec3& newPosition);
+      void setEntityPosition(std::string_view name, const glm::vec3& newPosition);
 
-      [[nodiscard]] auto getEntityData(const std::string_view& name) const -> EntityData {
+      [[nodiscard]] auto getEntityData(std::string_view name) const -> EntityData {
          return dataStore.scene.at(name.data());
       }
 
