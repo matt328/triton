@@ -102,6 +102,7 @@ namespace ed::data {
       const auto skeletonFilename = dataStore.skeletons.at(entityData.skeleton).filePath;
       const auto animationFilename = dataStore.animations.at(entityData.animations[0]).filePath;
       const auto entityName = entityData.name;
+
       std::function<void(cm::EntityType)> fn = [this, entityName](cm::EntityType entity) {
          ZoneNamedN(z, "Create Entity", true);
          entityNameMap.insert({entityName, entity});
