@@ -18,7 +18,7 @@ namespace ed::ui::cmp {
       auto operator=(const EntityEditor&) -> EntityEditor& = default;
       auto operator=(EntityEditor&&) -> EntityEditor& = delete;
 
-      void render();
+      void render() const;
 
     private:
       std::shared_ptr<tr::gp::IGameplaySystem> gameplaySystem;
@@ -27,7 +27,7 @@ namespace ed::ui::cmp {
 
       std::optional<std::string> selectedEntity{std::nullopt};
 
-      void createAnimatedEntityDialog();
+      void createAnimatedEntityDialog() const;
    };
 
 }
