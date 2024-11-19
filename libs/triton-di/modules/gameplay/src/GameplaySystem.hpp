@@ -22,6 +22,7 @@ namespace tr::gp {
       auto createStaticModelEntity(std::string filename) -> cm::EntityType override;
       auto createAnimatedModelEntity(const AnimatedModelData& modelData) -> cm::EntityType override;
       auto createTerrain() -> cm::EntityType override;
+      auto createDefaultCamera() -> cm::EntityType override;
 
     private:
       RenderDataTransferHandler transferHandler;

@@ -66,10 +66,18 @@ namespace tr::gp {
    auto GameplaySystem::createAnimatedModelEntity(const AnimatedModelData& modelData)
        -> cm::EntityType {
       Log.trace("gameplaySystem createAnimatedModelEntity: {0}", modelData);
+
+      // have gfx create the resources and return a handle.
+
+      // use the handle(s) to create an entity in the ECS
+
       return static_cast<cm::EntityType>(1);
    }
 
    auto GameplaySystem::createTerrain() -> cm::EntityType {
       return static_cast<cm::EntityType>(1);
+   }
+
+   auto GameplaySystem::createDefaultCamera() -> cm::EntityType {
    }
 }
