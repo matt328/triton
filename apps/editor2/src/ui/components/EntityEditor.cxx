@@ -1,7 +1,7 @@
 #include "EntityEditor.hpp"
+
 #include "ui/components/DialogManager.hpp"
 #include "ui/components/ModalDialog.hpp"
-#include <string>
 
 namespace ed::ui::cmp {
    constexpr auto DialogName = "AnimatedEntity";
@@ -19,7 +19,7 @@ namespace ed::ui::cmp {
       Log.trace("Destroying EntityEditor");
    }
 
-   void EntityEditor::render() {
+   void EntityEditor::render() const {
 
       if (ImGui::Begin("Entity Editor",
                        nullptr,
@@ -89,7 +89,7 @@ namespace ed::ui::cmp {
       ImGui::End();
    }
 
-   void EntityEditor::createAnimatedEntityDialog() {
+   void EntityEditor::createAnimatedEntityDialog() const {
       // Maybe have to register a data provider thing to pass in a lambda to evaluate when
       // actually rendering this dialog. As it is right now, these will always be empty.
       ValueProvider modelProvider = [this]() -> std::vector<std::string> {
