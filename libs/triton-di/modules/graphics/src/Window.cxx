@@ -3,6 +3,13 @@
 #include "tr/IGuiAdapter.hpp"
 #include "tr/KeyMap.hpp"
 
+#ifdef _WIN32
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include <GLFW/glfw3native.h>
+#include <windows.h> // For general Windows APIs
+#include <dwmapi.h>  // For DWMWINDOWATTRIBUTE
+#endif
+
 namespace tr::gfx {
 
    constexpr int MinWidth = 320;
@@ -23,6 +30,43 @@ namespace tr::gfx {
 
          window =
              glfwCreateWindow(dimensions.x, dimensions.y, windowTitle.data(), nullptr, nullptr);
+
+#ifdef _WIN32
+
+         auto hWnd = glfwGetWin32Window(window);
+         // Paints the background of the window black
+         PAINTSTRUCT ps;
+         RECT rc;
+         HDC hdc = BeginPaint(hWnd, &ps);
+         GetClientRect(hWnd, &rc);
+         SetBkColor(hdc, RGB(0, 0, 0));
+         ExtTextOut(hdc, 0, 0, ETO_OPAQUE, &rc, nullptr, 0, nullptr);
+         EndPaint(hWnd, &ps);
+         BOOL value = TRUE;
+         HRESULT result;
+         result = DwmSetWindowAttribute(hWnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &value, sizeof(value));
+         if (result != S_OK) {
+            Log.warn("Error setting Window Attributes");
+         }
+         RECT rcClient{};
+         GetWindowRect(hWnd, &rcClient);
+         // I feel like trash for this but i can't figure out how to make it repaint enough of the
+         // window to actually update it and glfw doesn't want to support dark mode yet.
+         SetWindowPos(hWnd,
+                      nullptr,
+                      rcClient.left,
+                      rcClient.top,
+                      rcClient.right - rcClient.left - 1,
+                      rcClient.bottom - rcClient.top - 1,
+                      SWP_FRAMECHANGED);
+         SetWindowPos(hWnd,
+                      nullptr,
+                      rcClient.left,
+                      rcClient.top,
+                      rcClient.right - rcClient.left,
+                      rcClient.bottom - rcClient.top,
+                      SWP_FRAMECHANGED);
+#endif
 
          glfwSetWindowSizeLimits(window, MinWidth, MinHeight, GLFW_DONT_CARE, GLFW_DONT_CARE);
 
