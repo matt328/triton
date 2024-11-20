@@ -34,6 +34,7 @@ namespace tr::gp {
           -> cm::EntityType = 0;
       virtual auto createTerrain() -> cm::EntityType = 0;
       virtual auto createDefaultCamera() -> cm::EntityType = 0;
+      virtual auto createTestEntity(std::string_view name) -> cm::EntityType = 0;
 
       [[nodiscard]] virtual auto getRegistry() const -> entt::registry& = 0;
       [[nodiscard]] virtual auto getConstRegistry() const -> const entt::registry& = 0;

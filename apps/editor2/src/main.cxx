@@ -17,7 +17,7 @@ namespace di = boost::di;
 // #else
 auto main() -> int {
    // #endif
-   initLogger(spdlog::level::trace, spdlog::level::warn);
+   initLogger(spdlog::level::trace, spdlog::level::trace);
 
    Log.info("Console is now ready for logging!");
 

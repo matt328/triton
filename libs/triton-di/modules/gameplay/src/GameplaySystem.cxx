@@ -1,13 +1,19 @@
 #include "GameplaySystem.hpp"
 #include "cm/RenderData.hpp"
+#include "gp/components/Camera.hpp"
+#include "gp/components/EditorInfo.hpp"
+#include "gp/components/Transform.hpp"
 #include "tr/IGameplaySystem.hpp"
+#include <entt/entity/fwd.hpp>
+#include <memory>
 
 namespace tr::gp {
 
    GameplaySystem::GameplaySystem(const std::shared_ptr<IActionSystem>& actionSystem,
                                   std::shared_ptr<IEventBus> newEventBus)
        : eventBus{std::move(newEventBus)} {
-      Log.debug("Creating Gameplay System");
+      Log.trace("Creating Gameplay System");
+      registry = std::make_unique<entt::registry>();
 
       // TODO(matt): synchronization isn't applied correctly (at all) here.
       // actionSystem->getDelegate().connect<&sys::CameraSystem::handleAction>(
@@ -81,6 +87,14 @@ namespace tr::gp {
    }
 
    auto GameplaySystem::createDefaultCamera() -> cm::EntityType {
+   }
+
+   auto GameplaySystem::createTestEntity(std::string_view name) -> cm::EntityType {
+      const auto entity = registry->create();
+      registry->emplace<cmp::EditorInfo>(entity, name.data());
+      registry->emplace<cmp::Camera>(entity);
+      registry->emplace<cmp::Transform>(entity);
+      return entity;
    }
 
    [[nodiscard]] auto GameplaySystem::getRegistry() const -> entt::registry& {

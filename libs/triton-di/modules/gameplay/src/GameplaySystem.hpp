@@ -27,6 +27,7 @@ namespace tr::gp {
       auto createAnimatedModelEntity(const AnimatedModelData& modelData) -> cm::EntityType override;
       auto createTerrain() -> cm::EntityType override;
       auto createDefaultCamera() -> cm::EntityType override;
+      auto createTestEntity(std::string_view name) -> cm::EntityType override;
 
       [[nodiscard]] auto getRegistry() const -> entt::registry& override;
       [[nodiscard]] auto getConstRegistry() const -> const entt::registry& override;

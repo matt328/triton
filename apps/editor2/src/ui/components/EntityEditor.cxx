@@ -1,9 +1,19 @@
 #include "EntityEditor.hpp"
 
+#include "gp/components/Camera.hpp"
 #include "ui/components/DialogManager.hpp"
 #include "ui/components/ModalDialog.hpp"
 
+#include "gp/components/EditorInfo.hpp"
+#include "gp/components/Transform.hpp"
+#include <entt/core/hashed_string.hpp>
+#include <entt/entity/fwd.hpp>
+#include <entt/entt.hpp>
+
 namespace ed::ui::cmp {
+
+   using entt::operator""_hs;
+
    constexpr auto DialogName = "AnimatedEntity";
    EntityEditor::EntityEditor(std::shared_ptr<tr::gp::IGameplaySystem> newGameplaySystem,
                               std::shared_ptr<data::DataFacade> newDataFacade,
@@ -13,13 +23,17 @@ namespace ed::ui::cmp {
          dialogManager{std::move(newDialogManager)} {
       Log.trace("Creating EntityEditor");
       createAnimatedEntityDialog();
+
+      gameplaySystem->createTestEntity("Entity 1");
+      gameplaySystem->createTestEntity("Entity 2");
+      gameplaySystem->createTestEntity("Entity 3");
    }
 
    EntityEditor::~EntityEditor() {
       Log.trace("Destroying EntityEditor");
    }
 
-   void EntityEditor::render() const {
+   void EntityEditor::render() {
 
       if (ImGui::Begin("Entity Editor",
                        nullptr,
@@ -43,48 +57,61 @@ namespace ed::ui::cmp {
                            ImVec2(150, 0),
                            ImGuiChildFlags_Border | ImGuiChildFlags_ResizeX);
 
-         // for (const auto& sceneData = dataFacade.getScene();
-         //      const auto& name : sceneData | std::views::keys) {
-         //    if (ImGui::Selectable(name.c_str(), name == selectedEntity)) {
-         //       selectedEntity = name;
-         //       auto data = dataFacade.getEntityData(selectedEntity.value());
-         //       position = data.position;
-         //       previousPosition = position;
-         //       rotation = data.rotation;
-         //       previousRotation = data.rotation;
-         //    }
-         // }
+         auto& registry = gameplaySystem->getRegistry();
+         auto view = registry.view<::tr::gp::cmp::EditorInfo>();
+         for (auto [entity, editorInfo] : view.each()) {
+            if (ImGui::Selectable(editorInfo.name.c_str(), entity == selectedEntity)) {
+               Log.trace("Selected Entity: {}", editorInfo.name);
+               selectedEntity = entity;
+            }
+         }
 
          ImGui::EndChild();
          ImGui::SameLine();
 
          // Right
-         // {
-         //    ImGui::BeginChild("item view", ImVec2(0, 0), ImGuiChildFlags_Border);
-         //    if (selectedEntity.has_value()) {
-         //       ImGui::Text("%s", selectedEntity.value().c_str());
-         //    } else {
-         //       ImGui::Text("No Entity Selected");
-         //    }
+         {
+            // Header
+            ImGui::BeginChild("item view", ImVec2(0, 0), ImGuiChildFlags_Border);
+            if (selectedEntity.has_value()) {
+               // Editor Info Component
+               auto* editorInfo = registry.try_get<tr::gp::cmp::EditorInfo>(selectedEntity.value());
+               if (editorInfo == nullptr) {
+                  return;
+               }
+               ImGui::Text("%s", editorInfo->name.c_str());
 
-         //    if (selectedEntity.has_value()) {
-         //       ImGui::SeparatorText("Transform");
-         //       if (ImGui::DragFloat3("Position", glm::value_ptr(position), 1.f)) {
-         //          if (position != previousPosition) {
-         //             dataFacade.setEntityPosition(selectedEntity.value(), position);
-         //          }
-         //       }
-         //       ImGui::DragFloat3("Rotation", glm::value_ptr(rotation), .1f, -180.f, 180.f);
-         //    }
+               // Transform Component
+               auto* transform = registry.try_get<tr::gp::cmp::Transform>(selectedEntity.value());
+               if (transform != nullptr) {
+                  if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
+                     if (ImGui::DragFloat3("Position##Transform",
+                                           glm::value_ptr(transform->position),
+                                           0.5f)) {}
+                     if (ImGui::DragFloat3("Rotation##Transform",
+                                           glm::value_ptr(transform->rotation),
+                                           0.5f)) {}
+                  }
+               }
 
-         //    if (selectedEntity.has_value()) {
-         //       const auto entityData = dataFacade.getEntityData(selectedEntity.value());
-         //       if (!entityData.animations.empty()) {
-         //          renderAnimationArea(gameplayFacade);
-         //       }
-         //    }
-         // }
-         // ImGui::EndChild();
+               // Camera Component
+               auto* camera = registry.try_get<tr::gp::cmp::Camera>(selectedEntity.value());
+               if (camera != nullptr) {
+                  if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
+                     if (ImGui::DragFloat3("Position##Camera",
+                                           glm::value_ptr(camera->position),
+                                           0.5f)) {}
+                     if (ImGui::DragFloat3("Target##Camera",
+                                           glm::value_ptr(camera->target),
+                                           0.5f)) {}
+                  }
+               }
+
+            } else {
+               ImGui::Text("No Entity Selected");
+            }
+         }
+         ImGui::EndChild();
       }
       ImGui::End();
    }

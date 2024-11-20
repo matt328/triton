@@ -98,6 +98,7 @@ target_precompile_headers(${PROJECT_NAME}
    <ctime>
    <cstdint>
    <queue>
+   <shared_mutex>
    <unordered_map>
    <vector>
 )
@@ -125,9 +126,9 @@ target_include_directories(${PROJECT_NAME}
    PUBLIC
    modules/triton/include
    modules/common/include
+   modules/gameplay/include
    PRIVATE
    modules/common/src
-   modules/gameplay/include
    modules/gameplay/src
    modules/graphics/include
    modules/graphics/src
