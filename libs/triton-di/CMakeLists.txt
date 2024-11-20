@@ -66,6 +66,7 @@ target_compile_definitions(${PROJECT_NAME}
 
 target_precompile_headers(${PROJECT_NAME}
    PUBLIC
+   <entt/entt.hpp>
    <GLFW/glfw3.h>
    <bitset>
    <cereal/archives/json.hpp>
@@ -96,6 +97,7 @@ target_precompile_headers(${PROJECT_NAME}
    PRIVATE
    <ctime>
    <cstdint>
+   <queue>
    <unordered_map>
    <vector>
 )
@@ -103,7 +105,7 @@ target_precompile_headers(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
    PUBLIC
    asset-lib
-   EnTT
+   EnTT::EnTT
    glfw
    glm
    imgui_custom
