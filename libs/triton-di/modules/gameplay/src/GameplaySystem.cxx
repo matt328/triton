@@ -4,7 +4,9 @@
 
 namespace tr::gp {
 
-   GameplaySystem::GameplaySystem(const std::shared_ptr<IActionSystem>& actionSystem) {
+   GameplaySystem::GameplaySystem(const std::shared_ptr<IActionSystem>& actionSystem,
+                                  std::shared_ptr<IEventBus> newEventBus)
+       : eventBus{std::move(newEventBus)} {
       Log.debug("Creating Gameplay System");
 
       // TODO(matt): synchronization isn't applied correctly (at all) here.
@@ -79,5 +81,13 @@ namespace tr::gp {
    }
 
    auto GameplaySystem::createDefaultCamera() -> cm::EntityType {
+   }
+
+   [[nodiscard]] auto GameplaySystem::getRegistry() const -> entt::registry& {
+      return *registry;
+   }
+
+   [[nodiscard]] auto GameplaySystem::getConstRegistry() const -> const entt::registry& {
+      return *registry;
    }
 }
