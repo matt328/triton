@@ -1,6 +1,7 @@
 #include "EntityEditor.hpp"
 
 #include "gp/components/Camera.hpp"
+#include "tr/GameplayEvents.hpp"
 #include "ui/components/DialogManager.hpp"
 #include "ui/components/ModalDialog.hpp"
 
@@ -12,16 +13,22 @@
 
 namespace ed::ui::cmp {
 
-   using entt::operator""_hs;
-
    constexpr auto DialogName = "AnimatedEntity";
+
    EntityEditor::EntityEditor(std::shared_ptr<tr::gp::IGameplaySystem> newGameplaySystem,
                               std::shared_ptr<data::DataFacade> newDataFacade,
-                              std::shared_ptr<DialogManager> newDialogManager)
+                              std::shared_ptr<DialogManager> newDialogManager,
+                              std::shared_ptr<tr::IEventBus> newEventBus)
        : gameplaySystem{std::move(newGameplaySystem)},
          dataFacade{std::move(newDataFacade)},
-         dialogManager{std::move(newDialogManager)} {
+         dialogManager{std::move(newDialogManager)},
+         eventBus{std::move(newEventBus)} {
       Log.trace("Creating EntityEditor");
+
+      eventBus->subscribe<tr::EntityCreated>([](const tr::EntityCreated& event) {
+         Log.trace("EntityEditor entityCreated: {}", static_cast<long>(event.entityId));
+      });
+
       createAnimatedEntityDialog();
 
       gameplaySystem->createTestEntity("Entity 1");

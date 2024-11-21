@@ -3,6 +3,9 @@
 #include "Inputs.hpp"
 #include "Actions.hpp"
 
+#include "GameplayEvents.hpp"
+#include "tr/GameplayEvents.hpp"
+
 namespace tr {
 
    struct WindowIconified {
@@ -54,6 +57,7 @@ namespace tr {
                                      MouseCaptured,
                                      Action,
                                      PlayerMoved,
-                                     PlayerScored>;
+                                     PlayerScored,
+                                     EntityCreated>;
 
 }

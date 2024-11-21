@@ -25,6 +25,7 @@ namespace tr::gp {
    }
 
    BehaviorSystem::~BehaviorSystem() {
+      Log.trace("Destroying BehaviorSystem");
    }
 
    void BehaviorSystem::fixedUpdate([[maybe_unused]] const cm::Timer& timer,

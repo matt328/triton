@@ -19,6 +19,7 @@ namespace tr {
 
       virtual void emit(std::type_index type, const EventVariant& event) = 0;
 
+      /// Example: `eventBus->subscribe<EventType>([](const EventType& event) {})`
       template <typename T>
       void subscribe(std::function<void(const T&)> listener) {
          subscribe(typeid(T), [listener](const EventVariant& event) {
@@ -28,6 +29,8 @@ namespace tr {
          });
       }
 
+      /// Example: `eventBus->emit(EventType{})`
+      /// Don't forget to register EventType with the variant in `Events.hpp`
       template <typename T>
       void emit(const T& event) {
          emit(typeid(T), EventVariant(event));

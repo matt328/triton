@@ -5,7 +5,7 @@
 #include "gp/components/Transform.hpp"
 #include "tr/IGameplaySystem.hpp"
 #include <entt/entity/fwd.hpp>
-#include <memory>
+#include "systems/CameraSystem.hpp"
 
 namespace tr::gp {
 
@@ -14,6 +14,10 @@ namespace tr::gp {
        : eventBus{std::move(newEventBus)} {
       Log.trace("Creating Gameplay System");
       registry = std::make_unique<entt::registry>();
+
+      registry->on_construct<entt::entity>().connect<&GameplaySystem::entityCreated>(this);
+
+      commandQueue = std::make_unique<CommandQueue<entt::registry>>();
 
       // TODO(matt): synchronization isn't applied correctly (at all) here.
       // actionSystem->getDelegate().connect<&sys::CameraSystem::handleAction>(
@@ -61,6 +65,13 @@ namespace tr::gp {
    }
 
    void GameplaySystem::fixedUpdate() {
+      std::unique_lock lock{registryMutex};
+      commandQueue->processCommands(*registry);
+
+      {
+         ZoneNamedN(camZone, "CameraSystem", true);
+         // sys::CameraSystem::fixedUpdate(*registry);
+      }
    }
 
    void GameplaySystem::setRenderDataTransferHandler(const RenderDataTransferHandler& handler) {
@@ -103,5 +114,10 @@ namespace tr::gp {
 
    [[nodiscard]] auto GameplaySystem::getConstRegistry() const -> const entt::registry& {
       return *registry;
+   }
+
+   void GameplaySystem::entityCreated(entt::registry& reg, entt::entity entity) {
+      Log.trace("Entity Created: {}", static_cast<long>(entity));
+      eventBus->emit(EntityCreated{entity});
    }
 }

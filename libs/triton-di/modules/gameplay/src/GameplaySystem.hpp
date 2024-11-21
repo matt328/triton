@@ -39,5 +39,7 @@ namespace tr::gp {
       std::shared_mutex registryMutex{};
       std::unique_ptr<entt::registry> registry;
       std::unique_ptr<CommandQueue<entt::registry>> commandQueue;
+
+      void entityCreated(entt::registry&, entt::entity);
    };
 }
