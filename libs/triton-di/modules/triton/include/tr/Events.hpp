@@ -48,6 +48,11 @@ namespace tr {
       int score;
    };
 
+   struct SwapchainResized {
+      uint32_t width;
+      uint32_t height;
+   };
+
    using EventVariant = std::variant<WindowIconified,
                                      WindowClosed,
                                      KeyEvent,
@@ -58,6 +63,7 @@ namespace tr {
                                      Action,
                                      PlayerMoved,
                                      PlayerScored,
-                                     EntityCreated>;
+                                     EntityCreated,
+                                     SwapchainResized>;
 
 }
