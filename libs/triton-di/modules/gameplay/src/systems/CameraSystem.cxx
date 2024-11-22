@@ -13,45 +13,57 @@ namespace tr::gp::sys {
                               std::shared_ptr<Registry> newRegistry)
        : eventBus{std::move(newEventBus)}, registry{std::move(newRegistry)} {
 
-      eventBus->subscribe<Action>([&](const Action& action) {
-         for (const auto view = registry->getRegistry().view<cmp::Camera>();
-              auto [entity, cam] : view.each()) {
-            if (action.stateType == StateType::State) {
-               const auto value = std::get<bool>(action.value);
-               if (action.actionType == ActionType::StrafeLeft) {
-                  cam.velocity.x = value ? -CameraSpeed : 0.f;
-               }
-
-               if (action.actionType == ActionType::StrafeRight) {
-                  cam.velocity.x = value ? CameraSpeed : 0.f;
-               }
-
-               if (action.actionType == ActionType::MoveForward) {
-                  cam.velocity.z = value ? CameraSpeed : 0.f;
-               }
-
-               if (action.actionType == ActionType::MoveBackward) {
-                  cam.velocity.z = value ? -CameraSpeed : 0.f;
-               }
-            } else if (action.stateType == StateType::Range) {
-               const auto value = std::get<float>(action.value);
-
-               if (action.actionType == ActionType::LookHorizontal) {
-                  cam.yaw -= value * MouseSensitivity;
-               }
-
-               if (action.actionType == ActionType::LookVertical) {
-                  cam.pitch += value * MouseSensitivity; // Invert Y-Axis 4 life
-                  cam.pitch = std::min(cam.pitch, PitchExtent);
-                  cam.pitch = std::max(cam.pitch, -PitchExtent);
-               }
-            }
-         }
-      });
+      eventBus->subscribe<Action>([&](const Action& action) { handleAction(action); });
    }
 
    CameraSystem::~CameraSystem() {
       Log.trace("Destroying CameraSystem");
+   }
+
+   auto CameraSystem::handleAction(const Action& action) -> void {
+      for (const auto view = registry->getRegistry().view<cmp::Camera>();
+           auto [entity, cam] : view.each()) {
+         if (action.stateType == StateType::State) {
+            CameraSystem::handleStateAction(action, cam);
+         } else if (action.stateType == StateType::Range) {
+            CameraSystem::handleRangeAction(action, cam);
+         }
+      }
+   }
+
+   auto CameraSystem::handleStateAction(const Action& action, tr::gp::cmp::Camera& cam) -> void {
+      const auto value = std::get<bool>(action.value);
+      switch (action.actionType) {
+         case ActionType::StrafeLeft:
+            cam.velocity.x = value ? -CameraSpeed : 0.f;
+            break;
+         case ActionType::StrafeRight:
+            cam.velocity.x = value ? CameraSpeed : 0.f;
+            break;
+         case ActionType::MoveForward:
+            cam.velocity.z = value ? CameraSpeed : 0.f;
+            break;
+         case ActionType::MoveBackward:
+            cam.velocity.z = value ? -CameraSpeed : 0.f;
+            break;
+         default:
+            break;
+      }
+   }
+   auto CameraSystem::handleRangeAction(const Action& action, tr::gp::cmp::Camera& cam) -> void {
+      const auto value = std::get<float>(action.value);
+      switch (action.actionType) {
+         case ActionType::LookHorizontal:
+            cam.yaw -= value * MouseSensitivity;
+            break;
+         case ActionType::LookVertical:
+            cam.pitch += value * MouseSensitivity; // Invert Y-Axis 4 life
+            cam.pitch = std::min(cam.pitch, PitchExtent);
+            cam.pitch = std::max(cam.pitch, -PitchExtent);
+            break;
+         default:
+            break;
+      }
    }
 
    void CameraSystem::fixedUpdate() {
