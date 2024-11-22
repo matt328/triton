@@ -119,6 +119,10 @@ namespace tr::gfx {
                             const vk::Extent2D& srcSize,
                             const vk::Extent2D& dstSize) override;
 
+      auto recreateSwapchain() -> void override;
+
+      auto waitIdle() -> void override;
+
     private:
       Config config;
       [[nodiscard]] auto checkValidationLayerSupport() const -> bool;

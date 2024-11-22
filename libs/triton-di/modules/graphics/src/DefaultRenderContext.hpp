@@ -60,6 +60,5 @@ namespace tr::gfx {
       cm::gpu::RenderData renderData;
 
       [[nodiscard]] auto getViewportAndScissor() -> std::tuple<vk::Viewport, vk::Rect2D>;
-      void resizeSwapchain();
    };
 }
