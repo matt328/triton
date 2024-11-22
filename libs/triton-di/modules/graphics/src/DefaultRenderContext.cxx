@@ -67,7 +67,10 @@ namespace tr::gfx {
       const auto status = currentFrame.acquireSwapchainImage();
 
       if (status == AcquireResult::NeedsResize) {
-         resizeSwapchain();
+         graphicsDevice->waitIdle();
+         frameManager->destroySwapchainResources();
+         graphicsDevice->recreateSwapchain();
+         frameManager->createSwapchainResources();
          return;
       }
       if (status == AcquireResult::Error) {
@@ -96,13 +99,14 @@ namespace tr::gfx {
       currentFrame.renderGuiSystem(guiSystem);
 
       if (currentFrame.present()) {
-         resizeSwapchain();
+         graphicsDevice->waitIdle();
+         frameManager->destroySwapchainResources();
+         graphicsDevice->recreateSwapchain();
+         frameManager->createSwapchainResources();
+         return;
       }
 
       frameManager->nextFrame();
-   }
-
-   void DefaultRenderContext::resizeSwapchain() {
    }
 
    void DefaultRenderContext::waitIdle() {

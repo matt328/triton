@@ -273,12 +273,17 @@ namespace tr::gfx {
 
    auto VkGraphicsDevice::present(const std::unique_ptr<vk::raii::Semaphore>& semaphore,
                                   uint32_t imageIndex) -> vk::Result {
-      const auto sphore = std::array<vk::Semaphore, 1>{*semaphore};
-      return graphicsQueue->presentKHR(vk::PresentInfoKHR{.waitSemaphoreCount = 1,
-                                                          .pWaitSemaphores = sphore.data(),
-                                                          .swapchainCount = 1,
-                                                          .pSwapchains = &**swapchain,
-                                                          .pImageIndices = &imageIndex});
+      try {
+         const auto sphore = std::array<vk::Semaphore, 1>{*semaphore};
+         return graphicsQueue->presentKHR(vk::PresentInfoKHR{.waitSemaphoreCount = 1,
+                                                             .pWaitSemaphores = sphore.data(),
+                                                             .swapchainCount = 1,
+                                                             .pSwapchains = &**swapchain,
+                                                             .pImageIndices = &imageIndex});
+      } catch (const std::exception& ex) {
+         Log.trace("presentKHR error {}, recreating swapchain", ex.what());
+         return vk::Result::eSuboptimalKHR;
+      }
    }
 
    auto VkGraphicsDevice::createPipelineLayout(const vk::PipelineLayoutCreateInfo& createInfo,
@@ -600,13 +605,21 @@ namespace tr::gfx {
       return instance->enumeratePhysicalDevices();
    }
 
+   void VkGraphicsDevice::recreateSwapchain() {
+      oldSwapchain = std::move(swapchain);
+      createSwapchain();
+   }
+
+   auto VkGraphicsDevice::waitIdle() -> void {
+      vulkanDevice->waitIdle();
+   }
+
    void VkGraphicsDevice::createSwapchain() {
       if (oldSwapchain != nullptr) {
          commandPool.reset();
          swapchainImages.clear();
          swapchainImageViews.clear();
       }
-      // Create Swapchain
       auto queueFamilyIndicesInfo = Helpers::findQueueFamilies(*physicalDevice, *surface);
 
       auto [capabilities, formats, presentModes] =

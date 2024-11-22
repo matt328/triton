@@ -42,6 +42,8 @@ namespace tr::gfx {
       virtual auto getDescriptorBufferProperties()
           -> vk::PhysicalDeviceDescriptorBufferPropertiesEXT = 0;
 
+      virtual auto recreateSwapchain() -> void = 0;
+
       // Escape Hatches
       [[nodiscard]] virtual auto getVulkanDevice() const -> std::shared_ptr<vk::raii::Device> = 0;
       [[nodiscard]] virtual auto getVulkanInstance() const
@@ -102,6 +104,8 @@ namespace tr::gfx {
 
       [[nodiscard]] virtual auto acquireNextSwapchainImage(const vk::Semaphore& semaphore)
           -> std::variant<uint32_t, AcquireResult> = 0;
+
+      virtual auto waitIdle() -> void = 0;
 
       [[nodiscard]] virtual auto getTextures() const
           -> cm::LockableResource<const std::vector<vk::DescriptorImageInfo>> = 0;
