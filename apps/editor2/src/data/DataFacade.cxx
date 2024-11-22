@@ -31,15 +31,15 @@ namespace ed::data {
    }
 
    void DataFacade::createAABB() {
-      std::random_device rd;
-      std::mt19937 gen(rd());
-      std::uniform_real_distribution<float> dis(-50.f, 50.f);
+      // std::random_device rd;
+      // std::mt19937 gen(rd());
+      // std::uniform_real_distribution<float> dis(-50.f, 50.f);
 
-      for (int i = 0; i < 50; ++i) {
-         const auto min = glm::vec3{dis(gen), dis(gen), dis(gen)};
-         const auto max = min + glm::vec3{5.f, 1.f, 1.f};
-         //[[maybe_unused]] auto entityId = gameplayFacade.createDebugAABB(min, max);
-      }
+      // for (int i = 0; i < 50; ++i) {
+      //    const auto min = glm::vec3{dis(gen), dis(gen), dis(gen)};
+      //    const auto max = min + glm::vec3{5.f, 1.f, 1.f};
+      //    [[maybe_unused]] auto entityId = gameplayFacade.createDebugAABB(min, max);
+      // }
    }
 
    void DataFacade::addSkeleton(std::string_view name, const std::filesystem::path& path) {

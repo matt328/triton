@@ -1,4 +1,5 @@
 #include "GameplaySystem.hpp"
+#include "cm/EntitySystemTypes.hpp"
 #include "commands/CreateTestEntity.hpp"
 #include "tr/Events.hpp"
 #include "tr/IGameplaySystem.hpp"
@@ -82,7 +83,8 @@ namespace tr::gp {
       this->transferHandler = handler;
    }
 
-   auto GameplaySystem::createStaticModelEntity(std::string filename) -> cm::EntityType {
+   auto GameplaySystem::createStaticModelEntity([[maybe_unused]] std::string filename)
+       -> cm::EntityType {
       return static_cast<cm::EntityType>(1);
    }
 
@@ -102,14 +104,16 @@ namespace tr::gp {
    }
 
    auto GameplaySystem::createDefaultCamera() -> cm::EntityType {
+      return static_cast<cm::EntityType>(1);
    }
 
    auto GameplaySystem::createTestEntity(std::string_view name) -> void {
       commandQueue->enqueue(std::make_unique<CreateTestEntityCommand>(name));
    }
 
-   void GameplaySystem::entityCreated(entt::registry& reg, entt::entity entity) {
-      Log.trace("Entity Created: {}", static_cast<long>(entity));
+   void GameplaySystem::entityCreated([[maybe_unused]] entt::registry& reg,
+                                      [[maybe_unused]] entt::entity entity) {
+      Log.trace("Entity Created: {}", static_cast<uint32_t>(entity));
       eventBus->emit(EntityCreated{entity});
    }
 }
