@@ -1,5 +1,6 @@
 #pragma once
 
+#include "gp/Registry.hpp"
 namespace tr {
 
    class IGuiSystem;
@@ -24,5 +25,6 @@ namespace tr {
       virtual auto getGameplaySystem() -> std::shared_ptr<gp::IGameplaySystem> = 0;
       virtual auto getGuiSystem() -> std::shared_ptr<IGuiSystem> = 0;
       virtual auto getEventSystem() -> std::shared_ptr<IEventBus> = 0;
+      virtual auto getRegistry() -> std::shared_ptr<gp::Registry> = 0;
    };
 }
