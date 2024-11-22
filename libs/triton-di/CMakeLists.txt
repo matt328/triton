@@ -12,6 +12,7 @@ set(common_SRC
    modules/gameplay/src/GameplaySystem.cxx
    modules/gameplay/src/ActionSystem.cxx
    modules/gameplay/src/systems/CameraSystem.cxx
+   modules/gameplay/src/Registry.cxx
 
    modules/graphics/src/DefaultRenderContext.cxx
    modules/graphics/src/VkGraphicsDevice.cxx

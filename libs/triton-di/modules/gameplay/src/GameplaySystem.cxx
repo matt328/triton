@@ -1,27 +1,23 @@
 #include "GameplaySystem.hpp"
-#include "cm/RenderData.hpp"
-#include "gp/components/Camera.hpp"
-#include "gp/components/EditorInfo.hpp"
-#include "gp/components/Transform.hpp"
+#include "commands/CreateTestEntity.hpp"
 #include "tr/IGameplaySystem.hpp"
 #include <entt/entity/fwd.hpp>
-#include "systems/CameraSystem.hpp"
 
 namespace tr::gp {
 
    GameplaySystem::GameplaySystem(const std::shared_ptr<IActionSystem>& actionSystem,
-                                  std::shared_ptr<IEventBus> newEventBus)
-       : eventBus{std::move(newEventBus)} {
+                                  std::shared_ptr<IEventBus> newEventBus,
+                                  std::shared_ptr<Registry> newRegistry,
+                                  std::shared_ptr<sys::CameraSystem> newCameraSystem)
+       : eventBus{std::move(newEventBus)},
+         registry{std::move(newRegistry)},
+         cameraSystem{std::move(newCameraSystem)} {
       Log.trace("Creating Gameplay System");
-      registry = std::make_unique<entt::registry>();
 
-      registry->on_construct<entt::entity>().connect<&GameplaySystem::entityCreated>(this);
+      registry->getRegistry().on_construct<entt::entity>().connect<&GameplaySystem::entityCreated>(
+          this);
 
       commandQueue = std::make_unique<CommandQueue<entt::registry>>();
-
-      // TODO(matt): synchronization isn't applied correctly (at all) here.
-      // actionSystem->getDelegate().connect<&sys::CameraSystem::handleAction>(
-      //     *behaviorSystem->getRegistry());
 
       // Forward
       actionSystem->mapSource(Source{cm::Key::Up, SourceType::Boolean},
@@ -66,11 +62,11 @@ namespace tr::gp {
 
    void GameplaySystem::fixedUpdate() {
       std::unique_lock lock{registryMutex};
-      commandQueue->processCommands(*registry);
+      commandQueue->processCommands(registry->getRegistry());
 
       {
          ZoneNamedN(camZone, "CameraSystem", true);
-         // sys::CameraSystem::fixedUpdate(*registry);
+         cameraSystem->fixedUpdate();
       }
    }
 
@@ -100,20 +96,8 @@ namespace tr::gp {
    auto GameplaySystem::createDefaultCamera() -> cm::EntityType {
    }
 
-   auto GameplaySystem::createTestEntity(std::string_view name) -> cm::EntityType {
-      const auto entity = registry->create();
-      registry->emplace<cmp::EditorInfo>(entity, name.data());
-      registry->emplace<cmp::Camera>(entity);
-      registry->emplace<cmp::Transform>(entity);
-      return entity;
-   }
-
-   [[nodiscard]] auto GameplaySystem::getRegistry() const -> entt::registry& {
-      return *registry;
-   }
-
-   [[nodiscard]] auto GameplaySystem::getConstRegistry() const -> const entt::registry& {
-      return *registry;
+   auto GameplaySystem::createTestEntity(std::string_view name) -> void {
+      commandQueue->enqueue(std::make_unique<CreateTestEntityCommand>(name));
    }
 
    void GameplaySystem::entityCreated(entt::registry& reg, entt::entity entity) {
