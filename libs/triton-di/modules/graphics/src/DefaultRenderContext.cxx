@@ -1,6 +1,8 @@
 #include "DefaultRenderContext.hpp"
 #include "DepthResources.hpp"
 #include "geo/VertexAttributes.hpp"
+#include "tr/Events.hpp"
+#include "tr/IEventBus.hpp"
 #include "tr/IGameplaySystem.hpp"
 #include "pipeline/StaticModelPipeline.hpp"
 #include "renderer/RendererFactory.hpp"
@@ -20,15 +22,22 @@ namespace tr::gfx {
        std::shared_ptr<pipe::IShaderCompiler> newShaderCompiler,
        std::shared_ptr<rd::RendererFactory> newRendererFactory,
        std::shared_ptr<gp::IGameplaySystem> newGameplaySystem,
-       std::shared_ptr<IGuiSystem> newGuiSystem)
+       std::shared_ptr<IGuiSystem> newGuiSystem,
+       std::shared_ptr<IEventBus> newEventBus)
        : graphicsDevice{std::move(newGraphicsDevice)},
          layoutFactory{std::move(newLayoutFactory)},
          shaderBindingFactory{std::move(newShaderBindingFactory)},
          shaderCompiler{std::move(newShaderCompiler)},
          rendererFactory{std::move(newRendererFactory)},
          gameplaySystem{std::move(newGameplaySystem)},
-         guiSystem{std::move(newGuiSystem)} {
+         guiSystem{std::move(newGuiSystem)},
+         eventBus{std::move(newEventBus)} {
+
       Log.trace("Constructing DefaultRenderContext");
+
+      const auto& extent = graphicsDevice->getSwapchainExtent();
+
+      eventBus->emit(SwapchainResized{extent.width, extent.height});
 
       // TODO(matt) These shouldn't be empty
       auto defaultSetLayouts = std::vector<vk::DescriptorSetLayout>{};
@@ -103,6 +112,8 @@ namespace tr::gfx {
          frameManager->destroySwapchainResources();
          graphicsDevice->recreateSwapchain();
          frameManager->createSwapchainResources();
+         eventBus->emit(SwapchainResized{graphicsDevice->getSwapchainExtent().width,
+                                         graphicsDevice->getSwapchainExtent().height});
          return;
       }
 

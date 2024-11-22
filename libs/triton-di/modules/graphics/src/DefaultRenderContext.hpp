@@ -1,5 +1,6 @@
 #pragma once
 
+#include "tr/IEventBus.hpp"
 #include "tr/IGuiSystem.hpp"
 #include "gfx/IRenderContext.hpp"
 #include "tr/IGameplaySystem.hpp"
@@ -29,7 +30,8 @@ namespace tr::gfx {
           std::shared_ptr<pipe::IShaderCompiler> newShaderCompiler,
           std::shared_ptr<rd::RendererFactory> newRendererFactory,
           std::shared_ptr<gp::IGameplaySystem> newGameplaySystem,
-          std::shared_ptr<tr::IGuiSystem> newGuiSystem);
+          std::shared_ptr<tr::IGuiSystem> newGuiSystem,
+          std::shared_ptr<IEventBus> newEventBus);
       ~DefaultRenderContext() override;
 
       DefaultRenderContext(const DefaultRenderContext&) = delete;
@@ -49,6 +51,7 @@ namespace tr::gfx {
       std::shared_ptr<rd::RendererFactory> rendererFactory;
       std::shared_ptr<gp::IGameplaySystem> gameplaySystem;
       std::shared_ptr<tr::IGuiSystem> guiSystem;
+      std::shared_ptr<IEventBus> eventBus;
 
       std::shared_ptr<FrameManager> frameManager;
 

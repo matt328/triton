@@ -70,10 +70,7 @@ namespace tr::gp::sys {
       auto& reg = registry->getRegistry();
       const auto view = reg.view<cmp::Camera>();
 
-      // TODO const auto [width, height] = reg.ctx().get<const cmp::WindowDimensions>();
-
-      auto width = 1920;
-      auto height = 1080;
+      const auto [width, height] = reg.ctx().get<const cmp::WindowDimensions>();
 
       for (auto [entity, cam] : view.each()) {
 
