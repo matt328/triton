@@ -99,7 +99,7 @@
          "configuration": "Debug",
          "jobs": 18,
          "targets": [
-            "editor",
+            "editor2",
             "assettool"
          ]
       },
@@ -110,7 +110,7 @@
          "configuration": "Release",
          "jobs": 18,
          "targets": [
-            "editor"
+            "editor2"
          ]
       },
       {
@@ -120,7 +120,7 @@
          "configuration": "Debug",
          "jobs": 18,
          "targets": [
-            "editor"
+            "editor2"
          ]
       },
       {
