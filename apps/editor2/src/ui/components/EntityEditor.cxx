@@ -18,11 +18,13 @@ namespace ed::ui::cmp {
    EntityEditor::EntityEditor(std::shared_ptr<tr::gp::IGameplaySystem> newGameplaySystem,
                               std::shared_ptr<data::DataFacade> newDataFacade,
                               std::shared_ptr<DialogManager> newDialogManager,
-                              std::shared_ptr<tr::IEventBus> newEventBus)
+                              std::shared_ptr<tr::IEventBus> newEventBus,
+                              std::shared_ptr<tr::gp::Registry> newRegistry)
        : gameplaySystem{std::move(newGameplaySystem)},
          dataFacade{std::move(newDataFacade)},
          dialogManager{std::move(newDialogManager)},
-         eventBus{std::move(newEventBus)} {
+         eventBus{std::move(newEventBus)},
+         registry{std::move(newRegistry)} {
       Log.trace("Creating EntityEditor");
 
       eventBus->subscribe<tr::EntityCreated>([](const tr::EntityCreated& event) {
@@ -64,8 +66,8 @@ namespace ed::ui::cmp {
                            ImVec2(150, 0),
                            ImGuiChildFlags_Border | ImGuiChildFlags_ResizeX);
 
-         auto& registry = gameplaySystem->getRegistry();
-         auto view = registry.view<::tr::gp::cmp::EditorInfo>();
+         auto& reg = registry->getRegistry();
+         auto view = reg.view<::tr::gp::cmp::EditorInfo>();
          for (auto [entity, editorInfo] : view.each()) {
             if (ImGui::Selectable(editorInfo.name.c_str(), entity == selectedEntity)) {
                Log.trace("Selected Entity: {}", editorInfo.name);
@@ -82,14 +84,14 @@ namespace ed::ui::cmp {
             ImGui::BeginChild("item view", ImVec2(0, 0), ImGuiChildFlags_Border);
             if (selectedEntity.has_value()) {
                // Editor Info Component
-               auto* editorInfo = registry.try_get<tr::gp::cmp::EditorInfo>(selectedEntity.value());
+               auto* editorInfo = reg.try_get<tr::gp::cmp::EditorInfo>(selectedEntity.value());
                if (editorInfo == nullptr) {
                   return;
                }
                ImGui::Text("%s", editorInfo->name.c_str());
 
                // Transform Component
-               auto* transform = registry.try_get<tr::gp::cmp::Transform>(selectedEntity.value());
+               auto* transform = reg.try_get<tr::gp::cmp::Transform>(selectedEntity.value());
                if (transform != nullptr) {
                   if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
                      if (ImGui::DragFloat3("Position##Transform",
@@ -102,7 +104,7 @@ namespace ed::ui::cmp {
                }
 
                // Camera Component
-               auto* camera = registry.try_get<tr::gp::cmp::Camera>(selectedEntity.value());
+               auto* camera = reg.try_get<tr::gp::cmp::Camera>(selectedEntity.value());
                if (camera != nullptr) {
                   if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
                      if (ImGui::DragFloat3("Position##Camera",

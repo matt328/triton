@@ -1,6 +1,7 @@
 #pragma once
 
 #include "cm/EntitySystemTypes.hpp"
+#include "gp/Registry.hpp"
 #include "tr/IEventBus.hpp"
 #include "tr/IGameplaySystem.hpp"
 #include "data/DataFacade.hpp"
@@ -16,7 +17,8 @@ namespace ed::ui::cmp {
       EntityEditor(std::shared_ptr<tr::gp::IGameplaySystem> newGameplaySystem,
                    std::shared_ptr<data::DataFacade> newDataFacade,
                    std::shared_ptr<DialogManager> newDialogManager,
-                   std::shared_ptr<tr::IEventBus> newEventBus);
+                   std::shared_ptr<tr::IEventBus> newEventBus,
+                   std::shared_ptr<tr::gp::Registry> newRegistry);
       ~EntityEditor();
 
       EntityEditor(const EntityEditor&) = default;
@@ -31,6 +33,7 @@ namespace ed::ui::cmp {
       std::shared_ptr<data::DataFacade> dataFacade;
       std::shared_ptr<DialogManager> dialogManager;
       std::shared_ptr<tr::IEventBus> eventBus;
+      std::shared_ptr<tr::gp::Registry> registry;
 
       std::optional<tr::cm::EntityType> selectedEntity{std::nullopt};
 
