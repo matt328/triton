@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gp/Registry.hpp"
+#include "gp/components/Camera.hpp"
 #include "tr/IEventBus.hpp"
 namespace tr {
    struct Action;
@@ -23,5 +24,9 @@ namespace tr::gp::sys {
     private:
       std::shared_ptr<IEventBus> eventBus;
       std::shared_ptr<Registry> registry;
+
+      auto handleAction(const Action& action) -> void;
+      static auto handleStateAction(const Action& action, tr::gp::cmp::Camera& cam) -> void;
+      static auto handleRangeAction(const Action& action, tr::gp::cmp::Camera& cam) -> void;
    };
 }

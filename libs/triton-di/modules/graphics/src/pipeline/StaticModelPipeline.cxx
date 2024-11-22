@@ -73,9 +73,9 @@ namespace tr::gfx::pipe {
       };
 
       // Rasterizer
-      const auto rasterizer = vk::PipelineRasterizationStateCreateInfo{
-          .polygonMode = vk::PolygonMode::eFill,
-      };
+      const auto rasterizer =
+          vk::PipelineRasterizationStateCreateInfo{.polygonMode = vk::PolygonMode::eFill,
+                                                   .lineWidth = 1.f};
 
       // Multisampling
       const auto multisampling = vk::PipelineMultisampleStateCreateInfo{
