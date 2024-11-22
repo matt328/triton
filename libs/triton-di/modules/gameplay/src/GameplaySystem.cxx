@@ -1,6 +1,8 @@
 #include "GameplaySystem.hpp"
 #include "commands/CreateTestEntity.hpp"
+#include "tr/Events.hpp"
 #include "tr/IGameplaySystem.hpp"
+#include "gp/components/Resources.hpp"
 #include <entt/entity/fwd.hpp>
 
 namespace tr::gp {
@@ -18,6 +20,12 @@ namespace tr::gp {
           this);
 
       commandQueue = std::make_unique<CommandQueue<entt::registry>>();
+
+      eventBus->subscribe<SwapchainResized>([&](const SwapchainResized& event) {
+         auto& reg = registry->getRegistry();
+         reg.ctx().insert_or_assign<cmp::WindowDimensions>(
+             cmp::WindowDimensions{event.height, event.width});
+      });
 
       // Forward
       actionSystem->mapSource(Source{cm::Key::Up, SourceType::Boolean},
