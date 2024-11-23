@@ -43,6 +43,8 @@ set(common_SRC
    modules/graphics/src/geo/HeightField.cxx
 
    modules/graphics/src/tex/Texture.cxx
+  modules/gameplay/src/systems/TransformSystem.cxx
+  modules/gameplay/src/systems/TransformSystem.hpp
 )
 
 add_library(${PROJECT_NAME} STATIC ${common_SRC})

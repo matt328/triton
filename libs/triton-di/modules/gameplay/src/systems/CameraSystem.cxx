@@ -20,18 +20,18 @@ namespace tr::gp::sys {
       Log.trace("Destroying CameraSystem");
    }
 
-   auto CameraSystem::handleAction(const Action& action) -> void {
+   auto CameraSystem::handleAction(const Action& action) const -> void {
       for (const auto view = registry->getRegistry().view<cmp::Camera>();
            auto [entity, cam] : view.each()) {
          if (action.stateType == StateType::State) {
-            CameraSystem::handleStateAction(action, cam);
+            handleStateAction(action, cam);
          } else if (action.stateType == StateType::Range) {
-            CameraSystem::handleRangeAction(action, cam);
+            handleRangeAction(action, cam);
          }
       }
    }
 
-   auto CameraSystem::handleStateAction(const Action& action, tr::gp::cmp::Camera& cam) -> void {
+   auto CameraSystem::handleStateAction(const Action& action, cmp::Camera& cam) -> void {
       const auto value = std::get<bool>(action.value);
       switch (action.actionType) {
          case ActionType::StrafeLeft:
@@ -50,7 +50,7 @@ namespace tr::gp::sys {
             break;
       }
    }
-   auto CameraSystem::handleRangeAction(const Action& action, tr::gp::cmp::Camera& cam) -> void {
+   auto CameraSystem::handleRangeAction(const Action& action, cmp::Camera& cam) -> void {
       const auto value = std::get<float>(action.value);
       switch (action.actionType) {
          case ActionType::LookHorizontal:
@@ -66,7 +66,7 @@ namespace tr::gp::sys {
       }
    }
 
-   void CameraSystem::fixedUpdate() {
+   void CameraSystem::fixedUpdate() const {
       auto& reg = registry->getRegistry();
       const auto view = reg.view<cmp::Camera>();
 
