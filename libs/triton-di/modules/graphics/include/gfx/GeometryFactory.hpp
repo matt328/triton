@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Transvoxel.hpp"
-#include "GeometryHandles.hpp"
+#include "geo/Transvoxel.hpp"
+#include "geo/GeometryHandles.hpp"
 
 #include "as/Vertex.hpp"
 #include "cm/Rando.hpp"

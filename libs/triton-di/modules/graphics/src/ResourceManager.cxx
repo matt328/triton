@@ -1,11 +1,11 @@
-#include "ResourceManager.hpp"
+#include "gfx/ResourceManager.hpp"
 
 #include "ResourceExceptions.hpp"
 #include "cm/Handles.hpp"
 #include "cm/LockableResource.hpp"
 
 #include "geo/GeometryData.hpp"
-#include "geo/GeometryFactory.hpp"
+#include "gfx/GeometryFactory.hpp"
 #include "geo/GeometryHandles.hpp"
 
 #include "gfx/IGraphicsDevice.hpp"
@@ -87,8 +87,8 @@ namespace tr::gfx {
       return modelData;
    }
 
-   auto ResourceManager::createAABB(const glm::vec3& min,
-                                    const glm::vec3& max) noexcept -> cm::ModelData {
+   auto ResourceManager::createAABB(const glm::vec3& min, const glm::vec3& max) noexcept
+       -> cm::ModelData {
       auto geometryHandle = geometryFactory->generateAABB(min, max);
       auto meshHandle =
           graphicsDevice->uploadVertexData(geometryFactory->getGeometryData(geometryHandle));

@@ -7,6 +7,7 @@
 #include "as/gltf/SkinningDataExtractor.hpp"
 #include "as/gltf/TextureExtractor.hpp"
 #include "as/gltf/TransformParser.hpp"
+#include "GlmCereal.hpp"
 
 constexpr int ExpectedArgCount = 5;
 
@@ -35,8 +36,7 @@ auto parseCommandLine(const std::vector<std::string>& args) {
 
 auto main(int argc, char* argv[]) -> int {
    std::vector<std::string> args(argv, argv + argc);
-   initLogger();
-   Log.set_level(spdlog::level::debug);
+   initLogger(spdlog::level::trace, spdlog::level::trace);
 
    namespace fs = std::filesystem;
    namespace as = tr::as;

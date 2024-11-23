@@ -26,7 +26,9 @@ namespace tr::as {
       std::unique_ptr<GltfFileLoader> loader = std::make_unique<gltf::GltfLoaderImpl>();
 
       model = modelLoader->load(loader.get(), resources.modelPath);
-      skeleton = skeletonLoader->load(resources.skeletonPath);
+      if (resources.skeletonPath.has_value()) {
+         skeleton = skeletonLoader->load(*resources.skeletonPath);
+      }
    }
 
    auto ModelConverter::buildTritonModel() const -> Model {
@@ -38,8 +40,10 @@ namespace tr::as {
          nodeParser->execute(model, model.nodes[nodeIndex], tritonModel);
       }
 
-      skinningDataExtractor->execute(model, skeleton, tritonModel);
+      if (skeleton.has_value()) {
+         skinningDataExtractor->execute(model, *skeleton, tritonModel);
+      }
 
       return tritonModel;
    }
-} // namespace tr::as
+}

@@ -3,7 +3,7 @@
 #include <entt/entity/fwd.hpp>
 
 namespace tr::gp {
-   template <typename T>
+   template <typename... Args>
    class ICommand {
     public:
       ICommand() = default;
@@ -13,23 +13,24 @@ namespace tr::gp {
       auto operator=(ICommand&&) -> ICommand& = delete;
 
       virtual ~ICommand() = default;
-      virtual void execute(T& thing) const = 0;
+      virtual void execute(Args... args) const = 0;
    };
 
-   template <typename T>
+   template <typename... Args>
    class CommandQueue {
-      std::queue<std::unique_ptr<ICommand<T>>> commands;
-
     public:
-      void enqueue(std::unique_ptr<ICommand<T>> command) {
+      void enqueue(std::unique_ptr<ICommand<Args...>> command) {
          commands.push(std::move(command));
       }
 
-      void processCommands(T& thing) {
+      void processCommands(Args... args) {
          while (!commands.empty()) {
-            commands.front()->execute(thing);
+            commands.front()->execute(args...);
             commands.pop();
          }
       }
+
+    private:
+      std::queue<std::unique_ptr<ICommand<Args...>>> commands;
    };
 }

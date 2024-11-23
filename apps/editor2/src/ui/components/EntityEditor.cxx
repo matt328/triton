@@ -14,6 +14,7 @@
 namespace ed::ui::cmp {
 
    constexpr auto DialogName = "AnimatedEntity";
+   constexpr auto StaticEntityDialogName = "StaticEntity";
 
    EntityEditor::EntityEditor(std::shared_ptr<tr::gp::IGameplaySystem> newGameplaySystem,
                               std::shared_ptr<data::DataFacade> newDataFacade,
@@ -32,6 +33,7 @@ namespace ed::ui::cmp {
       });
 
       createAnimatedEntityDialog();
+      createStaticEntityDialog();
 
       gameplaySystem->createTestEntity("Entity 1");
       gameplaySystem->createTestEntity("Entity 2");
@@ -51,7 +53,7 @@ namespace ed::ui::cmp {
          if (ImGui::BeginMenuBar()) {
             if (ImGui::BeginMenu("New")) {
                if (ImGui::MenuItem("Static Model...")) {
-                  // dialogManager->showDialog(StaticModelDialogName)
+                  dialogManager->setOpen(StaticEntityDialogName);
                }
                if (ImGui::MenuItem("Animated Model...")) {
                   dialogManager->setOpen(DialogName);
@@ -126,8 +128,6 @@ namespace ed::ui::cmp {
    }
 
    void EntityEditor::createAnimatedEntityDialog() const {
-      // Maybe have to register a data provider thing to pass in a lambda to evaluate when
-      // actually rendering this dialog. As it is right now, these will always be empty.
       ValueProvider modelProvider = [this]() -> std::vector<std::string> {
          const auto& models = dataFacade->getModels();
          auto modelNames = std::vector<std::string>{};
@@ -185,5 +185,31 @@ namespace ed::ui::cmp {
                          animationsProvider);
 
       dialogManager->addDialog(DialogName, std::move(dialog));
+   }
+
+   void EntityEditor::createStaticEntityDialog() const {
+      ValueProvider modelProvider = [this]() -> std::vector<std::string> {
+         const auto& models = dataFacade->getModels();
+         auto modelNames = std::vector<std::string>{};
+         modelNames.reserve(models.size());
+         std::ranges::transform(models, std::back_inserter(modelNames), [](const auto& pair) {
+            return pair.first;
+         });
+         return modelNames;
+      };
+
+      const auto onOk = [&](const cmp::ModalDialog& dialog) {
+         dataFacade->createStaticModel(
+             data::EntityData{.name = dialog.getValue<std::string>("name").value(),
+                              .modelName = dialog.getValue<std::string>("model").value()});
+      };
+
+      const auto onCancel = []() { Log.debug("Cancelled Dialog with no input"); };
+
+      auto dialog = std::make_unique<ModalDialog>(StaticEntityDialogName, onOk, onCancel);
+      dialog->addControl("name", "Entity Name", std::string{"Unnamed Entity"});
+      dialog->addControl("model", "Model Name", std::string{"Unnamed Model"}, modelProvider);
+
+      dialogManager->addDialog(StaticEntityDialogName, std::move(dialog));
    }
 }

@@ -66,29 +66,23 @@ namespace ed::data {
    void DataFacade::removeModel([[maybe_unused]] std::string_view name) {
    }
 
-   void DataFacade::createStaticModel(std::string_view entityName,
-                                      std::string_view modelName) noexcept {
-      dataStore.scene.insert({entityName.data(),
-                              EntityData{.name = entityName.data(),
-                                         .position = glm::vec3{0.F},
-                                         .rotation = glm::identity<glm::quat>(),
-                                         .modelName = modelName.data()}});
-      unsaved = true;
-      const auto modelFilename = dataStore.models.at(modelName.data()).filePath;
+   void DataFacade::createStaticModel(const EntityData& entityData) noexcept {
+      dataStore.scene.insert({entityData.name, entityData});
 
-      const auto onComplete = [this, entityName](cm::EntityType entity) {
+      unsaved = true;
+      const auto modelFilename = dataStore.models.at(entityData.modelName).filePath;
+      const auto entityName = entityData.name;
+
+      const auto onComplete = [this, entityName]() {
          const auto* const name = entityName.data();
-         entityNameMap.insert({name, entity});
          engineBusy = false;
-         Log.info("Finished creating entity: id: {0}, name: {1}",
-                  static_cast<int64_t>(entity),
-                  name);
+         Log.info("Finished creating entity: name: {}", name);
       };
 
       engineBusy = true;
 
-      const auto task = [this, &modelFilename]() {
-         return gameplaySystem->createStaticModelEntity(modelFilename);
+      const auto task = [this, modelFilename, entityName]() {
+         gameplaySystem->createStaticModelEntity(modelFilename, entityName);
       };
 
       const auto result = taskQueue->enqueue(task, onComplete);
@@ -178,7 +172,7 @@ namespace ed::data {
 
          for (const auto& entityData : tempStore.scene | std::views::values) {
             if (entityData.animations.empty()) {
-               createStaticModel(entityData.name, entityData.modelName);
+               createStaticModel(entityData);
             } else {
                createAnimatedModel(entityData);
             }
