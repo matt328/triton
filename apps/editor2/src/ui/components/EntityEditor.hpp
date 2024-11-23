@@ -38,6 +38,7 @@ namespace ed::ui::cmp {
       std::optional<tr::cm::EntityType> selectedEntity{std::nullopt};
 
       void createAnimatedEntityDialog() const;
+      void createStaticEntityDialog() const;
    };
 
 }

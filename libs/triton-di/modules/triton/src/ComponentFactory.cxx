@@ -5,6 +5,7 @@
 #include "tr/IGuiSystem.hpp"
 #include "cm/ImGuiSystem.hpp"
 #include "gfx/IRenderContext.hpp"
+#include "gfx/GeometryFactory.hpp"
 #include "pipeline/IShaderCompiler.hpp"
 #include "pipeline/SpirvShaderCompiler.hpp"
 #include "sb/LayoutFactory.hpp"

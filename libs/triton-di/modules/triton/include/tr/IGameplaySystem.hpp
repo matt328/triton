@@ -29,7 +29,8 @@ namespace tr::gp {
 
       virtual void setRenderDataTransferHandler(const RenderDataTransferHandler& handler) = 0;
 
-      virtual auto createStaticModelEntity(std::string filename) -> cm::EntityType = 0;
+      virtual auto createStaticModelEntity(std::string filename, std::string_view entityName)
+          -> void = 0;
       virtual auto createAnimatedModelEntity(const AnimatedModelData& modelData)
           -> cm::EntityType = 0;
       virtual auto createTerrain() -> cm::EntityType = 0;
