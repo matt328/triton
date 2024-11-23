@@ -18,12 +18,11 @@ namespace ed {
 
       Log.debug("Created Application");
 
-      const auto recentFile = properties->getRecentFile();
-      if (recentFile.has_value()) {
-         Log.debug("recentfile from properties: {0}", recentFile.value().string());
+      if (const auto recentFile = properties->getRecentFile(); recentFile.has_value()) {
+         Log.debug("recentFile from properties: {0}", recentFile.value().string());
       }
 
-      guiSystem->setRenderCallback([&]() {
+      guiSystem->setRenderCallback([&] {
          if (manager != nullptr) {
             manager->render();
          }

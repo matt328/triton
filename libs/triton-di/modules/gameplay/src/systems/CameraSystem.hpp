@@ -3,6 +3,7 @@
 #include "gp/Registry.hpp"
 #include "gp/components/Camera.hpp"
 #include "tr/IEventBus.hpp"
+
 namespace tr {
    struct Action;
 }
@@ -19,14 +20,14 @@ namespace tr::gp::sys {
       auto operator=(const CameraSystem&) -> CameraSystem& = default;
       auto operator=(CameraSystem&&) -> CameraSystem& = delete;
 
-      void fixedUpdate();
+      void fixedUpdate() const;
 
     private:
       std::shared_ptr<IEventBus> eventBus;
       std::shared_ptr<Registry> registry;
 
-      auto handleAction(const Action& action) -> void;
-      static auto handleStateAction(const Action& action, tr::gp::cmp::Camera& cam) -> void;
-      static auto handleRangeAction(const Action& action, tr::gp::cmp::Camera& cam) -> void;
+      auto handleAction(const Action& action) const -> void;
+      static auto handleStateAction(const Action& action, cmp::Camera& cam) -> void;
+      static auto handleRangeAction(const Action& action, cmp::Camera& cam) -> void;
    };
 }

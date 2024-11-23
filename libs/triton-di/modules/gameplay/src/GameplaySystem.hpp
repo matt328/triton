@@ -7,17 +7,21 @@
 #include "tr/IGameplaySystem.hpp"
 #include "gp/action/IActionSystem.hpp"
 #include "CommandQueue.hpp"
+#include "systems/TransformSystem.hpp"
+
 #include <entt/entity/fwd.hpp>
 
 namespace tr::gp {
-   class GameplaySystem : public IGameplaySystem {
+
+   class GameplaySystem final : public IGameplaySystem {
     public:
       explicit GameplaySystem(const std::shared_ptr<IActionSystem>& actionSystem,
                               std::shared_ptr<IEventBus> newEventBus,
                               std::shared_ptr<Registry> newRegistry,
                               std::shared_ptr<sys::CameraSystem> newCameraSystem,
-                              std::shared_ptr<gfx::ResourceManager> newResourceManager);
-      ~GameplaySystem() override = default;
+                              std::shared_ptr<gfx::ResourceManager> newResourceManager,
+                              std::shared_ptr<sys::TransformSystem> newTransformSystem);
+      ~GameplaySystem() override;
 
       GameplaySystem(const GameplaySystem&) = delete;
       GameplaySystem(GameplaySystem&&) = delete;
@@ -41,12 +45,15 @@ namespace tr::gp {
       std::shared_ptr<Registry> registry;
       std::shared_ptr<sys::CameraSystem> cameraSystem;
       std::shared_ptr<gfx::ResourceManager> resourceManager;
+      std::shared_ptr<sys::TransformSystem> transformSystem;
 
       RenderDataTransferHandler transferHandler;
       std::shared_mutex registryMutex{};
       std::unique_ptr<CommandQueue<entt::registry&, const std::shared_ptr<gfx::ResourceManager>&>>
           commandQueue;
 
-      void entityCreated(entt::registry&, entt::entity);
+      entt::connection entityCreatedConnection;
+
+      void entityCreated(entt::registry&, entt::entity) const;
    };
 }

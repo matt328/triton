@@ -9,14 +9,15 @@
 #include "gfx/ResourceManager.hpp"
 
 namespace tr::gp {
-   class CreateTestEntityCommand
+   class CreateTestEntityCommand final
        : public ICommand<entt::registry&, const std::shared_ptr<gfx::ResourceManager>&> {
     public:
-      explicit CreateTestEntityCommand(std::string_view newName) : name{newName.data()} {
+      explicit CreateTestEntityCommand(const std::string_view newName) : name{newName.data()} {
       }
 
       void execute(entt::registry& registry,
-                   const std::shared_ptr<gfx::ResourceManager>& resourceManager) const override {
+                   [[maybe_unused]] const std::shared_ptr<gfx::ResourceManager>& resourceManager)
+          const override {
          const auto entity = registry.create();
          registry.emplace<cmp::EditorInfo>(entity, name);
          registry.emplace<cmp::Camera>(entity);
