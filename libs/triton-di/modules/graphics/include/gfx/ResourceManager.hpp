@@ -25,11 +25,11 @@ namespace tr::gfx {
       auto operator=(const ResourceManager&) -> ResourceManager& = delete;
       auto operator=(ResourceManager&&) -> ResourceManager& = delete;
 
-      auto createTerrain() -> std::vector<cm::ModelData>;
+      auto createTerrain() const -> std::vector<cm::ModelData>;
 
-      auto createModel(const std::filesystem::path& filename) noexcept -> cm::ModelData;
+      auto createModel(const std::filesystem::path& filename) const noexcept -> cm::ModelData;
 
-      auto createAABB(const glm::vec3& min, const glm::vec3& max) noexcept -> cm::ModelData;
+      auto createAABB(const glm::vec3& min, const glm::vec3& max) const noexcept -> cm::ModelData;
 
       auto createStaticMesh(const geo::GeometryData& geometry) -> cm::MeshHandle;
 

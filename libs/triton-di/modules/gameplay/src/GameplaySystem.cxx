@@ -14,21 +14,24 @@ namespace tr::gp {
                                   std::shared_ptr<IEventBus> newEventBus,
                                   std::shared_ptr<Registry> newRegistry,
                                   std::shared_ptr<sys::CameraSystem> newCameraSystem,
-                                  std::shared_ptr<gfx::ResourceManager> newResourceManager)
+                                  std::shared_ptr<gfx::ResourceManager> newResourceManager,
+                                  std::shared_ptr<sys::TransformSystem> newTransformSystem)
        : eventBus{std::move(newEventBus)},
          registry{std::move(newRegistry)},
          cameraSystem{std::move(newCameraSystem)},
-         resourceManager{std::move(newResourceManager)} {
+         resourceManager{std::move(newResourceManager)},
+         transformSystem{std::move(newTransformSystem)} {
       Log.trace("Creating Gameplay System");
 
-      registry->getRegistry().on_construct<entt::entity>().connect<&GameplaySystem::entityCreated>(
-          this);
+      auto& reg = registry->getRegistry();
+
+      entityCreatedConnection =
+          reg.on_construct<entt::entity>().connect<&GameplaySystem::entityCreated>(this);
 
       commandQueue = std::make_unique<
           CommandQueue<entt::registry&, const std::shared_ptr<gfx::ResourceManager>&>>();
 
       eventBus->subscribe<SwapchainResized>([&](const SwapchainResized& event) {
-         auto& reg = registry->getRegistry();
          reg.ctx().insert_or_assign<cmp::WindowDimensions>(
              cmp::WindowDimensions{event.height, event.width});
       });
@@ -70,17 +73,24 @@ namespace tr::gp {
                               tr::StateType::Range,
                               tr::ActionType::LookVertical);
    }
+   GameplaySystem::~GameplaySystem() {
+      Log.trace("Destroying Gameplay System");
+      entityCreatedConnection.release();
+   }
 
    void GameplaySystem::update() {
    }
 
    void GameplaySystem::fixedUpdate() {
-      std::unique_lock lock{registryMutex};
+      std::unique_lock const lock{registryMutex};
       commandQueue->processCommands(registry->getRegistry(), resourceManager);
-
       {
          ZoneNamedN(camZone, "CameraSystem", true);
          cameraSystem->fixedUpdate();
+      }
+      {
+         ZoneNamedN(xformZone, "Transform", true);
+         transformSystem->update();
       }
    }
 
@@ -88,14 +98,8 @@ namespace tr::gp {
       this->transferHandler = handler;
    }
 
-   auto GameplaySystem::createStaticModelEntity(std::string filename, std::string_view entityName)
-       -> void {
-      /*
-         Need some way to have the renderer create the things and return handles
-         then pass handles to the cmd::CreateStaticEntity
-         - Add ResourceManager to the current command queue and pass a ref into each cmd::execute
-
-      */
+   auto GameplaySystem::createStaticModelEntity(std::string filename,
+                                                const std::string_view entityName) -> void {
       commandQueue->enqueue(
           std::make_unique<cmd::CreateStaticEntityCommand>(filename, entityName.data()));
    }
@@ -124,7 +128,7 @@ namespace tr::gp {
    }
 
    void GameplaySystem::entityCreated([[maybe_unused]] entt::registry& reg,
-                                      [[maybe_unused]] entt::entity entity) {
+                                      [[maybe_unused]] entt::entity entity) const {
       Log.trace("Entity Created: {}", static_cast<uint32_t>(entity));
       eventBus->emit(EntityCreated{entity});
    }

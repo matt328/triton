@@ -2,7 +2,6 @@
 
 #include "ResourceExceptions.hpp"
 #include "cm/Handles.hpp"
-#include "cm/LockableResource.hpp"
 
 #include "geo/GeometryData.hpp"
 #include "gfx/GeometryFactory.hpp"
@@ -19,7 +18,7 @@ namespace tr::gfx {
       geometryFactory = std::make_unique<geo::GeometryFactory>();
    }
 
-   auto ResourceManager::createTerrain() -> std::vector<cm::ModelData> {
+   auto ResourceManager::createTerrain() const -> std::vector<cm::ModelData> {
       ZoneNamedN(zn2, "Creating Terrain", true);
 
       const auto dataHandle = geometryFactory->createTerrain();
@@ -40,7 +39,7 @@ namespace tr::gfx {
       return modelDataList;
    }
 
-   auto ResourceManager::createModel(const std::filesystem::path& filename) noexcept
+   auto ResourceManager::createModel(const std::filesystem::path& filename) const noexcept
        -> cm::ModelData {
       ZoneNamedN(zn1, "ResourceManager::loadModel", true);
 
@@ -87,10 +86,10 @@ namespace tr::gfx {
       return modelData;
    }
 
-   auto ResourceManager::createAABB(const glm::vec3& min, const glm::vec3& max) noexcept
+   auto ResourceManager::createAABB(const glm::vec3& min, const glm::vec3& max) const noexcept
        -> cm::ModelData {
-      auto geometryHandle = geometryFactory->generateAABB(min, max);
-      auto meshHandle =
+      const auto geometryHandle = geometryFactory->generateAABB(min, max);
+      const auto meshHandle =
           graphicsDevice->uploadVertexData(geometryFactory->getGeometryData(geometryHandle));
       return cm::ModelData{
           .meshData = cm::MeshData{.meshHandle = meshHandle, .topology = cm::Topology::LineList}};

@@ -10,7 +10,7 @@ namespace ed {
 
    class Application {
     public:
-      Application(std::shared_ptr<Properties> properties,
+      Application(std::shared_ptr<Properties> newProperties,
                   std::shared_ptr<tr::IContext> newContext,
                   std::shared_ptr<tr::gp::IGameplaySystem> newGameplaySystem,
                   std::shared_ptr<tr::IGuiSystem> newGuiSystem,
