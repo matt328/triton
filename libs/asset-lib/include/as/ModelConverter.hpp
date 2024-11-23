@@ -16,7 +16,7 @@ namespace tr::as {
 
    struct ModelResources {
       std::filesystem::path modelPath;
-      std::filesystem::path skeletonPath;
+      std::optional<std::filesystem::path> skeletonPath = std::nullopt;
    };
 
    class ModelConverter {
@@ -42,7 +42,7 @@ namespace tr::as {
 
     private:
       tinygltf::Model model;
-      ozz::animation::Skeleton skeleton;
+      std::optional<ozz::animation::Skeleton> skeleton = std::nullopt;
 
       std::unique_ptr<NodeParser> nodeParser;
       std::unique_ptr<SkinningDataExtractor> skinningDataExtractor;

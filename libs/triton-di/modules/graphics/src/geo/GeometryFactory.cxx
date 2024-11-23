@@ -1,4 +1,4 @@
-#include "GeometryFactory.hpp"
+#include "gfx/GeometryFactory.hpp"
 
 #include "as/Vertex.hpp"
 #include "as/Model.hpp"

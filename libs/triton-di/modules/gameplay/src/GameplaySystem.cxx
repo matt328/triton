@@ -1,6 +1,8 @@
 #include "GameplaySystem.hpp"
+#include "gfx/ResourceManager.hpp"
 #include "cm/EntitySystemTypes.hpp"
 #include "commands/CreateTestEntity.hpp"
+#include "commands/CreateStaticEntity.hpp"
 #include "tr/Events.hpp"
 #include "tr/IGameplaySystem.hpp"
 #include "gp/components/Resources.hpp"
@@ -11,16 +13,19 @@ namespace tr::gp {
    GameplaySystem::GameplaySystem(const std::shared_ptr<IActionSystem>& actionSystem,
                                   std::shared_ptr<IEventBus> newEventBus,
                                   std::shared_ptr<Registry> newRegistry,
-                                  std::shared_ptr<sys::CameraSystem> newCameraSystem)
+                                  std::shared_ptr<sys::CameraSystem> newCameraSystem,
+                                  std::shared_ptr<gfx::ResourceManager> newResourceManager)
        : eventBus{std::move(newEventBus)},
          registry{std::move(newRegistry)},
-         cameraSystem{std::move(newCameraSystem)} {
+         cameraSystem{std::move(newCameraSystem)},
+         resourceManager{std::move(newResourceManager)} {
       Log.trace("Creating Gameplay System");
 
       registry->getRegistry().on_construct<entt::entity>().connect<&GameplaySystem::entityCreated>(
           this);
 
-      commandQueue = std::make_unique<CommandQueue<entt::registry>>();
+      commandQueue = std::make_unique<
+          CommandQueue<entt::registry&, const std::shared_ptr<gfx::ResourceManager>&>>();
 
       eventBus->subscribe<SwapchainResized>([&](const SwapchainResized& event) {
          auto& reg = registry->getRegistry();
@@ -71,7 +76,7 @@ namespace tr::gp {
 
    void GameplaySystem::fixedUpdate() {
       std::unique_lock lock{registryMutex};
-      commandQueue->processCommands(registry->getRegistry());
+      commandQueue->processCommands(registry->getRegistry(), resourceManager);
 
       {
          ZoneNamedN(camZone, "CameraSystem", true);
@@ -83,9 +88,16 @@ namespace tr::gp {
       this->transferHandler = handler;
    }
 
-   auto GameplaySystem::createStaticModelEntity([[maybe_unused]] std::string filename)
-       -> cm::EntityType {
-      return static_cast<cm::EntityType>(1);
+   auto GameplaySystem::createStaticModelEntity(std::string filename, std::string_view entityName)
+       -> void {
+      /*
+         Need some way to have the renderer create the things and return handles
+         then pass handles to the cmd::CreateStaticEntity
+         - Add ResourceManager to the current command queue and pass a ref into each cmd::execute
+
+      */
+      commandQueue->enqueue(
+          std::make_unique<cmd::CreateStaticEntityCommand>(filename, entityName.data()));
    }
 
    auto GameplaySystem::createAnimatedModelEntity(const AnimatedModelData& modelData)
