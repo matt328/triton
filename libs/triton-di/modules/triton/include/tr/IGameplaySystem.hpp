@@ -34,7 +34,7 @@ namespace tr::gp {
       virtual auto createAnimatedModelEntity(const AnimatedModelData& modelData)
           -> cm::EntityType = 0;
       virtual auto createTerrain() -> cm::EntityType = 0;
-      virtual auto createDefaultCamera() -> cm::EntityType = 0;
+      virtual auto createDefaultCamera() -> void = 0;
       virtual auto createTestEntity(std::string_view name) -> void = 0;
    };
 }

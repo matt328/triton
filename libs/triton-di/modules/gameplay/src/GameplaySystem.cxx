@@ -3,6 +3,7 @@
 #include "cm/EntitySystemTypes.hpp"
 #include "commands/CreateTestEntity.hpp"
 #include "commands/CreateStaticEntity.hpp"
+#include "commands/CreateCamera.hpp"
 #include "tr/Events.hpp"
 #include "tr/IGameplaySystem.hpp"
 #include "gp/components/Resources.hpp"
@@ -15,12 +16,14 @@ namespace tr::gp {
                                   std::shared_ptr<Registry> newRegistry,
                                   std::shared_ptr<sys::CameraSystem> newCameraSystem,
                                   std::shared_ptr<gfx::ResourceManager> newResourceManager,
-                                  std::shared_ptr<sys::TransformSystem> newTransformSystem)
+                                  std::shared_ptr<sys::TransformSystem> newTransformSystem,
+                                  std::shared_ptr<sys::RenderDataSystem> newRenderDataSystem)
        : eventBus{std::move(newEventBus)},
          registry{std::move(newRegistry)},
          cameraSystem{std::move(newCameraSystem)},
          resourceManager{std::move(newResourceManager)},
-         transformSystem{std::move(newTransformSystem)} {
+         transformSystem{std::move(newTransformSystem)},
+         renderDataSystem{std::move(newRenderDataSystem)} {
       Log.trace("Creating Gameplay System");
 
       auto& reg = registry->getRegistry();
@@ -79,6 +82,16 @@ namespace tr::gp {
    }
 
    void GameplaySystem::update() {
+      {
+         ZoneNamedN(rd, "RenderData", true);
+         renderData.objectData.clear();
+         renderData.staticMeshData.clear();
+         renderData.terrainMeshData.clear();
+         renderData.skinnedMeshData.clear();
+         renderData.animationData.clear();
+         renderDataSystem->update(renderData);
+      }
+      transferHandler(renderData);
    }
 
    void GameplaySystem::fixedUpdate() {
@@ -119,8 +132,18 @@ namespace tr::gp {
       return static_cast<cm::EntityType>(1);
    }
 
-   auto GameplaySystem::createDefaultCamera() -> cm::EntityType {
-      return static_cast<cm::EntityType>(1);
+   auto GameplaySystem::createDefaultCamera() -> void {
+      const auto [width, height] = registry->getRegistry().ctx().get<const cmp::WindowDimensions>();
+
+      auto cameraInfo = cmp::CameraInfo{
+          .width = width,
+          .height = height,
+          .fov = 60.f,
+          .nearClip = 0.1f,
+          .farClip = 10000.f,
+          .position = glm::vec3{1.0f, 1.0f, 3.0f},
+      };
+      commandQueue->enqueue(std::make_unique<cmd::CreateCamera>(cameraInfo));
    }
 
    auto GameplaySystem::createTestEntity(std::string_view name) -> void {
