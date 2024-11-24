@@ -27,7 +27,7 @@ namespace di = boost::di;
 namespace tr {
    auto ComponentFactory::getContext(const FrameworkConfig& config) -> std::shared_ptr<IContext> {
 
-      const auto rendererConfig = gfx::RenderContextConfig{
+      constexpr auto rendererConfig = gfx::RenderContextConfig{
           .useDescriptorBuffers = false,
           .maxTextures = 16,
       };
