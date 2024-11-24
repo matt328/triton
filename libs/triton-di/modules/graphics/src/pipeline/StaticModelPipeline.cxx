@@ -28,11 +28,11 @@ namespace tr::gfx::pipe {
           graphicsDevice->createPipelineLayout(pipelineLayoutCreateInfo, "StaticModel");
 
       // PipelineRenderingInfo
-      const vk::Format colorAttachmentFormat = vk::Format::eB8G8R8A8Srgb;
-      auto pipelineRenderingInfo = vk::PipelineRenderingCreateInfo{
-          .colorAttachmentCount = 1,
-          .pColorAttachmentFormats = &colorAttachmentFormat,
-      };
+      constexpr auto colorAttachmentFormat = vk::Format::eR16G16B16A16Sfloat;
+      auto pipelineRenderingInfo =
+          vk::PipelineRenderingCreateInfo{.colorAttachmentCount = 1,
+                                          .pColorAttachmentFormats = &colorAttachmentFormat,
+                                          .depthAttachmentFormat = vk::Format::eD32Sfloat};
 
       // Stages
       auto shaderStages = std::vector<vk::PipelineShaderStageCreateInfo>{};
@@ -67,24 +67,24 @@ namespace tr::gfx::pipe {
           .pVertexAttributeDescriptions = vertexAttributeDescriptions.data()};
 
       // Input Assembly
-      const auto inputAssembly = vk::PipelineInputAssemblyStateCreateInfo{
+      constexpr auto inputAssembly = vk::PipelineInputAssemblyStateCreateInfo{
           .topology = vk::PrimitiveTopology::eTriangleList,
           .primitiveRestartEnable = VK_FALSE,
       };
 
       // Rasterizer
-      const auto rasterizer =
+      constexpr auto rasterizer =
           vk::PipelineRasterizationStateCreateInfo{.polygonMode = vk::PolygonMode::eFill,
                                                    .lineWidth = 1.f};
 
       // Multisampling
-      const auto multisampling = vk::PipelineMultisampleStateCreateInfo{
+      constexpr auto multisampling = vk::PipelineMultisampleStateCreateInfo{
           .rasterizationSamples = vk::SampleCountFlagBits::e1,
           .sampleShadingEnable = VK_FALSE,
           .minSampleShading = 1.f};
 
       // Depth Stencil
-      const auto depthStencil =
+      constexpr auto depthStencil =
           vk::PipelineDepthStencilStateCreateInfo{.depthTestEnable = VK_TRUE,
                                                   .depthWriteEnable = VK_TRUE,
                                                   .depthCompareOp = vk::CompareOp::eLess,
@@ -92,7 +92,7 @@ namespace tr::gfx::pipe {
                                                   .stencilTestEnable = VK_FALSE};
 
       // Color Blending
-      const auto colorBlendAttachment = vk::PipelineColorBlendAttachmentState{};
+      constexpr auto colorBlendAttachment = vk::PipelineColorBlendAttachmentState{};
       const auto colorBlending =
           vk::PipelineColorBlendStateCreateInfo{.logicOpEnable = VK_FALSE,
                                                 .logicOp = vk::LogicOp::eCopy,
@@ -100,7 +100,7 @@ namespace tr::gfx::pipe {
                                                 .pAttachments = &colorBlendAttachment};
 
       // Dynamic State
-      const auto dynamicStates = std::array<vk::DynamicState, 2>{
+      constexpr auto dynamicStates = std::array<vk::DynamicState, 2>{
           vk::DynamicState::eViewportWithCount,
           vk::DynamicState::eScissorWithCount,
       };
@@ -134,7 +134,7 @@ namespace tr::gfx::pipe {
 
    void StaticModelPipeline::applyShaderBinding(
        const sb::ShaderBinding& binding,
-       uint32_t setIndex,
+       const uint32_t setIndex,
        const std::unique_ptr<vk::raii::CommandBuffer>& commandBuffer) {
       binding.bindToPipeline(*commandBuffer,
                              vk::PipelineBindPoint::eGraphics,

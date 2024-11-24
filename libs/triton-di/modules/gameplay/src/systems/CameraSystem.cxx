@@ -1,7 +1,7 @@
 #include "CameraSystem.hpp"
 
 #include "gp/components/Camera.hpp"
-#include "components/Resources.hpp"
+#include "gp/components/Resources.hpp"
 
 namespace tr::gp::sys {
 

@@ -44,7 +44,7 @@ auto main() -> int {
           .windowTitle = windowTitle.str(),
       };
 
-      const auto taskQueueConfig = ed::TaskQueueConfig{.maxQueueSize = 3};
+      constexpr auto taskQueueConfig = ed::TaskQueueConfig{.maxQueueSize = 3};
 
       auto context = tr::ComponentFactory::getContext(frameworkConfig);
       auto gameplaySystem = context->getGameplaySystem();

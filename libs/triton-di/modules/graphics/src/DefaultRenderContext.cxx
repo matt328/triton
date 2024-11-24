@@ -65,7 +65,7 @@ namespace tr::gfx {
 
    DefaultRenderContext::~DefaultRenderContext() {
       Log.trace("Destroying DefaultRenderContext");
-      waitIdle();
+      DefaultRenderContext::waitIdle();
    }
 
    void DefaultRenderContext::render() {

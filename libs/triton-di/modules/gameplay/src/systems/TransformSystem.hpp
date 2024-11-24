@@ -4,7 +4,7 @@
 namespace tr::gp::sys {
    class TransformSystem {
     public:
-      TransformSystem(std::shared_ptr<Registry> newRegistry);
+      explicit TransformSystem(std::shared_ptr<Registry> newRegistry);
       ~TransformSystem() = default;
 
       TransformSystem(const TransformSystem&) = delete;

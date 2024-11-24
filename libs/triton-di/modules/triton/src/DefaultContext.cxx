@@ -11,7 +11,7 @@
 
 namespace tr {
 
-   constexpr auto SleepMillis = 100;
+   static constexpr auto SleepMillis = 100;
 
    DefaultContext::DefaultContext(std::shared_ptr<IEventBus> newEventBus,
                                   std::shared_ptr<gp::IGameplaySystem> newGameplaySystem,
@@ -35,7 +35,9 @@ namespace tr {
 
       // Wire together game world to render world
       gameplaySystem->setRenderDataTransferHandler(
-          [&](cm::gpu::RenderData& renderData) { renderContext->setRenderData(renderData); });
+          [&](const cm::gpu::RenderData& renderData) { renderContext->setRenderData(renderData); });
+
+      gameplaySystem->createDefaultCamera();
    }
 
    void DefaultContext::run() {
