@@ -14,8 +14,7 @@ namespace tr {
       }
 
       void emit(std::type_index type, const EventVariant& event) override {
-         auto it = listenersMap.find(type);
-         if (it != listenersMap.end()) {
+         if (auto it = listenersMap.find(type); it != listenersMap.end()) {
             for (auto& listener : it->second) {
                listener(event); // Call each listener with the event
             }

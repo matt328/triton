@@ -16,12 +16,16 @@ namespace ed::ui {
                     std::shared_ptr<cmp::AssetViewer> newAssetViewer,
                     std::shared_ptr<cmp::DialogManager> newDialogManager,
                     std::shared_ptr<cmp::EntityEditor> newEntityEditor,
-                    std::shared_ptr<TaskQueue> newTaskQueue)
+                    std::shared_ptr<TaskQueue> newTaskQueue,
+                    std::shared_ptr<Properties> newProperties,
+                    std::shared_ptr<data::DataFacade> newDataFacade)
        : appMenu{std::move(newAppMenu)},
          assetViewer{std::move(newAssetViewer)},
          dialogManager{std::move(newDialogManager)},
          entityEditor{std::move(newEntityEditor)},
-         taskQueue{std::move(newTaskQueue)} {
+         taskQueue{std::move(newTaskQueue)},
+         properties{std::move(newProperties)},
+         dataFacade{std::move(newDataFacade)} {
 
       Log.trace("Constructing Manager");
       ImGuiEx::setupImGuiStyle();
@@ -37,6 +41,14 @@ namespace ed::ui {
          }
       };
       Log.sinks().push_back(std::make_shared<my_sink_mt>(logFn));
+
+      if (const auto recentFile = properties->getRecentFile(); recentFile.has_value()) {
+         dataFacade->clear();
+         dataFacade->load(recentFile.value());
+
+         dataFacade->createStaticModel(
+             data::EntityData{.name = "Default Model", .modelName = "Model #1"});
+      }
    }
 
    Manager::~Manager() {

@@ -3,6 +3,8 @@
 #include "gp/components/Camera.hpp"
 #include "gp/components/Resources.hpp"
 
+#include "cm/GlmToString.hpp"
+
 namespace tr::gp::sys {
 
    constexpr auto CameraSpeed = .010f;
@@ -81,7 +83,7 @@ namespace tr::gp::sys {
          cam.front = normalize(direction);
          cam.right = normalize(cross(cam.front, glm::vec3(0.0f, 1.0f, 0.0f)));
 
-         glm::mat3 rotationMatrix{cam.right, cmp::worldUp, cam.front};
+         glm::mat3 const rotationMatrix{cam.right, cmp::worldUp, cam.front};
 
          const auto rotatedVelocity = rotationMatrix * cam.velocity;
 

@@ -20,7 +20,6 @@ namespace tr::gp {
           const override {
          const auto entity = registry.create();
          registry.emplace<cmp::EditorInfo>(entity, name);
-         registry.emplace<cmp::Camera>(entity);
          registry.emplace<cmp::Transform>(entity);
       }
 

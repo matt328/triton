@@ -17,6 +17,7 @@ namespace tr::gp::sys {
       auto& reg = registry->getRegistry();
 
       if (!reg.ctx().contains<const cmp::CurrentCamera>()) {
+         Log.trace("Context doesn't contain current camera");
          return;
       }
 
