@@ -36,45 +36,45 @@ namespace tr::gp {
 
       eventBus->subscribe<SwapchainResized>([&](const SwapchainResized& event) {
          reg.ctx().insert_or_assign<cmp::WindowDimensions>(
-             cmp::WindowDimensions{event.height, event.width});
+             cmp::WindowDimensions{event.width, event.height});
       });
 
       // Forward
-      actionSystem->mapSource(Source{cm::Key::Up, SourceType::Boolean},
-                              tr::StateType::State,
-                              tr::ActionType::MoveForward);
-      actionSystem->mapSource(Source{cm::Key::W, SourceType::Boolean},
-                              tr::StateType::State,
-                              tr::ActionType::MoveForward);
+      actionSystem->mapSource(Source{Key::Up, SourceType::Boolean},
+                              StateType::State,
+                              ActionType::MoveForward);
+      actionSystem->mapSource(Source{Key::W, SourceType::Boolean},
+                              StateType::State,
+                              ActionType::MoveForward);
 
       // Backward
-      actionSystem->mapSource(Source{cm::Key::Down, SourceType::Boolean},
-                              tr::StateType::State,
-                              tr::ActionType::MoveBackward);
-      actionSystem->mapSource(Source{cm::Key::S, SourceType::Boolean},
-                              tr::StateType::State,
-                              tr::ActionType::MoveBackward);
+      actionSystem->mapSource(Source{Key::Down, SourceType::Boolean},
+                              StateType::State,
+                              ActionType::MoveBackward);
+      actionSystem->mapSource(Source{Key::S, SourceType::Boolean},
+                              StateType::State,
+                              ActionType::MoveBackward);
       // Left
-      actionSystem->mapSource(Source{cm::Key::Left, SourceType::Boolean},
-                              tr::StateType::State,
-                              tr::ActionType::StrafeLeft);
-      actionSystem->mapSource(Source{cm::Key::A, SourceType::Boolean},
-                              tr::StateType::State,
-                              tr::ActionType::StrafeLeft);
+      actionSystem->mapSource(Source{Key::Left, SourceType::Boolean},
+                              StateType::State,
+                              ActionType::StrafeLeft);
+      actionSystem->mapSource(Source{Key::A, SourceType::Boolean},
+                              StateType::State,
+                              ActionType::StrafeLeft);
       // Right
-      actionSystem->mapSource(Source{cm::Key::Right, SourceType::Boolean},
-                              tr::StateType::State,
-                              tr::ActionType::StrafeRight);
-      actionSystem->mapSource(Source{cm::Key::D, SourceType::Boolean},
-                              tr::StateType::State,
-                              tr::ActionType::StrafeRight);
+      actionSystem->mapSource(Source{Key::Right, SourceType::Boolean},
+                              StateType::State,
+                              ActionType::StrafeRight);
+      actionSystem->mapSource(Source{Key::D, SourceType::Boolean},
+                              StateType::State,
+                              ActionType::StrafeRight);
       // Look
-      actionSystem->mapSource(Source{cm::MouseInput::MOVE_X, SourceType::Float},
-                              tr::StateType::Range,
-                              tr::ActionType::LookHorizontal);
-      actionSystem->mapSource(Source{cm::MouseInput::MOVE_Y, SourceType::Float},
-                              tr::StateType::Range,
-                              tr::ActionType::LookVertical);
+      actionSystem->mapSource(Source{MouseInput::MOVE_X, SourceType::Float},
+                              StateType::Range,
+                              ActionType::LookHorizontal);
+      actionSystem->mapSource(Source{MouseInput::MOVE_Y, SourceType::Float},
+                              StateType::Range,
+                              ActionType::LookVertical);
    }
    GameplaySystem::~GameplaySystem() {
       Log.trace("Destroying Gameplay System");

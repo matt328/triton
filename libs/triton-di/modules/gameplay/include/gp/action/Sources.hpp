@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cm/Inputs.hpp"
+#include "tr/Inputs.hpp"
 
 namespace tr::gp {
    enum class SourceType : uint32_t {
@@ -9,17 +9,16 @@ namespace tr::gp {
    };
 
    struct Source {
-      Source(cm::MouseInput mouseInput, const SourceType sType)
-          : src{mouseInput}, sourceType{sType} {
+      Source(MouseInput mouseInput, const SourceType sType) : src{mouseInput}, sourceType{sType} {
       }
 
-      Source(cm::Key key, const SourceType sType) : src{key}, sourceType{sType} {
+      Source(Key key, const SourceType sType) : src{key}, sourceType{sType} {
       }
 
-      Source(cm::GamepadInput gpInput, const SourceType sType) : src{gpInput}, sourceType{sType} {
+      Source(GamepadInput gpInput, const SourceType sType) : src{gpInput}, sourceType{sType} {
       }
 
-      std::variant<cm::MouseInput, cm::Key, cm::GamepadInput> src{};
+      std::variant<MouseInput, Key, GamepadInput> src{};
       SourceType sourceType{};
    };
 }

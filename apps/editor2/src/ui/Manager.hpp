@@ -16,7 +16,9 @@ namespace ed::ui {
                        std::shared_ptr<cmp::AssetViewer> newAssetViewer,
                        std::shared_ptr<cmp::DialogManager> newDialogManager,
                        std::shared_ptr<cmp::EntityEditor> newEntityEditor,
-                       std::shared_ptr<TaskQueue> newTaskQueue);
+                       std::shared_ptr<TaskQueue> newTaskQueue,
+                       std::shared_ptr<Properties> newProperties,
+                       std::shared_ptr<data::DataFacade> newDataFacade);
       ~Manager();
 
       Manager(const Manager&) = delete;
@@ -34,6 +36,8 @@ namespace ed::ui {
       std::shared_ptr<cmp::DialogManager> dialogManager;
       std::shared_ptr<cmp::EntityEditor> entityEditor;
       std::shared_ptr<TaskQueue> taskQueue;
+      std::shared_ptr<Properties> properties;
+      std::shared_ptr<data::DataFacade> dataFacade;
 
       auto setupFonts() -> void;
    };

@@ -27,6 +27,7 @@ namespace tr::gp::cmd {
                                        cameraInfo.nearClip,
                                        cameraInfo.farClip,
                                        cameraInfo.position);
+         registry.emplace<cmp::EditorInfo>(entity, "Default Camera");
          registry.ctx().insert_or_assign<cmp::CurrentCamera>(cmp::CurrentCamera{entity});
       }
 
