@@ -73,9 +73,11 @@ namespace tr::gfx::pipe {
       };
 
       // Rasterizer
-      constexpr auto rasterizer =
-          vk::PipelineRasterizationStateCreateInfo{.polygonMode = vk::PolygonMode::eFill,
-                                                   .lineWidth = 1.f};
+      constexpr auto rasterizer = vk::PipelineRasterizationStateCreateInfo{
+          .polygonMode = vk::PolygonMode::eFill,
+          .cullMode = vk::CullModeFlagBits::eBack,
+          .lineWidth = 1.f,
+      };
 
       // Multisampling
       constexpr auto multisampling = vk::PipelineMultisampleStateCreateInfo{
@@ -92,7 +94,10 @@ namespace tr::gfx::pipe {
                                                   .stencilTestEnable = VK_FALSE};
 
       // Color Blending
-      constexpr auto colorBlendAttachment = vk::PipelineColorBlendAttachmentState{};
+      constexpr auto colorBlendAttachment = vk::PipelineColorBlendAttachmentState{
+          .blendEnable = VK_FALSE,
+          .colorWriteMask = vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG |
+                            vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA};
       const auto colorBlending =
           vk::PipelineColorBlendStateCreateInfo{.logicOpEnable = VK_FALSE,
                                                 .logicOp = vk::LogicOp::eCopy,
