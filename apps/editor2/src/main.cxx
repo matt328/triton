@@ -31,7 +31,7 @@ auto main() -> int {
 #ifdef _DEBUG
    windowTitle << " - Debug Build";
 #else
-   ss << " - Release Build";
+   windowTitle << " - Release Build";
 #endif
 
    const auto configDir = std::filesystem::path(sago::getConfigHome()) / "editor";

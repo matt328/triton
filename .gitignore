@@ -8,3 +8,4 @@ deps/*
 cmake-build-debug-coverage/*
 /cmake-build-debug-coverage/
 vendor/imgui/*
+/triton.cap
