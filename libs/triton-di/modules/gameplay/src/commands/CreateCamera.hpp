@@ -18,7 +18,8 @@ namespace tr::gp::cmd {
       auto operator=(CreateCamera&& other) noexcept -> CreateCamera& = delete;
 
       void execute(entt::registry& registry,
-                   const std::shared_ptr<gfx::ResourceManager>& resourceManager) const override {
+                   [[maybe_unused]] const std::shared_ptr<gfx::ResourceManager>& resourceManager)
+          const override {
          const auto entity = registry.create();
          registry.emplace<cmp::Camera>(entity,
                                        cameraInfo.width,

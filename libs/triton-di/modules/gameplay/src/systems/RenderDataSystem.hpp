@@ -21,6 +21,8 @@ namespace tr::gp::sys {
 
     private:
       std::shared_ptr<Registry> registry;
+
+      static auto convertOzzToGlm(const ozz::math::Float4x4& ozzMatrix) -> glm::mat4;
    };
 
 }
