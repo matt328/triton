@@ -10,6 +10,11 @@
 #include <entt/core/hashed_string.hpp>
 #include <entt/entity/fwd.hpp>
 #include <entt/entt.hpp>
+#include "ui/components/editors/CameraInspector.hpp"
+#include "ui/components/editors/TransformInspector.hpp"
+#include "ui/components/editors/AnimationInspector.hpp"
+
+#include <gp/components/Animation.hpp>
 
 namespace ed::ui::cmp {
 
@@ -93,33 +98,21 @@ namespace ed::ui::cmp {
                ImGui::Text("%s", editorInfo->name.c_str());
 
                // Transform Component
-               auto* transform = reg.try_get<tr::gp::cmp::Transform>(selectedEntity.value());
-               if (transform != nullptr) {
-                  if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
-                     if (ImGui::DragFloat3("Position##Transform",
-                                           glm::value_ptr(transform->position),
-                                           0.5f)) {}
-                     if (ImGui::DragFloat3("Rotation##Transform",
-                                           glm::value_ptr(transform->rotation),
-                                           0.5f)) {}
-                  }
+               if (auto* transform = reg.try_get<tr::gp::cmp::Transform>(selectedEntity.value());
+                   transform != nullptr) {
+                  renderTransformInspector(transform);
                }
 
                // Camera Component
-               auto* camera = reg.try_get<tr::gp::cmp::Camera>(selectedEntity.value());
-               if (camera != nullptr) {
-                  if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
-                     if (ImGui::DragFloat3("Position##Camera",
-                                           glm::value_ptr(camera->position),
-                                           0.5f)) {}
-                     if (ImGui::DragFloat3("Front##Camera",
-                                           glm::value_ptr(camera->front),
-                                           0.5f)) {}
-                     if (ImGui::DragFloat("Yaw##Camera", &camera->yaw, 0.5f)) {}
-                     if (ImGui::DragFloat("Pitch##Camera", &camera->pitch, 0.5f)) {}
-                     if (ImGui::DragFloat3("Velocity##Camera", value_ptr(camera->velocity), 0.5f)) {
-                     }
-                  }
+               if (auto* camera = reg.try_get<tr::gp::cmp::Camera>(selectedEntity.value());
+                   camera != nullptr) {
+                  renderCameraInspector(camera);
+               }
+
+               // Animation Component
+               if (auto* animation = reg.try_get<tr::gp::cmp::Animation>(selectedEntity.value());
+                   animation != nullptr) {
+                  renderAnimationInspector(animation);
                }
 
             } else {

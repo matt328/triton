@@ -19,6 +19,8 @@
 #include "VkGraphicsDevice.hpp"
 #include "DefaultRenderContext.hpp"
 #include "DefaultContext.hpp"
+#include "DefaultDebugManager.hpp"
+#include "NoopDebugManager.hpp"
 
 #include <di.hpp>
 
@@ -32,13 +34,9 @@ namespace tr {
           .maxTextures = 16,
       };
 
-      const auto deviceConfig =
-          gfx::VkGraphicsDevice::Config{.validationLayers = {"VK_LAYER_KHRONOS_validation"},
-                                        .validationEnabled = true};
-
       const auto injector = di::make_injector(
+          di::bind<gfx::IDebugManager>.to<gfx::NoopDebugManager>(),
           di::bind<gfx::RenderContextConfig>.to(rendererConfig),
-          di::bind<gfx::VkGraphicsDevice::Config>.to(deviceConfig),
           di::bind<gp::IGameplaySystem>.to<gp::GameplaySystem>(),
           di::bind<gfx::IGraphicsDevice>.to<gfx::VkGraphicsDevice>(),
           di::bind<IGuiSystem>.to<cm::ImGuiSystem>(),

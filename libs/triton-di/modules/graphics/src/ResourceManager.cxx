@@ -11,10 +11,14 @@
 
 #include "as/Model.hpp"
 
+#include <tiny_gltf.h>
+
 namespace tr::gfx {
 
-   ResourceManager::ResourceManager(std::shared_ptr<IGraphicsDevice> newGraphicsDevice)
-       : graphicsDevice{std::move(newGraphicsDevice)} {
+   ResourceManager::ResourceManager(std::shared_ptr<IGraphicsDevice> newGraphicsDevice,
+                                    std::shared_ptr<gp::AnimationFactory> newAnimationFactory)
+       : graphicsDevice{std::move(newGraphicsDevice)},
+         animationFactory{std::move(newAnimationFactory)} {
       geometryFactory = std::make_unique<geo::GeometryFactory>();
    }
 
@@ -93,6 +97,14 @@ namespace tr::gfx {
           graphicsDevice->uploadVertexData(geometryFactory->getGeometryData(geometryHandle));
       return cm::ModelData{
           .meshData = cm::MeshData{.meshHandle = meshHandle, .topology = cm::Topology::LineList}};
+   }
+   auto ResourceManager::loadSkeleton(const std::filesystem::path& filename) const noexcept
+       -> cm::SkeletonHandle {
+      return animationFactory->loadSkeleton(filename);
+   }
+   auto ResourceManager::loadAnimation(const std::filesystem::path& filename) const noexcept
+       -> cm::AnimationHandle {
+      return animationFactory->loadAnimation(filename);
    }
 
 }

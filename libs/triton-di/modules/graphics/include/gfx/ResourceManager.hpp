@@ -2,6 +2,8 @@
 
 #include "cm/Handles.hpp"
 
+#include <gp/AnimationFactory.hpp>
+
 namespace tr::gfx {
    class IGraphicsDevice;
 }
@@ -17,7 +19,8 @@ namespace tr::gfx {
 
    class ResourceManager {
     public:
-      explicit ResourceManager(std::shared_ptr<IGraphicsDevice> newGraphicsDevice);
+      explicit ResourceManager(std::shared_ptr<IGraphicsDevice> newGraphicsDevice,
+                               std::shared_ptr<gp::AnimationFactory> newAnimationFactory);
       ~ResourceManager() = default;
 
       ResourceManager(const ResourceManager&) = delete;
@@ -25,16 +28,26 @@ namespace tr::gfx {
       auto operator=(const ResourceManager&) -> ResourceManager& = delete;
       auto operator=(ResourceManager&&) -> ResourceManager& = delete;
 
-      auto createTerrain() const -> std::vector<cm::ModelData>;
+      [[nodiscard]] auto createTerrain() const -> std::vector<cm::ModelData>;
 
-      auto createModel(const std::filesystem::path& filename) const noexcept -> cm::ModelData;
+      [[nodiscard]] auto createModel(const std::filesystem::path& filename) const noexcept
+          -> cm::ModelData;
 
-      auto createAABB(const glm::vec3& min, const glm::vec3& max) const noexcept -> cm::ModelData;
+      [[nodiscard]] auto createAABB(const glm::vec3& min, const glm::vec3& max) const noexcept
+          -> cm::ModelData;
 
       auto createStaticMesh(const geo::GeometryData& geometry) -> cm::MeshHandle;
 
+      [[nodiscard]] auto loadSkeleton(const std::filesystem::path& filename) const noexcept
+          -> cm::SkeletonHandle;
+
+      [[nodiscard]] auto loadAnimation(const std::filesystem::path& filename) const noexcept
+          -> cm::AnimationHandle;
+
     private:
       std::shared_ptr<IGraphicsDevice> graphicsDevice;
+      std::shared_ptr<gp::AnimationFactory> animationFactory;
+
       std::unique_ptr<geo::GeometryFactory> geometryFactory;
    };
 }

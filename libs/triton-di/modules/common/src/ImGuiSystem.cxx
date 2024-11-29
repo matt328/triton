@@ -2,9 +2,12 @@
 #include "gfx/IGraphicsDevice.hpp"
 #include "tr/IWindow.hpp"
 
+#include <vk/Instance.hpp>
+
 namespace tr::cm {
    ImGuiSystem::ImGuiSystem(const std::shared_ptr<gfx::IGraphicsDevice>& graphicsDevice,
-                            const std::shared_ptr<IWindow>& window) {
+                            const std::shared_ptr<IWindow>& window,
+                            const std::shared_ptr<gfx::Instance>& instance) {
       Log.trace("Creating ImGuiSystem");
       static constexpr auto poolSizes = std::array{
           vk::DescriptorPoolSize{.type = vk::DescriptorType::eSampler, .descriptorCount = 1000},
@@ -43,7 +46,7 @@ namespace tr::cm {
       ImGui_ImplGlfw_InitForVulkan(static_cast<GLFWwindow*>(window->getNativeWindow()), true);
 
       ImGui_ImplVulkan_InitInfo initInfo = {};
-      initInfo.Instance = **graphicsDevice->getVulkanInstance();
+      initInfo.Instance = instance->getVkInstance();
       initInfo.PhysicalDevice = **graphicsDevice->getPhysicalDevice();
       initInfo.Device = **graphicsDevice->getVulkanDevice();
       initInfo.Queue = **graphicsDevice->getGraphicsQueue();
