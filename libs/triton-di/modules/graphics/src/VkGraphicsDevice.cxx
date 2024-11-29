@@ -10,114 +10,43 @@
 #include "ResourceExceptions.hpp"
 #include "tex/Texture.hpp"
 #include "geo/Mesh.hpp"
+#include "vk/PhysicalDevice.hpp"
+
+/*
+ * Have PhysicalDevice create a vk::raii::Device, and wrap that with a Device injectable.
+ * Create an injectable abstraction over a queue, and have 4 types, but whatever the system supports
+ * There will need to be a factory that uses the Device class to create queues.
+ * Some queues may just fall back to using others underneath, eg if a separate transfer queue isn't
+ * available, still present a transfer queue api, but just use the graphics queue underneath
+ *
+ *
+ */
+
+/*
+ * - extract ResourceManager into a DI component
+ *    - All buffers, images, image views, samplers, pipelines/layouts, descriptor sets and pools
+ *      should be created by the ResourceManager and only handles given out.
+ * - create RenderScheduler
+ * - implement what's needed for a StaticGeometryRenderJob
+ * - add PBR and some kind of lighting?
+ * - Add an AnimatedModelRenderJob
+ * - Add TerrainRenderJob
+ */
 
 namespace tr::gfx {
 
-   VkGraphicsDevice::VkGraphicsDevice(Config newConfig, std::shared_ptr<tr::IWindow> newWindow)
-       : config{std::move(newConfig)}, window{std::move(newWindow)} {
+   VkGraphicsDevice::VkGraphicsDevice(std::shared_ptr<tr::IWindow> newWindow,
+                                      std::shared_ptr<Context> newContext,
+                                      std::shared_ptr<IDebugManager> newDebugManager,
+                                      std::shared_ptr<Instance> newInstance,
+                                      std::shared_ptr<PhysicalDevice> newPhysicalDevice)
+       : window{std::move(newWindow)},
+         context{std::move(newContext)},
+         debugManager{std::move(newDebugManager)},
+         instance{std::move(newInstance)},
+         physicalDevice{std::move(newPhysicalDevice)} {
 
-      Log.debug("Created graphics device, validation enabled: {0}", config.validationEnabled);
-
-      {
-         ZoneNamedN(zCreateContext, "Create Context", true);
-         context = std::make_unique<vk::raii::Context>();
-      }
-
-      // Log available extensions
-      // const auto instanceExtensions = context->enumerateInstanceExtensionProperties();
-
-      if (config.validationEnabled && !checkValidationLayerSupport()) {
-         throw std::runtime_error("Validation layers requested but not available");
-      }
-
-      auto [extensions, portabilityRequired] = getRequiredExtensions();
-
-      vk::ApplicationInfo appInfo{.pApplicationName = "Triton",
-                                  .applicationVersion = VK_MAKE_API_VERSION(0, 0, 0, 1),
-                                  .pEngineName = "Triton Engine",
-                                  .engineVersion = VK_MAKE_API_VERSION(0, 0, 0, 1),
-                                  .apiVersion = VK_API_VERSION_1_3};
-
-      vk::InstanceCreateInfo instanceCreateInfo{
-          .pApplicationInfo = &appInfo,
-          .enabledLayerCount = 0,
-          .enabledExtensionCount = static_cast<uint32_t>(extensions.size()),
-          .ppEnabledExtensionNames = extensions.data(),
-      };
-
-      // For some reason, now Win64 decides portability is required
-      // Added an override to only even try to detect portability on __APPLE__
-      if (portabilityRequired) {
-         instanceCreateInfo.flags |= vk::InstanceCreateFlagBits::eEnumeratePortabilityKHR;
-         desiredDeviceExtensions.push_back("VK_KHR_portability_subset");
-      }
-
-      const auto debugCreateInfo = vk::DebugUtilsMessengerCreateInfoEXT{
-          .messageSeverity = vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo |
-                             vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
-                             vk::DebugUtilsMessageSeverityFlagBitsEXT::eError,
-          .messageType = vk::DebugUtilsMessageTypeFlagBitsEXT::eDeviceAddressBinding |
-                         vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation |
-                         vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance,
-          .pfnUserCallback = debugCallbackFn};
-
-      if (config.validationEnabled) {
-         instanceCreateInfo.enabledLayerCount =
-             static_cast<uint32_t>(config.validationLayers.size());
-         instanceCreateInfo.ppEnabledLayerNames = config.validationLayers.data();
-         instanceCreateInfo.pNext = &debugCreateInfo;
-      }
-
-      {
-         ZoneNamedN(zone, "Create Instance", true);
-         instance = std::make_shared<vk::raii::Instance>(*context, instanceCreateInfo);
-      }
-
-      Log.trace("Created Instance");
-
-      if (config.validationEnabled) {
-         const vk::DebugReportCallbackCreateInfoEXT ci = {
-             .pNext = nullptr,
-             .flags = vk::DebugReportFlagBitsEXT::eWarning |
-                      vk::DebugReportFlagBitsEXT::ePerformanceWarning |
-                      vk::DebugReportFlagBitsEXT::eError | vk::DebugReportFlagBitsEXT::eDebug,
-             .pfnCallback = &vulkanDebugReportCallback,
-             .pUserData = nullptr};
-
-         debugCallback = std::make_unique<vk::raii::DebugUtilsMessengerEXT>(
-             instance->createDebugUtilsMessengerEXT(debugCreateInfo));
-
-         reportCallback = std::make_unique<vk::raii::DebugReportCallbackEXT>(
-             instance->createDebugReportCallbackEXT(ci));
-      }
-
-      VkSurfaceKHR tempSurface = nullptr;
-
-      auto* glfwWindow = static_cast<GLFWwindow*>(window->getNativeWindow());
-      glfwCreateWindowSurface(**instance, glfwWindow, nullptr, &tempSurface);
-
-      Log.trace("Created Surface");
-      surface = std::make_unique<vk::raii::SurfaceKHR>(*instance, tempSurface);
-
-      // Select a PhysicalDevice
-      const auto physicalDevices = enumeratePhysicalDevices();
-
-      if (physicalDevices.empty()) {
-         throw std::runtime_error("Failed to find any GPUs with Vulkan Support");
-      }
-
-      for (const auto& possibleDevice : physicalDevices) {
-         if (Helpers::isDeviceSuitable(possibleDevice, *surface, desiredDeviceExtensions)) {
-            physicalDevice = std::make_shared<vk::raii::PhysicalDevice>(possibleDevice);
-            break;
-         }
-      }
-
-      if (physicalDevice == nullptr) {
-         throw std::runtime_error("Failed to find a suitable GPU");
-      }
-
-      Log.info("Using physical device: {0}", physicalDevice->getProperties().deviceName.data());
+      debugManager->checkDebugSupport();
 
       // Select and identify Queues
       auto queueFamilyIndices = Helpers::findQueueFamilies(*physicalDevice, *surface);
@@ -184,10 +113,7 @@ namespace tr::gfx {
           .enabledExtensionCount = static_cast<uint32_t>(desiredDeviceExtensions.size()),
           .ppEnabledExtensionNames = desiredDeviceExtensions.data()};
 
-      if (config.validationEnabled) {
-         createInfo.enabledLayerCount = static_cast<uint32_t>(config.validationLayers.size());
-         createInfo.ppEnabledLayerNames = config.validationLayers.data();
-      }
+      debugManager->addDeviceConfig(createInfo);
 
       // const auto dbFeatures =
       // vk::PhysicalDeviceDescriptorBufferFeaturesEXT{.descriptorBuffer = true};
@@ -253,7 +179,7 @@ namespace tr::gfx {
           .physicalDevice = **physicalDevice,
           .device = **vulkanDevice,
           .pVulkanFunctions = &vulkanFunctions,
-          .instance = **instance,
+          .instance = instance->getVkInstance(),
       };
 
       {
@@ -264,6 +190,7 @@ namespace tr::gfx {
 
    VkGraphicsDevice::~VkGraphicsDevice() {
       Log.trace("Destroying VkGraphicsDevice");
+      debugManager->destroyDebugCallbacks();
    }
 
    auto VkGraphicsDevice::submit(const vk::SubmitInfo& submitInfo,
@@ -498,11 +425,11 @@ namespace tr::gfx {
    // Utility Functions
 
    auto VkGraphicsDevice::findDepthFormat() -> vk::Format {
-      const auto candidates = std::array<vk::Format, 3>{
+      constexpr auto candidates = std::array<vk::Format, 3>{
           {vk::Format::eD32Sfloat, vk::Format::eD32SfloatS8Uint, vk::Format::eD24UnormS8Uint}};
       for (const auto format : candidates) {
-         auto props = physicalDevice->getFormatProperties(format);
-         if ((props.linearTilingFeatures | props.optimalTilingFeatures) &
+         if (auto props = physicalDevice->getFormatProperties(format);
+             (props.linearTilingFeatures | props.optimalTilingFeatures) &
              vk::FormatFeatureFlagBits::eDepthStencilAttachment) {
             return format;
          }
@@ -515,24 +442,6 @@ namespace tr::gfx {
       return descriptorBufferProperties;
    }
 
-   auto VkGraphicsDevice::checkValidationLayerSupport() const -> bool {
-      const auto availableLayers = context->enumerateInstanceLayerProperties();
-
-      for (const auto* const layerName : config.validationLayers) {
-         bool layerFound = false;
-         for (const auto& layerProperties : availableLayers) {
-            if (strcmp(layerName, layerProperties.layerName) == 0) {
-               layerFound = true;
-               break;
-            }
-         }
-         if (!layerFound) {
-            return false;
-         }
-      }
-      return true;
-   }
-
    auto VkGraphicsDevice::getRequiredExtensions() const
        -> std::pair<std::vector<const char*>, bool> {
       uint32_t glfwExtensionCount = 0;
@@ -543,17 +452,12 @@ namespace tr::gfx {
 
       extensions.push_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
 
-      if (config.validationEnabled) {
-         extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-         extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
-      }
-
-      const auto exts = context->enumerateInstanceExtensionProperties();
+      const auto exts = context->getExtensionProperties();
 
       std::vector<std::string> extNames = {};
 
       extNames.reserve(exts.size());
-      for (auto& ext : exts) {
+      for (const auto& ext : exts) {
          extNames.push_back(ext.extensionName);
       }
 
@@ -572,32 +476,6 @@ namespace tr::gfx {
 #endif
 
       return std::make_pair(extensions, portabilityPresent);
-   }
-
-   auto VkGraphicsDevice::debugCallbackFn(
-       [[maybe_unused]] VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-       [[maybe_unused]] VkDebugUtilsMessageTypeFlagsEXT messageType,
-       [[maybe_unused]] const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
-       [[maybe_unused]] void* pUserData) -> VkBool32 {
-
-      Log.trace("Validation Layer: {0}", pCallbackData->pMessage);
-      return VK_FALSE;
-   }
-
-   auto VkGraphicsDevice::vulkanDebugReportCallback(
-       [[maybe_unused]] VkDebugReportFlagsEXT flags,
-       [[maybe_unused]] VkDebugReportObjectTypeEXT objectType,
-       [[maybe_unused]] uint64_t object,
-       [[maybe_unused]] size_t location,
-       [[maybe_unused]] int32_t messageCode,
-       [[maybe_unused]] const char* pLayerPrefix,
-       [[maybe_unused]] const char* pMessage,
-       [[maybe_unused]] void* userData) -> VkBool32 {
-      // if (!strcmp(pLayerPrefix, "Loader Message")) {
-      //    return VK_FALSE;
-      // }
-      Log.debug("Debug Callback ({0}): {1}", pLayerPrefix, pMessage);
-      return VK_TRUE;
    }
 
    auto VkGraphicsDevice::enumeratePhysicalDevices() const

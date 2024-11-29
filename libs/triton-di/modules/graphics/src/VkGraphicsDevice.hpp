@@ -3,6 +3,12 @@
 #include "gfx/IGraphicsDevice.hpp"
 #include "tr/IWindow.hpp"
 
+#include "vk/Context.hpp"
+#include "vk/Instance.hpp"
+#include "IDebugManager.hpp"
+
+#include <vk/PhysicalDevice.hpp>
+
 namespace tr::gfx {
 
    class VkContext;
@@ -19,14 +25,18 @@ namespace tr::gfx {
       class Texture;
    }
 
-   class VkGraphicsDevice : public IGraphicsDevice {
+   class VkGraphicsDevice final : public IGraphicsDevice {
     public:
       struct Config {
          std::vector<const char*> validationLayers;
          bool validationEnabled;
       };
 
-      explicit VkGraphicsDevice(Config config, std::shared_ptr<tr::IWindow> newWindow);
+      explicit VkGraphicsDevice(std::shared_ptr<tr::IWindow> newWindow,
+                                std::shared_ptr<Context> newContext,
+                                std::shared_ptr<IDebugManager> newDebugManager,
+                                std::shared_ptr<Instance> newInstance,
+                                std::shared_ptr<PhysicalDevice> newPhysicalDevice);
       ~VkGraphicsDevice() override;
 
       VkGraphicsDevice(const VkGraphicsDevice&) = delete;
@@ -40,10 +50,6 @@ namespace tr::gfx {
       auto getVulkanDevice() const -> std::shared_ptr<vk::raii::Device> override {
          return vulkanDevice;
       }
-
-      auto getVulkanInstance() const -> std::shared_ptr<vk::raii::Instance> override {
-         return instance;
-      };
 
       auto getGraphicsQueue() const -> std::shared_ptr<vk::raii::Queue> override {
          return graphicsQueue;
@@ -124,8 +130,6 @@ namespace tr::gfx {
       auto waitIdle() -> void override;
 
     private:
-      Config config;
-      [[nodiscard]] auto checkValidationLayerSupport() const -> bool;
       [[nodiscard]] auto getRequiredExtensions() const -> std::pair<std::vector<const char*>, bool>;
       [[nodiscard]] auto enumeratePhysicalDevices() const -> std::vector<vk::raii::PhysicalDevice>;
       [[nodiscard]] auto getCurrentSize() const -> std::pair<uint32_t, uint32_t>;
@@ -166,28 +170,13 @@ namespace tr::gfx {
           VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME,
           VK_EXT_EXTENDED_DYNAMIC_STATE_EXTENSION_NAME};
 
-      VKAPI_ATTR static auto VKAPI_CALL
-      debugCallbackFn(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-                      VkDebugUtilsMessageTypeFlagsEXT messageType,
-                      const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
-                      void* pUserData) -> VkBool32;
-
-      static VKAPI_ATTR auto VKAPI_CALL
-      vulkanDebugReportCallback(VkDebugReportFlagsEXT flags,
-                                VkDebugReportObjectTypeEXT objectType,
-                                uint64_t object,
-                                size_t location,
-                                int32_t messageCode,
-                                const char* pLayerPrefix,
-                                const char* pMessage,
-                                void* userData) -> VkBool32;
-
       std::shared_ptr<tr::IWindow> window;
+      std::shared_ptr<Context> context;
+      std::shared_ptr<IDebugManager> debugManager;
+      std::shared_ptr<Instance> instance;
+      std::shared_ptr<PhysicalDevice> physicalDevice;
 
-      std::unique_ptr<vk::raii::Context> context;
-      std::shared_ptr<vk::raii::Instance> instance;
       std::unique_ptr<vk::raii::SurfaceKHR> surface;
-      std::shared_ptr<vk::raii::PhysicalDevice> physicalDevice;
       std::shared_ptr<vk::raii::Device> vulkanDevice;
 
       std::shared_ptr<vk::raii::Queue> graphicsQueue;
@@ -203,9 +192,6 @@ namespace tr::gfx {
       std::vector<vk::raii::ImageView> swapchainImageViews;
       vk::Format swapchainImageFormat = vk::Format::eUndefined;
       vk::Extent2D swapchainExtent;
-
-      std::unique_ptr<vk::raii::DebugUtilsMessengerEXT> debugCallback;
-      std::unique_ptr<vk::raii::DebugReportCallbackEXT> reportCallback;
 
       vk::PhysicalDeviceDescriptorBufferPropertiesEXT descriptorBufferProperties;
 

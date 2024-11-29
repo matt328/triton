@@ -4,6 +4,7 @@
 #include "commands/CreateTestEntity.hpp"
 #include "commands/CreateStaticEntity.hpp"
 #include "commands/CreateCamera.hpp"
+#include "commands/CreateAnimatedEntity.hpp"
 #include "tr/Events.hpp"
 #include "tr/IGameplaySystem.hpp"
 #include "gp/components/Resources.hpp"
@@ -17,13 +18,15 @@ namespace tr::gp {
                                   std::shared_ptr<sys::CameraSystem> newCameraSystem,
                                   std::shared_ptr<gfx::ResourceManager> newResourceManager,
                                   std::shared_ptr<sys::TransformSystem> newTransformSystem,
-                                  std::shared_ptr<sys::RenderDataSystem> newRenderDataSystem)
+                                  std::shared_ptr<sys::RenderDataSystem> newRenderDataSystem,
+                                  std::shared_ptr<sys::AnimationSystem> newAnimationSystem)
        : eventBus{std::move(newEventBus)},
          registry{std::move(newRegistry)},
          cameraSystem{std::move(newCameraSystem)},
          resourceManager{std::move(newResourceManager)},
          transformSystem{std::move(newTransformSystem)},
-         renderDataSystem{std::move(newRenderDataSystem)} {
+         renderDataSystem{std::move(newRenderDataSystem)},
+         animationSystem{std::move(newAnimationSystem)} {
       Log.trace("Creating Gameplay System");
 
       auto& reg = registry->getRegistry();
@@ -105,6 +108,10 @@ namespace tr::gp {
          ZoneNamedN(xformZone, "Transform", true);
          transformSystem->update();
       }
+      {
+         ZoneNamedN(animationZone, "Animation", true);
+         animationSystem->update();
+      }
    }
 
    void GameplaySystem::setRenderDataTransferHandler(const RenderDataTransferHandler& handler) {
@@ -117,19 +124,11 @@ namespace tr::gp {
           std::make_unique<cmd::CreateStaticEntityCommand>(filename, entityName.data()));
    }
 
-   auto GameplaySystem::createAnimatedModelEntity(const AnimatedModelData& modelData)
-       -> cm::EntityType {
-      Log.trace("gameplaySystem createAnimatedModelEntity: {0}", modelData);
-
-      // have gfx create the resources and return a handle.
-
-      // use the handle(s) to create an entity in the ECS
-
-      return static_cast<cm::EntityType>(1);
+   auto GameplaySystem::createAnimatedModelEntity(const AnimatedModelData& modelData) -> void {
+      commandQueue->enqueue(std::make_unique<cmd::CreateAnimatedEntity>(modelData));
    }
 
-   auto GameplaySystem::createTerrain() -> cm::EntityType {
-      return static_cast<cm::EntityType>(1);
+   auto GameplaySystem::createTerrain() -> void {
    }
 
    auto GameplaySystem::createDefaultCamera() -> void {

@@ -11,6 +11,7 @@
 #include "systems/RenderDataSystem.hpp"
 
 #include <entt/entity/fwd.hpp>
+#include <systems/AnimationSystem.hpp>
 
 namespace tr::gp {
    namespace sys {
@@ -25,7 +26,8 @@ namespace tr::gp {
                               std::shared_ptr<sys::CameraSystem> newCameraSystem,
                               std::shared_ptr<gfx::ResourceManager> newResourceManager,
                               std::shared_ptr<sys::TransformSystem> newTransformSystem,
-                              std::shared_ptr<sys::RenderDataSystem> newRenderDataSystem);
+                              std::shared_ptr<sys::RenderDataSystem> newRenderDataSystem,
+                              std::shared_ptr<sys::AnimationSystem> newAnimationSystem);
       ~GameplaySystem() override;
 
       GameplaySystem(const GameplaySystem&) = delete;
@@ -40,8 +42,8 @@ namespace tr::gp {
 
       auto createStaticModelEntity(std::string filename, std::string_view entityName)
           -> void override;
-      auto createAnimatedModelEntity(const AnimatedModelData& modelData) -> cm::EntityType override;
-      auto createTerrain() -> cm::EntityType override;
+      auto createAnimatedModelEntity(const AnimatedModelData& modelData) -> void override;
+      auto createTerrain() -> void override;
       auto createDefaultCamera() -> void override;
       auto createTestEntity(std::string_view name) -> void override;
 
@@ -52,6 +54,7 @@ namespace tr::gp {
       std::shared_ptr<gfx::ResourceManager> resourceManager;
       std::shared_ptr<sys::TransformSystem> transformSystem;
       std::shared_ptr<sys::RenderDataSystem> renderDataSystem;
+      std::shared_ptr<sys::AnimationSystem> animationSystem;
 
       RenderDataTransferHandler transferHandler;
       std::shared_mutex registryMutex{};

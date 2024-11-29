@@ -93,6 +93,9 @@ namespace tr::gfx {
          auto lock = std::lock_guard{renderDataMutex};
          LockableName(renderDataMutex, "SetRenderData", 13);
          LockMark(renderDataMutex);
+         if (!renderData.skinnedMeshData.empty()) {
+            Log.trace("Skinned Mesh Data Present");
+         }
          currentFrame.applyRenderData(renderData);
       }
 
@@ -112,8 +115,8 @@ namespace tr::gfx {
          frameManager->destroySwapchainResources();
          graphicsDevice->recreateSwapchain();
          frameManager->createSwapchainResources();
-         eventBus->emit(SwapchainResized{graphicsDevice->getSwapchainExtent().width,
-                                         graphicsDevice->getSwapchainExtent().height});
+         eventBus->emit(SwapchainResized{.width = graphicsDevice->getSwapchainExtent().width,
+                                         .height = graphicsDevice->getSwapchainExtent().height});
          return;
       }
 

@@ -12,6 +12,7 @@ namespace tr::gp {
       std::string modelFilename;
       std::string skeletonFilename;
       std::string animationFilename;
+      std::optional<std::string> entityName = std::nullopt;
    };
 
    class IGameplaySystem {
@@ -31,9 +32,8 @@ namespace tr::gp {
 
       virtual auto createStaticModelEntity(std::string filename, std::string_view entityName)
           -> void = 0;
-      virtual auto createAnimatedModelEntity(const AnimatedModelData& modelData)
-          -> cm::EntityType = 0;
-      virtual auto createTerrain() -> cm::EntityType = 0;
+      virtual auto createAnimatedModelEntity(const AnimatedModelData& modelData) -> void = 0;
+      virtual auto createTerrain() -> void = 0;
       virtual auto createDefaultCamera() -> void = 0;
       virtual auto createTestEntity(std::string_view name) -> void = 0;
    };

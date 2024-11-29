@@ -52,5 +52,52 @@ namespace tr::gp::sys {
             }
          }
       }
+
+      // Animated Models
+      const auto animationsView = reg.view<cmp::Animation, cmp::Renderable, cmp::Transform>();
+      uint32_t jointMatricesIndex = 0;
+      for (const auto& [entity, animationData, renderable, transform] : animationsView.each()) {
+         // Convert the jointMap into a list of join matrices the gpu needs
+         auto jointMatrices = std::vector<glm::mat4>{};
+         jointMatrices.resize(animationData.jointMap.size());
+         int index = 0;
+         for (const auto& [position, jointId] : animationData.jointMap) {
+            auto inverseBindMatrix = animationData.inverseBindMatrices[index];
+            if (animationData.renderBindPose) {
+               inverseBindMatrix = glm::identity<glm::mat4>();
+            }
+            jointMatrices[position] =
+                convertOzzToGlm(animationData.models[jointId]) * inverseBindMatrix;
+            ++index;
+         }
+
+         for (const auto jointMatrix : jointMatrices) {
+            renderData.animationData.push_back({jointMatrix});
+         }
+
+         // Add everything to the RenderData struct
+         for (const auto& [meshHandle, topology, textureHandle] : renderable.meshData) {
+            const auto objectDataPosition = renderData.objectData.size();
+            renderData.skinnedMeshData.emplace_back(meshHandle, topology, objectDataPosition);
+            renderData.objectData.emplace_back(transform.transformation,
+                                               textureHandle,
+                                               jointMatricesIndex);
+         }
+
+         jointMatricesIndex += jointMatrices.size();
+      }
+   }
+
+   auto RenderDataSystem::convertOzzToGlm(const ozz::math::Float4x4& ozzMatrix) -> glm::mat4 {
+      glm::mat4 glmMatrix{};
+
+      for (int i = 0; i < 4; ++i) {
+         std::array<float, 4> temp{};
+         ozz::math::StorePtrU(ozzMatrix.cols[i], temp.data());
+         for (int j = 0; j < 4; ++j) {
+            glmMatrix[i][j] = temp[j];
+         }
+      }
+      return glmMatrix;
    }
 }

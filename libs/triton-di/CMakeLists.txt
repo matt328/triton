@@ -23,6 +23,9 @@ set(common_SRC
   modules/graphics/src/Frame.cxx
   modules/graphics/src/ResourceManager.cxx
 
+  modules/graphics/src/vk/Context.cxx
+  modules/graphics/src/vk/Instance.cxx
+
   modules/graphics/src/sb/LayoutFactory.cxx
   modules/graphics/src/sb/Layout.cxx
   modules/graphics/src/sb/ShaderBindingFactory.cxx
@@ -45,6 +48,14 @@ set(common_SRC
   modules/graphics/src/tex/Texture.cxx
   modules/gameplay/src/systems/TransformSystem.cxx
   modules/gameplay/src/systems/RenderDataSystem.cxx
+  modules/gameplay/src/systems/AnimationSystem.cxx
+  modules/gameplay/src/AnimationFactory.cxx
+  modules/graphics/src/DefaultDebugManager.cxx
+  modules/graphics/src/NoopDebugManager.cxx
+  modules/graphics/src/vk/Surface.cxx
+  modules/graphics/src/vk/Surface.hpp
+  modules/graphics/src/vk/PhysicalDevice.cxx
+  modules/graphics/src/vk/PhysicalDevice.hpp
 )
 
 add_library(${PROJECT_NAME} STATIC ${common_SRC})
@@ -98,17 +109,17 @@ target_precompile_headers(${PROJECT_NAME}
   <vk_mem_alloc.hpp>
   <vulkan/vulkan_raii.hpp>
   <tracy/TracyVulkan.hpp>
+  <ozz/animation/runtime/sampling_job.h>
+  <ozz/base/containers/vector.h>
   PRIVATE
   <ctime>
   <cstdint>
   <ozz/animation/runtime/animation.h>
   <ozz/animation/runtime/local_to_model_job.h>
-  <ozz/animation/runtime/sampling_job.h>
   <ozz/animation/runtime/skeleton.h>
   <ozz/base/maths/soa_transform.h>
   <ozz/base/maths/simd_math.h>
   <ozz/base/maths/soa_transform.h>
-  <ozz/base/containers/vector.h>
   <ozz/base/span.h>
   <ozz/base/io/archive.h>
   <ozz/base/io/stream.h>

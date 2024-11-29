@@ -81,11 +81,11 @@ namespace ed::data {
 
       engineBusy = true;
 
-      const auto task = [this, modelFilename, entityName]() {
+      const auto task = [this, modelFilename, entityName] {
          gameplaySystem->createStaticModelEntity(modelFilename, entityName);
       };
 
-      const auto result = taskQueue->enqueue(task, onComplete);
+      taskQueue->enqueue(task, onComplete);
    }
 
    void DataFacade::createAnimatedModel(const EntityData& entityData) {
@@ -97,26 +97,23 @@ namespace ed::data {
       const auto animationFilename = dataStore.animations.at(entityData.animations[0]).filePath;
       const auto entityName = entityData.name;
 
-      std::function<void(cm::EntityType)> fn = [this, entityName](cm::EntityType entity) {
+      const auto onComplete = [this, entityName]() {
          ZoneNamedN(z, "Create Entity", true);
-         entityNameMap.insert({entityName, entity});
          engineBusy = false;
-         Log.info("Finished creating entity: id: {0}, name: {1}",
-                  static_cast<long long>(entity),
-                  entityName);
       };
       engineBusy = true;
 
       const auto animatedEntityData =
           tr::gp::AnimatedModelData{.modelFilename = modelFilename,
                                     .skeletonFilename = skeletonFilename,
-                                    .animationFilename = animationFilename};
+                                    .animationFilename = animationFilename,
+                                    .entityName = entityName};
 
-      const auto task = [this, animatedEntityData]() {
-         return gameplaySystem->createAnimatedModelEntity(animatedEntityData);
+      const auto task = [this, animatedEntityData] {
+         gameplaySystem->createAnimatedModelEntity(animatedEntityData);
       };
 
-      auto result = taskQueue->enqueue(task, fn);
+      taskQueue->enqueue(task, onComplete);
    }
 
    void DataFacade::addAnimationToEntity([[maybe_unused]] std::string_view entityName,
@@ -134,9 +131,9 @@ namespace ed::data {
    }
 
    void DataFacade::createTerrain([[maybe_unused]] std::string_view terrainName) {
-      const auto task = [&]() { gameplaySystem->createTerrain(); };
+      const std::function<void()> task = [&] { gameplaySystem->createTerrain(); };
 
-      std::function<void()> onComplete = [this]() { engineBusy = false; };
+      std::function<void()> const onComplete = [this]() { engineBusy = false; };
       engineBusy = true;
       auto result = taskQueue->enqueue(task, onComplete);
    }

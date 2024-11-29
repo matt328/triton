@@ -3,6 +3,7 @@
 #include "tr/IGuiSystem.hpp"
 
 namespace tr::gfx {
+   class Instance;
    class IGraphicsDevice;
 }
 
@@ -14,7 +15,8 @@ namespace tr::cm {
    class ImGuiSystem : public IGuiSystem {
     public:
       ImGuiSystem(const std::shared_ptr<gfx::IGraphicsDevice>& graphicsDevice,
-                  const std::shared_ptr<IWindow>& window);
+                  const std::shared_ptr<IWindow>& window,
+                  const std::shared_ptr<gfx::Instance>& instance);
       ~ImGuiSystem() override;
 
       ImGuiSystem(const ImGuiSystem&) = delete;

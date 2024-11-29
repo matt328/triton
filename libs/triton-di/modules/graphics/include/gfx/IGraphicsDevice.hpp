@@ -46,8 +46,6 @@ namespace tr::gfx {
 
       // Escape Hatches
       [[nodiscard]] virtual auto getVulkanDevice() const -> std::shared_ptr<vk::raii::Device> = 0;
-      [[nodiscard]] virtual auto getVulkanInstance() const
-          -> std::shared_ptr<vk::raii::Instance> = 0;
       [[nodiscard]] virtual auto getGraphicsQueue() const -> std::shared_ptr<vk::raii::Queue> = 0;
       [[nodiscard]] virtual auto getPhysicalDevice() const
           -> std::shared_ptr<vk::raii::PhysicalDevice> = 0;
