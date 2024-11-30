@@ -45,11 +45,6 @@ namespace tr::gfx {
       virtual auto recreateSwapchain() -> void = 0;
 
       // Escape Hatches
-      [[nodiscard]] virtual auto getVulkanDevice() const -> std::shared_ptr<vk::raii::Device> = 0;
-      [[nodiscard]] virtual auto getGraphicsQueue() const -> std::shared_ptr<vk::raii::Queue> = 0;
-      [[nodiscard]] virtual auto getPhysicalDevice() const
-          -> std::shared_ptr<vk::raii::PhysicalDevice> = 0;
-
       virtual auto submit(const vk::SubmitInfo& submitInfo,
                           const std::unique_ptr<vk::raii::Fence>& fence) -> void = 0;
 

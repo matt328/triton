@@ -53,9 +53,11 @@ set(common_SRC
   modules/graphics/src/DefaultDebugManager.cxx
   modules/graphics/src/NoopDebugManager.cxx
   modules/graphics/src/vk/Surface.cxx
-  modules/graphics/src/vk/Surface.hpp
   modules/graphics/src/vk/PhysicalDevice.cxx
-  modules/graphics/src/vk/PhysicalDevice.hpp
+  modules/graphics/src/vk/Device.cxx
+  modules/graphics/src/vk/QueueTypes.cxx
+  modules/graphics/src/vk/VkResourceManager.cxx
+  modules/graphics/src/vk/Swapchain.cxx
 )
 
 add_library(${PROJECT_NAME} STATIC ${common_SRC})

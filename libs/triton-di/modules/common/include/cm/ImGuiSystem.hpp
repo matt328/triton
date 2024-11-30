@@ -2,6 +2,9 @@
 
 #include "tr/IGuiSystem.hpp"
 
+#include <vk/Device.hpp>
+#include <vk/VkResourceManager.hpp>
+
 namespace tr::gfx {
    class Instance;
    class IGraphicsDevice;
@@ -12,11 +15,14 @@ namespace tr {
 }
 
 namespace tr::cm {
-   class ImGuiSystem : public IGuiSystem {
+   class ImGuiSystem final : public IGuiSystem {
     public:
-      ImGuiSystem(const std::shared_ptr<gfx::IGraphicsDevice>& graphicsDevice,
-                  const std::shared_ptr<IWindow>& window,
-                  const std::shared_ptr<gfx::Instance>& instance);
+      ImGuiSystem(const std::shared_ptr<IWindow>& window,
+                  const std::shared_ptr<gfx::Instance>& instance,
+                  const std::shared_ptr<gfx::Device>& device,
+                  const std::shared_ptr<gfx::PhysicalDevice>& physicalDevice,
+                  const std::shared_ptr<gfx::queue::Graphics>& graphicsQueue,
+                  std::shared_ptr<gfx::VkResourceManager> newResourceManager);
       ~ImGuiSystem() override;
 
       ImGuiSystem(const ImGuiSystem&) = delete;
@@ -30,7 +36,9 @@ namespace tr::cm {
                   const vk::Extent2D& swapchainExtent) -> void override;
 
     private:
+      std::shared_ptr<gfx::VkResourceManager> resourceManager;
+
       std::unique_ptr<vk::raii::DescriptorPool> descriptorPool;
-      std::function<void(void)> renderFn;
+      std::function<void()> renderFn;
    };
 }
