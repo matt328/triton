@@ -7,6 +7,7 @@
 #include "vk/Instance.hpp"
 #include "IDebugManager.hpp"
 
+#include <vk/Device.hpp>
 #include <vk/PhysicalDevice.hpp>
 
 namespace tr::gfx {
@@ -36,7 +37,8 @@ namespace tr::gfx {
                                 std::shared_ptr<Context> newContext,
                                 std::shared_ptr<IDebugManager> newDebugManager,
                                 std::shared_ptr<Instance> newInstance,
-                                std::shared_ptr<PhysicalDevice> newPhysicalDevice);
+                                std::shared_ptr<PhysicalDevice> newPhysicalDevice,
+                                std::shared_ptr<Device> newDevice);
       ~VkGraphicsDevice() override;
 
       VkGraphicsDevice(const VkGraphicsDevice&) = delete;
@@ -46,18 +48,6 @@ namespace tr::gfx {
 
       auto getDescriptorBufferProperties()
           -> vk::PhysicalDeviceDescriptorBufferPropertiesEXT override;
-
-      auto getVulkanDevice() const -> std::shared_ptr<vk::raii::Device> override {
-         return vulkanDevice;
-      }
-
-      auto getGraphicsQueue() const -> std::shared_ptr<vk::raii::Queue> override {
-         return graphicsQueue;
-      };
-
-      auto getPhysicalDevice() const -> std::shared_ptr<vk::raii::PhysicalDevice> override {
-         return physicalDevice;
-      }
 
       auto submit(const vk::SubmitInfo& submitInfo, const std::unique_ptr<vk::raii::Fence>& fence)
           -> void override;
@@ -136,48 +126,12 @@ namespace tr::gfx {
 
       void createSwapchain();
 
-      template <typename T>
-      void setObjectName(T const& handle, const std::string_view name) {
-         auto fn = (PFN_vkDebugMarkerSetObjectNameEXT)vkGetDeviceProcAddr(
-             **vulkanDevice,
-             "vkDebugMarkerSetObjectNameEXT");
-
-         if (fn != nullptr) {
-            // NOLINTNEXTLINE this is just debug anyway
-            const auto debugHandle =
-                reinterpret_cast<uint64_t>(static_cast<typename T::CType>(handle));
-
-            [[maybe_unused]] const auto debugNameInfo =
-                vk::DebugMarkerObjectNameInfoEXT{.objectType = handle.debugReportObjectType,
-                                                 .object = debugHandle,
-                                                 .pObjectName = name.data()};
-            vulkanDevice->debugMarkerSetObjectNameEXT(debugNameInfo);
-         }
-      }
-
-      std::vector<const char*> desiredDeviceExtensions = {
-          VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-          VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME,
-          VK_KHR_DEPTH_STENCIL_RESOLVE_EXTENSION_NAME,
-#ifdef __APPLE__
-          VK_KHR_COPY_COMMANDS_2_EXTENSION_NAME,
-#endif
-          VK_KHR_CREATE_RENDERPASS_2_EXTENSION_NAME,
-          VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME,
-          VK_EXT_EXTENDED_DYNAMIC_STATE_3_EXTENSION_NAME,
-          //  VK_EXT_DESCRIPTOR_BUFFER_EXTENSION_NAME,
-          VK_KHR_DEVICE_GROUP_EXTENSION_NAME,
-          VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME,
-          VK_EXT_EXTENDED_DYNAMIC_STATE_EXTENSION_NAME};
-
       std::shared_ptr<tr::IWindow> window;
       std::shared_ptr<Context> context;
       std::shared_ptr<IDebugManager> debugManager;
       std::shared_ptr<Instance> instance;
       std::shared_ptr<PhysicalDevice> physicalDevice;
-
-      std::unique_ptr<vk::raii::SurfaceKHR> surface;
-      std::shared_ptr<vk::raii::Device> vulkanDevice;
+      std::shared_ptr<Device> device;
 
       std::shared_ptr<vk::raii::Queue> graphicsQueue;
       std::unique_ptr<vk::raii::Queue> presentQueue;
@@ -196,7 +150,6 @@ namespace tr::gfx {
       vk::PhysicalDeviceDescriptorBufferPropertiesEXT descriptorBufferProperties;
 
       std::shared_ptr<VkContext> asyncTransferContext;
-      std::shared_ptr<mem::Allocator> allocator;
 
       std::vector<geo::ImmutableMesh> meshList;
 

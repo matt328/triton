@@ -9,7 +9,8 @@ namespace tr::gfx {
    class PhysicalDevice {
     public:
       explicit PhysicalDevice(const std::shared_ptr<Instance>& instance,
-                              const std::shared_ptr<Surface>& surface);
+                              std::shared_ptr<Surface> newSurface,
+                              std::shared_ptr<IDebugManager> newDebugManager);
       ~PhysicalDevice();
 
       PhysicalDevice(const PhysicalDevice&) = delete;
@@ -17,8 +18,22 @@ namespace tr::gfx {
       auto operator=(const PhysicalDevice&) -> PhysicalDevice& = delete;
       auto operator=(PhysicalDevice&&) -> PhysicalDevice& = delete;
 
+      auto createDevice() -> std::unique_ptr<vk::raii::Device>;
+
+      [[nodiscard]] auto getVkPhysicalDevice() const -> vk::raii::PhysicalDevice&;
+
+      [[nodiscard]] auto getQueueFamilyIndices() const -> QueueFamilyIndices;
+
+      [[nodiscard]] auto querySwapchainSupport() const -> SwapchainSupportDetails;
+
+      [[nodiscard]] auto getSurfaceSize() const -> std::pair<uint32_t, uint32_t>;
+
     private:
+      std::shared_ptr<Surface> surface;
+      std::shared_ptr<IDebugManager> debugManager;
       std::unique_ptr<vk::raii::PhysicalDevice> physicalDevice;
+
+      QueueFamilyIndices deviceQueueFamilyIndices;
 
       std::vector<const char*> desiredDeviceExtensions = {
           VK_KHR_SWAPCHAIN_EXTENSION_NAME,
