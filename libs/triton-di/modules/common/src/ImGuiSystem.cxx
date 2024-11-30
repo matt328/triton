@@ -5,41 +5,16 @@
 #include <vk/Instance.hpp>
 
 namespace tr::cm {
-   ImGuiSystem::ImGuiSystem(const std::shared_ptr<gfx::IGraphicsDevice>& graphicsDevice,
-                            const std::shared_ptr<IWindow>& window,
-                            const std::shared_ptr<gfx::Instance>& instance) {
+   ImGuiSystem::ImGuiSystem(const std::shared_ptr<IWindow>& window,
+                            const std::shared_ptr<gfx::Instance>& instance,
+                            const std::shared_ptr<gfx::Device>& device,
+                            const std::shared_ptr<gfx::PhysicalDevice>& physicalDevice,
+                            const std::shared_ptr<gfx::queue::Graphics>& graphicsQueue,
+                            std::shared_ptr<gfx::VkResourceManager> newResourceManager)
+       : resourceManager{std::move(newResourceManager)} {
       Log.trace("Creating ImGuiSystem");
-      static constexpr auto poolSizes = std::array{
-          vk::DescriptorPoolSize{.type = vk::DescriptorType::eSampler, .descriptorCount = 1000},
-          vk::DescriptorPoolSize{.type = vk::DescriptorType::eCombinedImageSampler,
-                                 .descriptorCount = 1000},
-          vk::DescriptorPoolSize{.type = vk::DescriptorType::eSampledImage,
-                                 .descriptorCount = 1000},
-          vk::DescriptorPoolSize{.type = vk::DescriptorType::eStorageImage,
-                                 .descriptorCount = 1000},
-          vk::DescriptorPoolSize{.type = vk::DescriptorType::eUniformTexelBuffer,
-                                 .descriptorCount = 1000},
-          vk::DescriptorPoolSize{.type = vk::DescriptorType::eStorageTexelBuffer,
-                                 .descriptorCount = 1000},
-          vk::DescriptorPoolSize{.type = vk::DescriptorType::eUniformBuffer,
-                                 .descriptorCount = 1000},
-          vk::DescriptorPoolSize{.type = vk::DescriptorType::eStorageBuffer,
-                                 .descriptorCount = 1000},
-          vk::DescriptorPoolSize{.type = vk::DescriptorType::eUniformBufferDynamic,
-                                 .descriptorCount = 1000},
-          vk::DescriptorPoolSize{.type = vk::DescriptorType::eStorageBufferDynamic,
-                                 .descriptorCount = 1000},
-          vk::DescriptorPoolSize{.type = vk::DescriptorType::eInputAttachment,
-                                 .descriptorCount = 1000}};
 
-      constexpr vk::DescriptorPoolCreateInfo poolInfo{
-          .flags = vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet,
-          .maxSets = 1000,
-          .poolSizeCount = poolSizes.size(),
-          .pPoolSizes = poolSizes.data()};
-
-      descriptorPool = std::make_unique<vk::raii::DescriptorPool>(
-          graphicsDevice->getVulkanDevice()->createDescriptorPool(poolInfo, nullptr));
+      descriptorPool = resourceManager->createDefaultDescriptorPool();
 
       ImGui::CreateContext();
 
@@ -47,9 +22,9 @@ namespace tr::cm {
 
       ImGui_ImplVulkan_InitInfo initInfo = {};
       initInfo.Instance = instance->getVkInstance();
-      initInfo.PhysicalDevice = **graphicsDevice->getPhysicalDevice();
-      initInfo.Device = **graphicsDevice->getVulkanDevice();
-      initInfo.Queue = **graphicsDevice->getGraphicsQueue();
+      initInfo.PhysicalDevice = *physicalDevice->getVkPhysicalDevice();
+      initInfo.Device = *device->getVkDevice();
+      initInfo.Queue = *graphicsQueue->getQueue();
       initInfo.DescriptorPool = **descriptorPool;
       initInfo.MinImageCount = 3;
       initInfo.ImageCount = 3;

@@ -124,7 +124,7 @@ namespace tr::gfx {
    }
 
    void DefaultRenderContext::waitIdle() {
-      graphicsDevice->getVulkanDevice()->waitIdle();
+      graphicsDevice->waitIdle();
    }
 
    void DefaultRenderContext::setRenderData(const cm::gpu::RenderData& newRenderData) {

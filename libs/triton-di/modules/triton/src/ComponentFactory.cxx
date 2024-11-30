@@ -21,6 +21,7 @@
 #include "DefaultContext.hpp"
 #include "DefaultDebugManager.hpp"
 #include "NoopDebugManager.hpp"
+#include "gfx/QueueTypes.hpp"
 
 #include <di.hpp>
 
@@ -49,7 +50,18 @@ namespace tr {
           di::bind<gp::IActionSystem>.to<gp::ActionSystem>(),
           di::bind<gfx::pipe::IShaderCompiler>.to<gfx::pipe::SpirvShaderCompiler>(),
           di::bind<glm::ivec2>.to(config.initialWindowSize),
-          di::bind<std::string>.to(config.windowTitle));
+          di::bind<std::string>.to(config.windowTitle),
+          di::bind<gfx::Device>.to<gfx::Device>(),
+          di::bind<gfx::queue::Graphics>.to(
+              [](const gfx::Device& device) { return device.createGraphicsQueue(); }),
+          di::bind<gfx::queue::Present>.to(
+              [](const gfx::Device& device) { return device.createPresentQueue(); }),
+          di::bind<gfx::queue::Transfer>.to(
+              [](const gfx::Device& device) { return device.createTransferQueue(); }),
+          di::bind<gfx::queue::Compute>.to(
+              [](const gfx::Device& device) { return device.createComputeQueue(); })
+
+      );
 
       return injector.create<std::shared_ptr<DefaultContext>>();
    }

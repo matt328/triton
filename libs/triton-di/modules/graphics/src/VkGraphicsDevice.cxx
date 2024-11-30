@@ -11,6 +11,7 @@
 #include "tex/Texture.hpp"
 #include "geo/Mesh.hpp"
 #include "vk/PhysicalDevice.hpp"
+#include "vk/Swapchain.hpp"
 
 /*
  * Have PhysicalDevice create a vk::raii::Device, and wrap that with a Device injectable.
@@ -35,157 +36,29 @@
 
 namespace tr::gfx {
 
-   VkGraphicsDevice::VkGraphicsDevice(std::shared_ptr<tr::IWindow> newWindow,
+   VkGraphicsDevice::VkGraphicsDevice(std::shared_ptr<IWindow> newWindow,
                                       std::shared_ptr<Context> newContext,
                                       std::shared_ptr<IDebugManager> newDebugManager,
                                       std::shared_ptr<Instance> newInstance,
-                                      std::shared_ptr<PhysicalDevice> newPhysicalDevice)
+                                      std::shared_ptr<PhysicalDevice> newPhysicalDevice,
+                                      std::shared_ptr<Device> newDevice)
        : window{std::move(newWindow)},
          context{std::move(newContext)},
          debugManager{std::move(newDebugManager)},
          instance{std::move(newInstance)},
-         physicalDevice{std::move(newPhysicalDevice)} {
+         physicalDevice{std::move(newPhysicalDevice)},
+         device{std::move(newDevice)} {
 
       debugManager->checkDebugSupport();
 
-      // Select and identify Queues
-      auto queueFamilyIndices = Helpers::findQueueFamilies(*physicalDevice, *surface);
-      std::vector<vk::DeviceQueueCreateInfo> queueCreateInfos;
-
-      // Graphics Queue(s)
-      if (queueFamilyIndices.graphicsFamily.has_value() &&
-          queueFamilyIndices.graphicsFamilyCount.has_value()) {
-         const auto graphicsFamilyCreateInfo = vk::DeviceQueueCreateInfo{
-             .queueFamilyIndex = queueFamilyIndices.graphicsFamily.value(),
-             .queueCount = queueFamilyIndices.graphicsFamilyCount.value(),
-             .pQueuePriorities = queueFamilyIndices.graphicsFamilyPriorities.data()};
-         queueCreateInfos.push_back(graphicsFamilyCreateInfo);
-      }
-
-      // If present queue family is different from graphics
-      if (queueFamilyIndices.graphicsFamily.value() != queueFamilyIndices.presentFamily.value()) {
-         Log.trace("Device supports separate present queue");
-         // Present Queue(s)
-         if (queueFamilyIndices.presentFamily.has_value() &&
-             queueFamilyIndices.presentFamilyCount.has_value()) {
-            const auto presentFamilyCreateInfo = vk::DeviceQueueCreateInfo{
-                .queueFamilyIndex = queueFamilyIndices.presentFamily.value(),
-                .queueCount = queueFamilyIndices.presentFamilyCount.value(),
-                .pQueuePriorities = queueFamilyIndices.presentFamilyPriorities.data()};
-            queueCreateInfos.push_back(presentFamilyCreateInfo);
-         }
-      }
-
-      auto deviceProperties =
-          physicalDevice->getProperties2KHR<vk::PhysicalDeviceProperties2KHR,
-                                            vk::PhysicalDeviceDescriptorBufferPropertiesEXT>();
-
-      descriptorBufferProperties =
-          deviceProperties.get<vk::PhysicalDeviceDescriptorBufferPropertiesEXT>();
-
-      auto drfs = vk::PhysicalDeviceDynamicRenderingFeaturesKHR{
-          .dynamicRendering = VK_TRUE,
-      };
-
-      auto features2 =
-          physicalDevice->getFeatures2<vk::PhysicalDeviceFeatures2,
-                                       vk::PhysicalDevice16BitStorageFeatures,
-                                       vk::PhysicalDeviceDescriptorIndexingFeaturesEXT>();
-
-      auto indexingFeatures = features2.get<vk::PhysicalDeviceDescriptorIndexingFeatures>();
-
-      auto drawParamsFeatures =
-          vk::PhysicalDeviceShaderDrawParametersFeatures{.shaderDrawParameters = VK_TRUE};
-
-      if (const auto bindlessTexturesSupported = indexingFeatures.descriptorBindingPartiallyBound &&
-                                                 indexingFeatures.runtimeDescriptorArray;
-          !bindlessTexturesSupported) {
-         throw std::runtime_error("GPU does not support bindless textures :(");
-      }
-
-      auto physicalFeatures2 = physicalDevice->getFeatures2();
-      physicalFeatures2.features.samplerAnisotropy = VK_TRUE;
-
-      vk::DeviceCreateInfo createInfo{
-          .queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size()),
-          .pQueueCreateInfos = queueCreateInfos.data(),
-          .enabledLayerCount = 0,
-          .enabledExtensionCount = static_cast<uint32_t>(desiredDeviceExtensions.size()),
-          .ppEnabledExtensionNames = desiredDeviceExtensions.data()};
-
-      debugManager->addDeviceConfig(createInfo);
-
-      // const auto dbFeatures =
-      // vk::PhysicalDeviceDescriptorBufferFeaturesEXT{.descriptorBuffer = true};
-
-      const auto extendedDynamicStateFeatures =
-          vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT{.extendedDynamicState = true};
-
-      constexpr auto bdaFeatures =
-          vk::PhysicalDeviceBufferDeviceAddressFeaturesKHR{.bufferDeviceAddress = true};
-
-      const vk::StructureChain c{createInfo,
-                                 physicalFeatures2,
-                                 drawParamsFeatures,
-                                 indexingFeatures,
-                                 drfs,
-                                 // dbFeatures,
-                                 extendedDynamicStateFeatures,
-                                 bdaFeatures};
-
-      vulkanDevice =
-          std::make_shared<vk::raii::Device>(physicalDevice->createDevice(c.get(), nullptr));
-
-      // Just don't name this because a bug in vulkan keeps complaining it doesn't match but it does
-      // Helpers::setObjectName(**vulkanDevice, *vulkanDevice.get(), "Primary Device");
-
-      Log.trace("Created Logical Device");
-
-      graphicsQueue = std::make_shared<vk::raii::Queue>(
-          vulkanDevice->getQueue(queueFamilyIndices.graphicsFamily.value(), 0));
-      Helpers::setObjectName(**graphicsQueue, *vulkanDevice, "Graphics Queue");
-      Log.trace("Created Graphics Queue");
-
-      presentQueue = std::make_unique<vk::raii::Queue>(
-          vulkanDevice->getQueue(queueFamilyIndices.presentFamily.value(), 0));
-      Helpers::setObjectName(**presentQueue, *vulkanDevice, "Present Queue");
-      Log.trace("Created Present Queue");
-
-      transferQueue = std::make_shared<vk::raii::Queue>(
-          vulkanDevice->getQueue(queueFamilyIndices.transferFamily.value(), 0));
-      Helpers::setObjectName(**transferQueue, *vulkanDevice, "Transfer Queue");
-      Log.trace("Created Transfer Queue");
-
-      computeQueue = std::make_unique<vk::raii::Queue>(
-          vulkanDevice->getQueue(queueFamilyIndices.computeFamily.value(), 0));
-      Helpers::setObjectName(**computeQueue, *vulkanDevice, "Compute Queue");
-      Log.trace("Created Compute Queue");
-
       createSwapchain();
 
-      asyncTransferContext = std::make_shared<VkContext>(*vulkanDevice,
-                                                         *physicalDevice,
-                                                         0,
-                                                         queueFamilyIndices.transferFamily.value(),
-                                                         "Async Transfer Context");
-
-      constexpr auto vulkanFunctions = vma::VulkanFunctions{
-          .vkGetInstanceProcAddr = vkGetInstanceProcAddr,
-          .vkGetDeviceProcAddr = vkGetDeviceProcAddr,
-      };
-
-      const auto allocatorCreateInfo = vma::AllocatorCreateInfo{
-          .flags = vma::AllocatorCreateFlagBits::eBufferDeviceAddress,
-          .physicalDevice = **physicalDevice,
-          .device = **vulkanDevice,
-          .pVulkanFunctions = &vulkanFunctions,
-          .instance = instance->getVkInstance(),
-      };
-
-      {
-         ZoneNamedN(zone, "Create Allocator", true);
-         allocator = std::make_unique<mem::Allocator>(allocatorCreateInfo, *vulkanDevice);
-      }
+      // asyncTransferContext = std::make_shared<VkContext>(*vulkanDevice,
+      //                                                    *physicalDevice,
+      //                                                    0,
+      //                                                    queueFamilyIndices.transferFamily.value(),
+      //                                                    "Async Transfer Context");
+      //
    }
 
    VkGraphicsDevice::~VkGraphicsDevice() {
@@ -493,88 +366,6 @@ namespace tr::gfx {
    }
 
    void VkGraphicsDevice::createSwapchain() {
-      if (oldSwapchain != nullptr) {
-         commandPool.reset();
-         swapchainImages.clear();
-         swapchainImageViews.clear();
-      }
-      auto queueFamilyIndicesInfo = Helpers::findQueueFamilies(*physicalDevice, *surface);
-
-      auto [capabilities, formats, presentModes] =
-          Helpers::querySwapchainSupport(*physicalDevice, *surface);
-
-      const auto surfaceFormat = Helpers::chooseSwapSurfaceFormat(formats);
-      const auto presentMode = Helpers::chooseSwapPresentMode(presentModes);
-      const auto extent = Helpers::chooseSwapExtent(capabilities, getCurrentSize());
-
-      uint32_t imageCount = capabilities.minImageCount + 1;
-
-      if (capabilities.maxImageCount > 0 && imageCount > capabilities.maxImageCount) {
-         imageCount = capabilities.maxImageCount;
-      }
-
-      vk::SwapchainCreateInfoKHR swapchainCreateInfo{
-          .surface = **surface,
-          .minImageCount = imageCount,
-          .imageFormat = surfaceFormat.format,
-          .imageColorSpace = surfaceFormat.colorSpace,
-          .imageExtent = extent,
-          .imageArrayLayers = 1,
-          .imageUsage =
-              vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferDst,
-          .preTransform = capabilities.currentTransform,
-          .compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque,
-          .presentMode = presentMode,
-          .clipped = VK_TRUE,
-          .oldSwapchain = VK_NULL_HANDLE};
-
-      if (oldSwapchain != nullptr) {
-         swapchainCreateInfo.oldSwapchain = **oldSwapchain;
-      }
-
-      const auto queueFamilyIndices = std::array{queueFamilyIndicesInfo.graphicsFamily.value(),
-                                                 queueFamilyIndicesInfo.presentFamily.value()};
-
-      if (queueFamilyIndicesInfo.graphicsFamily != queueFamilyIndicesInfo.presentFamily) {
-         swapchainCreateInfo.imageSharingMode = vk::SharingMode::eConcurrent;
-         swapchainCreateInfo.queueFamilyIndexCount = 2;
-         swapchainCreateInfo.pQueueFamilyIndices = queueFamilyIndices.data();
-      } else {
-         swapchainCreateInfo.imageSharingMode = vk::SharingMode::eExclusive;
-      }
-
-      swapchain = std::make_unique<vk::raii::SwapchainKHR>(*vulkanDevice, swapchainCreateInfo);
-      Log.info("Created Swapchain");
-
-      swapchainExtent = extent;
-      swapchainImageFormat = surfaceFormat.format;
-
-      swapchainImages = swapchain->getImages();
-      swapchainImageViews.reserve(swapchainImages.size());
-
-      constexpr vk::ComponentMapping components{.r = vk::ComponentSwizzle::eIdentity,
-                                                .g = vk::ComponentSwizzle::eIdentity,
-                                                .b = vk::ComponentSwizzle::eIdentity,
-                                                .a = vk::ComponentSwizzle::eIdentity};
-
-      constexpr vk::ImageSubresourceRange subresourceRange{.aspectMask =
-                                                               vk::ImageAspectFlagBits::eColor,
-                                                           .baseMipLevel = 0,
-                                                           .levelCount = 1,
-                                                           .baseArrayLayer = 0,
-                                                           .layerCount = 1};
-
-      for (const auto& image : swapchainImages) {
-         vk::ImageViewCreateInfo createInfo{.image = image,
-                                            .viewType = vk::ImageViewType::e2D,
-                                            .format = swapchainImageFormat,
-                                            .components = components,
-                                            .subresourceRange = subresourceRange};
-
-         swapchainImageViews.emplace_back(*vulkanDevice, createInfo);
-      }
-      Log.info("Created {0} swapchain image views", swapchainImageViews.size());
-
       // Create Command Pools
       auto commandPoolCreateInfo = vk::CommandPoolCreateInfo{
           .flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
