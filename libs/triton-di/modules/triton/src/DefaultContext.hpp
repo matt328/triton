@@ -15,7 +15,7 @@ namespace tr {
       class IGameplaySystem;
    }
 
-   class DefaultContext : public IContext {
+   class DefaultContext final : public IContext {
     public:
       explicit DefaultContext(std::shared_ptr<IEventBus> newEventBus,
                               std::shared_ptr<gp::IGameplaySystem> newGameplaySystem,
