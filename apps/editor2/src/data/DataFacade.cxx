@@ -82,7 +82,7 @@ namespace ed::data {
       engineBusy = true;
 
       const auto task = [this, modelFilename, entityName] {
-         gameplaySystem->createStaticModelEntity(modelFilename, entityName);
+         // gameplaySystem->createStaticModelEntity(modelFilename, entityName);
       };
 
       taskQueue->enqueue(task, onComplete);

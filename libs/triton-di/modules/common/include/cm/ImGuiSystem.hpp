@@ -2,10 +2,12 @@
 
 #include "tr/IGuiSystem.hpp"
 
+#include <gfx/QueueTypes.hpp>
 #include <vk/Device.hpp>
 #include <vk/VkResourceManager.hpp>
 
 namespace tr::gfx {
+   class Swapchain;
    class Instance;
    class IGraphicsDevice;
 }
@@ -22,6 +24,7 @@ namespace tr::cm {
                   const std::shared_ptr<gfx::Device>& device,
                   const std::shared_ptr<gfx::PhysicalDevice>& physicalDevice,
                   const std::shared_ptr<gfx::queue::Graphics>& graphicsQueue,
+                  const std::shared_ptr<gfx::Swapchain>& swapchain,
                   std::shared_ptr<gfx::VkResourceManager> newResourceManager);
       ~ImGuiSystem() override;
 

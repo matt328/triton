@@ -1,6 +1,10 @@
 #include "NewRenderContext.hpp"
 
 namespace tr::gfx {
+   NewRenderContext::NewRenderContext() {
+      Log.trace("Creating NewRenderContext");
+   }
+
    NewRenderContext::~NewRenderContext() {
       Log.trace("Destroying NewRenderContext");
    }

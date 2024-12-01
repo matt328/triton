@@ -124,9 +124,9 @@ namespace tr::gfx {
    }
    auto PhysicalDevice::querySwapchainSupport() const -> SwapchainSupportDetails {
       const auto details = SwapchainSupportDetails{
+          .capabilities = physicalDevice->getSurfaceCapabilitiesKHR(*surface->getVkSurface()),
           .formats = physicalDevice->getSurfaceFormatsKHR(*surface->getVkSurface()),
-          .presentModes = physicalDevice->getSurfacePresentModesKHR(*surface->getVkSurface()),
-          .capabilities = physicalDevice->getSurfaceCapabilitiesKHR(*surface->getVkSurface())};
+          .presentModes = physicalDevice->getSurfacePresentModesKHR(*surface->getVkSurface())};
 
       return details;
    }

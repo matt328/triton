@@ -14,7 +14,7 @@ namespace tr::gfx {
       auto operator=(const Surface&) -> Surface& = delete;
       auto operator=(Surface&&) -> Surface& = delete;
 
-      auto getVkSurface() -> vk::raii::SurfaceKHR&;
+      auto getVkSurface() const -> vk::raii::SurfaceKHR&;
 
     private:
       std::shared_ptr<IWindow> window;
