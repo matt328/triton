@@ -14,16 +14,13 @@ namespace tr {
    static constexpr auto SleepMillis = 100;
 
    DefaultContext::DefaultContext(std::shared_ptr<IEventBus> newEventBus,
-                                  std::shared_ptr<gp::IGameplaySystem> newGameplaySystem,
                                   std::shared_ptr<gfx::IRenderContext> newRenderContext,
-                                  std::shared_ptr<gfx::IGraphicsDevice> newGraphicsDevice,
                                   std::shared_ptr<tr::IWindow> newWindow,
                                   std::shared_ptr<IGuiSystem> newGuiSystem,
                                   std::shared_ptr<gp::Registry> newRegistry)
        : eventBus{std::move(newEventBus)},
-         gameplaySystem{std::move(newGameplaySystem)},
+         // gameplaySystem{std::move(newGameplaySystem)},
          renderContext{std::move(newRenderContext)},
-         graphicsDevice{std::move(newGraphicsDevice)},
          window{std::move(newWindow)},
          guiSystem{std::move(newGuiSystem)},
          registry{std::move(newRegistry)} {
@@ -34,10 +31,11 @@ namespace tr {
           [&]([[maybe_unused]] const tr::WindowClosed& event) { running = false; });
 
       // Wire together game world to render world
-      gameplaySystem->setRenderDataTransferHandler(
-          [&](const cm::gpu::RenderData& renderData) { renderContext->setRenderData(renderData); });
-
-      gameplaySystem->createDefaultCamera();
+      // gameplaySystem->setRenderDataTransferHandler(
+      //     [&](const cm::gpu::RenderData& renderData) { renderContext->setRenderData(renderData);
+      //     });
+      //
+      // gameplaySystem->createDefaultCamera();
    }
 
    void DefaultContext::run() {
@@ -74,7 +72,7 @@ namespace tr {
          }
 
          while (accumulator >= dt) {
-            gameplaySystem->fixedUpdate();
+            // gameplaySystem->fixedUpdate();
             t += dt;
             accumulator -= dt;
          }
@@ -83,7 +81,7 @@ namespace tr {
 
          {
             ZoneNamedN(z, "Gameplay Update", true);
-            gameplaySystem->update();
+            // gameplaySystem->update();
          }
 
          {
@@ -96,7 +94,7 @@ namespace tr {
    }
 
    auto DefaultContext::getGameplaySystem() -> std::shared_ptr<gp::IGameplaySystem> {
-      return gameplaySystem;
+      return nullptr;
    }
 
    auto DefaultContext::getGuiSystem() -> std::shared_ptr<IGuiSystem> {

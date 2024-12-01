@@ -8,7 +8,7 @@ namespace tr::gfx {
    Surface::~Surface() {
       Log.trace("Destroying Surface");
    }
-   auto Surface::getVkSurface() -> vk::raii::SurfaceKHR& {
+   auto Surface::getVkSurface() const -> vk::raii::SurfaceKHR& {
       return *surface;
    }
 }

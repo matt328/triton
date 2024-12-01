@@ -40,9 +40,9 @@ namespace ed::ui::cmp {
       createAnimatedEntityDialog();
       createStaticEntityDialog();
 
-      gameplaySystem->createTestEntity("Entity 1");
-      gameplaySystem->createTestEntity("Entity 2");
-      gameplaySystem->createTestEntity("Entity 3");
+      // gameplaySystem->createTestEntity("Entity 1");
+      // gameplaySystem->createTestEntity("Entity 2");
+      // gameplaySystem->createTestEntity("Entity 3");
    }
 
    EntityEditor::~EntityEditor() {
