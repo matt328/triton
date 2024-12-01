@@ -3,6 +3,7 @@
 #include "tr/IWindow.hpp"
 
 #include <vk/Instance.hpp>
+#include <vk/Swapchain.hpp>
 
 namespace tr::cm {
    ImGuiSystem::ImGuiSystem(const std::shared_ptr<IWindow>& window,
@@ -10,6 +11,7 @@ namespace tr::cm {
                             const std::shared_ptr<gfx::Device>& device,
                             const std::shared_ptr<gfx::PhysicalDevice>& physicalDevice,
                             const std::shared_ptr<gfx::queue::Graphics>& graphicsQueue,
+                            const std::shared_ptr<gfx::Swapchain>& swapchain,
                             std::shared_ptr<gfx::VkResourceManager> newResourceManager)
        : resourceManager{std::move(newResourceManager)} {
       Log.trace("Creating ImGuiSystem");
@@ -33,7 +35,7 @@ namespace tr::cm {
 
       auto createInfo = vk::PipelineRenderingCreateInfo{};
       createInfo.colorAttachmentCount = 1;
-      const auto format = graphicsDevice->getSwapchainFormat();
+      const auto format = swapchain->getImageFormat();
       createInfo.pColorAttachmentFormats = &format;
 
       initInfo.UseDynamicRendering = true;
@@ -64,7 +66,7 @@ namespace tr::cm {
       };
 
       const auto renderInfo = vk::RenderingInfo{
-          .renderArea = vk::Rect2D{.offset = {0, 0}, .extent = swapchainExtent},
+          .renderArea = vk::Rect2D{.offset = {.x = 0, .y = 0}, .extent = swapchainExtent},
           .layerCount = 1,
           .colorAttachmentCount = 1,
           .pColorAttachments = &colorAttachment,

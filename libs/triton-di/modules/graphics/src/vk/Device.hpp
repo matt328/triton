@@ -1,6 +1,5 @@
 #pragma once
 #include "PhysicalDevice.hpp"
-#include "gfx/QueueTypes.hpp"
 
 namespace tr::gfx {
 
@@ -14,17 +13,18 @@ namespace tr::gfx {
       Device(const Device&) = delete;
       Device(Device&&) = delete;
 
-      [[nodiscard]] auto createGraphicsQueue() const -> std::shared_ptr<queue::Graphics>;
-      [[nodiscard]] auto createPresentQueue() const -> std::shared_ptr<queue::Present>;
-      [[nodiscard]] auto createTransferQueue() const -> std::shared_ptr<queue::Transfer>;
-      [[nodiscard]] auto createComputeQueue() const -> std::shared_ptr<queue::Compute>;
+      [[nodiscard]] auto createGraphicsQueue() const -> std::unique_ptr<vk::raii::Queue>;
+      [[nodiscard]] auto createPresentQueue() const -> std::unique_ptr<vk::raii::Queue>;
+      [[nodiscard]] auto createTransferQueue() const -> std::unique_ptr<vk::raii::Queue>;
+      [[nodiscard]] auto createComputeQueue() const -> std::unique_ptr<vk::raii::Queue>;
 
       [[nodiscard]] auto createDescriptorPool(const vk::DescriptorPoolCreateInfo& info) const
           -> vk::raii::DescriptorPool;
 
       [[nodiscard]] auto getVkDevice() const -> vk::raii::Device&;
 
-      [[nodiscard]] auto createSwapchain(const vk::SwapchainCreateInfoKHR& info) const -> std::unique_ptr<vk::raii::SwapchainKHR>;
+      [[nodiscard]] auto createSwapchain(const vk::SwapchainCreateInfoKHR& info) const
+          -> std::unique_ptr<vk::raii::SwapchainKHR>;
 
     private:
       std::unique_ptr<vk::raii::Device> device;

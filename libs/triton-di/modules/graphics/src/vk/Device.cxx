@@ -11,25 +11,21 @@ namespace tr::gfx {
       Log.trace("Destroying Device");
    }
 
-   auto Device::createGraphicsQueue() const -> std::shared_ptr<queue::Graphics> {
-      auto queue = std::make_unique<vk::raii::Queue>(
+   auto Device::createGraphicsQueue() const -> std::unique_ptr<vk::raii::Queue> {
+      return std::make_unique<vk::raii::Queue>(
           device->getQueue(queueFamilyIndices.graphicsFamily.value(), 0));
-      return std::make_shared<queue::Graphics>(std::move(queue));
    }
-   auto Device::createPresentQueue() const -> std::shared_ptr<queue::Present> {
-      auto queue = std::make_unique<vk::raii::Queue>(
+   auto Device::createPresentQueue() const -> std::unique_ptr<vk::raii::Queue> {
+      return std::make_unique<vk::raii::Queue>(
           device->getQueue(queueFamilyIndices.presentFamily.value(), 0));
-      return std::make_shared<queue::Present>(std::move(queue));
    }
-   auto Device::createTransferQueue() const -> std::shared_ptr<queue::Transfer> {
-      auto queue = std::make_unique<vk::raii::Queue>(
+   auto Device::createTransferQueue() const -> std::unique_ptr<vk::raii::Queue> {
+      return std::make_unique<vk::raii::Queue>(
           device->getQueue(queueFamilyIndices.transferFamily.value(), 0));
-      return std::make_shared<queue::Transfer>(std::move(queue));
    }
-   auto Device::createComputeQueue() const -> std::shared_ptr<queue::Compute> {
-      auto queue = std::make_unique<vk::raii::Queue>(
+   auto Device::createComputeQueue() const -> std::unique_ptr<vk::raii::Queue> {
+      return std::make_unique<vk::raii::Queue>(
           device->getQueue(queueFamilyIndices.computeFamily.value(), 0));
-      return std::make_shared<queue::Compute>(std::move(queue));
    }
    auto Device::createDescriptorPool(const vk::DescriptorPoolCreateInfo& info) const
        -> vk::raii::DescriptorPool {

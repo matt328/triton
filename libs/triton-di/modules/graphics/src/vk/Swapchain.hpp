@@ -16,6 +16,8 @@ namespace tr::gfx {
       auto operator=(const Swapchain&) -> Swapchain& = delete;
       auto operator=(Swapchain&&) -> Swapchain& = delete;
 
+      [[nodiscard]] auto getImageFormat() const -> vk::Format;
+
     private:
       std::shared_ptr<PhysicalDevice> physicalDevice;
       std::shared_ptr<Device> device;
@@ -26,6 +28,9 @@ namespace tr::gfx {
 
       std::vector<vk::Image> swapchainImages;
       std::vector<vk::raii::ImageView> swapchainImageViews;
+
+      vk::Format swapchainImageFormat;
+      vk::Extent2D swapchainExtent;
 
       [[nodiscard]] static auto choosePresentMode(
           const std::vector<vk::PresentModeKHR>& availablePresentModes) -> vk::PresentModeKHR;

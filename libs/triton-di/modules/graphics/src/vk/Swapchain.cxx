@@ -49,6 +49,9 @@ namespace tr::gfx {
 
       swapchain = device->createSwapchain(swapchainCreateInfo);
 
+      swapchainExtent = extent;
+      swapchainImageFormat = surfaceFormat.format;
+
       swapchainImages = swapchain->getImages();
       swapchainImageViews.reserve(swapchainImages.size());
 
@@ -76,6 +79,10 @@ namespace tr::gfx {
 
    Swapchain::~Swapchain() {
       Log.trace("Destroying Swapchain");
+   }
+
+   auto Swapchain::getImageFormat() const -> vk::Format {
+      return swapchainImageFormat;
    }
 
    auto Swapchain::choosePresentMode(const std::vector<vk::PresentModeKHR>& availablePresentModes)

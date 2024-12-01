@@ -8,7 +8,8 @@ namespace tr::gfx {
    class Instance {
     public:
       explicit Instance(std::shared_ptr<Context> newContext,
-                        std::shared_ptr<IDebugManager> newDebugManager);
+                        std::shared_ptr<IDebugManager> newDebugManager,
+                        std::shared_ptr<IWindow> newWindow);
       ~Instance();
 
       Instance(const Instance&) = delete;
@@ -26,10 +27,11 @@ namespace tr::gfx {
     private:
       std::shared_ptr<Context> context;
       std::shared_ptr<IDebugManager> debugManager;
+      std::shared_ptr<IWindow> window;
 
       std::unique_ptr<vk::raii::Instance> instance;
 
-      auto getInstanceExtensions() -> std::vector<const char*>;
+      auto getInstanceExtensions() const -> std::vector<const char*>;
       static auto isPortabilityRequired(std::span<const char*> extensionNames) -> bool;
    };
 

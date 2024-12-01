@@ -5,25 +5,19 @@
 #include "tr/IGuiSystem.hpp"
 #include "cm/ImGuiSystem.hpp"
 #include "gfx/IRenderContext.hpp"
-#include "gfx/GeometryFactory.hpp"
-#include "pipeline/IShaderCompiler.hpp"
-#include "pipeline/SpirvShaderCompiler.hpp"
-#include "sb/LayoutFactory.hpp"
-#include "sb/ShaderBindingFactory.hpp"
 #include "tr/IContext.hpp"
 
 #include "gp/action/ActionSystem.hpp"
 
 #include "DefaultEventBus.hpp"
-#include "GameplaySystem.hpp"
-#include "VkGraphicsDevice.hpp"
-#include "DefaultRenderContext.hpp"
 #include "DefaultContext.hpp"
 #include "DefaultDebugManager.hpp"
-#include "NoopDebugManager.hpp"
-#include "gfx/QueueTypes.hpp"
-
+#include "NewRenderContext.hpp"
 #include <di.hpp>
+#include "vk/Swapchain.hpp"
+#include "vk/Surface.hpp"
+#include "gfx/QueueTypes.hpp"
+#include "vk/Device.hpp"
 
 namespace di = boost::di;
 
@@ -35,33 +29,19 @@ namespace tr {
           .maxTextures = 16,
       };
 
-      const auto injector = di::make_injector(
-          di::bind<gfx::IDebugManager>.to<gfx::NoopDebugManager>(),
-          di::bind<gfx::RenderContextConfig>.to(rendererConfig),
-          di::bind<gp::IGameplaySystem>.to<gp::GameplaySystem>(),
-          di::bind<gfx::IGraphicsDevice>.to<gfx::VkGraphicsDevice>(),
-          di::bind<IGuiSystem>.to<cm::ImGuiSystem>(),
-          di::bind<IGuiAdapter>.to<cm::ImGuiAdapter>(),
-          di::bind<tr::IWindow>.to<gfx::Window>(),
-          di::bind<IEventBus>.to<DefaultEventBus>(),
-          di::bind<gfx::IRenderContext>.to<gfx::DefaultRenderContext>(),
-          di::bind<gfx::sb::ILayoutFactory>.to<gfx::sb::LayoutFactory>(),
-          di::bind<gfx::sb::IShaderBindingFactory>.to<gfx::sb::ShaderBindingFactory>(),
-          di::bind<gp::IActionSystem>.to<gp::ActionSystem>(),
-          di::bind<gfx::pipe::IShaderCompiler>.to<gfx::pipe::SpirvShaderCompiler>(),
-          di::bind<glm::ivec2>.to(config.initialWindowSize),
-          di::bind<std::string>.to(config.windowTitle),
-          di::bind<gfx::Device>.to<gfx::Device>(),
-          di::bind<gfx::queue::Graphics>.to(
-              [](const gfx::Device& device) { return device.createGraphicsQueue(); }),
-          di::bind<gfx::queue::Present>.to(
-              [](const gfx::Device& device) { return device.createPresentQueue(); }),
-          di::bind<gfx::queue::Transfer>.to(
-              [](const gfx::Device& device) { return device.createTransferQueue(); }),
-          di::bind<gfx::queue::Compute>.to(
-              [](const gfx::Device& device) { return device.createComputeQueue(); })
-
-      );
+      const auto injector =
+          di::make_injector(di::bind<gfx::IDebugManager>.to<gfx::DefaultDebugManager>(),
+                            di::bind<gfx::RenderContextConfig>.to(rendererConfig),
+                            di::bind<IGuiSystem>.to<cm::ImGuiSystem>(),
+                            di::bind<IGuiAdapter>.to<cm::ImGuiAdapter>(),
+                            di::bind<tr::IWindow>.to<gfx::Window>(),
+                            di::bind<IEventBus>.to<DefaultEventBus>(),
+                            di::bind<gfx::IRenderContext>.to<gfx::NewRenderContext>(),
+                            di::bind<gp::IActionSystem>.to<gp::ActionSystem>(),
+                            di::bind<glm::ivec2>.to(config.initialWindowSize),
+                            di::bind<std::string>.to(config.windowTitle),
+                            di::bind<gfx::Device>.to<gfx::Device>(),
+                            di::bind<gfx::queue::Graphics>.to<gfx::queue::Graphics>());
 
       return injector.create<std::shared_ptr<DefaultContext>>();
    }

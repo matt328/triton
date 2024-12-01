@@ -9,34 +9,20 @@ set(common_SRC
   modules/triton/src/DefaultContext.cxx
   modules/triton/src/DefaultEventBus.cxx
 
-  modules/gameplay/src/GameplaySystem.cxx
+  
   modules/gameplay/src/ActionSystem.cxx
   modules/gameplay/src/systems/CameraSystem.cxx
   modules/gameplay/src/Registry.cxx
 
-  modules/graphics/src/DefaultRenderContext.cxx
-  modules/graphics/src/VkGraphicsDevice.cxx
   modules/graphics/src/VkContext.cxx
   modules/graphics/src/Window.cxx
-  modules/graphics/src/DepthResources.cxx
-  modules/graphics/src/FrameManager.cxx
-  modules/graphics/src/Frame.cxx
-  modules/graphics/src/ResourceManager.cxx
 
   modules/graphics/src/vk/Context.cxx
   modules/graphics/src/vk/Instance.cxx
 
-  modules/graphics/src/sb/LayoutFactory.cxx
-  modules/graphics/src/sb/Layout.cxx
-  modules/graphics/src/sb/ShaderBindingFactory.cxx
-  modules/graphics/src/sb/DSShaderBinding.cxx
-
   modules/graphics/src/mem/Allocator.cxx
   modules/graphics/src/mem/Buffer.cxx
   modules/graphics/src/mem/Image.cxx
-
-  modules/graphics/src/pipeline/SpirvShaderCompiler.cxx
-  modules/graphics/src/pipeline/StaticModelPipeline.cxx
 
   modules/graphics/src/renderer/DefaultRenderer.cxx
   modules/graphics/src/renderer/RendererFactory.cxx

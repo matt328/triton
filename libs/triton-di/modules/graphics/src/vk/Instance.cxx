@@ -2,8 +2,11 @@
 
 namespace tr::gfx {
    Instance::Instance(std::shared_ptr<Context> newContext,
-                      std::shared_ptr<IDebugManager> newDebugManager)
-       : context{std::move(newContext)}, debugManager{std::move(newDebugManager)} {
+                      std::shared_ptr<IDebugManager> newDebugManager,
+                      std::shared_ptr<IWindow> newWindow)
+       : context{std::move(newContext)},
+         debugManager{std::move(newDebugManager)},
+         window{std::move(newWindow)} {
 
       auto extensions = getInstanceExtensions();
       const auto debugExtensions = debugManager->getAdditionalInstanceExtensions();
@@ -35,6 +38,7 @@ namespace tr::gfx {
 
    Instance::~Instance() {
       Log.trace("Destroying Instance");
+      debugManager->destroyDebugCallbacks();
    }
 
    auto Instance::createSurface(IWindow& window) const -> std::unique_ptr<vk::raii::SurfaceKHR> {
@@ -55,7 +59,7 @@ namespace tr::gfx {
       return **instance;
    }
 
-   auto Instance::getInstanceExtensions() -> std::vector<char const*> {
+   auto Instance::getInstanceExtensions() const -> std::vector<char const*> {
       uint32_t glfwExtensionCount = 0;
       auto* const glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
