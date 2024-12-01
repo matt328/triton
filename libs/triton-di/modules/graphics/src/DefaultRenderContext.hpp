@@ -21,7 +21,7 @@ namespace tr::gfx {
       class RendererFactory;
    }
 
-   class DefaultRenderContext : public IRenderContext {
+   class DefaultRenderContext final : public IRenderContext {
     public:
       explicit DefaultRenderContext(
           std::shared_ptr<IGraphicsDevice> graphicsDevice,

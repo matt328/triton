@@ -58,6 +58,8 @@ set(common_SRC
   modules/graphics/src/vk/QueueTypes.cxx
   modules/graphics/src/vk/VkResourceManager.cxx
   modules/graphics/src/vk/Swapchain.cxx
+  modules/graphics/src/NewRenderContext.cxx
+  modules/graphics/src/NewRenderContext.hpp
 )
 
 add_library(${PROJECT_NAME} STATIC ${common_SRC})
