@@ -13,11 +13,12 @@
 #include "DefaultContext.hpp"
 #include "DefaultDebugManager.hpp"
 #include "NewRenderContext.hpp"
-#include <di.hpp>
 #include "vk/Swapchain.hpp"
 #include "vk/Surface.hpp"
 #include "gfx/QueueTypes.hpp"
 #include "vk/Device.hpp"
+
+#include <di.hpp>
 
 namespace di = boost::di;
 
@@ -41,7 +42,10 @@ namespace tr {
                             di::bind<glm::ivec2>.to(config.initialWindowSize),
                             di::bind<std::string>.to(config.windowTitle),
                             di::bind<gfx::Device>.to<gfx::Device>(),
-                            di::bind<gfx::queue::Graphics>.to<gfx::queue::Graphics>());
+                            di::bind<gfx::queue::Graphics>.to<gfx::queue::Graphics>(),
+                            di::bind<gfx::queue::Transfer>.to<gfx::queue::Transfer>(),
+                            di::bind<gfx::queue::Present>.to<gfx::queue::Present>(),
+                            di::bind<gfx::queue::Compute>.to<gfx::queue::Compute>());
 
       return injector.create<std::shared_ptr<DefaultContext>>();
    }

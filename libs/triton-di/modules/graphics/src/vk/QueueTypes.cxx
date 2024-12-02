@@ -9,21 +9,24 @@ namespace tr::gfx::queue {
       return *queue;
    }
 
-   Present::Present(std::unique_ptr<vk::raii::Queue> newQueue) : queue{std::move(newQueue)} {
+   Present::Present(const std::shared_ptr<Device>& device) {
+      queue = device->createPresentQueue();
    }
 
    auto Present::getQueue() const -> vk::raii::Queue& {
       return *queue;
    }
 
-   Transfer::Transfer(std::unique_ptr<vk::raii::Queue> newQueue) : queue{std::move(newQueue)} {
+   Transfer::Transfer(const std::shared_ptr<Device>& device) {
+      queue = device->createTransferQueue();
    }
 
    auto Transfer::getQueue() const -> vk::raii::Queue& {
       return *queue;
    }
 
-   Compute::Compute(std::unique_ptr<vk::raii::Queue> newQueue) : queue{std::move(newQueue)} {
+   Compute::Compute(const std::shared_ptr<Device>& device) {
+      queue = device->createComputeQueue();
    }
 
    auto Compute::getQueue() const -> vk::raii::Queue& {
