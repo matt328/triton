@@ -1,15 +1,16 @@
+#pragma once
+
 template <class T, class D = std::default_delete<T>>
 class SimpleObjectPool {
  public:
    explicit SimpleObjectPool(const size_t n) {
       for (size_t i = 0; i < n; ++i) {
-         pool.push(std::make_unique<T>(i));
+         pool.push(std::make_unique<T>());
       }
    }
 
  private:
    void add(std::unique_ptr<T, D> obj) {
-      Log.debug("Returning object to the pool. {}", static_cast<T>(*obj));
       pool.push(std::move(obj));
    }
 
@@ -34,8 +35,6 @@ class SimpleObjectPool {
       auto obj = std::move(pool.top());
       pool.pop();
 
-      Log.debug("Acquired object from pool. {}", static_cast<T>(*obj));
-
       return std::unique_ptr<T, ReturnToPoolDeleter>(obj.release(), ReturnToPoolDeleter{this});
    }
 
@@ -50,20 +49,3 @@ class SimpleObjectPool {
  private:
    std::stack<std::unique_ptr<T>> pool;
 };
-
-auto main() -> int {
-
-   initLogger(spdlog::level::trace, spdlog::level::trace);
-
-   const auto pool = std::make_unique<SimpleObjectPool<int>>(10);
-
-   { auto one = pool->acquire(); }
-   {
-      auto two = pool->acquire();
-      auto three = pool->acquire();
-      auto four = pool->acquire();
-      auto five = pool->acquire();
-   }
-
-   return 0;
-}

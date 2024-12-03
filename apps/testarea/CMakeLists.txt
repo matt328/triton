@@ -4,8 +4,6 @@ project("testarea" VERSION "0.0.1" LANGUAGES CXX)
 # Source files for the main target
 set(testarea_SRC
    src/main.cxx
-   src/Application.cxx
-   src/DefaultWindow.cxx
 )
 
 # Main executable target
