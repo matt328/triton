@@ -1,11 +1,5 @@
 #include "NewRenderContext.hpp"
 
-/*
- * RenderContext should have RenderScheduler injected into it, and configure it after its been
- * created.
- *
- */
-
 namespace tr::gfx {
    NewRenderContext::NewRenderContext() {
       Log.trace("Creating NewRenderContext");
