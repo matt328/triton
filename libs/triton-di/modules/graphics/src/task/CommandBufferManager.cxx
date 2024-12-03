@@ -1,5 +1,7 @@
 #include "CommandBufferManager.hpp"
 
+#include "SimpleObjectPool.hpp"
+
 namespace tr::gfx {
 
    CommandBufferManager::CommandBufferManager(std::shared_ptr<Device> newDevice,

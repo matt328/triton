@@ -17,6 +17,8 @@ namespace tr::gfx {
       auto operator=(const CommandBufferManager&) -> CommandBufferManager& = delete;
       auto operator=(CommandBufferManager&&) -> CommandBufferManager& = delete;
 
+      auto getCommandBuffer(uint32_t frameIndex) -> std::unique_ptr<vk::raii::CommandBuffer>;
+
     private:
       std::shared_ptr<Device> device;
       uint32_t framesInFlight;
