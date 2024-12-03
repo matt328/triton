@@ -9,7 +9,7 @@ set(common_SRC
   modules/triton/src/DefaultContext.cxx
   modules/triton/src/DefaultEventBus.cxx
 
-  
+
   modules/gameplay/src/ActionSystem.cxx
   modules/gameplay/src/systems/CameraSystem.cxx
   modules/gameplay/src/Registry.cxx
@@ -45,7 +45,9 @@ set(common_SRC
   modules/graphics/src/vk/VkResourceManager.cxx
   modules/graphics/src/vk/Swapchain.cxx
   modules/graphics/src/NewRenderContext.cxx
-  modules/graphics/src/NewRenderContext.hpp
+  modules/graphics/src/task/DefaultRenderScheduler.cxx
+  modules/graphics/src/task/CommandBufferManager.cxx
+  modules/graphics/src/task/CommandBufferManager.hpp
 )
 
 add_library(${PROJECT_NAME} STATIC ${common_SRC})
