@@ -47,7 +47,8 @@ set(common_SRC
   modules/graphics/src/NewRenderContext.cxx
   modules/graphics/src/task/DefaultRenderScheduler.cxx
   modules/graphics/src/task/CommandBufferManager.cxx
-  modules/graphics/src/task/CommandBufferManager.hpp
+  modules/graphics/src/task/Frame.cxx
+  modules/graphics/src/task/Frame.hpp
 )
 
 add_library(${PROJECT_NAME} STATIC ${common_SRC})

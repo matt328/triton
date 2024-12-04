@@ -1,7 +1,7 @@
 #pragma once
 
 #include "gfx/IRenderScheduler.hpp"
-#include "gfx/IRenderTask.hpp"
+#include "IRenderTask.hpp"
 
 namespace tr::gfx {
 
@@ -14,11 +14,12 @@ namespace tr::gfx {
       DefaultRenderScheduler(DefaultRenderScheduler&&) = delete;
       auto operator=(const DefaultRenderScheduler&) -> DefaultRenderScheduler& = delete;
       auto operator=(DefaultRenderScheduler&&) -> DefaultRenderScheduler& = delete;
-      auto execute(vk::raii::CommandBuffer& commandBuffer) const -> void override;
-      auto addTask(std::shared_ptr<task::IRenderTask> task) -> void override;
+
+      auto executeStaticTasks(vk::raii::CommandBuffer& commandBuffer) const -> void override;
+      auto addStaticTask(std::shared_ptr<task::IRenderTask> task) -> void override;
 
     private:
-      std::vector<std::shared_ptr<task::IRenderTask>> tasks;
+      std::vector<std::shared_ptr<task::IRenderTask>> staticRenderTasks;
    };
 
 }
