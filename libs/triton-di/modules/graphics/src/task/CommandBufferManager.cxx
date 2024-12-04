@@ -39,9 +39,15 @@ namespace tr::gfx {
    auto CommandBufferManager::getCommandBuffer(const uint32_t frameIndex,
                                                const uint32_t queueFamily) -> CommandBufferPtr {
       assert(frameIndex < framesInFlight);
-      const auto key = getKey(frameIndex, queueFamily);
-      return commandPools[key]->acquire();
+      if (const auto key = getKey(frameIndex, queueFamily); commandPools.contains(key)) {
+         return commandPools[key]->acquire();
+      }
+      throw std::out_of_range(
+          std::format("Invalid frameIndex {} or queueFamily {} in getCommandBuffer",
+                      frameIndex,
+                      queueFamily));
    }
+
    auto CommandBufferManager::getKey(const uint32_t frameIndex, const uint32_t queueIndex)
        -> uint64_t {
       return (static_cast<uint64_t>(frameIndex) << 32) | queueIndex;
