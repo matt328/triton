@@ -25,10 +25,9 @@ namespace di = boost::di;
 namespace tr {
    auto ComponentFactory::getContext(const FrameworkConfig& config) -> std::shared_ptr<IContext> {
 
-      constexpr auto rendererConfig = gfx::RenderContextConfig{
-          .useDescriptorBuffers = false,
-          .maxTextures = 16,
-      };
+      constexpr auto rendererConfig = gfx::RenderContextConfig{.useDescriptorBuffers = false,
+                                                               .maxTextures = 16,
+                                                               .framesInFlight = 2};
 
       const auto injector =
           di::make_injector(di::bind<gfx::IDebugManager>.to<gfx::DefaultDebugManager>(),

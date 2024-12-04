@@ -1,7 +1,8 @@
 #include "NewRenderContext.hpp"
 
 namespace tr::gfx {
-   NewRenderContext::NewRenderContext() {
+   NewRenderContext::NewRenderContext(std::shared_ptr<CommandBufferManager> newCommandBufferManager)
+       : commandBufferManager{std::move(newCommandBufferManager)} {
       Log.trace("Creating NewRenderContext");
    }
 
@@ -19,5 +20,4 @@ namespace tr::gfx {
    void NewRenderContext::setRenderData(const cm::gpu::RenderData& renderData) {
       Log.trace("setRenderData");
    }
-
 }
