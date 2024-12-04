@@ -75,6 +75,6 @@ class CommandBufferPool {
    }
 
  private:
-   std::stack<std::unique_ptr<vk::raii::CommandBuffer>> pool;
    std::unique_ptr<vk::raii::CommandPool> commandPool;
+   std::stack<std::unique_ptr<vk::raii::CommandBuffer>> pool;
 };
