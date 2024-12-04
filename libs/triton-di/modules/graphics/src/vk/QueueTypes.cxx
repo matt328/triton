@@ -1,7 +1,8 @@
 #include "gfx/QueueTypes.hpp"
 
 namespace tr::gfx::queue {
-   Graphics::Graphics(const std::shared_ptr<Device>& device) {
+   Graphics::Graphics(const std::shared_ptr<Device>& device)
+       : queueFamilyIndex(device->getGraphicsQueueFamily()) {
       queue = device->createGraphicsQueue();
    }
 
@@ -9,7 +10,12 @@ namespace tr::gfx::queue {
       return *queue;
    }
 
-   Present::Present(const std::shared_ptr<Device>& device) {
+   auto Graphics::getFamily() const -> uint32_t {
+      return queueFamilyIndex;
+   }
+
+   Present::Present(const std::shared_ptr<Device>& device)
+       : queueFamilyIndex(device->getPresentQueueFamily()) {
       queue = device->createPresentQueue();
    }
 
@@ -17,7 +23,12 @@ namespace tr::gfx::queue {
       return *queue;
    }
 
-   Transfer::Transfer(const std::shared_ptr<Device>& device) {
+   auto Present::getFamily() const -> uint32_t {
+      return queueFamilyIndex;
+   }
+
+   Transfer::Transfer(const std::shared_ptr<Device>& device)
+       : queueFamilyIndex(device->getTransferQueueFamily()) {
       queue = device->createTransferQueue();
    }
 
@@ -25,12 +36,21 @@ namespace tr::gfx::queue {
       return *queue;
    }
 
-   Compute::Compute(const std::shared_ptr<Device>& device) {
+   auto Transfer::getFamily() const -> uint32_t {
+      return queueFamilyIndex;
+   }
+
+   Compute::Compute(const std::shared_ptr<Device>& device)
+       : queueFamilyIndex(device->getComputeQueueFamily()) {
       queue = device->createComputeQueue();
    }
 
    auto Compute::getQueue() const -> vk::raii::Queue& {
       return *queue;
+   }
+
+   auto Compute::getFamily() const -> uint32_t {
+      return queueFamilyIndex;
    }
 
 }
