@@ -13,10 +13,15 @@ namespace tr::gfx {
       Device(const Device&) = delete;
       Device(Device&&) = delete;
 
-      [[nodiscard]] auto createGraphicsQueue() const -> std::unique_ptr<vk::raii::Queue>;
+      [[nodiscard]] auto createGraphicsQueue() const -> std::shared_ptr<vk::raii::Queue>;
       [[nodiscard]] auto createPresentQueue() const -> std::unique_ptr<vk::raii::Queue>;
       [[nodiscard]] auto createTransferQueue() const -> std::unique_ptr<vk::raii::Queue>;
       [[nodiscard]] auto createComputeQueue() const -> std::unique_ptr<vk::raii::Queue>;
+
+      [[nodiscard]] auto getGraphicsQueueFamily() const -> uint32_t;
+      [[nodiscard]] auto getPresentQueueFamily() const -> uint32_t;
+      [[nodiscard]] auto getTransferQueueFamily() const -> uint32_t;
+      [[nodiscard]] auto getComputeQueueFamily() const -> uint32_t;
 
       [[nodiscard]] auto createDescriptorPool(const vk::DescriptorPoolCreateInfo& info) const
           -> vk::raii::DescriptorPool;

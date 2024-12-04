@@ -1,7 +1,7 @@
 template <class T, class D = std::default_delete<T>>
-class SimpleObjectPool {
+class CommandBufferPool {
  public:
-   explicit SimpleObjectPool(const size_t n) {
+   explicit CommandBufferPool(const size_t n) {
       for (size_t i = 0; i < n; ++i) {
          pool.push(std::make_unique<T>(i));
       }
@@ -14,15 +14,15 @@ class SimpleObjectPool {
    }
 
    struct ReturnToPoolDeleter {
-      explicit ReturnToPoolDeleter(SimpleObjectPool* pool) : pool_(pool) {
+      explicit ReturnToPoolDeleter(CommandBufferPool* pool) : pool(pool) {
       }
 
       void operator()(T* ptr) {
-         pool_->add(std::unique_ptr<T>{ptr});
+         pool->add(std::unique_ptr<T>{ptr});
       }
 
     private:
-      SimpleObjectPool* pool_;
+      CommandBufferPool* pool;
    };
 
  public:
@@ -55,7 +55,7 @@ auto main() -> int {
 
    initLogger(spdlog::level::trace, spdlog::level::trace);
 
-   const auto pool = std::make_unique<SimpleObjectPool<int>>(10);
+   const auto pool = std::make_unique<CommandBufferPool<int>>(10);
 
    { auto one = pool->acquire(); }
    {

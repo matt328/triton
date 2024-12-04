@@ -7,6 +7,7 @@ namespace tr::gfx {
    struct RenderContextConfig {
       bool useDescriptorBuffers{};
       uint16_t maxTextures{};
+      uint32_t framesInFlight{};
    };
 
    class IRenderContext {
