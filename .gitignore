@@ -21,3 +21,4 @@ vendor/imgui/*
 # Ignore user-specific files
 .idea/workspace.xml
 .idea/editor.xml
+.idea/misc.xml
