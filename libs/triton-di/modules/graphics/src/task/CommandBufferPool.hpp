@@ -1,18 +1,12 @@
 #pragma once
 #include <vk/Device.hpp>
 
-struct ReturnToPoolDeleter;
-
-using CommandBufferPtr = std::unique_ptr<vk::raii::CommandBuffer, ReturnToPoolDeleter>;
-
 class CommandBufferPool {
  public:
    CommandBufferPool(const std::shared_ptr<tr::gfx::Device>& device,
                      const uint32_t queueFamilyIndex,
                      const uint32_t initialCommandBufferCount = 3) {
-      Log.trace("Creating CommandBufferPool: queueFamily: {}, initialCommandBufferCount: {}",
-                queueFamilyIndex,
-                initialCommandBufferCount);
+
       const auto commandPoolCreateInfo =
           vk::CommandPoolCreateInfo{.flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
                                     .queueFamilyIndex = queueFamilyIndex};
@@ -24,10 +18,9 @@ class CommandBufferPool {
           vk::CommandBufferAllocateInfo{.commandPool = **commandPool,
                                         .level = vk::CommandBufferLevel::ePrimary,
                                         .commandBufferCount = initialCommandBufferCount};
-      auto commandBuffers = device->getVkDevice().allocateCommandBuffers(allocInfo);
 
-      for (size_t i = 0; i < commandBuffers.size(); ++i) {
-         add(std::make_unique<vk::raii::CommandBuffer>(std::move(commandBuffers[i])));
+      for (auto& commandBuffer : device->getVkDevice().allocateCommandBuffers(allocInfo)) {
+         add(std::make_unique<vk::raii::CommandBuffer>(std::move(commandBuffer)));
       }
    }
 
@@ -43,6 +36,7 @@ class CommandBufferPool {
    void add(std::unique_ptr<vk::raii::CommandBuffer> obj) {
       pool.push(std::move(obj));
    }
+
    struct ReturnToPoolDeleter {
       explicit ReturnToPoolDeleter(CommandBufferPool* pool) : pool(pool) {
       }
@@ -66,11 +60,11 @@ class CommandBufferPool {
       return {obj.release(), ReturnToPoolDeleter{this}};
    }
 
-   [[nodiscard]] auto empty() const -> bool {
+   [[nodiscard]] auto empty() const noexcept {
       return pool.empty();
    }
 
-   [[nodiscard]] auto size() const -> size_t {
+   [[nodiscard]] auto size() const noexcept {
       return pool.size();
    }
 
