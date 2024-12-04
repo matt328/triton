@@ -34,7 +34,6 @@ namespace tr::gfx {
 
    CommandBufferManager::~CommandBufferManager() {
       Log.trace("Destroying CommandBufferManager");
-      commandPools.clear();
    }
 
    auto CommandBufferManager::getCommandBuffer(const uint32_t frameIndex,
