@@ -17,6 +17,7 @@
 #include "vk/Surface.hpp"
 #include "gfx/QueueTypes.hpp"
 #include "vk/Device.hpp"
+#include "gfx/RenderContextConfig.hpp"
 
 #include <di.hpp>
 

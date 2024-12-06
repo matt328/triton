@@ -2,9 +2,11 @@
 #include "CommandBufferPool.hpp"
 
 #include <vk/Device.hpp>
+#include "CommandBufferType.hpp"
+
+#include <gfx/RenderContextConfig.hpp>
 
 namespace tr::gfx {
-   struct RenderContextConfig;
    namespace queue {
       class Compute;
       class Transfer;
@@ -17,9 +19,9 @@ namespace tr::gfx {
    class CommandBufferManager {
     public:
       CommandBufferManager(std::shared_ptr<Device> newDevice,
-                           const std::shared_ptr<queue::Graphics>& graphicsQueue,
-                           const std::shared_ptr<queue::Transfer>& transferQueue,
-                           const std::shared_ptr<queue::Compute>& computeQueue,
+                           std::shared_ptr<queue::Graphics> newGraphicsQueue,
+                           std::shared_ptr<queue::Transfer> newTransferQueue,
+                           std::shared_ptr<queue::Compute> newComputeQueue,
                            const RenderContextConfig& rendererConfig);
       ~CommandBufferManager();
 
@@ -28,15 +30,23 @@ namespace tr::gfx {
       auto operator=(const CommandBufferManager&) -> CommandBufferManager& = delete;
       auto operator=(CommandBufferManager&&) -> CommandBufferManager& = delete;
 
-      auto getCommandBuffer(uint32_t frameIndex, uint32_t queueFamily) -> CommandBufferPtr;
+      auto registerType(CommandBufferType cmdType);
+
+      auto getCommandBuffer(uint8_t frameIndex, CommandBufferType cmdType) -> CommandBufferPtr;
 
     private:
       std::shared_ptr<Device> device;
-      uint32_t framesInFlight;
+      std::shared_ptr<queue::Graphics> graphicsQueue;
+      std::shared_ptr<queue::Transfer> transferQueue;
+      std::shared_ptr<queue::Compute> computeQueue;
+
+      std::shared_ptr<CommandBufferPool> commandBufferPool;
+      uint8_t framesInFlight;
 
       std::unordered_map<uint64_t, std::unique_ptr<CommandBufferPool>> commandPools;
 
-      static auto getKey(uint32_t frameIndex, uint32_t queueIndex) -> uint64_t;
+      static auto getKey(uint8_t frameIndex, CommandBufferType cmdType, uint32_t queueIndex)
+          -> uint64_t;
    };
 
 }
