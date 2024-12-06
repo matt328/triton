@@ -18,6 +18,9 @@ namespace tr::gfx::task {
 
    auto DefaultFrameManager::acquireFrame() -> Frame& {
       const auto& frame = frames[currentFrame];
+
+
+
       frame->acquireSwapchainImage();
       currentFrame = (currentFrame + 1) % frames.size();
       return *frame;

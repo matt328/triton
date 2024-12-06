@@ -1,8 +1,8 @@
 #include "NewRenderContext.hpp"
 
 namespace tr::gfx {
-   NewRenderContext::NewRenderContext(std::shared_ptr<CommandBufferManager> newCommandBufferManager)
-       : commandBufferManager{std::move(newCommandBufferManager)} {
+   NewRenderContext::NewRenderContext(std::shared_ptr<task::IFrameManager> newFrameManager)
+       : frameManager{std::move(newFrameManager)} {
       Log.trace("Creating NewRenderContext");
    }
 
