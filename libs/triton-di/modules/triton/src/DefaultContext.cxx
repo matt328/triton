@@ -86,7 +86,7 @@ namespace tr {
 
          {
             ZoneNamedN(z, "RenderContext Render", true);
-            renderContext->render();
+            renderContext->renderNextFrame();
          }
          FrameMark;
       }

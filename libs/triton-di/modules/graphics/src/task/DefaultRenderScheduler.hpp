@@ -1,13 +1,17 @@
 #pragma once
 
+#include "CommandBufferManager.hpp"
+#include "IFrameManager.hpp"
 #include "gfx/IRenderScheduler.hpp"
 #include "IRenderTask.hpp"
 
 namespace tr::gfx {
 
-   class DefaultRenderScheduler : public task::IRenderScheduler {
+   class DefaultRenderScheduler final : public task::IRenderScheduler {
     public:
-      DefaultRenderScheduler();
+      explicit DefaultRenderScheduler(
+          std::shared_ptr<task::IFrameManager> newFrameManager,
+          std::shared_ptr<CommandBufferManager> newCommandBufferManager);
       ~DefaultRenderScheduler() override;
 
       DefaultRenderScheduler(const DefaultRenderScheduler&) = delete;
@@ -15,10 +19,13 @@ namespace tr::gfx {
       auto operator=(const DefaultRenderScheduler&) -> DefaultRenderScheduler& = delete;
       auto operator=(DefaultRenderScheduler&&) -> DefaultRenderScheduler& = delete;
 
-      auto executeStaticTasks(vk::raii::CommandBuffer& commandBuffer) const -> void override;
+      auto executeStaticTasks(Frame& frame) const -> void override;
       auto addStaticTask(std::shared_ptr<task::IRenderTask> task) -> void override;
 
     private:
+      std::shared_ptr<task::IFrameManager> frameManager;
+      std::shared_ptr<CommandBufferManager> commandBufferManager;
+
       std::vector<std::shared_ptr<task::IRenderTask>> staticRenderTasks;
    };
 
