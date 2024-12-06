@@ -1,12 +1,12 @@
 #pragma once
 #include <gfx/IRenderContext.hpp>
-#include <task/CommandBufferManager.hpp>
+#include <task/IFrameManager.hpp>
 
 namespace tr::gfx {
 
    class NewRenderContext final : public IRenderContext {
     public:
-      explicit NewRenderContext(std::shared_ptr<CommandBufferManager> newCommandBufferManager);
+      explicit NewRenderContext(std::shared_ptr<task::IFrameManager> newFrameManager);
       ~NewRenderContext() override;
 
       NewRenderContext(const NewRenderContext&) = delete;
@@ -19,7 +19,7 @@ namespace tr::gfx {
       void setRenderData(const cm::gpu::RenderData& renderData) override;
 
     private:
-      std::shared_ptr<CommandBufferManager> commandBufferManager;
+      std::shared_ptr<task::IFrameManager> frameManager;
    };
 
 }
