@@ -14,7 +14,7 @@ namespace tr::gfx {
       auto operator=(const NewRenderContext&) -> NewRenderContext& = delete;
       auto operator=(NewRenderContext&&) -> NewRenderContext& = delete;
 
-      void render() override;
+      void renderNextFrame() override;
       void waitIdle() override;
       void setRenderData(const cm::gpu::RenderData& renderData) override;
 

@@ -12,7 +12,7 @@ namespace tr::gfx::task {
       auto operator=(IRenderScheduler&&) -> IRenderScheduler& = delete;
       auto operator=(const IRenderScheduler&) -> IRenderScheduler& = delete;
 
-      virtual auto executeStaticTasks(vk::raii::CommandBuffer& commandBuffer) const -> void = 0;
+      virtual auto executeStaticTasks(Frame& frame) const -> void = 0;
       virtual auto addStaticTask(std::shared_ptr<IRenderTask> task) -> void = 0;
    };
 }

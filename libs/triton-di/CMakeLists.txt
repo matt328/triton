@@ -49,6 +49,7 @@ set(common_SRC
   modules/graphics/src/task/CommandBufferManager.cxx
   modules/graphics/src/task/Frame.cxx
   modules/graphics/src/task/Frame.hpp
+  modules/graphics/src/task/DefaultFrameManager.cxx
 )
 
 add_library(${PROJECT_NAME} STATIC ${common_SRC})
