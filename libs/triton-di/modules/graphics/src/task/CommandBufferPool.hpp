@@ -60,6 +60,11 @@ class CommandBufferPool {
       return {obj.release(), ReturnToPoolDeleter{this}};
    }
 
+   [[nodiscard]] static auto getEmpty()
+       -> std::unique_ptr<vk::raii::CommandBuffer, ReturnToPoolDeleter> {
+      return {nullptr, ReturnToPoolDeleter{nullptr}};
+   }
+
    [[nodiscard]] auto empty() const noexcept {
       return pool.empty();
    }

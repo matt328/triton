@@ -17,12 +17,20 @@ namespace tr::gfx::task {
          return fence;
       }
 
-      return vk::raii::Fence(device->getVkDevice(), vk::FenceCreateInfo{});
+      return vk::raii::Fence(device->getVkDevice(),
+                             vk::FenceCreateInfo{.flags = vk::FenceCreateFlagBits::eSignaled});
    }
 
    auto SyncManager::recycleFence(vk::raii::Fence fence) -> void {
       device->getVkDevice().resetFences({*fence});
       fencePool.push(std::move(fence));
+   }
+
+   auto SyncManager::awaitFence(const vk::raii::Fence& fence) const -> void {
+      if (const auto res = device->getVkDevice().waitForFences(*fence, vk::True, UINT64_MAX);
+          res != vk::Result::eSuccess) {
+         throw std::runtime_error("Failed to wait fences");
+      }
    }
 
    auto SyncManager::trackFence(vk::raii::Fence fence, std::vector<CommandBufferPtr> commandBuffers)
@@ -32,7 +40,6 @@ namespace tr::gfx::task {
 
    auto SyncManager::poll() -> void {
       while (!pendingFences.empty()) {
-
          if (auto& pending = pendingFences.front();
              pending.fence.getStatus() == vk::Result::eSuccess) {
             pending.commandBuffers.clear(); // Clearing this should return the command buffer

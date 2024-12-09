@@ -4,6 +4,12 @@
 
 namespace tr::gfx {
 
+   enum class ImageAcquireResult : uint8_t {
+      Success,
+      NeedsResize,
+      Error
+   };
+
    class Swapchain {
     public:
       Swapchain(std::shared_ptr<PhysicalDevice> newPhysicalDevice,
@@ -17,6 +23,9 @@ namespace tr::gfx {
       auto operator=(Swapchain&&) -> Swapchain& = delete;
 
       [[nodiscard]] auto getImageFormat() const -> vk::Format;
+
+      auto acquireNextImage(const vk::Semaphore& semaphore) const
+          -> std::variant<uint32_t, ImageAcquireResult>;
 
     private:
       std::shared_ptr<PhysicalDevice> physicalDevice;

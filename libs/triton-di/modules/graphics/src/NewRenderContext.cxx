@@ -1,8 +1,9 @@
 #include "NewRenderContext.hpp"
 
 namespace tr::gfx {
-   NewRenderContext::NewRenderContext(std::shared_ptr<task::IFrameManager> newFrameManager)
-       : frameManager{std::move(newFrameManager)} {
+   NewRenderContext::NewRenderContext(std::shared_ptr<task::IFrameManager> newFrameManager,
+                                      std::shared_ptr<task::IRenderScheduler> newRenderScheduler)
+       : frameManager{std::move(newFrameManager)}, renderScheduler{std::move(newRenderScheduler)} {
       Log.trace("Creating NewRenderContext");
    }
 
@@ -11,14 +12,17 @@ namespace tr::gfx {
    }
 
    void NewRenderContext::renderNextFrame() {
-      // AcquireFrame will get command buffers from commandbuffermanager and place them in the Frame
       auto& frame = frameManager->acquireFrame();
+
+      renderScheduler->prepareFrame(frame);
 
       // This will .begin() and .end() on the commandBuffers before handing them off to renderTasks
       renderScheduler->recordRenderTasks(frame);
 
+      renderScheduler->endFrame(frame);
+
       // Command Buffers cannot be returned to the pool until its associated fence is signaled.
-      frameManager->submitFrame();
+      frameManager->submitFrame(frame);
    }
 
    void NewRenderContext::waitIdle() {

@@ -1,12 +1,14 @@
 #pragma once
 #include <gfx/IRenderContext.hpp>
+#include <gfx/IRenderScheduler.hpp>
 #include <task/IFrameManager.hpp>
 
 namespace tr::gfx {
 
    class NewRenderContext final : public IRenderContext {
     public:
-      explicit NewRenderContext(std::shared_ptr<task::IFrameManager> newFrameManager);
+      NewRenderContext(std::shared_ptr<task::IFrameManager> newFrameManager,
+                       std::shared_ptr<task::IRenderScheduler> newRenderScheduler);
       ~NewRenderContext() override;
 
       NewRenderContext(const NewRenderContext&) = delete;
@@ -20,6 +22,7 @@ namespace tr::gfx {
 
     private:
       std::shared_ptr<task::IFrameManager> frameManager;
+      std::shared_ptr<task::IRenderScheduler> renderScheduler;
    };
 
 }

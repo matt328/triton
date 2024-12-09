@@ -38,4 +38,8 @@ namespace tr::gfx {
        -> void {
       staticRenderTasks.push_back(task);
    }
+
+   auto DefaultRenderScheduler::recordRenderTasks(Frame& frame) const -> void {
+      executeStaticTasks(frame);
+   }
 }

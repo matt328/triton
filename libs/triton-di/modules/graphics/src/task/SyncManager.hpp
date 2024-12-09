@@ -6,7 +6,8 @@ namespace tr::gfx::task {
 
    class SyncManager {
     public:
-      SyncManager(std::shared_ptr<Device> newDevice, std::shared_ptr<CommandBufferManager> newCommandBufferManager);
+      SyncManager(std::shared_ptr<Device> newDevice,
+                  std::shared_ptr<CommandBufferManager> newCommandBufferManager);
       ~SyncManager();
 
       SyncManager(const SyncManager&) = delete;
@@ -16,6 +17,9 @@ namespace tr::gfx::task {
 
       auto acquireFence() -> vk::raii::Fence;
       auto recycleFence(vk::raii::Fence fence) -> void;
+
+      auto awaitFence(const vk::raii::Fence& fence) const -> void;
+
       auto trackFence(vk::raii::Fence fence, std::vector<CommandBufferPtr> commandBuffers) -> void;
       auto poll() -> void;
 

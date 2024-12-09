@@ -49,6 +49,9 @@ namespace tr::gfx {
                       frameIndex,
                       queueFamily));
    }
+   auto CommandBufferManager::getEmpty() -> CommandBufferPtr {
+      return CommandBufferPool::getEmpty();
+   }
 
    auto CommandBufferManager::getKey(const uint8_t frameIndex,
                                      CommandBufferType cmdType,

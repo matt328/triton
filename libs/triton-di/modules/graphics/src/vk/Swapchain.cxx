@@ -85,6 +85,24 @@ namespace tr::gfx {
       return swapchainImageFormat;
    }
 
+   auto Swapchain::acquireNextImage(const vk::Semaphore& semaphore) const
+       -> std::variant<uint32_t, ImageAcquireResult> {
+      try {
+         ZoneNamedN(acquire, "Acquire Swapchain Image", true);
+         auto [result, imageIndex] = swapchain->acquireNextImage(UINT64_MAX, semaphore, nullptr);
+         if (result == vk::Result::eSuccess) {
+            return imageIndex;
+         }
+         if (result == vk::Result::eSuboptimalKHR || result == vk::Result::eErrorOutOfDateKHR) {
+            return ImageAcquireResult::NeedsResize;
+         }
+         return ImageAcquireResult::Error;
+      } catch (const std::exception& ex) {
+         Log.warn("Swapchain needs resized: {0}", ex.what());
+         return ImageAcquireResult::NeedsResize;
+      }
+   }
+
    auto Swapchain::choosePresentMode(const std::vector<vk::PresentModeKHR>& availablePresentModes)
        -> vk::PresentModeKHR {
       for (const auto& availablePresentMode : availablePresentModes) {
