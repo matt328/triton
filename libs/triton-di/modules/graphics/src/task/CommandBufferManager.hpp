@@ -33,6 +33,7 @@ namespace tr::gfx {
       auto registerType(CommandBufferType cmdType);
 
       auto getCommandBuffer(uint8_t frameIndex, CommandBufferType cmdType) -> CommandBufferPtr;
+      static auto getEmpty() -> CommandBufferPtr;
 
     private:
       std::shared_ptr<Device> device;

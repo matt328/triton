@@ -11,7 +11,9 @@ namespace tr::gfx::task {
    class DefaultFrameManager final : public IFrameManager {
     public:
       explicit DefaultFrameManager(const RenderContextConfig& rendererConfig,
-                                   std::shared_ptr<CommandBufferManager> newCommandBufferManager);
+                                   std::shared_ptr<CommandBufferManager> newCommandBufferManager,
+                                   std::shared_ptr<VkResourceManager> newResourceManager,
+                                   std::shared_ptr<queue::Graphics> newGraphicsQueue);
       ~DefaultFrameManager() override;
 
       DefaultFrameManager(const DefaultFrameManager&) = delete;
@@ -25,6 +27,8 @@ namespace tr::gfx::task {
     private:
       size_t currentFrame;
       std::shared_ptr<CommandBufferManager> commandBufferManager;
+      std::shared_ptr<VkResourceManager> resourceManager;
+      std::shared_ptr<queue::Graphics> graphicsQueue;
 
       std::vector<std::unique_ptr<Frame>> frames;
    };
