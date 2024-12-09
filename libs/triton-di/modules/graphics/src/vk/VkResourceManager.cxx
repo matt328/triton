@@ -59,4 +59,58 @@ namespace tr::gfx {
 
       return std::make_unique<vk::raii::DescriptorPool>(device->createDescriptorPool(poolInfo));
    }
+
+   auto VkResourceManager::createImageAndView(std::string_view imageName, const vk::Extent2D extent)
+       -> void {
+      constexpr auto drawImageFormat = vk::Format::eR16G16B16A16Sfloat;
+
+      const auto imageCreateInfo = vk::ImageCreateInfo{
+          .imageType = vk::ImageType::e2D,
+          .format = drawImageFormat,
+          .extent = vk::Extent3D{extent.width, extent.height, 1},
+          .mipLevels = 1,
+          .arrayLayers = 1,
+          .samples = vk::SampleCountFlagBits::e1,
+          .tiling = vk::ImageTiling::eOptimal,
+          .usage = vk::ImageUsageFlagBits::eTransferSrc | vk::ImageUsageFlagBits::eTransferDst |
+                   vk::ImageUsageFlagBits::eStorage | vk::ImageUsageFlagBits::eColorAttachment,
+          .sharingMode = vk::SharingMode::eExclusive,
+          .initialLayout = vk::ImageLayout::eUndefined};
+
+      constexpr auto imageAllocateCreateInfo =
+          vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eGpuOnly,
+                                    .requiredFlags = vk::MemoryPropertyFlagBits::eDeviceLocal};
+
+      auto [image, allocation] =
+          allocator->getAllocator()->createImage(imageCreateInfo, imageAllocateCreateInfo);
+
+      images.emplace(imageName.data(),
+                     AllocatedImagePtr(new ImageResource{.image = image, .allocation = allocation},
+                                       ImageDeleter{*allocator->getAllocator()}));
+
+      const auto imageViewInfo =
+          vk::ImageViewCreateInfo{.image = getImage(imageName.data()),
+                                  .viewType = vk::ImageViewType::e2D,
+                                  .format = drawImageFormat,
+                                  .subresourceRange = {
+                                      .aspectMask = vk::ImageAspectFlagBits::eColor,
+                                      .levelCount = 1,
+                                      .layerCount = 1,
+                                  }};
+
+      imageViews.emplace(imageName.data(), device->getVkDevice().createImageView(imageViewInfo));
+   }
+
+   auto VkResourceManager::getImage(const std::string& id) const -> const vk::Image& {
+      return images.at(id)->image;
+   }
+
+   auto VkResourceManager::getImageView(const std::string& id) const -> const vk::ImageView& {
+      return *imageViews.at(id);
+   }
+
+   auto VkResourceManager::destroyImage(const std::string& id) -> void {
+      imageViews.erase(id);
+      images.erase(id);
+   }
 }
