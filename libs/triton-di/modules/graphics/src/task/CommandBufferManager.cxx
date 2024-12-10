@@ -23,7 +23,7 @@ namespace tr::gfx {
       Log.trace("Destroying CommandBufferManager");
    }
 
-   auto CommandBufferManager::registerType(const CommandBufferType cmdType) {
+   auto CommandBufferManager::registerType(const CommandBufferType cmdType) -> void {
       if (cmdType == CommandBufferType::StaticTasks) {
          for (uint32_t i = 0; i < framesInFlight; ++i) {
             const auto key = getKey(i, cmdType, graphicsQueue->getFamily());

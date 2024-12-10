@@ -570,3 +570,100 @@ classDiagram
     DebugTools --> CommandBufferManager: observes
 
 ```
+
+1. RenderContext
+
+The RenderContext acts as the core manager for rendering resources, state, and the overall rendering pipeline. It serves
+as a central hub that ties everything together.
+
+Responsibilities:
+
+    Initialization & Configuration: Create Vulkan objects like the device, swapchain, and basic synchronization primitives (semaphores, fences, etc.).
+    Global Resource Management:
+        Manage persistent resources such as shaders, pipelines, and descriptors.
+        Provide access to shared components like the CommandBufferManager, ResourceManager, or SyncManager.
+    Lifecycle Management:
+        Handle initialization and cleanup of the Vulkan instance and resources.
+        Provide entry points for starting and stopping the rendering process.
+    Interface:
+        Expose methods to begin a frame, end a frame, and submit rendering work.
+        Act as a mediator between the FrameManager, RenderScheduler, and other components.
+
+2. FrameManager
+
+The FrameManager is responsible for orchestrating the rendering of individual frames. It ensures synchronization and
+prepares the per-frame resources.
+
+Responsibilities:
+
+    Frame Acquisition:
+        Acquire the next swapchain image from the RenderContext.
+        Manage synchronization primitives (fences and semaphores) for ensuring GPU-CPU synchronization.
+    Frame Resource Allocation:
+        Allocate per-frame resources (e.g., command buffers, transient buffers) and pass them to the Frame.
+        Manage in-flight frames to ensure the correct reuse of resources.
+    Submission Management:
+        Collect and submit command buffers to the Vulkan queue.
+        Chain submissions with semaphores and fences to enforce dependencies.
+
+3. Frame
+
+The Frame represents a snapshot of rendering-specific resources and state for a single frame. It acts as a container for
+all per-frame data.
+
+Responsibilities:
+
+    Per-Frame State:
+        Hold command buffers, synchronization objects, and other resources (e.g., framebuffers, render passes) for the current frame.
+        Store references to transient data used for rendering tasks, such as per-frame uniform buffers.
+    Ownership of Command Buffers:
+        Store command buffers (acquired from a CommandBufferManager) for recording rendering commands.
+        Provide methods or data structures for render tasks to record their commands.
+    Execution Hooks:
+        Offer methods like begin() and end() to encapsulate rendering logic (e.g., starting and ending render passes).
+    Synchronization State:
+        Track synchronization objects (fences and semaphores) associated with the frame.
+
+4. RenderScheduler
+
+The RenderScheduler is responsible for managing the execution of render tasks for a frame. It schedules and organizes
+the pipeline stages and their dependencies.
+
+Responsibilities:
+
+    Render Task Management:
+        Register and configure render tasks during initialization.
+        Manage dependencies between tasks (e.g., ensure the depth pre-pass runs before the main shading pass).
+    Command Recording:
+        Use the Frame to record commands for each render task.
+        Set up pipeline barriers or transitions between tasks to ensure resource availability.
+    Execution Scheduling:
+        Define the order of render task execution within a frame.
+        Handle parallel recording of command buffers if supported.
+    Task-Specific Resources:
+        Prepare and bind render-specific resources (e.g., descriptors, pipelines) required for each task.
+
+Workflow for Rendering a Frame
+
+Here’s how these components interact during the rendering of a complete frame:
+
+    Start of Frame:
+        RenderContext initializes the rendering process for the current frame.
+        FrameManager acquires a Frame and retrieves the next swapchain image, along with synchronization primitives (e.g., image-available semaphore).
+
+    Command Buffer Preparation:
+        The FrameManager resets and allocates command buffers for the frame.
+        The RenderScheduler iterates through registered render tasks and requests the Frame's command buffers to record commands.
+        The RenderScheduler ensures proper barriers are in place and coordinates task execution.
+
+    Task Execution:
+        Each render task records its commands into command buffers using the resources provided by the Frame.
+        Barriers and transitions (managed by the RenderScheduler) ensure resources (e.g., images, buffers) are in the correct state for each task.
+
+    Submission:
+        Once all tasks are recorded, the FrameManager submits the command buffers to the Vulkan queue using the appropriate semaphores and fences.
+        RenderContext handles the final presentation of the swapchain image.
+
+    End of Frame:
+        FrameManager updates in-flight frame tracking and recycles resources (e.g., fences, command buffers).
+        The RenderContext prepares for the next frame.

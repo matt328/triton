@@ -2,6 +2,8 @@
 
 #include "Frame.hpp"
 
+#include <vk/Swapchain.hpp>
+
 namespace tr::gfx::task {
    class IFrameManager {
     public:
@@ -13,7 +15,7 @@ namespace tr::gfx::task {
       auto operator=(const IFrameManager&) -> IFrameManager& = delete;
       auto operator=(IFrameManager&&) -> IFrameManager& = delete;
 
-      virtual auto acquireFrame() -> Frame& = 0;
-      virtual auto submitFrame(Frame& frame) -> void = 0;
+      virtual auto acquireFrame()
+          -> std::variant<std::reference_wrapper<Frame>, ImageAcquireResult> = 0;
    };
 }

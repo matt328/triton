@@ -2,8 +2,11 @@
 
 namespace tr::gfx {
    NewRenderContext::NewRenderContext(std::shared_ptr<task::IFrameManager> newFrameManager,
-                                      std::shared_ptr<task::IRenderScheduler> newRenderScheduler)
-       : frameManager{std::move(newFrameManager)}, renderScheduler{std::move(newRenderScheduler)} {
+                                      std::shared_ptr<task::IRenderScheduler> newRenderScheduler,
+                                      std::shared_ptr<queue::Graphics> newGraphicsQueue)
+       : frameManager{std::move(newFrameManager)},
+         renderScheduler{std::move(newRenderScheduler)},
+         graphicsQueue{std::move(newGraphicsQueue)} {
       Log.trace("Creating NewRenderContext");
    }
 
@@ -12,17 +15,30 @@ namespace tr::gfx {
    }
 
    void NewRenderContext::renderNextFrame() {
-      auto& frame = frameManager->acquireFrame();
+      const auto result = frameManager->acquireFrame();
 
-      renderScheduler->prepareFrame(frame);
+      if (std::holds_alternative<std::reference_wrapper<Frame>>(result)) {
+         const auto& frame = std::get<std::reference_wrapper<Frame>>(result);
+         renderScheduler->setupCommandBuffersForFrame(frame);
+         renderScheduler->recordRenderTasks(frame);
 
-      // This will .begin() and .end() on the commandBuffers before handing them off to renderTasks
-      renderScheduler->recordRenderTasks(frame);
+         // The render context should probably be the thing interacting with the Queues, not the
+         // frame manager
+         const auto buffers = std::array{(**startBuffer), **staticCommandBuffer, **endBuffer};
+         const auto submitInfo = vk::SubmitInfo{
+             .commandBufferCount = buffers.size(),
+             .pCommandBuffers = buffers.data(),
+         };
+         graphicsQueue->getQueue().submit(submitInfo, inFlightFence);
+         return;
+      }
 
-      renderScheduler->endFrame(frame);
-
-      // Command Buffers cannot be returned to the pool until its associated fence is signaled.
-      frameManager->submitFrame(frame);
+      if (const auto acquireResult = std::get<ImageAcquireResult>(result);
+          acquireResult == ImageAcquireResult::NeedsResize) {
+         // resizeSwapchain();
+      } else if (acquireResult == ImageAcquireResult::Error) {
+         Log.warn("Failed to acquire swapchain image");
+      }
    }
 
    void NewRenderContext::waitIdle() {
