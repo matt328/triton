@@ -17,6 +17,8 @@ namespace tr::gfx::task {
 
       virtual auto recordRenderTasks(Frame& frame) const -> void = 0;
 
+      virtual auto endFrame(Frame& frame) const -> void = 0;
+
       virtual auto executeStaticTasks(Frame& frame) const -> void = 0;
       virtual auto addStaticTask(std::shared_ptr<IRenderTask> task) -> void = 0;
    };

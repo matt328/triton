@@ -1,17 +1,6 @@
 #include "DefaultRenderScheduler.hpp"
 #include "CommandBufferManager.hpp"
 
-/*
- * Keep Frame a mostly POD structure with a few utility functions until the per frame logic becomes
- * too much for the RenderScheduler
- * TODO(matt)
- * FrameManager should be what interacts with CommandBufferManager
- * It will need to know what types of command buffers what execute*Tasks require. That's ok, not
- * every component can live in complete isolation from the others. It's more like the render tasks
- * don't know or care about the command buffer they're using, they just know how to record their
- * commands into the given command buffer.
- */
-
 namespace tr::gfx {
    DefaultRenderScheduler::DefaultRenderScheduler(
        std::shared_ptr<task::IFrameManager> newFrameManager,
@@ -27,7 +16,7 @@ namespace tr::gfx {
    }
 
    auto DefaultRenderScheduler::executeStaticTasks(Frame& frame) const -> void {
-      auto& commandBuffer = frame.getStaticCommandBuffer();
+      auto& commandBuffer = frame.getCommandBuffer(CmdBufferType::Static);
       // Start Rendering and all that with command buffer
 
       for (const auto& task : staticRenderTasks) {
@@ -64,6 +53,17 @@ namespace tr::gfx {
    auto DefaultRenderScheduler::setupCommandBuffersForFrame(Frame& frame) -> void {
       auto staticCommandBuffer =
           commandBufferManager->getCommandBuffer(frame.getIndex(), CommandBufferType::StaticTasks);
-      frame.setStaticCommandBuffer(std::move(staticCommandBuffer));
+      frame.clearCommandBuffers();
+      frame.addCommandBuffer(CmdBufferType::Static, std::move(staticCommandBuffer));
+   }
+
+   auto DefaultRenderScheduler::endFrame(Frame& frame) const -> void {
+      // Get all the buffers one at a time because order matters
+      const auto buffers = std::array{*frame.getCommandBuffer(CmdBufferType::Static)};
+      const auto submitInfo = vk::SubmitInfo{
+          .commandBufferCount = static_cast<uint32_t>(buffers.size()),
+          .pCommandBuffers = buffers.data(),
+      };
+      graphicsQueue->getQueue().submit(submitInfo, frame.getInFlightFence());
    }
 }

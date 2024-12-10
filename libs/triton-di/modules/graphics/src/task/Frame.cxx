@@ -1,5 +1,9 @@
 #include "Frame.hpp"
 
+#include <__ranges/elements_view.h>
+#include <__ranges/to.h>
+#include <__ranges/transform_view.h>
+
 namespace tr::gfx {
 
    Frame::Frame(const uint8_t newIndex,
@@ -17,10 +21,6 @@ namespace tr::gfx {
       return index;
    }
 
-   auto Frame::getStaticCommandBuffer() const -> vk::raii::CommandBuffer& {
-      return *staticCommandBuffer;
-   }
-
    auto Frame::getImageAvailableSemaphore() -> vk::raii::Semaphore& {
       return imageAvailableSemaphore;
    }
@@ -32,12 +32,22 @@ namespace tr::gfx {
       return swapchainImageIndex;
    }
 
-   auto Frame::setStaticCommandBuffer(CommandBufferPtr&& buffer) -> void {
-      staticCommandBuffer = std::move(buffer);
-   }
-
    auto Frame::setSwapchainImageIndex(const uint32_t index) -> void {
       swapchainImageIndex = index;
+   }
+
+   auto Frame::addCommandBuffer(CmdBufferType cmdType, CommandBufferPtr&& commandBuffer) -> void {
+      commandBuffers.insert(std::make_pair(cmdType, std::move(commandBuffer)));
+   }
+
+   auto Frame::getCommandBuffer(const CmdBufferType cmdType) const -> vk::raii::CommandBuffer& {
+      return *commandBuffers.at(cmdType);
+   }
+
+   auto Frame::clearCommandBuffers() -> void {
+      // Only call clear command buffers if they are not being used
+      assert(inFlightFence.getStatus() == vk::Result::eSuccess);
+      commandBuffers.clear();
    }
 
    auto Frame::transitionImage(const vk::raii::CommandBuffer& cmd,
