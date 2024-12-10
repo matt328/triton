@@ -21,15 +21,8 @@ namespace tr::gfx {
          const auto& frame = std::get<std::reference_wrapper<Frame>>(result);
          renderScheduler->setupCommandBuffersForFrame(frame);
          renderScheduler->recordRenderTasks(frame);
+         renderScheduler->endFrame(frame);
 
-         // The render context should probably be the thing interacting with the Queues, not the
-         // frame manager
-         const auto buffers = std::array{(**startBuffer), **staticCommandBuffer, **endBuffer};
-         const auto submitInfo = vk::SubmitInfo{
-             .commandBufferCount = buffers.size(),
-             .pCommandBuffers = buffers.data(),
-         };
-         graphicsQueue->getQueue().submit(submitInfo, inFlightFence);
          return;
       }
 

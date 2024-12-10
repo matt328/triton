@@ -23,6 +23,7 @@ namespace tr::gfx {
       auto addStaticTask(std::shared_ptr<task::IRenderTask> task) -> void override;
       auto recordRenderTasks(Frame& frame) const -> void override;
       auto setupCommandBuffersForFrame(Frame& frame) -> void override;
+      auto endFrame(Frame& frame) const -> void override;
 
     private:
       std::shared_ptr<task::IFrameManager> frameManager;
