@@ -1,54 +1,43 @@
 #include "Frame.hpp"
 
-#include "task/SyncManager.hpp"
-#include <gfx/QueueTypes.hpp>
-
 namespace tr::gfx {
 
    Frame::Frame(const uint8_t newIndex,
-                std::shared_ptr<CommandBufferManager> newCommandBufferManager,
-                std::shared_ptr<VkResourceManager> newResourceManager,
-                std::shared_ptr<queue::Graphics> newGraphicsQueue,
-                std::shared_ptr<task::SyncManager> newSyncManager)
+                vk::raii::Fence&& newRenderFence,
+                vk::raii::Semaphore&& newImageAvailableSemaphore,
+                vk::raii::Semaphore&& newRenderFinishedSemaphore)
        : index{newIndex},
-         commandBufferManager{std::move(newCommandBufferManager)},
-         resourceManager{std::move(newResourceManager)},
-         graphicsQueue{std::move(newGraphicsQueue)},
-         syncManager{std::move(newSyncManager)},
-         fence{syncManager->acquireFence()} {
+         inFlightFence{std::move(newRenderFence)},
+         imageAvailableSemaphore{std::move(newImageAvailableSemaphore)},
+         renderFinishedSemaphore{std::move(newRenderFinishedSemaphore)} {
       drawImageName = "Frame" + std::to_string(index);
-      resourceManager->createImageAndView(drawImageName, vk::Extent2D{.width = 1, .height = 1});
-   }
-
-   auto Frame::beginFrame() -> void {
-
-      syncManager->awaitFence(fence);
-
-      // Since the pointers refcounts should go to zero, they should be recycled.
-      staticCommandBuffer =
-          commandBufferManager->getCommandBuffer(index, CommandBufferType::StaticTasks);
-      startBuffer = commandBufferManager->getCommandBuffer(index, CommandBufferType::StaticTasks);
-      endBuffer = commandBufferManager->getCommandBuffer(index, CommandBufferType::StaticTasks);
-
-      startBuffer->begin(vk::CommandBufferBeginInfo{});
-      transitionImage(*startBuffer,
-                      resourceManager->getImage(drawImageName),
-                      vk::ImageLayout::eUndefined,
-                      vk::ImageLayout::eColorAttachmentOptimal);
-      startBuffer->end();
-   }
-
-   auto Frame::endFrame() const -> void {
-      const auto buffers = std::array{(**startBuffer), **staticCommandBuffer, **endBuffer};
-      const auto submitInfo = vk::SubmitInfo{
-          .commandBufferCount = buffers.size(),
-          .pCommandBuffers = buffers.data(),
-      };
-      graphicsQueue->getQueue().submit(submitInfo, fence);
    }
 
    auto Frame::getIndex() const -> uint8_t {
       return index;
+   }
+
+   auto Frame::getStaticCommandBuffer() const -> vk::raii::CommandBuffer& {
+      return *staticCommandBuffer;
+   }
+
+   auto Frame::getImageAvailableSemaphore() -> vk::raii::Semaphore& {
+      return imageAvailableSemaphore;
+   }
+
+   auto Frame::getInFlightFence() -> vk::raii::Fence& {
+      return inFlightFence;
+   }
+   auto Frame::getSwapchainImageIndex() const -> uint32_t {
+      return swapchainImageIndex;
+   }
+
+   auto Frame::setStaticCommandBuffer(CommandBufferPtr&& buffer) -> void {
+      staticCommandBuffer = std::move(buffer);
+   }
+
+   auto Frame::setSwapchainImageIndex(const uint32_t index) -> void {
+      swapchainImageIndex = index;
    }
 
    auto Frame::transitionImage(const vk::raii::CommandBuffer& cmd,

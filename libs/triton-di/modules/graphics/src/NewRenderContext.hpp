@@ -8,7 +8,8 @@ namespace tr::gfx {
    class NewRenderContext final : public IRenderContext {
     public:
       NewRenderContext(std::shared_ptr<task::IFrameManager> newFrameManager,
-                       std::shared_ptr<task::IRenderScheduler> newRenderScheduler);
+                       std::shared_ptr<task::IRenderScheduler> newRenderScheduler,
+                       std::shared_ptr<queue::Graphics> newGraphicsQueue);
       ~NewRenderContext() override;
 
       NewRenderContext(const NewRenderContext&) = delete;
@@ -23,6 +24,7 @@ namespace tr::gfx {
     private:
       std::shared_ptr<task::IFrameManager> frameManager;
       std::shared_ptr<task::IRenderScheduler> renderScheduler;
+      std::shared_ptr<queue::Graphics> graphicsQueue;
    };
 
 }

@@ -1,4 +1,5 @@
 #include "DefaultRenderScheduler.hpp"
+#include "CommandBufferManager.hpp"
 
 /*
  * Keep Frame a mostly POD structure with a few utility functions until the per frame logic becomes
@@ -21,14 +22,16 @@ namespace tr::gfx {
       commandBufferManager->registerType(CommandBufferType::StaticTasks);
    }
 
-   auto DefaultRenderScheduler::executeStaticTasks(Frame& frame) const -> void {
-      const auto commandBuffer =
-          commandBufferManager->getCommandBuffer(frame.getIndex(), CommandBufferType::StaticTasks);
+   DefaultRenderScheduler::~DefaultRenderScheduler() {
+      Log.trace("Destroying DefaultRenderScheduler");
+   }
 
+   auto DefaultRenderScheduler::executeStaticTasks(Frame& frame) const -> void {
+      auto& commandBuffer = frame.getStaticCommandBuffer();
       // Start Rendering and all that with command buffer
 
       for (const auto& task : staticRenderTasks) {
-         task->record(*commandBuffer);
+         task->record(commandBuffer);
       }
 
       // End Rendering and all that with command buffer
@@ -40,6 +43,27 @@ namespace tr::gfx {
    }
 
    auto DefaultRenderScheduler::recordRenderTasks(Frame& frame) const -> void {
+
+      // Record image transitions to start command buffer
+
+      // prepare command buffer(s) used by static tasks.
+
       executeStaticTasks(frame);
+
+      // finish command buffers used by static tasks
+
+      // Prepare command buffers used by other tasks
+
+      // executeOtherTasks(frame);
+
+      // finish command buffers used by other tasks
+
+      // Record image transitions to the end command buffer
+   }
+
+   auto DefaultRenderScheduler::setupCommandBuffersForFrame(Frame& frame) -> void {
+      auto staticCommandBuffer =
+          commandBufferManager->getCommandBuffer(frame.getIndex(), CommandBufferType::StaticTasks);
+      frame.setStaticCommandBuffer(std::move(staticCommandBuffer));
    }
 }
