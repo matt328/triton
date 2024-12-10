@@ -30,7 +30,7 @@ namespace tr::gfx {
       auto operator=(const CommandBufferManager&) -> CommandBufferManager& = delete;
       auto operator=(CommandBufferManager&&) -> CommandBufferManager& = delete;
 
-      auto registerType(CommandBufferType cmdType);
+      auto registerType(CommandBufferType cmdType) -> void;
 
       auto getCommandBuffer(uint8_t frameIndex, CommandBufferType cmdType) -> CommandBufferPtr;
       static auto getEmpty() -> CommandBufferPtr;

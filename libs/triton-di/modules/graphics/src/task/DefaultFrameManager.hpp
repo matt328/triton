@@ -4,6 +4,7 @@
 #include "IFrameManager.hpp"
 
 namespace tr::gfx {
+   class Swapchain;
    struct RenderContextConfig;
 }
 namespace tr::gfx::task {
@@ -12,8 +13,8 @@ namespace tr::gfx::task {
     public:
       explicit DefaultFrameManager(const RenderContextConfig& rendererConfig,
                                    std::shared_ptr<CommandBufferManager> newCommandBufferManager,
-                                   std::shared_ptr<VkResourceManager> newResourceManager,
-                                   std::shared_ptr<queue::Graphics> newGraphicsQueue);
+                                   std::shared_ptr<Device> newDevice,
+                                   std::shared_ptr<Swapchain> newSwapchain);
       ~DefaultFrameManager() override;
 
       DefaultFrameManager(const DefaultFrameManager&) = delete;
@@ -21,14 +22,14 @@ namespace tr::gfx::task {
       auto operator=(const DefaultFrameManager&) -> DefaultFrameManager& = delete;
       auto operator=(DefaultFrameManager&&) -> DefaultFrameManager& = delete;
 
-      auto acquireFrame() -> Frame& override;
-      auto submitFrame(Frame& frame) -> void override;
+      auto acquireFrame()
+          -> std::variant<std::reference_wrapper<Frame>, ImageAcquireResult> override;
 
     private:
       size_t currentFrame;
       std::shared_ptr<CommandBufferManager> commandBufferManager;
-      std::shared_ptr<VkResourceManager> resourceManager;
-      std::shared_ptr<queue::Graphics> graphicsQueue;
+      std::shared_ptr<Device> device;
+      std::shared_ptr<Swapchain> swapchain;
 
       std::vector<std::unique_ptr<Frame>> frames;
    };

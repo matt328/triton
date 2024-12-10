@@ -9,26 +9,29 @@ namespace tr::gfx {
 
    class Frame {
     public:
-      Frame(uint8_t newIndex,
-            std::shared_ptr<CommandBufferManager> newCommandBufferManager,
-            std::shared_ptr<VkResourceManager> newResourceManager,
-            std::shared_ptr<queue::Graphics> newGraphicsQueue,
-            std::shared_ptr<task::SyncManager> newSyncManager);
-
-      auto beginFrame() -> void;
-      auto endFrame() const -> void;
+      explicit Frame(uint8_t newIndex,
+                     vk::raii::Fence&& newRenderFence,
+                     vk::raii::Semaphore&& newImageAvailableSemaphore,
+                     vk::raii::Semaphore&& newRenderFinishedSemaphore);
 
       [[nodiscard]] auto getIndex() const -> uint8_t;
+      [[nodiscard]] auto getStaticCommandBuffer() const -> vk::raii::CommandBuffer&;
+      [[nodiscard]] auto getImageAvailableSemaphore() -> vk::raii::Semaphore&;
+      [[nodiscard]] auto getInFlightFence() -> vk::raii::Fence&;
+      [[nodiscard]] auto getSwapchainImageIndex() const -> uint32_t;
+
+      auto setStaticCommandBuffer(CommandBufferPtr&& buffer) -> void;
+      auto setSwapchainImageIndex(uint32_t index) -> void;
 
     private:
       uint8_t index;
-      std::shared_ptr<CommandBufferManager> commandBufferManager;
-      std::shared_ptr<VkResourceManager> resourceManager;
-      std::shared_ptr<queue::Graphics> graphicsQueue;
-      std::shared_ptr<task::SyncManager> syncManager;
 
       std::string drawImageName;
-      vk::raii::Fence fence;
+      vk::raii::Fence inFlightFence;
+      vk::raii::Semaphore imageAvailableSemaphore;
+      vk::raii::Semaphore renderFinishedSemaphore;
+
+      uint32_t swapchainImageIndex;
 
       CommandBufferPtr staticCommandBuffer = CommandBufferManager::getEmpty();
       CommandBufferPtr startBuffer = CommandBufferManager::getEmpty();

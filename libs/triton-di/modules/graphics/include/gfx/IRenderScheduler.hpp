@@ -13,6 +13,8 @@ namespace tr::gfx::task {
       auto operator=(IRenderScheduler&&) -> IRenderScheduler& = delete;
       auto operator=(const IRenderScheduler&) -> IRenderScheduler& = delete;
 
+      virtual auto setupCommandBuffersForFrame(Frame& frame) -> void = 0;
+
       virtual auto recordRenderTasks(Frame& frame) const -> void = 0;
 
       virtual auto executeStaticTasks(Frame& frame) const -> void = 0;

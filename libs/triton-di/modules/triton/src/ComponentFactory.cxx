@@ -20,6 +20,8 @@
 #include "gfx/RenderContextConfig.hpp"
 
 #include <di.hpp>
+#include <task/DefaultFrameManager.hpp>
+#include <task/DefaultRenderScheduler.hpp>
 
 namespace di = boost::di;
 
@@ -38,6 +40,8 @@ namespace tr {
                             di::bind<tr::IWindow>.to<gfx::Window>(),
                             di::bind<IEventBus>.to<DefaultEventBus>(),
                             di::bind<gfx::IRenderContext>.to<gfx::NewRenderContext>(),
+                            di::bind<gfx::task::IRenderScheduler>.to<gfx::DefaultRenderScheduler>(),
+                            di::bind<gfx::task::IFrameManager>.to<gfx::task::DefaultFrameManager>(),
                             di::bind<gp::IActionSystem>.to<gp::ActionSystem>(),
                             di::bind<glm::ivec2>.to(config.initialWindowSize),
                             di::bind<std::string>.to(config.windowTitle),
