@@ -22,14 +22,11 @@ namespace tr::gfx {
          renderScheduler->setupCommandBuffersForFrame(frame);
          renderScheduler->recordRenderTasks(frame);
          renderScheduler->endFrame(frame);
-
          return;
       }
 
       if (const auto acquireResult = std::get<ImageAcquireResult>(result);
-          acquireResult == ImageAcquireResult::NeedsResize) {
-         // resizeSwapchain();
-      } else if (acquireResult == ImageAcquireResult::Error) {
+          acquireResult == ImageAcquireResult::Error) {
          Log.warn("Failed to acquire swapchain image");
       }
    }
@@ -38,7 +35,7 @@ namespace tr::gfx {
       Log.trace("waitIdle");
    }
 
-   void NewRenderContext::setRenderData(const cm::gpu::RenderData& renderData) {
+   void NewRenderContext::setRenderData([[maybe_unused]] const cm::gpu::RenderData& renderData) {
       Log.trace("setRenderData");
    }
 }

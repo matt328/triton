@@ -1,9 +1,5 @@
 #include "Frame.hpp"
 
-#include <__ranges/elements_view.h>
-#include <__ranges/to.h>
-#include <__ranges/transform_view.h>
-
 namespace tr::gfx {
 
    Frame::Frame(const uint8_t newIndex,
@@ -28,6 +24,7 @@ namespace tr::gfx {
    auto Frame::getInFlightFence() -> vk::raii::Fence& {
       return inFlightFence;
    }
+
    auto Frame::getSwapchainImageIndex() const -> uint32_t {
       return swapchainImageIndex;
    }
