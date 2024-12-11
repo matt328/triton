@@ -3,7 +3,7 @@ project("testarea" VERSION "0.0.1" LANGUAGES CXX)
 
 # Source files for the main target
 set(testarea_SRC
-   src/main.cxx
+  src/main.cxx
 )
 
 # Main executable target
@@ -13,25 +13,24 @@ add_executable(${PROJECT_NAME} ${testarea_SRC})
 target_code_coverage(${PROJECT_NAME} AUTO ALL)
 
 target_link_libraries(${PROJECT_NAME}
-   PRIVATE
-   BoostDI
-   util-lib
-   m
+  PRIVATE
+  BoostDI
+  util-lib
 )
 
 # Main target settings
 target_compile_definitions(${PROJECT_NAME}
-   PRIVATE
+  PRIVATE
 )
 target_precompile_headers(${PROJECT_NAME}
-   PRIVATE
-   <iostream>
-   <chrono>
-   <future>
+  PRIVATE
+  <iostream>
+  <chrono>
+  <future>
 )
 target_include_directories(${PROJECT_NAME}
-   PUBLIC
-   .
+  PUBLIC
+  .
 )
 
 add_subdirectory(test)

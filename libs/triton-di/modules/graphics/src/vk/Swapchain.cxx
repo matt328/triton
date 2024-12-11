@@ -8,6 +8,45 @@ namespace tr::gfx {
        : physicalDevice{std::move(newPhysicalDevice)},
          device{std::move(newDevice)},
          surface{std::move(newSurface)} {
+      createSwapchain();
+   }
+
+   Swapchain::~Swapchain() {
+      Log.trace("Destroying Swapchain");
+   }
+
+   auto Swapchain::getImageFormat() const -> vk::Format {
+      return swapchainImageFormat;
+   }
+
+   auto Swapchain::acquireNextImage(const vk::Semaphore& semaphore) const
+       -> std::variant<uint32_t, ImageAcquireResult> {
+      try {
+         ZoneNamedN(acquire, "Acquire Swapchain Image", true);
+         auto [result, imageIndex] = swapchain->acquireNextImage(UINT64_MAX, semaphore, nullptr);
+         if (result == vk::Result::eSuccess) {
+            return imageIndex;
+         }
+         if (result == vk::Result::eSuboptimalKHR || result == vk::Result::eErrorOutOfDateKHR) {
+            return ImageAcquireResult::NeedsResize;
+         }
+         return ImageAcquireResult::Error;
+      } catch (const std::exception& ex) {
+         Log.warn("Swapchain needs resized: {0}", ex.what());
+         return ImageAcquireResult::NeedsResize;
+      }
+   }
+   auto Swapchain::recreate() -> void {
+      oldSwapchain = std::move(swapchain);
+      createSwapchain();
+   }
+
+   auto Swapchain::createSwapchain() -> void {
+      device->getVkDevice().waitIdle();
+      if (oldSwapchain != nullptr) {
+         swapchainImages.clear();
+         swapchainImageViews.clear();
+      }
 
       auto queueFamilyIndicesInfo = physicalDevice->getQueueFamilyIndices();
 
@@ -74,32 +113,6 @@ namespace tr::gfx {
                                                          .components = components,
                                                          .subresourceRange = subresourceRange};
          swapchainImageViews.emplace_back(device->getVkDevice(), createInfo);
-      }
-   }
-
-   Swapchain::~Swapchain() {
-      Log.trace("Destroying Swapchain");
-   }
-
-   auto Swapchain::getImageFormat() const -> vk::Format {
-      return swapchainImageFormat;
-   }
-
-   auto Swapchain::acquireNextImage(const vk::Semaphore& semaphore) const
-       -> std::variant<uint32_t, ImageAcquireResult> {
-      try {
-         ZoneNamedN(acquire, "Acquire Swapchain Image", true);
-         auto [result, imageIndex] = swapchain->acquireNextImage(UINT64_MAX, semaphore, nullptr);
-         if (result == vk::Result::eSuccess) {
-            return imageIndex;
-         }
-         if (result == vk::Result::eSuboptimalKHR || result == vk::Result::eErrorOutOfDateKHR) {
-            return ImageAcquireResult::NeedsResize;
-         }
-         return ImageAcquireResult::Error;
-      } catch (const std::exception& ex) {
-         Log.warn("Swapchain needs resized: {0}", ex.what());
-         return ImageAcquireResult::NeedsResize;
       }
    }
 

@@ -35,6 +35,8 @@ namespace tr::gfx {
       auto getCommandBuffer(uint8_t frameIndex, CommandBufferType cmdType) -> CommandBufferPtr;
       static auto getEmpty() -> CommandBufferPtr;
 
+      auto swapchainRecreated() -> void;
+
     private:
       std::shared_ptr<Device> device;
       std::shared_ptr<queue::Graphics> graphicsQueue;

@@ -52,6 +52,8 @@ namespace tr::gfx {
    auto CommandBufferManager::getEmpty() -> CommandBufferPtr {
       return CommandBufferPool::getEmpty();
    }
+   auto CommandBufferManager::swapchainRecreated() -> void {
+   }
 
    auto CommandBufferManager::getKey(const uint8_t frameIndex,
                                      CommandBufferType cmdType,

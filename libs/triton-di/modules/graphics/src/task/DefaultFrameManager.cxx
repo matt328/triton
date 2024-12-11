@@ -48,6 +48,14 @@ namespace tr::gfx::task {
          currentFrame = (currentFrame + 1) % frames.size();
          return *frame;
       }
-      return std::get<ImageAcquireResult>(result);
+
+      const auto iar = std::get<ImageAcquireResult>(result);
+
+      if (iar == ImageAcquireResult::NeedsResize) {
+         swapchain->recreate();
+         commandBufferManager->swapchainRecreated();
+      }
+
+      return iar;
    }
 }

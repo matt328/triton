@@ -9,9 +9,9 @@ namespace tr::gfx {
 
    class DefaultRenderScheduler final : public task::IRenderScheduler {
     public:
-      explicit DefaultRenderScheduler(
-          std::shared_ptr<task::IFrameManager> newFrameManager,
-          std::shared_ptr<CommandBufferManager> newCommandBufferManager);
+      explicit DefaultRenderScheduler(std::shared_ptr<task::IFrameManager> newFrameManager,
+                                      std::shared_ptr<CommandBufferManager> newCommandBufferManager,
+                                      std::shared_ptr<queue::Graphics> newGraphicsQueue);
       ~DefaultRenderScheduler() override;
 
       DefaultRenderScheduler(const DefaultRenderScheduler&) = delete;
@@ -28,6 +28,7 @@ namespace tr::gfx {
     private:
       std::shared_ptr<task::IFrameManager> frameManager;
       std::shared_ptr<CommandBufferManager> commandBufferManager;
+      std::shared_ptr<queue::Graphics> graphicsQueue;
 
       std::vector<std::shared_ptr<task::IRenderTask>> staticRenderTasks;
    };
