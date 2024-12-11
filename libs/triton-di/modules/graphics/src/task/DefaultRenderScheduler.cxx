@@ -1,12 +1,16 @@
 #include "DefaultRenderScheduler.hpp"
 #include "CommandBufferManager.hpp"
 
+#include <gfx/QueueTypes.hpp>
+
 namespace tr::gfx {
    DefaultRenderScheduler::DefaultRenderScheduler(
        std::shared_ptr<task::IFrameManager> newFrameManager,
-       std::shared_ptr<CommandBufferManager> newCommandBufferManager)
+       std::shared_ptr<CommandBufferManager> newCommandBufferManager,
+       std::shared_ptr<queue::Graphics> newGraphicsQueue)
        : frameManager{std::move(newFrameManager)},
-         commandBufferManager{std::move(newCommandBufferManager)} {
+         commandBufferManager{std::move(newCommandBufferManager)},
+         graphicsQueue{std::move(newGraphicsQueue)} {
 
       commandBufferManager->registerType(CommandBufferType::StaticTasks);
    }

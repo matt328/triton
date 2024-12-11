@@ -24,8 +24,10 @@ namespace tr::gfx {
 
       [[nodiscard]] auto getImageFormat() const -> vk::Format;
 
-      auto acquireNextImage(const vk::Semaphore& semaphore) const
+      [[nodiscard]] auto acquireNextImage(const vk::Semaphore& semaphore) const
           -> std::variant<uint32_t, ImageAcquireResult>;
+
+      auto recreate() -> void;
 
     private:
       std::shared_ptr<PhysicalDevice> physicalDevice;
@@ -40,6 +42,8 @@ namespace tr::gfx {
 
       vk::Format swapchainImageFormat;
       vk::Extent2D swapchainExtent;
+
+      auto createSwapchain() -> void;
 
       [[nodiscard]] static auto choosePresentMode(
           const std::vector<vk::PresentModeKHR>& availablePresentModes) -> vk::PresentModeKHR;
