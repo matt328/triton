@@ -7,10 +7,12 @@ namespace tr::gfx {
    DefaultRenderScheduler::DefaultRenderScheduler(
        std::shared_ptr<task::IFrameManager> newFrameManager,
        std::shared_ptr<CommandBufferManager> newCommandBufferManager,
-       std::shared_ptr<queue::Graphics> newGraphicsQueue)
+       std::shared_ptr<queue::Graphics> newGraphicsQueue,
+       std::shared_ptr<VkResourceManager> newResourceManager)
        : frameManager{std::move(newFrameManager)},
          commandBufferManager{std::move(newCommandBufferManager)},
-         graphicsQueue{std::move(newGraphicsQueue)} {
+         graphicsQueue{std::move(newGraphicsQueue)},
+         resourceManager{std::move(newResourceManager)} {
 
       commandBufferManager->registerType(CommandBufferType::StaticTasks);
    }
@@ -37,7 +39,16 @@ namespace tr::gfx {
 
    auto DefaultRenderScheduler::recordRenderTasks(Frame& frame) const -> void {
 
-      // Record image transitions to start command buffer
+      const auto& startCmd = frame.getCommandBuffer(CmdBufferType::Start);
+      startCmd.begin(
+          vk::CommandBufferBeginInfo{.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse});
+
+      transitionImage(startCmd,
+                      resourceManager->getImage(frame.getDrawImageId()),
+                      vk::ImageLayout::eUndefined,
+                      vk::ImageLayout::eColorAttachmentOptimal);
+
+      startCmd.end();
 
       // prepare command buffer(s) used by static tasks.
 
@@ -51,7 +62,33 @@ namespace tr::gfx {
 
       // finish command buffers used by other tasks
 
-      // Record image transitions to the end command buffer
+      const auto& endCmd = frame.getCommandBuffer(CmdBufferType::End);
+
+      endCmd.begin(
+          vk::CommandBufferBeginInfo{.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse});
+
+      transitionImage(endCmd,
+                      resourceManager->getImage(frame.getDrawImageId()),
+                      vk::ImageLayout::eColorAttachmentOptimal,
+                      vk::ImageLayout::eTransferSrcOptimal);
+
+      transitionImage(endCmd,
+                      swapchain->getSwapchainImage(frame.getSwapchainImageIndex()),
+                      vk::ImageLayout::eUndefined,
+                      vk::ImageLayout::eTransferDstOptimal);
+
+      copyImageToImage(endCmd,
+                       resourceManager->getImage(frame.getDrawImageId()),
+                       swapchain->getSwapchainImage(frame.getSwapchainImageIndex()),
+                       drawImageExtent,
+                       swapchain->getImageExtent());
+
+      transitionImage(endCmd,
+                      swapchain->getSwapchainImage(frame.getSwapchainImageIndex()),
+                      vk::ImageLayout::eTransferDstOptimal,
+                      vk::ImageLayout::eColorAttachmentOptimal);
+
+      endCmd.end();
    }
 
    auto DefaultRenderScheduler::setupCommandBuffersForFrame(Frame& frame) -> void {
@@ -69,5 +106,27 @@ namespace tr::gfx {
           .pCommandBuffers = buffers.data(),
       };
       graphicsQueue->getQueue().submit(submitInfo, frame.getInFlightFence());
+   }
+
+   auto DefaultRenderScheduler::transitionImage(const vk::raii::CommandBuffer& cmd,
+                                                const vk::Image& image,
+                                                vk::ImageLayout currentLayout,
+                                                vk::ImageLayout newLayout) -> void {
+      const auto barrier = vk::ImageMemoryBarrier{
+          .srcAccessMask = vk::AccessFlagBits::eMemoryWrite,
+          .dstAccessMask = vk::AccessFlagBits::eMemoryWrite | vk::AccessFlagBits::eMemoryRead,
+          .oldLayout = currentLayout,
+          .newLayout = newLayout,
+          .image = image,
+          .subresourceRange = {.aspectMask = vk::ImageAspectFlagBits::eColor,
+                               .levelCount = 1,
+                               .layerCount = 1}};
+
+      cmd.pipelineBarrier(vk::PipelineStageFlagBits::eAllCommands,
+                          vk::PipelineStageFlagBits::eAllCommands,
+                          vk::DependencyFlagBits{}, // None
+                          {},
+                          {},
+                          barrier);
    }
 }

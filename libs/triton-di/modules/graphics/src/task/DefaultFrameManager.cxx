@@ -9,21 +9,28 @@ namespace tr::gfx::task {
        const RenderContextConfig& rendererConfig,
        std::shared_ptr<CommandBufferManager> newCommandBufferManager,
        std::shared_ptr<Device> newDevice,
-       std::shared_ptr<Swapchain> newSwapchain)
+       std::shared_ptr<Swapchain> newSwapchain,
+       std::shared_ptr<VkResourceManager> newResourceManager)
        : currentFrame{0},
          commandBufferManager{std::move(newCommandBufferManager)},
          device{std::move(newDevice)},
-         swapchain{std::move(newSwapchain)} {
+         swapchain{std::move(newSwapchain)},
+         resourceManager{std::move(newResourceManager)} {
 
       for (uint8_t i = 0; i < rendererConfig.framesInFlight; ++i) {
+
          auto fence = device->getVkDevice().createFence(
              vk::FenceCreateInfo{.flags = vk::FenceCreateFlagBits::eSignaled});
+
          auto acquireImageSemaphore = device->getVkDevice().createSemaphore({});
          auto renderFinishedSemaphore = device->getVkDevice().createSemaphore({});
+
          frames.push_back(std::make_unique<Frame>(static_cast<uint8_t>(frames.size()),
                                                   std::move(fence),
                                                   std::move(acquireImageSemaphore),
                                                   std::move(renderFinishedSemaphore)));
+         resourceManager->createDrawImageAndView(frames[frames.size() - 1]->getDrawImageId(),
+                                                 swapchain->getImageExtent());
       }
    }
 
@@ -55,6 +62,8 @@ namespace tr::gfx::task {
          swapchain->recreate();
          commandBufferManager->swapchainRecreated();
       }
+
+      device->getVkDevice().resetFences(*frame->getInFlightFence());
 
       return iar;
    }

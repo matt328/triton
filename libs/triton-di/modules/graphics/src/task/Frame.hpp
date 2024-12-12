@@ -24,12 +24,12 @@ namespace tr::gfx {
       [[nodiscard]] auto getImageAvailableSemaphore() -> vk::raii::Semaphore&;
       [[nodiscard]] auto getInFlightFence() -> vk::raii::Fence&;
       [[nodiscard]] auto getSwapchainImageIndex() const -> uint32_t;
+      [[nodiscard]] auto getDrawImageId() const -> std::string;
 
       auto setSwapchainImageIndex(uint32_t index) -> void;
 
       auto addCommandBuffer(CmdBufferType cmdType, CommandBufferPtr&& commandBuffer) -> void;
-      [[nodiscard]] auto getCommandBuffer(CmdBufferType cmdType) const
-          -> vk::raii::CommandBuffer&;
+      [[nodiscard]] auto getCommandBuffer(CmdBufferType cmdType) const -> vk::raii::CommandBuffer&;
       auto clearCommandBuffers() -> void;
 
     private:

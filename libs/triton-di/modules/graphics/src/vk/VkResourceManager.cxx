@@ -60,7 +60,7 @@ namespace tr::gfx {
       return std::make_unique<vk::raii::DescriptorPool>(device->createDescriptorPool(poolInfo));
    }
 
-   auto VkResourceManager::createImageAndView(std::string_view imageName, const vk::Extent2D extent)
+   auto VkResourceManager::createDrawImageAndView(std::string_view imageName, const vk::Extent2D extent)
        -> void {
       constexpr auto drawImageFormat = vk::Format::eR16G16B16A16Sfloat;
 

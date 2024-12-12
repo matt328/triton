@@ -19,6 +19,14 @@ namespace tr::gfx {
       return swapchainImageFormat;
    }
 
+   auto Swapchain::getImageExtent() const -> vk::Extent2D {
+      return swapchainExtent;
+   }
+
+   auto Swapchain::getSwapchainImage(const uint32_t imageIndex) const -> vk::Image {
+      return swapchainImages[imageIndex];
+   }
+
    auto Swapchain::acquireNextImage(const vk::Semaphore& semaphore) const
        -> std::variant<uint32_t, ImageAcquireResult> {
       try {
