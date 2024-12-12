@@ -11,7 +11,8 @@ namespace tr::gfx {
     public:
       explicit DefaultRenderScheduler(std::shared_ptr<task::IFrameManager> newFrameManager,
                                       std::shared_ptr<CommandBufferManager> newCommandBufferManager,
-                                      std::shared_ptr<queue::Graphics> newGraphicsQueue);
+                                      std::shared_ptr<queue::Graphics> newGraphicsQueue,
+                                      std::shared_ptr<VkResourceManager> newResourceManager);
       ~DefaultRenderScheduler() override;
 
       DefaultRenderScheduler(const DefaultRenderScheduler&) = delete;
@@ -29,8 +30,14 @@ namespace tr::gfx {
       std::shared_ptr<task::IFrameManager> frameManager;
       std::shared_ptr<CommandBufferManager> commandBufferManager;
       std::shared_ptr<queue::Graphics> graphicsQueue;
+      std::shared_ptr<VkResourceManager> resourceManager;
 
       std::vector<std::shared_ptr<task::IRenderTask>> staticRenderTasks;
+
+      static auto transitionImage(const vk::raii::CommandBuffer& cmd,
+                                  const vk::Image& image,
+                                  vk::ImageLayout currentLayout,
+                                  vk::ImageLayout newLayout) -> void;
    };
 
 }

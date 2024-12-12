@@ -10,7 +10,7 @@ namespace tr::gfx {
          inFlightFence{std::move(newRenderFence)},
          imageAvailableSemaphore{std::move(newImageAvailableSemaphore)},
          renderFinishedSemaphore{std::move(newRenderFinishedSemaphore)} {
-      drawImageName = "Frame" + std::to_string(index);
+      drawImageName = "DrawImage Frame" + std::to_string(index);
    }
 
    auto Frame::getIndex() const -> uint8_t {
@@ -27,6 +27,10 @@ namespace tr::gfx {
 
    auto Frame::getSwapchainImageIndex() const -> uint32_t {
       return swapchainImageIndex;
+   }
+
+   auto Frame::getDrawImageId() const -> std::string {
+      return drawImageName;
    }
 
    auto Frame::setSwapchainImageIndex(const uint32_t index) -> void {
