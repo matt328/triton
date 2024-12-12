@@ -22,6 +22,7 @@ namespace tr::gfx {
 
       [[nodiscard]] auto getIndex() const -> uint8_t;
       [[nodiscard]] auto getImageAvailableSemaphore() -> vk::raii::Semaphore&;
+      [[nodiscard]] auto getRenderFinishedSemaphore() -> vk::raii::Semaphore&;
       [[nodiscard]] auto getInFlightFence() -> vk::raii::Fence&;
       [[nodiscard]] auto getSwapchainImageIndex() const -> uint32_t;
       [[nodiscard]] auto getDrawImageId() const -> std::string;

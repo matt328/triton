@@ -2,17 +2,19 @@
 
 namespace tr::gfx {
 
+   class Device;
+
    struct ObjectHandle {
       enum class Type {
          Semaphore,
          Pipeline
       } type;
       union {
-         vk::raii::Semaphore& semaphore;
+         vk::Semaphore semaphore;
          VkPipeline pipeline;
       };
 
-      ObjectHandle(vk::raii::Semaphore& s) : type(Type::Semaphore), semaphore{s} {
+      ObjectHandle(vk::Semaphore s) : type(Type::Semaphore), semaphore{s} {
       }
       ObjectHandle(const VkPipeline p) : type(Type::Pipeline), pipeline(p) {
       }
@@ -27,6 +29,8 @@ namespace tr::gfx {
       IDebugManager(IDebugManager&&) = delete;
       auto operator=(const IDebugManager&) -> IDebugManager& = delete;
       auto operator=(IDebugManager&&) -> IDebugManager& = delete;
+
+      virtual auto setDevice(std::shared_ptr<Device> newDevice) -> void = 0;
 
       /// @brief Ensures required validation layers are available
       /// @throws std::runtime_error if a requested layer is not available.
