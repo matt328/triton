@@ -53,19 +53,8 @@ namespace tr::gfx {
    }
 
    auto DefaultDebugManager::initializeInstance(vk::raii::Instance& instance) -> void {
-      const vk::DebugReportCallbackCreateInfoEXT ci = {
-          .pNext = nullptr,
-          .flags = vk::DebugReportFlagBitsEXT::eWarning |
-                   vk::DebugReportFlagBitsEXT::ePerformanceWarning |
-                   vk::DebugReportFlagBitsEXT::eError | vk::DebugReportFlagBitsEXT::eDebug,
-          .pfnCallback = &vulkanDebugReportCallback,
-          .pUserData = nullptr};
-
       debugCallback = std::make_unique<vk::raii::DebugUtilsMessengerEXT>(
           instance.createDebugUtilsMessengerEXT(debugCreateInfo));
-
-      reportCallback = std::make_unique<vk::raii::DebugReportCallbackEXT>(
-          instance.createDebugReportCallbackEXT(ci));
    }
    auto DefaultDebugManager::addDeviceConfig(vk::DeviceCreateInfo& deviceCreateInfo) -> void {
       deviceCreateInfo.enabledLayerCount = static_cast<uint32_t>(ValidationLayers.size());
@@ -73,7 +62,28 @@ namespace tr::gfx {
    }
    auto DefaultDebugManager::destroyDebugCallbacks() -> void {
       debugCallback = nullptr;
-      reportCallback = nullptr;
+   }
+   auto DefaultDebugManager::setObjectName(const ObjectHandle& handle, std::string_view name)
+       -> void {
+      if (!device.has_value()) {
+         Log.warn("Attempted to set object name before Device was initialized");
+         return;
+      }
+      const auto fn =
+          (PFN_vkDebugMarkerSetObjectNameEXT)vkGetDeviceProcAddr(*device->getVkDevice(),
+                                                                 "vkDebugMarkerSetObjectNameEXT");
+      if (fn != nullptr) {
+         switch (handle.type) {
+            case ObjectHandle::Type::Semaphore:
+               auto l = reinterpret_cast<uint64_t>(static_cast<VkSemaphore>(*handle.semaphore));
+               const auto debugNameInfo = vk::DebugMarkerObjectNameInfoEXT{
+                   .objectType = vk::raii::Semaphore::debugReportObjectType,
+                   .object = l,
+                   .pObjectName = name.data()};
+               device->getVkDevice().debugMarkerSetObjectNameEXT(debugNameInfo);
+            default:;
+         }
+      }
    }
 
    auto DefaultDebugManager::debugCallbackFn(
@@ -84,17 +94,4 @@ namespace tr::gfx {
       Log.trace("Validation Layer: {0}", pCallbackData->pMessage);
       return VK_FALSE;
    }
-   auto DefaultDebugManager::vulkanDebugReportCallback(
-       [[maybe_unused]] VkDebugReportFlagsEXT flags,
-       [[maybe_unused]] VkDebugReportObjectTypeEXT objectType,
-       [[maybe_unused]] uint64_t object,
-       [[maybe_unused]] size_t location,
-       [[maybe_unused]] int32_t messageCode,
-       const char* pLayerPrefix,
-       const char* pMessage,
-       [[maybe_unused]] void* userData) -> VkBool32 {
-      Log.debug("Debug Callback ({0}): {1}", pLayerPrefix, pMessage);
-      return VK_TRUE;
-   }
-
 }

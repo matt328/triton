@@ -2,6 +2,9 @@
 
 #include "IDebugManager.hpp"
 
+#include <vk/Context.hpp>
+#include <vk/Device.hpp>
+
 namespace tr::gfx {
 
    class Context;
@@ -26,12 +29,14 @@ namespace tr::gfx {
       auto addDeviceConfig(vk::DeviceCreateInfo& deviceCreateInfo) -> void override;
       auto destroyDebugCallbacks() -> void override;
 
+      auto setObjectName(const ObjectHandle& handle, std::string_view name) -> void override;
+
     private:
       std::shared_ptr<Context> context;
 
-      std::unique_ptr<vk::raii::DebugUtilsMessengerEXT> debugCallback;
-      std::unique_ptr<vk::raii::DebugReportCallbackEXT> reportCallback;
+      std::optional<Device> device;
 
+      std::unique_ptr<vk::raii::DebugUtilsMessengerEXT> debugCallback;
       vk::DebugUtilsMessengerCreateInfoEXT debugCreateInfo;
 
       static auto debugCallbackFn(
@@ -39,14 +44,6 @@ namespace tr::gfx {
           [[maybe_unused]] VkDebugUtilsMessageTypeFlagsEXT messageType,
           [[maybe_unused]] const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
           [[maybe_unused]] void* pUserData) -> VkBool32;
-      static auto vulkanDebugReportCallback([[maybe_unused]] VkDebugReportFlagsEXT flags,
-                                            [[maybe_unused]] VkDebugReportObjectTypeEXT objectType,
-                                            [[maybe_unused]] uint64_t object,
-                                            [[maybe_unused]] size_t location,
-                                            [[maybe_unused]] int32_t messageCode,
-                                            [[maybe_unused]] const char* pLayerPrefix,
-                                            [[maybe_unused]] const char* pMessage,
-                                            [[maybe_unused]] void* userData) -> VkBool32;
    };
 
 }

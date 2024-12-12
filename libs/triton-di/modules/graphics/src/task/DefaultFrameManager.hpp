@@ -34,6 +34,7 @@ namespace tr::gfx::task {
       std::shared_ptr<VkResourceManager> resourceManager;
 
       std::vector<std::unique_ptr<Frame>> frames;
+      static auto scaleNumber(uint32_t number, float percent) -> uint32_t;
    };
 
 }

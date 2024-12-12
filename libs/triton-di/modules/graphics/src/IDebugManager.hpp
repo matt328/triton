@@ -1,6 +1,23 @@
 #pragma once
 
 namespace tr::gfx {
+
+   struct ObjectHandle {
+      enum class Type {
+         Semaphore,
+         Pipeline
+      } type;
+      union {
+         vk::raii::Semaphore& semaphore;
+         VkPipeline pipeline;
+      };
+
+      ObjectHandle(vk::raii::Semaphore& s) : type(Type::Semaphore), semaphore{s} {
+      }
+      ObjectHandle(const VkPipeline p) : type(Type::Pipeline), pipeline(p) {
+      }
+   };
+
    class IDebugManager {
     public:
       IDebugManager() = default;
@@ -27,5 +44,7 @@ namespace tr::gfx {
       virtual auto addDeviceConfig(vk::DeviceCreateInfo& deviceCreateInfo) -> void = 0;
 
       virtual auto destroyDebugCallbacks() -> void = 0;
+
+      virtual auto setObjectName(const ObjectHandle& handle, std::string_view name) -> void = 0;
    };
 }

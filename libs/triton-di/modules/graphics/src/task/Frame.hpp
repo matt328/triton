@@ -27,6 +27,7 @@ namespace tr::gfx {
       [[nodiscard]] auto getDrawImageId() const -> std::string;
 
       auto setSwapchainImageIndex(uint32_t index) -> void;
+      auto setDrawImageExtent(vk::Extent2D extent) -> void;
 
       auto addCommandBuffer(CmdBufferType cmdType, CommandBufferPtr&& commandBuffer) -> void;
       [[nodiscard]] auto getCommandBuffer(CmdBufferType cmdType) const -> vk::raii::CommandBuffer&;
@@ -41,6 +42,7 @@ namespace tr::gfx {
       vk::raii::Semaphore renderFinishedSemaphore;
 
       uint32_t swapchainImageIndex{};
+      vk::Extent2D drawImageExtent{};
 
       CommandBufferPtr staticCommandBuffer = CommandBufferManager::getEmpty();
       CommandBufferPtr startBuffer = CommandBufferManager::getEmpty();
