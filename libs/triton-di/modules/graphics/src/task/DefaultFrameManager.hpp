@@ -14,7 +14,8 @@ namespace tr::gfx::task {
       explicit DefaultFrameManager(const RenderContextConfig& rendererConfig,
                                    std::shared_ptr<CommandBufferManager> newCommandBufferManager,
                                    std::shared_ptr<Device> newDevice,
-                                   std::shared_ptr<Swapchain> newSwapchain);
+                                   std::shared_ptr<Swapchain> newSwapchain,
+                                   std::shared_ptr<VkResourceManager> newResourceManager);
       ~DefaultFrameManager() override;
 
       DefaultFrameManager(const DefaultFrameManager&) = delete;
@@ -30,6 +31,7 @@ namespace tr::gfx::task {
       std::shared_ptr<CommandBufferManager> commandBufferManager;
       std::shared_ptr<Device> device;
       std::shared_ptr<Swapchain> swapchain;
+      std::shared_ptr<VkResourceManager> resourceManager;
 
       std::vector<std::unique_ptr<Frame>> frames;
    };

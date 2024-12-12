@@ -23,6 +23,9 @@ namespace tr::gfx {
       auto operator=(Swapchain&&) -> Swapchain& = delete;
 
       [[nodiscard]] auto getImageFormat() const -> vk::Format;
+      [[nodiscard]] auto getImageExtent() const -> vk::Extent2D;
+
+      [[nodiscard]] auto getSwapchainImage(uint32_t imageIndex) const -> vk::Image;
 
       [[nodiscard]] auto acquireNextImage(const vk::Semaphore& semaphore) const
           -> std::variant<uint32_t, ImageAcquireResult>;
