@@ -42,15 +42,20 @@ namespace tr::gfx {
       auto createDrawImageAndView(std::string_view imageName, vk::Extent2D extent) -> void;
       [[nodiscard]] auto getImage(const std::string& id) const -> const vk::Image&;
       [[nodiscard]] auto getImageView(const std::string& id) const -> const vk::ImageView&;
+      [[nodiscard]] auto getImageExtent(const std::string& id) const -> const vk::Extent2D;
 
       auto destroyImage(const std::string& id) -> void;
 
     private:
+      struct ImageInfo {
+         AllocatedImagePtr image;
+         vk::raii::ImageView imageView;
+         vk::Extent2D extent;
+      };
       std::shared_ptr<Device> device;
 
       std::shared_ptr<mem::Allocator> allocator;
 
-      std::unordered_map<std::string, AllocatedImagePtr> images;
-      std::unordered_map<std::string, vk::raii::ImageView> imageViews;
+      std::unordered_map<std::string, ImageInfo> imageInfoMap;
    };
 }

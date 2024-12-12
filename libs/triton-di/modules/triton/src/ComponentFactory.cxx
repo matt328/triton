@@ -37,7 +37,7 @@ namespace tr {
                             di::bind<gfx::RenderContextConfig>.to(rendererConfig),
                             di::bind<IGuiSystem>.to<cm::ImGuiSystem>(),
                             di::bind<IGuiAdapter>.to<cm::ImGuiAdapter>(),
-                            di::bind<tr::IWindow>.to<gfx::Window>(),
+                            di::bind<IWindow>.to<gfx::Window>(),
                             di::bind<IEventBus>.to<DefaultEventBus>(),
                             di::bind<gfx::IRenderContext>.to<gfx::NewRenderContext>(),
                             di::bind<gfx::task::IRenderScheduler>.to<gfx::DefaultRenderScheduler>(),

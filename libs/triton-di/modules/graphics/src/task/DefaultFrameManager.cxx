@@ -10,7 +10,8 @@ namespace tr::gfx::task {
        std::shared_ptr<CommandBufferManager> newCommandBufferManager,
        std::shared_ptr<Device> newDevice,
        std::shared_ptr<Swapchain> newSwapchain,
-       std::shared_ptr<VkResourceManager> newResourceManager)
+       std::shared_ptr<VkResourceManager> newResourceManager,
+       const std::shared_ptr<IDebugManager>& debugManager)
        : currentFrame{0},
          commandBufferManager{std::move(newCommandBufferManager)},
          device{std::move(newDevice)},
@@ -23,14 +24,20 @@ namespace tr::gfx::task {
              vk::FenceCreateInfo{.flags = vk::FenceCreateFlagBits::eSignaled});
 
          auto acquireImageSemaphore = device->getVkDevice().createSemaphore({});
+         debugManager->setObjectName(device, acquireImageSemaphore);
+
          auto renderFinishedSemaphore = device->getVkDevice().createSemaphore({});
 
          frames.push_back(std::make_unique<Frame>(static_cast<uint8_t>(frames.size()),
                                                   std::move(fence),
                                                   std::move(acquireImageSemaphore),
                                                   std::move(renderFinishedSemaphore)));
+
+         const auto drawImageExtent = vk::Extent2D{
+             .width = scaleNumber(swapchain->getImageExtent().width, rendererConfig.renderScale),
+             .height = scaleNumber(swapchain->getImageExtent().height, rendererConfig.renderScale)};
          resourceManager->createDrawImageAndView(frames[frames.size() - 1]->getDrawImageId(),
-                                                 swapchain->getImageExtent());
+                                                 drawImageExtent);
       }
    }
 
@@ -53,6 +60,7 @@ namespace tr::gfx::task {
       if (std::holds_alternative<uint32_t>(result)) {
          frame->setSwapchainImageIndex(std::get<uint32_t>(result));
          currentFrame = (currentFrame + 1) % frames.size();
+         device->getVkDevice().resetFences(*frame->getInFlightFence());
          return *frame;
       }
 
@@ -63,8 +71,13 @@ namespace tr::gfx::task {
          commandBufferManager->swapchainRecreated();
       }
 
-      device->getVkDevice().resetFences(*frame->getInFlightFence());
-
       return iar;
+   }
+
+   auto DefaultFrameManager::scaleNumber(const uint32_t number, const float percent) -> uint32_t {
+      const auto scaledNumber = static_cast<float>(number) * percent;
+      float whole = 0.f;
+      std::modf(scaledNumber, &whole);
+      return static_cast<uint32_t>(whole);
    }
 }
