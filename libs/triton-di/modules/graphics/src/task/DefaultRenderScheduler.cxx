@@ -111,15 +111,37 @@ namespace tr::gfx {
       const auto buffers = std::array{*frame.getCommandBuffer(CmdBufferType::Start),
                                       //*frame.getCommandBuffer(CmdBufferType::Static),
                                       *frame.getCommandBuffer(CmdBufferType::End)};
+
+      constexpr auto waitStages =
+          std::array<vk::PipelineStageFlags, 1>{vk::PipelineStageFlagBits::eColorAttachmentOutput};
       const auto submitInfo = vk::SubmitInfo{
+          .waitSemaphoreCount = 1,
+          .pWaitSemaphores = &*frame.getImageAvailableSemaphore(),
+          .pWaitDstStageMask = waitStages.data(),
           .commandBufferCount = static_cast<uint32_t>(buffers.size()),
           .pCommandBuffers = buffers.data(),
+          .signalSemaphoreCount = 1,
+          .pSignalSemaphores = &*frame.getRenderFinishedSemaphore(),
       };
       try {
          graphicsQueue->getQueue().submit(submitInfo, *frame.getInFlightFence());
       } catch (const std::exception& ex) {
          Log.error("Failed to submit command buffer submission {}", ex.what());
       }
+
+      try {
+         const auto swapchainImageIndex = frame.getSwapchainImageIndex();
+         const auto chain = swapchain->getSwapchain();
+         if (const auto result2 = graphicsQueue->getQueue().presentKHR(
+                 vk::PresentInfoKHR{.waitSemaphoreCount = 1,
+                                    .pWaitSemaphores = &*frame.getRenderFinishedSemaphore(),
+                                    .swapchainCount = 1,
+                                    .pSwapchains = &chain,
+                                    .pImageIndices = &swapchainImageIndex});
+             result2 == vk::Result::eSuboptimalKHR) {
+            Log.trace("Swapchain Needs Resized");
+         }
+      } catch (const std::exception& ex) { Log.trace("Swapchain needs recreated: {0}", ex.what()); }
    }
 
    auto DefaultRenderScheduler::transitionImage(const vk::raii::CommandBuffer& cmd,

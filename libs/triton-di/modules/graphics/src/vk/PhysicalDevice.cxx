@@ -21,6 +21,9 @@ namespace tr::gfx {
             break;
          }
       }
+      if (physicalDevice == nullptr) {
+         Log.error("Failed to select a suitable physical device");
+      }
    }
 
    PhysicalDevice::~PhysicalDevice() {
@@ -212,6 +215,7 @@ namespace tr::gfx {
                                                desiredDeviceExtensions.end());
 
       for (const auto& extension : availableExtensions) {
+         Log.debug("Extension {}", extension.extensionName.data());
          requiredExtensions.erase(extension.extensionName);
       }
 

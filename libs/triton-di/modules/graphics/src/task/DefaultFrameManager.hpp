@@ -15,7 +15,8 @@ namespace tr::gfx::task {
                                    std::shared_ptr<CommandBufferManager> newCommandBufferManager,
                                    std::shared_ptr<Device> newDevice,
                                    std::shared_ptr<Swapchain> newSwapchain,
-                                   std::shared_ptr<VkResourceManager> newResourceManager);
+                                   std::shared_ptr<VkResourceManager> newResourceManager,
+                                   const std::shared_ptr<IDebugManager>& debugManager);
       ~DefaultFrameManager() override;
 
       DefaultFrameManager(const DefaultFrameManager&) = delete;

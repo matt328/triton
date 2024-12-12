@@ -21,6 +21,10 @@ namespace tr::gfx {
       return imageAvailableSemaphore;
    }
 
+   auto Frame::getRenderFinishedSemaphore() -> vk::raii::Semaphore& {
+      return renderFinishedSemaphore;
+   }
+
    auto Frame::getInFlightFence() -> vk::raii::Fence& {
       return inFlightFence;
    }

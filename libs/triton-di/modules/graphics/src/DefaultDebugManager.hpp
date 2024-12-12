@@ -29,12 +29,14 @@ namespace tr::gfx {
       auto addDeviceConfig(vk::DeviceCreateInfo& deviceCreateInfo) -> void override;
       auto destroyDebugCallbacks() -> void override;
 
+      auto setDevice(std::shared_ptr<Device> newDevice) -> void override;
+
       auto setObjectName(const ObjectHandle& handle, std::string_view name) -> void override;
 
     private:
       std::shared_ptr<Context> context;
 
-      std::optional<Device> device;
+      std::optional<std::shared_ptr<Device>> device;
 
       std::unique_ptr<vk::raii::DebugUtilsMessengerEXT> debugCallback;
       vk::DebugUtilsMessengerCreateInfoEXT debugCreateInfo;
