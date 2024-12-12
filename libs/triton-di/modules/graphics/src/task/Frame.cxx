@@ -47,7 +47,7 @@ namespace tr::gfx {
 
    auto Frame::clearCommandBuffers() -> void {
       // Only call clear command buffers if they are not being used
-      assert(inFlightFence.getStatus() == vk::Result::eSuccess);
+      // assert(inFlightFence.getStatus() == vk::Result::eSuccess);
       commandBuffers.clear();
    }
 

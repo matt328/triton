@@ -60,8 +60,8 @@ namespace tr::gfx {
       return std::make_unique<vk::raii::DescriptorPool>(device->createDescriptorPool(poolInfo));
    }
 
-   auto VkResourceManager::createDrawImageAndView(std::string_view imageName, const vk::Extent2D extent)
-       -> void {
+   auto VkResourceManager::createDrawImageAndView(std::string_view imageName,
+                                                  const vk::Extent2D extent) -> void {
       constexpr auto drawImageFormat = vk::Format::eR16G16B16A16Sfloat;
 
       const auto imageCreateInfo = vk::ImageCreateInfo{
@@ -84,12 +84,8 @@ namespace tr::gfx {
       auto [image, allocation] =
           allocator->getAllocator()->createImage(imageCreateInfo, imageAllocateCreateInfo);
 
-      images.emplace(imageName.data(),
-                     AllocatedImagePtr(new ImageResource{.image = image, .allocation = allocation},
-                                       ImageDeleter{*allocator->getAllocator()}));
-
       const auto imageViewInfo =
-          vk::ImageViewCreateInfo{.image = getImage(imageName.data()),
+          vk::ImageViewCreateInfo{.image = image,
                                   .viewType = vk::ImageViewType::e2D,
                                   .format = drawImageFormat,
                                   .subresourceRange = {
@@ -98,19 +94,28 @@ namespace tr::gfx {
                                       .layerCount = 1,
                                   }};
 
-      imageViews.emplace(imageName.data(), device->getVkDevice().createImageView(imageViewInfo));
+      imageInfoMap.emplace(
+          imageName.data(),
+          ImageInfo{.image = AllocatedImagePtr(
+                        new ImageResource{.image = image, .allocation = allocation},
+                        ImageDeleter{*allocator->getAllocator()}),
+                    .imageView = device->getVkDevice().createImageView(imageViewInfo),
+                    .extent = extent});
    }
 
    auto VkResourceManager::getImage(const std::string& id) const -> const vk::Image& {
-      return images.at(id)->image;
+      return imageInfoMap.at(id).image->image;
    }
 
    auto VkResourceManager::getImageView(const std::string& id) const -> const vk::ImageView& {
-      return *imageViews.at(id);
+      return *imageInfoMap.at(id).imageView;
+   }
+
+   auto VkResourceManager::getImageExtent(const std::string& id) const -> const vk::Extent2D {
+      return imageInfoMap.at(id).extent;
    }
 
    auto VkResourceManager::destroyImage(const std::string& id) -> void {
-      imageViews.erase(id);
-      images.erase(id);
+      imageInfoMap.erase(id);
    }
 }
