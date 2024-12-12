@@ -1,6 +1,7 @@
 #include "DefaultDebugManager.hpp"
 
 #include "vk/Context.hpp"
+#include "vk/Device.hpp"
 
 namespace tr::gfx {
 
@@ -30,7 +31,7 @@ namespace tr::gfx {
    }
 
    auto DefaultDebugManager::getAdditionalInstanceExtensions() -> std::vector<char const*> {
-      return {VK_EXT_DEBUG_UTILS_EXTENSION_NAME, VK_EXT_DEBUG_REPORT_EXTENSION_NAME};
+      return {VK_EXT_DEBUG_UTILS_EXTENSION_NAME};
    }
 
    auto DefaultDebugManager::getDebugMessengerCreateInfo() -> vk::DebugUtilsMessengerCreateInfoEXT {
@@ -63,26 +64,25 @@ namespace tr::gfx {
    auto DefaultDebugManager::destroyDebugCallbacks() -> void {
       debugCallback = nullptr;
    }
+   auto DefaultDebugManager::setDevice(std::shared_ptr<Device> newDevice) -> void {
+      device.emplace(std::move(newDevice));
+   }
+
    auto DefaultDebugManager::setObjectName(const ObjectHandle& handle, std::string_view name)
        -> void {
       if (!device.has_value()) {
          Log.warn("Attempted to set object name before Device was initialized");
          return;
       }
-      const auto fn =
-          (PFN_vkDebugMarkerSetObjectNameEXT)vkGetDeviceProcAddr(*device->getVkDevice(),
-                                                                 "vkDebugMarkerSetObjectNameEXT");
-      if (fn != nullptr) {
-         switch (handle.type) {
-            case ObjectHandle::Type::Semaphore:
-               auto l = reinterpret_cast<uint64_t>(static_cast<VkSemaphore>(*handle.semaphore));
-               const auto debugNameInfo = vk::DebugMarkerObjectNameInfoEXT{
-                   .objectType = vk::raii::Semaphore::debugReportObjectType,
-                   .object = l,
-                   .pObjectName = name.data()};
-               device->getVkDevice().debugMarkerSetObjectNameEXT(debugNameInfo);
-            default:;
-         }
+
+      switch (handle.type) {
+         case ObjectHandle::Type::Semaphore:
+            const auto l = reinterpret_cast<uint64_t>(static_cast<VkSemaphore>(handle.semaphore));
+            const auto debugNameInfo =
+                vk::DebugUtilsObjectNameInfoEXT{.objectType = vk::ObjectType::eSemaphore,
+                                                .objectHandle = l,
+                                                .pObjectName = name.data()};
+            device->get()->getVkDevice().setDebugUtilsObjectNameEXT(debugNameInfo);
       }
    }
 
@@ -91,7 +91,10 @@ namespace tr::gfx {
        [[maybe_unused]] VkDebugUtilsMessageTypeFlagsEXT messageType,
        const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
        [[maybe_unused]] void* pUserData) -> VkBool32 {
+
       Log.trace("Validation Layer: {0}", pCallbackData->pMessage);
       return VK_FALSE;
    }
 }
+
+// Send rick a chg thing.

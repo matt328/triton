@@ -18,13 +18,16 @@ namespace tr::gfx::task {
          swapchain{std::move(newSwapchain)},
          resourceManager{std::move(newResourceManager)} {
 
+      debugManager->setDevice(device);
+
       for (uint8_t i = 0; i < rendererConfig.framesInFlight; ++i) {
 
          auto fence = device->getVkDevice().createFence(
              vk::FenceCreateInfo{.flags = vk::FenceCreateFlagBits::eSignaled});
 
          auto acquireImageSemaphore = device->getVkDevice().createSemaphore({});
-         debugManager->setObjectName(device, acquireImageSemaphore);
+         debugManager->setObjectName(*acquireImageSemaphore,
+                                     "AcquireImageSemaphoreFrame:" + std::to_string(i));
 
          auto renderFinishedSemaphore = device->getVkDevice().createSemaphore({});
 

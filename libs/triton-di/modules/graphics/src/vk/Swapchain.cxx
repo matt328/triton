@@ -22,6 +22,9 @@ namespace tr::gfx {
    auto Swapchain::getImageExtent() const -> vk::Extent2D {
       return swapchainExtent;
    }
+   auto Swapchain::getSwapchain() const -> vk::SwapchainKHR {
+      return *swapchain;
+   }
 
    auto Swapchain::getSwapchainImage(const uint32_t imageIndex) const -> vk::Image {
       return swapchainImages[imageIndex];
