@@ -102,6 +102,45 @@ namespace tr::gfx {
                     .imageView = device->getVkDevice().createImageView(imageViewInfo),
                     .extent = extent});
    }
+   auto VkResourceManager::createDepthImageAndView(std::string_view imageName,
+                                                   vk::Extent2D extent,
+                                                   vk::Format format) -> void {
+      const auto imageCreateInfo = vk::ImageCreateInfo{
+          .imageType = vk::ImageType::e2D,
+          .format = format,
+          .extent = vk::Extent3D{.width = extent.width, .height = extent.height, .depth = 1},
+          .mipLevels = 1,
+          .arrayLayers = 1,
+          .samples = vk::SampleCountFlagBits::e1,
+          .tiling = vk::ImageTiling::eOptimal,
+          .usage = vk::ImageUsageFlagBits::eDepthStencilAttachment,
+          .sharingMode = vk::SharingMode::eExclusive,
+          .initialLayout = vk::ImageLayout::eUndefined};
+
+      constexpr auto imageAllocateCreateInfo =
+          vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eGpuOnly};
+
+      auto [image, allocation] =
+          allocator->getAllocator()->createImage(imageCreateInfo, imageAllocateCreateInfo);
+
+      const auto imageViewInfo =
+          vk::ImageViewCreateInfo{.image = image,
+                                  .viewType = vk::ImageViewType::e2D,
+                                  .format = format,
+                                  .subresourceRange = {
+                                      .aspectMask = vk::ImageAspectFlagBits::eDepth,
+                                      .levelCount = 1,
+                                      .layerCount = 1,
+                                  }};
+
+      imageInfoMap.emplace(
+          imageName.data(),
+          ImageInfo{.image = AllocatedImagePtr(
+                        new ImageResource{.image = image, .allocation = allocation},
+                        ImageDeleter{*allocator->getAllocator()}),
+                    .imageView = device->getVkDevice().createImageView(imageViewInfo),
+                    .extent = extent});
+   }
 
    auto VkResourceManager::getImage(const std::string& id) const -> const vk::Image& {
       return imageInfoMap.at(id).image->image;

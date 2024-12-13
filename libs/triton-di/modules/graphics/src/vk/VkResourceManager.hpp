@@ -40,6 +40,9 @@ namespace tr::gfx {
           -> std::unique_ptr<vk::raii::DescriptorPool>;
 
       auto createDrawImageAndView(std::string_view imageName, vk::Extent2D extent) -> void;
+      auto createDepthImageAndView(std::string_view imageName,
+                                   vk::Extent2D extent,
+                                   vk::Format format) -> void;
       [[nodiscard]] auto getImage(const std::string& id) const -> const vk::Image&;
       [[nodiscard]] auto getImageView(const std::string& id) const -> const vk::ImageView&;
       [[nodiscard]] auto getImageExtent(const std::string& id) const -> const vk::Extent2D;

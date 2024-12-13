@@ -1,6 +1,7 @@
 #include "DefaultFrameManager.hpp"
 #include <gfx/RenderContextConfig.hpp>
 #include "Frame.hpp"
+#include "Maths.hpp"
 
 #include <vk/Swapchain.hpp>
 
@@ -36,9 +37,11 @@ namespace tr::gfx::task {
                                                   std::move(acquireImageSemaphore),
                                                   std::move(renderFinishedSemaphore)));
 
-         const auto drawImageExtent = vk::Extent2D{
-             .width = scaleNumber(swapchain->getImageExtent().width, rendererConfig.renderScale),
-             .height = scaleNumber(swapchain->getImageExtent().height, rendererConfig.renderScale)};
+         const auto drawImageExtent =
+             vk::Extent2D{.width = maths::scaleNumber(swapchain->getImageExtent().width,
+                                                      rendererConfig.renderScale),
+                          .height = maths::scaleNumber(swapchain->getImageExtent().height,
+                                                       rendererConfig.renderScale)};
          resourceManager->createDrawImageAndView(frames[frames.size() - 1]->getDrawImageId(),
                                                  drawImageExtent);
       }
@@ -46,6 +49,7 @@ namespace tr::gfx::task {
 
    DefaultFrameManager::~DefaultFrameManager() {
       Log.trace("Destroying DefaultFrameManager");
+      device->waitIdle();
       frames.clear();
    }
 
@@ -75,12 +79,5 @@ namespace tr::gfx::task {
       }
 
       return iar;
-   }
-
-   auto DefaultFrameManager::scaleNumber(const uint32_t number, const float percent) -> uint32_t {
-      const auto scaledNumber = static_cast<float>(number) * percent;
-      float whole = 0.f;
-      std::modf(scaledNumber, &whole);
-      return static_cast<uint32_t>(whole);
    }
 }

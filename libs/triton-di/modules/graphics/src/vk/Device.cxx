@@ -2,7 +2,8 @@
 
 namespace tr::gfx {
 
-   Device::Device(const std::shared_ptr<PhysicalDevice>& physicalDevice) {
+   Device::Device(std::shared_ptr<PhysicalDevice> newPhysicalDevice)
+       : physicalDevice{std::move(newPhysicalDevice)} {
       device = physicalDevice->createDevice();
       queueFamilyIndices = physicalDevice->getQueueFamilyIndices();
    }
@@ -59,6 +60,9 @@ namespace tr::gfx {
    auto Device::createSwapchain(const vk::SwapchainCreateInfoKHR& info) const
        -> std::unique_ptr<vk::raii::SwapchainKHR> {
       return std::make_unique<vk::raii::SwapchainKHR>(device->createSwapchainKHR(info));
+   }
+   auto Device::waitIdle() const -> void {
+      device->waitIdle();
    }
 
 }
