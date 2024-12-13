@@ -2,7 +2,13 @@
 #include "CommandBufferManager.hpp"
 #include "Maths.hpp"
 
-#include <gfx/QueueTypes.hpp>
+#include "gfx/QueueTypes.hpp"
+
+/*
+   Each frame really only needs one primary command buffer to bind as many descriptor sets as it
+   can and then defer to secondary command buffers that inherit from the primary. Each render task
+   can get a secondary command buffer that inherits from the main one.
+*/
 
 namespace tr::gfx {
    DefaultRenderScheduler::DefaultRenderScheduler(
