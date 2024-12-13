@@ -26,6 +26,7 @@ namespace tr::gfx {
       [[nodiscard]] auto getImageExtent() const -> vk::Extent2D;
       [[nodiscard]] auto getSwapchain() const -> vk::SwapchainKHR;
       [[nodiscard]] auto getSwapchainImage(uint32_t imageIndex) const -> vk::Image;
+      [[nodiscard]] auto getDepthFormat() const -> vk::Format;
 
       [[nodiscard]] auto acquireNextImage(const vk::Semaphore& semaphore) const
           -> std::variant<uint32_t, ImageAcquireResult>;

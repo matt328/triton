@@ -7,13 +7,16 @@
 
 namespace tr::gfx {
 
+   constexpr auto DepthImageName = "DepthImage";
+
    class DefaultRenderScheduler final : public task::IRenderScheduler {
     public:
       explicit DefaultRenderScheduler(std::shared_ptr<task::IFrameManager> newFrameManager,
                                       std::shared_ptr<CommandBufferManager> newCommandBufferManager,
                                       std::shared_ptr<queue::Graphics> newGraphicsQueue,
                                       std::shared_ptr<VkResourceManager> newResourceManager,
-                                      std::shared_ptr<Swapchain> newSwapchain);
+                                      std::shared_ptr<Swapchain> newSwapchain,
+                                      const RenderContextConfig& rendererConfig);
       ~DefaultRenderScheduler() override;
 
       DefaultRenderScheduler(const DefaultRenderScheduler&) = delete;
