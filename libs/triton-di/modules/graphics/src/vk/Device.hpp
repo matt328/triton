@@ -5,7 +5,7 @@ namespace tr::gfx {
 
    class Device {
     public:
-      explicit Device(const std::shared_ptr<PhysicalDevice>& physicalDevice);
+      explicit Device(std::shared_ptr<PhysicalDevice> newPhysicalDevice);
       ~Device();
 
       auto operator=(const Device&) -> Device& = delete;
@@ -31,8 +31,11 @@ namespace tr::gfx {
       [[nodiscard]] auto createSwapchain(const vk::SwapchainCreateInfoKHR& info) const
           -> std::unique_ptr<vk::raii::SwapchainKHR>;
 
+      auto waitIdle() const -> void;
+
     private:
       std::unique_ptr<vk::raii::Device> device;
+      std::shared_ptr<PhysicalDevice> physicalDevice;
       QueueFamilyIndices queueFamilyIndices;
    };
 

@@ -29,6 +29,18 @@ namespace tr::gfx {
    auto Swapchain::getSwapchainImage(const uint32_t imageIndex) const -> vk::Image {
       return swapchainImages[imageIndex];
    }
+   auto Swapchain::getDepthFormat() const -> vk::Format {
+      constexpr auto candidates = std::array<vk::Format, 3>{
+          {vk::Format::eD32Sfloat, vk::Format::eD32SfloatS8Uint, vk::Format::eD24UnormS8Uint}};
+      for (const auto format : candidates) {
+         if (auto props = physicalDevice->getVkPhysicalDevice().getFormatProperties(format);
+             (props.linearTilingFeatures | props.optimalTilingFeatures) &
+             vk::FormatFeatureFlagBits::eDepthStencilAttachment) {
+            return format;
+         }
+      }
+      throw std::runtime_error("Failed to find supported format");
+   }
 
    auto Swapchain::acquireNextImage(const vk::Semaphore& semaphore) const
        -> std::variant<uint32_t, ImageAcquireResult> {

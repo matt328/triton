@@ -1,5 +1,6 @@
 #include "DefaultRenderScheduler.hpp"
 #include "CommandBufferManager.hpp"
+#include "Maths.hpp"
 
 #include <gfx/QueueTypes.hpp>
 
@@ -9,7 +10,8 @@ namespace tr::gfx {
        std::shared_ptr<CommandBufferManager> newCommandBufferManager,
        std::shared_ptr<queue::Graphics> newGraphicsQueue,
        std::shared_ptr<VkResourceManager> newResourceManager,
-       std::shared_ptr<Swapchain> newSwapchain)
+       std::shared_ptr<Swapchain> newSwapchain,
+       const RenderContextConfig& rendererConfig)
        : frameManager{std::move(newFrameManager)},
          commandBufferManager{std::move(newCommandBufferManager)},
          graphicsQueue{std::move(newGraphicsQueue)},
@@ -17,6 +19,16 @@ namespace tr::gfx {
          swapchain{std::move(newSwapchain)} {
 
       commandBufferManager->registerType(CommandBufferType::StaticTasks);
+
+      const auto drawImageExtent = vk::Extent2D{
+          .width =
+              maths::scaleNumber(swapchain->getImageExtent().width, rendererConfig.renderScale),
+          .height =
+              maths::scaleNumber(swapchain->getImageExtent().height, rendererConfig.renderScale)};
+
+      resourceManager->createDepthImageAndView(DepthImageName,
+                                               drawImageExtent,
+                                               swapchain->getDepthFormat());
    }
 
    DefaultRenderScheduler::~DefaultRenderScheduler() {
@@ -25,13 +37,44 @@ namespace tr::gfx {
 
    auto DefaultRenderScheduler::executeStaticTasks(Frame& frame) const -> void {
       auto& commandBuffer = frame.getCommandBuffer(CmdBufferType::Static);
-      // Start Rendering and all that with command buffer
+
+      const auto colorAttachmentInfo = vk::RenderingAttachmentInfo{
+          .imageView = resourceManager->getImageView(frame.getDrawImageId()),
+          .imageLayout = vk::ImageLayout::eColorAttachmentOptimal,
+          .loadOp = vk::AttachmentLoadOp::eClear,
+          .storeOp = vk::AttachmentStoreOp::eStore,
+          .clearValue = vk::ClearValue{.color = vk::ClearColorValue{std::array<float, 4>(
+                                           {{0.39f, 0.58f, 0.93f, 1.f}})}},
+      };
+
+      const auto depthAttachmentInfo = vk::RenderingAttachmentInfo{
+          .imageView = resourceManager->getImageView(DepthImageName),
+          .imageLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal,
+          .loadOp = vk::AttachmentLoadOp::eClear,
+          .storeOp = vk::AttachmentStoreOp::eStore,
+          .clearValue = vk::ClearValue{.depthStencil =
+                                           vk::ClearDepthStencilValue{.depth = 1.f, .stencil = 0}},
+      };
+
+      const auto renderingInfo = vk::RenderingInfo{
+          .renderArea =
+              vk::Rect2D{.offset = {.x = 0, .y = 0},
+                         .extent = resourceManager->getImageExtent(frame.getDrawImageId())},
+          .layerCount = 1,
+          .colorAttachmentCount = 1,
+          .pColorAttachments = &colorAttachmentInfo,
+          .pDepthAttachment = &depthAttachmentInfo};
+
+      commandBuffer.begin(vk::CommandBufferBeginInfo{});
+
+      commandBuffer.beginRendering(renderingInfo);
 
       for (const auto& task : staticRenderTasks) {
          task->record(commandBuffer);
       }
 
-      // End Rendering and all that with command buffer
+      commandBuffer.endRendering();
+      commandBuffer.end();
    }
 
    auto DefaultRenderScheduler::addStaticTask(const std::shared_ptr<task::IRenderTask> task)
@@ -52,11 +95,7 @@ namespace tr::gfx {
 
       startCmd.end();
 
-      // prepare command buffer(s) used by static tasks.
-
       executeStaticTasks(frame);
-
-      // finish command buffers used by static tasks
 
       // Prepare command buffers used by other tasks
 
@@ -88,7 +127,7 @@ namespace tr::gfx {
       transitionImage(endCmd,
                       swapchain->getSwapchainImage(frame.getSwapchainImageIndex()),
                       vk::ImageLayout::eTransferDstOptimal,
-                      vk::ImageLayout::eColorAttachmentOptimal);
+                      vk::ImageLayout::ePresentSrcKHR);
 
       endCmd.end();
    }
