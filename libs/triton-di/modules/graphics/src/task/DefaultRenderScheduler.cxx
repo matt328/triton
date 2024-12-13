@@ -148,7 +148,7 @@ namespace tr::gfx {
    auto DefaultRenderScheduler::endFrame(Frame& frame) const -> void {
       // Get all the buffers one at a time because order matters
       const auto buffers = std::array{*frame.getCommandBuffer(CmdBufferType::Start),
-                                      //*frame.getCommandBuffer(CmdBufferType::Static),
+                                      *frame.getCommandBuffer(CmdBufferType::Static),
                                       *frame.getCommandBuffer(CmdBufferType::End)};
 
       constexpr auto waitStages =
