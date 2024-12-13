@@ -215,7 +215,6 @@ namespace tr::gfx {
                                                desiredDeviceExtensions.end());
 
       for (const auto& extension : availableExtensions) {
-         Log.debug("Extension {}", extension.extensionName.data());
          requiredExtensions.erase(extension.extensionName);
       }
 
