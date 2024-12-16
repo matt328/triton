@@ -2,7 +2,6 @@
 #include "cm/IndirectPushConstants.hpp"
 #include "cm/ObjectData.hpp"
 #include "vk/VkResourceManager.hpp"
-#include <vulkan/vulkan_structs.hpp>
 
 namespace tr::gfx::task {
 
