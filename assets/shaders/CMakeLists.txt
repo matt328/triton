@@ -7,6 +7,8 @@ set(Shaders
    debug.frag
    skinned.vert
    skinned.frag
+   indirect.vert
+   indirect.frag
 )
 
 get_property(GENERATOR_IS_MULTI_CONFIG GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)

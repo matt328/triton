@@ -6,17 +6,17 @@ namespace tr::gfx::geo {
    std::vector<vk::VertexInputAttributeDescription> VertexBuilder::vertexInputAttributeDescriptions;
    vk::PipelineVertexInputStateCreateInfo VertexBuilder::pipelineVertexInputStateCreateInfo;
 
-   vk::VertexInputBindingDescription VertexBuilder::inputBindingDescription(
-       const uint32_t binding) {
+   auto VertexBuilder::inputBindingDescription(const uint32_t binding)
+       -> vk::VertexInputBindingDescription {
       return {.binding = binding,
               .stride = sizeof(as::Vertex),
               .inputRate = vk::VertexInputRate::eVertex};
    }
 
-   vk::VertexInputAttributeDescription VertexBuilder::inputAttributeDescription(
-       const uint32_t binding,
-       const uint32_t location,
-       const VertexComponent component) {
+   auto VertexBuilder::inputAttributeDescription(const uint32_t binding,
+                                                 const uint32_t location,
+                                                 const VertexComponent component)
+       -> vk::VertexInputAttributeDescription {
       switch (component) {
          case VertexComponent::Position:
             return {.location = location,
@@ -35,12 +35,12 @@ namespace tr::gfx::geo {
          case VertexComponent::Color:
             return {.location = location,
                     .binding = binding,
-                    .format = vk::Format::eR32G32B32Sfloat,
+                    .format = vk::Format::eR32G32B32A32Sfloat,
                     .offset = offsetof(as::Vertex, color)};
          case VertexComponent::Tangent:
             return {.location = location,
                     .binding = binding,
-                    .format = vk::Format::eR32G32B32Sfloat,
+                    .format = vk::Format::eR32G32B32A32Sfloat,
                     .offset = offsetof(as::Vertex, tangent)};
          case VertexComponent::Joint0:
             return {.location = location,

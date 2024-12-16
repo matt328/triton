@@ -5,8 +5,8 @@
 
 namespace tr::gfx::pipe {
 
-   SpirvShaderCompiler::SpirvShaderCompiler(std::shared_ptr<IGraphicsDevice> newGraphicsDevice)
-       : graphicsDevice{std::move(newGraphicsDevice)} {
+   SpirvShaderCompiler::SpirvShaderCompiler(std::shared_ptr<Device> newDevice)
+       : device{std::move(newDevice)} {
       Log.trace("Constructed SpirvShaderCompiler");
       glslang::InitializeProcess();
    }
@@ -24,7 +24,7 @@ namespace tr::gfx::pipe {
           vk::ShaderModuleCreateInfo{.codeSize = 4 * vertexSpirv.size(),
                                      .pCode = vertexSpirv.data()};
 
-      return graphicsDevice->getVulkanDevice()->createShaderModule(vertexShaderCreateInfo);
+      return device->getVkDevice().createShaderModule(vertexShaderCreateInfo);
    }
 
    auto SpirvShaderCompiler::readShaderFile(const std::filesystem::path& filename) -> std::string {

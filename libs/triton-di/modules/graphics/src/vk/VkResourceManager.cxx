@@ -1,12 +1,17 @@
 #include "VkResourceManager.hpp"
 
 #include <mem/Allocator.hpp>
+#include <vulkan/vulkan_enums.hpp>
+#include "ResourceExceptions.hpp"
 
 namespace tr::gfx {
-   VkResourceManager::VkResourceManager(std::shared_ptr<Device> newDevice,
-                                        const std::shared_ptr<PhysicalDevice>& physicalDevice,
-                                        const std::shared_ptr<Instance>& instance)
-       : device{std::move(newDevice)} {
+   VkResourceManager::VkResourceManager(
+       std::shared_ptr<Device> newDevice,
+       std::shared_ptr<ImmediateTransferContext> newImmediateTransferContext,
+       const std::shared_ptr<PhysicalDevice>& physicalDevice,
+       const std::shared_ptr<Instance>& instance)
+       : device{std::move(newDevice)},
+         immediateTransferContext{std::move(newImmediateTransferContext)} {
 
       constexpr auto vulkanFunctions = vma::VulkanFunctions{
           .vkGetInstanceProcAddr = vkGetInstanceProcAddr,
@@ -23,9 +28,82 @@ namespace tr::gfx {
 
       allocator = std::make_unique<mem::Allocator>(allocatorCreateInfo, device->getVkDevice());
    }
+
    VkResourceManager::~VkResourceManager() {
       Log.trace("Destroying VkResourceManager");
    }
+
+   auto VkResourceManager::asyncUpload(const geo::GeometryData& geometryData) -> cm::MeshHandle {
+      // Prepare Vertex Buffer
+      const auto vbSize = geometryData.vertexDataSize();
+      const auto ibSize = geometryData.indexDataSize();
+
+      try {
+         const auto vbStagingBuffer =
+             allocator->createStagingBuffer(vbSize, "Vertex Staging Buffer");
+         void* vbData = allocator->mapMemory(*vbStagingBuffer);
+         memcpy(vbData, geometryData.vertices.data(), static_cast<size_t>(vbSize));
+         allocator->unmapMemory(*vbStagingBuffer);
+
+         // Prepare Index Buffer
+         const auto ibStagingBuffer =
+             allocator->createStagingBuffer(ibSize, "Index Staging Buffer");
+
+         auto* const data = allocator->mapMemory(*ibStagingBuffer);
+         memcpy(data, geometryData.indices.data(), ibSize);
+         allocator->unmapMemory(*ibStagingBuffer);
+
+         auto vertexBuffer = allocator->createGpuVertexBuffer(vbSize, "GPU Vertex");
+         auto indexBuffer = allocator->createGpuIndexBuffer(ibSize, "GPU Index");
+         const auto indicesCount = geometryData.indices.size();
+
+         // Upload Buffers
+         immediateTransferContext->submit([&](const vk::raii::CommandBuffer& cmd) {
+            const auto vbCopy = vk::BufferCopy{.srcOffset = 0, .dstOffset = 0, .size = vbSize};
+            cmd.copyBuffer(vbStagingBuffer->getBuffer(), vertexBuffer->getBuffer(), vbCopy);
+            const auto copy = vk::BufferCopy{.srcOffset = 0, .dstOffset = 0, .size = ibSize};
+            cmd.copyBuffer(ibStagingBuffer->getBuffer(), indexBuffer->getBuffer(), copy);
+         });
+
+         const auto meshHandle = meshList.size();
+         meshList.emplace_back(std::move(vertexBuffer), std::move(indexBuffer), indicesCount);
+
+         return meshHandle;
+
+      } catch (const mem::AllocationException& ex) {
+         throw ResourceUploadException(
+             fmt::format("Error allocating resources for geometry, {0}", ex.what()));
+      }
+   }
+
+   auto VkResourceManager::createBuffer(size_t size,
+                                        vk::Flags<vk::BufferUsageFlagBits> flags,
+                                        std::string_view name) -> std::unique_ptr<mem::Buffer> {
+      const auto bufferCreateInfo = vk::BufferCreateInfo{.size = size, .usage = flags};
+
+      constexpr auto allocationCreateInfo =
+          vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eCpuToGpu,
+                                    .requiredFlags = vk::MemoryPropertyFlagBits::eHostCoherent};
+
+      return allocator->createBuffer(&bufferCreateInfo, &allocationCreateInfo, name);
+   }
+
+   auto VkResourceManager::createIndirectBuffer(size_t size) -> std::unique_ptr<mem::Buffer> {
+      const auto bufferCreateInfo =
+          vk::BufferCreateInfo{.size = size, .usage = vk::BufferUsageFlagBits::eIndirectBuffer};
+
+      constexpr auto allocationCreateInfo =
+          vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eGpuOnly,
+                                    .requiredFlags = vk::MemoryPropertyFlagBits::eDeviceLocal};
+
+      return allocator->createBuffer(&bufferCreateInfo, &allocationCreateInfo, "IndirectBuffer");
+   }
+
+   [[nodiscard]] auto VkResourceManager::getMesh(cm::MeshHandle handle)
+       -> const geo::ImmutableMesh& {
+      return meshList[handle];
+   }
+
    auto VkResourceManager::createDefaultDescriptorPool() const
        -> std::unique_ptr<vk::raii::DescriptorPool> {
       static constexpr auto poolSizes = std::array{

@@ -1,6 +1,7 @@
 #include "PhysicalDevice.hpp"
 
 #include "Surface.hpp"
+#include <vulkan/vulkan_structs.hpp>
 
 namespace tr::gfx {
    PhysicalDevice::PhysicalDevice(const std::shared_ptr<Instance>& instance,

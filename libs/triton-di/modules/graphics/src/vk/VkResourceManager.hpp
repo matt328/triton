@@ -1,7 +1,16 @@
 #pragma once
 #include "Device.hpp"
+#include "ImmediateTransferContext.hpp"
+#include "cm/Handles.hpp"
+#include "geo/GeometryData.hpp"
+#include "geo/Mesh.hpp"
+#include <vulkan/vulkan_enums.hpp>
 
 namespace tr::gfx {
+
+   struct Vertex {
+      glm::vec3 position;
+   };
 
    namespace mem {
       class Allocator;
@@ -27,9 +36,11 @@ namespace tr::gfx {
 
    class VkResourceManager {
     public:
-      explicit VkResourceManager(std::shared_ptr<Device> newDevice,
-                                 const std::shared_ptr<PhysicalDevice>& physicalDevice,
-                                 const std::shared_ptr<Instance>& instance);
+      explicit VkResourceManager(
+          std::shared_ptr<Device> newDevice,
+          std::shared_ptr<ImmediateTransferContext> newImmediateTransferContext,
+          const std::shared_ptr<PhysicalDevice>& physicalDevice,
+          const std::shared_ptr<Instance>& instance);
       ~VkResourceManager();
       VkResourceManager(const VkResourceManager&) = delete;
       VkResourceManager(VkResourceManager&&) = delete;
@@ -47,6 +58,18 @@ namespace tr::gfx {
       [[nodiscard]] auto getImageView(const std::string& id) const -> const vk::ImageView&;
       [[nodiscard]] auto getImageExtent(const std::string& id) const -> const vk::Extent2D;
 
+      [[nodiscard]] auto getMesh(cm::MeshHandle handle) -> const geo::ImmutableMesh&;
+
+      /// For now, VkResourceManager doesn't centrally manage buffers, but gives out unique_ptrs
+      /// and they'll clean themselves up if the ptr goes out of scope.
+      [[nodiscard]] auto createBuffer(size_t size,
+                                      vk::Flags<vk::BufferUsageFlagBits> flags,
+                                      std::string_view name) -> std::unique_ptr<mem::Buffer>;
+
+      [[nodiscard]] auto createIndirectBuffer(size_t size) -> std::unique_ptr<mem::Buffer>;
+
+      auto asyncUpload(const geo::GeometryData& geometryData) -> cm::MeshHandle;
+
       auto destroyImage(const std::string& id) -> void;
 
     private:
@@ -56,9 +79,12 @@ namespace tr::gfx {
          vk::Extent2D extent;
       };
       std::shared_ptr<Device> device;
+      std::shared_ptr<ImmediateTransferContext> immediateTransferContext;
 
       std::shared_ptr<mem::Allocator> allocator;
 
       std::unordered_map<std::string, ImageInfo> imageInfoMap;
+
+      std::vector<geo::ImmutableMesh> meshList;
    };
 }
