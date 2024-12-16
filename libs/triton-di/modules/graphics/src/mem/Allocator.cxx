@@ -1,6 +1,7 @@
 #include "Allocator.hpp"
 #include "Buffer.hpp"
 #include "Image.hpp"
+#include <vulkan/vulkan_enums.hpp>
 
 #define VMA_IMPLEMENTATION
 #include <vk_mem_alloc.h>
@@ -68,7 +69,8 @@ namespace tr::gfx::mem {
 
       const auto bufferCreateInfo = vk::BufferCreateInfo{
           .size = size,
-          .usage = vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst,
+          .usage = vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst |
+                   vk::BufferUsageFlagBits::eShaderDeviceAddress,
           .sharingMode = vk::SharingMode::eExclusive};
       constexpr auto allocationCreateInfo =
           vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eGpuOnly};
@@ -94,7 +96,8 @@ namespace tr::gfx::mem {
        -> std::unique_ptr<Buffer> {
       const auto bufferCreateInfo = vk::BufferCreateInfo{
           .size = size,
-          .usage = vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst,
+          .usage = vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst |
+                   vk::BufferUsageFlagBits::eShaderDeviceAddress,
           .sharingMode = vk::SharingMode::eExclusive};
       constexpr auto allocationCreateInfo =
           vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eGpuOnly};

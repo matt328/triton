@@ -1,7 +1,7 @@
 #pragma once
 
 namespace tr::gfx {
-   class VkContext;
+   class ImmediateTransferContext;
    namespace mem {
       class Allocator;
       class Image;
@@ -18,7 +18,7 @@ namespace tr::gfx::tex {
       explicit Texture(const std::string_view& filename,
                        const mem::Allocator& allocator,
                        const vk::raii::Device& device,
-                       const VkContext& transferContext);
+                       const ImmediateTransferContext& transferContext);
 
       explicit Texture(const void* data,
                        uint32_t width,
@@ -26,7 +26,7 @@ namespace tr::gfx::tex {
                        uint32_t channels,
                        const mem::Allocator& allocator,
                        const vk::raii::Device& device,
-                       const VkContext& transferContext);
+                       const ImmediateTransferContext& transferContext);
 
       ~Texture();
 
@@ -57,7 +57,7 @@ namespace tr::gfx::tex {
                       uint32_t channels,
                       const mem::Allocator& allocator,
                       const vk::raii::Device& device,
-                      const VkContext& transferContext,
+                      const ImmediateTransferContext& transferContext,
                       const std::string_view& textureName = "unnamed texture");
 
       static auto createTransitionBarrier(const vk::Image& image,

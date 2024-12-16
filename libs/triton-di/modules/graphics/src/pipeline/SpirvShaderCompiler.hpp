@@ -3,12 +3,12 @@
 #include <glslang/Public/ShaderLang.h>
 
 #include "IShaderCompiler.hpp"
-#include "gfx/IGraphicsDevice.hpp"
+#include "vk/Device.hpp"
 
 namespace tr::gfx::pipe {
    class SpirvShaderCompiler : public IShaderCompiler {
     public:
-      explicit SpirvShaderCompiler(std::shared_ptr<IGraphicsDevice> newGraphicsDevice);
+      explicit SpirvShaderCompiler(std::shared_ptr<Device> newDevice);
       ~SpirvShaderCompiler();
 
       SpirvShaderCompiler(const SpirvShaderCompiler&) = default;
@@ -21,7 +21,7 @@ namespace tr::gfx::pipe {
           -> vk::raii::ShaderModule override;
 
     private:
-      std::shared_ptr<IGraphicsDevice> graphicsDevice;
+      std::shared_ptr<Device> device;
 
       static auto compileShader(vk::ShaderStageFlagBits shaderType, const char* shaderCode)
           -> std::vector<uint32_t>;

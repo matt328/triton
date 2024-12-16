@@ -28,6 +28,10 @@ namespace tr::gfx::geo {
    GeometryFactory::~GeometryFactory() { // NOLINT(*-use-equals-default)
    }
 
+   auto GeometryFactory::createUnitCube() -> GeometryHandle {
+      return generateAABB({-0.5f, -0.5f, -0.5f}, {0.5f, 0.5f, 0.5f});
+   }
+
    auto GeometryFactory::sdfPlane(const glm::vec3& point,
                                   [[maybe_unused]] const glm::vec3& normal,
                                   [[maybe_unused]] float distance) -> int8_t {
@@ -411,18 +415,58 @@ namespace tr::gfx::geo {
        -> GeometryHandle {
 
       auto vertices = std::vector<as::Vertex>{{
-          {{min.x, min.y, min.z}}, // 0: Bottom-left-back
-          {{max.x, min.y, min.z}}, // 1: Bottom-right-back
-          {{max.x, max.y, min.z}}, // 2: Top-right-back
-          {{min.x, max.y, min.z}}, // 3: Top-left-back
-          {{min.x, min.y, max.z}}, // 4: Bottom-left-front
-          {{max.x, min.y, max.z}}, // 5: Bottom-right-front
-          {{max.x, max.y, max.z}}, // 6: Top-right-front
-          {{min.x, max.y, max.z}}  // 7: Top-left-front
+          {.pos = {min.x, min.y, min.z}, .color = {1.f, 1.f, 1.f, 1.f}}, // 0: Bottom-left-back
+          {.pos = {max.x, min.y, min.z}, .color = {0.f, 1.f, 1.f, 1.f}}, // 1: Bottom-right-back
+          {.pos = {max.x, max.y, min.z}, .color = {1.f, 0.f, 1.f, 1.f}}, // 2: Top-right-back
+          {.pos = {min.x, max.y, min.z}, .color = {1.f, 1.f, 0.f, 1.f}}, // 3: Top-left-back
+          {.pos = {min.x, min.y, max.z}, .color = {1.f, 1.f, 1.f, 1.f}}, // 4: Bottom-left-front
+          {.pos = {max.x, min.y, max.z}, .color = {1.f, 1.f, 1.f, 1.f}}, // 5: Bottom-right-front
+          {.pos = {max.x, max.y, max.z}, .color = {1.f, 1.f, 1.f, 1.f}}, // 6: Top-right-front
+          {.pos = {min.x, max.y, max.z}, .color = {1.f, 1.f, 1.f, 1.f}}  // 7: Top-left-front
       }};
 
-      std::vector<uint32_t> indices = {0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 6,
-                                       6, 7, 7, 4, 0, 4, 1, 5, 2, 6, 3, 7};
+      std::vector<uint32_t> indices = {// Back face
+                                       0,
+                                       1,
+                                       2,
+                                       2,
+                                       3,
+                                       0,
+                                       // Front face
+                                       4,
+                                       5,
+                                       6,
+                                       6,
+                                       7,
+                                       4,
+                                       // Left face
+                                       0,
+                                       4,
+                                       7,
+                                       7,
+                                       3,
+                                       0,
+                                       // Right face
+                                       1,
+                                       5,
+                                       6,
+                                       6,
+                                       2,
+                                       1,
+                                       // Bottom face
+                                       0,
+                                       1,
+                                       5,
+                                       5,
+                                       4,
+                                       0,
+                                       // Top face
+                                       3,
+                                       2,
+                                       6,
+                                       6,
+                                       7,
+                                       3};
 
       const auto key = geometryKey.getKey();
       auto geometryHandle = GeometryHandle{key, cm::Topology::LineList};

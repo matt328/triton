@@ -4,6 +4,7 @@
 #include "IFrameManager.hpp"
 #include "gfx/IRenderScheduler.hpp"
 #include "IRenderTask.hpp"
+#include "task/CubeRenderTask.hpp"
 
 namespace tr::gfx {
 
@@ -16,6 +17,7 @@ namespace tr::gfx {
                                       std::shared_ptr<queue::Graphics> newGraphicsQueue,
                                       std::shared_ptr<VkResourceManager> newResourceManager,
                                       std::shared_ptr<Swapchain> newSwapchain,
+                                      std::shared_ptr<task::CubeRenderTask> newCubeRenderTask,
                                       const RenderContextConfig& rendererConfig);
       ~DefaultRenderScheduler() override;
 
@@ -36,6 +38,7 @@ namespace tr::gfx {
       std::shared_ptr<queue::Graphics> graphicsQueue;
       std::shared_ptr<VkResourceManager> resourceManager;
       std::shared_ptr<Swapchain> swapchain;
+      std::shared_ptr<task::CubeRenderTask> cubeRenderTask;
 
       std::vector<std::shared_ptr<task::IRenderTask>> staticRenderTasks;
 
