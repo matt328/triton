@@ -1,6 +1,6 @@
 #include "Texture.hpp"
 
-#include "VkContext.hpp"
+#include "ImmediateTransferContext.hpp"
 #include "mem/Buffer.hpp"
 #include "mem/Image.hpp"
 #include "mem/Allocator.hpp"
@@ -10,7 +10,7 @@ namespace tr::gfx::tex {
    Texture::Texture(const std::string_view& filename,
                     const mem::Allocator& allocator,
                     const vk::raii::Device& device,
-                    const VkContext& transferContext)
+                    const ImmediateTransferContext& transferContext)
        : imageLayout{vk::ImageLayout::eShaderReadOnlyOptimal} {
       Log.debug("Creating Texture from file: {0}", filename.data());
 
@@ -33,7 +33,7 @@ namespace tr::gfx::tex {
                     const uint32_t channels,
                     const mem::Allocator& allocator,
                     const vk::raii::Device& device,
-                    const VkContext& transferContext)
+                    const ImmediateTransferContext& transferContext)
        : imageLayout{vk::ImageLayout::eShaderReadOnlyOptimal} {
       initialize(data, width, height, channels, allocator, device, transferContext);
    }
@@ -47,7 +47,7 @@ namespace tr::gfx::tex {
                             uint32_t channels,
                             const mem::Allocator& allocator,
                             const vk::raii::Device& device,
-                            const VkContext& transferContext,
+                            const ImmediateTransferContext& transferContext,
                             const std::string_view& textureName) {
 
       vk::DeviceSize textureSize = width * height * channels;

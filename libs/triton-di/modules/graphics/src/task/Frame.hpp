@@ -8,7 +8,7 @@ namespace tr::gfx {
    }
 
    enum class CmdBufferType : uint8_t {
-      Static = 0,
+      Main = 0,
       Start,
       End
    };

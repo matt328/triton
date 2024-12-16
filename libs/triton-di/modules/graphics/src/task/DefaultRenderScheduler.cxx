@@ -5,9 +5,11 @@
 #include "gfx/QueueTypes.hpp"
 
 /*
-   Each frame really only needs one primary command buffer to bind as many descriptor sets as it
-   can and then defer to secondary command buffers that inherit from the primary. Each render task
-   can get a secondary command buffer that inherits from the main one.
+   Each frame really only needs one primary command buffer. Secondary command buffers are for
+   when you render stuff that doesn't change often, so you don't have to re record them every frame,
+   or for when you want to render the same stuff multiple times with different attachments, etc.
+   reuse the same secondary command buffer to render the 3 components of deferred rendering's
+   gbuffer
 */
 
 namespace tr::gfx {
@@ -17,14 +19,16 @@ namespace tr::gfx {
        std::shared_ptr<queue::Graphics> newGraphicsQueue,
        std::shared_ptr<VkResourceManager> newResourceManager,
        std::shared_ptr<Swapchain> newSwapchain,
+       std::shared_ptr<task::CubeRenderTask> newCubeRenderTask,
        const RenderContextConfig& rendererConfig)
        : frameManager{std::move(newFrameManager)},
          commandBufferManager{std::move(newCommandBufferManager)},
          graphicsQueue{std::move(newGraphicsQueue)},
          resourceManager{std::move(newResourceManager)},
-         swapchain{std::move(newSwapchain)} {
+         swapchain{std::move(newSwapchain)},
+         cubeRenderTask{std::move(newCubeRenderTask)} {
 
-      commandBufferManager->registerType(CommandBufferType::StaticTasks);
+      commandBufferManager->registerType(PoolId::Main);
 
       const auto drawImageExtent = vk::Extent2D{
           .width =
@@ -42,7 +46,7 @@ namespace tr::gfx {
    }
 
    auto DefaultRenderScheduler::executeStaticTasks(Frame& frame) const -> void {
-      auto& commandBuffer = frame.getCommandBuffer(CmdBufferType::Static);
+      auto& commandBuffer = frame.getCommandBuffer(CmdBufferType::Main);
 
       const auto colorAttachmentInfo = vk::RenderingAttachmentInfo{
           .imageView = resourceManager->getImageView(frame.getDrawImageId()),
@@ -71,16 +75,11 @@ namespace tr::gfx {
           .pColorAttachments = &colorAttachmentInfo,
           .pDepthAttachment = &depthAttachmentInfo};
 
-      commandBuffer.begin(vk::CommandBufferBeginInfo{});
-
       commandBuffer.beginRendering(renderingInfo);
 
-      for (const auto& task : staticRenderTasks) {
-         task->record(commandBuffer);
-      }
+      cubeRenderTask->record(commandBuffer);
 
       commandBuffer.endRendering();
-      commandBuffer.end();
    }
 
    auto DefaultRenderScheduler::addStaticTask(const std::shared_ptr<task::IRenderTask> task)
@@ -90,7 +89,7 @@ namespace tr::gfx {
 
    auto DefaultRenderScheduler::recordRenderTasks(Frame& frame) const -> void {
 
-      const auto& startCmd = frame.getCommandBuffer(CmdBufferType::Start);
+      const auto& startCmd = frame.getCommandBuffer(CmdBufferType::Main);
       startCmd.begin(
           vk::CommandBufferBeginInfo{.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse});
 
@@ -99,63 +98,50 @@ namespace tr::gfx {
                       vk::ImageLayout::eUndefined,
                       vk::ImageLayout::eColorAttachmentOptimal);
 
-      startCmd.end();
-
       executeStaticTasks(frame);
 
-      // Prepare command buffers used by other tasks
-
-      // executeOtherTasks(frame);
-
-      // finish command buffers used by other tasks
-
-      const auto& endCmd = frame.getCommandBuffer(CmdBufferType::End);
-
-      endCmd.begin(
-          vk::CommandBufferBeginInfo{.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse});
-
-      transitionImage(endCmd,
+      transitionImage(startCmd,
                       resourceManager->getImage(frame.getDrawImageId()),
                       vk::ImageLayout::eColorAttachmentOptimal,
                       vk::ImageLayout::eTransferSrcOptimal);
 
-      transitionImage(endCmd,
+      transitionImage(startCmd,
                       swapchain->getSwapchainImage(frame.getSwapchainImageIndex()),
                       vk::ImageLayout::eUndefined,
                       vk::ImageLayout::eTransferDstOptimal);
 
-      copyImageToImage(endCmd,
+      copyImageToImage(startCmd,
                        resourceManager->getImage(frame.getDrawImageId()),
                        swapchain->getSwapchainImage(frame.getSwapchainImageIndex()),
                        resourceManager->getImageExtent(frame.getDrawImageId()),
                        swapchain->getImageExtent());
 
-      transitionImage(endCmd,
+      transitionImage(startCmd,
                       swapchain->getSwapchainImage(frame.getSwapchainImageIndex()),
                       vk::ImageLayout::eTransferDstOptimal,
                       vk::ImageLayout::ePresentSrcKHR);
 
-      endCmd.end();
+      startCmd.end();
    }
 
    auto DefaultRenderScheduler::setupCommandBuffersForFrame(Frame& frame) -> void {
       auto staticCommandBuffer =
-          commandBufferManager->getCommandBuffer(frame.getIndex(), CommandBufferType::StaticTasks);
+          commandBufferManager->getPrimaryCommandBuffer(frame.getIndex(), PoolId::Main);
       auto startCommandBuffer =
-          commandBufferManager->getCommandBuffer(frame.getIndex(), CommandBufferType::StaticTasks);
+          commandBufferManager->getPrimaryCommandBuffer(frame.getIndex(), PoolId::Main);
       auto endCommandBuffer =
-          commandBufferManager->getCommandBuffer(frame.getIndex(), CommandBufferType::StaticTasks);
+          commandBufferManager->getPrimaryCommandBuffer(frame.getIndex(), PoolId::Main);
+
       frame.clearCommandBuffers();
-      frame.addCommandBuffer(CmdBufferType::Static, std::move(staticCommandBuffer));
+
+      frame.addCommandBuffer(CmdBufferType::Main, std::move(staticCommandBuffer));
       frame.addCommandBuffer(CmdBufferType::Start, std::move(startCommandBuffer));
       frame.addCommandBuffer(CmdBufferType::End, std::move(endCommandBuffer));
    }
 
    auto DefaultRenderScheduler::endFrame(Frame& frame) const -> void {
       // Get all the buffers one at a time because order matters
-      const auto buffers = std::array{*frame.getCommandBuffer(CmdBufferType::Start),
-                                      *frame.getCommandBuffer(CmdBufferType::Static),
-                                      *frame.getCommandBuffer(CmdBufferType::End)};
+      const auto buffers = std::array{*frame.getCommandBuffer(CmdBufferType::Main)};
 
       constexpr auto waitStages =
           std::array<vk::PipelineStageFlags, 1>{vk::PipelineStageFlagBits::eColorAttachmentOutput};

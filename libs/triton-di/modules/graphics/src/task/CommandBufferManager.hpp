@@ -1,10 +1,9 @@
 #pragma once
 #include "CommandBufferPool.hpp"
 
-#include <vk/Device.hpp>
-#include "CommandBufferType.hpp"
-
-#include <gfx/RenderContextConfig.hpp>
+#include "vk/Device.hpp"
+#include "PoolId.hpp"
+#include "gfx/RenderContextConfig.hpp"
 
 namespace tr::gfx {
    namespace queue {
@@ -30,9 +29,11 @@ namespace tr::gfx {
       auto operator=(const CommandBufferManager&) -> CommandBufferManager& = delete;
       auto operator=(CommandBufferManager&&) -> CommandBufferManager& = delete;
 
-      auto registerType(CommandBufferType cmdType) -> void;
+      auto registerType(PoolId cmdType) -> void;
 
-      auto getCommandBuffer(uint8_t frameIndex, CommandBufferType cmdType) -> CommandBufferPtr;
+      auto getPrimaryCommandBuffer(uint8_t frameIndex, PoolId cmdType) -> CommandBufferPtr;
+      auto getSecondaryCommandBuffer(uint8_t frameIndex, PoolId cmdType) -> CommandBufferPtr;
+      auto getTransferCommandBuffer() -> CommandBufferPtr;
       static auto getEmpty() -> CommandBufferPtr;
 
       auto swapchainRecreated() -> void;
@@ -48,7 +49,7 @@ namespace tr::gfx {
 
       std::unordered_map<uint64_t, std::unique_ptr<CommandBufferPool>> commandPools;
 
-      static auto getKey(uint8_t frameIndex, CommandBufferType cmdType, uint32_t queueIndex)
+      static auto getKey(uint8_t frameIndex, PoolId cmdType, uint32_t queueIndex, bool isPrimary)
           -> uint64_t;
    };
 
