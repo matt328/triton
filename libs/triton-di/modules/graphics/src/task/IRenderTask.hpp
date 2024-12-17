@@ -1,5 +1,7 @@
 #pragma once
 
+#include "task/graph/Barrier.hpp"
+
 namespace tr::gfx::task {
    class IRenderTask {
     public:
@@ -12,5 +14,11 @@ namespace tr::gfx::task {
       auto operator=(IRenderTask&&) -> IRenderTask& = delete;
 
       virtual auto record(vk::raii::CommandBuffer& commandBuffer) -> void = 0;
+      [[nodiscard]] auto getBarriers() const -> std::vector<graph::Barrier>;
+
+      auto addBarrier(graph::Barrier barrier) -> void;
+
+    private:
+      std::vector<graph::Barrier> pendingBarriers;
    };
 }

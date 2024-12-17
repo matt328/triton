@@ -3,15 +3,14 @@
 #include "cm/ObjectData.hpp"
 #include "vk/VkResourceManager.hpp"
 
-namespace tr::gfx::task {
+/*
+   - get camera data in from game world
+   - set up RenderScheduler to dispatch a compute shader with memory barriers for any involved
+   buffers
+   - also need to insert a memory barrier before the draw call using the indirect buffer.
+*/
 
-   struct IndirectCommand {
-      uint32_t vertexCount;
-      uint32_t instanceCount;
-      uint32_t firstVertex;
-      uint32_t firstInstance;
-      std::array<uint8_t, 4> padding; // Vulkan wants this buffer's stride to be 20 bytes.
-   };
+namespace tr::gfx::task {
 
    struct InstanceData {
       glm::mat4 model;
@@ -27,18 +26,20 @@ namespace tr::gfx::task {
       const auto geometryHandle = geometryFactory->createUnitCube();
       meshHandle = resourceManager->asyncUpload(geometryFactory->getGeometryData(geometryHandle));
 
-      const auto commandData = IndirectCommand{.vertexCount = 36, // Index Count not Vertex Count
-                                               .instanceCount = 1,
-                                               .firstVertex = 0,
-                                               .firstInstance = 0};
+      const auto commandData =
+          vk::DrawIndexedIndirectCommand{.indexCount = 36, // Index Count not Vertex Count
+                                         .instanceCount = 1,
+                                         .firstIndex = 0,
+                                         .vertexOffset = 0,
+                                         .firstInstance = 0};
 
-      // The indirectBuffer is never actually referenced by any shader code.
-      indirectBuffer = resourceManager->createBuffer(sizeof(IndirectCommand),
+      // The indirectBuffer is never explicitly accessed by shader code.
+      indirectBuffer = resourceManager->createBuffer(sizeof(vk::DrawIndexedIndirectCommand),
                                                      vk::BufferUsageFlagBits::eIndirectBuffer |
                                                          vk::BufferUsageFlagBits::eTransferDst,
                                                      "Indirect Command");
       indirectBuffer->mapBuffer();
-      indirectBuffer->updateBufferValue(&commandData, sizeof(IndirectCommand));
+      indirectBuffer->updateBufferValue(&commandData, sizeof(vk::DrawIndexedIndirectCommand));
       indirectBuffer->unmapBuffer();
 
       instanceBuffer = resourceManager->createBuffer(
@@ -106,6 +107,9 @@ namespace tr::gfx::task {
                                                                   0,
                                                                   pushConstants);
 
-      commandBuffer.drawIndexedIndirect(indirectBuffer->getBuffer(), 0, 1, sizeof(IndirectCommand));
+      commandBuffer.drawIndexedIndirect(indirectBuffer->getBuffer(),
+                                        0,
+                                        1,
+                                        sizeof(vk::DrawIndexedIndirectCommand));
    }
 }

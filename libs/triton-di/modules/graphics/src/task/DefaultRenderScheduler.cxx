@@ -95,16 +95,18 @@ namespace tr::gfx {
 
    auto DefaultRenderScheduler::recordRenderTasks(Frame& frame) const -> void {
 
-      const auto& startCmd = frame.getCommandBuffer(CmdBufferType::Start);
-      startCmd.begin(
-          vk::CommandBufferBeginInfo{.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse});
+      {
+         const auto& startCmd = frame.getCommandBuffer(CmdBufferType::Start);
+         startCmd.begin(
+             vk::CommandBufferBeginInfo{.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse});
 
-      transitionImage(startCmd,
-                      resourceManager->getImage(frame.getDrawImageId()),
-                      vk::ImageLayout::eUndefined,
-                      vk::ImageLayout::eColorAttachmentOptimal);
+         transitionImage(startCmd,
+                         resourceManager->getImage(frame.getDrawImageId()),
+                         vk::ImageLayout::eUndefined,
+                         vk::ImageLayout::eColorAttachmentOptimal);
 
-      startCmd.end();
+         startCmd.end();
+      }
 
       executeStaticTasks(frame);
 
