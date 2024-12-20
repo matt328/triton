@@ -91,9 +91,9 @@ namespace tr::gfx {
    auto DefaultRenderScheduler::addStaticTask(const std::shared_ptr<task::IRenderTask> task)
        -> void {
       staticRenderTasks.push_back(task);
-   }
-
-   auto DefaultRenderScheduler::recordRenderTasks(Frame& frame) const -> void {
+  }
+  
+  auto DefaultRenderScheduler::recordRenderTasks(Frame& frame) const -> void {
 
       {
          const auto& startCmd = frame.getCommandBuffer(CmdBufferType::Start);

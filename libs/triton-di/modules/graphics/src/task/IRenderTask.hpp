@@ -1,6 +1,7 @@
 #pragma once
 
 #include "task/graph/Barrier.hpp"
+#include "task/graph/Resource.hpp"
 
 namespace tr::gfx::task {
    class IRenderTask {
@@ -20,5 +21,6 @@ namespace tr::gfx::task {
 
     private:
       std::vector<graph::Barrier> pendingBarriers;
+      std::vector<graph::Resource> resources;
    };
 }

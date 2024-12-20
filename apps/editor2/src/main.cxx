@@ -38,7 +38,6 @@ auto main() -> int {
    auto propertiesPath = configDir / "editor";
 
    try {
-
       const auto frameworkConfig = tr::FrameworkConfig{
           .initialWindowSize = glm::ivec2(width, height),
           .windowTitle = windowTitle.str(),

@@ -14,9 +14,13 @@
    - does defining a TaskResource cause the creation of the buffer/image?
 
    - Maybe on init or change, the Task can provide its TaskResources and register them with each
-   frame. That way the frame can own the mem::Buffer, and hand out a handle to it to be used in the
-   TaskResource and when recording the command buffer, the Task will just ask the current frame for
-   the mem::Buffer at the handle supplied by the Pending Barrier
+   frame.
+   - how to decide which task 'owns' which resource? resources could just have a unique identifier
+   among the tasks and whichever task registers it first will create it and the subsequent ones will
+   just be noops
+   - That way the frame can own the mem::Buffer, and hand out a handle to it to be
+   used in the TaskResource and when recording the command buffer, the Task will just ask the
+   current frame for the mem::Buffer at the handle supplied by the Pending Barrier
    - Calculating the dependencies would involve creating a PendingBarrier using info from the
    'overlapping' TaskResource
 
@@ -33,16 +37,27 @@
 
 namespace tr::gfx::task::graph {
 
+   struct BarrierConfig {
+      IRenderTask& producer;
+      IRenderTask& consumer;
+   };
+
    class TaskGraph {
     public:
       TaskGraph() = default;
       ~TaskGraph() = default;
+
+      TaskGraph(TaskGraph&& taskGraph) = delete;
+      TaskGraph(const TaskGraph& taskGraph) = delete;
+      auto operator=(TaskGraph&& taskGraph) = delete;
+      auto operator=(const TaskGraph& taskGraph) = delete;
 
       auto resolveDependencies() -> void;
 
     private:
       std::vector<TaskNode> taskNodes;
 
-      auto insertBarrier(IRenderTask& producer, IRenderTask& consumer) -> void;
+      /// Inserts a Barrier here.
+      auto insertBarrier(const BarrierConfig& barrierConfig) -> void;
    };
 }

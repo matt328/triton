@@ -6,7 +6,6 @@
 #include "gfx/GeometryFactory.hpp"
 #include "mem/Buffer.hpp"
 #include "pipeline/IndirectPipeline.hpp"
-#include <vulkan/vulkan_structs.hpp>
 
 namespace tr::gfx {
    class VkResourceManager;

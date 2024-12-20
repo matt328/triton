@@ -19,3 +19,5 @@ ColumnLimit: 100
 FixNamespaceComments: false
 SortIncludes: Never
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
+InsertNewlineAtEOF: true
+
