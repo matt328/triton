@@ -22,6 +22,7 @@ namespace ed {
       auto operator=(const Application&) -> Application& = delete;
       auto operator=(Application&&) -> Application& = delete;
 
+      /// Runs the Application.
       void run() const;
 
     private:
