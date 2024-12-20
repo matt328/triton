@@ -7,8 +7,6 @@
 
 namespace ed::data {
 
-   namespace cm = ::tr::cm;
-
    DataFacade::DataFacade(std::shared_ptr<tr::gp::IGameplaySystem> newGameplaySystem,
                           std::shared_ptr<TaskQueue> newTaskQueue)
        : gameplaySystem{std::move(newGameplaySystem)}, taskQueue{std::move(newTaskQueue)} {
@@ -43,7 +41,7 @@ namespace ed::data {
    }
 
    void DataFacade::addSkeleton(std::string_view name, const std::filesystem::path& path) {
-      dataStore.skeletons.insert({name.data(), SkeletonData{name.data(), path.string()}});
+      dataStore.skeletons.insert({name.data(), SkeletonData{.name=name.data(), .filePath=path.string()}});
       unsaved = true;
    }
 
