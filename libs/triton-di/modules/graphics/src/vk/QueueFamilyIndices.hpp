@@ -1,6 +1,6 @@
 #pragma once
 
-namespace tr::gfx {
+namespace tr {
    struct QueueFamilyIndices {
       std::optional<uint32_t> graphicsFamily;
       std::optional<uint32_t> graphicsFamilyCount;

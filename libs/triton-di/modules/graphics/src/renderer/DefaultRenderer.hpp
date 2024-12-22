@@ -1,22 +1,22 @@
 #include "IRenderer.hpp"
 #include "renderer/RendererConfig.hpp"
 
-namespace tr::gfx {
+namespace tr {
    class IGraphicsDevice;
 }
 
-namespace tr::gfx::pipe {
+namespace tr {
    class IPipeline;
    class IShaderCompiler;
 }
 
-namespace tr::gfx::rd {
+namespace tr {
 
    class DefaultRenderer : public IRenderer {
     public:
       explicit DefaultRenderer(const RendererConfig& config,
                                std::shared_ptr<IGraphicsDevice> graphicsDevice,
-                               const std::shared_ptr<pipe::IShaderCompiler>& shaderCompiler);
+                               const std::shared_ptr<IShaderCompiler>& shaderCompiler);
       ~DefaultRenderer() override = default;
 
       DefaultRenderer(const DefaultRenderer&) = default;
@@ -27,7 +27,7 @@ namespace tr::gfx::rd {
       void bindPipeline(const std::unique_ptr<vk::raii::CommandBuffer>& commandBuffer) override;
 
       void applyShaderBinding(
-          const std::unique_ptr<sb::ShaderBinding>& binding,
+          const std::unique_ptr<ShaderBinding>& binding,
           uint32_t setIndex,
           const std::unique_ptr<vk::raii::CommandBuffer>& commandBuffer) override;
 
@@ -37,6 +37,6 @@ namespace tr::gfx::rd {
 
     private:
       std::shared_ptr<IGraphicsDevice> graphicsDevice;
-      std::shared_ptr<pipe::IPipeline> pipeline;
+      std::shared_ptr<IPipeline> pipeline;
    };
 }

@@ -3,7 +3,7 @@
 #include "task/graph/Barrier.hpp"
 #include "task/graph/Resource.hpp"
 
-namespace tr::gfx::task {
+namespace tr {
    class IRenderTask {
     public:
       IRenderTask() = default;
@@ -15,13 +15,13 @@ namespace tr::gfx::task {
       auto operator=(IRenderTask&&) -> IRenderTask& = delete;
 
       virtual auto record(vk::raii::CommandBuffer& commandBuffer) -> void = 0;
-      [[nodiscard]] auto getBarriers() const -> std::vector<graph::Barrier>;
+      [[nodiscard]] auto getBarriers() const -> std::vector<Barrier>;
 
-      auto addBarrier(graph::Barrier barrier) -> void;
-      [[nodiscard]] auto getResources() -> std::vector<graph::Resource>&;
+      auto addBarrier(Barrier barrier) -> void;
+      [[nodiscard]] auto getResources() -> std::vector<Resource>&;
 
     private:
-      std::vector<graph::Barrier> pendingBarriers;
-      std::vector<graph::Resource> resources;
+      std::vector<Barrier> pendingBarriers;
+      std::vector<Resource> resources;
    };
 }

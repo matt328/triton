@@ -1,10 +1,10 @@
 #pragma once
 
-namespace tr::gfx::sb {
+namespace tr {
    class ShaderBinding;
 }
 
-namespace tr::gfx::pipe {
+namespace tr {
 
    const std::filesystem::path SHADERS = std::filesystem::current_path() / "assets" / "shaders";
 
@@ -20,7 +20,7 @@ namespace tr::gfx::pipe {
 
       virtual void bind(const vk::raii::CommandBuffer& cmd) = 0;
       virtual void applyShaderBinding(
-          const sb::ShaderBinding& binding,
+          const ShaderBinding& binding,
           uint32_t setIndex,
           const std::unique_ptr<vk::raii::CommandBuffer>& commandBuffer) = 0;
    };

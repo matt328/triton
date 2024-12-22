@@ -2,7 +2,7 @@
 #include <task/Frame.hpp>
 #include <task/IRenderTask.hpp>
 
-namespace tr::gfx::task {
+namespace tr {
    class IRenderScheduler {
     public:
       IRenderScheduler() = default;

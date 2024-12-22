@@ -3,14 +3,14 @@
 
 namespace tr::gp::cmd {
    class CreateAnimatedEntity final
-       : public ICommand<entt::registry&, const std::shared_ptr<gfx::ResourceManager>&> {
+       : public ICommand<entt::registry&, const std::shared_ptr<ResourceManager>&> {
     public:
       explicit CreateAnimatedEntity(AnimatedModelData newModelData)
           : animatedModelData{std::move(newModelData)} {
       }
 
       void execute(entt::registry& registry,
-                   const std::shared_ptr<gfx::ResourceManager>& resourceManager) const override {
+                   const std::shared_ptr<ResourceManager>& resourceManager) const override {
          auto modelData =
              resourceManager->createModel(std::filesystem::path(animatedModelData.modelFilename));
 

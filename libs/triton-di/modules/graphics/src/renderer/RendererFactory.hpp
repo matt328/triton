@@ -2,22 +2,22 @@
 
 #include "RendererConfig.hpp"
 
-namespace tr::gfx {
+namespace tr {
    class IGraphicsDevice;
 }
 
-namespace tr::gfx::pipe {
+namespace tr {
    class IShaderCompiler;
 }
 
-namespace tr::gfx::rd {
+namespace tr {
 
    class IRenderer;
 
    class RendererFactory {
     public:
       RendererFactory(std::shared_ptr<IGraphicsDevice> newGraphicsDevice,
-                      std::shared_ptr<pipe::IShaderCompiler> newShaderCompiler);
+                      std::shared_ptr<IShaderCompiler> newShaderCompiler);
       ~RendererFactory() = default;
 
       RendererFactory(const RendererFactory&) = default;
@@ -29,6 +29,6 @@ namespace tr::gfx::rd {
 
     private:
       std::shared_ptr<IGraphicsDevice> graphicsDevice;
-      std::shared_ptr<pipe::IShaderCompiler> shaderCompiler;
+      std::shared_ptr<IShaderCompiler> shaderCompiler;
    };
 }

@@ -30,29 +30,29 @@ namespace di = boost::di;
 namespace tr {
    auto ComponentFactory::getContext(const FrameworkConfig& config) -> std::shared_ptr<IContext> {
 
-      constexpr auto rendererConfig = gfx::RenderContextConfig{.useDescriptorBuffers = false,
+      constexpr auto rendererConfig = RenderContextConfig{.useDescriptorBuffers = false,
                                                                .maxTextures = 16,
                                                                .framesInFlight = 2};
 
       const auto injector = di::make_injector(
-          di::bind<gfx::IDebugManager>.to<gfx::DefaultDebugManager>(),
-          di::bind<gfx::RenderContextConfig>.to(rendererConfig),
+          di::bind<IDebugManager>.to<DefaultDebugManager>(),
+          di::bind<RenderContextConfig>.to(rendererConfig),
           di::bind<IGuiSystem>.to<cm::ImGuiSystem>(),
           di::bind<IGuiAdapter>.to<cm::ImGuiAdapter>(),
-          di::bind<IWindow>.to<gfx::Window>(),
+          di::bind<IWindow>.to<Window>(),
           di::bind<IEventBus>.to<DefaultEventBus>(),
-          di::bind<gfx::IRenderContext>.to<gfx::NewRenderContext>(),
-          di::bind<gfx::task::IRenderScheduler>.to<gfx::DefaultRenderScheduler>(),
-          di::bind<gfx::task::IFrameManager>.to<gfx::task::DefaultFrameManager>(),
+          di::bind<IRenderContext>.to<NewRenderContext>(),
+          di::bind<IRenderScheduler>.to<DefaultRenderScheduler>(),
+          di::bind<IFrameManager>.to<DefaultFrameManager>(),
           di::bind<gp::IActionSystem>.to<gp::ActionSystem>(),
           di::bind<glm::ivec2>.to(config.initialWindowSize),
           di::bind<std::string>.to(config.windowTitle),
-          di::bind<gfx::Device>.to<gfx::Device>(),
-          di::bind<gfx::pipe::IShaderCompiler>.to<gfx::pipe::SpirvShaderCompiler>(),
-          di::bind<gfx::queue::Graphics>.to<gfx::queue::Graphics>(),
-          di::bind<gfx::queue::Transfer>.to<gfx::queue::Transfer>(),
-          di::bind<gfx::queue::Present>.to<gfx::queue::Present>(),
-          di::bind<gfx::queue::Compute>.to<gfx::queue::Compute>());
+          di::bind<Device>.to<Device>(),
+          di::bind<IShaderCompiler>.to<SpirvShaderCompiler>(),
+          di::bind<queue::Graphics>.to<queue::Graphics>(),
+          di::bind<queue::Transfer>.to<queue::Transfer>(),
+          di::bind<queue::Present>.to<queue::Present>(),
+          di::bind<queue::Compute>.to<queue::Compute>());
 
       return injector.create<std::shared_ptr<DefaultContext>>();
    }

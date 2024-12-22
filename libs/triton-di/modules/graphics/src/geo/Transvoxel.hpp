@@ -1,6 +1,6 @@
 #pragma once
 
-namespace tr::gfx::geo {
+namespace tr {
 
    struct ReuseCell {
       std::vector<uint16_t> vertices;

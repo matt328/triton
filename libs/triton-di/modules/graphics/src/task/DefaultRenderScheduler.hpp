@@ -6,18 +6,18 @@
 #include "IRenderTask.hpp"
 #include "task/CubeRenderTask.hpp"
 
-namespace tr::gfx {
+namespace tr {
 
    constexpr auto DepthImageName = "DepthImage";
 
-   class DefaultRenderScheduler final : public task::IRenderScheduler {
+   class DefaultRenderScheduler final : public IRenderScheduler {
     public:
-      explicit DefaultRenderScheduler(std::shared_ptr<task::IFrameManager> newFrameManager,
+      explicit DefaultRenderScheduler(std::shared_ptr<IFrameManager> newFrameManager,
                                       std::shared_ptr<CommandBufferManager> newCommandBufferManager,
                                       std::shared_ptr<queue::Graphics> newGraphicsQueue,
                                       std::shared_ptr<VkResourceManager> newResourceManager,
                                       std::shared_ptr<Swapchain> newSwapchain,
-                                      std::shared_ptr<task::CubeRenderTask> newCubeRenderTask,
+                                      std::shared_ptr<CubeRenderTask> newCubeRenderTask,
                                       const RenderContextConfig& rendererConfig);
       ~DefaultRenderScheduler() override;
 
@@ -27,20 +27,20 @@ namespace tr::gfx {
       auto operator=(DefaultRenderScheduler&&) -> DefaultRenderScheduler& = delete;
 
       auto executeStaticTasks(Frame& frame) const -> void override;
-      auto addStaticTask(std::shared_ptr<task::IRenderTask> task) -> void override;
+      auto addStaticTask(std::shared_ptr<IRenderTask> task) -> void override;
       auto recordRenderTasks(Frame& frame) const -> void override;
       auto setupCommandBuffersForFrame(Frame& frame) -> void override;
       auto endFrame(Frame& frame) const -> void override;
 
     private:
-      std::shared_ptr<task::IFrameManager> frameManager;
+      std::shared_ptr<IFrameManager> frameManager;
       std::shared_ptr<CommandBufferManager> commandBufferManager;
       std::shared_ptr<queue::Graphics> graphicsQueue;
       std::shared_ptr<VkResourceManager> resourceManager;
       std::shared_ptr<Swapchain> swapchain;
-      std::shared_ptr<task::CubeRenderTask> cubeRenderTask;
+      std::shared_ptr<CubeRenderTask> cubeRenderTask;
 
-      std::vector<std::shared_ptr<task::IRenderTask>> staticRenderTasks;
+      std::vector<std::shared_ptr<IRenderTask>> staticRenderTasks;
 
       static auto transitionImage(const vk::raii::CommandBuffer& cmd,
                                   const vk::Image& image,

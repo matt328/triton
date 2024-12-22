@@ -3,7 +3,7 @@
 #include "Vulkan.hpp"
 #include <vulkan/vulkan.hpp>
 
-namespace tr::gfx::sb {
+namespace tr {
    Layout::Layout(std::shared_ptr<IGraphicsDevice> newGraphicsDevice,
                   const vk::DescriptorSetLayoutCreateInfo& info,
                   const std::string_view name)

@@ -3,7 +3,7 @@
 #include "geo/VertexAttributes.hpp"
 #include "cm/IndirectPushConstants.hpp"
 
-namespace tr::gfx::pipe {
+namespace tr {
 
    const auto VertexShaderFile = SHADERS / "indirect.vert";
    const auto FragmentShaderFile = SHADERS / "indirect.frag";
@@ -48,18 +48,18 @@ namespace tr::gfx::pipe {
                                             .pName = "main"});
 
       // Vertex Input State
-      auto vec = std::vector{geo::VertexComponent::Position,
-                             geo::VertexComponent::Normal,
-                             geo::VertexComponent::UV,
-                             geo::VertexComponent::Color,
-                             geo::VertexComponent::Joint0,
-                             geo::VertexComponent::Weight0,
-                             geo::VertexComponent::Tangent};
+      auto vec = std::vector{VertexComponent::Position,
+                             VertexComponent::Normal,
+                             VertexComponent::UV,
+                             VertexComponent::Color,
+                             VertexComponent::Joint0,
+                             VertexComponent::Weight0,
+                             VertexComponent::Tangent};
 
       const auto vertexAttributeDescriptions =
-          geo::VertexBuilder::inputAttributeDescriptions(0, std::span(vec.begin(), vec.end()));
+          VertexBuilder::inputAttributeDescriptions(0, std::span(vec.begin(), vec.end()));
 
-      const auto bindingDescription = geo::VertexBuilder::inputBindingDescription(0);
+      const auto bindingDescription = VertexBuilder::inputBindingDescription(0);
 
       const auto vertexInputStateCreateInfo = vk::PipelineVertexInputStateCreateInfo{
           .vertexBindingDescriptionCount = 1,
@@ -148,7 +148,7 @@ namespace tr::gfx::pipe {
    }
 
    void IndirectPipeline::applyShaderBinding(
-       const sb::ShaderBinding& binding,
+       const ShaderBinding& binding,
        uint32_t setIndex,
        const std::unique_ptr<vk::raii::CommandBuffer>& commandBuffer) {
    }

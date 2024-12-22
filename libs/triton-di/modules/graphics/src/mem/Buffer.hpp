@@ -1,6 +1,6 @@
 #pragma once
 
-namespace tr::gfx::mem {
+namespace tr {
    class Buffer {
     public:
       Buffer(const vma::Allocator& newAllocator,

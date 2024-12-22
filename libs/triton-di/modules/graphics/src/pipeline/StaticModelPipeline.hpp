@@ -3,11 +3,11 @@
 #include "IPipeline.hpp"
 #include "renderer/RendererConfig.hpp"
 
-namespace tr::gfx {
+namespace tr {
    class IGraphicsDevice;
 }
 
-namespace tr::gfx::pipe {
+namespace tr {
 
    class IShaderCompiler;
 
@@ -25,7 +25,7 @@ namespace tr::gfx::pipe {
 
       void bind(const vk::raii::CommandBuffer& cmd) override;
       void applyShaderBinding(
-          const sb::ShaderBinding& binding,
+          const ShaderBinding& binding,
           uint32_t setIndex,
           const std::unique_ptr<vk::raii::CommandBuffer>& commandBuffer) override;
 

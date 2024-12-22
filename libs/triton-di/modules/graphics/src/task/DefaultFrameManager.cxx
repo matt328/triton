@@ -5,7 +5,7 @@
 
 #include <vk/Swapchain.hpp>
 
-namespace tr::gfx::task {
+namespace tr {
    DefaultFrameManager::DefaultFrameManager(
        const RenderContextConfig& rendererConfig,
        std::shared_ptr<CommandBufferManager> newCommandBufferManager,

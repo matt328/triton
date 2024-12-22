@@ -11,7 +11,7 @@
 
 #include "cm/RenderData.hpp"
 
-namespace tr::gfx {
+namespace tr {
 
    class IGraphicsDevice;
    class DepthResources;
@@ -25,9 +25,9 @@ namespace tr::gfx {
     public:
       explicit DefaultRenderContext(
           std::shared_ptr<IGraphicsDevice> graphicsDevice,
-          std::shared_ptr<sb::ILayoutFactory> newLayoutFactory,
-          std::shared_ptr<sb::IShaderBindingFactory> newShaderBindingFactory,
-          std::shared_ptr<pipe::IShaderCompiler> newShaderCompiler,
+          std::shared_ptr<ILayoutFactory> newLayoutFactory,
+          std::shared_ptr<IShaderBindingFactory> newShaderBindingFactory,
+          std::shared_ptr<IShaderCompiler> newShaderCompiler,
           std::shared_ptr<rd::RendererFactory> newRendererFactory,
           std::shared_ptr<gp::IGameplaySystem> newGameplaySystem,
           std::shared_ptr<tr::IGuiSystem> newGuiSystem,
@@ -45,9 +45,9 @@ namespace tr::gfx {
 
     private:
       std::shared_ptr<IGraphicsDevice> graphicsDevice;
-      std::shared_ptr<sb::ILayoutFactory> layoutFactory;
-      std::shared_ptr<sb::IShaderBindingFactory> shaderBindingFactory;
-      std::shared_ptr<pipe::IShaderCompiler> shaderCompiler;
+      std::shared_ptr<ILayoutFactory> layoutFactory;
+      std::shared_ptr<IShaderBindingFactory> shaderBindingFactory;
+      std::shared_ptr<IShaderCompiler> shaderCompiler;
       std::shared_ptr<rd::RendererFactory> rendererFactory;
       std::shared_ptr<gp::IGameplaySystem> gameplaySystem;
       std::shared_ptr<tr::IGuiSystem> guiSystem;

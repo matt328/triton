@@ -13,7 +13,7 @@ namespace vk::raii {
    class Queue;
 }
 
-namespace tr::gfx {
+namespace tr {
 
    class ImmediateTransferContext {
     public:

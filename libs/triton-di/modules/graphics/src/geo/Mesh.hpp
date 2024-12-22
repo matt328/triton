@@ -2,7 +2,7 @@
 
 #include "mem/Buffer.hpp"
 
-namespace tr::gfx::geo {
+namespace tr {
 
    class ImmutableMesh {
     public:
@@ -14,19 +14,19 @@ namespace tr::gfx::geo {
       auto operator=(ImmutableMesh&&) -> ImmutableMesh& = delete;
       auto operator=(const ImmutableMesh&) -> ImmutableMesh& = delete;
 
-      ImmutableMesh(std::unique_ptr<mem::Buffer>&& vertexBuffer,
-                    std::unique_ptr<mem::Buffer>&& indexBuffer,
+      ImmutableMesh(std::unique_ptr<Buffer>&& vertexBuffer,
+                    std::unique_ptr<Buffer>&& indexBuffer,
                     const uint32_t indicesCount)
           : vertexBuffer(std::move(vertexBuffer)),
             indexBuffer(std::move(indexBuffer)),
             indicesCount(indicesCount) {
       }
 
-      [[nodiscard]] auto getVertexBuffer() const -> const std::unique_ptr<mem::Buffer>& {
+      [[nodiscard]] auto getVertexBuffer() const -> const std::unique_ptr<Buffer>& {
          return vertexBuffer;
       }
 
-      [[nodiscard]] auto getIndexBuffer() const -> const std::unique_ptr<mem::Buffer>& {
+      [[nodiscard]] auto getIndexBuffer() const -> const std::unique_ptr<Buffer>& {
          return indexBuffer;
       }
 
@@ -35,8 +35,8 @@ namespace tr::gfx::geo {
       }
 
     private:
-      std::unique_ptr<mem::Buffer> vertexBuffer;
-      std::unique_ptr<mem::Buffer> indexBuffer;
+      std::unique_ptr<Buffer> vertexBuffer;
+      std::unique_ptr<Buffer> indexBuffer;
       uint32_t indicesCount;
    };
 }

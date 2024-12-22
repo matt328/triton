@@ -1,6 +1,6 @@
 #include "Buffer.hpp"
 
-namespace tr::gfx::mem {
+namespace tr {
    Buffer::Buffer(const vma::Allocator& newAllocator,
                   const vk::Buffer newBuffer,
                   const vk::DeviceSize range,

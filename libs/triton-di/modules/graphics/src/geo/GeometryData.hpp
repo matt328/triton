@@ -2,7 +2,7 @@
 
 #include "as/Vertex.hpp"
 
-namespace tr::gfx::geo {
+namespace tr {
 
    class GeometryData {
     public:

@@ -2,7 +2,7 @@
 #include "CommandBufferManager.hpp"
 #include "vk/Device.hpp"
 
-namespace tr::gfx::task {
+namespace tr {
 
    class SyncManager {
     public:

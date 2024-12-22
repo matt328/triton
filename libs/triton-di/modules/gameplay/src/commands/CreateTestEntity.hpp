@@ -10,13 +10,13 @@
 
 namespace tr::gp {
    class CreateTestEntityCommand final
-       : public ICommand<entt::registry&, const std::shared_ptr<gfx::ResourceManager>&> {
+       : public ICommand<entt::registry&, const std::shared_ptr<ResourceManager>&> {
     public:
       explicit CreateTestEntityCommand(const std::string_view newName) : name{newName.data()} {
       }
 
       void execute(entt::registry& registry,
-                   [[maybe_unused]] const std::shared_ptr<gfx::ResourceManager>& resourceManager)
+                   [[maybe_unused]] const std::shared_ptr<ResourceManager>& resourceManager)
           const override {
          const auto entity = registry.create();
          registry.emplace<cmp::EditorInfo>(entity, name);

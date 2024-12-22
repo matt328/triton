@@ -18,7 +18,7 @@ namespace tr {
    class DefaultContext final : public IContext {
     public:
       explicit DefaultContext(std::shared_ptr<IEventBus> newEventBus,
-                              std::shared_ptr<gfx::IRenderContext> newRenderContext,
+                              std::shared_ptr<IRenderContext> newRenderContext,
                               std::shared_ptr<IWindow> newWindow,
                               std::shared_ptr<IGuiSystem> newGuiSystem,
                               std::shared_ptr<gp::Registry> newRegistry);
@@ -32,7 +32,7 @@ namespace tr {
       bool paused{};
       bool running{true};
       std::shared_ptr<IEventBus> eventBus;
-      std::shared_ptr<gfx::IRenderContext> renderContext;
+      std::shared_ptr<IRenderContext> renderContext;
       std::shared_ptr<IWindow> window;
       std::shared_ptr<tr::IGuiSystem> guiSystem;
       std::shared_ptr<gp::Registry> registry;

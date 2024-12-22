@@ -7,7 +7,7 @@
 #include "LayoutFactory.hpp"
 #include "Layout.hpp"
 
-namespace tr::gfx::sb {
+namespace tr {
    ShaderBindingFactory::ShaderBindingFactory(std::shared_ptr<IGraphicsDevice> newGraphicsDevice,
                                               std::shared_ptr<LayoutFactory> newLayoutFactory,
                                               RenderContextConfig rendererConfig)

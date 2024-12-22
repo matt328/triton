@@ -8,10 +8,10 @@
 #include "sb/IShaderBindingFactory.hpp"
 #include "sb/ShaderBinding.hpp"
 
-namespace tr::gfx {
+namespace tr {
    Frame::Frame(std::shared_ptr<IGraphicsDevice> newGraphicsDevice,
                 std::shared_ptr<vk::raii::ImageView> newDepthImageView,
-                const std::shared_ptr<sb::IShaderBindingFactory>& shaderBindingFactory,
+                const std::shared_ptr<IShaderBindingFactory>& shaderBindingFactory,
                 std::string_view name)
        : frameName{name},
          commandBuffer{newGraphicsDevice->createCommandBuffer()},
@@ -48,20 +48,20 @@ namespace tr::gfx {
       std::tie(drawImage, drawImageView) = graphicsDevice->createDrawImage("Draw Image");
 
       perFrameShaderBinding =
-          shaderBindingFactory->createShaderBinding(sb::ShaderBindingHandle::PerFrame);
+          shaderBindingFactory->createShaderBinding(ShaderBindingHandle::PerFrame);
       perFrameShaderBinding->bindBuffer(0, *cameraDataBuffer, sizeof(cm::gpu::CameraData));
 
       objectDataShaderBinding =
-          shaderBindingFactory->createShaderBinding(sb::ShaderBindingHandle::ObjectData);
+          shaderBindingFactory->createShaderBinding(ShaderBindingHandle::ObjectData);
       objectDataShaderBinding->bindBuffer(0,
                                           *objectDataBuffer,
                                           sizeof(cm::gpu::ObjectData) * cm::gpu::MAX_OBJECTS);
 
       textureShaderBinding =
-          shaderBindingFactory->createShaderBinding(sb::ShaderBindingHandle::Bindless);
+          shaderBindingFactory->createShaderBinding(ShaderBindingHandle::Bindless);
 
       animationDataShaderBinding =
-          shaderBindingFactory->createShaderBinding(sb::ShaderBindingHandle::AnimationData);
+          shaderBindingFactory->createShaderBinding(ShaderBindingHandle::AnimationData);
       animationDataShaderBinding->bindBuffer(0,
                                              *animationDataBuffer,
                                              sizeof(cm::AnimationData) * cm::gpu::MAX_OBJECTS);

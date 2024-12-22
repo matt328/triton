@@ -7,43 +7,41 @@
 #include "mem/Buffer.hpp"
 #include "pipeline/IndirectPipeline.hpp"
 
-namespace tr::gfx {
-   class VkResourceManager;
-}
+namespace tr {
 
-namespace tr::gfx::task {
+class VkResourceManager;
 
-   class CubeRenderTask final : public IRenderTask {
-    public:
-      CubeRenderTask(std::shared_ptr<VkResourceManager> newResourceManager,
-                     std::shared_ptr<geo::GeometryFactory> newGeometryFactory,
-                     std::shared_ptr<pipe::IndirectPipeline> newPipeline);
+class CubeRenderTask final : public IRenderTask {
+ public:
+   CubeRenderTask(std::shared_ptr<VkResourceManager> newResourceManager,
+                  std::shared_ptr<GeometryFactory> newGeometryFactory,
+                  std::shared_ptr<IndirectPipeline> newPipeline);
 
-      ~CubeRenderTask() override = default;
+   ~CubeRenderTask() override = default;
 
-      CubeRenderTask(const CubeRenderTask&) = delete;
-      CubeRenderTask(CubeRenderTask&&) = delete;
-      auto operator=(const CubeRenderTask&) -> CubeRenderTask& = delete;
-      auto operator=(CubeRenderTask&&) -> CubeRenderTask& = delete;
+   CubeRenderTask(const CubeRenderTask&) = delete;
+   CubeRenderTask(CubeRenderTask&&) = delete;
+   auto operator=(const CubeRenderTask&) -> CubeRenderTask& = delete;
+   auto operator=(CubeRenderTask&&) -> CubeRenderTask& = delete;
 
-      auto record(vk::raii::CommandBuffer& commandBuffer) -> void override;
+   auto record(vk::raii::CommandBuffer& commandBuffer) -> void override;
 
-    private:
-      std::shared_ptr<VkResourceManager> resourceManager;
-      std::shared_ptr<geo::GeometryFactory> geometryFactory;
-      std::shared_ptr<pipe::IndirectPipeline> pipeline;
+ private:
+   std::shared_ptr<VkResourceManager> resourceManager;
+   std::shared_ptr<GeometryFactory> geometryFactory;
+   std::shared_ptr<IndirectPipeline> pipeline;
 
-      cm::MeshHandle meshHandle = -1;
+   cm::MeshHandle meshHandle = -1;
 
-      std::unique_ptr<mem::Buffer> indirectBuffer;
-      std::unique_ptr<mem::Buffer> instanceBuffer;
+   std::unique_ptr<Buffer> indirectBuffer;
+   std::unique_ptr<Buffer> instanceBuffer;
 
-      std::unique_ptr<mem::Buffer> cameraDataBuffer;
+   std::unique_ptr<Buffer> cameraDataBuffer;
 
-      tr::cm::gpu::IndirectPushConstants pushConstants;
+   tr::cm::gpu::IndirectPushConstants pushConstants;
 
-      vk::Viewport viewport;
-      vk::Rect2D snezzor;
-   };
+   vk::Viewport viewport;
+   vk::Rect2D snezzor;
+};
 
 }

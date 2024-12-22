@@ -7,7 +7,7 @@
 #include <vk_mem_alloc.h>
 #include <vk_mem_alloc.hpp>
 
-namespace tr::gfx::mem {
+namespace tr {
 
    Allocator::Allocator(const vma::AllocatorCreateInfo& createInfo, const vk::raii::Device& device)
        : device{device} {

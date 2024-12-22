@@ -4,7 +4,7 @@
 
 #include <vk/Swapchain.hpp>
 
-namespace tr::gfx::task {
+namespace tr {
    class IFrameManager {
     public:
       IFrameManager() = default;

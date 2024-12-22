@@ -3,7 +3,7 @@
 #include "vk/Context.hpp"
 #include "vk/Device.hpp"
 
-namespace tr::gfx {
+namespace tr {
 
    DefaultDebugManager::DefaultDebugManager(std::shared_ptr<Context> newContext)
        : context{std::move(newContext)} {

@@ -7,12 +7,12 @@
 
 namespace tr::cm {
    ImGuiSystem::ImGuiSystem(const std::shared_ptr<IWindow>& window,
-                            const std::shared_ptr<gfx::Instance>& instance,
-                            const std::shared_ptr<gfx::Device>& device,
-                            const std::shared_ptr<gfx::PhysicalDevice>& physicalDevice,
-                            const std::shared_ptr<gfx::queue::Graphics>& graphicsQueue,
-                            const std::shared_ptr<gfx::Swapchain>& swapchain,
-                            std::shared_ptr<gfx::VkResourceManager> newResourceManager)
+                            const std::shared_ptr<Instance>& instance,
+                            const std::shared_ptr<Device>& device,
+                            const std::shared_ptr<PhysicalDevice>& physicalDevice,
+                            const std::shared_ptr<queue::Graphics>& graphicsQueue,
+                            const std::shared_ptr<Swapchain>& swapchain,
+                            std::shared_ptr<VkResourceManager> newResourceManager)
        : resourceManager{std::move(newResourceManager)} {
       Log.trace("Creating ImGuiSystem");
 

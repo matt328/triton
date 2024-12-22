@@ -3,12 +3,12 @@
 #include <gfx/IRenderScheduler.hpp>
 #include <task/IFrameManager.hpp>
 
-namespace tr::gfx {
+namespace tr {
 
    class NewRenderContext final : public IRenderContext {
     public:
-      NewRenderContext(std::shared_ptr<task::IFrameManager> newFrameManager,
-                       std::shared_ptr<task::IRenderScheduler> newRenderScheduler,
+      NewRenderContext(std::shared_ptr<IFrameManager> newFrameManager,
+                       std::shared_ptr<IRenderScheduler> newRenderScheduler,
                        std::shared_ptr<queue::Graphics> newGraphicsQueue);
       ~NewRenderContext() override;
 
@@ -22,8 +22,8 @@ namespace tr::gfx {
       void setRenderData(const cm::gpu::RenderData& renderData) override;
 
     private:
-      std::shared_ptr<task::IFrameManager> frameManager;
-      std::shared_ptr<task::IRenderScheduler> renderScheduler;
+      std::shared_ptr<IFrameManager> frameManager;
+      std::shared_ptr<IRenderScheduler> renderScheduler;
       std::shared_ptr<queue::Graphics> graphicsQueue;
    };
 

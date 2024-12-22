@@ -15,7 +15,7 @@
 
 // NOLINTBEGIN
 
-namespace tr::gfx::geo {
+namespace tr {
 
    using cm::sdf::VoxelDebugger;
 

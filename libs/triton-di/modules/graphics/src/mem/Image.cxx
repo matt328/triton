@@ -1,6 +1,6 @@
 #include "Image.hpp"
 
-namespace tr::gfx::mem {
+namespace tr {
    Image::Image(const vma::Allocator& newAllocator,
                 const vk::Image newImage,
                 const vma::Allocation newAllocation)

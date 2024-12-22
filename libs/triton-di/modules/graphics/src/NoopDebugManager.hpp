@@ -1,7 +1,7 @@
 #pragma once
 #include "IDebugManager.hpp"
 
-namespace tr::gfx {
+namespace tr {
 
    class NoopDebugManager final : public IDebugManager {
     public:

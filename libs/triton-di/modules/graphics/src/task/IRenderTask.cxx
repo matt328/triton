@@ -1,16 +1,16 @@
 #include "IRenderTask.hpp"
 
-namespace tr::gfx::task {
+namespace tr {
 
-   [[nodiscard]] auto IRenderTask::getBarriers() const -> std::vector<graph::Barrier> {
+   [[nodiscard]] auto IRendergetBarriers() const -> std::vector<Barrier> {
       return pendingBarriers;
    }
 
-   auto IRenderTask::addBarrier(graph::Barrier barrier) -> void {
+   auto IRenderaddBarrier(Barrier barrier) -> void {
       pendingBarriers.push_back(barrier);
    }
 
-   auto getResources() -> std::vector<graph::Resource>& {
+   auto getResources() -> std::vector<Resource>& {
       return resources;
    }
 

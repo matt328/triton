@@ -9,7 +9,7 @@
 #include <dwmapi.h>  // For DWMWINDOWATTRIBUTE
 #endif
 
-namespace tr::gfx {
+namespace tr {
 
    constexpr int MinWidth = 320;
    constexpr int MinHeight = 200;

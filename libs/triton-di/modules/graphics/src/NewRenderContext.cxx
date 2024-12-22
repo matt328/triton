@@ -1,8 +1,8 @@
 #include "NewRenderContext.hpp"
 
-namespace tr::gfx {
-   NewRenderContext::NewRenderContext(std::shared_ptr<task::IFrameManager> newFrameManager,
-                                      std::shared_ptr<task::IRenderScheduler> newRenderScheduler,
+namespace tr {
+   NewRenderContext::NewRenderContext(std::shared_ptr<IFrameManager> newFrameManager,
+                                      std::shared_ptr<IRenderScheduler> newRenderScheduler,
                                       std::shared_ptr<queue::Graphics> newGraphicsQueue)
        : frameManager{std::move(newFrameManager)},
          renderScheduler{std::move(newRenderScheduler)},

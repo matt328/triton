@@ -1,10 +1,10 @@
 #pragma once
 
-namespace tr::gfx::task {
+namespace tr {
    class IRenderTask;
 }
 
-namespace tr::gfx::task::graph {
+namespace tr {
 
    struct TaskNode {
       std::string name;

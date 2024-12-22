@@ -2,7 +2,7 @@
 #include "Device.hpp"
 #include "PhysicalDevice.hpp"
 
-namespace tr::gfx {
+namespace tr {
 
    enum class ImageAcquireResult : uint8_t {
       Success,

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace tr::gfx::Helpers {
+namespace tr::Helpers {
 
    // Structs
    struct QueueFamilyIndices {

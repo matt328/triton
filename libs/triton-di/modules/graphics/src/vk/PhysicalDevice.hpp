@@ -3,7 +3,7 @@
 #include "QueueFamilyIndices.hpp"
 #include "SwapchainSupportDetails.hpp"
 
-namespace tr::gfx {
+namespace tr {
    class Surface;
 
    class PhysicalDevice {

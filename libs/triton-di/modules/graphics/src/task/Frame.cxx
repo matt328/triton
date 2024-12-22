@@ -1,6 +1,6 @@
 #include "Frame.hpp"
 
-namespace tr::gfx {
+namespace tr {
 
    Frame::Frame(const uint8_t newIndex,
                 vk::raii::Fence&& newRenderFence,

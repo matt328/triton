@@ -13,13 +13,13 @@
 #include "Frame.hpp"
 #include "renderer/IRenderer.hpp"
 
-namespace tr::gfx {
+namespace tr {
 
    DefaultRenderContext::DefaultRenderContext(
        std::shared_ptr<IGraphicsDevice> newGraphicsDevice,
-       std::shared_ptr<sb::ILayoutFactory> newLayoutFactory,
-       std::shared_ptr<sb::IShaderBindingFactory> newShaderBindingFactory,
-       std::shared_ptr<pipe::IShaderCompiler> newShaderCompiler,
+       std::shared_ptr<ILayoutFactory> newLayoutFactory,
+       std::shared_ptr<IShaderBindingFactory> newShaderBindingFactory,
+       std::shared_ptr<IShaderCompiler> newShaderCompiler,
        std::shared_ptr<rd::RendererFactory> newRendererFactory,
        std::shared_ptr<gp::IGameplaySystem> newGameplaySystem,
        std::shared_ptr<IGuiSystem> newGuiSystem,
@@ -41,14 +41,14 @@ namespace tr::gfx {
 
       // TODO(matt) These shouldn't be empty
       auto defaultSetLayouts = std::vector<vk::DescriptorSetLayout>{};
-      defaultSetLayouts.push_back(layoutFactory->getVkLayout(sb::LayoutHandle::Bindless));
-      defaultSetLayouts.push_back(layoutFactory->getVkLayout(sb::LayoutHandle::ObjectData));
-      defaultSetLayouts.push_back(layoutFactory->getVkLayout(sb::LayoutHandle::PerFrame));
+      defaultSetLayouts.push_back(layoutFactory->getVkLayout(LayoutHandle::Bindless));
+      defaultSetLayouts.push_back(layoutFactory->getVkLayout(LayoutHandle::ObjectData));
+      defaultSetLayouts.push_back(layoutFactory->getVkLayout(LayoutHandle::PerFrame));
 
-      auto vec = std::vector{geo::VertexComponent::Position,
-                             geo::VertexComponent::Color,
-                             geo::VertexComponent::UV,
-                             geo::VertexComponent::Normal};
+      auto vec = std::vector{VertexComponent::Position,
+                             VertexComponent::Color,
+                             VertexComponent::UV,
+                             VertexComponent::Normal};
 
       defaultRenderer = rendererFactory->createRenderer(
           rd::RendererConfig{.rendererType = rd::RendererType::StaticModel,

@@ -1,6 +1,6 @@
 #include "gfx/QueueTypes.hpp"
 
-namespace tr::gfx::queue {
+namespace tr::queue {
    Graphics::Graphics(const std::shared_ptr<Device>& device)
        : queueFamilyIndex(device->getGraphicsQueueFamily()) {
       queue = device->createGraphicsQueue();

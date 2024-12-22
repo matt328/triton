@@ -2,7 +2,7 @@
 #include "Instance.hpp"
 #include <tr/IWindow.hpp>
 
-namespace tr::gfx {
+namespace tr {
 
    class Surface {
     public:
