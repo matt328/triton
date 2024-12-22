@@ -10,4 +10,9 @@ namespace tr::gfx::task {
       pendingBarriers.push_back(barrier);
    }
 
+   auto getResources() -> std::vector<graph::Resource>& {
+      return resources;
+   }
+
 }
+

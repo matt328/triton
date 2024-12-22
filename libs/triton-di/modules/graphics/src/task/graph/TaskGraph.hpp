@@ -38,8 +38,8 @@
 namespace tr::gfx::task::graph {
 
    struct BarrierConfig {
-      IRenderTask& producer;
-      IRenderTask& consumer;
+      IRenderTask* producer;
+      IRenderTask* consumer;
    };
 
    class TaskGraph {

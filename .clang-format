@@ -2,7 +2,7 @@ BasedOnStyle: Microsoft
 PointerAlignment: Left
 Standard: c++17
 AlwaysBreakTemplateDeclarations: Yes
-NamespaceIndentation: All
+NamespaceIndentation: None
 ForEachMacros: [TEST_CLASS, TEST_METHOD]
 IndentWidth: 3
 IndentCaseLabels: true
