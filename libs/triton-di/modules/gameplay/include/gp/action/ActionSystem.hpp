@@ -8,7 +8,7 @@ namespace tr {
    class IEventBus;
 }
 
-namespace tr::gp {
+namespace tr {
 
    class ActionSystem final : public IActionSystem {
     public:

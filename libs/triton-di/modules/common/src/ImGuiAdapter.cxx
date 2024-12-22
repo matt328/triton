@@ -1,6 +1,6 @@
 #include "cm/ImGuiAdapter.hpp"
 
-namespace tr::cm {
+namespace tr {
 
    auto ImGuiAdapter::needsKeyboard() -> bool {
       return ImGui::GetIO().WantCaptureKeyboard || ImGui::GetIO().WantTextInput;

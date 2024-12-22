@@ -56,7 +56,7 @@ class VkResourceManager {
    [[nodiscard]] auto getImageView(const std::string& id) const -> const vk::ImageView&;
    [[nodiscard]] auto getImageExtent(const std::string& id) const -> const vk::Extent2D;
 
-   [[nodiscard]] auto getMesh(cm::MeshHandle handle) -> const ImmutableMesh&;
+   [[nodiscard]] auto getMesh(MeshHandle handle) -> const ImmutableMesh&;
 
    /// For now, VkResourceManager doesn't centrally manage buffers, but gives out unique_ptrs
    /// and they'll clean themselves up if the ptr goes out of scope.
@@ -66,7 +66,7 @@ class VkResourceManager {
 
    [[nodiscard]] auto createIndirectBuffer(size_t size) -> std::unique_ptr<Buffer>;
 
-   auto asyncUpload(const GeometryData& geometryData) -> cm::MeshHandle;
+   auto asyncUpload(const GeometryData& geometryData) -> MeshHandle;
 
    auto destroyImage(const std::string& id) -> void;
 

@@ -1,7 +1,7 @@
 #include "gp/Registry.hpp"
 #include <entt/entity/fwd.hpp>
 
-namespace tr::gp {
+namespace tr {
    Registry::Registry() {
       registry = std::make_unique<entt::registry>();
    }

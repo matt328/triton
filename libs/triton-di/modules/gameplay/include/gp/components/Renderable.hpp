@@ -2,8 +2,8 @@
 
 #include "cm/Handles.hpp"
 
-namespace tr::gp::cmp {
+namespace tr {
    struct Renderable {
-      std::vector<cm::MeshData> meshData;
+      std::vector<MeshData> meshData;
    };
 }

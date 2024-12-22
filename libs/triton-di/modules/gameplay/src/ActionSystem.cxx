@@ -1,7 +1,7 @@
 #include "gp/action/ActionSystem.hpp"
 #include "tr/IEventBus.hpp"
 
-namespace tr::gp {
+namespace tr {
 
    ActionSystem::ActionSystem(std::shared_ptr<IEventBus> newEventBus)
        : eventBus{std::move(newEventBus)} {

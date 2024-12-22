@@ -16,7 +16,7 @@ namespace tr {
    class IWindow;
 }
 
-namespace tr::cm {
+namespace tr {
    class ImGuiSystem final : public IGuiSystem {
     public:
       ImGuiSystem(const std::shared_ptr<IWindow>& window,

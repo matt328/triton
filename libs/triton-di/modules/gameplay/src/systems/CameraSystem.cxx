@@ -5,7 +5,7 @@
 
 #include "cm/GlmToString.hpp"
 
-namespace tr::gp::sys {
+namespace tr {
 
    constexpr auto CameraSpeed = .010f;
    constexpr auto MouseSensitivity = 0.025f;
@@ -23,7 +23,7 @@ namespace tr::gp::sys {
    }
 
    auto CameraSystem::handleAction(const Action& action) const -> void {
-      for (const auto view = registry->getRegistry().view<cmp::Camera>();
+      for (const auto view = registry->getRegistry().view<Camera>();
            auto [entity, cam] : view.each()) {
          if (action.stateType == StateType::State) {
             handleStateAction(action, cam);
@@ -33,7 +33,7 @@ namespace tr::gp::sys {
       }
    }
 
-   auto CameraSystem::handleStateAction(const Action& action, cmp::Camera& cam) -> void {
+   auto CameraSystem::handleStateAction(const Action& action, Camera& cam) -> void {
       const auto value = std::get<bool>(action.value);
       switch (action.actionType) {
          case ActionType::StrafeLeft:
@@ -52,7 +52,7 @@ namespace tr::gp::sys {
             break;
       }
    }
-   auto CameraSystem::handleRangeAction(const Action& action, cmp::Camera& cam) -> void {
+   auto CameraSystem::handleRangeAction(const Action& action, Camera& cam) -> void {
       const auto value = std::get<float>(action.value);
       switch (action.actionType) {
          case ActionType::LookHorizontal:
@@ -70,9 +70,9 @@ namespace tr::gp::sys {
 
    void CameraSystem::fixedUpdate() const {
       auto& reg = registry->getRegistry();
-      const auto view = reg.view<cmp::Camera>();
+      const auto view = reg.view<Camera>();
 
-      const auto [width, height] = reg.ctx().get<const cmp::WindowDimensions>();
+      const auto [width, height] = reg.ctx().get<const WindowDimensions>();
 
       for (auto [entity, cam] : view.each()) {
 
@@ -83,7 +83,7 @@ namespace tr::gp::sys {
          cam.front = normalize(direction);
          cam.right = normalize(cross(cam.front, glm::vec3(0.0f, 1.0f, 0.0f)));
 
-         glm::mat3 const rotationMatrix{cam.right, cmp::worldUp, cam.front};
+         glm::mat3 const rotationMatrix{cam.right, worldUp, cam.front};
 
          const auto rotatedVelocity = rotationMatrix * cam.velocity;
 

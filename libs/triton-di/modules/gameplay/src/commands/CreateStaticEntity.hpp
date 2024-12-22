@@ -6,7 +6,7 @@
 #include "gp/components/Renderable.hpp"
 #include "gp/components/EditorInfo.hpp"
 
-namespace tr::gp::cmd {
+namespace tr {
    class CreateStaticEntityCommand final
        : public ICommand<entt::registry&, const std::shared_ptr<ResourceManager>&> {
     public:
@@ -19,9 +19,9 @@ namespace tr::gp::cmd {
                    const std::shared_ptr<ResourceManager>& resourceManager) const override {
          const auto modelData = resourceManager->createModel(std::filesystem::path{modelFilename});
          const auto entity = registry.create();
-         registry.emplace<cmp::Renderable>(entity, std::vector{modelData.meshData});
-         registry.emplace<cmp::Transform>(entity);
-         registry.emplace<cmp::EditorInfo>(entity, entityName);
+         registry.emplace<Renderable>(entity, std::vector{modelData.meshData});
+         registry.emplace<Transform>(entity);
+         registry.emplace<EditorInfo>(entity, entityName);
       }
 
     private:

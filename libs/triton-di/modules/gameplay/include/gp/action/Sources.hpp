@@ -2,7 +2,7 @@
 
 #include "tr/Inputs.hpp"
 
-namespace tr::gp {
+namespace tr {
    enum class SourceType : uint32_t {
       Boolean = 0,
       Float

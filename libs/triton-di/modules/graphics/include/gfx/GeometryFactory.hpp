@@ -106,8 +106,8 @@ namespace tr {
     private:
       RegularCellCache cache{Size * 10};
 
-      cm::MapKey geometryKey{};
-      cm::MapKey imageKey{};
+      MapKey geometryKey{};
+      MapKey imageKey{};
 
       std::unordered_map<GeometryHandle, GeometryData> geometryDataMap;
       std::unordered_map<ImageHandle, as::ImageData> imageDataMap;

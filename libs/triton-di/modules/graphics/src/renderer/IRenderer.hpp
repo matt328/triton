@@ -4,7 +4,7 @@ namespace tr {
    class ShaderBinding;
 }
 
-namespace tr::cm::gpu {
+namespace tr {
    struct MeshData;
 }
 
@@ -25,7 +25,7 @@ namespace tr {
           uint32_t setIndex,
           const std::unique_ptr<vk::raii::CommandBuffer>& commandBuffer) = 0;
       virtual void render(const std::unique_ptr<vk::raii::CommandBuffer>& commandBuffer,
-                          std::span<cm::gpu::MeshData> meshDataList,
+                          std::span<::MeshData> meshDataList,
                           const std::tuple<vk::Viewport, vk::Rect2D>& vpScissor) = 0;
    };
 }

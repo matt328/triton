@@ -5,34 +5,34 @@
 #include <gp/components/Camera.hpp>
 #include <gp/components/Resources.hpp>
 
-namespace tr::gp::cmd {
-   class CreateCamera final
-       : public ICommand<entt::registry&, const std::shared_ptr<ResourceManager>&> {
-    public:
-      explicit CreateCamera(const cmp::CameraInfo& newCameraInfo) : cameraInfo{newCameraInfo} {};
-      ~CreateCamera() override = default;
+namespace tr {
+class CreateCamera final
+    : public ICommand<entt::registry&, const std::shared_ptr<ResourceManager>&> {
+ public:
+   explicit CreateCamera(const CameraInfo& newCameraInfo) : cameraInfo{newCameraInfo} {};
+   ~CreateCamera() override = default;
 
-      CreateCamera(const CreateCamera& other) = delete;
-      CreateCamera(CreateCamera&& other) noexcept = delete;
-      auto operator=(const CreateCamera& other) -> CreateCamera& = delete;
-      auto operator=(CreateCamera&& other) noexcept -> CreateCamera& = delete;
+   CreateCamera(const CreateCamera& other) = delete;
+   CreateCamera(CreateCamera&& other) noexcept = delete;
+   auto operator=(const CreateCamera& other) -> CreateCamera& = delete;
+   auto operator=(CreateCamera&& other) noexcept -> CreateCamera& = delete;
 
-      void execute(entt::registry& registry,
-                   [[maybe_unused]] const std::shared_ptr<ResourceManager>& resourceManager)
-          const override {
-         const auto entity = registry.create();
-         registry.emplace<cmp::Camera>(entity,
-                                       cameraInfo.width,
-                                       cameraInfo.height,
-                                       cameraInfo.fov,
-                                       cameraInfo.nearClip,
-                                       cameraInfo.farClip,
-                                       cameraInfo.position);
-         registry.emplace<cmp::EditorInfo>(entity, "Default Camera");
-         registry.ctx().insert_or_assign<cmp::CurrentCamera>(cmp::CurrentCamera{entity});
-      }
+   void execute(
+       entt::registry& registry,
+       [[maybe_unused]] const std::shared_ptr<ResourceManager>& resourceManager) const override {
+      const auto entity = registry.create();
+      registry.emplace<Camera>(entity,
+                               cameraInfo.width,
+                               cameraInfo.height,
+                               cameraInfo.fov,
+                               cameraInfo.nearClip,
+                               cameraInfo.farClip,
+                               cameraInfo.position);
+      registry.emplace<EditorInfo>(entity, "Default Camera");
+      registry.ctx().insert_or_assign<CurrentCamera>(CurrentCamera{entity});
+   }
 
-    private:
-      cmp::CameraInfo cameraInfo{};
-   };
+ private:
+   CameraInfo cameraInfo{};
+};
 }

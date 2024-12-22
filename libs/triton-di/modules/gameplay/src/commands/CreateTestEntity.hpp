@@ -8,7 +8,7 @@
 #include "gp/components/Transform.hpp"
 #include "gfx/ResourceManager.hpp"
 
-namespace tr::gp {
+namespace tr {
    class CreateTestEntityCommand final
        : public ICommand<entt::registry&, const std::shared_ptr<ResourceManager>&> {
     public:
@@ -19,8 +19,8 @@ namespace tr::gp {
                    [[maybe_unused]] const std::shared_ptr<ResourceManager>& resourceManager)
           const override {
          const auto entity = registry.create();
-         registry.emplace<cmp::EditorInfo>(entity, name);
-         registry.emplace<cmp::Transform>(entity);
+         registry.emplace<EditorInfo>(entity, name);
+         registry.emplace<Transform>(entity);
       }
 
     private:

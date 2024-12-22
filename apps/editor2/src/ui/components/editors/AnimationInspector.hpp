@@ -2,7 +2,7 @@
 #include <gp/components/Animation.hpp>
 
 namespace ed {
-inline auto renderAnimationInspector(tr::gp::cmp::Animation* animation) -> void {
+inline auto renderAnimationInspector(tr::Animation* animation) -> void {
    if (ImGui::CollapsingHeader("Animation", ImGuiTreeNodeFlags_DefaultOpen)) {
       static size_t itemCurrentIndex{};
 

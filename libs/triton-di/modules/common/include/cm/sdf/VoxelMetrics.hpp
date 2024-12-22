@@ -1,7 +1,7 @@
 #pragma once
 
 #include "as/Vertex.hpp"
-namespace tr::cm::sdf {
+namespace tr {
 
    static constexpr uint8_t BitCount = 8;
 
@@ -66,4 +66,4 @@ namespace tr::cm::sdf {
       std::map<std::string, CellData> activeCubes;
    };
 
-} // namespace tr::cm::sdf
+} // namespace tr

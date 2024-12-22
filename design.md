@@ -263,7 +263,7 @@ classDiagram
         class GameplayFacade {
             +GameplaySystem& gameplaySystem
             +RenderContext& renderer
-            create*Entity() cm:: EntityType
+            create*Entity()  EntityType
             setCurrentCamera() void
         }
     }
@@ -273,7 +273,7 @@ classDiagram
             +std:: unique_ptr~EntitySystem~ entitySystem
             +std:: unique_ptr~ActionSystem~ actionSystem
             +std:: unique_ptr~AnimationFactory~ animationFactory
-            create*Entity() cm:: EntityType
+            create*Entity()  EntityType
             fixedUpdate() void
             update() void
         }
@@ -298,10 +298,10 @@ classDiagram
             +std:: unique_ptr~GeometryFactory~ geometryFactory
             +std:: vector~ImmutableMesh~ meshList
             +std:: vector~Textures::Texture~ textureList
-            getMesh(cm:: MeshHandle) ImmutableMesh&
-            getTextures() cm:: LockableResource~std::vector~vk::DescriptorImageInfo~~
-            createModel(const std:: filesystem:: path&) cm:: ModelData
-            createStaticMesh(const geo:: GeometryData& geometry) cm:: MeshHandle
+            getMesh( MeshHandle) ImmutableMesh&
+            getTextures()  LockableResource~std::vector~vk::DescriptorImageInfo~~
+            createModel(const std:: filesystem:: path&)  ModelData
+            createStaticMesh(const geo:: GeometryData& geometry)  MeshHandle
         }
 
         class FrameManager {

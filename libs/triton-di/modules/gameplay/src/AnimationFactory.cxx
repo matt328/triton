@@ -1,7 +1,7 @@
 #include "gp/AnimationFactory.hpp"
 
-namespace tr::gp {
-   auto AnimationFactory::loadSkeleton(const std::filesystem::path& path) -> cm::SkeletonHandle {
+namespace tr {
+   auto AnimationFactory::loadSkeleton(const std::filesystem::path& path) -> SkeletonHandle {
       const auto filename = path.string();
 
       if (const auto it = loadedSkeletons.find(filename); it != loadedSkeletons.end()) {
@@ -31,7 +31,7 @@ namespace tr::gp {
       return key;
    }
 
-   auto AnimationFactory::loadAnimation(const std::filesystem::path& path) -> cm::AnimationHandle {
+   auto AnimationFactory::loadAnimation(const std::filesystem::path& path) -> AnimationHandle {
       const auto filename = path.string();
 
       if (const auto it = loadedAnimations.find(filename); it != loadedAnimations.end()) {

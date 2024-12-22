@@ -49,7 +49,7 @@ CubeRenderTask::CubeRenderTask(std::shared_ptr<VkResourceManager> newResourceMan
                                                   "InstanceData");
 
    cameraDataBuffer = resourceManager->createBuffer(
-       sizeof(cm::gpu::CameraData),
+       sizeof(CameraData),
        vk::BufferUsageFlagBits::eStorageBuffer | vk::BufferUsageFlagBits::eTransferDst |
            vk::BufferUsageFlagBits::eShaderDeviceAddress,
        "CameraData");
@@ -59,13 +59,13 @@ CubeRenderTask::CubeRenderTask(std::shared_ptr<VkResourceManager> newResourceMan
    const auto projection =
        glm::perspective(glm::radians(60.f), static_cast<float>(1920 / 1080), 0.1f, 10000.0f);
 
-   const auto cameraData = cm::gpu::CameraData{.view = view,
-                                               .proj = projection,
-                                               .viewProj = view * projection,
-                                               .position = glm::vec4{0.f, 0.f, 0.f, 1.f}};
+   const auto cameraData = CameraData{.view = view,
+                                      .proj = projection,
+                                      .viewProj = view * projection,
+                                      .position = glm::vec4{0.f, 0.f, 0.f, 1.f}};
 
    cameraDataBuffer->mapBuffer();
-   cameraDataBuffer->updateBufferValue(&cameraData, sizeof(cm::gpu::CameraData));
+   cameraDataBuffer->updateBufferValue(&cameraData, sizeof(CameraData));
    cameraDataBuffer->unmapBuffer();
 
    const auto instanceData =
@@ -75,10 +75,9 @@ CubeRenderTask::CubeRenderTask(std::shared_ptr<VkResourceManager> newResourceMan
    instanceBuffer->updateBufferValue(&instanceData, sizeof(InstanceData));
    instanceBuffer->unmapBuffer();
 
-   pushConstants =
-       cm::gpu::IndirectPushConstants{.drawID = 0,
-                                      .baseAddress = instanceBuffer->getDeviceAddress(),
-                                      .cameraDataAddress = cameraDataBuffer->getDeviceAddress()};
+   pushConstants = IndirectPushConstants{.drawID = 0,
+                                         .baseAddress = instanceBuffer->getDeviceAddress(),
+                                         .cameraDataAddress = cameraDataBuffer->getDeviceAddress()};
 
    viewport = vk::Viewport{
        .width = 1920,
@@ -102,10 +101,10 @@ auto CubeRenderTask::record(vk::raii::CommandBuffer& commandBuffer) -> void {
    commandBuffer.bindVertexBuffers(0, mesh.getVertexBuffer()->getBuffer(), {0});
    commandBuffer.bindIndexBuffer(mesh.getIndexBuffer()->getBuffer(), 0, vk::IndexType::eUint32);
 
-   commandBuffer.pushConstants<cm::gpu::IndirectPushConstants>(pipeline->getPipelineLayout(),
-                                                               vk::ShaderStageFlagBits::eVertex,
-                                                               0,
-                                                               pushConstants);
+   commandBuffer.pushConstants<IndirectPushConstants>(pipeline->getPipelineLayout(),
+                                                      vk::ShaderStageFlagBits::eVertex,
+                                                      0,
+                                                      pushConstants);
 
    commandBuffer.drawIndexedIndirect(indirectBuffer->getBuffer(),
                                      0,

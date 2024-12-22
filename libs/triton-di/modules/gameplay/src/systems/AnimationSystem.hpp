@@ -2,7 +2,7 @@
 #include <gp/AnimationFactory.hpp>
 #include <gp/Registry.hpp>
 
-namespace tr::gp::sys {
+namespace tr {
 
    class AnimationSystem {
     public:

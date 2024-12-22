@@ -1,6 +1,6 @@
 #pragma once
 
-namespace tr::cm {
+namespace tr {
    struct MapKey {
 
       MapKey()

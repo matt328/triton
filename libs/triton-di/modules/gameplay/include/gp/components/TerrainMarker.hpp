@@ -1,6 +1,6 @@
 #pragma once
 
-namespace tr::gp::cmp {
+namespace tr {
    struct TerrainMarker {
       uint32_t width;
    };

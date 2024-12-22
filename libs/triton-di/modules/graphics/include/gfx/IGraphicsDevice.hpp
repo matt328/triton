@@ -80,13 +80,13 @@ class IGraphicsDevice {
 
    [[nodiscard]] virtual auto createTracyContext(std::string_view name,
                                                  const vk::raii::CommandBuffer& commandBuffer)
-       -> cm::TracyContextPtr = 0;
+       -> TracyContextPtr = 0;
 
    [[nodiscard]] virtual auto uploadVertexData(const GeometryData& geometryData)
-       -> cm::MeshHandle = 0;
+       -> MeshHandle = 0;
 
    [[nodiscard]] virtual auto uploadImageData(const as::ImageData& imageData)
-       -> cm::TextureHandle = 0;
+       -> TextureHandle = 0;
 
    [[nodiscard]] virtual auto findDepthFormat() -> vk::Format = 0;
 
@@ -96,9 +96,9 @@ class IGraphicsDevice {
    virtual auto waitIdle() -> void = 0;
 
    [[nodiscard]] virtual auto getTextures() const
-       -> cm::LockableResource<const std::vector<vk::DescriptorImageInfo>> = 0;
+       -> LockableResource<const std::vector<vk::DescriptorImageInfo>> = 0;
 
-   [[nodiscard]] virtual auto getMesh(cm::MeshHandle meshHandle) -> ImmutableMesh& = 0;
+   [[nodiscard]] virtual auto getMesh(MeshHandle meshHandle) -> ImmutableMesh& = 0;
 
    virtual void transitionImage(const vk::raii::CommandBuffer& cmd,
                                 const vk::Image& image,
