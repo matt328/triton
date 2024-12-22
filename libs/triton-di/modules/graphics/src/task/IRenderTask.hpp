@@ -18,6 +18,7 @@ namespace tr::gfx::task {
       [[nodiscard]] auto getBarriers() const -> std::vector<graph::Barrier>;
 
       auto addBarrier(graph::Barrier barrier) -> void;
+      [[nodiscard]] auto getResources() -> std::vector<graph::Resource>&;
 
     private:
       std::vector<graph::Barrier> pendingBarriers;
