@@ -2,27 +2,27 @@
 
 #include "ModalDialog.hpp"
 
-namespace ed::ui::cmp {
+namespace ed {
 
-   class ModalDialog;
+class ModalDialog;
 
-   class DialogManager {
-    public:
-      DialogManager() = default;
-      ~DialogManager() = default;
+class DialogManager {
+ public:
+   DialogManager() = default;
+   ~DialogManager() = default;
 
-      DialogManager(const DialogManager&) = default;
-      DialogManager(DialogManager&&) = delete;
-      auto operator=(const DialogManager&) -> DialogManager& = default;
-      auto operator=(DialogManager&&) -> DialogManager& = delete;
+   DialogManager(const DialogManager&) = default;
+   DialogManager(DialogManager&&) = delete;
+   auto operator=(const DialogManager&) -> DialogManager& = default;
+   auto operator=(DialogManager&&) -> DialogManager& = delete;
 
-      void render();
-      void addDialog(const std::string& dialogName, std::unique_ptr<ModalDialog> dialog);
-      void setOpen(const std::string& dialogName);
-      void update();
+   void render();
+   void addDialog(const std::string& dialogName, std::unique_ptr<ModalDialog> dialog);
+   void setOpen(const std::string& dialogName);
+   void update();
 
-    private:
-      std::unordered_map<std::string, std::unique_ptr<cmp::ModalDialog>> dialogMap{};
-   };
+ private:
+   std::unordered_map<std::string, std::unique_ptr<ModalDialog>> dialogMap;
+};
 
 }
