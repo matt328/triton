@@ -20,4 +20,6 @@ FixNamespaceComments: false
 SortIncludes: Never
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
 InsertNewlineAtEOF: true
+KeepEmptyLines:
+  AtEndOfFile: true
 
