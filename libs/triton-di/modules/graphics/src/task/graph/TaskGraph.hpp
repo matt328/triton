@@ -37,27 +37,28 @@
 
 namespace tr {
 
-   struct BarrierConfig {
-      IRenderTask* producer;
-      IRenderTask* consumer;
-   };
+struct BarrierConfig {
+   IRenderTask* producer;
+   IRenderTask* consumer;
+};
 
-   class TaskGraph {
-    public:
-      TaskGraph() = default;
-      ~TaskGraph() = default;
+class TaskGraph {
+ public:
+   TaskGraph() = default;
+   ~TaskGraph() = default;
 
-      TaskGraph(TaskGraph&& taskGraph) = delete;
-      TaskGraph(const TaskGraph& taskGraph) = delete;
-      auto operator=(TaskGraph&& taskGraph) = delete;
-      auto operator=(const TaskGraph& taskGraph) = delete;
+   TaskGraph(TaskGraph&& taskGraph) = delete;
+   TaskGraph(const TaskGraph& taskGraph) = delete;
+   auto operator=(TaskGraph&& taskGraph) = delete;
+   auto operator=(const TaskGraph& taskGraph) = delete;
 
-      auto resolveDependencies() -> void;
+   auto resolveDependencies() -> void;
 
-    private:
-      std::vector<TaskNode> taskNodes;
+ private:
+   std::vector<TaskNode> taskNodes;
 
-      /// Inserts a Barrier here.
-      auto insertBarrier(const BarrierConfig& barrierConfig) -> void;
-   };
+   /// Inserts a Barrier here.
+   auto insertBarrier(const BarrierConfig& barrierConfig) -> void;
+};
 }
+

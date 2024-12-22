@@ -6,7 +6,7 @@
 namespace tr {
 
 // task render -> (dependency) compute
-auto TaskresolveDependencies() -> void {
+auto TaskGraph::resolveDependencies() -> void {
 
    for (const auto& node : taskNodes) {
       for (auto* dep : node.dependencies) {
@@ -15,7 +15,7 @@ auto TaskresolveDependencies() -> void {
    }
 }
 
-auto TaskinsertBarrier(const BarrierConfig& barrierConfig) -> void {
+auto TaskGraph::insertBarrier(const BarrierConfig& barrierConfig) -> void {
    /*
       - figure out what the consumer's inputs are, and see if they are among the producer's
       outputs
@@ -37,3 +37,4 @@ auto TaskinsertBarrier(const BarrierConfig& barrierConfig) -> void {
 }
 
 }
+
