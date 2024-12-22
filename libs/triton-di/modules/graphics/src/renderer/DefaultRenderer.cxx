@@ -27,7 +27,7 @@ namespace tr {
    }
 
    void DefaultRenderer::render(const std::unique_ptr<vk::raii::CommandBuffer>& commandBuffer,
-                                std::span<cm::gpu::MeshData> meshDataList,
+                                std::span<::MeshData> meshDataList,
                                 const std::tuple<vk::Viewport, vk::Rect2D>& vpScissor) {
       const auto [vp, scissor] = vpScissor;
       commandBuffer->setViewportWithCount(vp);

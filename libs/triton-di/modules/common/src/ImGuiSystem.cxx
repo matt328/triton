@@ -5,7 +5,7 @@
 #include <vk/Instance.hpp>
 #include <vk/Swapchain.hpp>
 
-namespace tr::cm {
+namespace tr {
    ImGuiSystem::ImGuiSystem(const std::shared_ptr<IWindow>& window,
                             const std::shared_ptr<Instance>& instance,
                             const std::shared_ptr<Device>& device,

@@ -33,7 +33,7 @@ namespace tr {
       Log.trace("Destroying VkResourceManager");
    }
 
-   auto VkResourceManager::asyncUpload(const GeometryData& geometryData) -> cm::MeshHandle {
+   auto VkResourceManager::asyncUpload(const GeometryData& geometryData) -> MeshHandle {
       // Prepare Vertex Buffer
       const auto vbSize = geometryData.vertexDataSize();
       const auto ibSize = geometryData.indexDataSize();
@@ -99,7 +99,7 @@ namespace tr {
       return allocator->createBuffer(&bufferCreateInfo, &allocationCreateInfo, "IndirectBuffer");
    }
 
-   [[nodiscard]] auto VkResourceManager::getMesh(cm::MeshHandle handle)
+   [[nodiscard]] auto VkResourceManager::getMesh(MeshHandle handle)
        -> const ImmutableMesh& {
       return meshList[handle];
    }

@@ -1,7 +1,7 @@
 #pragma once
 #include <gp/Registry.hpp>
 
-namespace tr::gp::sys {
+namespace tr {
    class TransformSystem {
     public:
       explicit TransformSystem(std::shared_ptr<Registry> newRegistry);

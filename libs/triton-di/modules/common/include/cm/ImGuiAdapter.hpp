@@ -2,7 +2,7 @@
 
 #include "tr/IGuiAdapter.hpp"
 
-namespace tr::cm {
+namespace tr {
    class ImGuiAdapter : public IGuiAdapter {
     public:
       ImGuiAdapter() = default;

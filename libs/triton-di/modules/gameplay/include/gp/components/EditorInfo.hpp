@@ -1,6 +1,6 @@
 #pragma once
 
-namespace tr::gp::cmp {
+namespace tr {
    struct EditorInfo {
       std::string name;
    };

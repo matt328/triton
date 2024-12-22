@@ -55,8 +55,8 @@ auto main() -> int {
           di::make_injector(di::bind<tr::IContext>.to(context),
                             di::bind<tr::IGuiSystem>.to(guiSystem),
                             di::bind<tr::IEventBus>.to(eventSystem),
-                            di::bind<tr::gp::Registry>.to(registry),
-                            di::bind<tr::gp::IGameplaySystem>.to<>(gameplaySystem),
+                            di::bind<tr::Registry>.to(registry),
+                            di::bind<tr::IGameplaySystem>.to<>(gameplaySystem),
                             di::bind<std::filesystem::path>.to<>(propertiesPath),
                             di::bind<ed::TaskQueueConfig>.to(taskQueueConfig));
 

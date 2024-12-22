@@ -2,7 +2,7 @@
 
 #include <entt/fwd.hpp>
 
-namespace tr::cm {
+namespace tr {
    using EntityType = entt::entity;
-   using TerrainCreatedFn = std::function<void(cm::EntityType)>;
+   using TerrainCreatedFn = std::function<void(EntityType)>;
 }

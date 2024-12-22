@@ -8,7 +8,7 @@ namespace tr {
    struct Action;
 }
 
-namespace tr::gp::sys {
+namespace tr {
    class CameraSystem {
     public:
       explicit CameraSystem(std::shared_ptr<IEventBus> newEventBus,
@@ -27,7 +27,7 @@ namespace tr::gp::sys {
       std::shared_ptr<Registry> registry;
 
       auto handleAction(const Action& action) const -> void;
-      static auto handleStateAction(const Action& action, cmp::Camera& cam) -> void;
-      static auto handleRangeAction(const Action& action, cmp::Camera& cam) -> void;
+      static auto handleStateAction(const Action& action, Camera& cam) -> void;
+      static auto handleRangeAction(const Action& action, Camera& cam) -> void;
    };
 }

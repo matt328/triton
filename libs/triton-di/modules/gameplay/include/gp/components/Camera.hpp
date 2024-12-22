@@ -1,6 +1,6 @@
 #pragma once
 
-namespace tr::gp::cmp {
+namespace tr {
 
    constexpr auto DefaultYaw = -90.f;
    constexpr glm::vec3 worldUp = {0.f, 1.f, 0.f};

@@ -2,7 +2,7 @@
 
 #include <entt/entity/fwd.hpp>
 
-namespace tr::gp {
+namespace tr {
    class Registry {
     public:
       Registry();

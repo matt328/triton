@@ -3,7 +3,7 @@
 #include "Sources.hpp"
 #include "tr/Actions.hpp"
 
-namespace tr::gp {
+namespace tr {
    class IActionSystem {
     public:
       explicit IActionSystem() = default;

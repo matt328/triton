@@ -7,7 +7,7 @@
 
 namespace ed {
 
-DataFacade::DataFacade(std::shared_ptr<tr::gp::IGameplaySystem> newGameplaySystem,
+DataFacade::DataFacade(std::shared_ptr<tr::IGameplaySystem> newGameplaySystem,
                        std::shared_ptr<TaskQueue> newTaskQueue)
     : gameplaySystem{std::move(newGameplaySystem)}, taskQueue{std::move(newTaskQueue)} {
    Log.trace("Creating DataFacade");
@@ -102,7 +102,7 @@ void DataFacade::createAnimatedModel(const EntityData& entityData) {
    };
    engineBusy = true;
 
-   const auto animatedEntityData = tr::gp::AnimatedModelData{.modelFilename = modelFilename,
+   const auto animatedEntityData = tr::AnimatedModelData{.modelFilename = modelFilename,
                                                              .skeletonFilename = skeletonFilename,
                                                              .animationFilename = animationFilename,
                                                              .entityName = entityName};

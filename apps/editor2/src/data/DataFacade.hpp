@@ -20,7 +20,7 @@
    Will need a way to start, stop, and reset the 'time' of the game from the editor.
 */
 
-namespace tr::gp {
+namespace tr {
 class IGameplaySystem;
 }
 
@@ -101,7 +101,7 @@ class FutureMonitor;
 
 class DataFacade {
  public:
-   explicit DataFacade(std::shared_ptr<tr::gp::IGameplaySystem> newGameplaySystem,
+   explicit DataFacade(std::shared_ptr<tr::IGameplaySystem> newGameplaySystem,
                        std::shared_ptr<TaskQueue> newTaskQueue);
    ~DataFacade();
 
@@ -169,13 +169,13 @@ class DataFacade {
    }
 
  private:
-   std::shared_ptr<tr::gp::IGameplaySystem> gameplaySystem;
+   std::shared_ptr<tr::IGameplaySystem> gameplaySystem;
    std::shared_ptr<TaskQueue> taskQueue;
 
    bool unsaved{};
    bool engineBusy{};
    DataStore dataStore;
-   std::unordered_map<std::string, ::tr::cm::EntityType> entityNameMap;
+   std::unordered_map<std::string, tr::EntityType> entityNameMap;
 };
 
 } // namespace ed::data

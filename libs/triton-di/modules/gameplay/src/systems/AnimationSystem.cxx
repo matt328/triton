@@ -3,14 +3,14 @@
 #include <gp/components/Animation.hpp>
 #include <gp/Registry.hpp>
 
-namespace tr::gp::sys {
+namespace tr {
    AnimationSystem::AnimationSystem(std::shared_ptr<Registry> newRegistry,
                                     std::shared_ptr<AnimationFactory> newAnimationFactory)
        : registry{std::move(newRegistry)}, animationFactory{std::move(newAnimationFactory)} {
    }
 
    auto AnimationSystem::update() const -> void {
-      for (const auto view = registry->getRegistry().view<cmp::Animation>();
+      for (const auto view = registry->getRegistry().view<Animation>();
            auto [entity, animationData] : view.each()) {
 
          if (animationData.renderBindPose) {

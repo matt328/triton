@@ -21,11 +21,11 @@ namespace ed {
 constexpr auto DialogName = "AnimatedEntity";
 constexpr auto StaticEntityDialogName = "StaticEntity";
 
-EntityEditor::EntityEditor(std::shared_ptr<tr::gp::IGameplaySystem> newGameplaySystem,
+EntityEditor::EntityEditor(std::shared_ptr<tr::IGameplaySystem> newGameplaySystem,
                            std::shared_ptr<DataFacade> newDataFacade,
                            std::shared_ptr<DialogManager> newDialogManager,
                            std::shared_ptr<tr::IEventBus> newEventBus,
-                           std::shared_ptr<tr::gp::Registry> newRegistry)
+                           std::shared_ptr<tr::Registry> newRegistry)
     : gameplaySystem{std::move(newGameplaySystem)},
       dataFacade{std::move(newDataFacade)},
       dialogManager{std::move(newDialogManager)},
@@ -74,7 +74,7 @@ void EntityEditor::render() {
                         ImGuiChildFlags_Border | ImGuiChildFlags_ResizeX);
 
       auto& reg = registry->getRegistry();
-      auto view = reg.view<::tr::gp::cmp::EditorInfo>();
+      auto view = reg.view<::tr::EditorInfo>();
       for (auto [entity, editorInfo] : view.each()) {
          if (ImGui::Selectable(editorInfo.name.c_str(), entity == selectedEntity)) {
             Log.trace("Selected Entity: {}", editorInfo.name);
@@ -91,26 +91,26 @@ void EntityEditor::render() {
          ImGui::BeginChild("item view", ImVec2(0, 0), ImGuiChildFlags_Border);
          if (selectedEntity.has_value()) {
             // Editor Info Component
-            auto* editorInfo = reg.try_get<tr::gp::cmp::EditorInfo>(selectedEntity.value());
+            auto* editorInfo = reg.try_get<tr::EditorInfo>(selectedEntity.value());
             if (editorInfo == nullptr) {
                return;
             }
             ImGui::Text("%s", editorInfo->name.c_str());
 
             // Transform Component
-            if (auto* transform = reg.try_get<tr::gp::cmp::Transform>(selectedEntity.value());
+            if (auto* transform = reg.try_get<tr::Transform>(selectedEntity.value());
                 transform != nullptr) {
                renderTransformInspector(transform);
             }
 
             // Camera Component
-            if (auto* camera = reg.try_get<tr::gp::cmp::Camera>(selectedEntity.value());
+            if (auto* camera = reg.try_get<tr::Camera>(selectedEntity.value());
                 camera != nullptr) {
                renderCameraInspector(camera);
             }
 
             // Animation Component
-            if (auto* animation = reg.try_get<tr::gp::cmp::Animation>(selectedEntity.value());
+            if (auto* animation = reg.try_get<tr::Animation>(selectedEntity.value());
                 animation != nullptr) {
                renderAnimationInspector(animation);
             }

@@ -4,6 +4,6 @@
 
 namespace tr {
    struct EntityCreated {
-      cm::EntityType entityId;
+      EntityType entityId;
    };
 }

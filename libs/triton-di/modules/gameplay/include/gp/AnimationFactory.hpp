@@ -4,7 +4,7 @@
 
 #include <cm/Handles.hpp>
 
-namespace tr::gp {
+namespace tr {
 
    class AnimationFactory {
     public:
@@ -17,26 +17,26 @@ namespace tr::gp {
       AnimationFactory(AnimationFactory&&) = delete;
       auto operator=(AnimationFactory&&) -> AnimationFactory& = delete;
 
-      [[nodiscard]] auto getSkeleton(const cm::SkeletonHandle skeletonHandle) const -> const auto& {
+      [[nodiscard]] auto getSkeleton(const SkeletonHandle skeletonHandle) const -> const auto& {
          return skeletons.at(skeletonHandle);
       }
 
-      [[nodiscard]] auto getAnimation(const cm::AnimationHandle animationHandle) const -> const
+      [[nodiscard]] auto getAnimation(const AnimationHandle animationHandle) const -> const
           auto& {
          assert(animations.contains(animationHandle));
          return animations.at(animationHandle);
       }
 
-      auto loadSkeleton(const std::filesystem::path& path) -> cm::SkeletonHandle;
-      auto loadAnimation(const std::filesystem::path& path) -> cm::AnimationHandle;
+      auto loadSkeleton(const std::filesystem::path& path) -> SkeletonHandle;
+      auto loadAnimation(const std::filesystem::path& path) -> AnimationHandle;
 
     private:
-      cm::MapKey skeletonMapKey{};
-      cm::MapKey animationMapKey{};
-      std::unordered_map<std::string, cm::AnimationHandle> loadedAnimations;
-      std::unordered_map<std::string, cm::SkeletonHandle> loadedSkeletons;
+      MapKey skeletonMapKey{};
+      MapKey animationMapKey{};
+      std::unordered_map<std::string, AnimationHandle> loadedAnimations;
+      std::unordered_map<std::string, SkeletonHandle> loadedSkeletons;
 
-      std::unordered_map<cm::AnimationHandle, ozz::animation::Animation> animations;
-      std::unordered_map<cm::SkeletonHandle, ozz::animation::Skeleton> skeletons;
+      std::unordered_map<AnimationHandle, ozz::animation::Animation> animations;
+      std::unordered_map<SkeletonHandle, ozz::animation::Skeleton> skeletons;
    };
 }

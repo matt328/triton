@@ -31,14 +31,14 @@ class CubeRenderTask final : public IRenderTask {
    std::shared_ptr<GeometryFactory> geometryFactory;
    std::shared_ptr<IndirectPipeline> pipeline;
 
-   cm::MeshHandle meshHandle = -1;
+   MeshHandle meshHandle = -1;
 
    std::unique_ptr<Buffer> indirectBuffer;
    std::unique_ptr<Buffer> instanceBuffer;
 
    std::unique_ptr<Buffer> cameraDataBuffer;
 
-   tr::cm::gpu::IndirectPushConstants pushConstants;
+   tr::IndirectPushConstants pushConstants;
 
    vk::Viewport viewport;
    vk::Rect2D snezzor;

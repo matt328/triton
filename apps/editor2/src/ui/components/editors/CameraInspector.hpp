@@ -1,7 +1,7 @@
 #pragma once
 
 namespace ed {
-inline auto renderCameraInspector(tr::gp::cmp::Camera* camera) -> void {
+inline auto renderCameraInspector(tr::Camera* camera) -> void {
    if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
       if (ImGui::DragFloat3("Position##Camera", glm::value_ptr(camera->position), 0.5f)) {}
       if (ImGui::DragFloat3("Front##Camera", glm::value_ptr(camera->front), 0.5f)) {}

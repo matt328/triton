@@ -1,6 +1,6 @@
 #pragma once
 
-namespace tr::cm {
+namespace tr {
 
    template <typename T>
    class LockableResource {

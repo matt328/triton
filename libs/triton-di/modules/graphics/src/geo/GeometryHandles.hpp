@@ -6,7 +6,7 @@ namespace tr {
 
    struct GeometryHandle {
       size_t handle;
-      cm::Topology topology;
+      Topology topology;
 
       auto operator==(const GeometryHandle& other) const -> bool {
          return handle == other.handle && topology == other.topology;
@@ -20,12 +20,12 @@ namespace tr {
     private:
       GeometryHandle geometryHandle;
       ImageHandle imageHandle;
-      std::optional<cm::SkinData> skinData = std::nullopt;
+      std::optional<SkinData> skinData = std::nullopt;
 
     public:
       TritonModelData(const GeometryHandle geometryHandle,
                       const ImageHandle imageHandle,
-                      std::optional<cm::SkinData> skinData)
+                      std::optional<SkinData> skinData)
           : geometryHandle(geometryHandle),
             imageHandle(imageHandle),
             skinData(std::move(skinData)) {
@@ -39,7 +39,7 @@ namespace tr {
          return imageHandle;
       }
 
-      [[nodiscard]] auto getSkinData() const -> const std::optional<cm::SkinData>& {
+      [[nodiscard]] auto getSkinData() const -> const std::optional<SkinData>& {
          return skinData;
       }
    };

@@ -12,7 +12,7 @@ class Application {
  public:
    Application(std::shared_ptr<Properties> newProperties,
                std::shared_ptr<tr::IContext> newContext,
-               std::shared_ptr<tr::gp::IGameplaySystem> newGameplaySystem,
+               std::shared_ptr<tr::IGameplaySystem> newGameplaySystem,
                std::shared_ptr<tr::IGuiSystem> newGuiSystem,
                std::shared_ptr<Manager> newManager);
    ~Application();
@@ -28,7 +28,7 @@ class Application {
  private:
    std::shared_ptr<Properties> properties;
    std::shared_ptr<tr::IContext> context;
-   std::shared_ptr<tr::gp::IGameplaySystem> gameplaySystem;
+   std::shared_ptr<tr::IGameplaySystem> gameplaySystem;
    std::shared_ptr<tr::IGuiSystem> guiSystem;
    std::shared_ptr<Manager> manager;
 };

@@ -3,19 +3,19 @@
 
 namespace tr {
 
-   class IRenderContext {
-    public:
-      explicit IRenderContext() = default;
-      virtual ~IRenderContext() = default;
+class IRenderContext {
+ public:
+   explicit IRenderContext() = default;
+   virtual ~IRenderContext() = default;
 
-      IRenderContext(const IRenderContext&) = default;
-      IRenderContext(IRenderContext&&) = delete;
-      auto operator=(const IRenderContext&) -> IRenderContext& = default;
-      auto operator=(IRenderContext&&) -> IRenderContext& = delete;
+   IRenderContext(const IRenderContext&) = default;
+   IRenderContext(IRenderContext&&) = delete;
+   auto operator=(const IRenderContext&) -> IRenderContext& = default;
+   auto operator=(IRenderContext&&) -> IRenderContext& = delete;
 
-      virtual void renderNextFrame() = 0;
-      virtual void waitIdle() = 0;
+   virtual void renderNextFrame() = 0;
+   virtual void waitIdle() = 0;
 
-      virtual void setRenderData(const cm::gpu::RenderData& renderData) = 0;
-   };
+   virtual void setRenderData(const RenderData& renderData) = 0;
+};
 }
