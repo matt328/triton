@@ -5,47 +5,46 @@
 #include "tr/IEventBus.hpp"
 #include "ui/components/DialogManager.hpp"
 
-namespace ed::ui::cmp {
+namespace ed {
 
-   class Menu {
-    public:
-      explicit Menu(std::shared_ptr<data::DataFacade> newDataFacade,
-                    std::shared_ptr<Properties> newProperties,
-                    std::shared_ptr<DialogManager> newDialogManager,
-                    std::shared_ptr<tr::IEventBus> newEventBus);
-      ~Menu();
+class Menu {
+ public:
+   explicit Menu(std::shared_ptr<DataFacade> newDataFacade,
+                 std::shared_ptr<Properties> newProperties,
+                 std::shared_ptr<DialogManager> newDialogManager,
+                 std::shared_ptr<tr::IEventBus> newEventBus);
+   ~Menu();
 
-      Menu(const Menu&) = default;
-      Menu(Menu&&) = delete;
-      auto operator=(const Menu&) -> Menu& = default;
-      auto operator=(Menu&&) -> Menu& = delete;
+   Menu(const Menu&) = default;
+   Menu(Menu&&) = delete;
+   auto operator=(const Menu&) -> Menu& = default;
+   auto operator=(Menu&&) -> Menu& = delete;
 
-      void render();
+   void render();
 
-      void setQuitFn(const std::function<void(void)>& newQuitFn) {
-         quitFn = newQuitFn;
-      }
+   void setQuitFn(const std::function<void(void)>& newQuitFn) {
+      quitFn = newQuitFn;
+   }
 
-      void setFullscreenFn(std::function<void(void)>& newFullscreenFn) {
-         toggleFullscreenFn = newFullscreenFn;
-      }
+   void setFullscreenFn(std::function<void(void)>& newFullscreenFn) {
+      toggleFullscreenFn = newFullscreenFn;
+   }
 
-    private:
-      std::shared_ptr<data::DataFacade> dataFacade;
-      std::shared_ptr<Properties> properties;
-      std::shared_ptr<DialogManager> dialogManager;
-      std::shared_ptr<tr::IEventBus> eventBus;
+ private:
+   std::shared_ptr<DataFacade> dataFacade;
+   std::shared_ptr<Properties> properties;
+   std::shared_ptr<DialogManager> dialogManager;
+   std::shared_ptr<tr::IEventBus> eventBus;
 
-      std::optional<std::filesystem::path> openFilePath{};
-      bool fullscreen{};
-      bool enableWireframe{};
+   std::optional<std::filesystem::path> openFilePath;
+   bool fullscreen{};
+   bool enableWireframe{};
 
-      std::function<void(void)> quitFn;
-      std::function<void(void)> toggleFullscreenFn;
+   std::function<void(void)> quitFn;
+   std::function<void(void)> toggleFullscreenFn;
 
-      static constexpr auto ProjectFileFilters =
-          std::array{nfdfilteritem_t{"Triton Project", "trp"}};
+   static constexpr auto ProjectFileFilters = std::array{nfdfilteritem_t{"Triton Project", "trp"}};
 
-      static auto getSavePath() -> std::optional<std::filesystem::path>;
-   };
+   static auto getSavePath() -> std::optional<std::filesystem::path>;
+};
 }
