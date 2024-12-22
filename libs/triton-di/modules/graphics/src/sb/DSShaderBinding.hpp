@@ -2,7 +2,7 @@
 
 #include "ShaderBinding.hpp"
 
-namespace tr::gfx::sb {
+namespace tr {
    class DSShaderBinding final : public ShaderBinding {
     public:
       DSShaderBinding(std::shared_ptr<vk::raii::Device> newDevice,
@@ -13,7 +13,7 @@ namespace tr::gfx::sb {
 
       ~DSShaderBinding() override;
 
-      void bindBuffer(uint32_t binding, const mem::Buffer& buffer, size_t size) override;
+      void bindBuffer(uint32_t binding, const Buffer& buffer, size_t size) override;
 
       void bindImageSamplers(uint32_t binding,
                              const std::vector<vk::DescriptorImageInfo>& imageInfo) override;

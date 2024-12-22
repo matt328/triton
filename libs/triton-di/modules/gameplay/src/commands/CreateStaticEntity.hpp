@@ -8,7 +8,7 @@
 
 namespace tr::gp::cmd {
    class CreateStaticEntityCommand final
-       : public ICommand<entt::registry&, const std::shared_ptr<gfx::ResourceManager>&> {
+       : public ICommand<entt::registry&, const std::shared_ptr<ResourceManager>&> {
     public:
       explicit CreateStaticEntityCommand(const std::string_view newModelFilename,
                                          const std::string_view newEntityName)
@@ -16,7 +16,7 @@ namespace tr::gp::cmd {
       }
 
       void execute(entt::registry& registry,
-                   const std::shared_ptr<gfx::ResourceManager>& resourceManager) const override {
+                   const std::shared_ptr<ResourceManager>& resourceManager) const override {
          const auto modelData = resourceManager->createModel(std::filesystem::path{modelFilename});
          const auto entity = registry.create();
          registry.emplace<cmp::Renderable>(entity, std::vector{modelData.meshData});

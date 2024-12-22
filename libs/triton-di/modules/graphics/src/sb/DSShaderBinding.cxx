@@ -2,7 +2,7 @@
 #include "Vulkan.hpp"
 #include "mem/Buffer.hpp"
 
-namespace tr::gfx::sb {
+namespace tr {
 
    DSShaderBinding::DSShaderBinding(std::shared_ptr<vk::raii::Device> newDevice,
                                     const vk::DescriptorPool& pool,
@@ -27,7 +27,7 @@ namespace tr::gfx::sb {
    }
 
    void DSShaderBinding::bindBuffer(const uint32_t binding,
-                                    const mem::Buffer& buffer,
+                                    const Buffer& buffer,
                                     const size_t size) {
       const auto bufferInfo =
           vk::DescriptorBufferInfo{.buffer = buffer.getBuffer(), .offset = 0, .range = size};

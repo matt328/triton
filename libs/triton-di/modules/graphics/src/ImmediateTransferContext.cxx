@@ -4,7 +4,7 @@
 #include "gfx/QueueTypes.hpp"
 #include "task/CommandBufferManager.hpp"
 
-namespace tr::gfx {
+namespace tr {
 
    ImmediateTransferContext::ImmediateTransferContext(
        std::shared_ptr<Device> newDevice,

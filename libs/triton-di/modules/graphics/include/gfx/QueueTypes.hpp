@@ -1,7 +1,7 @@
 #pragma once
 #include <vk/Device.hpp>
 
-namespace tr::gfx::queue {
+namespace tr::queue {
    class Graphics {
     public:
       explicit Graphics(const std::shared_ptr<Device>& device);

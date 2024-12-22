@@ -7,7 +7,7 @@
 
 namespace tr::gp::cmd {
    class CreateCamera final
-       : public ICommand<entt::registry&, const std::shared_ptr<gfx::ResourceManager>&> {
+       : public ICommand<entt::registry&, const std::shared_ptr<ResourceManager>&> {
     public:
       explicit CreateCamera(const cmp::CameraInfo& newCameraInfo) : cameraInfo{newCameraInfo} {};
       ~CreateCamera() override = default;
@@ -18,7 +18,7 @@ namespace tr::gp::cmd {
       auto operator=(CreateCamera&& other) noexcept -> CreateCamera& = delete;
 
       void execute(entt::registry& registry,
-                   [[maybe_unused]] const std::shared_ptr<gfx::ResourceManager>& resourceManager)
+                   [[maybe_unused]] const std::shared_ptr<ResourceManager>& resourceManager)
           const override {
          const auto entity = registry.create();
          registry.emplace<cmp::Camera>(entity,

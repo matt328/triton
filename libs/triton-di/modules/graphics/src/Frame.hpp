@@ -4,7 +4,7 @@
 #include "cm/RenderData.hpp"
 #include "cm/TracyDefs.hpp"
 
-namespace tr::gfx {
+namespace tr {
 
    class IGraphicsDevice;
 
@@ -28,7 +28,7 @@ namespace tr::gfx {
     public:
       Frame(std::shared_ptr<IGraphicsDevice> graphicsDevice,
             std::shared_ptr<vk::raii::ImageView> newDepthImageView,
-            const std::shared_ptr<sb::IShaderBindingFactory>& shaderBindingFactory,
+            const std::shared_ptr<IShaderBindingFactory>& shaderBindingFactory,
             std::string_view name);
       ~Frame();
 
@@ -72,17 +72,17 @@ namespace tr::gfx {
       std::vector<cm::gpu::MeshData> skinnedModelList;
       cm::gpu::PushConstants pushConstants{};
 
-      std::unique_ptr<mem::Buffer> objectDataBuffer;
-      std::unique_ptr<mem::Buffer> cameraDataBuffer;
-      std::unique_ptr<mem::Buffer> animationDataBuffer;
+      std::unique_ptr<Buffer> objectDataBuffer;
+      std::unique_ptr<Buffer> cameraDataBuffer;
+      std::unique_ptr<Buffer> animationDataBuffer;
 
-      std::unique_ptr<mem::Image> drawImage;
+      std::unique_ptr<Image> drawImage;
       std::unique_ptr<vk::raii::ImageView> drawImageView;
 
-      std::unique_ptr<sb::ShaderBinding> perFrameShaderBinding;
-      std::unique_ptr<sb::ShaderBinding> objectDataShaderBinding;
-      std::unique_ptr<sb::ShaderBinding> textureShaderBinding;
-      std::unique_ptr<sb::ShaderBinding> animationDataShaderBinding;
+      std::unique_ptr<ShaderBinding> perFrameShaderBinding;
+      std::unique_ptr<ShaderBinding> objectDataShaderBinding;
+      std::unique_ptr<ShaderBinding> textureShaderBinding;
+      std::unique_ptr<ShaderBinding> animationDataShaderBinding;
 
       void updateObjectDataBuffer(const cm::gpu::ObjectData* data, size_t size) const;
       void updatePerFrameDataBuffer(const cm::gpu::CameraData* data, size_t size) const;

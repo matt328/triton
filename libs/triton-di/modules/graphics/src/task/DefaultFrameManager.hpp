@@ -3,11 +3,11 @@
 #include "CommandBufferManager.hpp"
 #include "IFrameManager.hpp"
 
-namespace tr::gfx {
+namespace tr {
    class Swapchain;
    struct RenderContextConfig;
 }
-namespace tr::gfx::task {
+namespace tr {
 
    class DefaultFrameManager final : public IFrameManager {
     public:

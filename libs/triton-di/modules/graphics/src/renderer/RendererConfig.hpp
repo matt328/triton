@@ -2,7 +2,7 @@
 
 #include "geo/VertexAttributes.hpp"
 
-namespace tr::gfx::rd {
+namespace tr {
    enum class RendererType : uint8_t {
       StaticModel = 1,
       AnimatedModel = 2,
@@ -14,7 +14,7 @@ namespace tr::gfx::rd {
    struct RendererConfig {
       RendererType rendererType;
       std::vector<vk::DescriptorSetLayout> setLayouts;
-      std::vector<geo::VertexComponent> vertexComponents;
+      std::vector<VertexComponent> vertexComponents;
       std::vector<vk::PushConstantRange> pushConstantRanges;
    };
 }

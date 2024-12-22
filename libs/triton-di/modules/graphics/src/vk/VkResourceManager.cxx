@@ -4,7 +4,7 @@
 #include <vulkan/vulkan_enums.hpp>
 #include "ResourceExceptions.hpp"
 
-namespace tr::gfx {
+namespace tr {
    VkResourceManager::VkResourceManager(
        std::shared_ptr<Device> newDevice,
        std::shared_ptr<ImmediateTransferContext> newImmediateTransferContext,
@@ -26,14 +26,14 @@ namespace tr::gfx {
           .instance = instance->getVkInstance(),
       };
 
-      allocator = std::make_unique<mem::Allocator>(allocatorCreateInfo, device->getVkDevice());
+      allocator = std::make_unique<Allocator>(allocatorCreateInfo, device->getVkDevice());
    }
 
    VkResourceManager::~VkResourceManager() {
       Log.trace("Destroying VkResourceManager");
    }
 
-   auto VkResourceManager::asyncUpload(const geo::GeometryData& geometryData) -> cm::MeshHandle {
+   auto VkResourceManager::asyncUpload(const GeometryData& geometryData) -> cm::MeshHandle {
       // Prepare Vertex Buffer
       const auto vbSize = geometryData.vertexDataSize();
       const auto ibSize = geometryData.indexDataSize();
@@ -70,7 +70,7 @@ namespace tr::gfx {
 
          return meshHandle;
 
-      } catch (const mem::AllocationException& ex) {
+      } catch (const AllocationException& ex) {
          throw ResourceUploadException(
              fmt::format("Error allocating resources for geometry, {0}", ex.what()));
       }
@@ -78,7 +78,7 @@ namespace tr::gfx {
 
    auto VkResourceManager::createBuffer(size_t size,
                                         vk::Flags<vk::BufferUsageFlagBits> flags,
-                                        std::string_view name) -> std::unique_ptr<mem::Buffer> {
+                                        std::string_view name) -> std::unique_ptr<Buffer> {
       const auto bufferCreateInfo = vk::BufferCreateInfo{.size = size, .usage = flags};
 
       constexpr auto allocationCreateInfo =
@@ -88,7 +88,7 @@ namespace tr::gfx {
       return allocator->createBuffer(&bufferCreateInfo, &allocationCreateInfo, name);
    }
 
-   auto VkResourceManager::createIndirectBuffer(size_t size) -> std::unique_ptr<mem::Buffer> {
+   auto VkResourceManager::createIndirectBuffer(size_t size) -> std::unique_ptr<Buffer> {
       const auto bufferCreateInfo =
           vk::BufferCreateInfo{.size = size, .usage = vk::BufferUsageFlagBits::eIndirectBuffer};
 
@@ -100,7 +100,7 @@ namespace tr::gfx {
    }
 
    [[nodiscard]] auto VkResourceManager::getMesh(cm::MeshHandle handle)
-       -> const geo::ImmutableMesh& {
+       -> const ImmutableMesh& {
       return meshList[handle];
    }
 

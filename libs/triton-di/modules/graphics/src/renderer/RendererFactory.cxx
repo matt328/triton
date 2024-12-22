@@ -3,10 +3,10 @@
 #include "renderer/RendererConfig.hpp"
 #include "DefaultRenderer.hpp"
 
-namespace tr::gfx::rd {
+namespace tr {
 
    RendererFactory::RendererFactory(std::shared_ptr<IGraphicsDevice> newGraphicsDevice,
-                                    std::shared_ptr<pipe::IShaderCompiler> newShaderCompiler)
+                                    std::shared_ptr<IShaderCompiler> newShaderCompiler)
        : graphicsDevice{std::move(newGraphicsDevice)},
          shaderCompiler{std::move(newShaderCompiler)} {
    }

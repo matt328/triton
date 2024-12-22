@@ -1,10 +1,10 @@
 #pragma once
 
-namespace tr::gfx {
+namespace tr {
    class GraphicsDevice;
 }
 
-namespace tr::gfx::mem {
+namespace tr {
 
    class AllocationException : public std::runtime_error {
     public:

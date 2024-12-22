@@ -1,9 +1,9 @@
 #include "sb/LayoutFactory.hpp"
 #include "Layout.hpp"
 
-namespace tr::gfx::sb {
+namespace tr {
    constexpr uint32_t MAX_TEXTURE_COUNT = 16;
-   LayoutFactory::LayoutFactory(const std::shared_ptr<gfx::IGraphicsDevice>& graphicsDevice,
+   LayoutFactory::LayoutFactory(const std::shared_ptr<IGraphicsDevice>& graphicsDevice,
                                 RenderContextConfig config)
        : config{config} {
       Log.trace("Constructing LayoutFactory");

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace tr::gfx {
+namespace tr {
    struct SwapchainSupportDetails {
       vk::SurfaceCapabilitiesKHR capabilities;
       std::vector<vk::SurfaceFormatKHR> formats;

@@ -1,6 +1,6 @@
 #include "Device.hpp"
 
-namespace tr::gfx {
+namespace tr {
 
    Device::Device(std::shared_ptr<PhysicalDevice> newPhysicalDevice)
        : physicalDevice{std::move(newPhysicalDevice)} {

@@ -2,7 +2,7 @@
 
 #include "BaseException.hpp"
 
-namespace tr::gfx {
+namespace tr {
    class ResourceUploadException final : public BaseException {
     public:
       using BaseException::BaseException;

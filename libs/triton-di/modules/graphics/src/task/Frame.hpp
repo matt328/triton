@@ -2,7 +2,7 @@
 #include "CommandBufferManager.hpp"
 #include <vk/VkResourceManager.hpp>
 
-namespace tr::gfx {
+namespace tr {
    namespace task {
       class SyncManager;
    }

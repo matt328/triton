@@ -3,7 +3,7 @@
 #include <SPIRV/GlslangToSpv.h>
 #include <glslang/Public/ShaderLang.h>
 
-namespace tr::gfx::pipe {
+namespace tr {
 
    SpirvShaderCompiler::SpirvShaderCompiler(std::shared_ptr<Device> newDevice)
        : device{std::move(newDevice)} {

@@ -1,6 +1,6 @@
 #include "Context.hpp"
 
-namespace tr::gfx {
+namespace tr {
    Context::Context() {
       context = std::make_unique<vk::raii::Context>();
    }

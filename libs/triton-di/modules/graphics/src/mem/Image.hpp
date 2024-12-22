@@ -1,6 +1,6 @@
 #pragma once
 
-namespace tr::gfx::mem {
+namespace tr {
    class Image {
     public:
       Image(const Image&) = default;

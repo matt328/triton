@@ -3,7 +3,7 @@
 #include "tr/IWindow.hpp"
 #include "IDebugManager.hpp"
 
-namespace tr::gfx {
+namespace tr {
 
    class Instance {
     public:

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace tr::gfx {
+namespace tr {
    struct RenderContextConfig {
       bool useDescriptorBuffers{};
       uint16_t maxTextures{};

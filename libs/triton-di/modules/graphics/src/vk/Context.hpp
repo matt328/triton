@@ -1,6 +1,6 @@
 #pragma once
 
-namespace tr::gfx {
+namespace tr {
    class Context {
     public:
       Context();

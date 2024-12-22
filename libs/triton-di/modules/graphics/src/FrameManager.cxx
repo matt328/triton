@@ -2,11 +2,11 @@
 
 #include "Frame.hpp"
 
-namespace tr::gfx {
+namespace tr {
    FrameManager::FrameManager(size_t numFrames,
                               const std::shared_ptr<IGraphicsDevice>& graphicsDevice,
                               const std::shared_ptr<vk::raii::ImageView>& depthImageView,
-                              const std::shared_ptr<sb::IShaderBindingFactory>& sbFactory)
+                              const std::shared_ptr<IShaderBindingFactory>& sbFactory)
        : numFrames(numFrames) {
       for (size_t i = 0; i < numFrames; ++i) {
          auto name = std::stringstream{};

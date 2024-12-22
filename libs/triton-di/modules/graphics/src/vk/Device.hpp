@@ -1,7 +1,7 @@
 #pragma once
 #include "PhysicalDevice.hpp"
 
-namespace tr::gfx {
+namespace tr {
 
    class Device {
     public:

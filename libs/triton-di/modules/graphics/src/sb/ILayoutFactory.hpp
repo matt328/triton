@@ -1,6 +1,6 @@
 #pragma once
 
-namespace tr::gfx::sb {
+namespace tr {
 
    class Layout;
 

@@ -1,6 +1,6 @@
 #include "SyncManager.hpp"
 
-namespace tr::gfx::task {
+namespace tr {
    SyncManager::SyncManager(std::shared_ptr<Device> newDevice,
                             std::shared_ptr<CommandBufferManager> newCommandBufferManager)
        : device{std::move(newDevice)}, commandBufferManager{std::move(newCommandBufferManager)} {

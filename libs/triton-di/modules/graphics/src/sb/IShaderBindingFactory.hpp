@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vulkan/vulkan.hpp>
-namespace tr::gfx::sb {
+namespace tr {
 
    class ShaderBinding;
 

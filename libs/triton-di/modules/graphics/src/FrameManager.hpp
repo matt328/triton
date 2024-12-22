@@ -1,6 +1,6 @@
 #pragma once
 
-namespace tr::gfx {
+namespace tr {
 
    class IGraphicsDevice;
 
@@ -15,7 +15,7 @@ namespace tr::gfx {
       explicit FrameManager(size_t numFrames,
                             const std::shared_ptr<IGraphicsDevice>& graphicsDevice,
                             const std::shared_ptr<vk::raii::ImageView>& depthImageView,
-                            const std::shared_ptr<sb::IShaderBindingFactory>& sbFactory);
+                            const std::shared_ptr<IShaderBindingFactory>& sbFactory);
       ~FrameManager();
 
       FrameManager(const FrameManager&) = default;

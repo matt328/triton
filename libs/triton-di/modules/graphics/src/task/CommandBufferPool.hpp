@@ -3,7 +3,7 @@
 
 class CommandBufferPool {
  public:
-   CommandBufferPool(const std::shared_ptr<tr::gfx::Device>& device,
+   CommandBufferPool(const std::shared_ptr<tr::Device>& device,
                      const uint32_t queueFamilyIndex,
                      const uint32_t initialCommandBufferCount = 6) {
 

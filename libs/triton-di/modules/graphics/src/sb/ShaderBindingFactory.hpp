@@ -3,14 +3,14 @@
 #include "IShaderBindingFactory.hpp"
 #include "gfx/IRenderContext.hpp"
 
-namespace tr::gfx {
+namespace tr {
    class IGraphicsDevice;
    namespace sb {
       class LayoutFactory;
    }
 }
 
-namespace tr::gfx::sb {
+namespace tr {
 
    class ShaderBindingFactory : public IShaderBindingFactory {
     public:

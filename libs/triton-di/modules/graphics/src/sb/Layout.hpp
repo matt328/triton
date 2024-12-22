@@ -1,10 +1,10 @@
 #pragma once
 
-namespace tr::gfx {
+namespace tr {
    class IGraphicsDevice;
 }
 
-namespace tr::gfx::sb {
+namespace tr {
    class Layout {
     public:
       Layout(std::shared_ptr<IGraphicsDevice> graphicsDevice,

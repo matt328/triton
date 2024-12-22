@@ -4,7 +4,7 @@
 #include "tr/IWindow.hpp"
 #include "tr/IEventBus.hpp"
 
-namespace tr::gfx {
+namespace tr {
 
    class Window : public tr::IWindow {
     public:

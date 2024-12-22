@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-namespace tr::gfx::task::graph {
+namespace tr {
    class Resource {
     public:
       Resource() = default;

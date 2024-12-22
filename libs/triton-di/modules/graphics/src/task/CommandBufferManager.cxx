@@ -4,7 +4,7 @@
 #include "gfx/QueueTypes.hpp"
 #include "gfx/RenderContextConfig.hpp"
 
-namespace tr::gfx {
+namespace tr {
 
    CommandBufferManager::CommandBufferManager(std::shared_ptr<Device> newDevice,
                                               std::shared_ptr<queue::Graphics> newGraphicsQueue,

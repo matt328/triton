@@ -6,7 +6,7 @@
 #include <vk/Device.hpp>
 #include <vk/VkResourceManager.hpp>
 
-namespace tr::gfx {
+namespace tr {
    class Swapchain;
    class Instance;
    class IGraphicsDevice;
@@ -20,12 +20,12 @@ namespace tr::cm {
    class ImGuiSystem final : public IGuiSystem {
     public:
       ImGuiSystem(const std::shared_ptr<IWindow>& window,
-                  const std::shared_ptr<gfx::Instance>& instance,
-                  const std::shared_ptr<gfx::Device>& device,
-                  const std::shared_ptr<gfx::PhysicalDevice>& physicalDevice,
-                  const std::shared_ptr<gfx::queue::Graphics>& graphicsQueue,
-                  const std::shared_ptr<gfx::Swapchain>& swapchain,
-                  std::shared_ptr<gfx::VkResourceManager> newResourceManager);
+                  const std::shared_ptr<Instance>& instance,
+                  const std::shared_ptr<Device>& device,
+                  const std::shared_ptr<PhysicalDevice>& physicalDevice,
+                  const std::shared_ptr<queue::Graphics>& graphicsQueue,
+                  const std::shared_ptr<Swapchain>& swapchain,
+                  std::shared_ptr<VkResourceManager> newResourceManager);
       ~ImGuiSystem() override;
 
       ImGuiSystem(const ImGuiSystem&) = delete;
@@ -39,7 +39,7 @@ namespace tr::cm {
                   const vk::Extent2D& swapchainExtent) -> void override;
 
     private:
-      std::shared_ptr<gfx::VkResourceManager> resourceManager;
+      std::shared_ptr<VkResourceManager> resourceManager;
 
       std::unique_ptr<vk::raii::DescriptorPool> descriptorPool;
       std::function<void()> renderFn;

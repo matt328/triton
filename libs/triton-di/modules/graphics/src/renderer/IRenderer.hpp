@@ -1,6 +1,6 @@
 #pragma once
 
-namespace tr::gfx::sb {
+namespace tr {
    class ShaderBinding;
 }
 
@@ -8,7 +8,7 @@ namespace tr::cm::gpu {
    struct MeshData;
 }
 
-namespace tr::gfx::rd {
+namespace tr {
    class IRenderer {
     public:
       IRenderer() = default;
@@ -21,7 +21,7 @@ namespace tr::gfx::rd {
 
       virtual void bindPipeline(const std::unique_ptr<vk::raii::CommandBuffer>& commandBuffer) = 0;
       virtual void applyShaderBinding(
-          const std::unique_ptr<sb::ShaderBinding>& binding,
+          const std::unique_ptr<ShaderBinding>& binding,
           uint32_t setIndex,
           const std::unique_ptr<vk::raii::CommandBuffer>& commandBuffer) = 0;
       virtual void render(const std::unique_ptr<vk::raii::CommandBuffer>& commandBuffer,

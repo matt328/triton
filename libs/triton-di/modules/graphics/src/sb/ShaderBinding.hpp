@@ -1,10 +1,10 @@
 #pragma once
 
-namespace tr::gfx::mem {
+namespace tr {
    class Buffer;
 }
 
-namespace tr::gfx::sb {
+namespace tr {
    class ShaderBinding {
     public:
       ShaderBinding() = default;
@@ -15,7 +15,7 @@ namespace tr::gfx::sb {
       ShaderBinding& operator=(ShaderBinding&&) = default;
       virtual ~ShaderBinding() = default;
 
-      virtual void bindBuffer(uint32_t binding, const mem::Buffer& buffer, size_t size) = 0;
+      virtual void bindBuffer(uint32_t binding, const Buffer& buffer, size_t size) = 0;
 
       virtual void bindImageSamplers(uint32_t binding,
                                      const std::vector<vk::DescriptorImageInfo>& imageInfo) = 0;

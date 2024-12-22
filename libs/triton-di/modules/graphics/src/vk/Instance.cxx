@@ -1,6 +1,6 @@
 #include "Instance.hpp"
 
-namespace tr::gfx {
+namespace tr {
    Instance::Instance(std::shared_ptr<Context> newContext,
                       std::shared_ptr<IDebugManager> newDebugManager,
                       std::shared_ptr<IWindow> newWindow)

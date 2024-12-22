@@ -1,6 +1,6 @@
 #pragma once
 
-namespace tr::gfx::pipe {
+namespace tr {
    class IShaderCompiler {
     public:
       IShaderCompiler() = default;

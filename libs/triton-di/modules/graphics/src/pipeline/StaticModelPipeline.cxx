@@ -6,7 +6,7 @@
 #include "renderer/RendererConfig.hpp"
 #include "sb/ShaderBinding.hpp"
 
-namespace tr::gfx::pipe {
+namespace tr {
    StaticModelPipeline::StaticModelPipeline(const std::shared_ptr<IGraphicsDevice>& graphicsDevice,
                                             const std::shared_ptr<IShaderCompiler>& shaderCompiler,
                                             const rd::RendererConfig& rendererConfig) {
@@ -50,14 +50,14 @@ namespace tr::gfx::pipe {
                                             .pName = "main"});
 
       // Vertex Input State
-      auto vec = std::vector{geo::VertexComponent::Position,
-                             geo::VertexComponent::Color,
-                             geo::VertexComponent::UV,
-                             geo::VertexComponent::Normal};
+      auto vec = std::vector{VertexComponent::Position,
+                             VertexComponent::Color,
+                             VertexComponent::UV,
+                             VertexComponent::Normal};
       const auto vertexAttributeDescriptions =
-          geo::VertexBuilder::inputAttributeDescriptions(0, std::span(vec.begin(), vec.end()));
+          VertexBuilder::inputAttributeDescriptions(0, std::span(vec.begin(), vec.end()));
 
-      const auto bindingDescription = geo::VertexBuilder::inputBindingDescription(0);
+      const auto bindingDescription = VertexBuilder::inputBindingDescription(0);
 
       const auto vertexInputStateCreateInfo = vk::PipelineVertexInputStateCreateInfo{
           .vertexBindingDescriptionCount = 1,
@@ -138,7 +138,7 @@ namespace tr::gfx::pipe {
    }
 
    void StaticModelPipeline::applyShaderBinding(
-       const sb::ShaderBinding& binding,
+       const ShaderBinding& binding,
        const uint32_t setIndex,
        const std::unique_ptr<vk::raii::CommandBuffer>& commandBuffer) {
       binding.bindToPipeline(*commandBuffer,

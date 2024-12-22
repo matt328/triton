@@ -1,7 +1,7 @@
 #include "Swapchain.hpp"
 #include "Surface.hpp"
 
-namespace tr::gfx {
+namespace tr {
    Swapchain::Swapchain(std::shared_ptr<PhysicalDevice> newPhysicalDevice,
                         std::shared_ptr<Device> newDevice,
                         std::shared_ptr<Surface> newSurface)

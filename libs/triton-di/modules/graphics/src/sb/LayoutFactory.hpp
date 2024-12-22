@@ -3,16 +3,16 @@
 #include "gfx/IRenderContext.hpp"
 #include "sb/ILayoutFactory.hpp"
 
-namespace tr::gfx {
+namespace tr {
    class IGraphicsDevice;
 }
 
-namespace tr::gfx::sb {
+namespace tr {
 
    class LayoutFactory : public ILayoutFactory {
 
     public:
-      LayoutFactory(const std::shared_ptr<gfx::IGraphicsDevice>& graphicsDevice,
+      LayoutFactory(const std::shared_ptr<IGraphicsDevice>& graphicsDevice,
                     RenderContextConfig config);
       ~LayoutFactory() override;
 
@@ -31,10 +31,10 @@ namespace tr::gfx::sb {
     private:
       RenderContextConfig config;
 
-      void initBindlessLayout(std::shared_ptr<gfx::IGraphicsDevice> graphicsDevice);
-      void initPerFrameLayout(std::shared_ptr<gfx::IGraphicsDevice> graphicsDevice);
-      void initObjectDataLayout(std::shared_ptr<gfx::IGraphicsDevice> graphicsDevice);
-      void initAnimationDataLayout(std::shared_ptr<gfx::IGraphicsDevice> graphicsDevice);
+      void initBindlessLayout(std::shared_ptr<IGraphicsDevice> graphicsDevice);
+      void initPerFrameLayout(std::shared_ptr<IGraphicsDevice> graphicsDevice);
+      void initObjectDataLayout(std::shared_ptr<IGraphicsDevice> graphicsDevice);
+      void initAnimationDataLayout(std::shared_ptr<IGraphicsDevice> graphicsDevice);
 
       std::unordered_map<LayoutHandle, std::unique_ptr<Layout>> layoutCache;
    };

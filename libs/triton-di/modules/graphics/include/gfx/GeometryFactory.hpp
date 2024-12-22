@@ -17,7 +17,7 @@ namespace tr::ct {
    class HeightField;
 }
 
-namespace tr::gfx::geo {
+namespace tr {
 
    class GeometryData;
 

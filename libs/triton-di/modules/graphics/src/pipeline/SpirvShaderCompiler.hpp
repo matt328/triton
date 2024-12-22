@@ -5,7 +5,7 @@
 #include "IShaderCompiler.hpp"
 #include "vk/Device.hpp"
 
-namespace tr::gfx::pipe {
+namespace tr {
    class SpirvShaderCompiler : public IShaderCompiler {
     public:
       explicit SpirvShaderCompiler(std::shared_ptr<Device> newDevice);

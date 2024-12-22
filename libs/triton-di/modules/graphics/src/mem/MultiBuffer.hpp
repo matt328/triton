@@ -5,7 +5,7 @@
 #include "mem/Buffer.hpp"
 #include "mem/Allocator.hpp"
 
-namespace tr::gfx::mem {
+namespace tr {
 
    struct BufferEntry {
       size_t offset;
@@ -53,8 +53,8 @@ namespace tr::gfx::mem {
       std::shared_ptr<VkContext> transferContext;
       std::shared_ptr<vk::raii::Device> device;
 
-      std::unique_ptr<mem::Buffer> stagingBuffer;
-      std::unique_ptr<mem::Buffer> buffer;
+      std::unique_ptr<Buffer> stagingBuffer;
+      std::unique_ptr<Buffer> buffer;
 
       std::vector<BufferEntry> bufferEntries{};
 

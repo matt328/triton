@@ -13,14 +13,14 @@
    gbuffer
 */
 
-namespace tr::gfx {
+namespace tr {
    DefaultRenderScheduler::DefaultRenderScheduler(
-       std::shared_ptr<task::IFrameManager> newFrameManager,
+       std::shared_ptr<IFrameManager> newFrameManager,
        std::shared_ptr<CommandBufferManager> newCommandBufferManager,
        std::shared_ptr<queue::Graphics> newGraphicsQueue,
        std::shared_ptr<VkResourceManager> newResourceManager,
        std::shared_ptr<Swapchain> newSwapchain,
-       std::shared_ptr<task::CubeRenderTask> newCubeRenderTask,
+       std::shared_ptr<CubeRenderTask> newCubeRenderTask,
        const RenderContextConfig& rendererConfig)
        : frameManager{std::move(newFrameManager)},
          commandBufferManager{std::move(newCommandBufferManager)},
@@ -88,7 +88,7 @@ namespace tr::gfx {
       commandBuffer.end();
    }
 
-   auto DefaultRenderScheduler::addStaticTask(const std::shared_ptr<task::IRenderTask> task)
+   auto DefaultRenderScheduler::addStaticTask(const std::shared_ptr<IRenderTask> task)
        -> void {
       staticRenderTasks.push_back(task);
   }

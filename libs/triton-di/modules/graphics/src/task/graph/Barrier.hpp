@@ -1,6 +1,6 @@
 #pragma once
 
-namespace tr::gfx::task::graph {
+namespace tr {
    struct Barrier {
       vk::PipelineStageFlags srcStage;
       vk::PipelineStageFlags dstStage;

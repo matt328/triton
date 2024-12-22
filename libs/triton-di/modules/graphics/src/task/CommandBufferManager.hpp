@@ -5,7 +5,7 @@
 #include "PoolId.hpp"
 #include "gfx/RenderContextConfig.hpp"
 
-namespace tr::gfx {
+namespace tr {
    namespace queue {
       class Compute;
       class Transfer;

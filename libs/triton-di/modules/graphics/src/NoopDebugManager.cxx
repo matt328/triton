@@ -1,6 +1,6 @@
 #include "NoopDebugManager.hpp"
 
-namespace tr::gfx {
+namespace tr {
    auto NoopDebugManager::checkDebugSupport() -> void {
    }
 

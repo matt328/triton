@@ -4,7 +4,7 @@
 #include "vk/Device.hpp"
 #include <vulkan/vulkan_handles.hpp>
 
-namespace tr::gfx::pipe {
+namespace tr {
    class IShaderCompiler;
 
    class IndirectPipeline : public IPipeline {
@@ -20,7 +20,7 @@ namespace tr::gfx::pipe {
 
       void bind(const vk::raii::CommandBuffer& cmd) override;
       void applyShaderBinding(
-          const sb::ShaderBinding& binding,
+          const ShaderBinding& binding,
           uint32_t setIndex,
           const std::unique_ptr<vk::raii::CommandBuffer>& commandBuffer) override;
 

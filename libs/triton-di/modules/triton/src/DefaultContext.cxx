@@ -14,7 +14,7 @@ namespace tr {
    static constexpr auto SleepMillis = 100;
 
    DefaultContext::DefaultContext(std::shared_ptr<IEventBus> newEventBus,
-                                  std::shared_ptr<gfx::IRenderContext> newRenderContext,
+                                  std::shared_ptr<IRenderContext> newRenderContext,
                                   std::shared_ptr<tr::IWindow> newWindow,
                                   std::shared_ptr<IGuiSystem> newGuiSystem,
                                   std::shared_ptr<gp::Registry> newRegistry)

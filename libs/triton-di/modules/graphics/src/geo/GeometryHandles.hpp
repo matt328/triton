@@ -2,7 +2,7 @@
 
 #include "cm/Handles.hpp"
 
-namespace tr::gfx::geo {
+namespace tr {
 
    struct GeometryHandle {
       size_t handle;
@@ -48,8 +48,8 @@ namespace tr::gfx::geo {
 
 namespace std {
    template <>
-   struct hash<tr::gfx::geo::GeometryHandle> {
-      auto operator()(const tr::gfx::geo::GeometryHandle& geometryHandle) const -> size_t {
+   struct hash<tr::GeometryHandle> {
+      auto operator()(const tr::GeometryHandle& geometryHandle) const -> size_t {
          // Combine hashes of handle and topology
          size_t hash1 = std::hash<size_t>{}(geometryHandle.handle);
          size_t hash2 = std::hash<int>{}(

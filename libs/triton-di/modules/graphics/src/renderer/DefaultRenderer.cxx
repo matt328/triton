@@ -4,14 +4,14 @@
 #include "pipeline/StaticModelPipeline.hpp"
 #include "geo/Mesh.hpp"
 
-namespace tr::gfx::rd {
+namespace tr {
    DefaultRenderer::DefaultRenderer(const RendererConfig& config,
                                     std::shared_ptr<IGraphicsDevice> newGraphicsDevice,
-                                    const std::shared_ptr<pipe::IShaderCompiler>& shaderCompiler)
+                                    const std::shared_ptr<IShaderCompiler>& shaderCompiler)
        : graphicsDevice{std::move(newGraphicsDevice)} {
       Log.trace("Constructing DefaultRenderer");
       pipeline =
-          std::make_shared<pipe::StaticModelPipeline>(graphicsDevice, shaderCompiler, config);
+          std::make_shared<StaticModelPipeline>(graphicsDevice, shaderCompiler, config);
    }
 
    void DefaultRenderer::bindPipeline(
@@ -20,7 +20,7 @@ namespace tr::gfx::rd {
    }
 
    void DefaultRenderer::applyShaderBinding(
-       const std::unique_ptr<sb::ShaderBinding>& binding,
+       const std::unique_ptr<ShaderBinding>& binding,
        uint32_t setIndex,
        const std::unique_ptr<vk::raii::CommandBuffer>& commandBuffer) {
       pipeline->applyShaderBinding(*binding, setIndex, commandBuffer);

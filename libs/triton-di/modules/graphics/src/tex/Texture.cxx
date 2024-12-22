@@ -5,10 +5,10 @@
 #include "mem/Image.hpp"
 #include "mem/Allocator.hpp"
 
-namespace tr::gfx::tex {
+namespace tr {
 
    Texture::Texture(const std::string_view& filename,
-                    const mem::Allocator& allocator,
+                    const Allocator& allocator,
                     const vk::raii::Device& device,
                     const ImmediateTransferContext& transferContext)
        : imageLayout{vk::ImageLayout::eShaderReadOnlyOptimal} {
@@ -31,7 +31,7 @@ namespace tr::gfx::tex {
                     const uint32_t width,
                     const uint32_t height,
                     const uint32_t channels,
-                    const mem::Allocator& allocator,
+                    const Allocator& allocator,
                     const vk::raii::Device& device,
                     const ImmediateTransferContext& transferContext)
        : imageLayout{vk::ImageLayout::eShaderReadOnlyOptimal} {
@@ -45,7 +45,7 @@ namespace tr::gfx::tex {
                             uint32_t width,
                             uint32_t height,
                             uint32_t channels,
-                            const mem::Allocator& allocator,
+                            const Allocator& allocator,
                             const vk::raii::Device& device,
                             const ImmediateTransferContext& transferContext,
                             const std::string_view& textureName) {
