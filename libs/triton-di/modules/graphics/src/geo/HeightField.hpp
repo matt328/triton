@@ -1,27 +1,27 @@
 #pragma once
 
 namespace tr::ct {
-   class HeightField {
-    public:
-      explicit HeightField(int size);
-      ~HeightField();
+class HeightField {
+public:
+  explicit HeightField(int size);
+  ~HeightField();
 
-      HeightField(const HeightField&) = default;
-      HeightField& operator=(const HeightField&) = default;
+  HeightField(const HeightField&) = default;
+  HeightField& operator=(const HeightField&) = default;
 
-      HeightField(HeightField&&) = delete;
-      HeightField& operator=(HeightField&&) = delete;
+  HeightField(HeightField&&) = delete;
+  HeightField& operator=(HeightField&&) = delete;
 
-      [[nodiscard]] auto valueAt(const uint32_t x, const uint32_t y) const {
-         return data[y * width + x];
-      }
+  [[nodiscard]] auto valueAt(const uint32_t x, const uint32_t y) const {
+    return data[y * width + x];
+  }
 
-      [[nodiscard]] auto getWidth() const {
-         return width;
-      }
+  [[nodiscard]] auto getWidth() const {
+    return width;
+  }
 
-    private:
-      int width;
-      std::vector<float> data;
-   };
+private:
+  int width;
+  std::vector<float> data;
+};
 }

@@ -12,39 +12,39 @@ using SkeletonHandle = uint64_t;
 using AnimationHandle = uint64_t;
 
 struct LoadedModelData {
-   MeshHandle meshHandle{};
-   TextureHandle textureHandle{};
+  MeshHandle meshHandle{};
+  TextureHandle textureHandle{};
 };
 
 enum class Topology : uint8_t {
-   Triangles = 0,
-   LineList = 1
+  Triangles = 0,
+  LineList = 1
 };
 
 struct MeshData {
-   MeshHandle meshHandle{};
-   Topology topology{Topology::Triangles};
-   TextureHandle textureHandle{};
+  MeshHandle meshHandle{};
+  Topology topology{Topology::Triangles};
+  TextureHandle textureHandle{};
 };
 
 struct SkinData {
-   std::unordered_map<int, int> jointMap;
-   std::vector<glm::mat4> inverseBindMatrices;
+  std::unordered_map<int, int> jointMap;
+  std::vector<glm::mat4> inverseBindMatrices;
 };
 
 struct AnimationData {
-   SkeletonHandle skeletonHandle{};
-   AnimationHandle animationHandle{};
+  SkeletonHandle skeletonHandle{};
+  AnimationHandle animationHandle{};
 };
 
 struct ModelData {
-   MeshData meshData{};
-   std::optional<SkinData> skinData;
-   std::optional<AnimationData> animationData;
+  MeshData meshData{};
+  std::optional<SkinData> skinData;
+  std::optional<AnimationData> animationData;
 };
 
 struct GroupHandle {
-   size_t meshId;
-   size_t instanceId;
+  size_t meshId;
+  size_t instanceId;
 };
 }

@@ -1,8 +1,8 @@
 #include "DefaultEventBus.hpp"
 
 namespace tr {
-   DefaultEventBus::DefaultEventBus() {
-      Log.trace("Constructing DefaultEventBus");
-   }
+DefaultEventBus::DefaultEventBus() {
+  Log.trace("Constructing DefaultEventBus");
+}
 
 }

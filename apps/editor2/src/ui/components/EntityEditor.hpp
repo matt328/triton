@@ -13,32 +13,32 @@ namespace ed {
 using ComponentInspectorFn = void (*)(entt::registry, tr::EntityType);
 
 class EntityEditor {
- public:
-   EntityEditor(std::shared_ptr<tr::IGameplaySystem> newGameplaySystem,
-                std::shared_ptr<DataFacade> newDataFacade,
-                std::shared_ptr<DialogManager> newDialogManager,
-                std::shared_ptr<tr::IEventBus> newEventBus,
-                std::shared_ptr<tr::Registry> newRegistry);
-   ~EntityEditor();
+public:
+  EntityEditor(std::shared_ptr<tr::IGameplaySystem> newGameplaySystem,
+               std::shared_ptr<DataFacade> newDataFacade,
+               std::shared_ptr<DialogManager> newDialogManager,
+               std::shared_ptr<tr::IEventBus> newEventBus,
+               std::shared_ptr<tr::Registry> newRegistry);
+  ~EntityEditor();
 
-   EntityEditor(const EntityEditor&) = default;
-   EntityEditor(EntityEditor&&) = delete;
-   auto operator=(const EntityEditor&) -> EntityEditor& = default;
-   auto operator=(EntityEditor&&) -> EntityEditor& = delete;
+  EntityEditor(const EntityEditor&) = default;
+  EntityEditor(EntityEditor&&) = delete;
+  auto operator=(const EntityEditor&) -> EntityEditor& = default;
+  auto operator=(EntityEditor&&) -> EntityEditor& = delete;
 
-   void render();
+  void render();
 
- private:
-   std::shared_ptr<tr::IGameplaySystem> gameplaySystem;
-   std::shared_ptr<DataFacade> dataFacade;
-   std::shared_ptr<DialogManager> dialogManager;
-   std::shared_ptr<tr::IEventBus> eventBus;
-   std::shared_ptr<tr::Registry> registry;
+private:
+  std::shared_ptr<tr::IGameplaySystem> gameplaySystem;
+  std::shared_ptr<DataFacade> dataFacade;
+  std::shared_ptr<DialogManager> dialogManager;
+  std::shared_ptr<tr::IEventBus> eventBus;
+  std::shared_ptr<tr::Registry> registry;
 
-   std::optional<tr::EntityType> selectedEntity{std::nullopt};
+  std::optional<tr::EntityType> selectedEntity{std::nullopt};
 
-   void createAnimatedEntityDialog() const;
-   void createStaticEntityDialog() const;
+  void createAnimatedEntityDialog() const;
+  void createStaticEntityDialog() const;
 };
 
 }

@@ -15,4 +15,3 @@ auto RenderTaskFactory::createCubeRenderTask() -> std::unique_ptr<CubeRenderTask
 }
 
 }
-

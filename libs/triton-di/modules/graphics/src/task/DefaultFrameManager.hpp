@@ -4,37 +4,36 @@
 #include "IFrameManager.hpp"
 
 namespace tr {
-   class Swapchain;
-   struct RenderContextConfig;
+class Swapchain;
+struct RenderContextConfig;
 }
 namespace tr {
 
-   class DefaultFrameManager final : public IFrameManager {
-    public:
-      explicit DefaultFrameManager(const RenderContextConfig& rendererConfig,
-                                   std::shared_ptr<CommandBufferManager> newCommandBufferManager,
-                                   std::shared_ptr<Device> newDevice,
-                                   std::shared_ptr<Swapchain> newSwapchain,
-                                   std::shared_ptr<VkResourceManager> newResourceManager,
-                                   const std::shared_ptr<IDebugManager>& debugManager);
-      ~DefaultFrameManager() override;
+class DefaultFrameManager final : public IFrameManager {
+public:
+  explicit DefaultFrameManager(const RenderContextConfig& rendererConfig,
+                               std::shared_ptr<CommandBufferManager> newCommandBufferManager,
+                               std::shared_ptr<Device> newDevice,
+                               std::shared_ptr<Swapchain> newSwapchain,
+                               std::shared_ptr<VkResourceManager> newResourceManager,
+                               const std::shared_ptr<IDebugManager>& debugManager);
+  ~DefaultFrameManager() override;
 
-      DefaultFrameManager(const DefaultFrameManager&) = delete;
-      DefaultFrameManager(DefaultFrameManager&&) = delete;
-      auto operator=(const DefaultFrameManager&) -> DefaultFrameManager& = delete;
-      auto operator=(DefaultFrameManager&&) -> DefaultFrameManager& = delete;
+  DefaultFrameManager(const DefaultFrameManager&) = delete;
+  DefaultFrameManager(DefaultFrameManager&&) = delete;
+  auto operator=(const DefaultFrameManager&) -> DefaultFrameManager& = delete;
+  auto operator=(DefaultFrameManager&&) -> DefaultFrameManager& = delete;
 
-      auto acquireFrame()
-          -> std::variant<std::reference_wrapper<Frame>, ImageAcquireResult> override;
+  auto acquireFrame() -> std::variant<std::reference_wrapper<Frame>, ImageAcquireResult> override;
 
-    private:
-      size_t currentFrame;
-      std::shared_ptr<CommandBufferManager> commandBufferManager;
-      std::shared_ptr<Device> device;
-      std::shared_ptr<Swapchain> swapchain;
-      std::shared_ptr<VkResourceManager> resourceManager;
+private:
+  size_t currentFrame;
+  std::shared_ptr<CommandBufferManager> commandBufferManager;
+  std::shared_ptr<Device> device;
+  std::shared_ptr<Swapchain> swapchain;
+  std::shared_ptr<VkResourceManager> resourceManager;
 
-      std::vector<std::unique_ptr<Frame>> frames;
-   };
+  std::vector<std::unique_ptr<Frame>> frames;
+};
 
 }

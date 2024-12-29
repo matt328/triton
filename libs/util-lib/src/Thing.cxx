@@ -1,6 +1,6 @@
 #include "Thing.hpp"
 
 namespace ut {
-   Thing::Thing() {
-   }
+Thing::Thing() {
+}
 }

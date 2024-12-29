@@ -2,110 +2,107 @@
 #include "Layout.hpp"
 
 namespace tr {
-   constexpr uint32_t MAX_TEXTURE_COUNT = 16;
-   LayoutFactory::LayoutFactory(const std::shared_ptr<IGraphicsDevice>& graphicsDevice,
-                                RenderContextConfig config)
-       : config{config} {
-      Log.trace("Constructing LayoutFactory");
-      initBindlessLayout(graphicsDevice);
-      initPerFrameLayout(graphicsDevice);
-      initObjectDataLayout(graphicsDevice);
-      initAnimationDataLayout(graphicsDevice);
-   }
+constexpr uint32_t MAX_TEXTURE_COUNT = 16;
+LayoutFactory::LayoutFactory(const std::shared_ptr<IGraphicsDevice>& graphicsDevice,
+                             RenderContextConfig config)
+    : config{config} {
+  Log.trace("Constructing LayoutFactory");
+  initBindlessLayout(graphicsDevice);
+  initPerFrameLayout(graphicsDevice);
+  initObjectDataLayout(graphicsDevice);
+  initAnimationDataLayout(graphicsDevice);
+}
 
-   LayoutFactory::~LayoutFactory() { // NOLINT(*-use-equals-default)
-   }
+LayoutFactory::~LayoutFactory() { // NOLINT(*-use-equals-default)
+}
 
-   [[nodiscard]] auto LayoutFactory::getVkLayout(const LayoutHandle handle) const
-       -> const vk::DescriptorSetLayout& {
-      return layoutCache.at(handle)->getVkLayout();
-   }
+[[nodiscard]] auto LayoutFactory::getVkLayout(const LayoutHandle handle) const
+    -> const vk::DescriptorSetLayout& {
+  return layoutCache.at(handle)->getVkLayout();
+}
 
-   void LayoutFactory::initBindlessLayout(std::shared_ptr<IGraphicsDevice> graphicsDevice) {
-      constexpr auto binding = vk::DescriptorSetLayoutBinding{
-          .binding = 3,
-          .descriptorType = vk::DescriptorType::eCombinedImageSampler,
-          .descriptorCount = MAX_TEXTURE_COUNT,
-          .stageFlags = vk::ShaderStageFlagBits::eAll};
+void LayoutFactory::initBindlessLayout(std::shared_ptr<IGraphicsDevice> graphicsDevice) {
+  constexpr auto binding =
+      vk::DescriptorSetLayoutBinding{.binding = 3,
+                                     .descriptorType = vk::DescriptorType::eCombinedImageSampler,
+                                     .descriptorCount = MAX_TEXTURE_COUNT,
+                                     .stageFlags = vk::ShaderStageFlagBits::eAll};
 
-      static constexpr vk::DescriptorBindingFlags bindlessFlags =
-          vk::DescriptorBindingFlagBits::ePartiallyBound;
+  static constexpr vk::DescriptorBindingFlags bindlessFlags =
+      vk::DescriptorBindingFlagBits::ePartiallyBound;
 
-      constexpr auto extendedInfo =
-          vk::DescriptorSetLayoutBindingFlagsCreateInfoEXT{.bindingCount = 1,
-                                                           .pBindingFlags = &bindlessFlags};
+  constexpr auto extendedInfo =
+      vk::DescriptorSetLayoutBindingFlagsCreateInfoEXT{.bindingCount = 1,
+                                                       .pBindingFlags = &bindlessFlags};
 
-      vk::DescriptorSetLayoutCreateFlags flags{};
-      if (config.useDescriptorBuffers) {
-         flags |= vk::DescriptorSetLayoutCreateFlagBits::eDescriptorBufferEXT;
-      }
+  vk::DescriptorSetLayoutCreateFlags flags{};
+  if (config.useDescriptorBuffers) {
+    flags |= vk::DescriptorSetLayoutCreateFlagBits::eDescriptorBufferEXT;
+  }
 
-      const auto dslCreateInfo = vk::DescriptorSetLayoutCreateInfo{.pNext = &extendedInfo,
-                                                                   .flags = flags,
-                                                                   .bindingCount = 1,
-                                                                   .pBindings = &binding};
+  const auto dslCreateInfo = vk::DescriptorSetLayoutCreateInfo{.pNext = &extendedInfo,
+                                                               .flags = flags,
+                                                               .bindingCount = 1,
+                                                               .pBindings = &binding};
 
-      layoutCache[LayoutHandle::Bindless] =
-          std::make_unique<Layout>(graphicsDevice, dslCreateInfo, "Bindless DS Layout");
-   }
+  layoutCache[LayoutHandle::Bindless] =
+      std::make_unique<Layout>(graphicsDevice, dslCreateInfo, "Bindless DS Layout");
+}
 
-   void LayoutFactory::initPerFrameLayout(std::shared_ptr<IGraphicsDevice> graphicsDevice) {
-      constexpr auto binding =
-          vk::DescriptorSetLayoutBinding{.binding = 0,
-                                         .descriptorType = vk::DescriptorType::eUniformBuffer,
-                                         .descriptorCount = 1,
-                                         .stageFlags = vk::ShaderStageFlagBits::eVertex};
+void LayoutFactory::initPerFrameLayout(std::shared_ptr<IGraphicsDevice> graphicsDevice) {
+  constexpr auto binding =
+      vk::DescriptorSetLayoutBinding{.binding = 0,
+                                     .descriptorType = vk::DescriptorType::eUniformBuffer,
+                                     .descriptorCount = 1,
+                                     .stageFlags = vk::ShaderStageFlagBits::eVertex};
 
-      vk::DescriptorSetLayoutCreateFlags flags{};
-      if (config.useDescriptorBuffers) {
-         flags |= vk::DescriptorSetLayoutCreateFlagBits::eDescriptorBufferEXT;
-      }
+  vk::DescriptorSetLayoutCreateFlags flags{};
+  if (config.useDescriptorBuffers) {
+    flags |= vk::DescriptorSetLayoutCreateFlagBits::eDescriptorBufferEXT;
+  }
 
-      const auto createInfo = vk::DescriptorSetLayoutCreateInfo{.flags = flags,
-                                                                .bindingCount = 1,
-                                                                .pBindings = &binding};
+  const auto createInfo =
+      vk::DescriptorSetLayoutCreateInfo{.flags = flags, .bindingCount = 1, .pBindings = &binding};
 
-      layoutCache[LayoutHandle::PerFrame] =
-          std::make_unique<Layout>(graphicsDevice, createInfo, "Per Frame DS Layout");
-   }
+  layoutCache[LayoutHandle::PerFrame] =
+      std::make_unique<Layout>(graphicsDevice, createInfo, "Per Frame DS Layout");
+}
 
-   void LayoutFactory::initObjectDataLayout(std::shared_ptr<IGraphicsDevice> graphicsDevice) {
-      constexpr auto binding =
-          vk::DescriptorSetLayoutBinding{.binding = 0,
-                                         .descriptorType = vk::DescriptorType::eStorageBuffer,
-                                         .descriptorCount = 1,
-                                         .stageFlags = vk::ShaderStageFlagBits::eVertex};
+void LayoutFactory::initObjectDataLayout(std::shared_ptr<IGraphicsDevice> graphicsDevice) {
+  constexpr auto binding =
+      vk::DescriptorSetLayoutBinding{.binding = 0,
+                                     .descriptorType = vk::DescriptorType::eStorageBuffer,
+                                     .descriptorCount = 1,
+                                     .stageFlags = vk::ShaderStageFlagBits::eVertex};
 
-      vk::DescriptorSetLayoutCreateFlags flags{};
-      if (config.useDescriptorBuffers) {
-         flags |= vk::DescriptorSetLayoutCreateFlagBits::eDescriptorBufferEXT;
-      }
+  vk::DescriptorSetLayoutCreateFlags flags{};
+  if (config.useDescriptorBuffers) {
+    flags |= vk::DescriptorSetLayoutCreateFlagBits::eDescriptorBufferEXT;
+  }
 
-      const auto createInfo = vk::DescriptorSetLayoutCreateInfo{.flags = flags,
-                                                                .bindingCount = 1,
-                                                                .pBindings = &binding};
+  const auto createInfo =
+      vk::DescriptorSetLayoutCreateInfo{.flags = flags, .bindingCount = 1, .pBindings = &binding};
 
-      layoutCache[LayoutHandle::ObjectData] =
-          std::make_unique<Layout>(graphicsDevice, createInfo, "Object Data DS Layout");
-   }
+  layoutCache[LayoutHandle::ObjectData] =
+      std::make_unique<Layout>(graphicsDevice, createInfo, "Object Data DS Layout");
+}
 
-   void LayoutFactory::initAnimationDataLayout(std::shared_ptr<IGraphicsDevice> graphicsDevice) {
-      constexpr auto binding =
-          vk::DescriptorSetLayoutBinding{.binding = 0,
-                                         .descriptorType = vk::DescriptorType::eStorageBuffer,
-                                         .descriptorCount = 1,
-                                         .stageFlags = vk::ShaderStageFlagBits::eVertex};
+void LayoutFactory::initAnimationDataLayout(std::shared_ptr<IGraphicsDevice> graphicsDevice) {
+  constexpr auto binding =
+      vk::DescriptorSetLayoutBinding{.binding = 0,
+                                     .descriptorType = vk::DescriptorType::eStorageBuffer,
+                                     .descriptorCount = 1,
+                                     .stageFlags = vk::ShaderStageFlagBits::eVertex};
 
-      vk::DescriptorSetLayoutCreateFlags flags{};
-      if (config.useDescriptorBuffers) {
-         flags |= vk::DescriptorSetLayoutCreateFlagBits::eDescriptorBufferEXT;
-      }
+  vk::DescriptorSetLayoutCreateFlags flags{};
+  if (config.useDescriptorBuffers) {
+    flags |= vk::DescriptorSetLayoutCreateFlagBits::eDescriptorBufferEXT;
+  }
 
-      const auto createInfo = vk::DescriptorSetLayoutCreateInfo{.flags = flags,
-                                                                .bindingCount = 1,
-                                                                .pBindings = &binding};
-      layoutCache[LayoutHandle::AnimationData] =
-          std::make_unique<Layout>(graphicsDevice, createInfo, "Animation Data DS Layout");
-   }
+  const auto createInfo =
+      vk::DescriptorSetLayoutCreateInfo{.flags = flags, .bindingCount = 1, .pBindings = &binding};
+  layoutCache[LayoutHandle::AnimationData] =
+      std::make_unique<Layout>(graphicsDevice, createInfo, "Animation Data DS Layout");
+}
 
 }

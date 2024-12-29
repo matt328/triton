@@ -7,4 +7,3 @@ auto Resource::operator==(const Resource& other) const -> bool {
 }
 
 }
-

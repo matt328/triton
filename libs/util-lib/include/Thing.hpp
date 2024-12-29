@@ -2,8 +2,8 @@
 
 namespace ut {
 
-   struct Thing {
-      Thing();
-   };
+struct Thing {
+  Thing();
+};
 
 }

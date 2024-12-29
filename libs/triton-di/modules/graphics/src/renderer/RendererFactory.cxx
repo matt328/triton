@@ -5,16 +5,15 @@
 
 namespace tr {
 
-   RendererFactory::RendererFactory(std::shared_ptr<IGraphicsDevice> newGraphicsDevice,
-                                    std::shared_ptr<IShaderCompiler> newShaderCompiler)
-       : graphicsDevice{std::move(newGraphicsDevice)},
-         shaderCompiler{std::move(newShaderCompiler)} {
-   }
+RendererFactory::RendererFactory(std::shared_ptr<IGraphicsDevice> newGraphicsDevice,
+                                 std::shared_ptr<IShaderCompiler> newShaderCompiler)
+    : graphicsDevice{std::move(newGraphicsDevice)}, shaderCompiler{std::move(newShaderCompiler)} {
+}
 
-   auto RendererFactory::createRenderer(RendererConfig config) -> std::shared_ptr<IRenderer> {
-      if (config.rendererType == RendererType::StaticModel) {
-         return std::make_shared<DefaultRenderer>(config, graphicsDevice, shaderCompiler);
-      }
-      return nullptr;
-   }
+auto RendererFactory::createRenderer(RendererConfig config) -> std::shared_ptr<IRenderer> {
+  if (config.rendererType == RendererType::StaticModel) {
+    return std::make_shared<DefaultRenderer>(config, graphicsDevice, shaderCompiler);
+  }
+  return nullptr;
+}
 }

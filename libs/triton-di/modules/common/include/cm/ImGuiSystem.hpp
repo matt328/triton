@@ -7,41 +7,41 @@
 #include <vk/VkResourceManager.hpp>
 
 namespace tr {
-   class Swapchain;
-   class Instance;
-   class IGraphicsDevice;
+class Swapchain;
+class Instance;
+class IGraphicsDevice;
 }
 
 namespace tr {
-   class IWindow;
+class IWindow;
 }
 
 namespace tr {
-   class ImGuiSystem final : public IGuiSystem {
-    public:
-      ImGuiSystem(const std::shared_ptr<IWindow>& window,
-                  const std::shared_ptr<Instance>& instance,
-                  const std::shared_ptr<Device>& device,
-                  const std::shared_ptr<PhysicalDevice>& physicalDevice,
-                  const std::shared_ptr<queue::Graphics>& graphicsQueue,
-                  const std::shared_ptr<Swapchain>& swapchain,
-                  std::shared_ptr<VkResourceManager> newResourceManager);
-      ~ImGuiSystem() override;
+class ImGuiSystem final : public IGuiSystem {
+public:
+  ImGuiSystem(const std::shared_ptr<IWindow>& window,
+              const std::shared_ptr<Instance>& instance,
+              const std::shared_ptr<Device>& device,
+              const std::shared_ptr<PhysicalDevice>& physicalDevice,
+              const std::shared_ptr<queue::Graphics>& graphicsQueue,
+              const std::shared_ptr<Swapchain>& swapchain,
+              std::shared_ptr<VkResourceManager> newResourceManager);
+  ~ImGuiSystem() override;
 
-      ImGuiSystem(const ImGuiSystem&) = delete;
-      ImGuiSystem(ImGuiSystem&&) = delete;
-      auto operator=(const ImGuiSystem&) -> ImGuiSystem& = delete;
-      auto operator=(ImGuiSystem&&) -> ImGuiSystem& = delete;
+  ImGuiSystem(const ImGuiSystem&) = delete;
+  ImGuiSystem(ImGuiSystem&&) = delete;
+  auto operator=(const ImGuiSystem&) -> ImGuiSystem& = delete;
+  auto operator=(ImGuiSystem&&) -> ImGuiSystem& = delete;
 
-      auto setRenderCallback(std::function<void(void)> newRenderFn) -> void override;
-      auto render(const std::unique_ptr<vk::raii::CommandBuffer>& commandBuffer,
-                  const vk::raii::ImageView& swapchainImageView,
-                  const vk::Extent2D& swapchainExtent) -> void override;
+  auto setRenderCallback(std::function<void(void)> newRenderFn) -> void override;
+  auto render(const std::unique_ptr<vk::raii::CommandBuffer>& commandBuffer,
+              const vk::raii::ImageView& swapchainImageView,
+              const vk::Extent2D& swapchainExtent) -> void override;
 
-    private:
-      std::shared_ptr<VkResourceManager> resourceManager;
+private:
+  std::shared_ptr<VkResourceManager> resourceManager;
 
-      std::unique_ptr<vk::raii::DescriptorPool> descriptorPool;
-      std::function<void()> renderFn;
-   };
+  std::unique_ptr<vk::raii::DescriptorPool> descriptorPool;
+  std::function<void()> renderFn;
+};
 }

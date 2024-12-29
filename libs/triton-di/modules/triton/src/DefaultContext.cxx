@@ -25,87 +25,87 @@ DefaultContext::DefaultContext(std::shared_ptr<IEventBus> newEventBus,
       guiSystem{std::move(newGuiSystem)},
       registry{std::move(newRegistry)} {
 
-   Log.trace("Constructing Default Context");
+  Log.trace("Constructing Default Context");
 
-   eventBus->subscribe<tr::WindowClosed>(
-       [&]([[maybe_unused]] const tr::WindowClosed& event) { running = false; });
+  eventBus->subscribe<tr::WindowClosed>(
+      [&]([[maybe_unused]] const tr::WindowClosed& event) { running = false; });
 
-   // Wire together game world to render world
-   // gameplaySystem->setRenderDataTransferHandler(
-   //     [&](const RenderData& renderData) { renderContext->setRenderData(renderData);
-   //     });
-   //
-   // gameplaySystem->createDefaultCamera();
+  // Wire together game world to render world
+  // gameplaySystem->setRenderDataTransferHandler(
+  //     [&](const RenderData& renderData) { renderContext->setRenderData(renderData);
+  //     });
+  //
+  // gameplaySystem->createDefaultCamera();
 }
 
 void DefaultContext::run() {
-   using Clock = std::chrono::steady_clock;
-   using namespace std::literals;
-   auto constexpr MaxFrameTime = 250ms;
-   auto constexpr dt = std::chrono::duration<int64_t, std::ratio<1, 90>>{1};
-   using duration = decltype(Clock::duration{} + dt);
-   using time_point = std::chrono::time_point<Clock, duration>;
+  using Clock = std::chrono::steady_clock;
+  using namespace std::literals;
+  auto constexpr MaxFrameTime = 250ms;
+  auto constexpr dt = std::chrono::duration<int64_t, std::ratio<1, 90>>{1};
+  using duration = decltype(Clock::duration{} + dt);
+  using time_point = std::chrono::time_point<Clock, duration>;
 
-   time_point t{};
+  time_point t{};
 
-   time_point currentTime = Clock::now();
-   duration accumulator = 0s;
+  time_point currentTime = Clock::now();
+  duration accumulator = 0s;
 
-   while (running) {
-      time_point newTime = Clock::now();
-      auto frameTime = newTime - currentTime;
-      if (frameTime > MaxFrameTime) {
-         frameTime = MaxFrameTime;
-      }
-      currentTime = newTime;
+  while (running) {
+    time_point newTime = Clock::now();
+    auto frameTime = newTime - currentTime;
+    if (frameTime > MaxFrameTime) {
+      frameTime = MaxFrameTime;
+    }
+    currentTime = newTime;
 
-      accumulator += frameTime;
+    accumulator += frameTime;
 
-      {
-         ZoneNamedN(poll, "Poll", true);
-         window->pollEvents();
-      }
+    {
+      ZoneNamedN(poll, "Poll", true);
+      window->pollEvents();
+    }
 
-      if (this->paused) {
-         std::this_thread::sleep_for(std::chrono::milliseconds(SleepMillis));
-         continue;
-      }
+    if (this->paused) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(SleepMillis));
+      continue;
+    }
 
-      while (accumulator >= dt) {
-         // gameplaySystem->fixedUpdate();
-         t += dt;
-         accumulator -= dt;
-      }
+    while (accumulator >= dt) {
+      // gameplaySystem->fixedUpdate();
+      t += dt;
+      accumulator -= dt;
+    }
 
-      [[maybe_unused]] const auto alpha = accumulator / dt;
+    [[maybe_unused]] const auto alpha = accumulator / dt;
 
-      {
-         ZoneNamedN(z, "Gameplay Update", true);
-         // gameplaySystem->update();
-      }
+    {
+      ZoneNamedN(z, "Gameplay Update", true);
+      // gameplaySystem->update();
+    }
 
-      {
-         ZoneNamedN(z, "RenderContext Render", true);
-         renderContext->renderNextFrame();
-      }
-      FrameMark;
-   }
-   Log.debug("Main Loop Finished");
+    {
+      ZoneNamedN(z, "RenderContext Render", true);
+      renderContext->renderNextFrame();
+    }
+    FrameMark;
+  }
+  Log.debug("Main Loop Finished");
 }
 
 auto DefaultContext::getGameplaySystem() -> std::shared_ptr<IGameplaySystem> {
-   return nullptr;
+  return nullptr;
 }
 
 auto DefaultContext::getGuiSystem() -> std::shared_ptr<IGuiSystem> {
-   return guiSystem;
+  return guiSystem;
 }
 
 auto DefaultContext::getEventSystem() -> std::shared_ptr<IEventBus> {
-   return eventBus;
+  return eventBus;
 }
 
 auto DefaultContext::getRegistry() -> std::shared_ptr<Registry> {
-   return registry;
+  return registry;
 }
 }

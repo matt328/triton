@@ -258,4 +258,3 @@ auto DefaultRenderScheduler::copyImageToImage(const vk::raii::CommandBuffer& cmd
   cmd.blitImage2(blitInfo);
 }
 } // namespace tr
-

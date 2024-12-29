@@ -3,23 +3,23 @@
 #include <task/IRenderTask.hpp>
 
 namespace tr {
-   class IRenderScheduler {
-    public:
-      IRenderScheduler() = default;
-      virtual ~IRenderScheduler() = default;
+class IRenderScheduler {
+public:
+  IRenderScheduler() = default;
+  virtual ~IRenderScheduler() = default;
 
-      IRenderScheduler(const IRenderScheduler&) = delete;
-      IRenderScheduler(IRenderScheduler&&) = delete;
-      auto operator=(IRenderScheduler&&) -> IRenderScheduler& = delete;
-      auto operator=(const IRenderScheduler&) -> IRenderScheduler& = delete;
+  IRenderScheduler(const IRenderScheduler&) = delete;
+  IRenderScheduler(IRenderScheduler&&) = delete;
+  auto operator=(IRenderScheduler&&) -> IRenderScheduler& = delete;
+  auto operator=(const IRenderScheduler&) -> IRenderScheduler& = delete;
 
-      virtual auto setupCommandBuffersForFrame(Frame& frame) -> void = 0;
+  virtual auto setupCommandBuffersForFrame(Frame& frame) -> void = 0;
 
-      virtual auto recordRenderTasks(Frame& frame) const -> void = 0;
+  virtual auto recordRenderTasks(Frame& frame) const -> void = 0;
 
-      virtual auto endFrame(Frame& frame) const -> void = 0;
+  virtual auto endFrame(Frame& frame) const -> void = 0;
 
-      virtual auto executeStaticTasks(Frame& frame) const -> void = 0;
-      virtual auto addStaticTask(std::shared_ptr<IRenderTask> task) -> void = 0;
-   };
+  virtual auto executeStaticTasks(Frame& frame) const -> void = 0;
+  virtual auto addStaticTask(std::shared_ptr<IRenderTask> task) -> void = 0;
+};
 }

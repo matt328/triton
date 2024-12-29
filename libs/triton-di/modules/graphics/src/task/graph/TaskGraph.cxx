@@ -35,4 +35,3 @@ auto TaskGraph::insertBarrier(const BarrierConfig& barrierConfig) -> void {
 }
 
 }
-

@@ -4,16 +4,16 @@
 #include "tr/Actions.hpp"
 
 namespace tr {
-   class IActionSystem {
-    public:
-      explicit IActionSystem() = default;
-      virtual ~IActionSystem() = default;
+class IActionSystem {
+public:
+  explicit IActionSystem() = default;
+  virtual ~IActionSystem() = default;
 
-      IActionSystem(const IActionSystem&) = default;
-      IActionSystem(IActionSystem&&) = delete;
-      auto operator=(const IActionSystem&) -> IActionSystem& = default;
-      auto operator=(IActionSystem&&) -> IActionSystem& = delete;
+  IActionSystem(const IActionSystem&) = default;
+  IActionSystem(IActionSystem&&) = delete;
+  auto operator=(const IActionSystem&) -> IActionSystem& = default;
+  auto operator=(IActionSystem&&) -> IActionSystem& = delete;
 
-      virtual void mapSource(Source source, tr::StateType sType, tr::ActionType aType) = 0;
-   };
+  virtual void mapSource(Source source, tr::StateType sType, tr::ActionType aType) = 0;
+};
 }

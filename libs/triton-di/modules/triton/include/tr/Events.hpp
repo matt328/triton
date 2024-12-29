@@ -8,62 +8,62 @@
 
 namespace tr {
 
-   struct WindowIconified {
-      int iconified;
-   };
+struct WindowIconified {
+  int iconified;
+};
 
-   struct WindowClosed {};
+struct WindowClosed {};
 
-   struct KeyEvent {
-      tr::Key key;
-      tr::ButtonState buttonState;
-   };
+struct KeyEvent {
+  tr::Key key;
+  tr::ButtonState buttonState;
+};
 
-   struct MouseMoved {
-      double x;
-      double y;
-   };
+struct MouseMoved {
+  double x;
+  double y;
+};
 
-   struct Fullscreen {
-      bool isFullscreen;
-   };
+struct Fullscreen {
+  bool isFullscreen;
+};
 
-   struct MouseCaptured {
-      bool isMouseCaptured;
-   };
+struct MouseCaptured {
+  bool isMouseCaptured;
+};
 
-   struct MouseButton {
-      int button;
-      int action;
-      int mods;
-   };
+struct MouseButton {
+  int button;
+  int action;
+  int mods;
+};
 
-   struct PlayerMoved {
-      int playerId;
-      float x, y;
-   };
+struct PlayerMoved {
+  int playerId;
+  float x, y;
+};
 
-   struct PlayerScored {
-      int playerId;
-      int score;
-   };
+struct PlayerScored {
+  int playerId;
+  int score;
+};
 
-   struct SwapchainResized {
-      uint32_t width;
-      uint32_t height;
-   };
+struct SwapchainResized {
+  uint32_t width;
+  uint32_t height;
+};
 
-   using EventVariant = std::variant<WindowIconified,
-                                     WindowClosed,
-                                     KeyEvent,
-                                     MouseMoved,
-                                     MouseButton,
-                                     Fullscreen,
-                                     MouseCaptured,
-                                     Action,
-                                     PlayerMoved,
-                                     PlayerScored,
-                                     EntityCreated,
-                                     SwapchainResized>;
+using EventVariant = std::variant<WindowIconified,
+                                  WindowClosed,
+                                  KeyEvent,
+                                  MouseMoved,
+                                  MouseButton,
+                                  Fullscreen,
+                                  MouseCaptured,
+                                  Action,
+                                  PlayerMoved,
+                                  PlayerScored,
+                                  EntityCreated,
+                                  SwapchainResized>;
 
 }
