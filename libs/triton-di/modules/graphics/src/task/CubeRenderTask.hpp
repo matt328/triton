@@ -12,36 +12,46 @@ namespace tr {
 class VkResourceManager;
 
 class CubeRenderTask final : public IRenderTask {
- public:
-   CubeRenderTask(std::shared_ptr<VkResourceManager> newResourceManager,
-                  std::shared_ptr<GeometryFactory> newGeometryFactory,
-                  std::shared_ptr<IndirectPipeline> newPipeline);
+public:
+  CubeRenderTask(std::shared_ptr<VkResourceManager> newResourceManager,
+                 std::shared_ptr<GeometryFactory> newGeometryFactory,
+                 std::shared_ptr<IndirectPipeline> newPipeline);
 
-   ~CubeRenderTask() override = default;
+  ~CubeRenderTask() override = default;
 
-   CubeRenderTask(const CubeRenderTask&) = delete;
-   CubeRenderTask(CubeRenderTask&&) = delete;
-   auto operator=(const CubeRenderTask&) -> CubeRenderTask& = delete;
-   auto operator=(CubeRenderTask&&) -> CubeRenderTask& = delete;
+  CubeRenderTask(const CubeRenderTask&) = delete;
+  CubeRenderTask(CubeRenderTask&&) = delete;
+  auto operator=(const CubeRenderTask&) -> CubeRenderTask& = delete;
+  auto operator=(CubeRenderTask&&) -> CubeRenderTask& = delete;
 
-   auto record(vk::raii::CommandBuffer& commandBuffer) -> void override;
+  auto record(vk::raii::CommandBuffer& commandBuffer) -> void override;
 
- private:
-   std::shared_ptr<VkResourceManager> resourceManager;
-   std::shared_ptr<GeometryFactory> geometryFactory;
-   std::shared_ptr<IndirectPipeline> pipeline;
+  enum class ResourceSlot : uint8_t {
+    IndirectBuffer = 0,
+    InstanceBuffer,
+    CameraDataBuffer,
+    DrawCountBuffer
+  };
 
-   MeshHandle meshHandle = -1;
+  auto registerResource(ResourceSlot slot, std::string_view resourceName) -> void;
 
-   std::unique_ptr<Buffer> indirectBuffer;
-   std::unique_ptr<Buffer> instanceBuffer;
+private:
+  std::shared_ptr<VkResourceManager> resourceManager;
+  std::shared_ptr<GeometryFactory> geometryFactory;
+  std::shared_ptr<IndirectPipeline> pipeline;
 
-   std::unique_ptr<Buffer> cameraDataBuffer;
+  MeshHandle meshHandle = -1;
 
-   tr::IndirectPushConstants pushConstants;
+  std::unique_ptr<Buffer> indirectBuffer;
+  std::unique_ptr<Buffer> instanceBuffer;
+  std::unique_ptr<Buffer> cameraDataBuffer;
 
-   vk::Viewport viewport;
-   vk::Rect2D snezzor;
+  std::string drawImageResourceName;
+
+  tr::IndirectPushConstants pushConstants;
+
+  vk::Viewport viewport;
+  vk::Rect2D snezzor;
 };
 
 }

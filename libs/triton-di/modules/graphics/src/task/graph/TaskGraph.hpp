@@ -3,26 +3,15 @@
 #include "TaskNode.hpp"
 
 /*
-   - Buffers are owned by a frame
-   - RenderTasks' abstraction over inputs and outputs should be 'classes' of buffers/images when
-   defining the dependencies
-   - When actually creating barriers, match up the buffer/image's class with the actual buffer/image
-   from the current Frame
-   - inputs and outputs abstraction == TaskResource
-   - how should a TaskResource call out a 'class' of buffers/images.
-   - should incorporate an ID or Tag somehow on the buffer?
-   - does defining a TaskResource cause the creation of the buffer/image?
+  Tasks will define ResourceUsages
+  - ResourceUsage will contain everything needed to create a barrier to ensure the incoming resource
+  is ready to be used. I *think* that is all that is needed, just to create barriers.
+  - ResourceUsage will also either own or map to a resource 'handle'. The RenderScheduler will
+  assign resource handles to slots in each task, this is how a task will know which buffers and
+  images to use. tasks will be dumb and just operate on whatever resource handles they're given.
+  - This is all completely independent of the TaskGraph.
+  - Maybe code this up, and orchestrate it manually in a ManualRenderScheduler to solidify the API.
 
-   - Maybe on init or change, the Task can provide its TaskResources and register them with each
-   frame.
-   - how to decide which task 'owns' which resource? resources could just have a unique identifier
-   among the tasks and whichever task registers it first will create it and the subsequent ones will
-   just be noops
-   - That way the frame can own the Buffer, and hand out a handle to it to be
-   used in the TaskResource and when recording the command buffer, the Task will just ask the
-   current frame for the Buffer at the handle supplied by the Pending Barrier
-   - Calculating the dependencies would involve creating a PendingBarrier using info from the
-   'overlapping' TaskResource
 
    CullingTask
    - input: ObjectBoundsBuffer
@@ -38,27 +27,28 @@
 namespace tr {
 
 struct BarrierConfig {
-   IRenderTask* producer;
-   IRenderTask* consumer;
+  IRenderTask* producer;
+  IRenderTask* consumer;
 };
 
 class TaskGraph {
- public:
-   TaskGraph() = default;
-   ~TaskGraph() = default;
+public:
+  TaskGraph() = default;
+  ~TaskGraph() = default;
 
-   TaskGraph(TaskGraph&& taskGraph) = delete;
-   TaskGraph(const TaskGraph& taskGraph) = delete;
-   auto operator=(TaskGraph&& taskGraph) = delete;
-   auto operator=(const TaskGraph& taskGraph) = delete;
+  TaskGraph(TaskGraph&& taskGraph) = delete;
+  TaskGraph(const TaskGraph& taskGraph) = delete;
+  auto operator=(TaskGraph&& taskGraph) = delete;
+  auto operator=(const TaskGraph& taskGraph) = delete;
 
-   auto resolveDependencies() -> void;
+  auto resolveDependencies() -> void;
 
- private:
-   std::vector<TaskNode> taskNodes;
+private:
+  std::vector<TaskNode> taskNodes;
 
-   /// Inserts a Barrier here.
-   auto insertBarrier(const BarrierConfig& barrierConfig) -> void;
+  /// Inserts a Barrier here.
+  auto insertBarrier(const BarrierConfig& barrierConfig) -> void;
 };
-}
+
+} // namespace tr
 

@@ -23,37 +23,37 @@
 #include <di.hpp>
 #include <task/DefaultFrameManager.hpp>
 #include <task/DefaultRenderScheduler.hpp>
+#include "task/graph/TaskGraph.hpp"
+
 #include "pipeline/SpirvShaderCompiler.hpp"
 
 namespace di = boost::di;
 
 namespace tr {
-   auto ComponentFactory::getContext(const FrameworkConfig& config) -> std::shared_ptr<IContext> {
+auto ComponentFactory::getContext(const FrameworkConfig& config) -> std::shared_ptr<IContext> {
 
-      constexpr auto rendererConfig = RenderContextConfig{.useDescriptorBuffers = false,
-                                                               .maxTextures = 16,
-                                                               .framesInFlight = 2};
+   constexpr auto rendererConfig =
+       RenderContextConfig{.useDescriptorBuffers = false, .maxTextures = 16, .framesInFlight = 2};
 
-      const auto injector = di::make_injector(
-          di::bind<IDebugManager>.to<DefaultDebugManager>(),
-          di::bind<RenderContextConfig>.to(rendererConfig),
-          di::bind<IGuiSystem>.to<ImGuiSystem>(),
-          di::bind<IGuiAdapter>.to<ImGuiAdapter>(),
-          di::bind<IWindow>.to<Window>(),
-          di::bind<IEventBus>.to<DefaultEventBus>(),
-          di::bind<IRenderContext>.to<NewRenderContext>(),
-          di::bind<IRenderScheduler>.to<DefaultRenderScheduler>(),
-          di::bind<IFrameManager>.to<DefaultFrameManager>(),
-          di::bind<IActionSystem>.to<ActionSystem>(),
-          di::bind<glm::ivec2>.to(config.initialWindowSize),
-          di::bind<std::string>.to(config.windowTitle),
-          di::bind<Device>.to<Device>(),
-          di::bind<IShaderCompiler>.to<SpirvShaderCompiler>(),
-          di::bind<queue::Graphics>.to<queue::Graphics>(),
-          di::bind<queue::Transfer>.to<queue::Transfer>(),
-          di::bind<queue::Present>.to<queue::Present>(),
-          di::bind<queue::Compute>.to<queue::Compute>());
+   const auto injector = di::make_injector(di::bind<IDebugManager>.to<DefaultDebugManager>(),
+                                           di::bind<RenderContextConfig>.to(rendererConfig),
+                                           di::bind<IGuiSystem>.to<ImGuiSystem>(),
+                                           di::bind<IGuiAdapter>.to<ImGuiAdapter>(),
+                                           di::bind<IWindow>.to<Window>(),
+                                           di::bind<IEventBus>.to<DefaultEventBus>(),
+                                           di::bind<IRenderContext>.to<NewRenderContext>(),
+                                           di::bind<IRenderScheduler>.to<DefaultRenderScheduler>(),
+                                           di::bind<IFrameManager>.to<DefaultFrameManager>(),
+                                           di::bind<IActionSystem>.to<ActionSystem>(),
+                                           di::bind<glm::ivec2>.to(config.initialWindowSize),
+                                           di::bind<std::string>.to(config.windowTitle),
+                                           di::bind<Device>.to<Device>(),
+                                           di::bind<IShaderCompiler>.to<SpirvShaderCompiler>(),
+                                           di::bind<queue::Graphics>.to<queue::Graphics>(),
+                                           di::bind<queue::Transfer>.to<queue::Transfer>(),
+                                           di::bind<queue::Present>.to<queue::Present>(),
+                                           di::bind<queue::Compute>.to<queue::Compute>());
 
-      return injector.create<std::shared_ptr<DefaultContext>>();
-   }
+   return injector.create<std::shared_ptr<DefaultContext>>();
+}
 }

@@ -8,7 +8,7 @@ FetchContent_Declare(
    DOWNLOAD_NO_EXTRACT TRUE
 )
 
-FetchContent_Populate(boost-di-header)
+FetchContent_MakeAvailable(boost-di-header)
 
 file(MAKE_DIRECTORY ${BOOSTDI_INCLUDE_DIR})
 file(RENAME ${boost-di-header_SOURCE_DIR}/di.hpp ${BOOSTDI_INCLUDE_DIR}/di.hpp)
