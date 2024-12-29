@@ -29,153 +29,153 @@ namespace ed {
 class TaskQueue;
 
 struct SkeletonData {
-   std::string name;
-   std::string filePath;
+  std::string name;
+  std::string filePath;
 
-   template <class T>
-   void serialize(T& archive) {
-      archive(name, filePath);
-   }
+  template <class T>
+  void serialize(T& archive) {
+    archive(name, filePath);
+  }
 };
 
 struct AnimationData {
-   std::string name;
-   std::string filePath;
+  std::string name;
+  std::string filePath;
 
-   template <class T>
-   void serialize(T& archive) {
-      archive(name, filePath);
-   }
+  template <class T>
+  void serialize(T& archive) {
+    archive(name, filePath);
+  }
 };
 
 struct ModelData {
-   std::string name;
-   std::string filePath;
+  std::string name;
+  std::string filePath;
 
-   template <class T>
-   void serialize(T& archive) {
-      archive(name, filePath);
-   }
+  template <class T>
+  void serialize(T& archive) {
+    archive(name, filePath);
+  }
 };
 
 struct EntityData {
-   std::string name;
-   glm::vec3 position{glm::zero<glm::vec3>()};
-   glm::quat rotation{glm::identity<glm::quat>()};
-   std::string modelName;
-   std::string skeleton;
-   std::vector<std::string> animations;
+  std::string name;
+  glm::vec3 position{glm::zero<glm::vec3>()};
+  glm::quat rotation{glm::identity<glm::quat>()};
+  std::string modelName;
+  std::string skeleton;
+  std::vector<std::string> animations;
 
-   template <class T>
-   void serialize(T& archive) {
-      archive(name, position, rotation, modelName, skeleton, animations);
-   }
+  template <class T>
+  void serialize(T& archive) {
+    archive(name, position, rotation, modelName, skeleton, animations);
+  }
 };
 
 struct TerrainData {
-   std::string name;
-   // adjustable terrain params
-   // Right now this is just a marker for the engine to do render whatever it thinks a terrain is
-   template <class T>
-   void serialize(T& archive) {
-      archive(name);
-   }
+  std::string name;
+  // adjustable terrain params
+  // Right now this is just a marker for the engine to do render whatever it thinks a terrain is
+  template <class T>
+  void serialize(T& archive) {
+    archive(name);
+  }
 };
 
 struct DataStore {
-   // Assets
-   std::unordered_map<std::string, SkeletonData> skeletons;
-   std::unordered_map<std::string, AnimationData> animations;
-   std::unordered_map<std::string, ModelData> models;
+  // Assets
+  std::unordered_map<std::string, SkeletonData> skeletons;
+  std::unordered_map<std::string, AnimationData> animations;
+  std::unordered_map<std::string, ModelData> models;
 
-   // Scene
-   std::unordered_map<std::string, EntityData> scene;
+  // Scene
+  std::unordered_map<std::string, EntityData> scene;
 
-   template <class T>
-   void serialize(T& archive) {
-      archive(skeletons, animations, models, scene);
-   }
+  template <class T>
+  void serialize(T& archive) {
+    archive(skeletons, animations, models, scene);
+  }
 };
 
 class FutureMonitor;
 
 class DataFacade {
- public:
-   explicit DataFacade(std::shared_ptr<tr::IGameplaySystem> newGameplaySystem,
-                       std::shared_ptr<TaskQueue> newTaskQueue);
-   ~DataFacade();
+public:
+  explicit DataFacade(std::shared_ptr<tr::IGameplaySystem> newGameplaySystem,
+                      std::shared_ptr<TaskQueue> newTaskQueue);
+  ~DataFacade();
 
-   DataFacade(const DataFacade&) = delete;
-   auto operator=(const DataFacade&) -> DataFacade& = delete;
+  DataFacade(const DataFacade&) = delete;
+  auto operator=(const DataFacade&) -> DataFacade& = delete;
 
-   DataFacade(DataFacade&&) = delete;
-   auto operator=(DataFacade&&) -> DataFacade& = delete;
+  DataFacade(DataFacade&&) = delete;
+  auto operator=(DataFacade&&) -> DataFacade& = delete;
 
-   void update() const;
+  void update() const;
 
-   void clear();
+  void clear();
 
-   void addSkeleton(std::string_view name, const std::filesystem::path& path);
-   void removeSkeleton(std::string_view name);
+  void addSkeleton(std::string_view name, const std::filesystem::path& path);
+  void removeSkeleton(std::string_view name);
 
-   void addAnimation(std::string_view name, const std::filesystem::path& path);
-   void removeAnimation(std::string_view name);
+  void addAnimation(std::string_view name, const std::filesystem::path& path);
+  void removeAnimation(std::string_view name);
 
-   void addModel(std::string_view name, const std::filesystem::path& path);
-   void removeModel(std::string_view name);
+  void addModel(std::string_view name, const std::filesystem::path& path);
+  void removeModel(std::string_view name);
 
-   void createStaticModel(const EntityData& entityData) noexcept;
+  void createStaticModel(const EntityData& entityData) noexcept;
 
-   void createAnimatedModel(const EntityData& entityData);
+  void createAnimatedModel(const EntityData& entityData);
 
-   void addAnimationToEntity(std::string_view entityName, std::string_view animationName);
+  void addAnimationToEntity(std::string_view entityName, std::string_view animationName);
 
-   void setEntitySkeleton(std::string_view entityName, std::string_view skeletonName);
+  void setEntitySkeleton(std::string_view entityName, std::string_view skeletonName);
 
-   void createTerrain(std::string_view terrainName);
-   void createAABB();
+  void createTerrain(std::string_view terrainName);
+  void createAABB();
 
-   void save(const std::filesystem::path& outputFile);
-   void load(const std::filesystem::path& inputFile);
+  void save(const std::filesystem::path& outputFile);
+  void load(const std::filesystem::path& inputFile);
 
-   void setEntityPosition(std::string_view name, const glm::vec3& newPosition);
+  void setEntityPosition(std::string_view name, const glm::vec3& newPosition);
 
-   [[nodiscard]] auto getEntityData(std::string_view name) const -> EntityData {
-      return dataStore.scene.at(name.data());
-   }
+  [[nodiscard]] auto getEntityData(std::string_view name) const -> EntityData {
+    return dataStore.scene.at(name.data());
+  }
 
-   [[nodiscard]] auto isUnsaved() const {
-      return unsaved;
-   }
+  [[nodiscard]] auto isUnsaved() const {
+    return unsaved;
+  }
 
-   [[nodiscard]] auto isEngineBusy() const {
-      return engineBusy;
-   }
+  [[nodiscard]] auto isEngineBusy() const {
+    return engineBusy;
+  }
 
-   [[nodiscard]] const auto& getSkeletons() const {
-      return dataStore.skeletons;
-   }
+  [[nodiscard]] const auto& getSkeletons() const {
+    return dataStore.skeletons;
+  }
 
-   [[nodiscard]] const auto& getAnimations() const {
-      return dataStore.animations;
-   }
+  [[nodiscard]] const auto& getAnimations() const {
+    return dataStore.animations;
+  }
 
-   [[nodiscard]] const auto& getModels() const {
-      return dataStore.models;
-   }
+  [[nodiscard]] const auto& getModels() const {
+    return dataStore.models;
+  }
 
-   [[nodiscard]] auto getScene() const -> const auto& {
-      return dataStore.scene;
-   }
+  [[nodiscard]] auto getScene() const -> const auto& {
+    return dataStore.scene;
+  }
 
- private:
-   std::shared_ptr<tr::IGameplaySystem> gameplaySystem;
-   std::shared_ptr<TaskQueue> taskQueue;
+private:
+  std::shared_ptr<tr::IGameplaySystem> gameplaySystem;
+  std::shared_ptr<TaskQueue> taskQueue;
 
-   bool unsaved{};
-   bool engineBusy{};
-   DataStore dataStore;
-   std::unordered_map<std::string, tr::EntityType> entityNameMap;
+  bool unsaved{};
+  bool engineBusy{};
+  DataStore dataStore;
+  std::unordered_map<std::string, tr::EntityType> entityNameMap;
 };
 
 } // namespace ed::data

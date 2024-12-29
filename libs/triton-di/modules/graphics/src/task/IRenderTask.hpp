@@ -1,27 +1,21 @@
 #pragma once
 
-#include "task/graph/Barrier.hpp"
-#include "task/graph/Resource.hpp"
-
 namespace tr {
-   class IRenderTask {
-    public:
-      IRenderTask() = default;
-      virtual ~IRenderTask() = default;
+class IRenderTask {
+public:
+  IRenderTask() = default;
+  virtual ~IRenderTask() = default;
 
-      IRenderTask(const IRenderTask&) = delete;
-      IRenderTask(IRenderTask&&) = delete;
-      auto operator=(const IRenderTask&) -> IRenderTask& = delete;
-      auto operator=(IRenderTask&&) -> IRenderTask& = delete;
+  IRenderTask(const IRenderTask&) = delete;
+  IRenderTask(IRenderTask&&) = delete;
+  auto operator=(const IRenderTask&) -> IRenderTask& = delete;
+  auto operator=(IRenderTask&&) -> IRenderTask& = delete;
 
-      virtual auto record(vk::raii::CommandBuffer& commandBuffer) -> void = 0;
-      [[nodiscard]] auto getBarriers() const -> std::vector<Barrier>;
+  virtual auto record(vk::raii::CommandBuffer& commandBuffer) -> void = 0;
 
-      auto addBarrier(Barrier barrier) -> void;
-      [[nodiscard]] auto getResources() -> std::vector<Resource>&;
+  [[nodiscard]] auto getName() -> std::string_view;
 
-    private:
-      std::vector<Barrier> pendingBarriers;
-      std::vector<Resource> resources;
-   };
+private:
+  std::string name;
+};
 }

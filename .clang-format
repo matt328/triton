@@ -4,7 +4,7 @@ Standard: c++17
 AlwaysBreakTemplateDeclarations: Yes
 NamespaceIndentation: None
 ForEachMacros: [TEST_CLASS, TEST_METHOD]
-IndentWidth: 3
+IndentWidth: 2
 IndentCaseLabels: true
 
 BinPackArguments: false
@@ -20,6 +20,3 @@ FixNamespaceComments: false
 SortIncludes: Never
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
 InsertNewlineAtEOF: true
-KeepEmptyLines:
-  AtEndOfFile: true
-

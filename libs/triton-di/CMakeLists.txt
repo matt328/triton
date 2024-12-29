@@ -49,6 +49,8 @@ set(common_SRC
    modules/graphics/src/task/DefaultFrameManager.cxx
    modules/graphics/src/task/SyncManager.cxx
    modules/graphics/src/task/CubeRenderTask.cxx
+   modules/graphics/src/task/RenderTaskFactory.cxx
+   modules/graphics/src/task/graph/TaskGraph.cxx
 
    modules/graphics/src/pipeline/IndirectPipeline.cxx
    modules/graphics/src/pipeline/SpirvShaderCompiler.cxx
