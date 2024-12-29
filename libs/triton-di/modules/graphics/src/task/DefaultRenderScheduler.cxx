@@ -3,6 +3,7 @@
 #include "Maths.hpp"
 
 #include "gfx/QueueTypes.hpp"
+#include "cm/ObjectData.hpp"
 #include "task/Frame.hpp"
 #include "task/IRenderTask.hpp"
 #include "task/graph/TaskGraph.hpp"
@@ -16,6 +17,10 @@
 */
 
 namespace tr {
+
+struct InstanceData {
+  glm::mat4 model;
+};
 
 DefaultRenderScheduler::DefaultRenderScheduler(
     std::shared_ptr<IFrameManager> newFrameManager,
@@ -44,26 +49,91 @@ DefaultRenderScheduler::DefaultRenderScheduler(
                                            drawImageExtent,
                                            swapchain->getDepthFormat());
 
+  const auto commandData =
+      vk::DrawIndexedIndirectCommand{.indexCount = 36, // Index Count not Vertex Count
+                                     .instanceCount = 1,
+                                     .firstIndex = 0,
+                                     .vertexOffset = 0,
+                                     .firstInstance = 0};
+
+  for (const auto& frame : frameManager->getFrames()) {
+
+    // Instance Data Buffer
+    {
+      const auto name = frame->getIndexedName("InstanceDataBuffer");
+      resourceManager->createBuffer(sizeof(InstanceData),
+                                    vk::BufferUsageFlagBits::eStorageBuffer |
+                                        vk::BufferUsageFlagBits::eTransferDst |
+                                        vk::BufferUsageFlagBits::eShaderDeviceAddress,
+                                    name);
+      auto& instanceBuffer = resourceManager->getBuffer(name);
+      const auto instanceData =
+          InstanceData{.model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -5.0f))};
+
+      instanceBuffer.mapBuffer();
+      instanceBuffer.updateBufferValue(&instanceData, sizeof(InstanceData));
+      instanceBuffer.unmapBuffer();
+    }
+
+    // IndirectCommandBuffer
+    { // TODO(matt) Come up with more solid buffer referencing than just hard coded strings
+      const auto name = frame->getIndexedName("IndirectCommandBuffer");
+      resourceManager->createBuffer(sizeof(vk::DrawIndexedIndirectCommand),
+                                    vk::BufferUsageFlagBits::eIndirectBuffer |
+                                        vk::BufferUsageFlagBits::eTransferDst,
+                                    name);
+      // Move this into a compute task
+      auto& b = resourceManager->getBuffer(name);
+      b.mapBuffer();
+      b.updateBufferValue(&commandData, sizeof(vk::DrawIndexedIndirectCommand));
+      b.unmapBuffer();
+    }
+
+    // Camera Data Buffer
+    {
+      const auto name = frame->getIndexedName("CameraDataBuffer");
+      resourceManager->createBuffer(sizeof(CameraData),
+                                    vk::BufferUsageFlagBits::eStorageBuffer |
+                                        vk::BufferUsageFlagBits::eTransferDst |
+                                        vk::BufferUsageFlagBits::eShaderDeviceAddress,
+                                    name);
+      const auto position = glm::vec3{0.f, 0.f, 0.f};
+      const auto view = glm::lookAt(position, glm::vec3{0.f, 0.f, -5.f}, glm::vec3{0.f, 1.f, 0.f});
+      const auto projection =
+          glm::perspective(glm::radians(60.f), static_cast<float>(1920 / 1080), 0.1f, 10000.0f);
+
+      const auto cameraData = CameraData{.view = view,
+                                         .proj = projection,
+                                         .viewProj = view * projection,
+                                         .position = glm::vec4{0.f, 0.f, 0.f, 1.f}};
+
+      auto& cameraDataBuffer = resourceManager->getBuffer(name);
+
+      cameraDataBuffer.mapBuffer();
+      cameraDataBuffer.updateBufferValue(&cameraData, sizeof(CameraData));
+      cameraDataBuffer.unmapBuffer();
+    }
+  }
+
   cubeRenderTask = renderTaskFactory->createCubeRenderTask();
   /*auto cullingTask = std::make_shared<CullingRenderTask>();*/
 
-  // The tasks themselves will create a ResourceUsage.
-  // These buffers here need to be some indirection into the current frame's buffers
-  /*cullingTask->registerResource("objectBoundsBuffer", objectBoundsBuffer);*/
-  /*cullingTask->registerResource("indirectCommandBuffer", indirectCommandBuffer);*/
-  /*cullingTask->registerResource("drawCountBuffer", drawCountBuffer);*/
-  /**/
-  cubeRenderTask->registerResource(CubeRenderTask::ResourceSlot::DrawCountBuffer,
-                                   "drawCountBuffer");
-  cubeRenderTask->registerResource(CubeRenderTask::ResourceSlot::IndirectBuffer,
-                                   "indirectCommandBuffer");
+  viewport = vk::Viewport{
+      .width = 1920,
+      .height = 1080,
+      .minDepth = 0.f,
+      .maxDepth = 1.f,
+  };
+
+  snezzor = vk::Rect2D{.offset = vk::Offset2D{.x = 0, .y = 0},
+                       .extent = vk::Extent2D{.width = 1920, .height = 1080}};
 }
 
 DefaultRenderScheduler::~DefaultRenderScheduler() {
   Log.trace("Destroying DefaultRenderScheduler");
 }
 
-auto DefaultRenderScheduler::executeStaticTasks(Frame& frame) const -> void {
+auto DefaultRenderScheduler::executeTasks(Frame& frame) const -> void {
   auto& commandBuffer = frame.getCommandBuffer(CmdBufferType::Main);
 
   const auto colorAttachmentInfo = vk::RenderingAttachmentInfo{
@@ -97,15 +167,14 @@ auto DefaultRenderScheduler::executeStaticTasks(Frame& frame) const -> void {
 
   commandBuffer.beginRendering(renderingInfo);
 
-  cubeRenderTask->record(commandBuffer);
+  commandBuffer.setViewportWithCount({viewport});
+  commandBuffer.setScissorWithCount({snezzor});
+
+  cubeRenderTask->record(commandBuffer, frame);
 
   commandBuffer.endRendering();
 
   commandBuffer.end();
-}
-
-auto DefaultRenderScheduler::addStaticTask(const std::shared_ptr<IRenderTask> task) -> void {
-  staticRenderTasks.push_back(task);
 }
 
 auto DefaultRenderScheduler::recordRenderTasks(Frame& frame) const -> void {
@@ -123,7 +192,7 @@ auto DefaultRenderScheduler::recordRenderTasks(Frame& frame) const -> void {
     startCmd.end();
   }
 
-  executeStaticTasks(frame);
+  executeTasks(frame);
 
   const auto& endCmd = frame.getCommandBuffer(CmdBufferType::End);
   endCmd.begin(

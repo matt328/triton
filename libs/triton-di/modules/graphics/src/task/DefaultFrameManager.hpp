@@ -26,6 +26,8 @@ public:
 
   auto acquireFrame() -> std::variant<std::reference_wrapper<Frame>, ImageAcquireResult> override;
 
+  [[nodiscard]] auto getFrames() const -> const std::vector<std::unique_ptr<Frame>>& override;
+
 private:
   size_t currentFrame;
   std::shared_ptr<CommandBufferManager> commandBufferManager;

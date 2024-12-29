@@ -1,6 +1,9 @@
 #pragma once
 
 namespace tr {
+
+class Frame;
+
 class IRenderTask {
 public:
   IRenderTask() = default;
@@ -11,11 +14,12 @@ public:
   auto operator=(const IRenderTask&) -> IRenderTask& = delete;
   auto operator=(IRenderTask&&) -> IRenderTask& = delete;
 
-  virtual auto record(vk::raii::CommandBuffer& commandBuffer) -> void = 0;
+  virtual auto record(vk::raii::CommandBuffer& commandBuffer, const Frame& frame) -> void = 0;
 
   [[nodiscard]] auto getName() -> std::string_view;
 
 private:
   std::string name;
 };
+
 }

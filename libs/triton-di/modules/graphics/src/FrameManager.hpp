@@ -3,11 +3,7 @@
 namespace tr {
 
 class IGraphicsDevice;
-
-namespace sb {
 class IShaderBindingFactory;
-}
-
 class Frame;
 
 class FrameManager {
@@ -28,6 +24,7 @@ public:
   void registerStorageBuffer(const std::string& name, size_t size) const;
   void destroySwapchainResources();
   void createSwapchainResources();
+  [[nodiscard]] auto getFrames() const -> const std::vector<std::unique_ptr<Frame>>&;
 
 private:
   size_t currentFrame = 0;

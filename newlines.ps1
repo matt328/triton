@@ -17,4 +17,3 @@ Get-ChildItem -Path $directory -Recurse -Include *.cxx, *.hpp | ForEach-Object {
         Write-Host "Already ends with a newline: $file"
     }
 }
-

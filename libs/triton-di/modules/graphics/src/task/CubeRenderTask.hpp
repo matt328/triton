@@ -4,11 +4,11 @@
 #include "cm/Handles.hpp"
 #include "cm/IndirectPushConstants.hpp"
 #include "gfx/GeometryFactory.hpp"
-#include "mem/Buffer.hpp"
 #include "pipeline/IndirectPipeline.hpp"
 
 namespace tr {
 
+class Frame;
 class VkResourceManager;
 
 class CubeRenderTask final : public IRenderTask {
@@ -24,7 +24,7 @@ public:
   auto operator=(const CubeRenderTask&) -> CubeRenderTask& = delete;
   auto operator=(CubeRenderTask&&) -> CubeRenderTask& = delete;
 
-  auto record(vk::raii::CommandBuffer& commandBuffer) -> void override;
+  auto record(vk::raii::CommandBuffer& commandBuffer, const Frame& frame) -> void override;
 
   enum class ResourceSlot : uint8_t {
     IndirectBuffer = 0,
@@ -33,8 +33,6 @@ public:
     DrawCountBuffer
   };
 
-  auto registerResource(ResourceSlot slot, std::string_view resourceName) -> void;
-
 private:
   std::shared_ptr<VkResourceManager> resourceManager;
   std::shared_ptr<GeometryFactory> geometryFactory;
@@ -42,16 +40,9 @@ private:
 
   MeshHandle meshHandle = -1;
 
-  std::unique_ptr<Buffer> indirectBuffer;
-  std::unique_ptr<Buffer> instanceBuffer;
-  std::unique_ptr<Buffer> cameraDataBuffer;
-
   std::string drawImageResourceName;
 
-  tr::IndirectPushConstants pushConstants;
-
-  vk::Viewport viewport;
-  vk::Rect2D snezzor;
+  IndirectPushConstants pushConstants{};
 };
 
 }

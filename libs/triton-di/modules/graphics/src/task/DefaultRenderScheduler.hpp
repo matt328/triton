@@ -30,8 +30,7 @@ public:
   auto operator=(const DefaultRenderScheduler&) -> DefaultRenderScheduler& = delete;
   auto operator=(DefaultRenderScheduler&&) -> DefaultRenderScheduler& = delete;
 
-  auto executeStaticTasks(Frame& frame) const -> void override;
-  auto addStaticTask(std::shared_ptr<IRenderTask> task) -> void override;
+  auto executeTasks(Frame& frame) const -> void override;
   auto recordRenderTasks(Frame& frame) const -> void override;
   auto setupCommandBuffersForFrame(Frame& frame) -> void override;
   auto endFrame(Frame& frame) const -> void override;
@@ -48,6 +47,12 @@ private:
   std::shared_ptr<CubeRenderTask> cubeRenderTask;
 
   std::vector<std::shared_ptr<IRenderTask>> staticRenderTasks;
+
+  vk::Viewport viewport;
+  vk::Rect2D snezzor;
+
+  std::unique_ptr<Buffer> indirectBuffer;
+  std::unique_ptr<Buffer> instanceDataBuffer;
 
   static auto transitionImage(const vk::raii::CommandBuffer& cmd,
                               const vk::Image& image,

@@ -20,6 +20,7 @@ public:
                  vk::raii::Semaphore&& newImageAvailableSemaphore,
                  vk::raii::Semaphore&& newRenderFinishedSemaphore);
 
+  [[nodiscard]] auto getIndexedName(std::string_view input) const -> std::string;
   [[nodiscard]] auto getIndex() const -> uint8_t;
   [[nodiscard]] auto getImageAvailableSemaphore() -> vk::raii::Semaphore&;
   [[nodiscard]] auto getRenderFinishedSemaphore() -> vk::raii::Semaphore&;
