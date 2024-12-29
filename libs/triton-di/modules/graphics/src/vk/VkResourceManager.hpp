@@ -60,11 +60,12 @@ public:
 
   /// For now, VkResourceManager doesn't centrally manage buffers, but gives out unique_ptrs
   /// and they'll clean themselves up if the ptr goes out of scope.
-  [[nodiscard]] auto createBuffer(size_t size,
-                                  vk::Flags<vk::BufferUsageFlagBits> flags,
-                                  std::string_view name) -> std::unique_ptr<Buffer>;
+  auto createBuffer(size_t size, vk::Flags<vk::BufferUsageFlagBits> flags, std::string_view name)
+      -> void;
 
-  [[nodiscard]] auto createIndirectBuffer(size_t size) -> std::unique_ptr<Buffer>;
+  auto createIndirectBuffer(size_t size) -> void;
+
+  [[nodiscard]] auto getBuffer(std::string_view name) const -> Buffer&;
 
   auto asyncUpload(const GeometryData& geometryData) -> MeshHandle;
 
@@ -82,6 +83,7 @@ private:
   std::shared_ptr<Allocator> allocator;
 
   std::unordered_map<std::string, ImageInfo> imageInfoMap;
+  std::unordered_map<std::string, std::unique_ptr<Buffer>> bufferMap;
 
   std::vector<ImmutableMesh> meshList;
 };

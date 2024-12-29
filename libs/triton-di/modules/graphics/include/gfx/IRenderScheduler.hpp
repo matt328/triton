@@ -1,8 +1,9 @@
 #pragma once
-#include <task/Frame.hpp>
-#include <task/IRenderTask.hpp>
+
+#include "task/Frame.hpp"
 
 namespace tr {
+
 class IRenderScheduler {
 public:
   IRenderScheduler() = default;
@@ -19,7 +20,7 @@ public:
 
   virtual auto endFrame(Frame& frame) const -> void = 0;
 
-  virtual auto executeStaticTasks(Frame& frame) const -> void = 0;
-  virtual auto addStaticTask(std::shared_ptr<IRenderTask> task) -> void = 0;
+  virtual auto executeTasks(Frame& frame) const -> void = 0;
 };
+
 }

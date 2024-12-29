@@ -1,11 +1,12 @@
 #pragma once
 
 #include "Frame.hpp"
-
-#include <vk/Swapchain.hpp>
+#include "vk/Swapchain.hpp"
 
 namespace tr {
+
 class IFrameManager {
+
 public:
   IFrameManager() = default;
   virtual ~IFrameManager() = default;
@@ -17,5 +18,7 @@ public:
 
   virtual auto acquireFrame()
       -> std::variant<std::reference_wrapper<Frame>, ImageAcquireResult> = 0;
+  [[nodiscard]] virtual auto getFrames() const -> const std::vector<std::unique_ptr<Frame>>& = 0;
 };
+
 }

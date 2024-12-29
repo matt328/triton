@@ -6,6 +6,7 @@
 #include <vk/Swapchain.hpp>
 
 namespace tr {
+
 DefaultFrameManager::DefaultFrameManager(
     const RenderContextConfig& rendererConfig,
     std::shared_ptr<CommandBufferManager> newCommandBufferManager,
@@ -79,4 +80,9 @@ auto DefaultFrameManager::acquireFrame()
 
   return iar;
 }
+
+auto DefaultFrameManager::getFrames() const -> const std::vector<std::unique_ptr<Frame>>& {
+  return frames;
+}
+
 }

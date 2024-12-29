@@ -76,17 +76,17 @@ auto VkResourceManager::asyncUpload(const GeometryData& geometryData) -> MeshHan
 
 auto VkResourceManager::createBuffer(size_t size,
                                      vk::Flags<vk::BufferUsageFlagBits> flags,
-                                     std::string_view name) -> std::unique_ptr<Buffer> {
+                                     std::string_view name) -> void {
   const auto bufferCreateInfo = vk::BufferCreateInfo{.size = size, .usage = flags};
 
   constexpr auto allocationCreateInfo =
       vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eCpuToGpu,
                                 .requiredFlags = vk::MemoryPropertyFlagBits::eHostCoherent};
 
-  return allocator->createBuffer(&bufferCreateInfo, &allocationCreateInfo, name);
+  bufferMap.emplace(name, allocator->createBuffer(&bufferCreateInfo, &allocationCreateInfo, name));
 }
 
-auto VkResourceManager::createIndirectBuffer(size_t size) -> std::unique_ptr<Buffer> {
+auto VkResourceManager::createIndirectBuffer(size_t size) -> void {
   const auto bufferCreateInfo =
       vk::BufferCreateInfo{.size = size, .usage = vk::BufferUsageFlagBits::eIndirectBuffer};
 
@@ -94,7 +94,9 @@ auto VkResourceManager::createIndirectBuffer(size_t size) -> std::unique_ptr<Buf
       vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eGpuOnly,
                                 .requiredFlags = vk::MemoryPropertyFlagBits::eDeviceLocal};
 
-  return allocator->createBuffer(&bufferCreateInfo, &allocationCreateInfo, "IndirectBuffer");
+  bufferMap.emplace(
+      "IndirectBuffer",
+      allocator->createBuffer(&bufferCreateInfo, &allocationCreateInfo, "IndirectBuffer"));
 }
 
 [[nodiscard]] auto VkResourceManager::getMesh(MeshHandle handle) -> const ImmutableMesh& {
@@ -223,7 +225,12 @@ auto VkResourceManager::getImageExtent(const std::string& id) const -> const vk:
   return imageInfoMap.at(id).extent;
 }
 
+auto VkResourceManager::getBuffer(std::string_view name) const -> Buffer& {
+  return *bufferMap.at(name.data());
+}
+
 auto VkResourceManager::destroyImage(const std::string& id) -> void {
   imageInfoMap.erase(id);
 }
+
 }

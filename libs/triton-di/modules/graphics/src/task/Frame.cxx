@@ -13,6 +13,10 @@ Frame::Frame(const uint8_t newIndex,
   drawImageName = "DrawImage Frame" + std::to_string(index);
 }
 
+auto Frame::getIndexedName(std::string_view input) const -> std::string {
+  return fmt::format("{0}{1}", input.data(), index);
+}
+
 auto Frame::getIndex() const -> uint8_t {
   return index;
 }

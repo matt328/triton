@@ -72,42 +72,42 @@ InstanceData
 - `uint32_t instanceOffset`
 
 - init()
-    - shaders
-    - ShaderBindings
-    - pipelines
-    - Dynamic Vertex/Index Buffers
-    - Transform buffer
-    - Color buffer
-    - common uniform buffer
+  - shaders
+  - ShaderBindings
+  - pipelines
+  - Dynamic Vertex/Index Buffers
+  - Transform buffer
+  - Color buffer
+  - common uniform buffer
 
 - update()
-    - copy buffers
+  - copy buffers
 
 - render()
-    - bind buffers
-    - draw indexed from the store
+  - bind buffers
+  - draw indexed from the store
 
 ## Architecture Overview
 
 ### Triton (Engine Itself, static lib, `tr`)
 
-#### Context `tr::ctx`
+#### Context
 
 - Contains GameplaySystem and Renderer
 - Handles decoupling the two so that renderer can be the only place where the graphics api is directly used.
 
-#### Gameplay `tr::ctx::gp`
+#### Gameplay
 
 - Contain the ECS
 - Provides GameplayAPI
 
-#### Renderer `tr::ctx::gfx`
+#### Renderer
 
 - Handles rendering and resource creation/management
 - is completely unaware of which platform it's running on, and which windowing system has been used. The applications
   should be responsible for abstracting that away
 
-### Editor (executable `tr::ed`
+### Editor (executable `ed`)
 
 - Contains Imgui that can be handed to the renderer to be drawn
 - Wires up window events, input callbacks etc into the context
@@ -116,7 +116,7 @@ InstanceData
 - Knows how to query the GamplayAPI in order to store game file(s)
 - Knows how to read in game file(s) and set up the game using the GamplayAPI
 
-### Game (executable `tr::gm`)
+### Game (executable)
 
 - Wires up things like window events, input callbacks, etc into the context.
 - Reads optimized game files.
@@ -179,7 +179,7 @@ and favor doing them in C++ where they're fast.
 #### Models
 
 - Offline process models from fbx into a model, animation, and skeleton
-    - use the offline libs from ozz-animation to do this all in one step.
+  - use the offline libs from ozz-animation to do this all in one step.
 
 - Skeletons are what binds an animation to a model. Can have multiple animations per skeleton, and a skeleton can work
   for multiple models.
@@ -242,7 +242,7 @@ components. Edit: this worked out well.
   a hardcoded scene like blender.
 - Think about 'camera' more. Maybe the editor should always just supply a camera and don't bother writing it to the
   file, only reset its position when you load a different project.
-    - Probably don't do too much with this until there's a need for multiple cameras, as it will change then anyway.
+  - Probably don't do too much with this until there's a need for multiple cameras, as it will change then anyway.
 - Handle errors instead of crashing.
 
 ## Game World/Renderer Interaction
@@ -389,60 +389,7 @@ sequenceDiagram
 
 ```
 
-```mermaid
----
-title: RenderGroup
----
-classDiagram
-    class RenderGroup {
-        addMesh(std:: vector~as::Vertex~) size_t
-        addInstance(size_t meshId) void
-        render() void
-        +std:: vector~MeshData~ meshList
-        +std:: shared_ptr~MultiBuffer~
-    }
-
-    class MeshData {
-        +uint32_t vertexOffset
-        +uint32_t vertexCount
-        +uint32_t firstInstance
-        +uint32_t instanceCount
-    }
-
-    class MultiBuffer {
-        +std:: unique_ptr~mem::Buffer~~ buffer
-    }
-
-    RenderGroup --* MeshData
-    RenderGroup --* MultiBuffer
-
-```
-
-RenderGroup::render()
-
-The components in the ECS will hold the game world data for the transform and visibility of each instance.
-
-```mermaid
-classDiagram
-    class RenderGroupComponent {
-        +size_t meshId
-        +size_t instanceId
-        +glm:: mat4 transform
-        +bool visible
-    }
-```
-
-Preparing render data should put instance data into a
-
-```c
-std::unordered_map<meshId, std::unordered_map<instanceId, InstanceData>>
-```
-
-so that the RenderGroup can construct a single storage buffer containing the InstanceData, corresponding to the order of
-the meshes and instances. I don't think the order of the instances matters, so long as each bucket of instance data
-matches the correct mesh.
-
-# Render Job System
+## Render Job System
 
 ```mermaid
 graph TD
@@ -458,8 +405,6 @@ graph TD
 
     subgraph Vulkan Pipeline
         Pipeline["Pipeline"]
-        DescriptorManager["DescriptorManager"]
-        RenderPassManager["RenderPassManager"]
     end
 
     subgraph Resource Management
@@ -474,15 +419,10 @@ graph TD
     RenderScheduler --> RenderJob1
     RenderScheduler --> RenderJob2
     RenderJob1 -->|Uses| Pipeline
-    RenderJob1 -->|Uses| DescriptorManager
     RenderJob2 -->|Uses| Pipeline
-    RenderJob2 -->|Uses| DescriptorManager
-    Pipeline --> RenderPassManager
-    DescriptorManager --> RenderPassManager
     RenderScheduler --> CommandBufferManager
     CommandBufferManager -->|Submits| SynchronizationManager
     CommandBufferManager --> ResourceManager
-    RenderPassManager --> CommandBufferManager
     SynchronizationManager --> FrameManager
     DebugTools -.-> RenderScheduler
     DebugTools -.-> ResourceManager
@@ -570,100 +510,3 @@ classDiagram
     DebugTools --> CommandBufferManager: observes
 
 ```
-
-1. RenderContext
-
-The RenderContext acts as the core manager for rendering resources, state, and the overall rendering pipeline. It serves
-as a central hub that ties everything together.
-
-Responsibilities:
-
-    Initialization & Configuration: Create Vulkan objects like the device, swapchain, and basic synchronization primitives (semaphores, fences, etc.).
-    Global Resource Management:
-        Manage persistent resources such as shaders, pipelines, and descriptors.
-        Provide access to shared components like the CommandBufferManager, ResourceManager, or SyncManager.
-    Lifecycle Management:
-        Handle initialization and cleanup of the Vulkan instance and resources.
-        Provide entry points for starting and stopping the rendering process.
-    Interface:
-        Expose methods to begin a frame, end a frame, and submit rendering work.
-        Act as a mediator between the FrameManager, RenderScheduler, and other components.
-
-2. FrameManager
-
-The FrameManager is responsible for orchestrating the rendering of individual frames. It ensures synchronization and
-prepares the per-frame resources.
-
-Responsibilities:
-
-    Frame Acquisition:
-        Acquire the next swapchain image from the RenderContext.
-        Manage synchronization primitives (fences and semaphores) for ensuring GPU-CPU synchronization.
-    Frame Resource Allocation:
-        Allocate per-frame resources (e.g., command buffers, transient buffers) and pass them to the Frame.
-        Manage in-flight frames to ensure the correct reuse of resources.
-    Submission Management:
-        Collect and submit command buffers to the Vulkan queue.
-        Chain submissions with semaphores and fences to enforce dependencies.
-
-3. Frame
-
-The Frame represents a snapshot of rendering-specific resources and state for a single frame. It acts as a container for
-all per-frame data.
-
-Responsibilities:
-
-    Per-Frame State:
-        Hold command buffers, synchronization objects, and other resources (e.g., framebuffers, render passes) for the current frame.
-        Store references to transient data used for rendering tasks, such as per-frame uniform buffers.
-    Ownership of Command Buffers:
-        Store command buffers (acquired from a CommandBufferManager) for recording rendering commands.
-        Provide methods or data structures for render tasks to record their commands.
-    Execution Hooks:
-        Offer methods like begin() and end() to encapsulate rendering logic (e.g., starting and ending render passes).
-    Synchronization State:
-        Track synchronization objects (fences and semaphores) associated with the frame.
-
-4. RenderScheduler
-
-The RenderScheduler is responsible for managing the execution of render tasks for a frame. It schedules and organizes
-the pipeline stages and their dependencies.
-
-Responsibilities:
-
-    Render Task Management:
-        Register and configure render tasks during initialization.
-        Manage dependencies between tasks (e.g., ensure the depth pre-pass runs before the main shading pass).
-    Command Recording:
-        Use the Frame to record commands for each render task.
-        Set up pipeline barriers or transitions between tasks to ensure resource availability.
-    Execution Scheduling:
-        Define the order of render task execution within a frame.
-        Handle parallel recording of command buffers if supported.
-    Task-Specific Resources:
-        Prepare and bind render-specific resources (e.g., descriptors, pipelines) required for each task.
-
-Workflow for Rendering a Frame
-
-Here’s how these components interact during the rendering of a complete frame:
-
-    Start of Frame:
-        RenderContext initializes the rendering process for the current frame.
-        FrameManager acquires a Frame and retrieves the next swapchain image, along with synchronization primitives (e.g., image-available semaphore).
-
-    Command Buffer Preparation:
-        The FrameManager resets and allocates command buffers for the frame.
-        The RenderScheduler iterates through registered render tasks and requests the Frame's command buffers to record commands.
-        The RenderScheduler ensures proper barriers are in place and coordinates task execution.
-
-    Task Execution:
-        Each render task records its commands into command buffers using the resources provided by the Frame.
-        Barriers and transitions (managed by the RenderScheduler) ensure resources (e.g., images, buffers) are in the correct state for each task.
-
-    Submission:
-        Once all tasks are recorded, the FrameManager submits the command buffers to the Vulkan queue using the appropriate semaphores and fences.
-        RenderContext handles the final presentation of the swapchain image.
-
-    End of Frame:
-        FrameManager updates in-flight frame tracking and recycles resources (e.g., fences, command buffers).
-        The RenderContext prepares for the next frame.
