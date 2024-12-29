@@ -16,27 +16,27 @@ Application::Application(std::shared_ptr<Properties> newProperties,
       guiSystem{std::move(newGuiSystem)},
       manager{std::move(newManager)} {
 
-   Log.debug("Created Application");
+  Log.debug("Created Application");
 
-   if (const auto recentFile = properties->getRecentFile(); recentFile.has_value()) {
-      Log.debug("recentFile from properties: {0}", recentFile.value().string());
-   }
+  if (const auto recentFile = properties->getRecentFile(); recentFile.has_value()) {
+    Log.debug("recentFile from properties: {0}", recentFile.value().string());
+  }
 
-   guiSystem->setRenderCallback([&] {
-      if (manager != nullptr) {
-         manager->render();
-      }
-   });
+  guiSystem->setRenderCallback([&] {
+    if (manager != nullptr) {
+      manager->render();
+    }
+  });
 }
 
 Application::~Application() {
-   Log.debug("Destroying Application");
+  Log.debug("Destroying Application");
 }
 
 void Application::run() const {
-   Log.debug("Application run");
-   context->run();
-   Log.debug("Application stopped");
+  Log.debug("Application run");
+  context->run();
+  Log.debug("Application stopped");
 }
 
 }

@@ -1,7 +1,7 @@
 #pragma once
 
 namespace tr {
-   struct EditorInfo {
-      std::string name;
-   };
+struct EditorInfo {
+  std::string name;
+};
 }

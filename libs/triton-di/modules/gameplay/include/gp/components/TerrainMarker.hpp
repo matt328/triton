@@ -1,7 +1,7 @@
 #pragma once
 
 namespace tr {
-   struct TerrainMarker {
-      uint32_t width;
-   };
+struct TerrainMarker {
+  uint32_t width;
+};
 }

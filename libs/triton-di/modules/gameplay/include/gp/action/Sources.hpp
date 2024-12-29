@@ -3,22 +3,22 @@
 #include "tr/Inputs.hpp"
 
 namespace tr {
-   enum class SourceType : uint32_t {
-      Boolean = 0,
-      Float
-   };
+enum class SourceType : uint32_t {
+  Boolean = 0,
+  Float
+};
 
-   struct Source {
-      Source(MouseInput mouseInput, const SourceType sType) : src{mouseInput}, sourceType{sType} {
-      }
+struct Source {
+  Source(MouseInput mouseInput, const SourceType sType) : src{mouseInput}, sourceType{sType} {
+  }
 
-      Source(Key key, const SourceType sType) : src{key}, sourceType{sType} {
-      }
+  Source(Key key, const SourceType sType) : src{key}, sourceType{sType} {
+  }
 
-      Source(GamepadInput gpInput, const SourceType sType) : src{gpInput}, sourceType{sType} {
-      }
+  Source(GamepadInput gpInput, const SourceType sType) : src{gpInput}, sourceType{sType} {
+  }
 
-      std::variant<MouseInput, Key, GamepadInput> src{};
-      SourceType sourceType{};
-   };
+  std::variant<MouseInput, Key, GamepadInput> src{};
+  SourceType sourceType{};
+};
 }

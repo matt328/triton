@@ -7,4 +7,3 @@ auto IRenderTask::getName() -> std::string_view {
 }
 
 }
-

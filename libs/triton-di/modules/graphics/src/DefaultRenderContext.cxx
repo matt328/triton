@@ -33,120 +33,119 @@ DefaultRenderContext::DefaultRenderContext(
       guiSystem{std::move(newGuiSystem)},
       eventBus{std::move(newEventBus)} {
 
-   Log.trace("Constructing DefaultRenderContext");
+  Log.trace("Constructing DefaultRenderContext");
 
-   const auto& extent = graphicsDevice->getSwapchainExtent();
+  const auto& extent = graphicsDevice->getSwapchainExtent();
 
-   eventBus->emit(SwapchainResized{extent.width, extent.height});
+  eventBus->emit(SwapchainResized{extent.width, extent.height});
 
-   // TODO(matt) These shouldn't be empty
-   auto defaultSetLayouts = std::vector<vk::DescriptorSetLayout>{};
-   defaultSetLayouts.push_back(layoutFactory->getVkLayout(LayoutHandle::Bindless));
-   defaultSetLayouts.push_back(layoutFactory->getVkLayout(LayoutHandle::ObjectData));
-   defaultSetLayouts.push_back(layoutFactory->getVkLayout(LayoutHandle::PerFrame));
+  // TODO(matt) These shouldn't be empty
+  auto defaultSetLayouts = std::vector<vk::DescriptorSetLayout>{};
+  defaultSetLayouts.push_back(layoutFactory->getVkLayout(LayoutHandle::Bindless));
+  defaultSetLayouts.push_back(layoutFactory->getVkLayout(LayoutHandle::ObjectData));
+  defaultSetLayouts.push_back(layoutFactory->getVkLayout(LayoutHandle::PerFrame));
 
-   auto vec = std::vector{VertexComponent::Position,
-                          VertexComponent::Color,
-                          VertexComponent::UV,
-                          VertexComponent::Normal};
+  auto vec = std::vector{VertexComponent::Position,
+                         VertexComponent::Color,
+                         VertexComponent::UV,
+                         VertexComponent::Normal};
 
-   defaultRenderer = rendererFactory->createRenderer(
-       rd::RendererConfig{.rendererType = rd::RendererType::StaticModel,
-                          .setLayouts = defaultSetLayouts,
-                          .vertexComponents = vec});
+  defaultRenderer = rendererFactory->createRenderer(
+      rd::RendererConfig{.rendererType = rd::RendererType::StaticModel,
+                         .setLayouts = defaultSetLayouts,
+                         .vertexComponents = vec});
 
-   depthResources = std::make_shared<DepthResources>(graphicsDevice);
+  depthResources = std::make_shared<DepthResources>(graphicsDevice);
 
-   frameManager = std::make_shared<FrameManager>(2,
-                                                 graphicsDevice,
-                                                 depthResources->getImageView(),
-                                                 shaderBindingFactory);
+  frameManager = std::make_shared<FrameManager>(2,
+                                                graphicsDevice,
+                                                depthResources->getImageView(),
+                                                shaderBindingFactory);
 }
 
 DefaultRenderContext::~DefaultRenderContext() {
-   Log.trace("Destroying DefaultRenderContext");
-   DefaultRenderContext::waitIdle();
+  Log.trace("Destroying DefaultRenderContext");
+  DefaultRenderContext::waitIdle();
 }
 
 void DefaultRenderContext::render() {
-   auto& currentFrame = frameManager->getCurrentFrame();
+  auto& currentFrame = frameManager->getCurrentFrame();
 
-   currentFrame.awaitInFlightFence();
+  currentFrame.awaitInFlightFence();
 
-   const auto status = currentFrame.acquireSwapchainImage();
+  const auto status = currentFrame.acquireSwapchainImage();
 
-   if (status == AcquireResult::NeedsResize) {
-      graphicsDevice->waitIdle();
-      frameManager->destroySwapchainResources();
-      graphicsDevice->recreateSwapchain();
-      frameManager->createSwapchainResources();
-      return;
-   }
-   if (status == AcquireResult::Error) {
-      Log.error("Error acquiring next image");
-      return;
-   }
+  if (status == AcquireResult::NeedsResize) {
+    graphicsDevice->waitIdle();
+    frameManager->destroySwapchainResources();
+    graphicsDevice->recreateSwapchain();
+    frameManager->createSwapchainResources();
+    return;
+  }
+  if (status == AcquireResult::Error) {
+    Log.error("Error acquiring next image");
+    return;
+  }
 
-   currentFrame.resetInFlightFence();
+  currentFrame.resetInFlightFence();
 
-   {
-      auto lock = std::lock_guard{renderDataMutex};
-      LockableName(renderDataMutex, "SetRenderData", 13);
-      LockMark(renderDataMutex);
-      if (!renderData.skinnedMeshData.empty()) {
-         Log.trace("Skinned Mesh Data Present");
-      }
-      currentFrame.applyRenderData(renderData);
-   }
+  {
+    auto lock = std::lock_guard{renderDataMutex};
+    LockableName(renderDataMutex, "SetRenderData", 13);
+    LockMark(renderDataMutex);
+    if (!renderData.skinnedMeshData.empty()) {
+      Log.trace("Skinned Mesh Data Present");
+    }
+    currentFrame.applyRenderData(renderData);
+  }
 
-   {
-      const auto imageInfoList = graphicsDevice->getTextures();
-      currentFrame.applyTextures(imageInfoList.get());
-   }
+  {
+    const auto imageInfoList = graphicsDevice->getTextures();
+    currentFrame.applyTextures(imageInfoList.get());
+  }
 
-   currentFrame.render(defaultRenderer, getViewportAndScissor());
+  currentFrame.render(defaultRenderer, getViewportAndScissor());
 
-   currentFrame.end3d();
+  currentFrame.end3d();
 
-   currentFrame.renderGuiSystem(guiSystem);
+  currentFrame.renderGuiSystem(guiSystem);
 
-   if (currentFrame.present()) {
-      graphicsDevice->waitIdle();
-      frameManager->destroySwapchainResources();
-      graphicsDevice->recreateSwapchain();
-      frameManager->createSwapchainResources();
-      eventBus->emit(SwapchainResized{.width = graphicsDevice->getSwapchainExtent().width,
-                                      .height = graphicsDevice->getSwapchainExtent().height});
-      return;
-   }
+  if (currentFrame.present()) {
+    graphicsDevice->waitIdle();
+    frameManager->destroySwapchainResources();
+    graphicsDevice->recreateSwapchain();
+    frameManager->createSwapchainResources();
+    eventBus->emit(SwapchainResized{.width = graphicsDevice->getSwapchainExtent().width,
+                                    .height = graphicsDevice->getSwapchainExtent().height});
+    return;
+  }
 
-   frameManager->nextFrame();
+  frameManager->nextFrame();
 }
 
 void DefaultRenderContext::waitIdle() {
-   graphicsDevice->waitIdle();
+  graphicsDevice->waitIdle();
 }
 
 void DefaultRenderContext::setRenderData(const RenderData& newRenderData) {
-   auto lock = std::lock_guard{renderDataMutex};
-   LockableName(renderDataMutex, "SetRenderData", 13);
-   LockMark(renderDataMutex);
-   renderData = newRenderData;
+  auto lock = std::lock_guard{renderDataMutex};
+  LockableName(renderDataMutex, "SetRenderData", 13);
+  LockMark(renderDataMutex);
+  renderData = newRenderData;
 }
 
 [[nodiscard]] auto DefaultRenderContext::getViewportAndScissor()
     -> std::tuple<vk::Viewport, vk::Rect2D> {
-   const auto viewportSize = graphicsDevice->getSwapchainExtent();
-   const auto mainViewport = vk::Viewport{.x = 0.f,
-                                          .y = 0.f,
-                                          .width = static_cast<float>(viewportSize.width),
-                                          .height = static_cast<float>(viewportSize.height),
-                                          .minDepth = 0.f,
-                                          .maxDepth = 1.f};
+  const auto viewportSize = graphicsDevice->getSwapchainExtent();
+  const auto mainViewport = vk::Viewport{.x = 0.f,
+                                         .y = 0.f,
+                                         .width = static_cast<float>(viewportSize.width),
+                                         .height = static_cast<float>(viewportSize.height),
+                                         .minDepth = 0.f,
+                                         .maxDepth = 1.f};
 
-   const auto mainScissor = vk::Rect2D{.offset = {0, 0}, .extent = viewportSize};
+  const auto mainScissor = vk::Rect2D{.offset = {0, 0}, .extent = viewportSize};
 
-   return {mainViewport, mainScissor};
+  return {mainViewport, mainScissor};
 }
 }
-
