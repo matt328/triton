@@ -165,6 +165,25 @@ auto DefaultRenderScheduler::executeTasks(Frame& frame) const -> void {
   commandBuffer.begin(
       vk::CommandBufferBeginInfo{.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse});
 
+  auto& indirectBuffer = resourceManager->getBuffer(frame.getIndexedName("IndirectCommandBuffer"));
+
+  vk::BufferMemoryBarrier bufferMemoryBarrier{
+      .srcAccessMask = vk::AccessFlagBits::eHostWrite,
+      .dstAccessMask = vk::AccessFlagBits::eIndirectCommandRead,
+      .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+      .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+      .buffer = indirectBuffer.getBuffer(),
+      .offset = 0,
+      .size = VK_WHOLE_SIZE,
+  };
+
+  commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eHost,
+                                vk::PipelineStageFlagBits::eDrawIndirect,
+                                vk::DependencyFlags{},
+                                nullptr,
+                                bufferMemoryBarrier,
+                                nullptr);
+
   commandBuffer.beginRendering(renderingInfo);
 
   commandBuffer.setViewportWithCount({viewport});

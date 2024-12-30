@@ -51,9 +51,6 @@ private:
   vk::Viewport viewport;
   vk::Rect2D snezzor;
 
-  std::unique_ptr<Buffer> indirectBuffer;
-  std::unique_ptr<Buffer> instanceDataBuffer;
-
   static auto transitionImage(const vk::raii::CommandBuffer& cmd,
                               const vk::Image& image,
                               vk::ImageLayout currentLayout,

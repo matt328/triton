@@ -1,6 +1,5 @@
 #include "CubeRenderTask.hpp"
 #include "cm/IndirectPushConstants.hpp"
-#include "cm/ObjectData.hpp"
 #include "task/Frame.hpp"
 #include "vk/VkResourceManager.hpp"
 
