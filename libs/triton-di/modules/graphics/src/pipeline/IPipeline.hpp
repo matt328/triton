@@ -18,11 +18,8 @@ public:
   auto operator=(const IPipeline&) -> IPipeline& = default;
   auto operator=(IPipeline&&) -> IPipeline& = delete;
 
-  virtual void bind(const vk::raii::CommandBuffer& cmd) = 0;
-  virtual void applyShaderBinding(
-      const ShaderBinding& binding,
-      uint32_t setIndex,
-      const std::unique_ptr<vk::raii::CommandBuffer>& commandBuffer) = 0;
+  [[nodiscard]] virtual auto getPipeline() const -> vk::Pipeline = 0;
+  [[nodiscard]] virtual auto getPipelineLayout() const -> vk::PipelineLayout = 0;
 };
 
 }

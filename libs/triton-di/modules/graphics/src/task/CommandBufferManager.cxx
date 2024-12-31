@@ -1,8 +1,10 @@
 #include "CommandBufferManager.hpp"
 
 #include "CommandBufferPool.hpp"
+#include "Logger2.hpp"
 #include "gfx/QueueTypes.hpp"
 #include "gfx/RenderContextConfig.hpp"
+#include "task/PoolId.hpp"
 
 namespace tr {
 
@@ -25,6 +27,7 @@ CommandBufferManager::~CommandBufferManager() {
 }
 
 auto CommandBufferManager::registerType(const PoolId cmdType) -> void {
+
   if (cmdType == PoolId::Main) {
     for (uint32_t i = 0; i < framesInFlight; ++i) {
       {
@@ -37,9 +40,27 @@ auto CommandBufferManager::registerType(const PoolId cmdType) -> void {
       }
     }
   }
+
   if (cmdType == PoolId::Transfer) {
+    Log.trace("Registering transfer command buffer with family: {}", transferQueue->getFamily());
     const auto key = getKey(0, cmdType, transferQueue->getFamily(), true);
+    if (commandPools.contains(key)) {
+      Log.warn("Transfer command buffer pool already registered");
+      return;
+    }
     commandPools[key] = std::make_unique<CommandBufferPool>(device, transferQueue->getFamily());
+  }
+
+  if (cmdType == PoolId::Compute) {
+    for (uint32_t i = 0; i < framesInFlight; ++i) {
+      Log.trace("Registering compute command buffer with family: {}", computeQueue->getFamily());
+      const auto key = getKey(i, cmdType, computeQueue->getFamily(), true);
+      if (commandPools.contains(key)) {
+        Log.warn("Transfer command buffer pool already registered");
+        return;
+      }
+      commandPools[key] = std::make_unique<CommandBufferPool>(device, computeQueue->getFamily());
+    }
   }
 }
 

@@ -37,7 +37,7 @@ auto CubeRenderTask::record(vk::raii::CommandBuffer& commandBuffer, const Frame&
                                                      0,
                                                      pushConstants);
 
-  auto& indirectBuffer = resourceManager->getBuffer(frame.getIndexedName("IndirectCommandBuffer"));
+  auto& indirectBuffer = resourceManager->getBuffer(frame.getIndexedName("DrawCommandBuffer"));
 
   commandBuffer.drawIndexedIndirect(indirectBuffer.getBuffer(),
                                     0,

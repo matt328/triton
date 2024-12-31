@@ -15,7 +15,7 @@ struct QueueFamilyIndices {
   std::optional<uint32_t> computeFamilyCount;
   std::vector<float> computeFamilyPriorities;
 
-  [[nodiscard]] bool isComplete() const {
+  [[nodiscard]] auto isComplete() const -> bool {
     return graphicsFamily.has_value() && presentFamily.has_value() && transferFamily.has_value() &&
            computeFamily.has_value();
   }

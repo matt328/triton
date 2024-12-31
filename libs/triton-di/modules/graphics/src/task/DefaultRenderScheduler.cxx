@@ -6,7 +6,10 @@
 #include "cm/ObjectData.hpp"
 #include "task/Frame.hpp"
 #include "task/IRenderTask.hpp"
+#include "task/PoolId.hpp"
 #include "task/graph/TaskGraph.hpp"
+#include <vulkan/vulkan_enums.hpp>
+#include <vulkan/vulkan_structs.hpp>
 
 /*
    Each frame really only needs one primary command buffer. Secondary command buffers are for
@@ -20,6 +23,10 @@ namespace tr {
 
 struct InstanceData {
   glm::mat4 model;
+  uint32_t indexCount;
+  uint32_t instanceCount;
+  uint32_t firstIndex;
+  uint32_t instanceID;
 };
 
 DefaultRenderScheduler::DefaultRenderScheduler(
@@ -40,6 +47,7 @@ DefaultRenderScheduler::DefaultRenderScheduler(
       taskGraph{std::move(newTaskGraph)} {
 
   commandBufferManager->registerType(PoolId::Main);
+  commandBufferManager->registerType(PoolId::Compute);
 
   const auto drawImageExtent = vk::Extent2D{
       .width = maths::scaleNumber(swapchain->getImageExtent().width, rendererConfig.renderScale),
@@ -49,12 +57,22 @@ DefaultRenderScheduler::DefaultRenderScheduler(
                                            drawImageExtent,
                                            swapchain->getDepthFormat());
 
-  const auto commandData =
-      vk::DrawIndexedIndirectCommand{.indexCount = 36, // Index Count not Vertex Count
-                                     .instanceCount = 1,
-                                     .firstIndex = 0,
-                                     .vertexOffset = 0,
-                                     .firstInstance = 0};
+  const auto instanceData =
+      InstanceData{.model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -5.0f)),
+                   .indexCount = 36,
+                   .instanceCount = 1,
+                   .firstIndex = 0,
+                   .instanceID = 0};
+
+  const auto position = glm::vec3{0.f, 0.f, 0.f};
+  const auto view = glm::lookAt(position, glm::vec3{0.f, 0.f, -5.f}, glm::vec3{0.f, 1.f, 0.f});
+  const auto projection =
+      glm::perspective(glm::radians(60.f), static_cast<float>(1920 / 1080), 0.1f, 10000.0f);
+
+  const auto cameraData = CameraData{.view = view,
+                                     .proj = projection,
+                                     .viewProj = view * projection,
+                                     .position = glm::vec4{0.f, 0.f, 0.f, 1.f}};
 
   for (const auto& frame : frameManager->getFrames()) {
 
@@ -67,8 +85,6 @@ DefaultRenderScheduler::DefaultRenderScheduler(
                                         vk::BufferUsageFlagBits::eShaderDeviceAddress,
                                     name);
       auto& instanceBuffer = resourceManager->getBuffer(name);
-      const auto instanceData =
-          InstanceData{.model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -5.0f))};
 
       instanceBuffer.mapBuffer();
       instanceBuffer.updateBufferValue(&instanceData, sizeof(InstanceData));
@@ -77,16 +93,12 @@ DefaultRenderScheduler::DefaultRenderScheduler(
 
     // IndirectCommandBuffer
     { // TODO(matt) Come up with more solid buffer referencing than just hard coded strings
-      const auto name = frame->getIndexedName("IndirectCommandBuffer");
+      const auto name = frame->getIndexedName("DrawCommandBuffer");
       resourceManager->createBuffer(sizeof(vk::DrawIndexedIndirectCommand),
                                     vk::BufferUsageFlagBits::eIndirectBuffer |
-                                        vk::BufferUsageFlagBits::eTransferDst,
+                                        vk::BufferUsageFlagBits::eTransferDst |
+                                        vk::BufferUsageFlagBits::eShaderDeviceAddress,
                                     name);
-      // Move this into a compute task
-      auto& b = resourceManager->getBuffer(name);
-      b.mapBuffer();
-      b.updateBufferValue(&commandData, sizeof(vk::DrawIndexedIndirectCommand));
-      b.unmapBuffer();
     }
 
     // Camera Data Buffer
@@ -97,15 +109,6 @@ DefaultRenderScheduler::DefaultRenderScheduler(
                                         vk::BufferUsageFlagBits::eTransferDst |
                                         vk::BufferUsageFlagBits::eShaderDeviceAddress,
                                     name);
-      const auto position = glm::vec3{0.f, 0.f, 0.f};
-      const auto view = glm::lookAt(position, glm::vec3{0.f, 0.f, -5.f}, glm::vec3{0.f, 1.f, 0.f});
-      const auto projection =
-          glm::perspective(glm::radians(60.f), static_cast<float>(1920 / 1080), 0.1f, 10000.0f);
-
-      const auto cameraData = CameraData{.view = view,
-                                         .proj = projection,
-                                         .viewProj = view * projection,
-                                         .position = glm::vec4{0.f, 0.f, 0.f, 1.f}};
 
       auto& cameraDataBuffer = resourceManager->getBuffer(name);
 
@@ -115,8 +118,10 @@ DefaultRenderScheduler::DefaultRenderScheduler(
     }
   }
 
+  resourceManager->createComputePipeline("Compute");
+
   cubeRenderTask = renderTaskFactory->createCubeRenderTask();
-  /*auto cullingTask = std::make_shared<CullingRenderTask>();*/
+  computeTask = renderTaskFactory->createComputeTask();
 
   viewport = vk::Viewport{
       .width = 1920,
@@ -134,6 +139,8 @@ DefaultRenderScheduler::~DefaultRenderScheduler() {
 }
 
 auto DefaultRenderScheduler::executeTasks(Frame& frame) const -> void {
+
+  // Render Task
   auto& commandBuffer = frame.getCommandBuffer(CmdBufferType::Main);
 
   const auto colorAttachmentInfo = vk::RenderingAttachmentInfo{
@@ -165,10 +172,10 @@ auto DefaultRenderScheduler::executeTasks(Frame& frame) const -> void {
   commandBuffer.begin(
       vk::CommandBufferBeginInfo{.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse});
 
-  auto& indirectBuffer = resourceManager->getBuffer(frame.getIndexedName("IndirectCommandBuffer"));
+  auto& indirectBuffer = resourceManager->getBuffer(frame.getIndexedName("DrawCommandBuffer"));
 
   vk::BufferMemoryBarrier bufferMemoryBarrier{
-      .srcAccessMask = vk::AccessFlagBits::eHostWrite,
+      .srcAccessMask = vk::AccessFlagBits::eShaderWrite,
       .dstAccessMask = vk::AccessFlagBits::eIndirectCommandRead,
       .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
       .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
@@ -177,7 +184,9 @@ auto DefaultRenderScheduler::executeTasks(Frame& frame) const -> void {
       .size = VK_WHOLE_SIZE,
   };
 
-  commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eHost,
+  computeTask->record(commandBuffer, frame);
+
+  commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eComputeShader,
                                 vk::PipelineStageFlagBits::eDrawIndirect,
                                 vk::DependencyFlags{},
                                 nullptr,
@@ -249,14 +258,19 @@ auto DefaultRenderScheduler::setupCommandBuffersForFrame(Frame& frame) -> void {
   auto endCommandBuffer =
       commandBufferManager->getPrimaryCommandBuffer(frame.getIndex(), PoolId::Main);
 
+  auto computeCommandBuffer =
+      commandBufferManager->getPrimaryCommandBuffer(frame.getIndex(), PoolId::Compute);
+
   frame.clearCommandBuffers();
 
   frame.addCommandBuffer(CmdBufferType::Main, std::move(staticCommandBuffer));
   frame.addCommandBuffer(CmdBufferType::Start, std::move(startCommandBuffer));
   frame.addCommandBuffer(CmdBufferType::End, std::move(endCommandBuffer));
+  frame.addCommandBuffer(CmdBufferType::Compute, std::move(computeCommandBuffer));
 }
 
 auto DefaultRenderScheduler::endFrame(Frame& frame) const -> void {
+
   // Get all the buffers one at a time because order matters
   const auto buffers = std::array{*frame.getCommandBuffer(CmdBufferType::Start),
                                   *frame.getCommandBuffer(CmdBufferType::Main),
@@ -264,6 +278,7 @@ auto DefaultRenderScheduler::endFrame(Frame& frame) const -> void {
 
   constexpr auto waitStages =
       std::array<vk::PipelineStageFlags, 1>{vk::PipelineStageFlagBits::eColorAttachmentOutput};
+
   const auto submitInfo = vk::SubmitInfo{
       .waitSemaphoreCount = 1,
       .pWaitSemaphores = &*frame.getImageAvailableSemaphore(),
