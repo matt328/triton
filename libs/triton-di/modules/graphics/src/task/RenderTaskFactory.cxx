@@ -14,4 +14,8 @@ auto RenderTaskFactory::createCubeRenderTask() -> std::unique_ptr<CubeRenderTask
   return std::make_unique<CubeRenderTask>(resourceManager, geometryFactory, indirectPipeline);
 }
 
+auto RenderTaskFactory::createComputeTask() -> std::unique_ptr<ComputeTask> {
+  return std::make_unique<ComputeTask>(resourceManager);
+}
+
 }

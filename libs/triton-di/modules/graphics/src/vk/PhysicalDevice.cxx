@@ -167,6 +167,8 @@ auto findQueueFamilies(const vk::raii::PhysicalDevice& possibleDevice,
 
   const auto queueFamilies = possibleDevice.getQueueFamilyProperties();
 
+  // Find a graphics queue
+
   for (int i = 0; const auto& queueFamily : queueFamilies) {
     if (queueFamily.queueFlags & vk::QueueFlagBits::eGraphics) {
       queueFamilyIndices.graphicsFamily = i;

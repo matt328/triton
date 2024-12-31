@@ -2,6 +2,7 @@
 
 #include "gfx/GeometryFactory.hpp"
 #include "pipeline/IndirectPipeline.hpp"
+#include "task/ComputeTask.hpp"
 #include "task/CubeRenderTask.hpp"
 #include "vk/VkResourceManager.hpp"
 
@@ -21,6 +22,7 @@ public:
   auto operator=(const RenderTaskFactory&) = delete;
 
   auto createCubeRenderTask() -> std::unique_ptr<CubeRenderTask>;
+  auto createComputeTask() -> std::unique_ptr<ComputeTask>;
 
 private:
   std::shared_ptr<VkResourceManager> resourceManager;

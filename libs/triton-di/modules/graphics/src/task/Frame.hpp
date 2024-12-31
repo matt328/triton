@@ -1,6 +1,7 @@
 #pragma once
 #include "CommandBufferManager.hpp"
 #include <vk/VkResourceManager.hpp>
+#include <vulkan/vulkan_raii.hpp>
 
 namespace tr {
 namespace task {
@@ -10,7 +11,8 @@ class SyncManager;
 enum class CmdBufferType : uint8_t {
   Main = 0,
   Start,
-  End
+  End,
+  Compute
 };
 
 class Frame {
@@ -18,12 +20,14 @@ public:
   explicit Frame(uint8_t newIndex,
                  vk::raii::Fence&& newRenderFence,
                  vk::raii::Semaphore&& newImageAvailableSemaphore,
-                 vk::raii::Semaphore&& newRenderFinishedSemaphore);
+                 vk::raii::Semaphore&& newRenderFinishedSemaphore,
+                 vk::raii::Semaphore&& newComputeFinishedSemaphore);
 
   [[nodiscard]] auto getIndexedName(std::string_view input) const -> std::string;
   [[nodiscard]] auto getIndex() const -> uint8_t;
   [[nodiscard]] auto getImageAvailableSemaphore() -> vk::raii::Semaphore&;
   [[nodiscard]] auto getRenderFinishedSemaphore() -> vk::raii::Semaphore&;
+  [[nodiscard]] auto getComputeFinishedSemaphore() -> vk::raii::Semaphore&;
   [[nodiscard]] auto getInFlightFence() -> vk::raii::Fence&;
   [[nodiscard]] auto getSwapchainImageIndex() const -> uint32_t;
   [[nodiscard]] auto getDrawImageId() const -> std::string;
@@ -42,6 +46,7 @@ private:
   vk::raii::Fence inFlightFence;
   vk::raii::Semaphore imageAvailableSemaphore;
   vk::raii::Semaphore renderFinishedSemaphore;
+  vk::raii::Semaphore computeFinishedSemaphore;
 
   uint32_t swapchainImageIndex{};
   vk::Extent2D drawImageExtent{};

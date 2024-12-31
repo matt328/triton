@@ -2,6 +2,7 @@
 #include "IShaderCompiler.hpp"
 #include "geo/VertexAttributes.hpp"
 #include "cm/IndirectPushConstants.hpp"
+#include "vk/Device.hpp"
 
 namespace tr {
 
@@ -135,19 +136,11 @@ IndirectPipeline::IndirectPipeline(const std::shared_ptr<Device>& device,
                                                   pipelineCreateInfo);
 }
 
-auto IndirectPipeline::getPipeline() -> vk::Pipeline {
+auto IndirectPipeline::getPipeline() const -> vk::Pipeline {
   return **pipeline;
 }
-auto IndirectPipeline::getPipelineLayout() -> vk::PipelineLayout {
+auto IndirectPipeline::getPipelineLayout() const -> vk::PipelineLayout {
   return **pipelineLayout;
 }
 
-void IndirectPipeline::bind(const vk::raii::CommandBuffer& cmd) {
-}
-
-void IndirectPipeline::applyShaderBinding(
-    const ShaderBinding& binding,
-    uint32_t setIndex,
-    const std::unique_ptr<vk::raii::CommandBuffer>& commandBuffer) {
-}
 }

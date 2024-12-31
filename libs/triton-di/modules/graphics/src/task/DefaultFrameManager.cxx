@@ -2,8 +2,7 @@
 #include <gfx/RenderContextConfig.hpp>
 #include "Frame.hpp"
 #include "Maths.hpp"
-
-#include <vk/Swapchain.hpp>
+#include "vk/Swapchain.hpp"
 
 namespace tr {
 
@@ -32,11 +31,17 @@ DefaultFrameManager::DefaultFrameManager(
                                 "AcquireImageSemaphoreFrame:" + std::to_string(i));
 
     auto renderFinishedSemaphore = device->getVkDevice().createSemaphore({});
+    debugManager->setObjectName(*renderFinishedSemaphore,
+                                "RenderFinishedFrame:" + std::to_string(i));
+    auto computeFinishedSemaphore = device->getVkDevice().createSemaphore({});
+    debugManager->setObjectName(*computeFinishedSemaphore,
+                                "ComputeFinishedFrame:" + std::to_string(i));
 
     frames.push_back(std::make_unique<Frame>(static_cast<uint8_t>(frames.size()),
                                              std::move(fence),
                                              std::move(acquireImageSemaphore),
-                                             std::move(renderFinishedSemaphore)));
+                                             std::move(renderFinishedSemaphore),
+                                             std::move(computeFinishedSemaphore)));
 
     const auto drawImageExtent = vk::Extent2D{
         .width = maths::scaleNumber(swapchain->getImageExtent().width, rendererConfig.renderScale),

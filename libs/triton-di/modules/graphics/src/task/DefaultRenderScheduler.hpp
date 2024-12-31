@@ -4,6 +4,7 @@
 #include "IFrameManager.hpp"
 #include "gfx/IRenderScheduler.hpp"
 #include "IRenderTask.hpp"
+#include "task/ComputeTask.hpp"
 #include "task/CubeRenderTask.hpp"
 #include "task/RenderTaskFactory.hpp"
 
@@ -45,6 +46,7 @@ private:
   std::shared_ptr<TaskGraph> taskGraph;
 
   std::shared_ptr<CubeRenderTask> cubeRenderTask;
+  std::shared_ptr<ComputeTask> computeTask;
 
   std::vector<std::shared_ptr<IRenderTask>> staticRenderTasks;
 

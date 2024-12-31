@@ -1,15 +1,18 @@
 #include "Frame.hpp"
+#include <vulkan/vulkan_raii.hpp>
 
 namespace tr {
 
 Frame::Frame(const uint8_t newIndex,
              vk::raii::Fence&& newRenderFence,
              vk::raii::Semaphore&& newImageAvailableSemaphore,
-             vk::raii::Semaphore&& newRenderFinishedSemaphore)
+             vk::raii::Semaphore&& newRenderFinishedSemaphore,
+             vk::raii::Semaphore&& newComputeFinishedSemaphore)
     : index{newIndex},
       inFlightFence{std::move(newRenderFence)},
       imageAvailableSemaphore{std::move(newImageAvailableSemaphore)},
-      renderFinishedSemaphore{std::move(newRenderFinishedSemaphore)} {
+      renderFinishedSemaphore{std::move(newRenderFinishedSemaphore)},
+      computeFinishedSemaphore{std::move(newComputeFinishedSemaphore)} {
   drawImageName = "DrawImage Frame" + std::to_string(index);
 }
 
@@ -27,6 +30,10 @@ auto Frame::getImageAvailableSemaphore() -> vk::raii::Semaphore& {
 
 auto Frame::getRenderFinishedSemaphore() -> vk::raii::Semaphore& {
   return renderFinishedSemaphore;
+}
+
+auto Frame::getComputeFinishedSemaphore() -> vk::raii::Semaphore& {
+  return computeFinishedSemaphore;
 }
 
 auto Frame::getInFlightFence() -> vk::raii::Fence& {

@@ -6,6 +6,7 @@
 #include "gfx/RenderContextConfig.hpp"
 
 namespace tr {
+
 namespace queue {
 class Compute;
 class Transfer;
@@ -33,6 +34,7 @@ public:
 
   auto getPrimaryCommandBuffer(uint8_t frameIndex, PoolId cmdType) -> CommandBufferPtr;
   auto getSecondaryCommandBuffer(uint8_t frameIndex, PoolId cmdType) -> CommandBufferPtr;
+
   auto getTransferCommandBuffer() -> CommandBufferPtr;
   static auto getEmpty() -> CommandBufferPtr;
 

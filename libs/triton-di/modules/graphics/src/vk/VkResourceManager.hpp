@@ -5,8 +5,11 @@
 #include "geo/GeometryData.hpp"
 #include "geo/Mesh.hpp"
 #include "mem/Allocator.hpp"
+#include "pipeline/IShaderCompiler.hpp"
 
 namespace tr {
+
+class IPipeline;
 
 struct Vertex {
   glm::vec3 position;
@@ -38,6 +41,7 @@ class VkResourceManager {
 public:
   explicit VkResourceManager(std::shared_ptr<Device> newDevice,
                              std::shared_ptr<ImmediateTransferContext> newImmediateTransferContext,
+                             std::shared_ptr<IShaderCompiler> newShaderCompiler,
                              const std::shared_ptr<PhysicalDevice>& physicalDevice,
                              const std::shared_ptr<Instance>& instance);
   ~VkResourceManager();
@@ -58,8 +62,6 @@ public:
 
   [[nodiscard]] auto getMesh(MeshHandle handle) -> const ImmutableMesh&;
 
-  /// For now, VkResourceManager doesn't centrally manage buffers, but gives out unique_ptrs
-  /// and they'll clean themselves up if the ptr goes out of scope.
   auto createBuffer(size_t size, vk::Flags<vk::BufferUsageFlagBits> flags, std::string_view name)
       -> void;
 
@@ -71,14 +73,20 @@ public:
 
   auto destroyImage(const std::string& id) -> void;
 
+  auto createComputePipeline(std::string_view name) -> void;
+
+  [[nodiscard]] auto getPipeline(std::string_view name) const -> const IPipeline&;
+
 private:
   struct ImageInfo {
     AllocatedImagePtr image;
     vk::raii::ImageView imageView;
     vk::Extent2D extent;
   };
+
   std::shared_ptr<Device> device;
   std::shared_ptr<ImmediateTransferContext> immediateTransferContext;
+  std::shared_ptr<IShaderCompiler> shaderCompiler;
 
   std::shared_ptr<Allocator> allocator;
 
@@ -86,5 +94,7 @@ private:
   std::unordered_map<std::string, std::unique_ptr<Buffer>> bufferMap;
 
   std::vector<ImmutableMesh> meshList;
+
+  std::unordered_map<std::string, std::unique_ptr<IPipeline>> pipelineMap;
 };
 }

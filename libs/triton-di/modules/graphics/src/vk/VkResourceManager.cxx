@@ -1,17 +1,21 @@
 #include "VkResourceManager.hpp"
 
 #include <mem/Allocator.hpp>
-#include <vulkan/vulkan_enums.hpp>
 #include "ResourceExceptions.hpp"
+#include "pipeline/ComputePipeline.hpp"
+#include "pipeline/IPipeline.hpp"
+#include "pipeline/IndirectPipeline.hpp"
 
 namespace tr {
 VkResourceManager::VkResourceManager(
     std::shared_ptr<Device> newDevice,
     std::shared_ptr<ImmediateTransferContext> newImmediateTransferContext,
+    std::shared_ptr<IShaderCompiler> newShaderCompiler,
     const std::shared_ptr<PhysicalDevice>& physicalDevice,
     const std::shared_ptr<Instance>& instance)
     : device{std::move(newDevice)},
-      immediateTransferContext{std::move(newImmediateTransferContext)} {
+      immediateTransferContext{std::move(newImmediateTransferContext)},
+      shaderCompiler{std::move(newShaderCompiler)} {
 
   constexpr auto vulkanFunctions = vma::VulkanFunctions{
       .vkGetInstanceProcAddr = vkGetInstanceProcAddr,
@@ -231,6 +235,14 @@ auto VkResourceManager::getBuffer(std::string_view name) const -> Buffer& {
 
 auto VkResourceManager::destroyImage(const std::string& id) -> void {
   imageInfoMap.erase(id);
+}
+
+auto VkResourceManager::createComputePipeline(std::string_view name) -> void {
+  pipelineMap.emplace(name.data(), std::make_unique<ComputePipeline>(device, shaderCompiler));
+}
+
+[[nodiscard]] auto VkResourceManager::getPipeline(std::string_view name) const -> const IPipeline& {
+  return *pipelineMap.at(name.data());
 }
 
 }
