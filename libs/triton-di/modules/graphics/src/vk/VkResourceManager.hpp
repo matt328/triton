@@ -56,9 +56,9 @@ public:
   auto createDrawImageAndView(std::string_view imageName, vk::Extent2D extent) -> void;
   auto createDepthImageAndView(std::string_view imageName, vk::Extent2D extent, vk::Format format)
       -> void;
-  [[nodiscard]] auto getImage(const std::string& id) const -> const vk::Image&;
-  [[nodiscard]] auto getImageView(const std::string& id) const -> const vk::ImageView&;
-  [[nodiscard]] auto getImageExtent(const std::string& id) const -> const vk::Extent2D;
+  [[nodiscard]] auto getImage(std::string_view id) const -> const vk::Image&;
+  [[nodiscard]] auto getImageView(std::string_view id) const -> const vk::ImageView&;
+  [[nodiscard]] auto getImageExtent(std::string_view id) const -> const vk::Extent2D;
 
   [[nodiscard]] auto getMesh(MeshHandle handle) -> const ImmutableMesh&;
 
@@ -92,9 +92,8 @@ private:
 
   std::unordered_map<std::string, ImageInfo> imageInfoMap;
   std::unordered_map<std::string, std::unique_ptr<Buffer>> bufferMap;
+  std::unordered_map<std::string, std::unique_ptr<IPipeline>> pipelineMap;
 
   std::vector<ImmutableMesh> meshList;
-
-  std::unordered_map<std::string, std::unique_ptr<IPipeline>> pipelineMap;
 };
 }

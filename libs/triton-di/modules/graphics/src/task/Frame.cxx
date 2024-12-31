@@ -1,5 +1,4 @@
 #include "Frame.hpp"
-#include <vulkan/vulkan_raii.hpp>
 
 namespace tr {
 
@@ -14,6 +13,34 @@ Frame::Frame(const uint8_t newIndex,
       renderFinishedSemaphore{std::move(newRenderFinishedSemaphore)},
       computeFinishedSemaphore{std::move(newComputeFinishedSemaphore)} {
   drawImageName = "DrawImage Frame" + std::to_string(index);
+}
+
+auto Frame::setupRenderingInfo(const std::shared_ptr<VkResourceManager>& resourceManager) -> void {
+  colorAttachmentInfo = vk::RenderingAttachmentInfo{
+      .imageView = resourceManager->getImageView(getDrawImageId()),
+      .imageLayout = vk::ImageLayout::eColorAttachmentOptimal,
+      .loadOp = vk::AttachmentLoadOp::eClear,
+      .storeOp = vk::AttachmentStoreOp::eStore,
+      .clearValue = vk::ClearValue{.color = vk::ClearColorValue{std::array<float, 4>(
+                                       {{0.39f, 0.58f, 0.93f, 1.f}})}},
+  };
+
+  depthAttachmentInfo = vk::RenderingAttachmentInfo{
+      .imageView = resourceManager->getImageView(DepthImageName),
+      .imageLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal,
+      .loadOp = vk::AttachmentLoadOp::eClear,
+      .storeOp = vk::AttachmentStoreOp::eStore,
+      .clearValue =
+          vk::ClearValue{.depthStencil = vk::ClearDepthStencilValue{.depth = 1.f, .stencil = 0}},
+  };
+
+  renderingInfo = vk::RenderingInfo{
+      .renderArea = vk::Rect2D{.offset = {.x = 0, .y = 0},
+                               .extent = resourceManager->getImageExtent(getDrawImageId())},
+      .layerCount = 1,
+      .colorAttachmentCount = 1,
+      .pColorAttachments = &colorAttachmentInfo,
+      .pDepthAttachment = &depthAttachmentInfo};
 }
 
 auto Frame::getIndexedName(std::string_view input) const -> std::string {
@@ -46,6 +73,10 @@ auto Frame::getSwapchainImageIndex() const -> uint32_t {
 
 auto Frame::getDrawImageId() const -> std::string {
   return drawImageName;
+}
+
+auto Frame::getRenderingInfo() const -> vk::RenderingInfo {
+  return renderingInfo;
 }
 
 auto Frame::setSwapchainImageIndex(const uint32_t index) -> void {

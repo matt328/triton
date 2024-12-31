@@ -217,16 +217,16 @@ auto VkResourceManager::createDepthImageAndView(std::string_view imageName,
                                  .extent = extent});
 }
 
-auto VkResourceManager::getImage(const std::string& id) const -> const vk::Image& {
-  return imageInfoMap.at(id).image->image;
+auto VkResourceManager::getImage(std::string_view id) const -> const vk::Image& {
+  return imageInfoMap.at(id.data()).image->image;
 }
 
-auto VkResourceManager::getImageView(const std::string& id) const -> const vk::ImageView& {
-  return *imageInfoMap.at(id).imageView;
+auto VkResourceManager::getImageView(std::string_view id) const -> const vk::ImageView& {
+  return *imageInfoMap.at(id.data()).imageView;
 }
 
-auto VkResourceManager::getImageExtent(const std::string& id) const -> const vk::Extent2D {
-  return imageInfoMap.at(id).extent;
+auto VkResourceManager::getImageExtent(std::string_view id) const -> const vk::Extent2D {
+  return imageInfoMap.at(id.data()).extent;
 }
 
 auto VkResourceManager::getBuffer(std::string_view name) const -> Buffer& {

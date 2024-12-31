@@ -10,8 +10,6 @@
 
 namespace tr {
 
-constexpr auto DepthImageName = "DepthImage";
-
 class TaskGraph;
 
 class DefaultRenderScheduler final : public IRenderScheduler {
