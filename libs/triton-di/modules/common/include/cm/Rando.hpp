@@ -1,6 +1,7 @@
 #pragma once
 
 namespace tr {
+
 struct MapKey {
 
   MapKey()
@@ -23,4 +24,5 @@ private:
   std::mt19937 geometryGen;
   std::uniform_int_distribution<std::size_t> geometryDistribution;
 };
+
 }

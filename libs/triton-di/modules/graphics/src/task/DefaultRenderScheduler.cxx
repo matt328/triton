@@ -8,16 +8,7 @@
 #include "task/IRenderTask.hpp"
 #include "task/PoolId.hpp"
 #include "task/graph/TaskGraph.hpp"
-#include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_structs.hpp>
-
-/*
-   Each frame really only needs one primary command buffer. Secondary command buffers are for
-   when you render stuff that doesn't change often, so you don't have to re record them every frame,
-   or for when you want to render the same stuff multiple times with different attachments, etc.
-   reuse the same secondary command buffer to render the 3 components of deferred rendering's
-   gbuffer
-*/
 
 namespace tr {
 
@@ -47,7 +38,6 @@ DefaultRenderScheduler::DefaultRenderScheduler(
       taskGraph{std::move(newTaskGraph)} {
 
   commandBufferManager->registerType(PoolId::Main);
-  commandBufferManager->registerType(PoolId::Compute);
 
   const auto drawImageExtent = vk::Extent2D{
       .width = maths::scaleNumber(swapchain->getImageExtent().width, rendererConfig.renderScale),
@@ -81,7 +71,6 @@ DefaultRenderScheduler::DefaultRenderScheduler(
       const auto name = frame->getIndexedName("InstanceDataBuffer");
       resourceManager->createBuffer(sizeof(InstanceData),
                                     vk::BufferUsageFlagBits::eStorageBuffer |
-                                        vk::BufferUsageFlagBits::eTransferDst |
                                         vk::BufferUsageFlagBits::eShaderDeviceAddress,
                                     name);
       auto& instanceBuffer = resourceManager->getBuffer(name);
@@ -96,7 +85,6 @@ DefaultRenderScheduler::DefaultRenderScheduler(
       const auto name = frame->getIndexedName("DrawCommandBuffer");
       resourceManager->createBuffer(sizeof(vk::DrawIndexedIndirectCommand),
                                     vk::BufferUsageFlagBits::eIndirectBuffer |
-                                        vk::BufferUsageFlagBits::eTransferDst |
                                         vk::BufferUsageFlagBits::eShaderDeviceAddress,
                                     name);
     }
@@ -106,7 +94,6 @@ DefaultRenderScheduler::DefaultRenderScheduler(
       const auto name = frame->getIndexedName("CameraDataBuffer");
       resourceManager->createBuffer(sizeof(CameraData),
                                     vk::BufferUsageFlagBits::eStorageBuffer |
-                                        vk::BufferUsageFlagBits::eTransferDst |
                                         vk::BufferUsageFlagBits::eShaderDeviceAddress,
                                     name);
 
@@ -116,6 +103,7 @@ DefaultRenderScheduler::DefaultRenderScheduler(
       cameraDataBuffer.updateBufferValue(&cameraData, sizeof(CameraData));
       cameraDataBuffer.unmapBuffer();
     }
+    frame->setupRenderingInfo(resourceManager);
   }
 
   resourceManager->createComputePipeline("Compute");
@@ -140,40 +128,16 @@ DefaultRenderScheduler::~DefaultRenderScheduler() {
 
 auto DefaultRenderScheduler::executeTasks(Frame& frame) const -> void {
 
-  // Render Task
   auto& commandBuffer = frame.getCommandBuffer(CmdBufferType::Main);
-
-  const auto colorAttachmentInfo = vk::RenderingAttachmentInfo{
-      .imageView = resourceManager->getImageView(frame.getDrawImageId()),
-      .imageLayout = vk::ImageLayout::eColorAttachmentOptimal,
-      .loadOp = vk::AttachmentLoadOp::eClear,
-      .storeOp = vk::AttachmentStoreOp::eStore,
-      .clearValue = vk::ClearValue{.color = vk::ClearColorValue{std::array<float, 4>(
-                                       {{0.39f, 0.58f, 0.93f, 1.f}})}},
-  };
-
-  const auto depthAttachmentInfo = vk::RenderingAttachmentInfo{
-      .imageView = resourceManager->getImageView(DepthImageName),
-      .imageLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal,
-      .loadOp = vk::AttachmentLoadOp::eClear,
-      .storeOp = vk::AttachmentStoreOp::eStore,
-      .clearValue =
-          vk::ClearValue{.depthStencil = vk::ClearDepthStencilValue{.depth = 1.f, .stencil = 0}},
-  };
-
-  const auto renderingInfo = vk::RenderingInfo{
-      .renderArea = vk::Rect2D{.offset = {.x = 0, .y = 0},
-                               .extent = resourceManager->getImageExtent(frame.getDrawImageId())},
-      .layerCount = 1,
-      .colorAttachmentCount = 1,
-      .pColorAttachments = &colorAttachmentInfo,
-      .pDepthAttachment = &depthAttachmentInfo};
 
   commandBuffer.begin(
       vk::CommandBufferBeginInfo{.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse});
 
+  computeTask->record(commandBuffer, frame);
+
   auto& indirectBuffer = resourceManager->getBuffer(frame.getIndexedName("DrawCommandBuffer"));
 
+  // Insert a memory barrier for the buffer the computeTask writes to
   vk::BufferMemoryBarrier bufferMemoryBarrier{
       .srcAccessMask = vk::AccessFlagBits::eShaderWrite,
       .dstAccessMask = vk::AccessFlagBits::eIndirectCommandRead,
@@ -184,14 +148,14 @@ auto DefaultRenderScheduler::executeTasks(Frame& frame) const -> void {
       .size = VK_WHOLE_SIZE,
   };
 
-  computeTask->record(commandBuffer, frame);
-
   commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eComputeShader,
                                 vk::PipelineStageFlagBits::eDrawIndirect,
                                 vk::DependencyFlags{},
                                 nullptr,
                                 bufferMemoryBarrier,
                                 nullptr);
+
+  const auto renderingInfo = frame.getRenderingInfo();
 
   commandBuffer.beginRendering(renderingInfo);
 
@@ -258,15 +222,11 @@ auto DefaultRenderScheduler::setupCommandBuffersForFrame(Frame& frame) -> void {
   auto endCommandBuffer =
       commandBufferManager->getPrimaryCommandBuffer(frame.getIndex(), PoolId::Main);
 
-  auto computeCommandBuffer =
-      commandBufferManager->getPrimaryCommandBuffer(frame.getIndex(), PoolId::Compute);
-
   frame.clearCommandBuffers();
 
   frame.addCommandBuffer(CmdBufferType::Main, std::move(staticCommandBuffer));
   frame.addCommandBuffer(CmdBufferType::Start, std::move(startCommandBuffer));
   frame.addCommandBuffer(CmdBufferType::End, std::move(endCommandBuffer));
-  frame.addCommandBuffer(CmdBufferType::Compute, std::move(computeCommandBuffer));
 }
 
 auto DefaultRenderScheduler::endFrame(Frame& frame) const -> void {

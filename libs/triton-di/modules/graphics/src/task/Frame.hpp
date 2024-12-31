@@ -1,12 +1,11 @@
 #pragma once
 #include "CommandBufferManager.hpp"
-#include <vk/VkResourceManager.hpp>
-#include <vulkan/vulkan_raii.hpp>
+#include "vk/VkResourceManager.hpp"
+#include <vulkan/vulkan_structs.hpp>
 
 namespace tr {
-namespace task {
-class SyncManager;
-}
+
+constexpr auto DepthImageName = "DepthImage";
 
 enum class CmdBufferType : uint8_t {
   Main = 0,
@@ -31,9 +30,12 @@ public:
   [[nodiscard]] auto getInFlightFence() -> vk::raii::Fence&;
   [[nodiscard]] auto getSwapchainImageIndex() const -> uint32_t;
   [[nodiscard]] auto getDrawImageId() const -> std::string;
+  [[nodiscard]] auto getRenderingInfo() const -> vk::RenderingInfo;
+  [[nodiscard]] auto getDrawImageExtent() const -> vk::Extent2D;
 
   auto setSwapchainImageIndex(uint32_t index) -> void;
   auto setDrawImageExtent(vk::Extent2D extent) -> void;
+  auto setupRenderingInfo(const std::shared_ptr<VkResourceManager>& resourceManager) -> void;
 
   auto addCommandBuffer(CmdBufferType cmdType, CommandBufferPtr&& commandBuffer) -> void;
   [[nodiscard]] auto getCommandBuffer(CmdBufferType cmdType) const -> vk::raii::CommandBuffer&;
@@ -56,6 +58,10 @@ private:
   CommandBufferPtr endBuffer = CommandBufferManager::getEmpty();
 
   std::unordered_map<CmdBufferType, CommandBufferPtr> commandBuffers;
+
+  vk::RenderingAttachmentInfo colorAttachmentInfo;
+  vk::RenderingAttachmentInfo depthAttachmentInfo;
+  vk::RenderingInfo renderingInfo;
 
   static auto transitionImage(const vk::raii::CommandBuffer& cmd,
                               const vk::Image& image,
