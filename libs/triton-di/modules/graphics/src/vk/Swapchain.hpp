@@ -1,6 +1,7 @@
 #pragma once
 #include "Device.hpp"
 #include "PhysicalDevice.hpp"
+#include <cstdint>
 
 namespace tr {
 
@@ -26,6 +27,7 @@ public:
   [[nodiscard]] auto getImageExtent() const -> vk::Extent2D;
   [[nodiscard]] auto getSwapchain() const -> vk::SwapchainKHR;
   [[nodiscard]] auto getSwapchainImage(uint32_t imageIndex) const -> vk::Image;
+  [[nodiscard]] auto getSwapchainImageView(uint32_t imageIndex) const -> vk::ImageView;
   [[nodiscard]] auto getDepthFormat() const -> vk::Format;
 
   [[nodiscard]] auto acquireNextImage(const vk::Semaphore& semaphore) const

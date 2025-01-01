@@ -12,8 +12,8 @@ public:
   auto operator=(IGuiSystem&&) -> IGuiSystem& = delete;
 
   virtual auto setRenderCallback(std::function<void(void)> newRenderFn) -> void = 0;
-  virtual auto render(const std::unique_ptr<vk::raii::CommandBuffer>& commandBuffer,
-                      const vk::raii::ImageView& swapchainImageView,
+  virtual auto render(vk::raii::CommandBuffer& commandBuffer,
+                      const vk::ImageView& swapchainImageView,
                       const vk::Extent2D& swapchainExtent) -> void = 0;
 };
 }

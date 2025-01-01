@@ -48,8 +48,8 @@ auto ImGuiSystem::setRenderCallback(std::function<void(void)> newRenderFn) -> vo
   renderFn = newRenderFn;
 }
 
-auto ImGuiSystem::render(const std::unique_ptr<vk::raii::CommandBuffer>& commandBuffer,
-                         const vk::raii::ImageView& swapchainImageView,
+auto ImGuiSystem::render(vk::raii::CommandBuffer& commandBuffer,
+                         const vk::ImageView& swapchainImageView,
                          const vk::Extent2D& swapchainExtent) -> void {
   ImGui_ImplVulkan_NewFrame();
   ImGui_ImplGlfw_NewFrame();
@@ -59,7 +59,7 @@ auto ImGuiSystem::render(const std::unique_ptr<vk::raii::CommandBuffer>& command
 
   ZoneNamedN(imguiZone, "Render ImGui", true);
   const auto colorAttachment = vk::RenderingAttachmentInfo{
-      .imageView = *swapchainImageView,
+      .imageView = swapchainImageView,
       .imageLayout = vk::ImageLayout::eColorAttachmentOptimal,
       .loadOp = vk::AttachmentLoadOp::eLoad,
       .storeOp = vk::AttachmentStoreOp::eStore,
@@ -72,14 +72,14 @@ auto ImGuiSystem::render(const std::unique_ptr<vk::raii::CommandBuffer>& command
       .pColorAttachments = &colorAttachment,
   };
 
-  commandBuffer->beginRendering(renderInfo);
+  commandBuffer.beginRendering(renderInfo);
 
   auto* dd = ImGui::GetDrawData();
   if (dd != nullptr) {
-    ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), **commandBuffer);
+    ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), *commandBuffer);
   }
 
-  commandBuffer->endRendering();
+  commandBuffer.endRendering();
 }
 
 ImGuiSystem::~ImGuiSystem() {
