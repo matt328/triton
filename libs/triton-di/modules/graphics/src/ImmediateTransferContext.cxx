@@ -1,8 +1,7 @@
 #include "ImmediateTransferContext.hpp"
 
-#include "Vulkan.hpp"
 #include "gfx/QueueTypes.hpp"
-#include "task/CommandBufferManager.hpp"
+#include "vk/CommandBufferManager.hpp"
 
 namespace tr {
 
@@ -10,20 +9,24 @@ ImmediateTransferContext::ImmediateTransferContext(
     std::shared_ptr<Device> newDevice,
     std::shared_ptr<PhysicalDevice> newPhysicalDevice,
     std::shared_ptr<queue::Transfer> newTransferQueue,
-    const std::shared_ptr<CommandBufferManager>& commandBufferManager,
+    std::shared_ptr<CommandBufferManager> newCommandBufferManager,
     const std::string_view& name)
     : device{std::move(newDevice)},
       physicalDevice{std::move(newPhysicalDevice)},
       transferQueue{std::move(newTransferQueue)},
-      commandBuffer(commandBufferManager->getTransferCommandBuffer()),
-      tracyContext(tracy::CreateVkContext(*physicalDevice->getVkPhysicalDevice(),
-                                          *device->getVkDevice(),
-                                          *transferQueue->getQueue(),
-                                          **commandBuffer,
-                                          nullptr,
-                                          nullptr)),
+      commandBufferManager{std::move(newCommandBufferManager)},
+      commandBufferHandle(commandBufferManager->createTransferCommandBuffer()),
       fence(std::make_unique<vk::raii::Fence>(
           device->getVkDevice().createFence(vk::FenceCreateInfo{}))) {
+
+  auto& commandBuffer = commandBufferManager->getCommandBuffer(commandBufferHandle);
+
+  tracyContext = tracy::CreateVkContext(*physicalDevice->getVkPhysicalDevice(),
+                                        *device->getVkDevice(),
+                                        *transferQueue->getQueue(),
+                                        *commandBuffer,
+                                        nullptr,
+                                        nullptr),
 
   tracyContext->Name(name.data(), name.length());
 }
@@ -38,16 +41,18 @@ void ImmediateTransferContext::submit(
   constexpr vk::CommandBufferBeginInfo cmdBeginInfo{
       .flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit};
 
-  commandBuffer->begin(cmdBeginInfo);
+  auto& commandBuffer = commandBufferManager->getCommandBuffer(commandBufferHandle);
+
+  commandBuffer.begin(cmdBeginInfo);
   {
-    TracyVkZone(tracyContext, **commandBuffer, "Immediate Transfer");
-    fn(*commandBuffer);
-    TracyVkCollect(tracyContext, **commandBuffer);
+    TracyVkZone(tracyContext, *commandBuffer, "Immediate Transfer");
+    fn(commandBuffer);
+    TracyVkCollect(tracyContext, *commandBuffer);
   }
-  commandBuffer->end();
+  commandBuffer.end();
 
   const auto submitInfo =
-      vk::SubmitInfo{.commandBufferCount = 1, .pCommandBuffers = &**commandBuffer};
+      vk::SubmitInfo{.commandBufferCount = 1, .pCommandBuffers = &*commandBuffer};
 
   transferQueue->getQueue().submit(submitInfo, **fence);
 
@@ -56,6 +61,6 @@ void ImmediateTransferContext::submit(
     Log.warn("Timeout waiting for fence during immediate submit");
   }
   device->getVkDevice().resetFences(**fence);
-  commandBuffer->reset();
+  commandBuffer.reset();
 }
 }

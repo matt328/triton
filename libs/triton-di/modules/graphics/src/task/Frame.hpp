@@ -1,11 +1,10 @@
 #pragma once
-#include "CommandBufferManager.hpp"
+#include "vk/CommandBufferManager.hpp"
 #include "vk/VkResourceManager.hpp"
-#include <vulkan/vulkan_structs.hpp>
 
 namespace tr {
 
-constexpr auto DepthImageName = "DepthImage";
+constexpr auto DepthImageName = "Image-Depth";
 
 enum class CmdBufferType : uint8_t {
   Main = 0,
@@ -20,7 +19,10 @@ public:
                  vk::raii::Fence&& newRenderFence,
                  vk::raii::Semaphore&& newImageAvailableSemaphore,
                  vk::raii::Semaphore&& newRenderFinishedSemaphore,
-                 vk::raii::Semaphore&& newComputeFinishedSemaphore);
+                 vk::raii::Semaphore&& newComputeFinishedSemaphore,
+                 CommandBufferHandle newStartCmdBuffer,
+                 CommandBufferHandle newEndCmdBuffer,
+                 CommandBufferHandle newMainCmdBuffer);
 
   [[nodiscard]] auto getIndexedName(std::string_view input) const -> std::string;
   [[nodiscard]] auto getIndex() const -> uint8_t;
@@ -29,22 +31,34 @@ public:
   [[nodiscard]] auto getComputeFinishedSemaphore() -> vk::raii::Semaphore&;
   [[nodiscard]] auto getInFlightFence() -> vk::raii::Fence&;
   [[nodiscard]] auto getSwapchainImageIndex() const -> uint32_t;
-  [[nodiscard]] auto getDrawImageId() const -> std::string;
   [[nodiscard]] auto getRenderingInfo() const -> vk::RenderingInfo;
   [[nodiscard]] auto getDrawImageExtent() const -> vk::Extent2D;
+
+  [[nodiscard]] auto getInstanceDataBufferHandle() const -> BufferHandle;
+  [[nodiscard]] auto getDrawCommandBufferHandle() const -> BufferHandle;
+  [[nodiscard]] auto getCameraBufferHandle() const -> BufferHandle;
+
+  [[nodiscard]] auto getDepthImageHandle() const -> ImageHandle;
+  [[nodiscard]] auto getDrawImageHandle() const -> ImageHandle;
+
+  [[nodiscard]] auto getStartCommandBufferHandle() const -> CommandBufferHandle;
+  [[nodiscard]] auto getMainCommandBufferHandle() const -> CommandBufferHandle;
+  [[nodiscard]] auto getEndCommandBufferHandle() const -> CommandBufferHandle;
+
+  auto setInstanceDataBufferHandle(BufferHandle handle) -> void;
+  auto setDrawCommandBufferHandle(BufferHandle handle) -> void;
+  auto setCameraBufferHandle(BufferHandle handle) -> void;
+
+  auto setDepthImageHandle(ImageHandle handle) -> void;
+  auto setDrawImageHandle(ImageHandle handle) -> void;
 
   auto setSwapchainImageIndex(uint32_t index) -> void;
   auto setDrawImageExtent(vk::Extent2D extent) -> void;
   auto setupRenderingInfo(const std::shared_ptr<VkResourceManager>& resourceManager) -> void;
 
-  auto addCommandBuffer(CmdBufferType cmdType, CommandBufferPtr&& commandBuffer) -> void;
-  [[nodiscard]] auto getCommandBuffer(CmdBufferType cmdType) const -> vk::raii::CommandBuffer&;
-  auto clearCommandBuffers() -> void;
-
 private:
   uint8_t index;
 
-  std::string drawImageName;
   vk::raii::Fence inFlightFence;
   vk::raii::Semaphore imageAvailableSemaphore;
   vk::raii::Semaphore renderFinishedSemaphore;
@@ -53,11 +67,16 @@ private:
   uint32_t swapchainImageIndex{};
   vk::Extent2D drawImageExtent{};
 
-  CommandBufferPtr staticCommandBuffer = CommandBufferManager::getEmpty();
-  CommandBufferPtr startBuffer = CommandBufferManager::getEmpty();
-  CommandBufferPtr endBuffer = CommandBufferManager::getEmpty();
+  BufferHandle instanceDataBuffer;
+  BufferHandle drawCommandBuffer;
+  BufferHandle cameraBuffer;
 
-  std::unordered_map<CmdBufferType, CommandBufferPtr> commandBuffers;
+  ImageHandle depthImageHandle;
+  ImageHandle drawImageHandle;
+
+  CommandBufferHandle startCmdBuffer;
+  CommandBufferHandle mainCmdBuffer;
+  CommandBufferHandle endCmdBuffer;
 
   vk::RenderingAttachmentInfo colorAttachmentInfo;
   vk::RenderingAttachmentInfo depthAttachmentInfo;

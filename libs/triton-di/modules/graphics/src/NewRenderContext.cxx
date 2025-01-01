@@ -26,7 +26,6 @@ void NewRenderContext::renderNextFrame() {
     // Compute task should reference the ObjectData buffer as well as CameraData buffer and
     // produce the indirectBuffer, and update the InstanceData buffer.
 
-    renderScheduler->setupCommandBuffersForFrame(frame);
     renderScheduler->recordRenderTasks(frame);
     renderScheduler->endFrame(frame);
     return;

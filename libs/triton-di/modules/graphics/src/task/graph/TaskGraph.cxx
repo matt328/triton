@@ -13,14 +13,14 @@ auto TaskGraph::resolveDependencies() -> void {
   }
 }
 
-auto TaskGraph::insertBarrier(const BarrierConfig& barrierConfig) -> void {
+auto TaskGraph::insertBarrier([[maybe_unused]] const BarrierConfig& barrierConfig) -> void {
   /*
      - figure out what the consumer's inputs are, and see if they are among the producer's
      outputs
      - if one is found, create a Barrier for it in the consumer
   */
-  auto* consumer = barrierConfig.consumer;
-  auto* provider = barrierConfig.producer;
+  // auto* consumer = barrierConfig.consumer;
+  // auto* provider = barrierConfig.producer;
   /*auto consumerResources = consumer->getResources();*/
   /*auto providerResources = provider->getResources();*/
   /**/

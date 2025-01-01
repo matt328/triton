@@ -1,5 +1,6 @@
 #pragma once
 
+#include "IDebugManager.hpp"
 namespace tr {
 class GraphicsDevice;
 }
@@ -17,7 +18,9 @@ class Image;
 
 class Allocator {
 public:
-  explicit Allocator(const vma::AllocatorCreateInfo& createInfo, const vk::raii::Device& device);
+  explicit Allocator(const vma::AllocatorCreateInfo& createInfo,
+                     const vk::raii::Device& device,
+                     std::shared_ptr<IDebugManager> newDebugManager);
   ~Allocator();
 
   Allocator(const Allocator&) = delete;
@@ -88,5 +91,6 @@ public:
 private:
   const vk::raii::Device& device;
   std::shared_ptr<vma::Allocator> allocator;
+  std::shared_ptr<IDebugManager> debugManager;
 };
 }

@@ -74,13 +74,64 @@ auto DefaultDebugManager::setObjectName(const ObjectHandle& handle, std::string_
   }
 
   switch (handle.type) {
-    case ObjectHandle::Type::Semaphore:
+    case ObjectHandle::Type::Semaphore: {
       const auto l = reinterpret_cast<uint64_t>(static_cast<VkSemaphore>(handle.semaphore));
       const auto debugNameInfo =
           vk::DebugUtilsObjectNameInfoEXT{.objectType = vk::ObjectType::eSemaphore,
                                           .objectHandle = l,
                                           .pObjectName = name.data()};
       device->get()->getVkDevice().setDebugUtilsObjectNameEXT(debugNameInfo);
+    } break;
+    case ObjectHandle::Type::Pipeline: {
+      const auto l = reinterpret_cast<uint64_t>(static_cast<VkPipeline>(handle.pipeline));
+      const auto debugNameInfo =
+          vk::DebugUtilsObjectNameInfoEXT{.objectType = vk::ObjectType::ePipeline,
+                                          .objectHandle = l,
+                                          .pObjectName = name.data()};
+      device->get()->getVkDevice().setDebugUtilsObjectNameEXT(debugNameInfo);
+    } break;
+    case ObjectHandle::Type::CommandPool: {
+      const auto l = reinterpret_cast<uint64_t>(static_cast<VkCommandPool>(handle.commandPool));
+      const auto debugNameInfo =
+          vk::DebugUtilsObjectNameInfoEXT{.objectType = vk::ObjectType::eCommandPool,
+                                          .objectHandle = l,
+                                          .pObjectName = name.data()};
+      device->get()->getVkDevice().setDebugUtilsObjectNameEXT(debugNameInfo);
+    } break;
+    case ObjectHandle::Type::Buffer: {
+      const auto l = reinterpret_cast<uint64_t>(static_cast<VkBuffer>(handle.buffer));
+      const auto debugNameInfo =
+          vk::DebugUtilsObjectNameInfoEXT{.objectType = vk::ObjectType::eBuffer,
+                                          .objectHandle = l,
+                                          .pObjectName = name.data()};
+      device->get()->getVkDevice().setDebugUtilsObjectNameEXT(debugNameInfo);
+    } break;
+    case ObjectHandle::Type::Image: {
+      const auto l = reinterpret_cast<uint64_t>(static_cast<VkImage>(handle.image));
+      const auto debugNameInfo =
+          vk::DebugUtilsObjectNameInfoEXT{.objectType = vk::ObjectType::eImage,
+                                          .objectHandle = l,
+                                          .pObjectName = name.data()};
+      device->get()->getVkDevice().setDebugUtilsObjectNameEXT(debugNameInfo);
+    } break;
+    case ObjectHandle::Type::ImageView: {
+      const auto l = reinterpret_cast<uint64_t>(static_cast<VkImageView>(handle.imageView));
+      const auto debugNameInfo =
+          vk::DebugUtilsObjectNameInfoEXT{.objectType = vk::ObjectType::eImageView,
+                                          .objectHandle = l,
+                                          .pObjectName = name.data()};
+      device->get()->getVkDevice().setDebugUtilsObjectNameEXT(debugNameInfo);
+    } break;
+    case ObjectHandle::Type::CommandBuffer: {
+      const auto l = reinterpret_cast<uint64_t>(static_cast<VkCommandBuffer>(handle.commandBuffer));
+      const auto debugNameInfo =
+          vk::DebugUtilsObjectNameInfoEXT{.objectType = vk::ObjectType::eCommandBuffer,
+                                          .objectHandle = l,
+                                          .pObjectName = name.data()};
+      device->get()->getVkDevice().setDebugUtilsObjectNameEXT(debugNameInfo);
+    } break;
+    default:
+      Log.warn("Object type not supported for setting name");
   }
 }
 

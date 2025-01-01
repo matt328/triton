@@ -6,15 +6,16 @@
 namespace tr {
 
 ComputeTask::ComputeTask(std::shared_ptr<VkResourceManager> newResourceManager)
-    : resourceManager{std::move(newResourceManager)} {
+    : resourceManager{std::move(newResourceManager)},
+      pipelineHandle{resourceManager->createComputePipeline("Compute")} {
 }
 
 auto ComputeTask::record(vk::raii::CommandBuffer& commandBuffer, const Frame& frame) -> void {
 
-  auto& instanceDataBuffer = resourceManager->getBuffer(frame.getIndexedName("InstanceDataBuffer"));
-  auto& drawCommandBuffer = resourceManager->getBuffer(frame.getIndexedName("DrawCommandBuffer"));
+  auto& instanceDataBuffer = resourceManager->getBuffer(frame.getInstanceDataBufferHandle());
+  auto& drawCommandBuffer = resourceManager->getBuffer(frame.getDrawCommandBufferHandle());
 
-  const auto& computePipeline = resourceManager->getPipeline("Compute");
+  const auto& computePipeline = resourceManager->getPipeline(pipelineHandle);
 
   commandBuffer.bindPipeline(vk::PipelineBindPoint::eCompute, computePipeline.getPipeline());
 

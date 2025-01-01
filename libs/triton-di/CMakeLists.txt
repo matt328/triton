@@ -42,12 +42,11 @@ set(common_SRC
   modules/graphics/src/vk/QueueTypes.cxx
   modules/graphics/src/vk/VkResourceManager.cxx
   modules/graphics/src/vk/Swapchain.cxx
+  modules/graphics/src/vk/CommandBufferManager.cxx
 
   modules/graphics/src/task/DefaultRenderScheduler.cxx
-  modules/graphics/src/task/CommandBufferManager.cxx
   modules/graphics/src/task/Frame.cxx
   modules/graphics/src/task/DefaultFrameManager.cxx
-  modules/graphics/src/task/SyncManager.cxx
   modules/graphics/src/task/CubeRenderTask.cxx
   modules/graphics/src/task/RenderTaskFactory.cxx
   modules/graphics/src/task/ComputeTask.cxx
@@ -59,6 +58,11 @@ set(common_SRC
 )
 
 add_library(${PROJECT_NAME} STATIC ${common_SRC})
+
+target_compile_options(${PROJECT_NAME}
+  PRIVATE
+  $<$<CXX_COMPILER_ID:Clang>:-g -Wall -Wextra -pedantic -Werror>
+)
 
 IF(WIN32)
   target_compile_definitions(${PROJECT_NAME}

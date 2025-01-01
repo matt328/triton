@@ -21,6 +21,8 @@ public:
 
 private:
   std::shared_ptr<VkResourceManager> resourceManager;
+
+  PipelineHandle pipelineHandle;
 };
 
 }

@@ -1,4 +1,5 @@
 #include "Frame.hpp"
+#include "vk/VkResourceManager.hpp"
 
 namespace tr {
 
@@ -6,18 +7,23 @@ Frame::Frame(const uint8_t newIndex,
              vk::raii::Fence&& newRenderFence,
              vk::raii::Semaphore&& newImageAvailableSemaphore,
              vk::raii::Semaphore&& newRenderFinishedSemaphore,
-             vk::raii::Semaphore&& newComputeFinishedSemaphore)
+             vk::raii::Semaphore&& newComputeFinishedSemaphore,
+             CommandBufferHandle newStartCmdBuffer,
+             CommandBufferHandle newEndCmdBuffer,
+             CommandBufferHandle newMainCmdBuffer)
     : index{newIndex},
       inFlightFence{std::move(newRenderFence)},
       imageAvailableSemaphore{std::move(newImageAvailableSemaphore)},
       renderFinishedSemaphore{std::move(newRenderFinishedSemaphore)},
-      computeFinishedSemaphore{std::move(newComputeFinishedSemaphore)} {
-  drawImageName = "DrawImage Frame" + std::to_string(index);
+      computeFinishedSemaphore{std::move(newComputeFinishedSemaphore)},
+      startCmdBuffer(newStartCmdBuffer),
+      mainCmdBuffer(newMainCmdBuffer),
+      endCmdBuffer(newEndCmdBuffer) {
 }
 
 auto Frame::setupRenderingInfo(const std::shared_ptr<VkResourceManager>& resourceManager) -> void {
   colorAttachmentInfo = vk::RenderingAttachmentInfo{
-      .imageView = resourceManager->getImageView(getDrawImageId()),
+      .imageView = resourceManager->getImageView(getDrawImageHandle()),
       .imageLayout = vk::ImageLayout::eColorAttachmentOptimal,
       .loadOp = vk::AttachmentLoadOp::eClear,
       .storeOp = vk::AttachmentStoreOp::eStore,
@@ -26,7 +32,7 @@ auto Frame::setupRenderingInfo(const std::shared_ptr<VkResourceManager>& resourc
   };
 
   depthAttachmentInfo = vk::RenderingAttachmentInfo{
-      .imageView = resourceManager->getImageView(DepthImageName),
+      .imageView = resourceManager->getImageView(getDepthImageHandle()),
       .imageLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal,
       .loadOp = vk::AttachmentLoadOp::eClear,
       .storeOp = vk::AttachmentStoreOp::eStore,
@@ -36,7 +42,7 @@ auto Frame::setupRenderingInfo(const std::shared_ptr<VkResourceManager>& resourc
 
   renderingInfo = vk::RenderingInfo{
       .renderArea = vk::Rect2D{.offset = {.x = 0, .y = 0},
-                               .extent = resourceManager->getImageExtent(getDrawImageId())},
+                               .extent = resourceManager->getImageExtent(getDrawImageHandle())},
       .layerCount = 1,
       .colorAttachmentCount = 1,
       .pColorAttachments = &colorAttachmentInfo,
@@ -71,28 +77,64 @@ auto Frame::getSwapchainImageIndex() const -> uint32_t {
   return swapchainImageIndex;
 }
 
-auto Frame::getDrawImageId() const -> std::string {
-  return drawImageName;
+auto Frame::getDrawImageHandle() const -> ImageHandle {
+  return drawImageHandle;
 }
 
 auto Frame::getRenderingInfo() const -> vk::RenderingInfo {
   return renderingInfo;
 }
 
+auto Frame::getInstanceDataBufferHandle() const -> BufferHandle {
+  return instanceDataBuffer;
+}
+
+auto Frame::getDrawCommandBufferHandle() const -> BufferHandle {
+  return drawCommandBuffer;
+}
+
+auto Frame::getCameraBufferHandle() const -> BufferHandle {
+  return cameraBuffer;
+}
+
+auto Frame::getDepthImageHandle() const -> ImageHandle {
+  return depthImageHandle;
+}
+
+auto Frame::getStartCommandBufferHandle() const -> CommandBufferHandle {
+  return startCmdBuffer;
+}
+
+auto Frame::getMainCommandBufferHandle() const -> CommandBufferHandle {
+  return mainCmdBuffer;
+}
+
+auto Frame::getEndCommandBufferHandle() const -> CommandBufferHandle {
+  return endCmdBuffer;
+}
+
+auto Frame::setDepthImageHandle(const ImageHandle handle) -> void {
+  depthImageHandle = handle;
+}
+
+auto Frame::setDrawImageHandle(const ImageHandle handle) -> void {
+  drawImageHandle = handle;
+}
+
 auto Frame::setSwapchainImageIndex(const uint32_t index) -> void {
   swapchainImageIndex = index;
 }
 
-auto Frame::addCommandBuffer(CmdBufferType cmdType, CommandBufferPtr&& commandBuffer) -> void {
-  commandBuffers.insert(std::make_pair(cmdType, std::move(commandBuffer)));
+auto Frame::setInstanceDataBufferHandle(BufferHandle handle) -> void {
+  instanceDataBuffer = handle;
 }
 
-auto Frame::getCommandBuffer(const CmdBufferType cmdType) const -> vk::raii::CommandBuffer& {
-  return *commandBuffers.at(cmdType);
+auto Frame::setDrawCommandBufferHandle(BufferHandle handle) -> void {
+  drawCommandBuffer = handle;
 }
 
-auto Frame::clearCommandBuffers() -> void {
-  commandBuffers.clear();
+auto Frame::setCameraBufferHandle(BufferHandle handle) -> void {
+  cameraBuffer = handle;
 }
 
 auto Frame::transitionImage(const vk::raii::CommandBuffer& cmd,

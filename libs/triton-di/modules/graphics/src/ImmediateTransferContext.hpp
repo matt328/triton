@@ -1,9 +1,9 @@
 #pragma once
 
 #include "gfx/QueueTypes.hpp"
-#include "task/CommandBufferManager.hpp"
 #include "vk/Device.hpp"
 #include "vk/PhysicalDevice.hpp"
+#include "vk/CommandBufferManager.hpp"
 
 namespace vk::raii {
 class Device;
@@ -20,7 +20,7 @@ public:
   ImmediateTransferContext(std::shared_ptr<Device> newDevice,
                            std::shared_ptr<PhysicalDevice> physicalDevice,
                            std::shared_ptr<queue::Transfer> newTransferQueue,
-                           const std::shared_ptr<CommandBufferManager>& commandBufferManager,
+                           std::shared_ptr<CommandBufferManager> newCommandBufferManager,
                            const std::string_view& name = "unnamed immediate context");
 
   ~ImmediateTransferContext();
@@ -36,8 +36,10 @@ private:
   std::shared_ptr<Device> device;
   std::shared_ptr<PhysicalDevice> physicalDevice;
   std::shared_ptr<queue::Transfer> transferQueue;
+  std::shared_ptr<CommandBufferManager> commandBufferManager;
 
-  CommandBufferPtr commandBuffer;
+  CommandBufferHandle commandBufferHandle;
+
   tracy::VkCtx* tracyContext;
   std::unique_ptr<vk::raii::Fence> fence = nullptr;
 };

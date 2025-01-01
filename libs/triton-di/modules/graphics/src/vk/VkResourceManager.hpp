@@ -1,7 +1,9 @@
 #pragma once
 #include "Device.hpp"
+#include "IDebugManager.hpp"
 #include "ImmediateTransferContext.hpp"
 #include "cm/Handles.hpp"
+#include "cm/Rando.hpp"
 #include "geo/GeometryData.hpp"
 #include "geo/Mesh.hpp"
 #include "mem/Allocator.hpp"
@@ -14,10 +16,6 @@ class IPipeline;
 struct Vertex {
   glm::vec3 position;
 };
-
-namespace mem {
-class Allocator;
-}
 
 struct ImageResource {
   vk::Image image;
@@ -37,11 +35,16 @@ struct ImageDeleter {
 
 using AllocatedImagePtr = std::unique_ptr<ImageResource, ImageDeleter>;
 
+using BufferHandle = size_t;
+using ImageHandle = size_t;
+using PipelineHandle = size_t;
+
 class VkResourceManager {
 public:
   explicit VkResourceManager(std::shared_ptr<Device> newDevice,
                              std::shared_ptr<ImmediateTransferContext> newImmediateTransferContext,
                              std::shared_ptr<IShaderCompiler> newShaderCompiler,
+                             std::shared_ptr<IDebugManager> newDebugManager,
                              const std::shared_ptr<PhysicalDevice>& physicalDevice,
                              const std::shared_ptr<Instance>& instance);
   ~VkResourceManager();
@@ -53,29 +56,37 @@ public:
   [[nodiscard]] auto createDefaultDescriptorPool() const
       -> std::unique_ptr<vk::raii::DescriptorPool>;
 
-  auto createDrawImageAndView(std::string_view imageName, vk::Extent2D extent) -> void;
-  auto createDepthImageAndView(std::string_view imageName, vk::Extent2D extent, vk::Format format)
-      -> void;
-  [[nodiscard]] auto getImage(std::string_view id) const -> const vk::Image&;
-  [[nodiscard]] auto getImageView(std::string_view id) const -> const vk::ImageView&;
-  [[nodiscard]] auto getImageExtent(std::string_view id) const -> const vk::Extent2D;
+  auto createDrawImageAndView(std::string_view imageName, vk::Extent2D extent) -> ImageHandle;
 
-  [[nodiscard]] auto getMesh(MeshHandle handle) -> const ImmutableMesh&;
+  auto createDepthImageAndView(std::string_view imageName, vk::Extent2D extent, vk::Format format)
+      -> ImageHandle;
 
   auto createBuffer(size_t size, vk::Flags<vk::BufferUsageFlagBits> flags, std::string_view name)
-      -> void;
+      -> BufferHandle;
 
-  auto createIndirectBuffer(size_t size) -> void;
-
-  [[nodiscard]] auto getBuffer(std::string_view name) const -> Buffer&;
+  auto createIndirectBuffer(size_t size) -> BufferHandle;
 
   auto asyncUpload(const GeometryData& geometryData) -> MeshHandle;
 
-  auto destroyImage(const std::string& id) -> void;
+  auto destroyImage(ImageHandle handle) -> void;
 
-  auto createComputePipeline(std::string_view name) -> void;
+  auto createComputePipeline(std::string_view name) -> PipelineHandle;
 
-  [[nodiscard]] auto getPipeline(std::string_view name) const -> const IPipeline&;
+  [[nodiscard]] auto getImage(ImageHandle handle) const -> const vk::Image&;
+
+  [[nodiscard]] auto getImageView(ImageHandle handle) const -> const vk::ImageView&;
+
+  [[nodiscard]] auto getImageExtent(ImageHandle handle) const -> const vk::Extent2D;
+
+  [[nodiscard]] auto getMesh(MeshHandle handle) -> const ImmutableMesh&;
+
+  [[nodiscard]] auto getBuffer(BufferHandle handle) const -> Buffer&;
+
+  [[nodiscard]] auto getPipeline(PipelineHandle handle) const -> const IPipeline&;
+
+  [[nodiscard]] auto getGraphicsCommandBuffer(size_t index) -> vk::raii::CommandBuffer&;
+
+  [[nodiscard]] auto getTransferCommandBuffer(size_t index) -> vk::raii::CommandBuffer&;
 
 private:
   struct ImageInfo {
@@ -87,12 +98,21 @@ private:
   std::shared_ptr<Device> device;
   std::shared_ptr<ImmediateTransferContext> immediateTransferContext;
   std::shared_ptr<IShaderCompiler> shaderCompiler;
+  std::shared_ptr<IDebugManager> debugManager;
 
   std::shared_ptr<Allocator> allocator;
+  std::unique_ptr<vk::raii::CommandPool> commandPool;
+  std::unique_ptr<vk::raii::CommandPool> transferCommandPool;
+  std::vector<vk::raii::CommandBuffer> commandBuffers;
+  std::vector<vk::raii::CommandBuffer> transferCommandBuffers;
 
-  std::unordered_map<std::string, ImageInfo> imageInfoMap;
-  std::unordered_map<std::string, std::unique_ptr<Buffer>> bufferMap;
-  std::unordered_map<std::string, std::unique_ptr<IPipeline>> pipelineMap;
+  std::unordered_map<ImageHandle, ImageInfo> imageInfoMap;
+  std::unordered_map<BufferHandle, std::unique_ptr<Buffer>> bufferMap;
+  std::unordered_map<PipelineHandle, std::unique_ptr<IPipeline>> pipelineMap;
+
+  MapKey bufferMapKeygen;
+  MapKey imageMapKeygen;
+  MapKey pipelineMapKeygen;
 
   std::vector<ImmutableMesh> meshList;
 };
