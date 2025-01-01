@@ -1,7 +1,10 @@
 #include "VkResourceManager.hpp"
 
 #include <mem/Allocator.hpp>
+#include <vulkan/vulkan_enums.hpp>
+#include "IDebugManager.hpp"
 #include "ResourceExceptions.hpp"
+#include "mem/Buffer.hpp"
 #include "pipeline/ComputePipeline.hpp"
 #include "pipeline/IPipeline.hpp"
 #include "pipeline/IndirectPipeline.hpp"
@@ -11,11 +14,15 @@ VkResourceManager::VkResourceManager(
     std::shared_ptr<Device> newDevice,
     std::shared_ptr<ImmediateTransferContext> newImmediateTransferContext,
     std::shared_ptr<IShaderCompiler> newShaderCompiler,
+    std::shared_ptr<IDebugManager> newDebugManager,
     const std::shared_ptr<PhysicalDevice>& physicalDevice,
     const std::shared_ptr<Instance>& instance)
     : device{std::move(newDevice)},
       immediateTransferContext{std::move(newImmediateTransferContext)},
-      shaderCompiler{std::move(newShaderCompiler)} {
+      shaderCompiler{std::move(newShaderCompiler)},
+      debugManager{std::move(newDebugManager)} {
+
+  debugManager->setDevice(device);
 
   constexpr auto vulkanFunctions = vma::VulkanFunctions{
       .vkGetInstanceProcAddr = vkGetInstanceProcAddr,
@@ -30,33 +37,77 @@ VkResourceManager::VkResourceManager(
       .instance = instance->getVkInstance(),
   };
 
-  allocator = std::make_unique<Allocator>(allocatorCreateInfo, device->getVkDevice());
+  allocator = std::make_unique<Allocator>(allocatorCreateInfo, device->getVkDevice(), debugManager);
+
+  {
+    const auto commandPoolCreateInfo = vk::CommandPoolCreateInfo{
+        .flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
+        .queueFamilyIndex = device->getGraphicsQueueFamily(),
+    };
+
+    commandPool = std::make_unique<vk::raii::CommandPool>(
+        device->getVkDevice().createCommandPool(commandPoolCreateInfo));
+    debugManager->setObjectName(**commandPool, "CommandPool-Graphics");
+
+    const auto allocInfo = vk::CommandBufferAllocateInfo{.commandPool = *commandPool,
+                                                         .level = vk::CommandBufferLevel::ePrimary,
+                                                         .commandBufferCount = 2};
+    commandBuffers = device->getVkDevice().allocateCommandBuffers(allocInfo);
+    int count = 0;
+    for (const auto& cmd : commandBuffers) {
+      auto name = fmt::format("CommandBuffer-Graphics-{}", count++);
+      debugManager->setObjectName(*cmd, name);
+    }
+  }
+  {
+    const auto commandPoolCreateInfo = vk::CommandPoolCreateInfo{
+        .flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
+        .queueFamilyIndex = device->getTransferQueueFamily(),
+    };
+
+    transferCommandPool = std::make_unique<vk::raii::CommandPool>(
+        device->getVkDevice().createCommandPool(commandPoolCreateInfo));
+    debugManager->setObjectName(**transferCommandPool, "CommandPool-Transfer");
+
+    const auto allocInfo = vk::CommandBufferAllocateInfo{.commandPool = *commandPool,
+                                                         .level = vk::CommandBufferLevel::ePrimary,
+                                                         .commandBufferCount = 2};
+    commandBuffers = device->getVkDevice().allocateCommandBuffers(allocInfo);
+
+    int count = 0;
+    for (const auto& cmd : transferCommandBuffers) {
+      auto name = fmt::format("CommandBuffer-Transfer-{}", count++);
+      debugManager->setObjectName(*cmd, name);
+    }
+  }
 }
 
 VkResourceManager::~VkResourceManager() {
   Log.trace("Destroying VkResourceManager");
 }
 
+// ok new plan. move command buffer pools and management into a commandBufferManager that can be
+// injected into immediate context
 auto VkResourceManager::asyncUpload(const GeometryData& geometryData) -> MeshHandle {
   // Prepare Vertex Buffer
   const auto vbSize = geometryData.vertexDataSize();
   const auto ibSize = geometryData.indexDataSize();
 
   try {
-    const auto vbStagingBuffer = allocator->createStagingBuffer(vbSize, "Vertex Staging Buffer");
+    const auto vbStagingBuffer = allocator->createStagingBuffer(vbSize, "Buffer-VertexStaging");
     void* vbData = allocator->mapMemory(*vbStagingBuffer);
     memcpy(vbData, geometryData.vertices.data(), static_cast<size_t>(vbSize));
     allocator->unmapMemory(*vbStagingBuffer);
 
     // Prepare Index Buffer
-    const auto ibStagingBuffer = allocator->createStagingBuffer(ibSize, "Index Staging Buffer");
+    const auto ibStagingBuffer = allocator->createStagingBuffer(ibSize, "Buffer-IndexStaging");
 
     auto* const data = allocator->mapMemory(*ibStagingBuffer);
     memcpy(data, geometryData.indices.data(), ibSize);
     allocator->unmapMemory(*ibStagingBuffer);
 
-    auto vertexBuffer = allocator->createGpuVertexBuffer(vbSize, "GPU Vertex");
-    auto indexBuffer = allocator->createGpuIndexBuffer(ibSize, "GPU Index");
+    auto vertexBuffer = allocator->createGpuVertexBuffer(vbSize, "Buffer-Vertex");
+    auto indexBuffer = allocator->createGpuIndexBuffer(ibSize, "Buffer-Index");
     const auto indicesCount = geometryData.indices.size();
 
     // Upload Buffers
@@ -80,17 +131,20 @@ auto VkResourceManager::asyncUpload(const GeometryData& geometryData) -> MeshHan
 
 auto VkResourceManager::createBuffer(size_t size,
                                      vk::Flags<vk::BufferUsageFlagBits> flags,
-                                     std::string_view name) -> void {
+                                     std::string_view name) -> BufferHandle {
   const auto bufferCreateInfo = vk::BufferCreateInfo{.size = size, .usage = flags};
 
   constexpr auto allocationCreateInfo =
       vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eCpuToGpu,
                                 .requiredFlags = vk::MemoryPropertyFlagBits::eHostCoherent};
 
-  bufferMap.emplace(name, allocator->createBuffer(&bufferCreateInfo, &allocationCreateInfo, name));
+  auto key = bufferMapKeygen.getKey();
+
+  bufferMap.emplace(key, allocator->createBuffer(&bufferCreateInfo, &allocationCreateInfo, name));
+  return key;
 }
 
-auto VkResourceManager::createIndirectBuffer(size_t size) -> void {
+auto VkResourceManager::createIndirectBuffer(size_t size) -> BufferHandle {
   const auto bufferCreateInfo =
       vk::BufferCreateInfo{.size = size, .usage = vk::BufferUsageFlagBits::eIndirectBuffer};
 
@@ -98,9 +152,12 @@ auto VkResourceManager::createIndirectBuffer(size_t size) -> void {
       vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eGpuOnly,
                                 .requiredFlags = vk::MemoryPropertyFlagBits::eDeviceLocal};
 
+  const auto key = bufferMapKeygen.getKey();
+
   bufferMap.emplace(
-      "IndirectBuffer",
-      allocator->createBuffer(&bufferCreateInfo, &allocationCreateInfo, "IndirectBuffer"));
+      key,
+      allocator->createBuffer(&bufferCreateInfo, &allocationCreateInfo, "Buffer-IndirectDraw"));
+  return key;
 }
 
 [[nodiscard]] auto VkResourceManager::getMesh(MeshHandle handle) -> const ImmutableMesh& {
@@ -138,7 +195,7 @@ auto VkResourceManager::createDefaultDescriptorPool() const
 }
 
 auto VkResourceManager::createDrawImageAndView(std::string_view imageName,
-                                               const vk::Extent2D extent) -> void {
+                                               const vk::Extent2D extent) -> ImageHandle {
   constexpr auto drawImageFormat = vk::Format::eR16G16B16A16Sfloat;
 
   const auto imageCreateInfo = vk::ImageCreateInfo{
@@ -161,6 +218,8 @@ auto VkResourceManager::createDrawImageAndView(std::string_view imageName,
   auto [image, allocation] =
       allocator->getAllocator()->createImage(imageCreateInfo, imageAllocateCreateInfo);
 
+  debugManager->setObjectName(image, imageName.data());
+
   const auto imageViewInfo =
       vk::ImageViewCreateInfo{.image = image,
                               .viewType = vk::ImageViewType::e2D,
@@ -171,16 +230,23 @@ auto VkResourceManager::createDrawImageAndView(std::string_view imageName,
                                   .layerCount = 1,
                               }};
 
-  imageInfoMap.emplace(imageName.data(),
+  const auto imageKey = imageMapKeygen.getKey();
+
+  imageInfoMap.emplace(imageKey,
                        ImageInfo{.image = AllocatedImagePtr(
                                      new ImageResource{.image = image, .allocation = allocation},
                                      ImageDeleter{*allocator->getAllocator()}),
                                  .imageView = device->getVkDevice().createImageView(imageViewInfo),
                                  .extent = extent});
+
+  debugManager->setObjectName(*imageInfoMap.at(imageKey).imageView,
+                              fmt::format("{}-View", imageName));
+
+  return imageKey;
 }
-auto VkResourceManager::createDepthImageAndView(std::string_view imageName,
+auto VkResourceManager::createDepthImageAndView([[maybe_unused]] std::string_view imageName,
                                                 vk::Extent2D extent,
-                                                vk::Format format) -> void {
+                                                vk::Format format) -> ImageHandle {
   const auto imageCreateInfo = vk::ImageCreateInfo{
       .imageType = vk::ImageType::e2D,
       .format = format,
@@ -209,40 +275,56 @@ auto VkResourceManager::createDepthImageAndView(std::string_view imageName,
                                   .layerCount = 1,
                               }};
 
-  imageInfoMap.emplace(imageName.data(),
+  const auto imageKey = imageMapKeygen.getKey();
+
+  imageInfoMap.emplace(imageKey,
                        ImageInfo{.image = AllocatedImagePtr(
                                      new ImageResource{.image = image, .allocation = allocation},
                                      ImageDeleter{*allocator->getAllocator()}),
                                  .imageView = device->getVkDevice().createImageView(imageViewInfo),
                                  .extent = extent});
+  return imageKey;
 }
 
-auto VkResourceManager::getImage(std::string_view id) const -> const vk::Image& {
-  return imageInfoMap.at(id.data()).image->image;
+auto VkResourceManager::getImage(ImageHandle handle) const -> const vk::Image& {
+  return imageInfoMap.at(handle).image->image;
 }
 
-auto VkResourceManager::getImageView(std::string_view id) const -> const vk::ImageView& {
-  return *imageInfoMap.at(id.data()).imageView;
+auto VkResourceManager::getImageView(ImageHandle handle) const -> const vk::ImageView& {
+  return *imageInfoMap.at(handle).imageView;
 }
 
-auto VkResourceManager::getImageExtent(std::string_view id) const -> const vk::Extent2D {
-  return imageInfoMap.at(id.data()).extent;
+auto VkResourceManager::getImageExtent(ImageHandle handle) const -> const vk::Extent2D {
+  return imageInfoMap.at(handle).extent;
 }
 
-auto VkResourceManager::getBuffer(std::string_view name) const -> Buffer& {
-  return *bufferMap.at(name.data());
+auto VkResourceManager::getBuffer(const BufferHandle handle) const -> Buffer& {
+  return *bufferMap.at(handle);
 }
 
-auto VkResourceManager::destroyImage(const std::string& id) -> void {
-  imageInfoMap.erase(id);
+auto VkResourceManager::destroyImage(ImageHandle handle) -> void {
+  imageInfoMap.erase(handle);
 }
 
-auto VkResourceManager::createComputePipeline(std::string_view name) -> void {
-  pipelineMap.emplace(name.data(), std::make_unique<ComputePipeline>(device, shaderCompiler));
+auto VkResourceManager::createComputePipeline([[maybe_unused]] std::string_view name)
+    -> PipelineHandle {
+  const auto key = pipelineMapKeygen.getKey();
+  pipelineMap.emplace(key, std::make_unique<ComputePipeline>(device, shaderCompiler));
+  return key;
 }
 
-[[nodiscard]] auto VkResourceManager::getPipeline(std::string_view name) const -> const IPipeline& {
-  return *pipelineMap.at(name.data());
+[[nodiscard]] auto VkResourceManager::getPipeline(PipelineHandle handle) const -> const IPipeline& {
+  return *pipelineMap.at(handle);
+}
+
+[[nodiscard]] auto VkResourceManager::getGraphicsCommandBuffer(size_t index)
+    -> vk::raii::CommandBuffer& {
+  return commandBuffers.at(index);
+}
+
+[[nodiscard]] auto VkResourceManager::getTransferCommandBuffer(size_t index)
+    -> vk::raii::CommandBuffer& {
+  return transferCommandBuffers.at(index);
 }
 
 }

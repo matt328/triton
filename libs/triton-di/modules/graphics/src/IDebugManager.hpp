@@ -7,16 +7,36 @@ class Device;
 struct ObjectHandle {
   enum class Type {
     Semaphore,
-    Pipeline
+    Pipeline,
+    CommandPool,
+    Buffer,
+    Image,
+    ImageView,
+    CommandBuffer,
   } type;
   union {
     vk::Semaphore semaphore;
-    VkPipeline pipeline;
+    vk::Pipeline pipeline;
+    vk::CommandPool commandPool;
+    vk::Buffer buffer;
+    vk::Image image;
+    vk::ImageView imageView;
+    vk::CommandBuffer commandBuffer;
   };
 
-  ObjectHandle(vk::Semaphore s) : type(Type::Semaphore), semaphore{s} {
+  ObjectHandle(const vk::Semaphore s) : type(Type::Semaphore), semaphore{s} {
   }
-  ObjectHandle(const VkPipeline p) : type(Type::Pipeline), pipeline(p) {
+  ObjectHandle(vk::Pipeline p) : type(Type::Pipeline), pipeline(p) {
+  }
+  ObjectHandle(vk::CommandPool cp) : type(Type::CommandPool), commandPool{cp} {
+  }
+  ObjectHandle(vk::Buffer b) : type(Type::Buffer), buffer{b} {
+  }
+  ObjectHandle(vk::Image i) : type(Type::Image), image{i} {
+  }
+  ObjectHandle(vk::ImageView i) : type(Type::ImageView), imageView{i} {
+  }
+  ObjectHandle(vk::CommandBuffer i) : type(Type::CommandBuffer), commandBuffer{i} {
   }
 };
 

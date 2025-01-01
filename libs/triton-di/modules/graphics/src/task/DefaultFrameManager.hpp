@@ -1,13 +1,13 @@
 #pragma once
 
-#include "CommandBufferManager.hpp"
 #include "IFrameManager.hpp"
 
 namespace tr {
+
+class CommandBufferManager;
 class Swapchain;
+
 struct RenderContextConfig;
-}
-namespace tr {
 
 class DefaultFrameManager final : public IFrameManager {
 public:

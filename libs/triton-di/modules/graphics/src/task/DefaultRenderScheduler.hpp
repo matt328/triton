@@ -1,6 +1,7 @@
 #pragma once
 
-#include "CommandBufferManager.hpp"
+#include "gfx/RenderContextConfig.hpp"
+#include "vk/CommandBufferManager.hpp"
 #include "IFrameManager.hpp"
 #include "gfx/IRenderScheduler.hpp"
 #include "IRenderTask.hpp"
@@ -31,7 +32,6 @@ public:
 
   auto executeTasks(Frame& frame) const -> void override;
   auto recordRenderTasks(Frame& frame) const -> void override;
-  auto setupCommandBuffersForFrame(Frame& frame) -> void override;
   auto endFrame(Frame& frame) const -> void override;
 
 private:

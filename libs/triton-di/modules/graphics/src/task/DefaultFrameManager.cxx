@@ -19,8 +19,6 @@ DefaultFrameManager::DefaultFrameManager(
       swapchain{std::move(newSwapchain)},
       resourceManager{std::move(newResourceManager)} {
 
-  debugManager->setDevice(device);
-
   for (uint8_t i = 0; i < rendererConfig.framesInFlight; ++i) {
 
     auto fence = device->getVkDevice().createFence(
@@ -28,27 +26,38 @@ DefaultFrameManager::DefaultFrameManager(
 
     auto acquireImageSemaphore = device->getVkDevice().createSemaphore({});
     debugManager->setObjectName(*acquireImageSemaphore,
-                                "AcquireImageSemaphoreFrame:" + std::to_string(i));
+                                "Semaphore-AcquireImage-Frame_" + std::to_string(i));
 
     auto renderFinishedSemaphore = device->getVkDevice().createSemaphore({});
     debugManager->setObjectName(*renderFinishedSemaphore,
-                                "RenderFinishedFrame:" + std::to_string(i));
+                                "Semaphore-RenderFinished-Frame_" + std::to_string(i));
     auto computeFinishedSemaphore = device->getVkDevice().createSemaphore({});
     debugManager->setObjectName(*computeFinishedSemaphore,
-                                "ComputeFinishedFrame:" + std::to_string(i));
+                                "Semaphore-ComputeFinished-Frame_" + std::to_string(i));
+
+    const auto startCmdBufferHandle = commandBufferManager->createGraphicsCommandBuffer();
+    const auto endCmdBufferHandle = commandBufferManager->createGraphicsCommandBuffer();
+    const auto mainCmdBufferHandle = commandBufferManager->createGraphicsCommandBuffer();
 
     frames.push_back(std::make_unique<Frame>(static_cast<uint8_t>(frames.size()),
                                              std::move(fence),
                                              std::move(acquireImageSemaphore),
                                              std::move(renderFinishedSemaphore),
-                                             std::move(computeFinishedSemaphore)));
+                                             std::move(computeFinishedSemaphore),
+                                             startCmdBufferHandle,
+                                             endCmdBufferHandle,
+                                             mainCmdBufferHandle));
+  }
 
-    const auto drawImageExtent = vk::Extent2D{
-        .width = maths::scaleNumber(swapchain->getImageExtent().width, rendererConfig.renderScale),
-        .height =
-            maths::scaleNumber(swapchain->getImageExtent().height, rendererConfig.renderScale)};
-    resourceManager->createDrawImageAndView(frames[frames.size() - 1]->getDrawImageId(),
-                                            drawImageExtent);
+  const auto drawImageExtent = vk::Extent2D{
+      .width = maths::scaleNumber(swapchain->getImageExtent().width, rendererConfig.renderScale),
+      .height = maths::scaleNumber(swapchain->getImageExtent().height, rendererConfig.renderScale)};
+
+  for (auto& frame : frames) {
+    auto drawImageHandle =
+        resourceManager->createDrawImageAndView(frame->getIndexedName("Image-Draw-Frame_"),
+                                                drawImageExtent);
+    frame->setDrawImageHandle(drawImageHandle);
   }
 }
 
@@ -80,7 +89,7 @@ auto DefaultFrameManager::acquireFrame()
 
   if (iar == ImageAcquireResult::NeedsResize) {
     swapchain->recreate();
-    commandBufferManager->swapchainRecreated();
+    // TODO(matt): commandBufferManager->recreate();
   }
 
   return iar;

@@ -1,7 +1,7 @@
 #include "Allocator.hpp"
 #include "Buffer.hpp"
 #include "Image.hpp"
-#include <vulkan/vulkan_enums.hpp>
+#include "IDebugManager.hpp"
 
 #define VMA_IMPLEMENTATION
 #include <vk_mem_alloc.h>
@@ -9,8 +9,10 @@
 
 namespace tr {
 
-Allocator::Allocator(const vma::AllocatorCreateInfo& createInfo, const vk::raii::Device& device)
-    : device{device} {
+Allocator::Allocator(const vma::AllocatorCreateInfo& createInfo,
+                     const vk::raii::Device& device,
+                     std::shared_ptr<IDebugManager> newDebugManager)
+    : device{device}, debugManager{std::move(newDebugManager)} {
   allocator = std::make_shared<vma::Allocator>(createAllocator(createInfo));
 }
 
@@ -27,6 +29,7 @@ auto Allocator::createBuffer(const vk::BufferCreateInfo* bci,
   try {
     auto [buffer, allocation] = allocator->createBuffer(*bci, *aci, info);
     allocator->setAllocationName(allocation, name.data());
+    debugManager->setObjectName(buffer, name.data());
     return std::make_unique<Buffer>(*allocator, buffer, bci->size, allocation, *device, info);
   } catch (const std::exception& ex) {
     throw AllocationException(
@@ -84,6 +87,7 @@ auto Allocator::createImage(const vk::ImageCreateInfo& imageCreateInfo,
   try {
     auto [image, allocation] = allocator->createImage(imageCreateInfo, allocationCreateInfo);
     allocator->setAllocationName(allocation, newName.data());
+    debugManager->setObjectName(image, newName.data());
     return std::make_unique<Image>(*allocator, image, allocation);
   } catch (const std::exception& ex) {
     throw AllocationException(

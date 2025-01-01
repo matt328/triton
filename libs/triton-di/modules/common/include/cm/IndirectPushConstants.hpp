@@ -1,6 +1,5 @@
 #pragma once
 
-#include <cstdint>
 namespace tr {
 
 struct IndirectPushConstants {

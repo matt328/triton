@@ -18,8 +18,8 @@ CubeRenderTask::CubeRenderTask(std::shared_ptr<VkResourceManager> newResourceMan
 
 auto CubeRenderTask::record(vk::raii::CommandBuffer& commandBuffer, const Frame& frame) -> void {
 
-  auto& instanceBuffer = resourceManager->getBuffer(frame.getIndexedName("InstanceDataBuffer"));
-  auto& cameraDataBuffer = resourceManager->getBuffer(frame.getIndexedName("CameraDataBuffer"));
+  auto& instanceBuffer = resourceManager->getBuffer(frame.getInstanceDataBufferHandle());
+  auto& cameraDataBuffer = resourceManager->getBuffer(frame.getCameraBufferHandle());
 
   pushConstants = IndirectPushConstants{.drawID = 0,
                                         .baseAddress = instanceBuffer.getDeviceAddress(),
@@ -37,7 +37,7 @@ auto CubeRenderTask::record(vk::raii::CommandBuffer& commandBuffer, const Frame&
                                                      0,
                                                      pushConstants);
 
-  auto& indirectBuffer = resourceManager->getBuffer(frame.getIndexedName("DrawCommandBuffer"));
+  auto& indirectBuffer = resourceManager->getBuffer(frame.getDrawCommandBufferHandle());
 
   commandBuffer.drawIndexedIndirect(indirectBuffer.getBuffer(),
                                     0,

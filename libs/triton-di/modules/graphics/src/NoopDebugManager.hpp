@@ -12,6 +12,8 @@ public:
   auto initializeInstance(vk::raii::Instance& instance) -> void override;
   auto addDeviceConfig(vk::DeviceCreateInfo& deviceCreateInfo) -> void override;
   auto destroyDebugCallbacks() -> void override;
+  auto setDevice(std::shared_ptr<Device> newDevice) -> void override;
+  auto setObjectName(const ObjectHandle& handle, std::string_view name) -> void override;
 };
 
 }

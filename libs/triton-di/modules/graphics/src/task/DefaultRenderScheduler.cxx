@@ -1,14 +1,13 @@
 #include "DefaultRenderScheduler.hpp"
-#include "CommandBufferManager.hpp"
+#include "vk/CommandBufferManager.hpp"
 #include "Maths.hpp"
-
 #include "gfx/QueueTypes.hpp"
 #include "cm/ObjectData.hpp"
 #include "task/Frame.hpp"
 #include "task/IRenderTask.hpp"
 #include "task/PoolId.hpp"
 #include "task/graph/TaskGraph.hpp"
-#include <vulkan/vulkan_structs.hpp>
+#include <vulkan/vulkan_raii.hpp>
 
 namespace tr {
 
@@ -37,15 +36,13 @@ DefaultRenderScheduler::DefaultRenderScheduler(
       renderTaskFactory{std::move(newRenderTaskFactory)},
       taskGraph{std::move(newTaskGraph)} {
 
-  commandBufferManager->registerType(PoolId::Main);
-
   const auto drawImageExtent = vk::Extent2D{
       .width = maths::scaleNumber(swapchain->getImageExtent().width, rendererConfig.renderScale),
       .height = maths::scaleNumber(swapchain->getImageExtent().height, rendererConfig.renderScale)};
 
-  resourceManager->createDepthImageAndView(DepthImageName,
-                                           drawImageExtent,
-                                           swapchain->getDepthFormat());
+  auto depthImageHandle = resourceManager->createDepthImageAndView(DepthImageName,
+                                                                   drawImageExtent,
+                                                                   swapchain->getDepthFormat());
 
   const auto instanceData =
       InstanceData{.model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -5.0f)),
@@ -66,14 +63,17 @@ DefaultRenderScheduler::DefaultRenderScheduler(
 
   for (const auto& frame : frameManager->getFrames()) {
 
+    frame->setDepthImageHandle(depthImageHandle);
+
     // Instance Data Buffer
     {
-      const auto name = frame->getIndexedName("InstanceDataBuffer");
-      resourceManager->createBuffer(sizeof(InstanceData),
-                                    vk::BufferUsageFlagBits::eStorageBuffer |
-                                        vk::BufferUsageFlagBits::eShaderDeviceAddress,
-                                    name);
-      auto& instanceBuffer = resourceManager->getBuffer(name);
+      const auto name = frame->getIndexedName("Buffer-InstanceData-Frame_");
+      const auto handle = resourceManager->createBuffer(
+          sizeof(InstanceData),
+          vk::BufferUsageFlagBits::eStorageBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress,
+          name);
+      auto& instanceBuffer = resourceManager->getBuffer(handle);
+      frame->setInstanceDataBufferHandle(handle);
 
       instanceBuffer.mapBuffer();
       instanceBuffer.updateBufferValue(&instanceData, sizeof(InstanceData));
@@ -82,31 +82,34 @@ DefaultRenderScheduler::DefaultRenderScheduler(
 
     // IndirectCommandBuffer
     { // TODO(matt) Come up with more solid buffer referencing than just hard coded strings
-      const auto name = frame->getIndexedName("DrawCommandBuffer");
-      resourceManager->createBuffer(sizeof(vk::DrawIndexedIndirectCommand),
-                                    vk::BufferUsageFlagBits::eIndirectBuffer |
-                                        vk::BufferUsageFlagBits::eShaderDeviceAddress,
-                                    name);
+      const auto name = frame->getIndexedName("Buffer-DrawCommand-Frame_");
+      const auto handle = resourceManager->createBuffer(
+          sizeof(vk::DrawIndexedIndirectCommand),
+          vk::BufferUsageFlagBits::eIndirectBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress,
+          name);
+      frame->setDrawCommandBufferHandle(handle);
     }
 
     // Camera Data Buffer
     {
-      const auto name = frame->getIndexedName("CameraDataBuffer");
-      resourceManager->createBuffer(sizeof(CameraData),
-                                    vk::BufferUsageFlagBits::eStorageBuffer |
-                                        vk::BufferUsageFlagBits::eShaderDeviceAddress,
-                                    name);
+      const auto name = frame->getIndexedName("Buffer-CameraData-Frame_");
+      const auto handle = resourceManager->createBuffer(
+          sizeof(CameraData),
+          vk::BufferUsageFlagBits::eStorageBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress,
+          name);
 
-      auto& cameraDataBuffer = resourceManager->getBuffer(name);
+      auto& cameraDataBuffer = resourceManager->getBuffer(handle);
 
       cameraDataBuffer.mapBuffer();
       cameraDataBuffer.updateBufferValue(&cameraData, sizeof(CameraData));
       cameraDataBuffer.unmapBuffer();
+
+      frame->setCameraBufferHandle(handle);
     }
     frame->setupRenderingInfo(resourceManager);
   }
 
-  resourceManager->createComputePipeline("Compute");
+  resourceManager->createComputePipeline("Pipeline-Compute");
 
   cubeRenderTask = renderTaskFactory->createCubeRenderTask();
   computeTask = renderTaskFactory->createComputeTask();
@@ -128,14 +131,17 @@ DefaultRenderScheduler::~DefaultRenderScheduler() {
 
 auto DefaultRenderScheduler::executeTasks(Frame& frame) const -> void {
 
-  auto& commandBuffer = frame.getCommandBuffer(CmdBufferType::Main);
+  auto& commandBuffer = commandBufferManager->getCommandBuffer(frame.getMainCommandBufferHandle());
 
   commandBuffer.begin(
       vk::CommandBufferBeginInfo{.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse});
 
-  computeTask->record(commandBuffer, frame);
+  {
+    ZoneNamedN(var, "ComputeTask", true);
+    computeTask->record(commandBuffer, frame);
+  }
 
-  auto& indirectBuffer = resourceManager->getBuffer(frame.getIndexedName("DrawCommandBuffer"));
+  auto& indirectBuffer = resourceManager->getBuffer(frame.getDrawCommandBufferHandle());
 
   // Insert a memory barrier for the buffer the computeTask writes to
   vk::BufferMemoryBarrier bufferMemoryBarrier{
@@ -162,7 +168,10 @@ auto DefaultRenderScheduler::executeTasks(Frame& frame) const -> void {
   commandBuffer.setViewportWithCount({viewport});
   commandBuffer.setScissorWithCount({snezzor});
 
-  cubeRenderTask->record(commandBuffer, frame);
+  {
+    ZoneNamedN(var, "CubeRenderTask", true);
+    cubeRenderTask->record(commandBuffer, frame);
+  }
 
   commandBuffer.endRendering();
 
@@ -172,69 +181,64 @@ auto DefaultRenderScheduler::executeTasks(Frame& frame) const -> void {
 auto DefaultRenderScheduler::recordRenderTasks(Frame& frame) const -> void {
 
   {
-    const auto& startCmd = frame.getCommandBuffer(CmdBufferType::Start);
+    ZoneNamedN(var, "StartCmd", true);
+    const auto& startCmd =
+        commandBufferManager->getCommandBuffer(frame.getStartCommandBufferHandle());
     startCmd.begin(
         vk::CommandBufferBeginInfo{.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse});
 
     transitionImage(startCmd,
-                    resourceManager->getImage(frame.getDrawImageId()),
+                    resourceManager->getImage(frame.getDrawImageHandle()),
                     vk::ImageLayout::eUndefined,
                     vk::ImageLayout::eColorAttachmentOptimal);
 
     startCmd.end();
   }
 
-  executeTasks(frame);
+  {
+    ZoneNamedN(var, "ExecuteTasks", true);
+    executeTasks(frame);
+  }
 
-  const auto& endCmd = frame.getCommandBuffer(CmdBufferType::End);
-  endCmd.begin(
-      vk::CommandBufferBeginInfo{.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse});
+  {
+    ZoneNamedN(var, "EndCmd", true);
+    const auto& endCmd = commandBufferManager->getCommandBuffer(frame.getEndCommandBufferHandle());
+    endCmd.begin(
+        vk::CommandBufferBeginInfo{.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse});
 
-  transitionImage(endCmd,
-                  resourceManager->getImage(frame.getDrawImageId()),
-                  vk::ImageLayout::eColorAttachmentOptimal,
-                  vk::ImageLayout::eTransferSrcOptimal);
+    transitionImage(endCmd,
+                    resourceManager->getImage(frame.getDrawImageHandle()),
+                    vk::ImageLayout::eColorAttachmentOptimal,
+                    vk::ImageLayout::eTransferSrcOptimal);
 
-  transitionImage(endCmd,
-                  swapchain->getSwapchainImage(frame.getSwapchainImageIndex()),
-                  vk::ImageLayout::eUndefined,
-                  vk::ImageLayout::eTransferDstOptimal);
+    transitionImage(endCmd,
+                    swapchain->getSwapchainImage(frame.getSwapchainImageIndex()),
+                    vk::ImageLayout::eUndefined,
+                    vk::ImageLayout::eTransferDstOptimal);
 
-  copyImageToImage(endCmd,
-                   resourceManager->getImage(frame.getDrawImageId()),
-                   swapchain->getSwapchainImage(frame.getSwapchainImageIndex()),
-                   resourceManager->getImageExtent(frame.getDrawImageId()),
-                   swapchain->getImageExtent());
+    copyImageToImage(endCmd,
+                     resourceManager->getImage(frame.getDrawImageHandle()),
+                     swapchain->getSwapchainImage(frame.getSwapchainImageIndex()),
+                     resourceManager->getImageExtent(frame.getDrawImageHandle()),
+                     swapchain->getImageExtent());
 
-  transitionImage(endCmd,
-                  swapchain->getSwapchainImage(frame.getSwapchainImageIndex()),
-                  vk::ImageLayout::eTransferDstOptimal,
-                  vk::ImageLayout::ePresentSrcKHR);
+    transitionImage(endCmd,
+                    swapchain->getSwapchainImage(frame.getSwapchainImageIndex()),
+                    vk::ImageLayout::eTransferDstOptimal,
+                    vk::ImageLayout::ePresentSrcKHR);
 
-  endCmd.end();
-}
-
-auto DefaultRenderScheduler::setupCommandBuffersForFrame(Frame& frame) -> void {
-  auto staticCommandBuffer =
-      commandBufferManager->getPrimaryCommandBuffer(frame.getIndex(), PoolId::Main);
-  auto startCommandBuffer =
-      commandBufferManager->getPrimaryCommandBuffer(frame.getIndex(), PoolId::Main);
-  auto endCommandBuffer =
-      commandBufferManager->getPrimaryCommandBuffer(frame.getIndex(), PoolId::Main);
-
-  frame.clearCommandBuffers();
-
-  frame.addCommandBuffer(CmdBufferType::Main, std::move(staticCommandBuffer));
-  frame.addCommandBuffer(CmdBufferType::Start, std::move(startCommandBuffer));
-  frame.addCommandBuffer(CmdBufferType::End, std::move(endCommandBuffer));
+    endCmd.end();
+  }
 }
 
 auto DefaultRenderScheduler::endFrame(Frame& frame) const -> void {
 
   // Get all the buffers one at a time because order matters
-  const auto buffers = std::array{*frame.getCommandBuffer(CmdBufferType::Start),
-                                  *frame.getCommandBuffer(CmdBufferType::Main),
-                                  *frame.getCommandBuffer(CmdBufferType::End)};
+  const auto buffers = std::array<vk::CommandBuffer, 3>{
+      *commandBufferManager->getCommandBuffer(frame.getStartCommandBufferHandle()),
+      *commandBufferManager->getCommandBuffer(frame.getMainCommandBufferHandle()),
+      *commandBufferManager->getCommandBuffer(frame.getEndCommandBufferHandle()),
+  };
 
   constexpr auto waitStages =
       std::array<vk::PipelineStageFlags, 1>{vk::PipelineStageFlagBits::eColorAttachmentOutput};
@@ -248,6 +252,7 @@ auto DefaultRenderScheduler::endFrame(Frame& frame) const -> void {
       .signalSemaphoreCount = 1,
       .pSignalSemaphores = &*frame.getRenderFinishedSemaphore(),
   };
+
   try {
     graphicsQueue->getQueue().submit(submitInfo, *frame.getInFlightFence());
   } catch (const std::exception& ex) {
