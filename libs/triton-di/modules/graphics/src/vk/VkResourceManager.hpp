@@ -84,10 +84,6 @@ public:
 
   [[nodiscard]] auto getPipeline(PipelineHandle handle) const -> const IPipeline&;
 
-  [[nodiscard]] auto getGraphicsCommandBuffer(size_t index) -> vk::raii::CommandBuffer&;
-
-  [[nodiscard]] auto getTransferCommandBuffer(size_t index) -> vk::raii::CommandBuffer&;
-
 private:
   struct ImageInfo {
     AllocatedImagePtr image;
@@ -101,10 +97,6 @@ private:
   std::shared_ptr<IDebugManager> debugManager;
 
   std::shared_ptr<Allocator> allocator;
-  std::unique_ptr<vk::raii::CommandPool> commandPool;
-  std::unique_ptr<vk::raii::CommandPool> transferCommandPool;
-  std::vector<vk::raii::CommandBuffer> commandBuffers;
-  std::vector<vk::raii::CommandBuffer> transferCommandBuffers;
 
   std::unordered_map<ImageHandle, ImageInfo> imageInfoMap;
   std::unordered_map<BufferHandle, std::unique_ptr<Buffer>> bufferMap;

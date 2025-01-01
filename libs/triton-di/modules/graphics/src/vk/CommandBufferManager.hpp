@@ -1,6 +1,7 @@
 #pragma once
 
 #include "cm/Rando.hpp"
+
 namespace tr {
 
 class Device;
@@ -34,6 +35,7 @@ private:
   std::unique_ptr<vk::raii::CommandPool> transferCommandPool;
 
   std::unordered_map<CommandBufferHandle, vk::raii::CommandBuffer> commandBufferMap;
+  std::unordered_map<CommandBufferHandle, std::string> commandBufferNameMap;
 };
 
 }
