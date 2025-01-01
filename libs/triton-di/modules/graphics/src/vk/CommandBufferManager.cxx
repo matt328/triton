@@ -7,6 +7,8 @@ namespace tr {
 CommandBufferManager::CommandBufferManager(std::shared_ptr<Device> newDevice,
                                            std::shared_ptr<IDebugManager> newDebugManager)
     : device{std::move(newDevice)}, debugManager{std::move(newDebugManager)} {
+  debugManager->setDevice(device);
+
   const auto commandPoolCreateInfo = vk::CommandPoolCreateInfo{
       .flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
       .queueFamilyIndex = device->getGraphicsQueueFamily(),

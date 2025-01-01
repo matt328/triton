@@ -22,8 +22,6 @@ VkResourceManager::VkResourceManager(
       shaderCompiler{std::move(newShaderCompiler)},
       debugManager{std::move(newDebugManager)} {
 
-  debugManager->setDevice(device);
-
   constexpr auto vulkanFunctions = vma::VulkanFunctions{
       .vkGetInstanceProcAddr = vkGetInstanceProcAddr,
       .vkGetDeviceProcAddr = vkGetDeviceProcAddr,
@@ -38,48 +36,6 @@ VkResourceManager::VkResourceManager(
   };
 
   allocator = std::make_unique<Allocator>(allocatorCreateInfo, device->getVkDevice(), debugManager);
-
-  {
-    const auto commandPoolCreateInfo = vk::CommandPoolCreateInfo{
-        .flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
-        .queueFamilyIndex = device->getGraphicsQueueFamily(),
-    };
-
-    commandPool = std::make_unique<vk::raii::CommandPool>(
-        device->getVkDevice().createCommandPool(commandPoolCreateInfo));
-    debugManager->setObjectName(**commandPool, "CommandPool-Graphics");
-
-    const auto allocInfo = vk::CommandBufferAllocateInfo{.commandPool = *commandPool,
-                                                         .level = vk::CommandBufferLevel::ePrimary,
-                                                         .commandBufferCount = 2};
-    commandBuffers = device->getVkDevice().allocateCommandBuffers(allocInfo);
-    int count = 0;
-    for (const auto& cmd : commandBuffers) {
-      auto name = fmt::format("CommandBuffer-Graphics-{}", count++);
-      debugManager->setObjectName(*cmd, name);
-    }
-  }
-  {
-    const auto commandPoolCreateInfo = vk::CommandPoolCreateInfo{
-        .flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
-        .queueFamilyIndex = device->getTransferQueueFamily(),
-    };
-
-    transferCommandPool = std::make_unique<vk::raii::CommandPool>(
-        device->getVkDevice().createCommandPool(commandPoolCreateInfo));
-    debugManager->setObjectName(**transferCommandPool, "CommandPool-Transfer");
-
-    const auto allocInfo = vk::CommandBufferAllocateInfo{.commandPool = *commandPool,
-                                                         .level = vk::CommandBufferLevel::ePrimary,
-                                                         .commandBufferCount = 2};
-    commandBuffers = device->getVkDevice().allocateCommandBuffers(allocInfo);
-
-    int count = 0;
-    for (const auto& cmd : transferCommandBuffers) {
-      auto name = fmt::format("CommandBuffer-Transfer-{}", count++);
-      debugManager->setObjectName(*cmd, name);
-    }
-  }
 }
 
 VkResourceManager::~VkResourceManager() {
@@ -315,16 +271,6 @@ auto VkResourceManager::createComputePipeline([[maybe_unused]] std::string_view 
 
 [[nodiscard]] auto VkResourceManager::getPipeline(PipelineHandle handle) const -> const IPipeline& {
   return *pipelineMap.at(handle);
-}
-
-[[nodiscard]] auto VkResourceManager::getGraphicsCommandBuffer(size_t index)
-    -> vk::raii::CommandBuffer& {
-  return commandBuffers.at(index);
-}
-
-[[nodiscard]] auto VkResourceManager::getTransferCommandBuffer(size_t index)
-    -> vk::raii::CommandBuffer& {
-  return transferCommandBuffers.at(index);
 }
 
 }
