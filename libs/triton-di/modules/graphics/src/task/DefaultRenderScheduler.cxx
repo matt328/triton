@@ -233,7 +233,6 @@ auto DefaultRenderScheduler::recordRenderTasks(Frame& frame) const -> void {
 
 auto DefaultRenderScheduler::endFrame(Frame& frame) const -> void {
 
-  // Get all the buffers one at a time because order matters
   const auto buffers = std::array<vk::CommandBuffer, 3>{
       *commandBufferManager->getCommandBuffer(frame.getStartCommandBufferHandle()),
       *commandBufferManager->getCommandBuffer(frame.getMainCommandBufferHandle()),
