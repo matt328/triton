@@ -1,4 +1,5 @@
 #include "DefaultRenderScheduler.hpp"
+#include "tr/IGuiSystem.hpp"
 #include "vk/CommandBufferManager.hpp"
 #include "Maths.hpp"
 #include "gfx/QueueTypes.hpp"
@@ -27,6 +28,7 @@ DefaultRenderScheduler::DefaultRenderScheduler(
     std::shared_ptr<Swapchain> newSwapchain,
     std::shared_ptr<RenderTaskFactory> newRenderTaskFactory,
     std::shared_ptr<TaskGraph> newTaskGraph,
+    std::shared_ptr<IGuiSystem> newGuiSystem,
     const RenderContextConfig& rendererConfig)
     : frameManager{std::move(newFrameManager)},
       commandBufferManager{std::move(newCommandBufferManager)},
@@ -34,7 +36,8 @@ DefaultRenderScheduler::DefaultRenderScheduler(
       resourceManager{std::move(newResourceManager)},
       swapchain{std::move(newSwapchain)},
       renderTaskFactory{std::move(newRenderTaskFactory)},
-      taskGraph{std::move(newTaskGraph)} {
+      taskGraph{std::move(newTaskGraph)},
+      guiSystem{std::move(newGuiSystem)} {
 
   const auto drawImageExtent = vk::Extent2D{
       .width = maths::scaleNumber(swapchain->getImageExtent().width, rendererConfig.renderScale),
@@ -202,7 +205,7 @@ auto DefaultRenderScheduler::recordRenderTasks(Frame& frame) const -> void {
 
   {
     ZoneNamedN(var, "EndCmd", true);
-    const auto& endCmd = commandBufferManager->getCommandBuffer(frame.getEndCommandBufferHandle());
+    auto& endCmd = commandBufferManager->getCommandBuffer(frame.getEndCommandBufferHandle());
     endCmd.begin(
         vk::CommandBufferBeginInfo{.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse});
 
@@ -221,6 +224,10 @@ auto DefaultRenderScheduler::recordRenderTasks(Frame& frame) const -> void {
                      swapchain->getSwapchainImage(frame.getSwapchainImageIndex()),
                      resourceManager->getImageExtent(frame.getDrawImageHandle()),
                      swapchain->getImageExtent());
+
+    guiSystem->render(endCmd,
+                      swapchain->getSwapchainImageView(frame.getSwapchainImageIndex()),
+                      swapchain->getImageExtent());
 
     transitionImage(endCmd,
                     swapchain->getSwapchainImage(frame.getSwapchainImageIndex()),

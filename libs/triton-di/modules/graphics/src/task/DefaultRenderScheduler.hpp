@@ -1,6 +1,8 @@
 #pragma once
 
+#include "cm/ImGuiSystem.hpp"
 #include "gfx/RenderContextConfig.hpp"
+#include "tr/IGuiSystem.hpp"
 #include "vk/CommandBufferManager.hpp"
 #include "IFrameManager.hpp"
 #include "gfx/IRenderScheduler.hpp"
@@ -22,6 +24,7 @@ public:
                                   std::shared_ptr<Swapchain> newSwapchain,
                                   std::shared_ptr<RenderTaskFactory> newRenderTaskFactory,
                                   std::shared_ptr<TaskGraph> newTaskGraph,
+                                  std::shared_ptr<IGuiSystem> newGuiSystem,
                                   const RenderContextConfig& rendererConfig);
   ~DefaultRenderScheduler() override;
 
@@ -42,6 +45,7 @@ private:
   std::shared_ptr<Swapchain> swapchain;
   std::shared_ptr<RenderTaskFactory> renderTaskFactory;
   std::shared_ptr<TaskGraph> taskGraph;
+  std::shared_ptr<IGuiSystem> guiSystem;
 
   std::shared_ptr<CubeRenderTask> cubeRenderTask;
   std::shared_ptr<ComputeTask> computeTask;

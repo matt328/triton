@@ -29,6 +29,11 @@ auto Swapchain::getSwapchain() const -> vk::SwapchainKHR {
 auto Swapchain::getSwapchainImage(const uint32_t imageIndex) const -> vk::Image {
   return swapchainImages[imageIndex];
 }
+
+[[nodiscard]] auto Swapchain::getSwapchainImageView(uint32_t imageIndex) const -> vk::ImageView {
+  return swapchainImageViews[imageIndex];
+}
+
 auto Swapchain::getDepthFormat() const -> vk::Format {
   constexpr auto candidates = std::array<vk::Format, 3>{
       {vk::Format::eD32Sfloat, vk::Format::eD32SfloatS8Uint, vk::Format::eD24UnormS8Uint}};
