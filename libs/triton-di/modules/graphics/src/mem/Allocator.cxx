@@ -2,6 +2,7 @@
 #include "Buffer.hpp"
 #include "Image.hpp"
 #include "IDebugManager.hpp"
+#include <vk_mem_alloc_structs.hpp>
 
 #define VMA_IMPLEMENTATION
 #include <vk_mem_alloc.h>
@@ -30,7 +31,14 @@ auto Allocator::createBuffer(const vk::BufferCreateInfo* bci,
     auto [buffer, allocation] = allocator->createBuffer(*bci, *aci, info);
     allocator->setAllocationName(allocation, name.data());
     debugManager->setObjectName(buffer, name.data());
-    return std::make_unique<Buffer>(*allocator, buffer, bci->size, allocation, *device, info);
+    return std::make_unique<Buffer>(*allocator,
+                                    buffer,
+                                    bci->size,
+                                    allocation,
+                                    *device,
+                                    info,
+                                    bci,
+                                    aci);
   } catch (const std::exception& ex) {
     throw AllocationException(
         fmt::format("Error creating and/or naming Buffer: {0}, {1}", name, ex.what()));
@@ -72,7 +80,8 @@ auto Allocator::createGpuVertexBuffer(const size_t size, const std::string_view&
   const auto bufferCreateInfo = vk::BufferCreateInfo{
       .size = size,
       .usage = vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst |
-               vk::BufferUsageFlagBits::eShaderDeviceAddress,
+               vk::BufferUsageFlagBits::eShaderDeviceAddress |
+               vk::BufferUsageFlagBits::eTransferSrc,
       .sharingMode = vk::SharingMode::eExclusive};
   constexpr auto allocationCreateInfo =
       vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eGpuOnly};
@@ -100,7 +109,8 @@ auto Allocator::createGpuIndexBuffer(const size_t size, const std::string_view& 
   const auto bufferCreateInfo = vk::BufferCreateInfo{
       .size = size,
       .usage = vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst |
-               vk::BufferUsageFlagBits::eShaderDeviceAddress,
+               vk::BufferUsageFlagBits::eShaderDeviceAddress |
+               vk::BufferUsageFlagBits::eTransferSrc,
       .sharingMode = vk::SharingMode::eExclusive};
   constexpr auto allocationCreateInfo =
       vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eGpuOnly};

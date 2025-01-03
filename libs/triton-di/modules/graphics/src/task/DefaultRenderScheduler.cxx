@@ -1,4 +1,5 @@
 #include "DefaultRenderScheduler.hpp"
+
 #include "tr/IGuiSystem.hpp"
 #include "vk/CommandBufferManager.hpp"
 #include "Maths.hpp"
@@ -6,9 +7,7 @@
 #include "cm/ObjectData.hpp"
 #include "task/Frame.hpp"
 #include "task/IRenderTask.hpp"
-#include "task/PoolId.hpp"
-#include "task/graph/TaskGraph.hpp"
-#include <vulkan/vulkan_raii.hpp>
+#include "vk/MeshBufferManager.hpp"
 
 namespace tr {
 
@@ -27,17 +26,25 @@ DefaultRenderScheduler::DefaultRenderScheduler(
     std::shared_ptr<VkResourceManager> newResourceManager,
     std::shared_ptr<Swapchain> newSwapchain,
     std::shared_ptr<RenderTaskFactory> newRenderTaskFactory,
-    std::shared_ptr<TaskGraph> newTaskGraph,
     std::shared_ptr<IGuiSystem> newGuiSystem,
-    const RenderContextConfig& rendererConfig)
+    const RenderContextConfig& rendererConfig,
+    const std::shared_ptr<GeometryFactory>& geometryFactory)
     : frameManager{std::move(newFrameManager)},
       commandBufferManager{std::move(newCommandBufferManager)},
       graphicsQueue{std::move(newGraphicsQueue)},
       resourceManager{std::move(newResourceManager)},
       swapchain{std::move(newSwapchain)},
       renderTaskFactory{std::move(newRenderTaskFactory)},
-      taskGraph{std::move(newTaskGraph)},
       guiSystem{std::move(newGuiSystem)} {
+
+  auto meshBufferManager = std::make_shared<MeshBufferManager>(resourceManager);
+
+  for (int i = 0; i < 200; ++i) {
+    const auto geometryHandle = geometryFactory->createUnitCube();
+    const auto meshHandle =
+        meshBufferManager->addMesh(geometryFactory->getGeometryData(geometryHandle));
+    Log.trace("Added mesh with handle: {}", meshHandle);
+  }
 
   const auto drawImageExtent = vk::Extent2D{
       .width = maths::scaleNumber(swapchain->getImageExtent().width, rendererConfig.renderScale),
@@ -114,7 +121,7 @@ DefaultRenderScheduler::DefaultRenderScheduler(
 
   resourceManager->createComputePipeline("Pipeline-Compute");
 
-  cubeRenderTask = renderTaskFactory->createCubeRenderTask();
+  indirectRenderTask = renderTaskFactory->createIndirectRenderTask();
   computeTask = renderTaskFactory->createComputeTask();
 
   viewport = vk::Viewport{
@@ -172,8 +179,8 @@ auto DefaultRenderScheduler::executeTasks(Frame& frame) const -> void {
   commandBuffer.setScissorWithCount({snezzor});
 
   {
-    ZoneNamedN(var, "CubeRenderTask", true);
-    cubeRenderTask->record(commandBuffer, frame);
+    ZoneNamedN(var, "IndirectRenderTask", true);
+    indirectRenderTask->record(commandBuffer, frame);
   }
 
   commandBuffer.endRendering();

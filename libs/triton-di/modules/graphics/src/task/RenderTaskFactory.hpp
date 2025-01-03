@@ -3,7 +3,7 @@
 #include "gfx/GeometryFactory.hpp"
 #include "pipeline/IndirectPipeline.hpp"
 #include "task/ComputeTask.hpp"
-#include "task/CubeRenderTask.hpp"
+#include "task/IndirectRenderTask.hpp"
 #include "vk/VkResourceManager.hpp"
 
 namespace tr {
@@ -21,7 +21,7 @@ public:
   auto operator=(RenderTaskFactory&&) = delete;
   auto operator=(const RenderTaskFactory&) = delete;
 
-  auto createCubeRenderTask() -> std::unique_ptr<CubeRenderTask>;
+  auto createIndirectRenderTask() -> std::unique_ptr<IndirectRenderTask>;
   auto createComputeTask() -> std::unique_ptr<ComputeTask>;
 
 private:

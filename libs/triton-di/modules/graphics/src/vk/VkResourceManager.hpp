@@ -8,6 +8,9 @@
 #include "geo/Mesh.hpp"
 #include "mem/Allocator.hpp"
 #include "pipeline/IShaderCompiler.hpp"
+#include <string_view>
+#include <vk_mem_alloc_enums.hpp>
+#include <vulkan/vulkan_enums.hpp>
 
 namespace tr {
 
@@ -61,16 +64,29 @@ public:
   auto createDepthImageAndView(std::string_view imageName, vk::Extent2D extent, vk::Format format)
       -> ImageHandle;
 
-  auto createBuffer(size_t size, vk::Flags<vk::BufferUsageFlagBits> flags, std::string_view name)
-      -> BufferHandle;
+  auto createBuffer(size_t size,
+                    vk::Flags<vk::BufferUsageFlagBits> flags,
+                    std::string_view name,
+                    vma::MemoryUsage usage = vma::MemoryUsage::eCpuToGpu,
+                    vk::MemoryPropertyFlags memoryProperties =
+                        vk::MemoryPropertyFlagBits::eHostCoherent) -> BufferHandle;
+
+  auto createGpuVertexBuffer(size_t size, std::string_view name) -> BufferHandle;
+  auto createGpuIndexBuffer(size_t size, std::string_view name) -> BufferHandle;
 
   auto createIndirectBuffer(size_t size) -> BufferHandle;
 
   auto asyncUpload(const GeometryData& geometryData) -> MeshHandle;
 
+  auto addToMesh(const GeometryData& geometryData,
+                 BufferHandle vertexBufferHandle,
+                 BufferHandle indexBufferHandle) -> void;
+
   auto destroyImage(ImageHandle handle) -> void;
 
   auto createComputePipeline(std::string_view name) -> PipelineHandle;
+
+  [[nodiscard]] auto resizeBuffer(BufferHandle handle, size_t newSize) -> BufferHandle;
 
   [[nodiscard]] auto getImage(ImageHandle handle) const -> const vk::Image&;
 

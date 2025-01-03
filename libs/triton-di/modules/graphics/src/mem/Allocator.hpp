@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IDebugManager.hpp"
+#include <vk_mem_alloc_handles.hpp>
 namespace tr {
 class GraphicsDevice;
 }

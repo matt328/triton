@@ -8,7 +8,9 @@ public:
          vk::DeviceSize range,
          vma::Allocation newAllocation,
          const vk::Device& device,
-         const vma::AllocationInfo& allocationInfo) noexcept;
+         const vma::AllocationInfo& allocationInfo,
+         const vk::BufferCreateInfo* bci,
+         const vma::AllocationCreateInfo* aci) noexcept;
 
   ~Buffer();
 
@@ -49,6 +51,14 @@ public:
     return allocationInfo.pMappedData;
   }
 
+  [[nodiscard]] auto getBufferCreateInfo() const {
+    return bufferCreateInfo;
+  }
+
+  [[nodiscard]] auto getAllocationCreateInfo() const {
+    return allocationCreateInfo;
+  }
+
   [[nodiscard]] auto getDeviceAddress() const -> uint64_t;
 
 private:
@@ -60,5 +70,8 @@ private:
   vma::Allocation allocation;
   vma::Allocator allocator;
   vma::AllocationInfo allocationInfo;
+
+  vk::BufferCreateInfo bufferCreateInfo;
+  vma::AllocationCreateInfo allocationCreateInfo;
 };
 }

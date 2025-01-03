@@ -43,14 +43,14 @@ set(common_SRC
   modules/graphics/src/vk/VkResourceManager.cxx
   modules/graphics/src/vk/Swapchain.cxx
   modules/graphics/src/vk/CommandBufferManager.cxx
+  modules/graphics/src/vk/MeshBufferManager.cxx
 
   modules/graphics/src/task/DefaultRenderScheduler.cxx
   modules/graphics/src/task/Frame.cxx
   modules/graphics/src/task/DefaultFrameManager.cxx
-  modules/graphics/src/task/CubeRenderTask.cxx
+  modules/graphics/src/task/IndirectRenderTask.cxx
   modules/graphics/src/task/RenderTaskFactory.cxx
   modules/graphics/src/task/ComputeTask.cxx
-  modules/graphics/src/task/graph/TaskGraph.cxx
 
   modules/graphics/src/pipeline/IndirectPipeline.cxx
   modules/graphics/src/pipeline/ComputePipeline.cxx

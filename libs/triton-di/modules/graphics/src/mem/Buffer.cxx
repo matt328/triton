@@ -6,13 +6,17 @@ Buffer::Buffer(const vma::Allocator& newAllocator,
                const vk::DeviceSize range,
                const vma::Allocation newAllocation,
                const vk::Device& device,
-               const vma::AllocationInfo& allocationInfo) noexcept
+               const vma::AllocationInfo& allocationInfo,
+               const vk::BufferCreateInfo* bci,
+               const vma::AllocationCreateInfo* aci) noexcept
     : device{device},
       buffer(newBuffer),
       bufferInfo{vk::DescriptorBufferInfo{.buffer = newBuffer, .offset = 0, .range = range}},
       allocation(newAllocation),
       allocator(newAllocator),
-      allocationInfo{allocationInfo} {
+      allocationInfo{allocationInfo},
+      bufferCreateInfo{*bci},
+      allocationCreateInfo{*aci} {
 }
 
 Buffer::~Buffer() {
