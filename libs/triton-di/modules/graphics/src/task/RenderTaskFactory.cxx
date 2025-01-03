@@ -10,8 +10,8 @@ RenderTaskFactory::RenderTaskFactory(std::shared_ptr<VkResourceManager> newResou
       indirectPipeline{std::move(newIndirectPipeline)} {
 }
 
-auto RenderTaskFactory::createCubeRenderTask() -> std::unique_ptr<CubeRenderTask> {
-  return std::make_unique<CubeRenderTask>(resourceManager, geometryFactory, indirectPipeline);
+auto RenderTaskFactory::createIndirectRenderTask() -> std::unique_ptr<IndirectRenderTask> {
+  return std::make_unique<IndirectRenderTask>(resourceManager, geometryFactory, indirectPipeline);
 }
 
 auto RenderTaskFactory::createComputeTask() -> std::unique_ptr<ComputeTask> {

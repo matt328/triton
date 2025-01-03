@@ -1,13 +1,13 @@
-#include "CubeRenderTask.hpp"
+#include "IndirectRenderTask.hpp"
 #include "cm/IndirectPushConstants.hpp"
 #include "task/Frame.hpp"
 #include "vk/VkResourceManager.hpp"
 
 namespace tr {
 
-CubeRenderTask::CubeRenderTask(std::shared_ptr<VkResourceManager> newResourceManager,
-                               std::shared_ptr<GeometryFactory> newGeometryFactory,
-                               std::shared_ptr<IndirectPipeline> newPipeline)
+IndirectRenderTask::IndirectRenderTask(std::shared_ptr<VkResourceManager> newResourceManager,
+                                       std::shared_ptr<GeometryFactory> newGeometryFactory,
+                                       std::shared_ptr<IndirectPipeline> newPipeline)
     : resourceManager{std::move(newResourceManager)},
       geometryFactory{std::move(newGeometryFactory)},
       pipeline{std::move(newPipeline)} {
@@ -16,7 +16,8 @@ CubeRenderTask::CubeRenderTask(std::shared_ptr<VkResourceManager> newResourceMan
   meshHandle = resourceManager->asyncUpload(geometryFactory->getGeometryData(geometryHandle));
 }
 
-auto CubeRenderTask::record(vk::raii::CommandBuffer& commandBuffer, const Frame& frame) -> void {
+auto IndirectRenderTask::record(vk::raii::CommandBuffer& commandBuffer, const Frame& frame)
+    -> void {
 
   auto& instanceBuffer = resourceManager->getBuffer(frame.getInstanceDataBufferHandle());
   auto& cameraDataBuffer = resourceManager->getBuffer(frame.getCameraBufferHandle());

@@ -1,6 +1,8 @@
 #include "VkResourceManager.hpp"
 
+#include <cstddef>
 #include <mem/Allocator.hpp>
+#include <tracy/Tracy.hpp>
 #include <vulkan/vulkan_enums.hpp>
 #include "IDebugManager.hpp"
 #include "ResourceExceptions.hpp"
@@ -85,14 +87,27 @@ auto VkResourceManager::asyncUpload(const GeometryData& geometryData) -> MeshHan
   }
 }
 
+auto VkResourceManager::createGpuVertexBuffer(size_t size, std::string_view name) -> BufferHandle {
+  const auto key = bufferMapKeygen.getKey();
+  bufferMap.emplace(key, allocator->createGpuVertexBuffer(size, name));
+  return key;
+}
+
+auto VkResourceManager::createGpuIndexBuffer(size_t size, std::string_view name) -> BufferHandle {
+  const auto key = bufferMapKeygen.getKey();
+  bufferMap.emplace(key, allocator->createGpuIndexBuffer(size, name));
+  return key;
+}
+
 auto VkResourceManager::createBuffer(size_t size,
                                      vk::Flags<vk::BufferUsageFlagBits> flags,
-                                     std::string_view name) -> BufferHandle {
+                                     std::string_view name,
+                                     vma::MemoryUsage usage,
+                                     vk::MemoryPropertyFlags memoryProperties) -> BufferHandle {
   const auto bufferCreateInfo = vk::BufferCreateInfo{.size = size, .usage = flags};
 
-  constexpr auto allocationCreateInfo =
-      vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eCpuToGpu,
-                                .requiredFlags = vk::MemoryPropertyFlagBits::eHostCoherent};
+  const auto allocationCreateInfo =
+      vma::AllocationCreateInfo{.usage = usage, .requiredFlags = memoryProperties};
 
   auto key = bufferMapKeygen.getKey();
 
@@ -114,6 +129,36 @@ auto VkResourceManager::createIndirectBuffer(size_t size) -> BufferHandle {
       key,
       allocator->createBuffer(&bufferCreateInfo, &allocationCreateInfo, "Buffer-IndirectDraw"));
   return key;
+}
+
+[[nodiscard]] auto VkResourceManager::resizeBuffer(BufferHandle handle, size_t newSize)
+    -> BufferHandle {
+  ZoneNamedN(var, "Resize Buffer", true);
+  auto& oldBuffer = bufferMap.at(handle);
+
+  auto bci = oldBuffer->getBufferCreateInfo();
+  const auto oldSize = bci.size;
+  bci.size = newSize;
+
+  auto aci = oldBuffer->getAllocationCreateInfo();
+
+  auto newBuffer = allocator->createBuffer(&bci, &aci);
+
+  immediateTransferContext->submit([&](const vk::raii::CommandBuffer& cmd) {
+    ZoneNamedN(var, "Copy Buffer", true);
+    const auto vbCopy = vk::BufferCopy{.srcOffset = 0, .dstOffset = 0, .size = oldSize};
+    cmd.copyBuffer(oldBuffer->getBuffer(), newBuffer->getBuffer(), vbCopy);
+  });
+
+  bufferMap.erase(handle);
+  const auto newHandle = bufferMapKeygen.getKey();
+  bufferMap.emplace(newHandle, std::move(newBuffer));
+  return newHandle;
+}
+
+auto VkResourceManager::addToMesh([[maybe_unused]] const GeometryData& geometryData,
+                                  [[maybe_unused]] BufferHandle vertexBufferHandle,
+                                  [[maybe_unused]] BufferHandle indexBufferHandle) -> void {
 }
 
 [[nodiscard]] auto VkResourceManager::getMesh(MeshHandle handle) -> const ImmutableMesh& {

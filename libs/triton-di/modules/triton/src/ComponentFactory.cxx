@@ -21,9 +21,8 @@
 #include "gfx/RenderContextConfig.hpp"
 
 #include <di.hpp>
-#include <task/DefaultFrameManager.hpp>
-#include <task/DefaultRenderScheduler.hpp>
-#include "task/graph/TaskGraph.hpp"
+#include "task/DefaultFrameManager.hpp"
+#include "task/DefaultRenderScheduler.hpp"
 
 #include "pipeline/SpirvShaderCompiler.hpp"
 
@@ -48,6 +47,8 @@ auto ComponentFactory::getContext(const FrameworkConfig& config) -> std::shared_
                                           di::bind<glm::ivec2>.to(config.initialWindowSize),
                                           di::bind<std::string>.to(config.windowTitle),
                                           di::bind<Device>.to<Device>(),
+                                          di::bind<Surface>.to<Surface>(),
+                                          di::bind<Swapchain>.to<Swapchain>(),
                                           di::bind<IShaderCompiler>.to<SpirvShaderCompiler>(),
                                           di::bind<queue::Graphics>.to<queue::Graphics>(),
                                           di::bind<queue::Transfer>.to<queue::Transfer>(),

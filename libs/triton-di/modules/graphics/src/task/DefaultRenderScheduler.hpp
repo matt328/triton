@@ -8,7 +8,7 @@
 #include "gfx/IRenderScheduler.hpp"
 #include "IRenderTask.hpp"
 #include "task/ComputeTask.hpp"
-#include "task/CubeRenderTask.hpp"
+#include "task/IndirectRenderTask.hpp"
 #include "task/RenderTaskFactory.hpp"
 
 namespace tr {
@@ -23,9 +23,9 @@ public:
                                   std::shared_ptr<VkResourceManager> newResourceManager,
                                   std::shared_ptr<Swapchain> newSwapchain,
                                   std::shared_ptr<RenderTaskFactory> newRenderTaskFactory,
-                                  std::shared_ptr<TaskGraph> newTaskGraph,
                                   std::shared_ptr<IGuiSystem> newGuiSystem,
-                                  const RenderContextConfig& rendererConfig);
+                                  const RenderContextConfig& rendererConfig,
+                                  const std::shared_ptr<GeometryFactory>& geometryFactory);
   ~DefaultRenderScheduler() override;
 
   DefaultRenderScheduler(const DefaultRenderScheduler&) = delete;
@@ -44,10 +44,9 @@ private:
   std::shared_ptr<VkResourceManager> resourceManager;
   std::shared_ptr<Swapchain> swapchain;
   std::shared_ptr<RenderTaskFactory> renderTaskFactory;
-  std::shared_ptr<TaskGraph> taskGraph;
   std::shared_ptr<IGuiSystem> guiSystem;
 
-  std::shared_ptr<CubeRenderTask> cubeRenderTask;
+  std::shared_ptr<IndirectRenderTask> indirectRenderTask;
   std::shared_ptr<ComputeTask> computeTask;
 
   std::vector<std::shared_ptr<IRenderTask>> staticRenderTasks;
