@@ -1,5 +1,7 @@
 #pragma once
 
+#include "gp/components/Transform.hpp"
+
 namespace ed {
 inline auto renderTransformInspector(tr::Transform* transform) -> void {
   if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {

@@ -24,13 +24,11 @@ constexpr auto StaticEntityDialogName = "StaticEntity";
 EntityEditor::EntityEditor(std::shared_ptr<tr::IGameplaySystem> newGameplaySystem,
                            std::shared_ptr<DataFacade> newDataFacade,
                            std::shared_ptr<DialogManager> newDialogManager,
-                           std::shared_ptr<tr::IEventBus> newEventBus,
-                           std::shared_ptr<tr::Registry> newRegistry)
+                           std::shared_ptr<tr::IEventBus> newEventBus)
     : gameplaySystem{std::move(newGameplaySystem)},
       dataFacade{std::move(newDataFacade)},
       dialogManager{std::move(newDialogManager)},
-      eventBus{std::move(newEventBus)},
-      registry{std::move(newRegistry)} {
+      eventBus{std::move(newEventBus)} {
   Log.trace("Creating EntityEditor");
 
   eventBus->subscribe<tr::EntityCreated>([](const tr::EntityCreated& event) {
@@ -73,14 +71,14 @@ void EntityEditor::render() {
                       ImVec2(150, 0),
                       ImGuiChildFlags_Border | ImGuiChildFlags_ResizeX);
 
-    auto& reg = registry->getRegistry();
-    auto view = reg.view<::tr::EditorInfo>();
-    for (auto [entity, editorInfo] : view.each()) {
-      if (ImGui::Selectable(editorInfo.name.c_str(), entity == selectedEntity)) {
-        Log.trace("Selected Entity: {}", editorInfo.name);
-        selectedEntity = entity;
-      }
-    }
+    // auto& reg = registry->getRegistry();
+    // auto view = reg.view<::tr::EditorInfo>();
+    // for (auto [entity, editorInfo] : view.each()) {
+    //   if (ImGui::Selectable(editorInfo.name.c_str(), entity == selectedEntity)) {
+    //     Log.trace("Selected Entity: {}", editorInfo.name);
+    //     selectedEntity = entity;
+    //   }
+    // }
 
     ImGui::EndChild();
     ImGui::SameLine();
@@ -91,28 +89,28 @@ void EntityEditor::render() {
       ImGui::BeginChild("item view", ImVec2(0, 0), ImGuiChildFlags_Border);
       if (selectedEntity.has_value()) {
         // Editor Info Component
-        auto* editorInfo = reg.try_get<tr::EditorInfo>(selectedEntity.value());
-        if (editorInfo == nullptr) {
-          return;
-        }
-        ImGui::Text("%s", editorInfo->name.c_str());
+        // auto* editorInfo = reg.try_get<tr::EditorInfo>(selectedEntity.value());
+        // if (editorInfo == nullptr) {
+        //   return;
+        // }
+        // ImGui::Text("%s", editorInfo->name.c_str());
 
-        // Transform Component
-        if (auto* transform = reg.try_get<tr::Transform>(selectedEntity.value());
-            transform != nullptr) {
-          renderTransformInspector(transform);
-        }
+        // // Transform Component
+        // if (auto* transform = reg.try_get<tr::Transform>(selectedEntity.value());
+        //     transform != nullptr) {
+        //   renderTransformInspector(transform);
+        // }
 
-        // Camera Component
-        if (auto* camera = reg.try_get<tr::Camera>(selectedEntity.value()); camera != nullptr) {
-          renderCameraInspector(camera);
-        }
+        // // Camera Component
+        // if (auto* camera = reg.try_get<tr::Camera>(selectedEntity.value()); camera != nullptr) {
+        //   renderCameraInspector(camera);
+        // }
 
-        // Animation Component
-        if (auto* animation = reg.try_get<tr::Animation>(selectedEntity.value());
-            animation != nullptr) {
-          renderAnimationInspector(animation);
-        }
+        // // Animation Component
+        // if (auto* animation = reg.try_get<tr::Animation>(selectedEntity.value());
+        //     animation != nullptr) {
+        //   renderAnimationInspector(animation);
+        // }
 
       } else {
         ImGui::Text("No Entity Selected");

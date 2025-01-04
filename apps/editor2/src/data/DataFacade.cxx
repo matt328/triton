@@ -1,6 +1,5 @@
 #include "DataFacade.hpp"
 
-#include "cm/EntitySystemTypes.hpp"
 #include "TaskQueue.hpp"
 
 #include "tr/IGameplaySystem.hpp"

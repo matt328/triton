@@ -1,8 +1,6 @@
 #include "DefaultContext.hpp"
 
-#include "gp/Registry.hpp"
 #include "tr/IGuiSystem.hpp"
-#include "gfx/IGraphicsDevice.hpp"
 #include "tr/IWindow.hpp"
 #include "tr/IEventBus.hpp"
 
@@ -17,13 +15,12 @@ DefaultContext::DefaultContext(std::shared_ptr<IEventBus> newEventBus,
                                std::shared_ptr<IRenderContext> newRenderContext,
                                std::shared_ptr<tr::IWindow> newWindow,
                                std::shared_ptr<IGuiSystem> newGuiSystem,
-                               std::shared_ptr<Registry> newRegistry)
+                               std::shared_ptr<IGameplaySystem> newGameplaySystem)
     : eventBus{std::move(newEventBus)},
-      // gameplaySystem{std::move(newGameplaySystem)},
       renderContext{std::move(newRenderContext)},
       window{std::move(newWindow)},
       guiSystem{std::move(newGuiSystem)},
-      registry{std::move(newRegistry)} {
+      gameplaySystem{std::move(newGameplaySystem)} {
 
   Log.trace("Constructing Default Context");
 
@@ -31,11 +28,10 @@ DefaultContext::DefaultContext(std::shared_ptr<IEventBus> newEventBus,
       [&]([[maybe_unused]] const tr::WindowClosed& event) { running = false; });
 
   // Wire together game world to render world
-  // gameplaySystem->setRenderDataTransferHandler(
-  //     [&](const RenderData& renderData) { renderContext->setRenderData(renderData);
-  //     });
-  //
-  // gameplaySystem->createDefaultCamera();
+  gameplaySystem->setRenderDataTransferHandler(
+      [&](const RenderData& renderData) { renderContext->setRenderData(renderData); });
+
+  gameplaySystem->createDefaultCamera();
 }
 
 void DefaultContext::run() {
@@ -72,7 +68,7 @@ void DefaultContext::run() {
     }
 
     while (accumulator >= dt) {
-      // gameplaySystem->fixedUpdate();
+      gameplaySystem->fixedUpdate();
       t += dt;
       accumulator -= dt;
     }
@@ -81,7 +77,7 @@ void DefaultContext::run() {
 
     {
       ZoneNamedN(z, "Gameplay Update", true);
-      // gameplaySystem->update();
+      gameplaySystem->update();
     }
 
     {
@@ -94,7 +90,7 @@ void DefaultContext::run() {
 }
 
 auto DefaultContext::getGameplaySystem() -> std::shared_ptr<IGameplaySystem> {
-  return nullptr;
+  return gameplaySystem;
 }
 
 auto DefaultContext::getGuiSystem() -> std::shared_ptr<IGuiSystem> {
@@ -105,7 +101,4 @@ auto DefaultContext::getEventSystem() -> std::shared_ptr<IEventBus> {
   return eventBus;
 }
 
-auto DefaultContext::getRegistry() -> std::shared_ptr<Registry> {
-  return registry;
-}
 }

@@ -1,17 +1,17 @@
 #include "AnimationSystem.hpp"
 
 #include <gp/components/Animation.hpp>
-#include <gp/Registry.hpp>
 
 namespace tr {
-AnimationSystem::AnimationSystem(std::shared_ptr<Registry> newRegistry,
-                                 std::shared_ptr<AnimationFactory> newAnimationFactory)
-    : registry{std::move(newRegistry)}, animationFactory{std::move(newAnimationFactory)} {
+
+constexpr auto TimeRatio = 0.0005f;
+
+AnimationSystem::AnimationSystem(std::shared_ptr<AnimationFactory> newAnimationFactory)
+    : animationFactory{std::move(newAnimationFactory)} {
 }
 
-auto AnimationSystem::update() const -> void {
-  for (const auto view = registry->getRegistry().view<Animation>();
-       auto [entity, animationData] : view.each()) {
+auto AnimationSystem::update(entt::registry& registry) const -> void {
+  for (const auto view = registry.view<Animation>(); auto [entity, animationData] : view.each()) {
 
     if (animationData.renderBindPose) {
       for (auto& model : animationData.models) {
@@ -21,7 +21,7 @@ auto AnimationSystem::update() const -> void {
     }
 
     if (animationData.playing) {
-      animationData.timeRatio += 0.0005f;
+      animationData.timeRatio += TimeRatio;
       if (animationData.timeRatio >= 1.f) {
         animationData.timeRatio = 0.f;
       }
@@ -53,4 +53,5 @@ auto AnimationSystem::update() const -> void {
     }
   }
 }
+
 }

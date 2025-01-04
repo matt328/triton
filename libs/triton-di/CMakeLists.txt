@@ -11,11 +11,11 @@ set(common_SRC
 
   modules/gameplay/src/ActionSystem.cxx
   modules/gameplay/src/systems/CameraSystem.cxx
-  modules/gameplay/src/Registry.cxx
   modules/gameplay/src/systems/TransformSystem.cxx
   modules/gameplay/src/systems/RenderDataSystem.cxx
   modules/gameplay/src/systems/AnimationSystem.cxx
   modules/gameplay/src/AnimationFactory.cxx
+  modules/gameplay/src/DefaultGameplaySystem.cxx
 
   modules/graphics/src/ImmediateTransferContext.cxx
   modules/graphics/src/Window.cxx
@@ -73,6 +73,7 @@ ENDIF(WIN32)
 
 target_compile_definitions(${PROJECT_NAME}
   PRIVATE
+  TRACY_ENABLE
   GLFW_EXPOSE_NATIVE_WIN32
   GLFW_INCLUDE_VULKAN=1
   VULKAN_HPP_NO_CONSTRUCTORS

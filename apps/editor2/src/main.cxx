@@ -1,7 +1,6 @@
 #include "config.h"
 #include "Application.hpp"
 
-#include "gp/Registry.hpp"
 #include "tr/ComponentFactory.hpp"
 #include "Properties.hpp"
 #include "TaskQueue.hpp"
@@ -49,12 +48,10 @@ auto main() -> int {
     auto gameplaySystem = context->getGameplaySystem();
     auto guiSystem = context->getGuiSystem();
     auto eventSystem = context->getEventSystem();
-    auto registry = context->getRegistry();
 
     const auto injector = di::make_injector(di::bind<tr::IContext>.to(context),
                                             di::bind<tr::IGuiSystem>.to(guiSystem),
                                             di::bind<tr::IEventBus>.to(eventSystem),
-                                            di::bind<tr::Registry>.to(registry),
                                             di::bind<tr::IGameplaySystem>.to<>(gameplaySystem),
                                             di::bind<std::filesystem::path>.to<>(propertiesPath),
                                             di::bind<ed::TaskQueueConfig>.to(taskQueueConfig));

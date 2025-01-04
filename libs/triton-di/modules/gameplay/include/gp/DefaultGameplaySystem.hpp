@@ -1,0 +1,62 @@
+#pragma once
+
+#include "systems/CameraSystem.hpp"
+#include "systems/RenderDataSystem.hpp"
+#include "systems/TransformSystem.hpp"
+#include "tr/IEventBus.hpp"
+#include "tr/IGameplaySystem.hpp"
+#include "CommandQueue.hpp"
+#include "vk/VkResourceManager.hpp"
+#include <entt/entity/fwd.hpp>
+
+namespace tr {
+
+class DefaultGameplaySystem : public IGameplaySystem {
+public:
+  DefaultGameplaySystem(std::shared_ptr<IEventBus> newEventBus,
+                        std::shared_ptr<CameraSystem> newCameraSystem,
+                        std::shared_ptr<VkResourceManager> newResourceManager,
+                        std::shared_ptr<TransformSystem> newTransformSystem,
+                        std::shared_ptr<RenderDataSystem> newRenderDataSystem);
+  ~DefaultGameplaySystem() override;
+
+  DefaultGameplaySystem(const DefaultGameplaySystem&) = delete;
+  DefaultGameplaySystem(DefaultGameplaySystem&&) = delete;
+  auto operator=(const DefaultGameplaySystem&) -> DefaultGameplaySystem& = delete;
+  auto operator=(DefaultGameplaySystem&&) -> DefaultGameplaySystem& = delete;
+
+  void update() override;
+  void fixedUpdate() override;
+
+  void setRenderDataTransferHandler(const RenderDataTransferHandler& handler) override;
+
+  auto createStaticModelEntity(std::string filename, std::string_view entityName) -> void override;
+  auto createAnimatedModelEntity(const AnimatedModelData& modelData) -> void override;
+  auto createTerrain() -> void override;
+  auto createDefaultCamera() -> void override;
+  auto createTestEntity(std::string_view name) -> void override;
+
+private:
+  std::shared_ptr<IEventBus> eventBus;
+  std::shared_ptr<CameraSystem> cameraSystem;
+  std::shared_ptr<VkResourceManager> resourceManager;
+  std::shared_ptr<TransformSystem> transformSystem;
+  std::shared_ptr<RenderDataSystem> renderDataSystem;
+
+  RenderDataTransferHandler transferHandler;
+  std::unique_ptr<entt::registry> registry;
+
+  mutable TracyLockable(std::shared_mutex, registryMutex);
+
+  std::unique_ptr<CommandQueue<entt::registry&, const std::shared_ptr<VkResourceManager>&>>
+      commandQueue;
+
+  entt::connection entityCreatedConnection;
+
+  RenderData renderData;
+
+  auto entityCreated([[maybe_unused]] entt::registry& reg,
+                     [[maybe_unused]] entt::entity entity) const -> void;
+};
+
+}

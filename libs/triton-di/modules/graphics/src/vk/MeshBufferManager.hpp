@@ -57,6 +57,8 @@ private:
   BufferHandle indexBufferHandle;
 
   std::vector<BufferEntry> bufferEntries;
+
+  auto testPrivateMethod() -> void;
 };
 
 }

@@ -3,27 +3,22 @@
 #include "gp/components/Camera.hpp"
 #include "gp/components/Resources.hpp"
 
-#include "cm/GlmToString.hpp"
-
 namespace tr {
 
 constexpr auto CameraSpeed = .010f;
 constexpr auto MouseSensitivity = 0.025f;
 constexpr auto PitchExtent = 89.f;
 
-CameraSystem::CameraSystem(std::shared_ptr<IEventBus> newEventBus,
-                           std::shared_ptr<Registry> newRegistry)
-    : eventBus{std::move(newEventBus)}, registry{std::move(newRegistry)} {
-
-  eventBus->subscribe<Action>([&](const Action& action) { handleAction(action); });
+CameraSystem::CameraSystem(const std::shared_ptr<IEventBus>& eventBus, entt::registry& registry) {
+  eventBus->subscribe<Action>([&](const Action& action) { handleAction(action, registry); });
 }
 
 CameraSystem::~CameraSystem() {
   Log.trace("Destroying CameraSystem");
 }
 
-auto CameraSystem::handleAction(const Action& action) const -> void {
-  for (const auto view = registry->getRegistry().view<Camera>(); auto [entity, cam] : view.each()) {
+auto CameraSystem::handleAction(const Action& action, entt::registry& registry) -> void {
+  for (const auto view = registry.view<Camera>(); auto [entity, cam] : view.each()) {
     if (action.stateType == StateType::State) {
       handleStateAction(action, cam);
     } else if (action.stateType == StateType::Range) {
@@ -67,11 +62,10 @@ auto CameraSystem::handleRangeAction(const Action& action, Camera& cam) -> void 
   }
 }
 
-void CameraSystem::fixedUpdate() const {
-  auto& reg = registry->getRegistry();
-  const auto view = reg.view<Camera>();
+void CameraSystem::fixedUpdate(entt::registry& registry) {
+  const auto view = registry.view<Camera>();
 
-  const auto [width, height] = reg.ctx().get<const WindowDimensions>();
+  const auto [width, height] = registry.ctx().get<const WindowDimensions>();
 
   for (auto [entity, cam] : view.each()) {
 

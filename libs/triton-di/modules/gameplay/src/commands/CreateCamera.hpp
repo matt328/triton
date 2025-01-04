@@ -1,13 +1,16 @@
 #pragma once
 
-#include "../CommandQueue.hpp"
-
-#include <gp/components/Camera.hpp>
-#include <gp/components/Resources.hpp>
+#include "CommandQueue.hpp"
+#include "gp/components/Camera.hpp"
+#include "gp/components/EditorInfo.hpp"
+#include "gp/components/Resources.hpp"
 
 namespace tr {
+
+class VkResourceManager;
+
 class CreateCamera final
-    : public ICommand<entt::registry&, const std::shared_ptr<ResourceManager>&> {
+    : public ICommand<entt::registry&, const std::shared_ptr<VkResourceManager>&> {
 public:
   explicit CreateCamera(const CameraInfo& newCameraInfo) : cameraInfo{newCameraInfo} {};
   ~CreateCamera() override = default;
@@ -19,7 +22,7 @@ public:
 
   void execute(
       entt::registry& registry,
-      [[maybe_unused]] const std::shared_ptr<ResourceManager>& resourceManager) const override {
+      [[maybe_unused]] const std::shared_ptr<VkResourceManager>& resourceManager) const override {
     const auto entity = registry.create();
     registry.emplace<Camera>(entity,
                              cameraInfo.width,
@@ -35,4 +38,5 @@ public:
 private:
   CameraInfo cameraInfo{};
 };
+
 }
