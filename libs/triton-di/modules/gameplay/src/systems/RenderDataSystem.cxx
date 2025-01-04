@@ -4,34 +4,31 @@
 #include "cm/RenderData.hpp"
 #include "gp/components/Renderable.hpp"
 #include "gp/components/Camera.hpp"
-#include "gp/components/Transform.hpp"
 #include "gp/components/Resources.hpp"
+#include "gp/components/Transform.hpp"
 #include "gp/components/Animation.hpp"
 #include "gp/components/TerrainMarker.hpp"
 
 namespace tr {
-RenderDataSystem::RenderDataSystem(std::shared_ptr<Registry> newRegistry)
-    : registry{std::move(newRegistry)} {
-}
-auto RenderDataSystem::update(RenderData& renderData) const -> void {
-  auto& reg = registry->getRegistry();
 
-  if (!reg.ctx().contains<const CurrentCamera>()) {
+auto RenderDataSystem::update(entt::registry& registry, RenderData& renderData) -> void {
+
+  if (!registry.ctx().contains<const CurrentCamera>()) {
     Log.trace("Context doesn't contain current camera");
     return;
   }
 
-  const auto cameraEntity = reg.ctx().get<const CurrentCamera>();
-  const auto cam = reg.get<Camera>(cameraEntity.currentCamera);
+  const auto cameraEntity = registry.ctx().get<const CurrentCamera>();
+  const auto cam = registry.get<Camera>(cameraEntity.currentCamera);
 
   renderData.cameraData =
       CameraData{.view = cam.view, .proj = cam.projection, .viewProj = cam.view * cam.projection};
 
   // Static Models and Terrain
-  for (const auto view = reg.view<Renderable, Transform>(entt::exclude<Animation>);
+  for (const auto view = registry.view<Renderable, Transform>(entt::exclude<Animation>);
        const auto& [entity, renderable, transform] : view.each()) {
 
-    const auto isTerrainEntity = reg.any_of<TerrainMarker>(entity);
+    const auto isTerrainEntity = registry.any_of<TerrainMarker>(entity);
 
     for (const auto& [meshHandle, topology, textureHandle] : renderable.meshData) {
       const auto objectDataPosition = renderData.objectData.size();
@@ -52,7 +49,7 @@ auto RenderDataSystem::update(RenderData& renderData) const -> void {
   }
 
   // Animated Models
-  const auto animationsView = reg.view<Animation, Renderable, Transform>();
+  const auto animationsView = registry.view<Animation, Renderable, Transform>();
   uint32_t jointMatricesIndex = 0;
   for (const auto& [entity, animationData, renderable, transform] : animationsView.each()) {
     // Convert the jointMap into a list of join matrices the gpu needs

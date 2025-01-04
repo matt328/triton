@@ -15,16 +15,12 @@ NewRenderContext::~NewRenderContext() {
   Log.trace("Destroying NewRenderContext");
 }
 
+/// This gets called directly after setRenderData
 void NewRenderContext::renderNextFrame() {
   const auto result = frameManager->acquireFrame();
 
   if (std::holds_alternative<std::reference_wrapper<Frame>>(result)) {
     const auto& frame = std::get<std::reference_wrapper<Frame>>(result);
-
-    // Update buffers from game world.
-    // Extract all the object's data into an ObjectData buffer to be handed to the Compute task
-    // Compute task should reference the ObjectData buffer as well as CameraData buffer and
-    // produce the indirectBuffer, and update the InstanceData buffer.
 
     renderScheduler->recordRenderTasks(frame);
     renderScheduler->endFrame(frame);
@@ -41,8 +37,11 @@ void NewRenderContext::waitIdle() {
   Log.trace("waitIdle");
 }
 
-void NewRenderContext::setRenderData([[maybe_unused]] const RenderData& renderData) {
-  Log.trace("setRenderData");
+void NewRenderContext::setRenderData(const RenderData& newRenderData) {
+  auto lock = std::lock_guard{renderDataMutex};
+  LockableName(renderDataMutex, "SetRenderData", 13);
+  LockMark(renderDataMutex);
+  renderData = newRenderData;
 }
 
 }

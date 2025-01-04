@@ -2,6 +2,7 @@
 #include <gfx/RenderContextConfig.hpp>
 #include "Frame.hpp"
 #include "Maths.hpp"
+#include "tr/Events.hpp"
 #include "vk/Swapchain.hpp"
 
 namespace tr {
@@ -12,12 +13,14 @@ DefaultFrameManager::DefaultFrameManager(
     std::shared_ptr<Device> newDevice,
     std::shared_ptr<Swapchain> newSwapchain,
     std::shared_ptr<VkResourceManager> newResourceManager,
+    std::shared_ptr<IEventBus> newEventBus,
     const std::shared_ptr<IDebugManager>& debugManager)
     : currentFrame{0},
       commandBufferManager{std::move(newCommandBufferManager)},
       device{std::move(newDevice)},
       swapchain{std::move(newSwapchain)},
-      resourceManager{std::move(newResourceManager)} {
+      resourceManager{std::move(newResourceManager)},
+      eventBus{std::move(newEventBus)} {
 
   for (uint8_t i = 0; i < rendererConfig.framesInFlight; ++i) {
 
@@ -47,6 +50,12 @@ DefaultFrameManager::DefaultFrameManager(
                                              startCmdBufferHandle,
                                              endCmdBufferHandle,
                                              mainCmdBufferHandle));
+
+    const auto& extent = swapchain->getImageExtent();
+    eventBus->emit(SwapchainResized{
+        .width = extent.width,
+        .height = extent.height,
+    });
   }
 
   const auto drawImageExtent = vk::Extent2D{
@@ -89,6 +98,10 @@ auto DefaultFrameManager::acquireFrame()
 
   if (iar == ImageAcquireResult::NeedsResize) {
     swapchain->recreate();
+    eventBus->emit(SwapchainResized{
+        .width = swapchain->getImageExtent().width,
+        .height = swapchain->getImageExtent().height,
+    });
     // TODO(matt): commandBufferManager->recreate();
   }
 

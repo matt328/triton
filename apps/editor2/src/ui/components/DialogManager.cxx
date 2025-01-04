@@ -13,7 +13,11 @@ void DialogManager::addDialog(const std::string& dialogName, std::unique_ptr<Mod
 }
 
 void DialogManager::setOpen(const std::string& dialogName) {
-  dialogMap.at(dialogName)->setOpen();
+  if (dialogMap.contains(dialogName)) {
+    dialogMap.at(dialogName)->setOpen();
+  } else {
+    Log.warn("No dialog registered with name: {}", dialogName);
+  }
 }
 
 void DialogManager::update() {

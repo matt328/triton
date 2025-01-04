@@ -2,13 +2,9 @@
 #include "gp/components/Transform.hpp"
 
 namespace tr {
-TransformSystem::TransformSystem(std::shared_ptr<Registry> newRegistry)
-    : registry{std::move(newRegistry)} {
-}
 
-auto TransformSystem::update() const -> void {
-  auto& reg = registry->getRegistry();
-  for (const auto view = reg.view<Transform>(); auto [entity, transform] : view.each()) {
+auto TransformSystem::update(entt::registry& registry) -> void {
+  for (const auto view = registry.view<Transform>(); auto [entity, transform] : view.each()) {
     {
       ZoneNamedN(update, "Update Entity", true);
       // Create combined rotation matrix

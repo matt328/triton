@@ -1,7 +1,9 @@
 #include "tr/ComponentFactory.hpp"
 #include "Window.hpp"
 #include "cm/ImGuiAdapter.hpp"
+#include "gp/DefaultGameplaySystem.hpp"
 #include "pipeline/IndirectPipeline.hpp"
+#include "tr/IGameplaySystem.hpp"
 #include "tr/IGuiAdapter.hpp"
 #include "tr/IGuiSystem.hpp"
 #include "cm/ImGuiSystem.hpp"
@@ -44,6 +46,7 @@ auto ComponentFactory::getContext(const FrameworkConfig& config) -> std::shared_
                                           di::bind<IRenderScheduler>.to<DefaultRenderScheduler>(),
                                           di::bind<IFrameManager>.to<DefaultFrameManager>(),
                                           di::bind<IActionSystem>.to<ActionSystem>(),
+                                          di::bind<IGameplaySystem>.to<DefaultGameplaySystem>(),
                                           di::bind<glm::ivec2>.to(config.initialWindowSize),
                                           di::bind<std::string>.to(config.windowTitle),
                                           di::bind<Device>.to<Device>(),

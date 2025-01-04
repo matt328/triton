@@ -25,6 +25,9 @@ private:
   std::shared_ptr<IFrameManager> frameManager;
   std::shared_ptr<IRenderScheduler> renderScheduler;
   std::shared_ptr<queue::Graphics> graphicsQueue;
+
+  mutable TracyLockable(std::mutex, renderDataMutex);
+  RenderData renderData;
 };
 
 }
