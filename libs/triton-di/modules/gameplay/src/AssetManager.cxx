@@ -4,6 +4,7 @@
 #include "as/Model.hpp"
 
 #include "GlmCereal.hpp"
+#include <optional>
 
 namespace tr {
 AssetManager::AssetManager(std::shared_ptr<VkResourceManager> newResourceManager)
@@ -24,11 +25,14 @@ auto AssetManager::loadModel(std::string_view filename) -> ModelData {
   geometryDataMap.erase(geometryHandle);
   imageDataMap.erase(imageHandle);
 
-  return ModelData{.meshData = MeshData{
-                       .meshHandle = meshHandle,
-                       .topology = Topology::Triangles,
-                       .textureHandle = textureHandle,
-                   }};
+  return ModelData{.meshData =
+                       MeshData{
+                           .meshHandle = meshHandle,
+                           .topology = Topology::Triangles,
+                           .textureHandle = textureHandle,
+                       },
+                   .skinData = std::nullopt,
+                   .animationData = std::nullopt};
 }
 
 /// Loads a TRM model.

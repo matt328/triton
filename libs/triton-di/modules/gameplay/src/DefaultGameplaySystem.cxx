@@ -9,6 +9,11 @@
 
 namespace tr {
 
+constexpr auto DefaultFOV = .60f;
+constexpr auto DefaultNearClip = 0.1f;
+constexpr auto DefaultFarClip = 10000.f;
+constexpr auto DefaultPosition = glm::vec3{1.f, 1.f, 3.f};
+
 DefaultGameplaySystem::DefaultGameplaySystem(std::shared_ptr<IEventBus> newEventBus,
                                              std::shared_ptr<CameraSystem> newCameraSystem,
                                              std::shared_ptr<AssetManager> newAssetManager,
@@ -104,11 +109,12 @@ auto DefaultGameplaySystem::createDefaultCamera() -> void {
   auto cameraInfo = CameraInfo{
       .width = width,
       .height = height,
-      .fov = 60.f,
-      .nearClip = 0.1f,
-      .farClip = 10000.f,
-      .position = glm::vec3{1.0f, 1.0f, 3.0f},
+      .fov = DefaultFOV,
+      .nearClip = DefaultNearClip,
+      .farClip = DefaultFarClip,
+      .position = DefaultPosition,
   };
+
   commandQueue->enqueue(std::make_unique<CreateCamera>(cameraInfo));
 }
 

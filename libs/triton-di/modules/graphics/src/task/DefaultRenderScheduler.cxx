@@ -137,8 +137,8 @@ DefaultRenderScheduler::~DefaultRenderScheduler() {
   Log.trace("Destroying DefaultRenderScheduler");
 }
 
-auto DefaultRenderScheduler::updatePerFrameRenderData(Frame& frame, const RenderData& renderData)
-    -> void {
+auto DefaultRenderScheduler::updatePerFrameRenderData(Frame& frame,
+                                                      const RenderData& renderData) -> void {
   // Update GpuBufferEntriesBuffer
   const auto gpuBufferEntryList = resourceManager->getStaticGpuData(renderData.staticGpuMeshData);
   auto& gpuBufferEntriesBuffer = resourceManager->getBuffer(frame.getGpuBufferEntryBufferHandle());
@@ -162,8 +162,9 @@ auto DefaultRenderScheduler::updatePerFrameRenderData(Frame& frame, const Render
 }
 
 auto DefaultRenderScheduler::recordRenderTasks(Frame& frame) const -> void {
+  ZoneNamedN(var, "Record Command Buffers", true);
   {
-    ZoneNamedN(var, "StartCmd", true);
+    ZoneNamedN(var, "Start", true);
     const auto& startCmd =
         commandBufferManager->getCommandBuffer(frame.getStartCommandBufferHandle());
     startCmd.begin(
@@ -178,12 +179,12 @@ auto DefaultRenderScheduler::recordRenderTasks(Frame& frame) const -> void {
   }
 
   {
-    ZoneNamedN(var, "ExecuteTasks", true);
+    ZoneNamedN(var, "RenderTasks", true);
     executeTasks(frame);
   }
 
   {
-    ZoneNamedN(var, "EndCmd", true);
+    ZoneNamedN(var, "End", true);
     auto& endCmd = commandBufferManager->getCommandBuffer(frame.getEndCommandBufferHandle());
     endCmd.begin(
         vk::CommandBufferBeginInfo{.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse});
