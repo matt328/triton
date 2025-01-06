@@ -93,6 +93,7 @@ auto MeshBufferManager::getInstanceData(const std::vector<GpuMeshData>& meshData
     const auto& bufferEntry = bufferEntries[meshData.handle];
     instanceDataList.push_back(GpuBufferEntry{.indexCount = bufferEntry.indexCount,
                                               .firstIndex = bufferEntry.firstIndex,
+                                              .vertexOffset = bufferEntry.vertexOffset,
                                               .instanceCount = 1,
                                               .firstInstance = 0,
                                               .objectDataId = meshData.objectDataId});

@@ -35,7 +35,7 @@ private:
   std::shared_ptr<VkResourceManager> resourceManager;
   std::shared_ptr<IndirectPipeline> pipeline;
 
-  MeshHandle meshHandle = -1;
+  [[maybe_unused]] MeshHandle meshHandle = -1;
 
   std::string drawImageResourceName;
 
