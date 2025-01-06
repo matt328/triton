@@ -16,6 +16,7 @@ set(common_SRC
   modules/gameplay/src/systems/AnimationSystem.cxx
   modules/gameplay/src/AnimationFactory.cxx
   modules/gameplay/src/DefaultGameplaySystem.cxx
+  modules/gameplay/src/AssetManager.cxx
 
   modules/graphics/src/ImmediateTransferContext.cxx
   modules/graphics/src/Window.cxx
@@ -25,7 +26,6 @@ set(common_SRC
   modules/graphics/src/mem/Image.cxx
 
   modules/graphics/src/geo/VertexAttributes.cxx
-  modules/graphics/src/geo/GeometryFactory.cxx
   modules/graphics/src/geo/HeightField.cxx
 
   modules/graphics/src/tex/Texture.cxx

@@ -6,19 +6,17 @@
 #include "systems/TransformSystem.hpp"
 #include "tr/IEventBus.hpp"
 #include "commands/CreateCamera.hpp"
-#include <entt/entity/fwd.hpp>
-#include <tracy/Tracy.hpp>
 
 namespace tr {
 
 DefaultGameplaySystem::DefaultGameplaySystem(std::shared_ptr<IEventBus> newEventBus,
                                              std::shared_ptr<CameraSystem> newCameraSystem,
-                                             std::shared_ptr<VkResourceManager> newResourceManager,
+                                             std::shared_ptr<AssetManager> newAssetManager,
                                              std::shared_ptr<TransformSystem> newTransformSystem,
                                              std::shared_ptr<RenderDataSystem> newRenderDataSystem)
     : eventBus{std::move(newEventBus)},
       cameraSystem{std::move(newCameraSystem)},
-      resourceManager{std::move(newResourceManager)},
+      assetManager{std::move(newAssetManager)},
       transformSystem{std::move(newTransformSystem)},
       renderDataSystem{std::move(newRenderDataSystem)} {
 
@@ -28,7 +26,7 @@ DefaultGameplaySystem::DefaultGameplaySystem(std::shared_ptr<IEventBus> newEvent
       registry->on_construct<entt::entity>().connect<&DefaultGameplaySystem::entityCreated>(this);
 
   commandQueue =
-      std::make_unique<CommandQueue<entt::registry&, const std::shared_ptr<VkResourceManager>&>>();
+      std::make_unique<CommandQueue<entt::registry&, const std::shared_ptr<AssetManager>&>>();
 
   eventBus->subscribe<SwapchainResized>([&](const SwapchainResized& event) {
     registry->ctx().insert_or_assign<WindowDimensions>(WindowDimensions{event.width, event.height});
@@ -48,7 +46,12 @@ void DefaultGameplaySystem::update() {
     renderData.terrainMeshData.clear();
     renderData.skinnedMeshData.clear();
     renderData.animationData.clear();
-    renderDataSystem->update(*registry, renderData);
+
+    {
+      std::unique_lock<LockableBase(std::shared_mutex)> lock(registryMutex);
+      LockMark(registryMutex);
+      renderDataSystem->update(*registry, renderData);
+    }
   }
   transferHandler(renderData);
 }
@@ -59,7 +62,7 @@ void DefaultGameplaySystem::fixedUpdate() {
 
   {
     ZoneNamedN(z, "Gameplay Command Queue", true);
-    commandQueue->processCommands(*registry, resourceManager);
+    commandQueue->processCommands(*registry, assetManager);
   }
   {
     ZoneNamedN(camZone, "CameraSystem", true);
@@ -75,20 +78,8 @@ void DefaultGameplaySystem::setRenderDataTransferHandler(const RenderDataTransfe
   this->transferHandler = handler;
 }
 
-auto DefaultGameplaySystem::createStaticModelEntity([[maybe_unused]] std::string filename,
-                                                    [[maybe_unused]] std::string_view entityName)
-    -> void {
-
-  /*
-    Think about the api between game world and renderer around loading resources into the renderer.
-    I guess for now, the game world can pass filenames to the renderer to have it load them.
-
-    Think about multithreading concerns. I think the registry needs to be synchronized.
-    Nothing will ask the renderer to render something until the entity has been created, so long as
-    the entity isn't created until after the resource is loaded and the multi buffer update/resize
-    is complete, it should be ok.
-  */
-
+auto DefaultGameplaySystem::createStaticModelEntity(std::string filename,
+                                                    std::string_view entityName) -> void {
   commandQueue->enqueue(std::make_unique<CreateStaticEntityCommand>(filename, entityName.data()));
 }
 

@@ -1,6 +1,5 @@
 #include "VkResourceManager.hpp"
 
-#include <cstddef>
 #include <mem/Allocator.hpp>
 #include <tracy/Tracy.hpp>
 #include <vulkan/vulkan_enums.hpp>
@@ -10,6 +9,7 @@
 #include "pipeline/ComputePipeline.hpp"
 #include "pipeline/IPipeline.hpp"
 #include "pipeline/IndirectPipeline.hpp"
+#include "vk/MeshBufferManager.hpp"
 
 namespace tr {
 VkResourceManager::VkResourceManager(
@@ -38,14 +38,24 @@ VkResourceManager::VkResourceManager(
   };
 
   allocator = std::make_unique<Allocator>(allocatorCreateInfo, device->getVkDevice(), debugManager);
+
+  staticMeshBufferManager = std::make_unique<MeshBufferManager>(this);
 }
 
 VkResourceManager::~VkResourceManager() {
   Log.trace("Destroying VkResourceManager");
 }
 
-// ok new plan. move command buffer pools and management into a commandBufferManager that can be
-// injected into immediate context
+/*
+  Todo(matt) Tomorrow refactor this method to be called just uploadStaticMesh.
+  - Add the mesh to the staticMeshBufferManager
+  - Refactor the IndirectRenderer to know to get the vertex and index buffers from
+  staticMeshBufferManager.
+
+  Create the impl of uploadImage method to use a TextureBufferManager.
+  - driven by descriptor buffers. heck any gpu that doesn't support Vulkan 1.3
+*/
+
 auto VkResourceManager::asyncUpload(const GeometryData& geometryData) -> MeshHandle {
   // Prepare Vertex Buffer
   const auto vbSize = geometryData.vertexDataSize();
@@ -85,6 +95,11 @@ auto VkResourceManager::asyncUpload(const GeometryData& geometryData) -> MeshHan
     throw ResourceUploadException(
         fmt::format("Error allocating resources for geometry, {0}", ex.what()));
   }
+}
+
+auto VkResourceManager::uploadImage([[maybe_unused]] const as::ImageData& imageData)
+    -> TextureHandle {
+  return 0L;
 }
 
 auto VkResourceManager::createGpuVertexBuffer(size_t size, std::string_view name) -> BufferHandle {
@@ -303,6 +318,11 @@ auto VkResourceManager::getBuffer(const BufferHandle handle) const -> Buffer& {
   return *bufferMap.at(handle);
 }
 
+auto VkResourceManager::getStaticMeshBuffers() const -> std::tuple<Buffer&, Buffer&> {
+  return {*bufferMap.at(staticMeshBufferManager->getVertexBufferHandle()),
+          *bufferMap.at(staticMeshBufferManager->getIndexBufferHandle())};
+}
+
 auto VkResourceManager::destroyImage(ImageHandle handle) -> void {
   imageInfoMap.erase(handle);
 }
@@ -316,6 +336,14 @@ auto VkResourceManager::createComputePipeline([[maybe_unused]] std::string_view 
 
 [[nodiscard]] auto VkResourceManager::getPipeline(PipelineHandle handle) const -> const IPipeline& {
   return *pipelineMap.at(handle);
+}
+
+/// Gets a list of the GpuBufferEntry that the game world thinks are involved in this frame.
+/// These are passed to the compute shader to get turned into DrawCommands and placed in the
+/// DrawIndexedIndirect buffer
+[[nodiscard]] auto VkResourceManager::getStaticGpuData(
+    const std::vector<GpuMeshData>& gpuBufferData) -> std::vector<GpuBufferEntry> {
+  return staticMeshBufferManager->getInstanceData(gpuBufferData);
 }
 
 }

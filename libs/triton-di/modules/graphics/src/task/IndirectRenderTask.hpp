@@ -3,7 +3,6 @@
 #include "IRenderTask.hpp"
 #include "cm/Handles.hpp"
 #include "cm/IndirectPushConstants.hpp"
-#include "gfx/GeometryFactory.hpp"
 #include "pipeline/IndirectPipeline.hpp"
 
 namespace tr {
@@ -14,7 +13,6 @@ class VkResourceManager;
 class IndirectRenderTask final : public IRenderTask {
 public:
   IndirectRenderTask(std::shared_ptr<VkResourceManager> newResourceManager,
-                     std::shared_ptr<GeometryFactory> newGeometryFactory,
                      std::shared_ptr<IndirectPipeline> newPipeline);
 
   ~IndirectRenderTask() override = default;
@@ -35,7 +33,6 @@ public:
 
 private:
   std::shared_ptr<VkResourceManager> resourceManager;
-  std::shared_ptr<GeometryFactory> geometryFactory;
   std::shared_ptr<IndirectPipeline> pipeline;
 
   MeshHandle meshHandle = -1;

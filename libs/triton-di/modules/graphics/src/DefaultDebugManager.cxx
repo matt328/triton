@@ -7,6 +7,7 @@ namespace tr {
 
 DefaultDebugManager::DefaultDebugManager(std::shared_ptr<Context> newContext)
     : context{std::move(newContext)} {
+  Log.trace("Constructing DefaultDebugManager");
 }
 
 DefaultDebugManager::~DefaultDebugManager() {

@@ -34,8 +34,9 @@ public:
   [[nodiscard]] auto getRenderingInfo() const -> vk::RenderingInfo;
   [[nodiscard]] auto getDrawImageExtent() const -> vk::Extent2D;
 
-  [[nodiscard]] auto getInstanceDataBufferHandle() const -> BufferHandle;
+  [[nodiscard]] auto getGpuBufferEntryBufferHandle() const -> BufferHandle;
   [[nodiscard]] auto getDrawCommandBufferHandle() const -> BufferHandle;
+  [[nodiscard]] auto getObjectDataBufferHandle() const -> BufferHandle;
   [[nodiscard]] auto getCameraBufferHandle() const -> BufferHandle;
 
   [[nodiscard]] auto getDepthImageHandle() const -> ImageHandle;
@@ -45,8 +46,9 @@ public:
   [[nodiscard]] auto getMainCommandBufferHandle() const -> CommandBufferHandle;
   [[nodiscard]] auto getEndCommandBufferHandle() const -> CommandBufferHandle;
 
-  auto setInstanceDataBufferHandle(BufferHandle handle) -> void;
+  auto setGpuBufferEntryBufferHandle(BufferHandle handle) -> void;
   auto setDrawCommandBufferHandle(BufferHandle handle) -> void;
+  auto setObjectDataBufferHandle(BufferHandle handle) -> void;
   auto setCameraBufferHandle(BufferHandle handle) -> void;
 
   auto setDepthImageHandle(ImageHandle handle) -> void;
@@ -67,8 +69,9 @@ private:
   uint32_t swapchainImageIndex{};
   vk::Extent2D drawImageExtent{};
 
-  BufferHandle instanceDataBuffer;
+  BufferHandle gpuBufferEntryBuffer;
   BufferHandle drawCommandBuffer;
+  BufferHandle objectDataBuffer;
   BufferHandle cameraBuffer;
 
   ImageHandle depthImageHandle;

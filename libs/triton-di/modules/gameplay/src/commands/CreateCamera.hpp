@@ -7,10 +7,9 @@
 
 namespace tr {
 
-class VkResourceManager;
+class AssetManager;
 
-class CreateCamera final
-    : public ICommand<entt::registry&, const std::shared_ptr<VkResourceManager>&> {
+class CreateCamera final : public ICommand<entt::registry&, const std::shared_ptr<AssetManager>&> {
 public:
   explicit CreateCamera(const CameraInfo& newCameraInfo) : cameraInfo{newCameraInfo} {};
   ~CreateCamera() override = default;
@@ -22,7 +21,7 @@ public:
 
   void execute(
       entt::registry& registry,
-      [[maybe_unused]] const std::shared_ptr<VkResourceManager>& resourceManager) const override {
+      [[maybe_unused]] const std::shared_ptr<AssetManager>& resourceManager) const override {
     const auto entity = registry.create();
     registry.emplace<Camera>(entity,
                              cameraInfo.width,

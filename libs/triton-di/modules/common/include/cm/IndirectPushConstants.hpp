@@ -10,7 +10,8 @@ struct IndirectPushConstants {
 
 struct ComputePushConstants {
   uint64_t drawCommandBufferAddress;
-  uint64_t instanceDataBufferAddress;
+  uint64_t gpuBufferEntryBufferAddress;
+  uint64_t objectDataBufferAddress;
   uint32_t instanceDataLength;
 };
 

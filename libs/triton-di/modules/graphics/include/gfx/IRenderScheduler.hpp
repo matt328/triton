@@ -14,6 +14,8 @@ public:
   auto operator=(IRenderScheduler&&) -> IRenderScheduler& = delete;
   auto operator=(const IRenderScheduler&) -> IRenderScheduler& = delete;
 
+  virtual auto updatePerFrameRenderData(Frame& frame, const RenderData& renderData) -> void = 0;
+
   virtual auto recordRenderTasks(Frame& frame) const -> void = 0;
 
   virtual auto endFrame(Frame& frame) const -> void = 0;

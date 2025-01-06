@@ -8,16 +8,11 @@
 #include "task/Frame.hpp"
 #include "task/IRenderTask.hpp"
 #include "vk/MeshBufferManager.hpp"
+#include <vulkan/vulkan_structs.hpp>
 
 namespace tr {
 
-struct InstanceData {
-  glm::mat4 model;
-  uint32_t indexCount;
-  uint32_t instanceCount;
-  uint32_t firstIndex;
-  uint32_t instanceID;
-};
+constexpr auto BufferEntryCount = 1000;
 
 DefaultRenderScheduler::DefaultRenderScheduler(
     std::shared_ptr<IFrameManager> newFrameManager,
@@ -27,8 +22,7 @@ DefaultRenderScheduler::DefaultRenderScheduler(
     std::shared_ptr<Swapchain> newSwapchain,
     std::shared_ptr<RenderTaskFactory> newRenderTaskFactory,
     std::shared_ptr<IGuiSystem> newGuiSystem,
-    const RenderContextConfig& rendererConfig,
-    const std::shared_ptr<GeometryFactory>& geometryFactory)
+    const RenderContextConfig& rendererConfig)
     : frameManager{std::move(newFrameManager)},
       commandBufferManager{std::move(newCommandBufferManager)},
       graphicsQueue{std::move(newGraphicsQueue)},
@@ -36,15 +30,6 @@ DefaultRenderScheduler::DefaultRenderScheduler(
       swapchain{std::move(newSwapchain)},
       renderTaskFactory{std::move(newRenderTaskFactory)},
       guiSystem{std::move(newGuiSystem)} {
-
-  auto meshBufferManager = std::make_shared<MeshBufferManager>(resourceManager);
-
-  for (int i = 0; i < 200; ++i) {
-    const auto geometryHandle = geometryFactory->createUnitCube();
-    const auto meshHandle =
-        meshBufferManager->addMesh(geometryFactory->getGeometryData(geometryHandle));
-    Log.trace("Added mesh with handle: {}", meshHandle);
-  }
 
   const auto drawImageExtent = vk::Extent2D{
       .width = maths::scaleNumber(swapchain->getImageExtent().width, rendererConfig.renderScale),
@@ -54,12 +39,8 @@ DefaultRenderScheduler::DefaultRenderScheduler(
                                                                    drawImageExtent,
                                                                    swapchain->getDepthFormat());
 
-  const auto instanceData =
-      InstanceData{.model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -5.0f)),
-                   .indexCount = 36,
-                   .instanceCount = 1,
-                   .firstIndex = 0,
-                   .instanceID = 0};
+  std::vector<GpuBufferEntry> gpuBufferEntryList{};
+  gpuBufferEntryList.reserve(1);
 
   const auto position = glm::vec3{0.f, 0.f, 0.f};
   const auto view = glm::lookAt(position, glm::vec3{0.f, 0.f, -5.f}, glm::vec3{0.f, 1.f, 0.f});
@@ -75,29 +56,46 @@ DefaultRenderScheduler::DefaultRenderScheduler(
 
     frame->setDepthImageHandle(depthImageHandle);
 
-    // Instance Data Buffer
+    // Gpu Buffer Entry Data
     {
-      const auto name = frame->getIndexedName("Buffer-InstanceData-Frame_");
+      const auto name = frame->getIndexedName("Buffer-GpuBufferEntry-Frame_");
       const auto handle = resourceManager->createBuffer(
-          sizeof(InstanceData),
+          sizeof(GpuBufferEntry) * BufferEntryCount,
           vk::BufferUsageFlagBits::eStorageBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress,
           name);
-      auto& instanceBuffer = resourceManager->getBuffer(handle);
-      frame->setInstanceDataBufferHandle(handle);
 
-      instanceBuffer.mapBuffer();
-      instanceBuffer.updateBufferValue(&instanceData, sizeof(InstanceData));
-      instanceBuffer.unmapBuffer();
+      frame->setGpuBufferEntryBufferHandle(handle);
+
+      auto& gpuBufferEntriesBuffer = resourceManager->getBuffer(handle);
+      gpuBufferEntriesBuffer.mapBuffer();
+      gpuBufferEntriesBuffer.updateBufferValue(gpuBufferEntryList.data(), sizeof(GpuBufferEntry));
+      gpuBufferEntriesBuffer.unmapBuffer();
     }
 
     // IndirectCommandBuffer
-    { // TODO(matt) Come up with more solid buffer referencing than just hard coded strings
+    {
       const auto name = frame->getIndexedName("Buffer-DrawCommand-Frame_");
       const auto handle = resourceManager->createBuffer(
           sizeof(vk::DrawIndexedIndirectCommand),
           vk::BufferUsageFlagBits::eIndirectBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress,
           name);
       frame->setDrawCommandBufferHandle(handle);
+      auto& indirectCommandBuffer = resourceManager->getBuffer(handle);
+      auto cmd = vk::DrawIndexedIndirectCommand{};
+      cmd.instanceCount = 0;
+      indirectCommandBuffer.mapBuffer();
+      indirectCommandBuffer.updateBufferValue(&cmd, sizeof(vk::DrawIndexedIndirectCommand));
+      indirectCommandBuffer.unmapBuffer();
+    }
+
+    // ObjectDataBuffer
+    {
+      const auto name = frame->getIndexedName("Buffer-ObjectData-Frame_");
+      const auto handle = resourceManager->createBuffer(
+          sizeof(ObjectData) * BufferEntryCount,
+          vk::BufferUsageFlagBits::eIndirectBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress,
+          name);
+      frame->setObjectDataBufferHandle(handle);
     }
 
     // Camera Data Buffer
@@ -139,57 +137,31 @@ DefaultRenderScheduler::~DefaultRenderScheduler() {
   Log.trace("Destroying DefaultRenderScheduler");
 }
 
-auto DefaultRenderScheduler::executeTasks(Frame& frame) const -> void {
+auto DefaultRenderScheduler::updatePerFrameRenderData(Frame& frame, const RenderData& renderData)
+    -> void {
+  // Update GpuBufferEntriesBuffer
+  const auto gpuBufferEntryList = resourceManager->getStaticGpuData(renderData.staticGpuMeshData);
+  auto& gpuBufferEntriesBuffer = resourceManager->getBuffer(frame.getGpuBufferEntryBufferHandle());
+  gpuBufferEntriesBuffer.mapBuffer();
+  gpuBufferEntriesBuffer.updateBufferValue(gpuBufferEntryList.data(),
+                                           sizeof(GpuBufferEntry) * gpuBufferEntryList.size());
+  gpuBufferEntriesBuffer.unmapBuffer();
 
-  auto& commandBuffer = commandBufferManager->getCommandBuffer(frame.getMainCommandBufferHandle());
+  // Update ObjectDataBuffer
+  auto& objectDataBuffer = resourceManager->getBuffer(frame.getObjectDataBufferHandle());
+  objectDataBuffer.mapBuffer();
+  objectDataBuffer.updateBufferValue(renderData.objectData.data(),
+                                     sizeof(ObjectData) * renderData.objectData.size());
+  objectDataBuffer.unmapBuffer();
 
-  commandBuffer.begin(
-      vk::CommandBufferBeginInfo{.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse});
-
-  {
-    ZoneNamedN(var, "ComputeTask", true);
-    computeTask->record(commandBuffer, frame);
-  }
-
-  auto& indirectBuffer = resourceManager->getBuffer(frame.getDrawCommandBufferHandle());
-
-  // Insert a memory barrier for the buffer the computeTask writes to
-  vk::BufferMemoryBarrier bufferMemoryBarrier{
-      .srcAccessMask = vk::AccessFlagBits::eShaderWrite,
-      .dstAccessMask = vk::AccessFlagBits::eIndirectCommandRead,
-      .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-      .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-      .buffer = indirectBuffer.getBuffer(),
-      .offset = 0,
-      .size = VK_WHOLE_SIZE,
-  };
-
-  commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eComputeShader,
-                                vk::PipelineStageFlagBits::eDrawIndirect,
-                                vk::DependencyFlags{},
-                                nullptr,
-                                bufferMemoryBarrier,
-                                nullptr);
-
-  const auto renderingInfo = frame.getRenderingInfo();
-
-  commandBuffer.beginRendering(renderingInfo);
-
-  commandBuffer.setViewportWithCount({viewport});
-  commandBuffer.setScissorWithCount({snezzor});
-
-  {
-    ZoneNamedN(var, "IndirectRenderTask", true);
-    indirectRenderTask->record(commandBuffer, frame);
-  }
-
-  commandBuffer.endRendering();
-
-  commandBuffer.end();
+  // Update CameraDataBuffer
+  auto& cameraDataBuffer = resourceManager->getBuffer(frame.getCameraBufferHandle());
+  cameraDataBuffer.mapBuffer();
+  cameraDataBuffer.updateBufferValue(&renderData.cameraData, sizeof(CameraData));
+  cameraDataBuffer.unmapBuffer();
 }
 
 auto DefaultRenderScheduler::recordRenderTasks(Frame& frame) const -> void {
-
   {
     ZoneNamedN(var, "StartCmd", true);
     const auto& startCmd =
@@ -243,6 +215,55 @@ auto DefaultRenderScheduler::recordRenderTasks(Frame& frame) const -> void {
 
     endCmd.end();
   }
+}
+
+auto DefaultRenderScheduler::executeTasks(Frame& frame) const -> void {
+
+  auto& commandBuffer = commandBufferManager->getCommandBuffer(frame.getMainCommandBufferHandle());
+
+  commandBuffer.begin(
+      vk::CommandBufferBeginInfo{.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse});
+
+  {
+    ZoneNamedN(var, "ComputeTask", true);
+    computeTask->record(commandBuffer, frame);
+  }
+
+  auto& indirectBuffer = resourceManager->getBuffer(frame.getDrawCommandBufferHandle());
+
+  // Insert a memory barrier for the buffer the computeTask writes to
+  vk::BufferMemoryBarrier bufferMemoryBarrier{
+      .srcAccessMask = vk::AccessFlagBits::eShaderWrite,
+      .dstAccessMask = vk::AccessFlagBits::eIndirectCommandRead,
+      .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+      .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+      .buffer = indirectBuffer.getBuffer(),
+      .offset = 0,
+      .size = VK_WHOLE_SIZE,
+  };
+
+  commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eComputeShader,
+                                vk::PipelineStageFlagBits::eDrawIndirect,
+                                vk::DependencyFlags{},
+                                nullptr,
+                                bufferMemoryBarrier,
+                                nullptr);
+
+  const auto renderingInfo = frame.getRenderingInfo();
+
+  commandBuffer.beginRendering(renderingInfo);
+
+  commandBuffer.setViewportWithCount({viewport});
+  commandBuffer.setScissorWithCount({snezzor});
+
+  {
+    ZoneNamedN(var, "IndirectRenderTask", true);
+    indirectRenderTask->record(commandBuffer, frame);
+  }
+
+  commandBuffer.endRendering();
+
+  commandBuffer.end();
 }
 
 auto DefaultRenderScheduler::endFrame(Frame& frame) const -> void {
