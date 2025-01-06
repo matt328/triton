@@ -24,14 +24,15 @@ public:
                                   std::shared_ptr<Swapchain> newSwapchain,
                                   std::shared_ptr<RenderTaskFactory> newRenderTaskFactory,
                                   std::shared_ptr<IGuiSystem> newGuiSystem,
-                                  const RenderContextConfig& rendererConfig,
-                                  const std::shared_ptr<GeometryFactory>& geometryFactory);
+                                  const RenderContextConfig& rendererConfig);
   ~DefaultRenderScheduler() override;
 
   DefaultRenderScheduler(const DefaultRenderScheduler&) = delete;
   DefaultRenderScheduler(DefaultRenderScheduler&&) = delete;
   auto operator=(const DefaultRenderScheduler&) -> DefaultRenderScheduler& = delete;
   auto operator=(DefaultRenderScheduler&&) -> DefaultRenderScheduler& = delete;
+
+  auto updatePerFrameRenderData(Frame& frame, const RenderData& renderData) -> void override;
 
   auto executeTasks(Frame& frame) const -> void override;
   auto recordRenderTasks(Frame& frame) const -> void override;

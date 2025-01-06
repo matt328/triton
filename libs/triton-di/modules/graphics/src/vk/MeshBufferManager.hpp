@@ -3,31 +3,35 @@
 #include "cm/RenderData.hpp"
 #include "geo/GeometryData.hpp"
 #include "cm/Handles.hpp"
-#include "vk/VkResourceManager.hpp"
-#include <cstddef>
+#include "ResourceManagerHandles.hpp"
+#include <vulkan/vulkan_structs.hpp>
 
 namespace tr {
 
 struct BufferEntry {
-  size_t vertexOffset;
-  size_t vertexCount;
-  size_t indexOffset;
-  size_t indexCount;
+  uint32_t indexCount;
+  uint32_t firstIndex;
+  uint32_t vertexOffset;
+  uint32_t vertexCount;
 };
 
 /// InstanceData is passed into the compute shader along with camera data (frustum) and ObjectData
-/// (AABB, model matrix, whatever is needed for culling) to generate the draw commands.
-struct InstanceData2 {
+/// (AABB, model matrix, whatever is needed for culling) to generate the draw commands. These
+/// parameters index into the large vertex and index buffers.
+struct GpuBufferEntry {
   uint32_t indexCount;
-  uint32_t instanceCount;
   uint32_t firstIndex;
-  uint32_t instanceID;
-  size_t objectDataId;
+  uint32_t vertexOffset;
+  uint32_t instanceCount;
+  uint32_t firstInstance;
+  uint32_t objectDataId;
 };
+
+class VkResourceManager;
 
 class MeshBufferManager {
 public:
-  explicit MeshBufferManager(std::shared_ptr<VkResourceManager> newResourceManager);
+  explicit MeshBufferManager(VkResourceManager* newResourceManager);
   ~MeshBufferManager() = default;
 
   MeshBufferManager(const MeshBufferManager&) = delete;
@@ -38,11 +42,14 @@ public:
   auto addMesh(const GeometryData& geometryData) -> MeshHandle;
   auto removeMesh(MeshHandle meshHandle) -> void;
 
-  [[nodiscard]] auto getInstanceData(std::vector<GpuMeshData> meshHandles)
-      -> std::vector<InstanceData2>;
+  [[nodiscard]] auto getInstanceData(const std::vector<GpuMeshData>& meshDataList)
+      -> std::vector<GpuBufferEntry>;
+
+  [[nodiscard]] auto getVertexBufferHandle() const -> BufferHandle;
+  [[nodiscard]] auto getIndexBufferHandle() const -> BufferHandle;
 
 private:
-  std::shared_ptr<VkResourceManager> resourceManager;
+  VkResourceManager* resourceManager;
 
   size_t vertexBufferMaxSize;
   size_t indexBufferMaxSize;

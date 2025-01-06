@@ -21,7 +21,7 @@ void NewRenderContext::renderNextFrame() {
 
   if (std::holds_alternative<std::reference_wrapper<Frame>>(result)) {
     const auto& frame = std::get<std::reference_wrapper<Frame>>(result);
-
+    renderScheduler->updatePerFrameRenderData(frame, renderData);
     renderScheduler->recordRenderTasks(frame);
     renderScheduler->endFrame(frame);
     return;

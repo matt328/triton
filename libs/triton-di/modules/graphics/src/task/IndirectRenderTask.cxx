@@ -6,32 +6,26 @@
 namespace tr {
 
 IndirectRenderTask::IndirectRenderTask(std::shared_ptr<VkResourceManager> newResourceManager,
-                                       std::shared_ptr<GeometryFactory> newGeometryFactory,
                                        std::shared_ptr<IndirectPipeline> newPipeline)
-    : resourceManager{std::move(newResourceManager)},
-      geometryFactory{std::move(newGeometryFactory)},
-      pipeline{std::move(newPipeline)} {
-
-  const auto geometryHandle = geometryFactory->createUnitCube();
-  meshHandle = resourceManager->asyncUpload(geometryFactory->getGeometryData(geometryHandle));
+    : resourceManager{std::move(newResourceManager)}, pipeline{std::move(newPipeline)} {
 }
 
 auto IndirectRenderTask::record(vk::raii::CommandBuffer& commandBuffer, const Frame& frame)
     -> void {
 
-  auto& instanceBuffer = resourceManager->getBuffer(frame.getInstanceDataBufferHandle());
+  auto& objectDataBuffer = resourceManager->getBuffer(frame.getObjectDataBufferHandle());
   auto& cameraDataBuffer = resourceManager->getBuffer(frame.getCameraBufferHandle());
 
   pushConstants = IndirectPushConstants{.drawID = 0,
-                                        .baseAddress = instanceBuffer.getDeviceAddress(),
+                                        .baseAddress = objectDataBuffer.getDeviceAddress(),
                                         .cameraDataAddress = cameraDataBuffer.getDeviceAddress()};
 
   // Bind the graphics pipeline
   commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline->getPipeline());
 
-  const auto& mesh = resourceManager->getMesh(meshHandle);
-  commandBuffer.bindVertexBuffers(0, mesh.getVertexBuffer()->getBuffer(), {0});
-  commandBuffer.bindIndexBuffer(mesh.getIndexBuffer()->getBuffer(), 0, vk::IndexType::eUint32);
+  const auto& [vertexBuffer, indexBuffer] = resourceManager->getStaticMeshBuffers();
+  commandBuffer.bindVertexBuffers(0, vertexBuffer.getBuffer(), {0});
+  commandBuffer.bindIndexBuffer(indexBuffer.getBuffer(), 0, vk::IndexType::eUint32);
 
   commandBuffer.pushConstants<IndirectPushConstants>(pipeline->getPipelineLayout(),
                                                      vk::ShaderStageFlagBits::eVertex,

@@ -85,12 +85,16 @@ auto Frame::getRenderingInfo() const -> vk::RenderingInfo {
   return renderingInfo;
 }
 
-auto Frame::getInstanceDataBufferHandle() const -> BufferHandle {
-  return instanceDataBuffer;
+auto Frame::getGpuBufferEntryBufferHandle() const -> BufferHandle {
+  return gpuBufferEntryBuffer;
 }
 
 auto Frame::getDrawCommandBufferHandle() const -> BufferHandle {
   return drawCommandBuffer;
+}
+
+auto Frame::getObjectDataBufferHandle() const -> BufferHandle {
+  return objectDataBuffer;
 }
 
 auto Frame::getCameraBufferHandle() const -> BufferHandle {
@@ -125,8 +129,12 @@ auto Frame::setSwapchainImageIndex(const uint32_t index) -> void {
   swapchainImageIndex = index;
 }
 
-auto Frame::setInstanceDataBufferHandle(BufferHandle handle) -> void {
-  instanceDataBuffer = handle;
+auto Frame::setGpuBufferEntryBufferHandle(BufferHandle handle) -> void {
+  gpuBufferEntryBuffer = handle;
+}
+
+auto Frame::setObjectDataBufferHandle(BufferHandle handle) -> void {
+  objectDataBuffer = handle;
 }
 
 auto Frame::setDrawCommandBufferHandle(BufferHandle handle) -> void {

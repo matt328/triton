@@ -1,27 +1,30 @@
 #pragma once
 
 #include "CommandQueue.hpp"
-#include "vk/VkResourceManager.hpp"
+#include "gp/AssetManager.hpp"
+#include "gp/components/EditorInfo.hpp"
+#include "gp/components/Renderable.hpp"
+#include "gp/components/Transform.hpp"
 
 namespace tr {
 
 class CreateStaticEntityCommand final
-    : public ICommand<entt::registry&, const std::shared_ptr<VkResourceManager>&> {
+    : public ICommand<entt::registry&, const std::shared_ptr<AssetManager>&> {
 public:
   explicit CreateStaticEntityCommand(const std::string_view newModelFilename,
                                      const std::string_view newEntityName)
       : entityName{newEntityName.data()}, modelFilename{newModelFilename.data()} {
   }
 
-  void execute(
-      [[maybe_unused]] entt::registry&,
-      [[maybe_unused]] const std::shared_ptr<VkResourceManager>& resourceManager) const override {
+  void execute([[maybe_unused]] entt::registry& registry,
+               [[maybe_unused]] const std::shared_ptr<AssetManager>& assetManager) const override {
 
-    // const auto modelData = resourceManager->createModel(std::filesystem::path{modelFilename});
-    // const auto entity = registry.create();
-    // registry.emplace<Renderable>(entity, std::vector{modelData.meshData});
-    // registry.emplace<Transform>(entity);
-    // registry.emplace<EditorInfo>(entity, entityName);
+    auto modelData = assetManager->loadModel(modelFilename);
+
+    const auto entity = registry.create();
+    registry.emplace<Renderable>(entity, std::vector{modelData.meshData});
+    registry.emplace<Transform>(entity);
+    registry.emplace<EditorInfo>(entity, entityName);
   }
 
 private:

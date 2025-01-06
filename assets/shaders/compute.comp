@@ -5,24 +5,27 @@
 
 layout(local_size_x = 16, local_size_y = 1, local_size_z = 1) in;
 
-struct InstanceData {
-  mat4 modelMatrix;
+struct GpuBufferEntry {
   uint indexCount;
-  uint instanceCount;
+  uint firstIndex;
   uint vertexOffset;
+  uint instanceCount;
+  uint firstInstance;
   uint instanceID;
 };
 
 struct DrawCommand {
-  uint vertexCount;
+  uint indexCount;
   uint instanceCount;
-  uint firstVertex;
+  uint firstIndex;
+  uint vertexOffset;
   uint firstInstance;
 };
 
 layout(push_constant) uniform PushConstants {
   uint64_t drawCommandBufferAddress;
-  uint64_t instanceDataBufferAddress;
+  uint64_t gpuBufferEntryBufferAddress;
+  uint64_t objectDataBufferAddress;
   uint instanceDataLength;
 }
 pc;
@@ -31,8 +34,8 @@ layout(buffer_reference, std430) buffer DrawCommandBuffer {
   DrawCommand commands[];
 };
 
-layout(buffer_reference, std430) buffer InstanceDataBuffer {
-  InstanceData instanceData[];
+layout(buffer_reference, std430) buffer GpuBufferEntryBuffer {
+  GpuBufferEntry instanceData[];
 };
 
 void main() {
@@ -40,18 +43,29 @@ void main() {
 
   // Access the buffers via push constant device addresses
   DrawCommandBuffer drawCommands = DrawCommandBuffer(pc.drawCommandBufferAddress);
-  InstanceDataBuffer instanceData = InstanceDataBuffer(pc.instanceDataBufferAddress);
+  GpuBufferEntryBuffer gpuBufferEntryData = GpuBufferEntryBuffer(pc.gpuBufferEntryBufferAddress);
+
+  if (pc.instanceDataLength == 0) {
+    drawCommands.commands[index].instanceCount = 0;
+    drawCommands.commands[index].indexCount = 0;
+    drawCommands.commands[index].instanceCount = 0;
+    drawCommands.commands[index].firstIndex = 0;
+    drawCommands.commands[index].vertexOffset = 0;
+    drawCommands.commands[index].firstInstance = 0;
+    return;
+  }
 
   // Check bounds
   if (index >= pc.instanceDataLength) {
     return;
   }
 
-  InstanceData data = instanceData.instanceData[index];
+  GpuBufferEntry data = gpuBufferEntryData.instanceData[index];
 
   // Populate indirect draw command
-  drawCommands.commands[index].vertexCount = data.indexCount;
   drawCommands.commands[index].instanceCount = data.instanceCount;
-  drawCommands.commands[index].firstVertex = data.vertexOffset;
-  drawCommands.commands[index].firstInstance = data.instanceID;
+  drawCommands.commands[index].indexCount = data.indexCount;
+  drawCommands.commands[index].firstIndex = data.firstIndex;
+  drawCommands.commands[index].vertexOffset = data.vertexOffset;
+  drawCommands.commands[index].firstInstance = data.firstInstance;
 }

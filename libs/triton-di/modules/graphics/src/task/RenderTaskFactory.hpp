@@ -1,6 +1,5 @@
 #pragma once
 
-#include "gfx/GeometryFactory.hpp"
 #include "pipeline/IndirectPipeline.hpp"
 #include "task/ComputeTask.hpp"
 #include "task/IndirectRenderTask.hpp"
@@ -11,7 +10,6 @@ namespace tr {
 class RenderTaskFactory {
 public:
   RenderTaskFactory(std::shared_ptr<VkResourceManager> newResourceManager,
-                    std::shared_ptr<GeometryFactory> newGeometryFactory,
                     std::shared_ptr<IndirectPipeline> newIndirectPipeline);
   ~RenderTaskFactory() = default;
 
@@ -26,7 +24,6 @@ public:
 
 private:
   std::shared_ptr<VkResourceManager> resourceManager;
-  std::shared_ptr<GeometryFactory> geometryFactory;
   std::shared_ptr<IndirectPipeline> indirectPipeline;
 };
 

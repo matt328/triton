@@ -8,13 +8,15 @@
 #include "geo/Mesh.hpp"
 #include "mem/Allocator.hpp"
 #include "pipeline/IShaderCompiler.hpp"
-#include <string_view>
-#include <vk_mem_alloc_enums.hpp>
-#include <vulkan/vulkan_enums.hpp>
+#include "as/Model.hpp"
+
+#include "ResourceManagerHandles.hpp"
+#include "vk/MeshBufferManager.hpp"
 
 namespace tr {
 
 class IPipeline;
+class MeshBufferManager;
 
 struct Vertex {
   glm::vec3 position;
@@ -37,10 +39,6 @@ struct ImageDeleter {
 };
 
 using AllocatedImagePtr = std::unique_ptr<ImageResource, ImageDeleter>;
-
-using BufferHandle = size_t;
-using ImageHandle = size_t;
-using PipelineHandle = size_t;
 
 class VkResourceManager {
 public:
@@ -77,6 +75,7 @@ public:
   auto createIndirectBuffer(size_t size) -> BufferHandle;
 
   auto asyncUpload(const GeometryData& geometryData) -> MeshHandle;
+  auto uploadImage(const as::ImageData& imageData) -> TextureHandle;
 
   auto addToMesh(const GeometryData& geometryData,
                  BufferHandle vertexBufferHandle,
@@ -98,7 +97,12 @@ public:
 
   [[nodiscard]] auto getBuffer(BufferHandle handle) const -> Buffer&;
 
+  [[nodiscard]] auto getStaticMeshBuffers() const -> std::tuple<Buffer&, Buffer&>;
+
   [[nodiscard]] auto getPipeline(PipelineHandle handle) const -> const IPipeline&;
+
+  [[nodiscard]] auto getStaticGpuData(const std::vector<GpuMeshData>& gpuBufferData)
+      -> std::vector<GpuBufferEntry>;
 
 private:
   struct ImageInfo {
@@ -123,5 +127,7 @@ private:
   MapKey pipelineMapKeygen;
 
   std::vector<ImmutableMesh> meshList;
+
+  std::unique_ptr<MeshBufferManager> staticMeshBufferManager;
 };
 }

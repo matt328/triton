@@ -1,13 +1,12 @@
 #pragma once
 
+#include "gp/AssetManager.hpp"
 #include "systems/CameraSystem.hpp"
 #include "systems/RenderDataSystem.hpp"
 #include "systems/TransformSystem.hpp"
 #include "tr/IEventBus.hpp"
 #include "tr/IGameplaySystem.hpp"
 #include "CommandQueue.hpp"
-#include "vk/VkResourceManager.hpp"
-#include <entt/entity/fwd.hpp>
 
 namespace tr {
 
@@ -15,7 +14,7 @@ class DefaultGameplaySystem : public IGameplaySystem {
 public:
   DefaultGameplaySystem(std::shared_ptr<IEventBus> newEventBus,
                         std::shared_ptr<CameraSystem> newCameraSystem,
-                        std::shared_ptr<VkResourceManager> newResourceManager,
+                        std::shared_ptr<AssetManager> newAssetManager,
                         std::shared_ptr<TransformSystem> newTransformSystem,
                         std::shared_ptr<RenderDataSystem> newRenderDataSystem);
   ~DefaultGameplaySystem() override;
@@ -39,7 +38,7 @@ public:
 private:
   std::shared_ptr<IEventBus> eventBus;
   std::shared_ptr<CameraSystem> cameraSystem;
-  std::shared_ptr<VkResourceManager> resourceManager;
+  std::shared_ptr<AssetManager> assetManager;
   std::shared_ptr<TransformSystem> transformSystem;
   std::shared_ptr<RenderDataSystem> renderDataSystem;
 
@@ -48,8 +47,7 @@ private:
 
   mutable TracyLockable(std::shared_mutex, registryMutex);
 
-  std::unique_ptr<CommandQueue<entt::registry&, const std::shared_ptr<VkResourceManager>&>>
-      commandQueue;
+  std::unique_ptr<CommandQueue<entt::registry&, const std::shared_ptr<AssetManager>&>> commandQueue;
 
   entt::connection entityCreatedConnection;
 
