@@ -1,4 +1,7 @@
 #include "tr/ComponentFactory.hpp"
+
+#include <di.hpp>
+
 #include "Window.hpp"
 #include "cm/ImGuiAdapter.hpp"
 #include "gp/DefaultGameplaySystem.hpp"
@@ -22,7 +25,6 @@
 #include "vk/Device.hpp"
 #include "gfx/RenderContextConfig.hpp"
 
-#include <di.hpp>
 #include "task/DefaultFrameManager.hpp"
 #include "task/DefaultRenderScheduler.hpp"
 

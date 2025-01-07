@@ -1,20 +1,8 @@
 #include "EntityEditor.hpp"
 
-#include "gp/components/Camera.hpp"
 #include "tr/GameplayEvents.hpp"
 #include "ui/components/DialogManager.hpp"
 #include "ui/components/ModalDialog.hpp"
-
-#include "gp/components/EditorInfo.hpp"
-#include "gp/components/Transform.hpp"
-#include <entt/core/hashed_string.hpp>
-#include <entt/entity/fwd.hpp>
-#include <entt/entt.hpp>
-#include "ui/components/editors/CameraInspector.hpp"
-#include "ui/components/editors/TransformInspector.hpp"
-#include "ui/components/editors/AnimationInspector.hpp"
-
-#include <gp/components/Animation.hpp>
 
 namespace ed {
 
@@ -37,10 +25,6 @@ EntityEditor::EntityEditor(std::shared_ptr<tr::IGameplaySystem> newGameplaySyste
 
   createAnimatedEntityDialog();
   createStaticEntityDialog();
-
-  // gameplaySystem->createTestEntity("Entity 1");
-  // gameplaySystem->createTestEntity("Entity 2");
-  // gameplaySystem->createTestEntity("Entity 3");
 }
 
 EntityEditor::~EntityEditor() {
@@ -195,7 +179,9 @@ void EntityEditor::createStaticEntityDialog() const {
   const auto onOk = [&](const ModalDialog& dialog) {
     dataFacade->createStaticModel(
         EntityData{.name = dialog.getValue<std::string>("name").value(),
-                   .modelName = dialog.getValue<std::string>("model").value()});
+                   .modelName = dialog.getValue<std::string>("model").value(),
+                   .skeleton = "",
+                   .animations = {}});
   };
 
   const auto onCancel = []() { Log.debug("Cancelled Dialog with no input"); };
@@ -206,4 +192,5 @@ void EntityEditor::createStaticEntityDialog() const {
 
   dialogManager->addDialog(StaticEntityDialogName, std::move(dialog));
 }
+
 }

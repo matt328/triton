@@ -1,6 +1,5 @@
 #pragma once
 
-#include <vulkan/vulkan.hpp>
 namespace tr {
 
 class ShaderBinding;

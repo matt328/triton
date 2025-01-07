@@ -1,8 +1,6 @@
 #include "VkResourceManager.hpp"
 
-#include <mem/Allocator.hpp>
-#include <tracy/Tracy.hpp>
-#include <vulkan/vulkan_enums.hpp>
+#include "mem/Allocator.hpp"
 #include "IDebugManager.hpp"
 #include "ResourceExceptions.hpp"
 #include "mem/Buffer.hpp"
@@ -150,8 +148,8 @@ auto VkResourceManager::createIndirectBuffer(size_t size) -> BufferHandle {
   return key;
 }
 
-[[nodiscard]] auto VkResourceManager::resizeBuffer(BufferHandle handle, size_t newSize)
-    -> BufferHandle {
+[[nodiscard]] auto VkResourceManager::resizeBuffer(BufferHandle handle,
+                                                   size_t newSize) -> BufferHandle {
   ZoneNamedN(var, "Resize Buffer", true);
   auto& oldBuffer = bufferMap.at(handle);
 

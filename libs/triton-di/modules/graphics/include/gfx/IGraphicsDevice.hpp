@@ -3,7 +3,6 @@
 #include "cm/Handles.hpp"
 #include "cm/LockableResource.hpp"
 #include "cm/TracyDefs.hpp"
-#include <vulkan/vulkan_raii.hpp>
 
 namespace tr::as {
 class ImageData;

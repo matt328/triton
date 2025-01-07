@@ -1,6 +1,6 @@
 #include "AnimationSystem.hpp"
 
-#include <gp/components/Animation.hpp>
+#include "gp/components/Animation.hpp"
 
 namespace tr {
 

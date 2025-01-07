@@ -2,7 +2,7 @@
 
 #include "gp/action/IActionSystem.hpp"
 
-#include <tr/Inputs.hpp>
+#include "tr/Inputs.hpp"
 
 namespace tr {
 class IEventBus;

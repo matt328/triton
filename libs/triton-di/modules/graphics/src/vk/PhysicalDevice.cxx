@@ -1,9 +1,9 @@
 #include "PhysicalDevice.hpp"
 
 #include "Surface.hpp"
-#include <vulkan/vulkan_structs.hpp>
 
 namespace tr {
+
 PhysicalDevice::PhysicalDevice(const std::shared_ptr<Instance>& instance,
                                std::shared_ptr<Surface> newSurface,
                                std::shared_ptr<IDebugManager> newDebugManager)
@@ -226,4 +226,5 @@ auto querySwapchainSupport(const vk::raii::PhysicalDevice& possibleDevice,
   details.presentModes = possibleDevice.getSurfacePresentModesKHR(*surface);
   return details;
 }
+
 }

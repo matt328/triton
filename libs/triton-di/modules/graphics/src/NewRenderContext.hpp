@@ -1,7 +1,7 @@
 #pragma once
-#include <gfx/IRenderContext.hpp>
-#include <gfx/IRenderScheduler.hpp>
-#include <task/IFrameManager.hpp>
+#include "gfx/IRenderContext.hpp"
+#include "gfx/IRenderScheduler.hpp"
+#include "task/IFrameManager.hpp"
 
 namespace tr {
 
