@@ -8,7 +8,6 @@
 #include "ui/components/AssetViewer.hpp"
 #include "ui/components/ImGuiSink.hpp"
 #include "ui/components/Dock.hpp"
-#include <optional>
 
 namespace ed {
 static constexpr float FontSize = 18.f;
@@ -45,11 +44,6 @@ Manager::Manager(std::shared_ptr<Menu> newAppMenu,
   if (const auto recentFile = properties->getRecentFile(); recentFile.has_value()) {
     dataFacade->clear();
     dataFacade->load(recentFile.value());
-
-    dataFacade->createStaticModel(EntityData{.name = "Default Model",
-                                             .modelName = "Model #1",
-                                             .skeleton = "",
-                                             .animations = {}});
   }
 }
 

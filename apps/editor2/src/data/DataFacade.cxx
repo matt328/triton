@@ -79,11 +79,11 @@ void DataFacade::createStaticModel(const EntityData& entityData) noexcept {
 
   engineBusy = true;
 
-  // const auto task = [this, modelFilename, entityName] {
-  //     gameplaySystem->createStaticModelEntity(modelFilename, entityName);
-  // };
+  const auto task = [this, modelFilename, entityName] {
+    gameplaySystem->createStaticModelEntity(modelFilename, entityName);
+  };
 
-  //   taskQueue->enqueue(task, onComplete);
+  taskQueue->enqueue(task, onComplete);
 }
 
 void DataFacade::createAnimatedModel(const EntityData& entityData) {

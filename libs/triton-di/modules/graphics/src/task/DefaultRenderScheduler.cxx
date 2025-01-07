@@ -76,7 +76,7 @@ DefaultRenderScheduler::DefaultRenderScheduler(
     {
       const auto name = frame->getIndexedName("Buffer-DrawCommand-Frame_");
       const auto handle = resourceManager->createBuffer(
-          sizeof(vk::DrawIndexedIndirectCommand),
+          sizeof(vk::DrawIndexedIndirectCommand) * 2, // Size this buffer to max_objects?
           vk::BufferUsageFlagBits::eIndirectBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress,
           name);
       frame->setDrawCommandBufferHandle(handle);
@@ -137,8 +137,8 @@ DefaultRenderScheduler::~DefaultRenderScheduler() {
   Log.trace("Destroying DefaultRenderScheduler");
 }
 
-auto DefaultRenderScheduler::updatePerFrameRenderData(Frame& frame,
-                                                      const RenderData& renderData) -> void {
+auto DefaultRenderScheduler::updatePerFrameRenderData(Frame& frame, const RenderData& renderData)
+    -> void {
   // Update GpuBufferEntriesBuffer
   const auto gpuBufferEntryList = resourceManager->getStaticGpuData(renderData.staticGpuMeshData);
   auto& gpuBufferEntriesBuffer = resourceManager->getBuffer(frame.getGpuBufferEntryBufferHandle());
@@ -259,7 +259,7 @@ auto DefaultRenderScheduler::executeTasks(Frame& frame) const -> void {
 
   {
     ZoneNamedN(var, "IndirectRenderTask", true);
-    indirectRenderTask->record(commandBuffer, frame);
+    // indirectRenderTask->record(commandBuffer, frame);
   }
 
   commandBuffer.endRendering();

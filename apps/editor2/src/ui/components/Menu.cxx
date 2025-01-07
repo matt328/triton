@@ -2,6 +2,7 @@
 #include "data/DataFacade.hpp"
 
 namespace ed {
+
 Menu::Menu(std::shared_ptr<DataFacade> newDataFacade,
            std::shared_ptr<Properties> newProperties,
            std::shared_ptr<DialogManager> newDialogManager,
