@@ -30,8 +30,6 @@ DefaultContext::DefaultContext(std::shared_ptr<IEventBus> newEventBus,
   // Wire together game world to render world
   gameplaySystem->setRenderDataTransferHandler(
       [&](const RenderData& renderData) { renderContext->setRenderData(renderData); });
-
-  gameplaySystem->createDefaultCamera();
 }
 
 void DefaultContext::run() {

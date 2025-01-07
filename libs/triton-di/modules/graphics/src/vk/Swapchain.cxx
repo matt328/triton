@@ -1,13 +1,17 @@
 #include "Swapchain.hpp"
 #include "Surface.hpp"
+#include "tr/Events.hpp"
+#include "tr/IEventBus.hpp"
 
 namespace tr {
 Swapchain::Swapchain(std::shared_ptr<PhysicalDevice> newPhysicalDevice,
                      std::shared_ptr<Device> newDevice,
-                     std::shared_ptr<Surface> newSurface)
+                     std::shared_ptr<Surface> newSurface,
+                     std::shared_ptr<IEventBus> newEventBus)
     : physicalDevice{std::move(newPhysicalDevice)},
       device{std::move(newDevice)},
-      surface{std::move(newSurface)} {
+      surface{std::move(newSurface)},
+      eventBus{std::move(newEventBus)} {
   createSwapchain();
 }
 
@@ -141,6 +145,10 @@ auto Swapchain::createSwapchain() -> void {
                                                     .subresourceRange = subresourceRange};
     swapchainImageViews.emplace_back(device->getVkDevice(), createInfo);
   }
+
+  Log.trace("Swapchain emitting SwapchainResized");
+  eventBus->emit(
+      SwapchainResized{.width = swapchainExtent.width, .height = swapchainExtent.height});
 }
 
 auto Swapchain::choosePresentMode(const std::vector<vk::PresentModeKHR>& availablePresentModes)

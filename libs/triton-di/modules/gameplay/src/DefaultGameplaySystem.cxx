@@ -34,7 +34,9 @@ DefaultGameplaySystem::DefaultGameplaySystem(std::shared_ptr<IEventBus> newEvent
   commandQueue =
       std::make_unique<CommandQueue<entt::registry&, const std::shared_ptr<AssetManager>&>>();
 
+  Log.trace("DefaultGameplaySystem Subscribing to SwapchainResized");
   eventBus->subscribe<SwapchainResized>([&](const SwapchainResized& event) {
+    Log.trace("Handling SwapchainResized, width: {}, height: {}", event.width, event.height);
     registry->ctx().insert_or_assign<WindowDimensions>(WindowDimensions{event.width, event.height});
   });
 
