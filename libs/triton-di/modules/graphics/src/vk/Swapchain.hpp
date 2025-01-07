@@ -1,7 +1,6 @@
 #pragma once
 #include "Device.hpp"
 #include "PhysicalDevice.hpp"
-#include <cstdint>
 
 namespace tr {
 

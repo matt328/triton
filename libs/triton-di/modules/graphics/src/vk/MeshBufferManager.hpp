@@ -4,7 +4,6 @@
 #include "geo/GeometryData.hpp"
 #include "cm/Handles.hpp"
 #include "ResourceManagerHandles.hpp"
-#include <vulkan/vulkan_structs.hpp>
 
 namespace tr {
 

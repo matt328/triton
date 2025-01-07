@@ -2,9 +2,9 @@
 
 #include "tr/IGuiSystem.hpp"
 
-#include <gfx/QueueTypes.hpp>
-#include <vk/Device.hpp>
-#include <vk/VkResourceManager.hpp>
+#include "gfx/QueueTypes.hpp"
+#include "vk/Device.hpp"
+#include "vk/VkResourceManager.hpp"
 
 namespace tr {
 class Swapchain;

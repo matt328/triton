@@ -1,5 +1,5 @@
 #pragma once
-#include <gp/components/Animation.hpp>
+#include "gp/components/Animation.hpp"
 
 namespace tr {
 class CreateAnimatedEntity final

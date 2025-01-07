@@ -1,5 +1,5 @@
 #include "DefaultFrameManager.hpp"
-#include <gfx/RenderContextConfig.hpp>
+#include "gfx/RenderContextConfig.hpp"
 #include "Frame.hpp"
 #include "Maths.hpp"
 #include "tr/Events.hpp"
