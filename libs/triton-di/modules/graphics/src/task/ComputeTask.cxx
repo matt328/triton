@@ -25,7 +25,8 @@ auto ComputeTask::record(vk::raii::CommandBuffer& commandBuffer, const Frame& fr
       .drawCommandBufferAddress = drawCommandBuffer.getDeviceAddress(),
       .gpuBufferEntryBufferAddress = gpuBufferEntryBuffer.getDeviceAddress(),
       .objectDataBufferAddress = objectDataBuffer.getDeviceAddress(),
-      .instanceDataLength = 0,
+      .instanceDataLength = 2,
+      // TODO(matt) put this instance data length somewhere
   };
 
   commandBuffer.pushConstants<ComputePushConstants>(computePipeline.getPipelineLayout(),

@@ -74,12 +74,18 @@ public:
 
   auto createIndirectBuffer(size_t size) -> BufferHandle;
 
-  auto asyncUpload(const GeometryData& geometryData) -> MeshHandle;
+  /// Add a static mesh to the MeshBufferManager for static meshes.
+  auto uploadStaticMesh(const GeometryData& geometryData) -> MeshHandle;
+
+  auto asyncUpload2(const GeometryData& geometryData) -> MeshHandle;
   auto uploadImage(const as::ImageData& imageData) -> TextureHandle;
 
+  /// Utility method to only be called by MeshBufferManagers.
   auto addToMesh(const GeometryData& geometryData,
                  BufferHandle vertexBufferHandle,
-                 BufferHandle indexBufferHandle) -> void;
+                 vk::DeviceSize vertexOffset,
+                 BufferHandle indexBufferHandle,
+                 vk::DeviceSize indexOffset) -> void;
 
   auto destroyImage(ImageHandle handle) -> void;
 

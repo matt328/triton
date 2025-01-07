@@ -42,7 +42,7 @@ auto RenderDataSystem::update(entt::registry& registry, RenderData& renderData) 
           renderData.objectData.emplace_back(transform.transformation, textureHandle);
         }
       } else {
-        renderData.staticMeshData.emplace_back(meshHandle, topology, objectDataPosition);
+        renderData.staticGpuMeshData.emplace_back(meshHandle, topology, objectDataPosition);
         renderData.objectData.emplace_back(transform.transformation, textureHandle);
       }
     }

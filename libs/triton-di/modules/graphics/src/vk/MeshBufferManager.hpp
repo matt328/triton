@@ -42,7 +42,7 @@ public:
   auto addMesh(const GeometryData& geometryData) -> MeshHandle;
   auto removeMesh(MeshHandle meshHandle) -> void;
 
-  [[nodiscard]] auto getInstanceData(const std::vector<GpuMeshData>& meshDataList)
+  [[nodiscard]] auto getGpuBufferEntries(const std::vector<GpuMeshData>& meshDataList)
       -> std::vector<GpuBufferEntry>;
 
   [[nodiscard]] auto getVertexBufferHandle() const -> BufferHandle;

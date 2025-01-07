@@ -1,5 +1,6 @@
 #include "gp/DefaultGameplaySystem.hpp"
 #include "commands/CreateStaticEntity.hpp"
+#include "commands/CreateTestEntity.hpp"
 #include "gp/components/Resources.hpp"
 #include "systems/CameraSystem.hpp"
 #include "systems/RenderDataSystem.hpp"
@@ -36,6 +37,8 @@ DefaultGameplaySystem::DefaultGameplaySystem(std::shared_ptr<IEventBus> newEvent
   eventBus->subscribe<SwapchainResized>([&](const SwapchainResized& event) {
     registry->ctx().insert_or_assign<WindowDimensions>(WindowDimensions{event.width, event.height});
   });
+
+  createTestEntity("test entity #1");
 }
 
 DefaultGameplaySystem::~DefaultGameplaySystem() {
@@ -51,6 +54,7 @@ void DefaultGameplaySystem::update() {
     renderData.terrainMeshData.clear();
     renderData.skinnedMeshData.clear();
     renderData.animationData.clear();
+    renderData.staticGpuMeshData.clear();
 
     {
       std::unique_lock<LockableBase(std::shared_mutex)> lock(registryMutex);
@@ -120,6 +124,8 @@ auto DefaultGameplaySystem::createDefaultCamera() -> void {
 
 auto DefaultGameplaySystem::createTestEntity([[maybe_unused]] std::string_view name) -> void {
   Log.trace("Creating test entity: {}", name.data());
+  commandQueue->enqueue(std::make_unique<CreateTestEntityCommand>(name));
+  commandQueue->enqueue(std::make_unique<CreateTestEntityCommand>(name));
 }
 
 auto DefaultGameplaySystem::entityCreated([[maybe_unused]] entt::registry& reg,

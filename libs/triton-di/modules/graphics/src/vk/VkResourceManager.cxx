@@ -56,7 +56,11 @@ VkResourceManager::~VkResourceManager() {
   - driven by descriptor buffers. heck any gpu that doesn't support Vulkan 1.3
 */
 
-auto VkResourceManager::asyncUpload(const GeometryData& geometryData) -> MeshHandle {
+auto VkResourceManager::uploadStaticMesh(const GeometryData& geometryData) -> MeshHandle {
+  return staticMeshBufferManager->addMesh(geometryData);
+}
+
+auto VkResourceManager::asyncUpload2(const GeometryData& geometryData) -> MeshHandle {
   // Prepare Vertex Buffer
   const auto vbSize = geometryData.vertexDataSize();
   const auto ibSize = geometryData.indexDataSize();
@@ -173,7 +177,48 @@ auto VkResourceManager::createIndirectBuffer(size_t size) -> BufferHandle {
 
 auto VkResourceManager::addToMesh([[maybe_unused]] const GeometryData& geometryData,
                                   [[maybe_unused]] BufferHandle vertexBufferHandle,
-                                  [[maybe_unused]] BufferHandle indexBufferHandle) -> void {
+                                  vk::DeviceSize vertexOffset,
+                                  [[maybe_unused]] BufferHandle indexBufferHandle,
+                                  vk::DeviceSize indexOffset) -> void {
+  const auto vbSize = geometryData.vertexDataSize();
+  const auto ibSize = geometryData.indexDataSize();
+
+  try {
+    const auto vbStagingBuffer = allocator->createStagingBuffer(vbSize, "Buffer-VertexStaging");
+    void* vbData = allocator->mapMemory(*vbStagingBuffer);
+    memcpy(vbData, geometryData.vertices.data(), static_cast<size_t>(vbSize));
+    allocator->unmapMemory(*vbStagingBuffer);
+
+    // Prepare Index Buffer
+    const auto ibStagingBuffer = allocator->createStagingBuffer(ibSize, "Buffer-IndexStaging");
+
+    auto* const data = allocator->mapMemory(*ibStagingBuffer);
+    memcpy(data, geometryData.indices.data(), ibSize);
+    allocator->unmapMemory(*ibStagingBuffer);
+
+    auto& vertexBuffer = getBuffer(vertexBufferHandle);
+    auto& indexBuffer = getBuffer(indexBufferHandle);
+
+    /*
+      TODO(matt) I don't think any GPU synchronization is needed here. Although we are working with
+      a buffer that will simultaneously be used to render geometry, the affected regions of the
+      buffer will not be read from at the same time they're being written to. Only once the copy
+      operations are complete will the entities be added to the ECS and then potentially referenced
+      by the DrawCommand buffer. This works because the ImmediateTransferContext waits for its fence
+      before the method returns. This whole process happens in a background thread, so the main
+      thread can continue to render what it knows about.
+    */
+    immediateTransferContext->submit([&](const vk::raii::CommandBuffer& cmd) {
+      const auto vbCopy = vk::BufferCopy{.srcOffset = 0, .dstOffset = vertexOffset, .size = vbSize};
+      cmd.copyBuffer(vbStagingBuffer->getBuffer(), vertexBuffer.getBuffer(), vbCopy);
+      const auto copy = vk::BufferCopy{.srcOffset = 0, .dstOffset = indexOffset, .size = ibSize};
+      cmd.copyBuffer(ibStagingBuffer->getBuffer(), indexBuffer.getBuffer(), copy);
+    });
+
+  } catch (const AllocationException& ex) {
+    throw ResourceUploadException(
+        fmt::format("Error allocating resources for geometry, {0}", ex.what()));
+  }
 }
 
 [[nodiscard]] auto VkResourceManager::getMesh(MeshHandle handle) -> const ImmutableMesh& {
@@ -343,7 +388,7 @@ auto VkResourceManager::createComputePipeline([[maybe_unused]] std::string_view 
 /// DrawIndexedIndirect buffer
 [[nodiscard]] auto VkResourceManager::getStaticGpuData(
     const std::vector<GpuMeshData>& gpuBufferData) -> std::vector<GpuBufferEntry> {
-  return staticMeshBufferManager->getInstanceData(gpuBufferData);
+  return staticMeshBufferManager->getGpuBufferEntries(gpuBufferData);
 }
 
 }

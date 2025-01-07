@@ -50,7 +50,11 @@ auto MeshBufferManager::addMesh(const GeometryData& geometryData) -> MeshHandle 
     indexBufferMaxSize *= 1.5f;
   }
 
-  resourceManager->addToMesh(geometryData, vertexBufferHandle, indexBufferHandle);
+  resourceManager->addToMesh(geometryData,
+                             vertexBufferHandle,
+                             vertexBufferCurrentSize,
+                             indexBufferHandle,
+                             indexBufferCurrentSize);
 
   size_t vertexOffset = 0;
   size_t indexOffset = 0;
@@ -60,10 +64,10 @@ auto MeshBufferManager::addMesh(const GeometryData& geometryData) -> MeshHandle 
   }
 
   const auto meshHandle = bufferEntries.size();
-  bufferEntries.emplace_back(vertexOffset,
-                             geometryData.vertices.size(),
+  bufferEntries.emplace_back(geometryData.indices.size(),
                              indexOffset,
-                             geometryData.indices.size());
+                             vertexOffset,
+                             geometryData.vertices.size());
 
   vertexBufferCurrentSize = newVertexSize;
   indexBufferCurrentSize = newIndexSize;
@@ -84,7 +88,7 @@ auto MeshBufferManager::removeMesh([[maybe_unused]] MeshHandle meshHandle) -> vo
 
 /// RenderDataSystem combines meshHandles and other data from the entities into GpuMeshData
 /// and the RenderData contains a list of them.
-auto MeshBufferManager::getInstanceData(const std::vector<GpuMeshData>& meshDataList)
+auto MeshBufferManager::getGpuBufferEntries(const std::vector<GpuMeshData>& meshDataList)
     -> std::vector<GpuBufferEntry> {
 
   auto instanceDataList = std::vector<GpuBufferEntry>{};

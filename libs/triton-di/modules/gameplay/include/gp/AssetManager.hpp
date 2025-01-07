@@ -47,6 +47,8 @@ public:
   /// any rendering operations.
   auto loadModel(std::string_view filename) -> ModelData;
 
+  auto createCube() -> ModelData;
+
 private:
   std::shared_ptr<VkResourceManager> resourceManager;
 
@@ -62,6 +64,8 @@ private:
   /// Loads a TRM file from the given path.
   /// @throws IOException if the file cannot be opened or parsed.
   static auto loadTrmFile(const std::filesystem::path& modelPath) -> as::Model;
+
+  auto generateAABB(const glm::vec3& min, const glm::vec3& max) -> GeometryHandle;
 };
 
 }
