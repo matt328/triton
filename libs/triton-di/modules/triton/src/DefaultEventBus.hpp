@@ -1,5 +1,6 @@
 #pragma once
 
+#include "tr/Events.hpp"
 #include "tr/IEventBus.hpp"
 
 namespace tr {
@@ -10,12 +11,17 @@ public:
 
   void subscribe(std::type_index type, std::function<void(const EventVariant&)> listener) override {
     listenersMap[type].push_back(listener);
+
+    if (auto it = historyMap.find(type); it != historyMap.end()) {
+      listener(it->second);
+    }
   }
 
   void emit(std::type_index type, const EventVariant& event) override {
+    historyMap[type] = event;
     if (auto it = listenersMap.find(type); it != listenersMap.end()) {
       for (auto& listener : it->second) {
-        listener(event); // Call each listener with the event
+        listener(event);
       }
     }
   }
@@ -23,5 +29,6 @@ public:
 private:
   std::unordered_map<std::type_index, std::vector<std::function<void(const EventVariant&)>>>
       listenersMap;
+  std::unordered_map<std::type_index, EventVariant> historyMap;
 };
 }

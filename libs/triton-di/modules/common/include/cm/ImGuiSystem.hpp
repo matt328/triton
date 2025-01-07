@@ -21,7 +21,7 @@ class ImGuiSystem final : public IGuiSystem {
 public:
   ImGuiSystem(const std::shared_ptr<IWindow>& window,
               const std::shared_ptr<Instance>& instance,
-              const std::shared_ptr<Device>& device,
+              std::shared_ptr<Device> newDevice,
               const std::shared_ptr<PhysicalDevice>& physicalDevice,
               const std::shared_ptr<queue::Graphics>& graphicsQueue,
               const std::shared_ptr<Swapchain>& swapchain,
@@ -40,6 +40,7 @@ public:
 
 private:
   std::shared_ptr<VkResourceManager> resourceManager;
+  std::shared_ptr<Device> device;
 
   std::unique_ptr<vk::raii::DescriptorPool> descriptorPool;
   std::function<void()> renderFn;

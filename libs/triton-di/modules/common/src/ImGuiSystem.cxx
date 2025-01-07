@@ -1,5 +1,4 @@
 #include "cm/ImGuiSystem.hpp"
-#include "gfx/IGraphicsDevice.hpp"
 #include "tr/IWindow.hpp"
 
 #include <vk/Instance.hpp>
@@ -8,12 +7,12 @@
 namespace tr {
 ImGuiSystem::ImGuiSystem(const std::shared_ptr<IWindow>& window,
                          const std::shared_ptr<Instance>& instance,
-                         const std::shared_ptr<Device>& device,
+                         std::shared_ptr<Device> newDevice,
                          const std::shared_ptr<PhysicalDevice>& physicalDevice,
                          const std::shared_ptr<queue::Graphics>& graphicsQueue,
                          const std::shared_ptr<Swapchain>& swapchain,
                          std::shared_ptr<VkResourceManager> newResourceManager)
-    : resourceManager{std::move(newResourceManager)} {
+    : resourceManager{std::move(newResourceManager)}, device{std::move(newDevice)} {
   Log.trace("Creating ImGuiSystem");
 
   descriptorPool = resourceManager->createDefaultDescriptorPool();
@@ -84,6 +83,8 @@ auto ImGuiSystem::render(vk::raii::CommandBuffer& commandBuffer,
 
 ImGuiSystem::~ImGuiSystem() {
   Log.trace("Destroying ImGuiSystem");
+
+  device->waitIdle();
   ImGui_ImplVulkan_DestroyFontsTexture();
   ImGui_ImplVulkan_Shutdown();
 }
