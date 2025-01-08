@@ -138,8 +138,8 @@ DefaultRenderScheduler::~DefaultRenderScheduler() {
   Log.trace("Destroying DefaultRenderScheduler");
 }
 
-auto DefaultRenderScheduler::updatePerFrameRenderData(Frame& frame, const RenderData& renderData)
-    -> void {
+auto DefaultRenderScheduler::updatePerFrameRenderData(Frame& frame,
+                                                      const RenderData& renderData) -> void {
   // Update GpuBufferEntriesBuffer
   const auto gpuBufferEntryList = resourceManager->getStaticGpuData(renderData.staticGpuMeshData);
   auto& gpuBufferEntriesBuffer = resourceManager->getBuffer(frame.getGpuBufferEntryBufferHandle());
@@ -162,7 +162,8 @@ auto DefaultRenderScheduler::updatePerFrameRenderData(Frame& frame, const Render
   cameraDataBuffer.unmapBuffer();
 }
 
-auto DefaultRenderScheduler::recordRenderTasks(Frame& frame, bool recordCommands) const -> void {
+auto DefaultRenderScheduler::recordRenderTasks(Frame& frame, bool recordTasks) -> void {
+  tasksRecorded = false;
   ZoneNamedN(var, "Record Command Buffers", true);
   {
     ZoneNamedN(var, "Start", true);
@@ -179,9 +180,10 @@ auto DefaultRenderScheduler::recordRenderTasks(Frame& frame, bool recordCommands
     startCmd.end();
   }
 
-  if (recordCommands) {
+  if (recordTasks) {
     ZoneNamedN(var, "RenderTasks", true);
     executeTasks(frame);
+    tasksRecorded = true;
   }
 
   {
@@ -270,11 +272,15 @@ auto DefaultRenderScheduler::executeTasks(Frame& frame) const -> void {
 
 auto DefaultRenderScheduler::endFrame(Frame& frame) const -> void {
 
-  const auto buffers = std::array<vk::CommandBuffer, 3>{
+  auto buffers = std::vector<vk::CommandBuffer>{
       *commandBufferManager->getCommandBuffer(frame.getStartCommandBufferHandle()),
-      *commandBufferManager->getCommandBuffer(frame.getMainCommandBufferHandle()),
-      *commandBufferManager->getCommandBuffer(frame.getEndCommandBufferHandle()),
   };
+
+  if (tasksRecorded) {
+    buffers.push_back(*commandBufferManager->getCommandBuffer(frame.getMainCommandBufferHandle()));
+  }
+
+  buffers.push_back(*commandBufferManager->getCommandBuffer(frame.getEndCommandBufferHandle()));
 
   constexpr auto waitStages =
       std::array<vk::PipelineStageFlags, 1>{vk::PipelineStageFlagBits::eColorAttachmentOutput};

@@ -35,7 +35,7 @@ public:
   auto updatePerFrameRenderData(Frame& frame, const RenderData& renderData) -> void override;
 
   auto executeTasks(Frame& frame) const -> void override;
-  auto recordRenderTasks(Frame& frame, bool recordTasks) const -> void override;
+  auto recordRenderTasks(Frame& frame, bool recordTasks) -> void override;
   auto endFrame(Frame& frame) const -> void override;
 
 private:
@@ -54,6 +54,8 @@ private:
 
   vk::Viewport viewport;
   vk::Rect2D snezzor;
+
+  bool tasksRecorded = false;
 
   static auto transitionImage(const vk::raii::CommandBuffer& cmd,
                               const vk::Image& image,
