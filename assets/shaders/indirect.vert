@@ -1,7 +1,7 @@
 #version 450
 #extension GL_EXT_buffer_reference : enable
-#extension GL_EXT_buffer_reference_uvec2 : enable
 #extension GL_EXT_shader_explicit_arithmetic_types_int64 : enable
+#extension GL_EXT_shader_explicit_arithmetic_types : require
 
 layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inNormal;
@@ -14,29 +14,44 @@ layout(location = 6) in vec4 inTangents;
 layout(location = 0) out vec4 fragColor;
 
 layout(push_constant) uniform PushConstants {
-   uint drawID;
-   uint64_t baseAddress;
-   uint64_t cameraDataAddress;
+  uint drawID;
+  uint64_t objectDataAddress;
+  uint64_t cameraDataAddress;
+  uint objectDataLength;
 }
 pc;
 
-layout(buffer_reference, std430) readonly buffer InstanceBuffer {
-   mat4 modelMatrix[];
+struct ObjectData {
+  mat4 modelMatrix;
+  uint64_t textureId;
+  uint animationDataIndex;
+  uint _padding;
+};
+
+layout(buffer_reference, std430) readonly buffer ObjectDataBuffer {
+  ObjectData objectData[];
 };
 
 layout(buffer_reference, std430) readonly buffer CameraDataBuffer {
-   mat4 view;
-   mat4 proj;
-   mat4 viewProj;
+  mat4 view;
+  mat4 proj;
+  mat4 viewProj;
+  vec4 position;
 };
 
 void main() {
-   InstanceBuffer instances = InstanceBuffer(pc.baseAddress);
-   CameraDataBuffer camData = CameraDataBuffer(pc.cameraDataAddress);
 
-   mat4 model = instances.modelMatrix[gl_InstanceIndex];
-   vec4 worldPos = camData.proj * camData.view * model * vec4(inPosition, 1.0);
+  // ObjectDataBuffer objectDataBuffer = ObjectDataBuffer(pc.objectDataAddress);
 
-   gl_Position = worldPos;
-   fragColor = inColor;
+  // if (gl_InstanceIndex >= pc.objectDataLength) {
+  //   return;
+  // }
+
+  // CameraDataBuffer camData = CameraDataBuffer(pc.cameraDataAddress);
+
+  // mat4 model = objectDataBuffer.objectData[gl_InstanceIndex].modelMatrix;
+  // vec4 worldPos = camData.proj * camData.view * model * vec4(inPosition, 1.0);
+
+  gl_Position = vec4(inPosition, 1.0);
+  fragColor = inColor;
 }

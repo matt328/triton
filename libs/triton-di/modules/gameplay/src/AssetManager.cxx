@@ -52,16 +52,60 @@ auto AssetManager::createCube() -> ModelData {
 
 auto AssetManager::generateAABB(const glm::vec3& min, const glm::vec3& max) -> GeometryHandle {
 
-  auto vertices = std::vector<as::Vertex>{{
-      {.pos = {min.x, min.y, min.z}, .color = {1.f, 1.f, 1.f, 1.f}}, // 0: Bottom-left-back
-      {.pos = {max.x, min.y, min.z}, .color = {0.f, 1.f, 1.f, 1.f}}, // 1: Bottom-right-back
-      {.pos = {max.x, max.y, min.z}, .color = {1.f, 0.f, 1.f, 1.f}}, // 2: Top-right-back
-      {.pos = {min.x, max.y, min.z}, .color = {1.f, 1.f, 0.f, 1.f}}, // 3: Top-left-back
-      {.pos = {min.x, min.y, max.z}, .color = {1.f, 1.f, 1.f, 1.f}}, // 4: Bottom-left-front
-      {.pos = {max.x, min.y, max.z}, .color = {1.f, 1.f, 1.f, 1.f}}, // 5: Bottom-right-front
-      {.pos = {max.x, max.y, max.z}, .color = {1.f, 1.f, 1.f, 1.f}}, // 6: Top-right-front
-      {.pos = {min.x, max.y, max.z}, .color = {1.f, 1.f, 1.f, 1.f}}  // 7: Top-left-front
-  }};
+  /*
+
+    vertices in the vertex buffer are not including tangent data for some reason.
+
+  */
+
+  auto vertices = std::vector<as::Vertex>{{{.pos = {min.x, min.y, min.z},
+                                            .uv = {1.f, 2.f},
+                                            .color = {1.f, 1.f, 1.f, 1.f},
+                                            .joint0 = {1, 2, 3, 4},
+                                            .weight0 = {1.f, 2.f, 3.f, 4.f},
+                                            .tangent = {11.f, 12.f, 13.f, 14.f}},
+                                           {.pos = {max.x, min.y, min.z},
+                                            .uv = {3.f, 4.f},
+                                            .color = {0.f, 1.f, 1.f, 1.f},
+                                            .joint0 = {5, 6, 7, 8},
+                                            .weight0 = {1.f, 2.f, 3.f, 4.f},
+                                            .tangent = {11.f, 12.f, 13.f, 14.f}},
+                                           {.pos = {max.x, max.y, min.z},
+                                            .uv = {5.f, 6.f},
+                                            .color = {1.f, 0.f, 1.f, 1.f},
+                                            .joint0 = {9, 10, 11, 12},
+                                            .weight0 = {1.f, 2.f, 3.f, 4.f},
+                                            .tangent = {11.f, 12.f, 13.f, 14.f}},
+                                           {.pos = {min.x, max.y, min.z},
+                                            .uv = {7.f, 8.f},
+                                            .color = {1.f, 1.f, 0.f, 1.f},
+                                            .joint0 = {13, 14, 15, 16},
+                                            .weight0 = {1.f, 2.f, 3.f, 4.f},
+                                            .tangent = {11.f, 12.f, 13.f, 14.f}},
+                                           {.pos = {min.x, min.y, max.z},
+                                            .uv = {9.f, 10.f},
+                                            .color = {1.f, 1.f, 1.f, 1.f},
+                                            .joint0 = {17, 18, 19, 20},
+                                            .weight0 = {1.f, 2.f, 3.f, 4.f},
+                                            .tangent = {11.f, 12.f, 13.f, 14.f}},
+                                           {.pos = {max.x, min.y, max.z},
+                                            .uv = {11.f, 12.f},
+                                            .color = {1.f, 1.f, 1.f, 1.f},
+                                            .joint0 = {21, 22, 23, 24},
+                                            .weight0 = {1.f, 2.f, 3.f, 4.f},
+                                            .tangent = {11.f, 12.f, 13.f, 14.f}},
+                                           {.pos = {max.x, max.y, max.z},
+                                            .uv = {13.f, 14.f},
+                                            .color = {1.f, 1.f, 1.f, 1.f},
+                                            .joint0 = {25, 26, 27, 28},
+                                            .weight0 = {1.f, 2.f, 3.f, 4.f},
+                                            .tangent = {11.f, 12.f, 13.f, 14.f}},
+                                           {.pos = {min.x, max.y, max.z},
+                                            .uv = {15.f, 16.f},
+                                            .color = {1.f, 1.f, 1.f, 1.f},
+                                            .joint0 = {30, 31, 32, 33},
+                                            .weight0 = {1.f, 2.f, 3.f, 4.f},
+                                            .tangent = {11.f, 12.f, 13.f, 14.f}}}};
 
   std::vector<uint32_t> indices = {// Back face
                                    0,

@@ -16,7 +16,7 @@ public:
 
   virtual auto updatePerFrameRenderData(Frame& frame, const RenderData& renderData) -> void = 0;
 
-  virtual auto recordRenderTasks(Frame& frame) const -> void = 0;
+  virtual auto recordRenderTasks(Frame& frame, bool recordCommands) const -> void = 0;
 
   virtual auto endFrame(Frame& frame) const -> void = 0;
 

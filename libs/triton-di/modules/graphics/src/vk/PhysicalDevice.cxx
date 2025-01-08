@@ -1,6 +1,7 @@
 #include "PhysicalDevice.hpp"
 
 #include "Surface.hpp"
+#include <vulkan/vulkan_structs.hpp>
 
 namespace tr {
 
@@ -86,8 +87,15 @@ auto PhysicalDevice::createDevice() -> std::unique_ptr<vk::raii::Device> {
     throw std::runtime_error("GPU does not support bindless textures :(");
   }
 
-  auto physicalFeatures2 = physicalDevice->getFeatures2();
+  auto vk12Features =
+      physicalDevice
+          ->getFeatures2<vk::PhysicalDeviceFeatures2, vk::PhysicalDeviceVulkan12Features>();
+
+  auto physicalFeatures2 = vk12Features.get<vk::PhysicalDeviceFeatures2>();
   physicalFeatures2.features.samplerAnisotropy = VK_TRUE;
+
+  auto physicalVulkan12Features = vk12Features.get<vk::PhysicalDeviceVulkan12Features>();
+  physicalVulkan12Features.shaderInt8 = VK_TRUE;
 
   vk::DeviceCreateInfo createInfo{
       .queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size()),
