@@ -6,6 +6,7 @@
 #include "TaskQueue.hpp"
 #include "TracyDefines.hpp"
 #include "tr/IEventBus.hpp"
+#include <entt/entity/fwd.hpp>
 
 namespace di = boost::di;
 
@@ -48,13 +49,15 @@ auto main() -> int {
     auto gameplaySystem = context->getGameplaySystem();
     auto guiSystem = context->getGuiSystem();
     auto eventSystem = context->getEventSystem();
+    auto registry = gameplaySystem->getRegistry();
 
     const auto injector = di::make_injector(di::bind<tr::IContext>.to(context),
                                             di::bind<tr::IGuiSystem>.to(guiSystem),
                                             di::bind<tr::IEventBus>.to(eventSystem),
                                             di::bind<tr::IGameplaySystem>.to<>(gameplaySystem),
                                             di::bind<std::filesystem::path>.to<>(propertiesPath),
-                                            di::bind<ed::TaskQueueConfig>.to(taskQueueConfig));
+                                            di::bind<ed::TaskQueueConfig>.to(taskQueueConfig),
+                                            di::bind<entt::registry>.to(registry));
 
     auto application = injector.create<std::shared_ptr<ed::Application>>();
 

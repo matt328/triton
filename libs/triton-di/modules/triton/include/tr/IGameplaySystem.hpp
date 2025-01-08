@@ -28,5 +28,6 @@ public:
   virtual auto createTerrain() -> void = 0;
   virtual auto createDefaultCamera() -> void = 0;
   virtual auto createTestEntity(std::string_view name) -> void = 0;
+  [[nodiscard]] virtual auto getRegistry() const -> std::shared_ptr<entt::registry> = 0;
 };
 }

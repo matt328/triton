@@ -146,7 +146,6 @@ auto Swapchain::createSwapchain() -> void {
     swapchainImageViews.emplace_back(device->getVkDevice(), createInfo);
   }
 
-  Log.trace("Swapchain emitting SwapchainResized");
   eventBus->emit(
       SwapchainResized{.width = swapchainExtent.width, .height = swapchainExtent.height});
 }

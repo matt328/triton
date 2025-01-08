@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gp/AssetManager.hpp"
+#include "gp/action/IActionSystem.hpp"
 #include "systems/CameraSystem.hpp"
 #include "systems/RenderDataSystem.hpp"
 #include "systems/TransformSystem.hpp"
@@ -13,10 +14,8 @@ namespace tr {
 class DefaultGameplaySystem : public IGameplaySystem {
 public:
   DefaultGameplaySystem(std::shared_ptr<IEventBus> newEventBus,
-                        std::shared_ptr<CameraSystem> newCameraSystem,
                         std::shared_ptr<AssetManager> newAssetManager,
-                        std::shared_ptr<TransformSystem> newTransformSystem,
-                        std::shared_ptr<RenderDataSystem> newRenderDataSystem);
+                        std::shared_ptr<IActionSystem> newActionSystem);
   ~DefaultGameplaySystem() override;
 
   DefaultGameplaySystem(const DefaultGameplaySystem&) = delete;
@@ -34,16 +33,19 @@ public:
   auto createTerrain() -> void override;
   auto createDefaultCamera() -> void override;
   auto createTestEntity(std::string_view name) -> void override;
+  auto getRegistry() const -> std::shared_ptr<entt::registry> override;
 
 private:
   std::shared_ptr<IEventBus> eventBus;
-  std::shared_ptr<CameraSystem> cameraSystem;
   std::shared_ptr<AssetManager> assetManager;
+  std::shared_ptr<IActionSystem> actionSystem;
+
+  std::shared_ptr<CameraSystem> cameraSystem;
   std::shared_ptr<TransformSystem> transformSystem;
   std::shared_ptr<RenderDataSystem> renderDataSystem;
 
   RenderDataTransferHandler transferHandler;
-  std::unique_ptr<entt::registry> registry;
+  std::shared_ptr<entt::registry> registry;
 
   mutable TracyLockable(std::shared_mutex, registryMutex);
 
