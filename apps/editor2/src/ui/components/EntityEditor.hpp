@@ -5,6 +5,7 @@
 #include "tr/IGameplaySystem.hpp"
 #include "data/DataFacade.hpp"
 #include "ui/components/DialogManager.hpp"
+#include <entt/entity/fwd.hpp>
 
 namespace ed {
 
@@ -15,7 +16,8 @@ public:
   EntityEditor(std::shared_ptr<tr::IGameplaySystem> newGameplaySystem,
                std::shared_ptr<DataFacade> newDataFacade,
                std::shared_ptr<DialogManager> newDialogManager,
-               std::shared_ptr<tr::IEventBus> newEventBus);
+               std::shared_ptr<tr::IEventBus> newEventBus,
+               std::shared_ptr<entt::registry> newRegistry);
   ~EntityEditor();
 
   EntityEditor(const EntityEditor&) = default;
@@ -30,6 +32,7 @@ private:
   std::shared_ptr<DataFacade> dataFacade;
   std::shared_ptr<DialogManager> dialogManager;
   std::shared_ptr<tr::IEventBus> eventBus;
+  std::shared_ptr<entt::registry> registry;
 
   std::optional<tr::EntityType> selectedEntity{std::nullopt};
 

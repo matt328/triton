@@ -132,6 +132,7 @@ void Window::keyCallback(GLFWwindow* window,
   if (action == GLFW_RELEASE) {
     buttonState = tr::ButtonState::Released;
   }
+
   thisWindow->eventBus->emit(tr::KeyEvent{mappedKey, buttonState});
 }
 

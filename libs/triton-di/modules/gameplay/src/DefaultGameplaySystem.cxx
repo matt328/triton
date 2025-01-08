@@ -1,6 +1,7 @@
 #include "gp/DefaultGameplaySystem.hpp"
 #include "commands/CreateStaticEntity.hpp"
 #include "commands/CreateTestEntity.hpp"
+#include "gp/action/IActionSystem.hpp"
 #include "gp/components/Resources.hpp"
 #include "systems/CameraSystem.hpp"
 #include "systems/RenderDataSystem.hpp"
@@ -16,17 +17,17 @@ constexpr auto DefaultFarClip = 10000.f;
 constexpr auto DefaultPosition = glm::vec3{0.f, 0.f, 5.f};
 
 DefaultGameplaySystem::DefaultGameplaySystem(std::shared_ptr<IEventBus> newEventBus,
-                                             std::shared_ptr<CameraSystem> newCameraSystem,
                                              std::shared_ptr<AssetManager> newAssetManager,
-                                             std::shared_ptr<TransformSystem> newTransformSystem,
-                                             std::shared_ptr<RenderDataSystem> newRenderDataSystem)
+                                             std::shared_ptr<IActionSystem> newActionSystem)
     : eventBus{std::move(newEventBus)},
-      cameraSystem{std::move(newCameraSystem)},
       assetManager{std::move(newAssetManager)},
-      transformSystem{std::move(newTransformSystem)},
-      renderDataSystem{std::move(newRenderDataSystem)} {
+      actionSystem{std::move(newActionSystem)} {
 
-  registry = std::make_unique<entt::registry>();
+  registry = std::make_shared<entt::registry>();
+
+  cameraSystem = std::make_shared<CameraSystem>(eventBus, *registry);
+  transformSystem = std::make_shared<TransformSystem>();
+  renderDataSystem = std::make_shared<RenderDataSystem>();
 
   entityCreatedConnection =
       registry->on_construct<entt::entity>().connect<&DefaultGameplaySystem::entityCreated>(this);
@@ -40,7 +41,45 @@ DefaultGameplaySystem::DefaultGameplaySystem(std::shared_ptr<IEventBus> newEvent
     registry->ctx().insert_or_assign<WindowDimensions>(WindowDimensions{event.width, event.height});
   });
 
+  // Forward
+  actionSystem->mapSource(Source{Key::Up, SourceType::Boolean},
+                          StateType::State,
+                          ActionType::MoveForward);
+  actionSystem->mapSource(Source{Key::W, SourceType::Boolean},
+                          StateType::State,
+                          ActionType::MoveForward);
+
+  // Backward
+  actionSystem->mapSource(Source{Key::Down, SourceType::Boolean},
+                          StateType::State,
+                          ActionType::MoveBackward);
+  actionSystem->mapSource(Source{Key::S, SourceType::Boolean},
+                          StateType::State,
+                          ActionType::MoveBackward);
+  // Left
+  actionSystem->mapSource(Source{Key::Left, SourceType::Boolean},
+                          StateType::State,
+                          ActionType::StrafeLeft);
+  actionSystem->mapSource(Source{Key::A, SourceType::Boolean},
+                          StateType::State,
+                          ActionType::StrafeLeft);
+  // Right
+  actionSystem->mapSource(Source{Key::Right, SourceType::Boolean},
+                          StateType::State,
+                          ActionType::StrafeRight);
+  actionSystem->mapSource(Source{Key::D, SourceType::Boolean},
+                          StateType::State,
+                          ActionType::StrafeRight);
+  // Look
+  actionSystem->mapSource(Source{MouseInput::MOVE_X, SourceType::Float},
+                          StateType::Range,
+                          ActionType::LookHorizontal);
+  actionSystem->mapSource(Source{MouseInput::MOVE_Y, SourceType::Float},
+                          StateType::Range,
+                          ActionType::LookVertical);
+
   createTestEntity("test entity #1");
+  createTestEntity("test entity #2");
 }
 
 DefaultGameplaySystem::~DefaultGameplaySystem() {
@@ -127,7 +166,10 @@ auto DefaultGameplaySystem::createDefaultCamera() -> void {
 auto DefaultGameplaySystem::createTestEntity([[maybe_unused]] std::string_view name) -> void {
   Log.trace("Creating test entity: {}", name.data());
   commandQueue->enqueue(std::make_unique<CreateTestEntityCommand>(name));
-  commandQueue->enqueue(std::make_unique<CreateTestEntityCommand>(name));
+}
+
+auto DefaultGameplaySystem::getRegistry() const -> std::shared_ptr<entt::registry> {
+  return registry;
 }
 
 auto DefaultGameplaySystem::entityCreated([[maybe_unused]] entt::registry& reg,
