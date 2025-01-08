@@ -21,9 +21,13 @@ public:
 
     auto modelData = assetManager->loadModel(modelFilename);
 
+    auto transform = Transform{.rotation = glm::zero<glm::vec3>(),
+                               .position = {0.f, 0.f, -35.f},
+                               .transformation = glm::identity<glm::mat4>()};
+
     const auto entity = registry.create();
     registry.emplace<Renderable>(entity, std::vector{modelData.meshData});
-    registry.emplace<Transform>(entity);
+    registry.emplace<Transform>(entity, transform);
     registry.emplace<EditorInfo>(entity, entityName);
   }
 

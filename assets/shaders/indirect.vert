@@ -41,17 +41,17 @@ layout(buffer_reference, std430) readonly buffer CameraDataBuffer {
 
 void main() {
 
-  // ObjectDataBuffer objectDataBuffer = ObjectDataBuffer(pc.objectDataAddress);
+  ObjectDataBuffer objectDataBuffer = ObjectDataBuffer(pc.objectDataAddress);
 
-  // if (gl_InstanceIndex >= pc.objectDataLength) {
-  //   return;
-  // }
+  if (gl_InstanceIndex >= pc.objectDataLength) {
+    return;
+  }
 
-  // CameraDataBuffer camData = CameraDataBuffer(pc.cameraDataAddress);
+  CameraDataBuffer camData = CameraDataBuffer(pc.cameraDataAddress);
 
-  // mat4 model = objectDataBuffer.objectData[gl_InstanceIndex].modelMatrix;
-  // vec4 worldPos = camData.proj * camData.view * model * vec4(inPosition, 1.0);
+  mat4 model = objectDataBuffer.objectData[gl_InstanceIndex].modelMatrix;
+  vec4 worldPos = camData.proj * camData.view * model * vec4(inPosition, 1.0);
 
-  gl_Position = vec4(inPosition, 1.0);
+  gl_Position = worldPos;
   fragColor = inColor;
 }
