@@ -2,6 +2,7 @@
 #include "cm/IndirectPushConstants.hpp"
 #include "task/Frame.hpp"
 #include "vk/VkResourceManager.hpp"
+#include <vulkan/vulkan_structs.hpp>
 
 namespace tr {
 
@@ -11,11 +12,6 @@ IndirectRenderTask::IndirectRenderTask(std::shared_ptr<VkResourceManager> newRes
 }
 
 /* TODO(matt)
- Then make sure the compute shader is producing the correct DrawCommands
- - no not even close.
-
- - for some reason there are 278 GpuBufferEntries in the buffer
-
  Then rename GpuBufferEntry.instanceID to objectDataId and use that in the vertex shader to hook up
  the model matrix
  Try just having a system rotate the cube entity so the model matrix changes each frame.
@@ -28,8 +24,9 @@ auto IndirectRenderTask::record(vk::raii::CommandBuffer& commandBuffer, const Fr
   auto& cameraDataBuffer = resourceManager->getBuffer(frame.getCameraBufferHandle());
 
   pushConstants = IndirectPushConstants{.drawID = 0,
-                                        .baseAddress = objectDataBuffer.getDeviceAddress(),
-                                        .cameraDataAddress = cameraDataBuffer.getDeviceAddress()};
+                                        .objectDataAddress = objectDataBuffer.getDeviceAddress(),
+                                        .cameraDataAddress = cameraDataBuffer.getDeviceAddress(),
+                                        .objectDataLength = 2};
 
   // Bind the graphics pipeline
   commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline->getPipeline());
@@ -43,11 +40,13 @@ auto IndirectRenderTask::record(vk::raii::CommandBuffer& commandBuffer, const Fr
                                                      0,
                                                      pushConstants);
 
+  [[maybe_unused]] vk::DrawIndexedIndirectCommand f{};
+
   auto& indirectBuffer = resourceManager->getBuffer(frame.getDrawCommandBufferHandle());
 
   commandBuffer.drawIndexedIndirect(indirectBuffer.getBuffer(),
                                     0,
-                                    1,
+                                    2,
                                     sizeof(vk::DrawIndexedIndirectCommand));
 }
 

@@ -8,6 +8,7 @@
 #include "task/Frame.hpp"
 #include "task/IRenderTask.hpp"
 #include "vk/MeshBufferManager.hpp"
+#include <vulkan/vulkan_enums.hpp>
 #include <vulkan/vulkan_structs.hpp>
 
 namespace tr {
@@ -161,7 +162,7 @@ auto DefaultRenderScheduler::updatePerFrameRenderData(Frame& frame, const Render
   cameraDataBuffer.unmapBuffer();
 }
 
-auto DefaultRenderScheduler::recordRenderTasks(Frame& frame) const -> void {
+auto DefaultRenderScheduler::recordRenderTasks(Frame& frame, bool recordCommands) const -> void {
   ZoneNamedN(var, "Record Command Buffers", true);
   {
     ZoneNamedN(var, "Start", true);
@@ -178,7 +179,7 @@ auto DefaultRenderScheduler::recordRenderTasks(Frame& frame) const -> void {
     startCmd.end();
   }
 
-  {
+  if (recordCommands) {
     ZoneNamedN(var, "RenderTasks", true);
     executeTasks(frame);
   }
@@ -259,7 +260,7 @@ auto DefaultRenderScheduler::executeTasks(Frame& frame) const -> void {
 
   {
     ZoneNamedN(var, "IndirectRenderTask", true);
-    // indirectRenderTask->record(commandBuffer, frame);
+    indirectRenderTask->record(commandBuffer, frame);
   }
 
   commandBuffer.endRendering();
