@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cm/RenderData.hpp"
+#include "cm/RenderMeshData.hpp"
 #include "geo/GeometryData.hpp"
 #include "cm/Handles.hpp"
 #include "ResourceManagerHandles.hpp"
