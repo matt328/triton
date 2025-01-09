@@ -23,7 +23,7 @@ struct GpuBufferEntry {
   uint32_t vertexOffset;
   uint32_t instanceCount;
   uint32_t firstInstance;
-  uint32_t objectDataId;
+  uint32_t padding;
 };
 
 class VkResourceManager;

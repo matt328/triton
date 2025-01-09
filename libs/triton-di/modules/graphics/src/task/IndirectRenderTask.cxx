@@ -1,13 +1,17 @@
 #include "IndirectRenderTask.hpp"
 #include "cm/IndirectPushConstants.hpp"
+#include "gfx/RenderContextConfig.hpp"
 #include "task/Frame.hpp"
 #include "vk/VkResourceManager.hpp"
 
 namespace tr {
 
 IndirectRenderTask::IndirectRenderTask(std::shared_ptr<VkResourceManager> newResourceManager,
-                                       std::shared_ptr<IndirectPipeline> newPipeline)
-    : resourceManager{std::move(newResourceManager)}, pipeline{std::move(newPipeline)} {
+                                       std::shared_ptr<IndirectPipeline> newPipeline,
+                                       RenderContextConfig newConfig)
+    : resourceManager{std::move(newResourceManager)},
+      pipeline{std::move(newPipeline)},
+      config{newConfig} {
 }
 
 auto IndirectRenderTask::record(vk::raii::CommandBuffer& commandBuffer, const Frame& frame)
@@ -18,8 +22,7 @@ auto IndirectRenderTask::record(vk::raii::CommandBuffer& commandBuffer, const Fr
 
   pushConstants = IndirectPushConstants{.drawID = 0,
                                         .objectDataAddress = objectDataBuffer.getDeviceAddress(),
-                                        .cameraDataAddress = cameraDataBuffer.getDeviceAddress(),
-                                        .objectDataLength = 2};
+                                        .cameraDataAddress = cameraDataBuffer.getDeviceAddress()};
 
   // Bind the graphics pipeline
   commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline->getPipeline());
@@ -42,7 +45,7 @@ auto IndirectRenderTask::record(vk::raii::CommandBuffer& commandBuffer, const Fr
                                          0,
                                          countBuffer.getBuffer(),
                                          0,
-                                         2,
+                                         config.maxStaticObjects,
                                          sizeof(vk::DrawIndexedIndirectCommand));
 }
 

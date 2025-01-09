@@ -3,6 +3,7 @@
 #include "IRenderTask.hpp"
 #include "cm/Handles.hpp"
 #include "cm/IndirectPushConstants.hpp"
+#include "gfx/RenderContextConfig.hpp"
 #include "pipeline/IndirectPipeline.hpp"
 
 namespace tr {
@@ -13,7 +14,8 @@ class VkResourceManager;
 class IndirectRenderTask final : public IRenderTask {
 public:
   IndirectRenderTask(std::shared_ptr<VkResourceManager> newResourceManager,
-                     std::shared_ptr<IndirectPipeline> newPipeline);
+                     std::shared_ptr<IndirectPipeline> newPipeline,
+                     RenderContextConfig newConfig);
 
   ~IndirectRenderTask() override = default;
 
@@ -34,6 +36,7 @@ public:
 private:
   std::shared_ptr<VkResourceManager> resourceManager;
   std::shared_ptr<IndirectPipeline> pipeline;
+  RenderContextConfig config;
 
   [[maybe_unused]] MeshHandle meshHandle = -1;
 

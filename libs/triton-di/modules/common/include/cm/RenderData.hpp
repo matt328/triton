@@ -7,13 +7,11 @@ namespace tr {
 struct GpuMeshData {
   MeshHandle handle{};
   Topology topology{Topology::Triangles};
-  uint32_t objectDataId{};
 
   friend void swap(GpuMeshData& first, GpuMeshData& second) noexcept {
     using std::swap;
     swap(first.handle, second.handle);
     swap(first.topology, second.topology);
-    swap(first.objectDataId, second.objectDataId);
   }
 };
 
@@ -30,7 +28,6 @@ struct RenderData {
   std::vector<GpuMeshData> terrainMeshData;
   std::vector<GpuMeshData> skinnedMeshData;
   std::vector<GpuAnimationData> animationData;
-  std::unordered_map<size_t, std::vector<GpuInstanceData>> instanceData;
 
   std::vector<GpuMeshData> staticGpuMeshData;
 };

@@ -11,8 +11,6 @@
 
 namespace tr {
 
-constexpr auto BufferEntryCount = 1000;
-
 DefaultRenderScheduler::DefaultRenderScheduler(
     std::shared_ptr<IFrameManager> newFrameManager,
     std::shared_ptr<CommandBufferManager> newCommandBufferManager,
@@ -59,7 +57,7 @@ DefaultRenderScheduler::DefaultRenderScheduler(
     {
       const auto name = frame->getIndexedName("Buffer-GpuBufferEntry-Frame_");
       const auto handle = resourceManager->createBuffer(
-          sizeof(GpuBufferEntry) * BufferEntryCount,
+          sizeof(GpuBufferEntry) * rendererConfig.maxStaticObjects,
           vk::BufferUsageFlagBits::eStorageBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress,
           name);
 
@@ -75,7 +73,8 @@ DefaultRenderScheduler::DefaultRenderScheduler(
     {
       const auto name = frame->getIndexedName("Buffer-DrawCommand-Frame_");
       const auto handle = resourceManager->createBuffer(
-          sizeof(vk::DrawIndexedIndirectCommand) * 2, // Size this buffer to max_objects?
+          sizeof(vk::DrawIndexedIndirectCommand) *
+              rendererConfig.maxStaticObjects, // Size this buffer to max_objects?
           vk::BufferUsageFlagBits::eIndirectBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress,
           name);
       frame->setDrawCommandBufferHandle(handle);
@@ -91,7 +90,7 @@ DefaultRenderScheduler::DefaultRenderScheduler(
     {
       const auto name = frame->getIndexedName("Buffer-ObjectData-Frame_");
       const auto handle = resourceManager->createBuffer(
-          sizeof(ObjectData) * BufferEntryCount,
+          sizeof(ObjectData) * rendererConfig.maxStaticObjects,
           vk::BufferUsageFlagBits::eIndirectBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress,
           name);
       frame->setObjectDataBufferHandle(handle);
