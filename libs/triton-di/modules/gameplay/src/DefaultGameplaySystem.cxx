@@ -79,7 +79,6 @@ DefaultGameplaySystem::DefaultGameplaySystem(std::shared_ptr<IEventBus> newEvent
                           ActionType::LookVertical);
 
   createTestEntity("test entity #1");
-  createTestEntity("test entity #2");
 }
 
 DefaultGameplaySystem::~DefaultGameplaySystem() {

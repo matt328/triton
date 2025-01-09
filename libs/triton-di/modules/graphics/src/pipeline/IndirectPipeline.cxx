@@ -77,6 +77,7 @@ IndirectPipeline::IndirectPipeline(const std::shared_ptr<Device>& device,
   constexpr auto rasterizer = vk::PipelineRasterizationStateCreateInfo{
       .polygonMode = vk::PolygonMode::eFill,
       .cullMode = vk::CullModeFlagBits::eBack,
+      .frontFace = vk::FrontFace::eCounterClockwise,
       .lineWidth = 1.f,
   };
 
