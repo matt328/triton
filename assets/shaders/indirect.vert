@@ -17,7 +17,6 @@ layout(push_constant) uniform PushConstants {
   uint drawID;
   uint64_t objectDataAddress;
   uint64_t cameraDataAddress;
-  uint objectDataLength;
 }
 pc;
 
@@ -42,10 +41,6 @@ layout(buffer_reference, std430) readonly buffer CameraDataBuffer {
 void main() {
 
   ObjectDataBuffer objectDataBuffer = ObjectDataBuffer(pc.objectDataAddress);
-
-  if (gl_InstanceIndex >= pc.objectDataLength) {
-    return;
-  }
 
   CameraDataBuffer camData = CameraDataBuffer(pc.cameraDataAddress);
 

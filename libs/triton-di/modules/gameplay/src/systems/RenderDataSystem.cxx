@@ -31,18 +31,15 @@ auto RenderDataSystem::update(entt::registry& registry, RenderData& renderData) 
     const auto isTerrainEntity = registry.any_of<TerrainMarker>(entity);
 
     for (const auto& [meshHandle, topology, textureHandle] : renderable.meshData) {
-      const auto objectDataPosition = renderData.objectData.size();
       if (isTerrainEntity) {
         if (topology == Topology::Triangles) {
-          renderData.terrainMeshData.emplace_back(meshHandle,
-                                                  Topology::Triangles,
-                                                  objectDataPosition);
+          renderData.terrainMeshData.emplace_back(meshHandle, Topology::Triangles);
         } else if (topology == Topology::LineList) {
-          renderData.staticMeshData.emplace_back(meshHandle, topology, objectDataPosition);
+          renderData.staticMeshData.emplace_back(meshHandle, topology);
           renderData.objectData.emplace_back(transform.transformation, textureHandle);
         }
       } else {
-        renderData.staticGpuMeshData.emplace_back(meshHandle, topology, objectDataPosition);
+        renderData.staticGpuMeshData.emplace_back(meshHandle, topology);
         renderData.objectData.emplace_back(transform.transformation, textureHandle);
       }
     }
@@ -71,8 +68,7 @@ auto RenderDataSystem::update(entt::registry& registry, RenderData& renderData) 
 
     // Add everything to the RenderData struct
     for (const auto& [meshHandle, topology, textureHandle] : renderable.meshData) {
-      const auto objectDataPosition = renderData.objectData.size();
-      renderData.skinnedMeshData.emplace_back(meshHandle, topology, objectDataPosition);
+      renderData.skinnedMeshData.emplace_back(meshHandle, topology);
       renderData.objectData.emplace_back(transform.transformation,
                                          textureHandle,
                                          jointMatricesIndex);

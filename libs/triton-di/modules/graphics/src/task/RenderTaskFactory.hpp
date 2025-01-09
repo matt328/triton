@@ -1,5 +1,6 @@
 #pragma once
 
+#include "gfx/RenderContextConfig.hpp"
 #include "pipeline/IndirectPipeline.hpp"
 #include "task/ComputeTask.hpp"
 #include "task/IndirectRenderTask.hpp"
@@ -10,7 +11,8 @@ namespace tr {
 class RenderTaskFactory {
 public:
   RenderTaskFactory(std::shared_ptr<VkResourceManager> newResourceManager,
-                    std::shared_ptr<IndirectPipeline> newIndirectPipeline);
+                    std::shared_ptr<IndirectPipeline> newIndirectPipeline,
+                    RenderContextConfig newConfig);
   ~RenderTaskFactory() = default;
 
   RenderTaskFactory(RenderTaskFactory&&) = delete;
@@ -25,6 +27,7 @@ public:
 private:
   std::shared_ptr<VkResourceManager> resourceManager;
   std::shared_ptr<IndirectPipeline> indirectPipeline;
+  RenderContextConfig config;
 };
 
 }

@@ -99,8 +99,7 @@ auto MeshBufferManager::getGpuBufferEntries(const std::vector<GpuMeshData>& mesh
                                               .firstIndex = bufferEntry.firstIndex,
                                               .vertexOffset = bufferEntry.vertexOffset,
                                               .instanceCount = 1,
-                                              .firstInstance = 0,
-                                              .objectDataId = meshData.objectDataId});
+                                              .firstInstance = 0});
   }
 
   return instanceDataList;
