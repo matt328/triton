@@ -52,103 +52,49 @@ auto AssetManager::createCube() -> ModelData {
 
 auto AssetManager::generateAABB(const glm::vec3& min, const glm::vec3& max) -> GeometryHandle {
 
-  /*
+  auto vertices = std::vector<as::Vertex>{{{
+                                               // 0
+                                               .pos = {min.x, min.y, min.z},
+                                               .color = {0.f, 0.f, 1.f, 1.f},
+                                           },
+                                           {
+                                               // 1
+                                               .pos = {max.x, min.y, min.z},
+                                               .color = {1.f, 1.f, 0.f, 1.f},
+                                           },
+                                           {
+                                               // 2
+                                               .pos = {max.x, max.y, min.z},
+                                               .color = {0.f, 1.f, 0.f, 1.f},
+                                           },
+                                           {
+                                               // 3
+                                               .pos = {min.x, max.y, min.z},
+                                               .color = {1.f, 0.f, 0.f, 1.f},
+                                           },
+                                           {
+                                               // 4
+                                               .pos = {min.x, min.y, max.z},
+                                               .color = {0.f, 1.f, 1.f, 1.f},
+                                           },
+                                           {
+                                               // 5
+                                               .pos = {max.x, min.y, max.z},
+                                               .color = {1.f, 0.f, 1.f, 1.f},
+                                           },
+                                           {
+                                               // 6
+                                               .pos = {max.x, max.y, max.z},
+                                               .color = {1.f, 1.f, 1.f, 1.f},
+                                           },
+                                           {
+                                               // 7
+                                               .pos = {min.x, max.y, max.z},
+                                               .color = {0.f, 0.f, 0.f, 1.f},
+                                           }}};
 
-    vertices in the vertex buffer are not including tangent data for some reason.
-
-  */
-
-  auto vertices = std::vector<as::Vertex>{{{.pos = {min.x, min.y, min.z},
-                                            .uv = {1.f, 2.f},
-                                            .color = {1.f, 1.f, 1.f, 1.f},
-                                            .joint0 = {1, 2, 3, 4},
-                                            .weight0 = {1.f, 2.f, 3.f, 4.f},
-                                            .tangent = {11.f, 12.f, 13.f, 14.f}},
-                                           {.pos = {max.x, min.y, min.z},
-                                            .uv = {3.f, 4.f},
-                                            .color = {0.f, 1.f, 1.f, 1.f},
-                                            .joint0 = {5, 6, 7, 8},
-                                            .weight0 = {1.f, 2.f, 3.f, 4.f},
-                                            .tangent = {11.f, 12.f, 13.f, 14.f}},
-                                           {.pos = {max.x, max.y, min.z},
-                                            .uv = {5.f, 6.f},
-                                            .color = {1.f, 0.f, 1.f, 1.f},
-                                            .joint0 = {9, 10, 11, 12},
-                                            .weight0 = {1.f, 2.f, 3.f, 4.f},
-                                            .tangent = {11.f, 12.f, 13.f, 14.f}},
-                                           {.pos = {min.x, max.y, min.z},
-                                            .uv = {7.f, 8.f},
-                                            .color = {1.f, 1.f, 0.f, 1.f},
-                                            .joint0 = {13, 14, 15, 16},
-                                            .weight0 = {1.f, 2.f, 3.f, 4.f},
-                                            .tangent = {11.f, 12.f, 13.f, 14.f}},
-                                           {.pos = {min.x, min.y, max.z},
-                                            .uv = {9.f, 10.f},
-                                            .color = {1.f, 1.f, 1.f, 1.f},
-                                            .joint0 = {17, 18, 19, 20},
-                                            .weight0 = {1.f, 2.f, 3.f, 4.f},
-                                            .tangent = {11.f, 12.f, 13.f, 14.f}},
-                                           {.pos = {max.x, min.y, max.z},
-                                            .uv = {11.f, 12.f},
-                                            .color = {1.f, 1.f, 1.f, 1.f},
-                                            .joint0 = {21, 22, 23, 24},
-                                            .weight0 = {1.f, 2.f, 3.f, 4.f},
-                                            .tangent = {11.f, 12.f, 13.f, 14.f}},
-                                           {.pos = {max.x, max.y, max.z},
-                                            .uv = {13.f, 14.f},
-                                            .color = {1.f, 1.f, 1.f, 1.f},
-                                            .joint0 = {25, 26, 27, 28},
-                                            .weight0 = {1.f, 2.f, 3.f, 4.f},
-                                            .tangent = {11.f, 12.f, 13.f, 14.f}},
-                                           {.pos = {min.x, max.y, max.z},
-                                            .uv = {15.f, 16.f},
-                                            .color = {1.f, 1.f, 1.f, 1.f},
-                                            .joint0 = {30, 31, 32, 33},
-                                            .weight0 = {1.f, 2.f, 3.f, 4.f},
-                                            .tangent = {11.f, 12.f, 13.f, 14.f}}}};
-
-  std::vector<uint32_t> indices = {// Back face
-                                   0,
-                                   1,
-                                   2,
-                                   2,
-                                   3,
-                                   0,
-                                   // Front face
-                                   4,
-                                   5,
-                                   6,
-                                   6,
-                                   7,
-                                   4,
-                                   // Left face
-                                   0,
-                                   4,
-                                   7,
-                                   7,
-                                   3,
-                                   0,
-                                   // Right face
-                                   1,
-                                   5,
-                                   6,
-                                   6,
-                                   2,
-                                   1,
-                                   // Bottom face
-                                   0,
-                                   1,
-                                   5,
-                                   5,
-                                   4,
-                                   0,
-                                   // Top face
-                                   3,
-                                   2,
-                                   6,
-                                   6,
-                                   7,
-                                   3};
+  std::vector<uint32_t> indices = {0, 2, 1, 0, 3, 2, 0, 4, 3, 4, 7, 3, 4, 5, 7, 5, 6, 7,
+                                   5, 1, 6, 1, 2, 6, 1, 5, 4, 1, 4, 0, 7, 2, 3, 7, 6, 2};
 
   const auto key = geometryKey.getKey();
   auto geometryHandle = GeometryHandle{key, Topology::LineList};
