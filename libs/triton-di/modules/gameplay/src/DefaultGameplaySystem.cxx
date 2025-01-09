@@ -78,7 +78,8 @@ DefaultGameplaySystem::DefaultGameplaySystem(std::shared_ptr<IEventBus> newEvent
                           StateType::Range,
                           ActionType::LookVertical);
 
-  createTestEntity("test entity #1");
+  createTestEntity("Test Cube #1");
+  createTestEntity("Test Cube #2");
 }
 
 DefaultGameplaySystem::~DefaultGameplaySystem() {

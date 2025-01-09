@@ -138,11 +138,13 @@ DefaultRenderScheduler::~DefaultRenderScheduler() {
   Log.trace("Destroying DefaultRenderScheduler");
 }
 
-auto DefaultRenderScheduler::updatePerFrameRenderData(Frame& frame,
-                                                      const RenderData& renderData) -> void {
+auto DefaultRenderScheduler::updatePerFrameRenderData(Frame& frame, const RenderData& renderData)
+    -> void {
   // Update GpuBufferEntriesBuffer
   const auto gpuBufferEntryList = resourceManager->getStaticGpuData(renderData.staticGpuMeshData);
+
   auto& gpuBufferEntriesBuffer = resourceManager->getBuffer(frame.getGpuBufferEntryBufferHandle());
+
   gpuBufferEntriesBuffer.mapBuffer();
   gpuBufferEntriesBuffer.updateBufferValue(gpuBufferEntryList.data(),
                                            sizeof(GpuBufferEntry) * gpuBufferEntryList.size());

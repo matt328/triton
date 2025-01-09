@@ -1,4 +1,4 @@
-#version 450
+#version 460
 #extension GL_EXT_buffer_reference : enable
 #extension GL_EXT_shader_explicit_arithmetic_types_int64 : enable
 #extension GL_EXT_shader_explicit_arithmetic_types : require
@@ -49,7 +49,7 @@ void main() {
 
   CameraDataBuffer camData = CameraDataBuffer(pc.cameraDataAddress);
 
-  mat4 model = objectDataBuffer.objectData[gl_InstanceIndex].modelMatrix;
+  mat4 model = objectDataBuffer.objectData[gl_DrawID].modelMatrix;
   vec4 worldPos = camData.proj * camData.view * model * vec4(inPosition, 1.0);
 
   gl_Position = worldPos;
