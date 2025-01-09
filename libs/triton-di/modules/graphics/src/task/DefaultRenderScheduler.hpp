@@ -1,6 +1,7 @@
 #pragma once
 
 #include "cm/ImGuiSystem.hpp"
+#include "cm/RenderData.hpp"
 #include "gfx/RenderContextConfig.hpp"
 #include "tr/IGuiSystem.hpp"
 #include "vk/CommandBufferManager.hpp"
