@@ -93,7 +93,7 @@ auto Frame::getDrawCommandBufferHandle() const -> BufferHandle {
   return drawCommandBuffer;
 }
 
-auto Frame::getObjectDataBufferHandle() const -> BufferHandle {
+auto Frame::getGpuObjectDataBufferHandle() const -> BufferHandle {
   return objectDataBuffer;
 }
 
@@ -137,7 +137,7 @@ auto Frame::setGpuBufferEntryBufferHandle(BufferHandle handle) -> void {
   gpuBufferEntryBuffer = handle;
 }
 
-auto Frame::setObjectDataBufferHandle(BufferHandle handle) -> void {
+auto Frame::setGpuObjectDataBufferHandle(BufferHandle handle) -> void {
   objectDataBuffer = handle;
 }
 

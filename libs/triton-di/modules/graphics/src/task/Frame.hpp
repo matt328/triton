@@ -36,7 +36,7 @@ public:
 
   [[nodiscard]] auto getGpuBufferEntryBufferHandle() const -> BufferHandle;
   [[nodiscard]] auto getDrawCommandBufferHandle() const -> BufferHandle;
-  [[nodiscard]] auto getObjectDataBufferHandle() const -> BufferHandle;
+  [[nodiscard]] auto getGpuObjectDataBufferHandle() const -> BufferHandle;
   [[nodiscard]] auto getCameraBufferHandle() const -> BufferHandle;
   [[nodiscard]] auto getCountBufferHandle() const -> BufferHandle;
 
@@ -49,7 +49,7 @@ public:
 
   auto setGpuBufferEntryBufferHandle(BufferHandle handle) -> void;
   auto setDrawCommandBufferHandle(BufferHandle handle) -> void;
-  auto setObjectDataBufferHandle(BufferHandle handle) -> void;
+  auto setGpuObjectDataBufferHandle(BufferHandle handle) -> void;
   auto setCameraBufferHandle(BufferHandle handle) -> void;
   auto setCountBufferHandle(BufferHandle handle) -> void;
 
