@@ -95,7 +95,8 @@ auto PhysicalDevice::createDevice() -> std::unique_ptr<vk::raii::Device> {
   physicalFeatures2.features.samplerAnisotropy = VK_TRUE;
 
   auto physicalVulkan12Features = vk12Features.get<vk::PhysicalDeviceVulkan12Features>();
-  physicalVulkan12Features.shaderInt8 = VK_TRUE;
+  physicalVulkan12Features.drawIndirectCount = VK_TRUE;
+  physicalVulkan12Features.bufferDeviceAddress = VK_TRUE;
 
   vk::DeviceCreateInfo createInfo{
       .queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size()),
@@ -112,17 +113,12 @@ auto PhysicalDevice::createDevice() -> std::unique_ptr<vk::raii::Device> {
   constexpr auto extendedDynamicStateFeatures =
       vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT{.extendedDynamicState = VK_TRUE};
 
-  constexpr auto bdaFeatures =
-      vk::PhysicalDeviceBufferDeviceAddressFeaturesKHR{.bufferDeviceAddress = VK_TRUE};
-
   const vk::StructureChain c{createInfo,
                              physicalFeatures2,
+                             physicalVulkan12Features,
                              drawParamsFeatures,
-                             indexingFeatures,
                              dynamicRenderingFeatures,
-                             // dbFeatures,
-                             extendedDynamicStateFeatures,
-                             bdaFeatures};
+                             extendedDynamicStateFeatures};
 
   return std::make_unique<vk::raii::Device>(physicalDevice->createDevice(c.get(), nullptr));
 }

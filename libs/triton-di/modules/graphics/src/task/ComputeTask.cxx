@@ -15,6 +15,7 @@ auto ComputeTask::record(vk::raii::CommandBuffer& commandBuffer, const Frame& fr
   auto& gpuBufferEntryBuffer = resourceManager->getBuffer(frame.getGpuBufferEntryBufferHandle());
   auto& objectDataBuffer = resourceManager->getBuffer(frame.getObjectDataBufferHandle());
   auto& drawCommandBuffer = resourceManager->getBuffer(frame.getDrawCommandBufferHandle());
+  auto& countBuffer = resourceManager->getBuffer(frame.getCountBufferHandle());
 
   const auto& computePipeline = resourceManager->getPipeline(pipelineHandle);
 
@@ -25,8 +26,8 @@ auto ComputeTask::record(vk::raii::CommandBuffer& commandBuffer, const Frame& fr
       .drawCommandBufferAddress = drawCommandBuffer.getDeviceAddress(),
       .gpuBufferEntryBufferAddress = gpuBufferEntryBuffer.getDeviceAddress(),
       .objectDataBufferAddress = objectDataBuffer.getDeviceAddress(),
-      .instanceDataLength = 2,
-      // TODO(matt) put this instance data length somewhere
+      .countBufferAddress = countBuffer.getDeviceAddress(),
+      .instanceDataLength = 2, // TODO(matt) hardcoded object size here
   };
 
   commandBuffer.pushConstants<ComputePushConstants>(computePipeline.getPipelineLayout(),

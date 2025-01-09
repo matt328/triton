@@ -8,8 +8,6 @@
 #include "task/Frame.hpp"
 #include "task/IRenderTask.hpp"
 #include "vk/MeshBufferManager.hpp"
-#include <vulkan/vulkan_enums.hpp>
-#include <vulkan/vulkan_structs.hpp>
 
 namespace tr {
 
@@ -114,6 +112,23 @@ DefaultRenderScheduler::DefaultRenderScheduler(
       cameraDataBuffer.unmapBuffer();
 
       frame->setCameraBufferHandle(handle);
+    }
+
+    // Object Count Buffer
+    {
+      const auto name = frame->getIndexedName("Buffer-Count-Frame_");
+      const auto handle = resourceManager->createBuffer(
+          sizeof(uint32_t),
+          vk::BufferUsageFlagBits::eIndirectBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress,
+          name);
+      auto& countBuffer = resourceManager->getBuffer(handle);
+
+      uint32_t count = 0;
+      countBuffer.mapBuffer();
+      countBuffer.updateBufferValue(&count, sizeof(uint32_t));
+      countBuffer.unmapBuffer();
+
+      frame->setCountBufferHandle(handle);
     }
     frame->setupRenderingInfo(resourceManager);
   }
@@ -235,25 +250,48 @@ auto DefaultRenderScheduler::executeTasks(Frame& frame) const -> void {
     computeTask->record(commandBuffer, frame);
   }
 
-  auto& indirectBuffer = resourceManager->getBuffer(frame.getDrawCommandBufferHandle());
+  {
+    auto& indirectBuffer = resourceManager->getBuffer(frame.getDrawCommandBufferHandle());
 
-  // Insert a memory barrier for the buffer the computeTask writes to
-  vk::BufferMemoryBarrier bufferMemoryBarrier{
-      .srcAccessMask = vk::AccessFlagBits::eShaderWrite,
-      .dstAccessMask = vk::AccessFlagBits::eIndirectCommandRead,
-      .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-      .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-      .buffer = indirectBuffer.getBuffer(),
-      .offset = 0,
-      .size = VK_WHOLE_SIZE,
-  };
+    // Insert a memory barrier for the buffer the computeTask writes to
+    vk::BufferMemoryBarrier bufferMemoryBarrier{
+        .srcAccessMask = vk::AccessFlagBits::eShaderWrite,
+        .dstAccessMask = vk::AccessFlagBits::eIndirectCommandRead,
+        .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+        .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+        .buffer = indirectBuffer.getBuffer(),
+        .offset = 0,
+        .size = VK_WHOLE_SIZE,
+    };
 
-  commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eComputeShader,
-                                vk::PipelineStageFlagBits::eDrawIndirect,
-                                vk::DependencyFlags{},
-                                nullptr,
-                                bufferMemoryBarrier,
-                                nullptr);
+    commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eComputeShader,
+                                  vk::PipelineStageFlagBits::eDrawIndirect,
+                                  vk::DependencyFlags{},
+                                  nullptr,
+                                  bufferMemoryBarrier,
+                                  nullptr);
+  }
+
+  {
+    auto& countBuffer = resourceManager->getBuffer(frame.getCountBufferHandle());
+    // Insert a memory barrier for the buffer the computeTask writes to
+    vk::BufferMemoryBarrier countBufferBarrier{
+        .srcAccessMask = vk::AccessFlagBits::eShaderWrite,
+        .dstAccessMask = vk::AccessFlagBits::eIndirectCommandRead,
+        .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+        .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+        .buffer = countBuffer.getBuffer(),
+        .offset = 0,
+        .size = VK_WHOLE_SIZE,
+    };
+
+    commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eComputeShader,
+                                  vk::PipelineStageFlagBits::eDrawIndirect,
+                                  vk::DependencyFlags{},
+                                  nullptr,
+                                  countBufferBarrier,
+                                  nullptr);
+  }
 
   const auto renderingInfo = frame.getRenderingInfo();
 
