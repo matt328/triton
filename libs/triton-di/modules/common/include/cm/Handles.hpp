@@ -2,25 +2,20 @@
 
 namespace tr {
 using TextureHandle = size_t;
+
+/// Opaque Handle to a BufferEntry, which, in turn, is a handle to a region of a Vertex and Index
+/// Buffer owned by the ResourceManager
 using MeshHandle = size_t;
-using MaterialHandle = uint32_t;
-using ModelInfoHandle = uint32_t;
-using JointMatricesHandle = uint32_t;
-using MeshMaterialHandle = std::unordered_map<MaterialHandle, std::vector<MeshHandle>>;
 
 using SkeletonHandle = uint64_t;
 using AnimationHandle = uint64_t;
-
-struct LoadedModelData {
-  MeshHandle meshHandle{};
-  TextureHandle textureHandle{};
-};
 
 enum class Topology : uint8_t {
   Triangles = 0,
   LineList = 1
 };
 
+/// Combination of MeshHandle, Topology, and a TextureHandle
 struct MeshData {
   MeshHandle meshHandle{};
   Topology topology{Topology::Triangles};
@@ -37,14 +32,11 @@ struct AnimationData {
   AnimationHandle animationHandle{};
 };
 
+/// Mesh and Optional Skin and Animation Data
 struct ModelData {
   MeshData meshData{};
   std::optional<SkinData> skinData;
   std::optional<AnimationData> animationData;
 };
 
-struct GroupHandle {
-  size_t meshId;
-  size_t instanceId;
-};
 }

@@ -385,7 +385,7 @@ auto VkResourceManager::createComputePipeline([[maybe_unused]] std::string_view 
 /// These are passed to the compute shader to get turned into DrawCommands and placed in the
 /// DrawIndexedIndirect buffer
 [[nodiscard]] auto VkResourceManager::getStaticGpuData(
-    const std::vector<GpuMeshData>& gpuBufferData) -> std::vector<GpuBufferEntry> {
+    const std::vector<RenderMeshData>& gpuBufferData) -> std::vector<GpuBufferEntry> {
   return staticMeshBufferManager->getGpuBufferEntries(gpuBufferData);
 }
 

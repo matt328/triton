@@ -86,24 +86,24 @@ auto MeshBufferManager::getIndexBufferHandle() const -> BufferHandle {
 auto MeshBufferManager::removeMesh([[maybe_unused]] MeshHandle meshHandle) -> void {
 }
 
-/// RenderDataSystem combines meshHandles and other data from the entities into GpuMeshData
+/// RenderDataSystem combines meshHandles and other data from the entities into RenderMeshData
 /// and the RenderData contains a list of them.
-auto MeshBufferManager::getGpuBufferEntries(const std::vector<GpuMeshData>& meshDataList)
+auto MeshBufferManager::getGpuBufferEntries(const std::vector<RenderMeshData>& meshDataList)
     -> std::vector<GpuBufferEntry> {
 
-  auto instanceDataList = std::vector<GpuBufferEntry>{};
+  auto gpuBufferEntryList = std::vector<GpuBufferEntry>{};
 
   for (const auto& meshData : meshDataList) {
     const auto& bufferEntry = bufferEntries[meshData.handle];
-    instanceDataList.push_back(GpuBufferEntry{.indexCount = bufferEntry.indexCount,
-                                              .firstIndex = bufferEntry.firstIndex,
-                                              .vertexOffset = bufferEntry.vertexOffset,
-                                              .instanceCount = 1,
-                                              .firstInstance = 0,
-                                              .padding = 0});
+    gpuBufferEntryList.push_back(GpuBufferEntry{.indexCount = bufferEntry.indexCount,
+                                                .firstIndex = bufferEntry.firstIndex,
+                                                .vertexOffset = bufferEntry.vertexOffset,
+                                                .instanceCount = 1,
+                                                .firstInstance = 0,
+                                                .padding = 0});
   }
 
-  return instanceDataList;
+  return gpuBufferEntryList;
 }
 
 }

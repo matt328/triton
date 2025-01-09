@@ -40,7 +40,7 @@ auto RenderDataSystem::update(entt::registry& registry, RenderData& renderData) 
           renderData.objectData.emplace_back(transform.transformation, textureHandle);
         }
       } else {
-        // TODO(matt) figure out a better name for MeshData and GpuMeshData
+        // TODO(matt) figure out a better name for MeshData and RenderMeshData
         renderData.staticGpuMeshData.emplace_back(meshHandle, topology);
         renderData.objectData.emplace_back(transform.transformation, textureHandle);
       }
