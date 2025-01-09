@@ -101,6 +101,10 @@ auto Frame::getCameraBufferHandle() const -> BufferHandle {
   return cameraBuffer;
 }
 
+auto Frame::getCountBufferHandle() const -> BufferHandle {
+  return countBuffer;
+}
+
 auto Frame::getDepthImageHandle() const -> ImageHandle {
   return depthImageHandle;
 }
@@ -143,6 +147,10 @@ auto Frame::setDrawCommandBufferHandle(BufferHandle handle) -> void {
 
 auto Frame::setCameraBufferHandle(BufferHandle handle) -> void {
   cameraBuffer = handle;
+}
+
+auto Frame::setCountBufferHandle(BufferHandle handle) -> void {
+  countBuffer = handle;
 }
 
 auto Frame::transitionImage(const vk::raii::CommandBuffer& cmd,
