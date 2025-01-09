@@ -59,8 +59,9 @@ public:
 
   auto createDrawImageAndView(std::string_view imageName, vk::Extent2D extent) -> ImageHandle;
 
-  auto createDepthImageAndView(std::string_view imageName, vk::Extent2D extent, vk::Format format)
-      -> ImageHandle;
+  auto createDepthImageAndView(std::string_view imageName,
+                               vk::Extent2D extent,
+                               vk::Format format) -> ImageHandle;
 
   auto createBuffer(size_t size,
                     vk::Flags<vk::BufferUsageFlagBits> flags,
@@ -107,7 +108,7 @@ public:
 
   [[nodiscard]] auto getPipeline(PipelineHandle handle) const -> const IPipeline&;
 
-  [[nodiscard]] auto getStaticGpuData(const std::vector<GpuMeshData>& gpuBufferData)
+  [[nodiscard]] auto getStaticGpuData(const std::vector<RenderMeshData>& gpuBufferData)
       -> std::vector<GpuBufferEntry>;
 
 private:
