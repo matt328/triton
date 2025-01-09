@@ -13,7 +13,7 @@ ComputeTask::ComputeTask(std::shared_ptr<VkResourceManager> newResourceManager)
 auto ComputeTask::record(vk::raii::CommandBuffer& commandBuffer, const Frame& frame) -> void {
 
   auto& gpuBufferEntryBuffer = resourceManager->getBuffer(frame.getGpuBufferEntryBufferHandle());
-  auto& objectDataBuffer = resourceManager->getBuffer(frame.getObjectDataBufferHandle());
+  auto& objectDataBuffer = resourceManager->getBuffer(frame.getGpuObjectDataBufferHandle());
   auto& drawCommandBuffer = resourceManager->getBuffer(frame.getDrawCommandBufferHandle());
   auto& countBuffer = resourceManager->getBuffer(frame.getCountBufferHandle());
 

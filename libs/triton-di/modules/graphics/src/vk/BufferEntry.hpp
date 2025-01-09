@@ -9,9 +9,9 @@ struct BufferEntry {
   uint32_t vertexCount;
 };
 
-/// InstanceData is passed into the compute shader along with camera data (frustum) and ObjectData
-/// (AABB, model matrix, whatever is needed for culling) to generate the draw commands. These
-/// parameters index into the large vertex and index buffers.
+/// InstanceData is passed into the compute shader along with camera data (frustum) and
+/// GpuObjectData (AABB, model matrix, whatever is needed for culling) to generate the draw
+/// commands. These parameters index into the large vertex and index buffers.
 struct GpuBufferEntry {
   uint32_t indexCount;
   uint32_t firstIndex;

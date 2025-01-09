@@ -4,7 +4,7 @@
 #include "vk/CommandBufferManager.hpp"
 #include "Maths.hpp"
 #include "gfx/QueueTypes.hpp"
-#include "cm/ObjectData.hpp"
+#include "cm/GpuObjectData.hpp"
 #include "task/Frame.hpp"
 #include "task/IRenderTask.hpp"
 #include "vk/MeshBufferManager.hpp"
@@ -86,14 +86,14 @@ DefaultRenderScheduler::DefaultRenderScheduler(
       indirectCommandBuffer.unmapBuffer();
     }
 
-    // ObjectDataBuffer
+    // GpuObjectDataBuffer
     {
-      const auto name = frame->getIndexedName("Buffer-ObjectData-Frame_");
+      const auto name = frame->getIndexedName("Buffer-GpuObjectData-Frame_");
       const auto handle = resourceManager->createBuffer(
-          sizeof(ObjectData) * rendererConfig.maxStaticObjects,
+          sizeof(GpuObjectData) * rendererConfig.maxStaticObjects,
           vk::BufferUsageFlagBits::eIndirectBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress,
           name);
-      frame->setObjectDataBufferHandle(handle);
+      frame->setGpuObjectDataBufferHandle(handle);
     }
 
     // Camera Data Buffer
@@ -164,11 +164,11 @@ auto DefaultRenderScheduler::updatePerFrameRenderData(Frame& frame,
                                            sizeof(GpuBufferEntry) * gpuBufferEntryList.size());
   gpuBufferEntriesBuffer.unmapBuffer();
 
-  // Update ObjectDataBuffer
-  auto& objectDataBuffer = resourceManager->getBuffer(frame.getObjectDataBufferHandle());
+  // Update GpuObjectDataBuffer
+  auto& objectDataBuffer = resourceManager->getBuffer(frame.getGpuObjectDataBufferHandle());
   objectDataBuffer.mapBuffer();
   objectDataBuffer.updateBufferValue(renderData.objectData.data(),
-                                     sizeof(ObjectData) * renderData.objectData.size());
+                                     sizeof(GpuObjectData) * renderData.objectData.size());
   objectDataBuffer.unmapBuffer();
 
   // Update CameraDataBuffer

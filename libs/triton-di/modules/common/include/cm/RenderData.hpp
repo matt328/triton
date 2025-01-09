@@ -1,20 +1,11 @@
 #pragma once
 
-#include "cm/ObjectData.hpp"
+#include "cm/GpuAnimationData.hpp"
+#include "cm/GpuObjectData.hpp"
 #include "cm/GpuCameraData.hpp"
+#include "cm/GpuMeshData.hpp"
 
 namespace tr {
-
-struct GpuMeshData {
-  MeshHandle handle{};
-  Topology topology{Topology::Triangles};
-
-  friend void swap(GpuMeshData& first, GpuMeshData& second) noexcept {
-    using std::swap;
-    swap(first.handle, second.handle);
-    swap(first.topology, second.topology);
-  }
-};
 
 struct alignas(ALIGNMENT) GpuInstanceData {
   glm::mat4 modelMatrix;
@@ -22,9 +13,8 @@ struct alignas(ALIGNMENT) GpuInstanceData {
 };
 
 struct RenderData {
-  PushConstants pushConstants{};
   GpuCameraData cameraData{};
-  std::vector<ObjectData> objectData;
+  std::vector<GpuObjectData> objectData;
   std::vector<GpuMeshData> staticMeshData;
   std::vector<GpuMeshData> terrainMeshData;
   std::vector<GpuMeshData> skinnedMeshData;
