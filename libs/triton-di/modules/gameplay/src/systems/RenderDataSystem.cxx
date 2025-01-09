@@ -1,6 +1,6 @@
 #include "RenderDataSystem.hpp"
 
-#include "cm/ObjectData.hpp"
+#include "cm/GpuCameraData.hpp"
 #include "cm/RenderData.hpp"
 #include "gp/components/Renderable.hpp"
 #include "gp/components/Camera.hpp"
@@ -21,8 +21,9 @@ auto RenderDataSystem::update(entt::registry& registry, RenderData& renderData) 
   const auto cameraEntity = registry.ctx().get<const CurrentCamera>();
   const auto cam = registry.get<Camera>(cameraEntity.currentCamera);
 
-  renderData.cameraData =
-      CameraData{.view = cam.view, .proj = cam.projection, .viewProj = cam.view * cam.projection};
+  renderData.cameraData = GpuCameraData{.view = cam.view,
+                                        .proj = cam.projection,
+                                        .viewProj = cam.view * cam.projection};
 
   // Static Models and Terrain
   for (const auto view = registry.view<Renderable, Transform>(entt::exclude<Animation>);

@@ -44,10 +44,10 @@ DefaultRenderScheduler::DefaultRenderScheduler(
   const auto projection =
       glm::perspective(glm::radians(60.f), static_cast<float>(1920 / 1080), 0.1f, 10000.0f);
 
-  const auto cameraData = CameraData{.view = view,
-                                     .proj = projection,
-                                     .viewProj = view * projection,
-                                     .position = glm::vec4{0.f, 0.f, 0.f, 1.f}};
+  const auto cameraData = GpuCameraData{.view = view,
+                                        .proj = projection,
+                                        .viewProj = view * projection,
+                                        .position = glm::vec4{0.f, 0.f, 0.f, 1.f}};
 
   for (const auto& frame : frameManager->getFrames()) {
 
@@ -100,14 +100,14 @@ DefaultRenderScheduler::DefaultRenderScheduler(
     {
       const auto name = frame->getIndexedName("Buffer-CameraData-Frame_");
       const auto handle = resourceManager->createBuffer(
-          sizeof(CameraData),
+          sizeof(GpuCameraData),
           vk::BufferUsageFlagBits::eStorageBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress,
           name);
 
       auto& cameraDataBuffer = resourceManager->getBuffer(handle);
 
       cameraDataBuffer.mapBuffer();
-      cameraDataBuffer.updateBufferValue(&cameraData, sizeof(CameraData));
+      cameraDataBuffer.updateBufferValue(&cameraData, sizeof(GpuCameraData));
       cameraDataBuffer.unmapBuffer();
 
       frame->setCameraBufferHandle(handle);
@@ -152,8 +152,8 @@ DefaultRenderScheduler::~DefaultRenderScheduler() {
   Log.trace("Destroying DefaultRenderScheduler");
 }
 
-auto DefaultRenderScheduler::updatePerFrameRenderData(Frame& frame, const RenderData& renderData)
-    -> void {
+auto DefaultRenderScheduler::updatePerFrameRenderData(Frame& frame,
+                                                      const RenderData& renderData) -> void {
   // Update GpuBufferEntriesBuffer
   const auto gpuBufferEntryList = resourceManager->getStaticGpuData(renderData.staticGpuMeshData);
 
@@ -174,7 +174,7 @@ auto DefaultRenderScheduler::updatePerFrameRenderData(Frame& frame, const Render
   // Update CameraDataBuffer
   auto& cameraDataBuffer = resourceManager->getBuffer(frame.getCameraBufferHandle());
   cameraDataBuffer.mapBuffer();
-  cameraDataBuffer.updateBufferValue(&renderData.cameraData, sizeof(CameraData));
+  cameraDataBuffer.updateBufferValue(&renderData.cameraData, sizeof(GpuCameraData));
   cameraDataBuffer.unmapBuffer();
 }
 

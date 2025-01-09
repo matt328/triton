@@ -14,13 +14,6 @@ struct alignas(ALIGNMENT) ObjectData {
   uint32_t animationDataIndex{};
 };
 
-struct CameraData {
-  glm::mat4 view{};
-  glm::mat4 proj{};
-  glm::mat4 viewProj{};
-  glm::vec4 position{};
-};
-
 struct PushConstants {
   glm::vec4 lightPosition;
   glm::vec4 params;
