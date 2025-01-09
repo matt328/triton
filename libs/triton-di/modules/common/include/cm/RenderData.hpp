@@ -1,6 +1,7 @@
 #pragma once
 
 #include "cm/ObjectData.hpp"
+#include "cm/GpuCameraData.hpp"
 
 namespace tr {
 
@@ -22,7 +23,7 @@ struct alignas(ALIGNMENT) GpuInstanceData {
 
 struct RenderData {
   PushConstants pushConstants{};
-  CameraData cameraData{};
+  GpuCameraData cameraData{};
   std::vector<ObjectData> objectData;
   std::vector<GpuMeshData> staticMeshData;
   std::vector<GpuMeshData> terrainMeshData;
