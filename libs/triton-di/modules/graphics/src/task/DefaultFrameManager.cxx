@@ -3,7 +3,7 @@
 #include "Frame.hpp"
 #include "Maths.hpp"
 #include "tr/Events.hpp"
-#include "vk/Swapchain.hpp"
+#include "vk/core/Swapchain.hpp"
 
 namespace tr {
 

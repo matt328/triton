@@ -1,8 +1,8 @@
 #include "IndirectPipeline.hpp"
 #include "IShaderCompiler.hpp"
 #include "geo/VertexAttributes.hpp"
-#include "cm/IndirectPushConstants.hpp"
-#include "vk/Device.hpp"
+#include "vk/core/Device.hpp"
+#include "vk/IndirectPushConstants.hpp"
 
 namespace tr {
 

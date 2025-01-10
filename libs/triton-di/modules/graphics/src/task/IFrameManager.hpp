@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Frame.hpp"
-#include "vk/Swapchain.hpp"
+#include "vk/core/Swapchain.hpp"
 
 namespace tr {
 

@@ -3,7 +3,7 @@
 #include "tr/IGuiSystem.hpp"
 
 #include "gfx/QueueTypes.hpp"
-#include "vk/Device.hpp"
+#include "vk/core/Device.hpp"
 #include "vk/VkResourceManager.hpp"
 
 namespace tr {

@@ -1,5 +1,5 @@
 #pragma once
-#include "vk/Device.hpp"
+#include "vk/core/Device.hpp"
 
 namespace tr::queue {
 class Graphics {

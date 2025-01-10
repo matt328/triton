@@ -1,6 +1,6 @@
 #include "ComputeTask.hpp"
 #include "Frame.hpp"
-#include "cm/IndirectPushConstants.hpp"
+#include "vk/ComputePushConstants.hpp"
 #include "pipeline/IPipeline.hpp"
 
 namespace tr {

@@ -1,7 +1,7 @@
 #include "ComputePipeline.hpp"
-#include "cm/IndirectPushConstants.hpp"
-#include "vk/Device.hpp"
+#include "vk/core/Device.hpp"
 #include "pipeline/IShaderCompiler.hpp"
+#include "vk/ComputePushConstants.hpp"
 
 namespace tr {
 

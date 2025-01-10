@@ -14,8 +14,6 @@
 
 namespace tr {
 
-class TaskGraph;
-
 class DefaultRenderScheduler final : public IRenderScheduler {
 public:
   explicit DefaultRenderScheduler(std::shared_ptr<IFrameManager> newFrameManager,

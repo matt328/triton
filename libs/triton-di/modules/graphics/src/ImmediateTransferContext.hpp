@@ -1,8 +1,8 @@
 #pragma once
 
 #include "gfx/QueueTypes.hpp"
-#include "vk/Device.hpp"
-#include "vk/PhysicalDevice.hpp"
+#include "vk/core/Device.hpp"
+#include "vk/core/PhysicalDevice.hpp"
 #include "vk/CommandBufferManager.hpp"
 
 namespace vk::raii {
