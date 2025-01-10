@@ -1,5 +1,5 @@
 #pragma once
-#include "IDebugManager.hpp"
+#include "tr/IDebugManager.hpp"
 
 namespace tr {
 

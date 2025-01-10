@@ -1,7 +1,7 @@
 #include "CommandBufferManager.hpp"
 
 #include "vk/core/Device.hpp"
-#include "IDebugManager.hpp"
+#include "tr/IDebugManager.hpp"
 
 namespace tr {
 CommandBufferManager::CommandBufferManager(std::shared_ptr<Device> newDevice,

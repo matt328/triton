@@ -1,6 +1,6 @@
 #pragma once
 
-#include "IFrameManager.hpp"
+#include "tr/IFrameManager.hpp"
 #include "gfx/RenderContextConfig.hpp"
 #include "tr/IEventBus.hpp"
 
@@ -8,6 +8,7 @@ namespace tr {
 
 class CommandBufferManager;
 class Swapchain;
+class VkResourceManager;
 
 class DefaultFrameManager final : public IFrameManager {
 public:

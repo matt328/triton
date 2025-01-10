@@ -1,9 +1,10 @@
 #pragma once
 
-#include "Frame.hpp"
 #include "vk/core/Swapchain.hpp"
 
 namespace tr {
+
+class Frame;
 
 class IFrameManager {
 
