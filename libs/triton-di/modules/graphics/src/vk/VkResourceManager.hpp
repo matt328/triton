@@ -1,6 +1,6 @@
 #pragma once
 #include "vk/core/Device.hpp"
-#include "IDebugManager.hpp"
+#include "tr/IDebugManager.hpp"
 #include "ImmediateTransferContext.hpp"
 #include "cm/Handles.hpp"
 #include "cm/Rando.hpp"
@@ -60,8 +60,9 @@ public:
   auto createDrawImageAndView(std::string_view imageName, vk::Extent2D extent) -> ImageHandle;
   auto destroyDrawImageAndView(ImageHandle handle) -> void;
 
-  auto createDepthImageAndView(std::string_view imageName, vk::Extent2D extent, vk::Format format)
-      -> ImageHandle;
+  auto createDepthImageAndView(std::string_view imageName,
+                               vk::Extent2D extent,
+                               vk::Format format) -> ImageHandle;
 
   auto createBuffer(size_t size,
                     vk::Flags<vk::BufferUsageFlagBits> flags,

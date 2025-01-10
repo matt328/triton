@@ -1,6 +1,6 @@
 #pragma once
 
-#include "IDebugManager.hpp"
+#include "tr/IDebugManager.hpp"
 
 #include "vk/core/Context.hpp"
 #include "vk/core/Device.hpp"

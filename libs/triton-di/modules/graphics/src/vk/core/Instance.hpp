@@ -1,7 +1,7 @@
 #pragma once
 #include "Context.hpp"
 #include "tr/IWindow.hpp"
-#include "IDebugManager.hpp"
+#include "tr/IDebugManager.hpp"
 
 namespace tr {
 

@@ -6,7 +6,7 @@
 #include "tr/Events.hpp"
 #include "tr/IGuiSystem.hpp"
 #include "vk/CommandBufferManager.hpp"
-#include "IFrameManager.hpp"
+#include "tr/IFrameManager.hpp"
 #include "gfx/IRenderScheduler.hpp"
 #include "IRenderTask.hpp"
 #include "task/ComputeTask.hpp"
