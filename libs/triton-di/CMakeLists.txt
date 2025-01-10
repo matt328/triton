@@ -2,7 +2,6 @@ project("triton-di")
 
 set(common_SRC
 
-  modules/common/src/ImGuiSystem.cxx
   modules/common/src/ImGuiAdapter.cxx
 
   modules/triton/src/ComponentFactory.cxx
@@ -31,6 +30,7 @@ set(common_SRC
   modules/graphics/src/tex/Texture.cxx
 
   modules/graphics/src/DefaultDebugManager.cxx
+  modules/graphics/src/ImGuiSystem.cxx
   modules/graphics/src/NoopDebugManager.cxx
   modules/graphics/src/NewRenderContext.cxx
 

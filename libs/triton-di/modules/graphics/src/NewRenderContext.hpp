@@ -8,8 +8,7 @@ namespace tr {
 class NewRenderContext final : public IRenderContext {
 public:
   NewRenderContext(std::shared_ptr<IFrameManager> newFrameManager,
-                   std::shared_ptr<IRenderScheduler> newRenderScheduler,
-                   std::shared_ptr<queue::Graphics> newGraphicsQueue);
+                   std::shared_ptr<IRenderScheduler> newRenderScheduler);
   ~NewRenderContext() override;
 
   NewRenderContext(const NewRenderContext&) = delete;
@@ -24,7 +23,6 @@ public:
 private:
   std::shared_ptr<IFrameManager> frameManager;
   std::shared_ptr<IRenderScheduler> renderScheduler;
-  std::shared_ptr<queue::Graphics> graphicsQueue;
 
   mutable TracyLockable(std::mutex, renderDataMutex);
   RenderData renderData;
