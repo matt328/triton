@@ -9,7 +9,6 @@ ActionSystem::ActionSystem(std::shared_ptr<IEventBus> newEventBus)
   Log.debug("Creating ActionSystem");
 
   eventBus->subscribe<MouseCaptured>([&](const MouseCaptured& event) {
-    Log.debug("Mouse Capture, captured: {0}", event.isMouseCaptured);
     if (event.isMouseCaptured) {
       firstMouse = true;
     }
