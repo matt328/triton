@@ -1,6 +1,6 @@
 #include "CommandBufferManager.hpp"
 
-#include "vk/Device.hpp"
+#include "vk/core/Device.hpp"
 #include "IDebugManager.hpp"
 
 namespace tr {

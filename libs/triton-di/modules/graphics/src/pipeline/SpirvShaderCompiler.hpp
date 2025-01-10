@@ -3,7 +3,7 @@
 #include <glslang/Public/ShaderLang.h>
 
 #include "IShaderCompiler.hpp"
-#include "vk/Device.hpp"
+#include "vk/core/Device.hpp"
 
 namespace tr {
 class SpirvShaderCompiler : public IShaderCompiler {

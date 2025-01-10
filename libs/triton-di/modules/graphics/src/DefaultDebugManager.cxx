@@ -1,7 +1,7 @@
 #include "DefaultDebugManager.hpp"
 
-#include "vk/Context.hpp"
-#include "vk/Device.hpp"
+#include "vk/core/Context.hpp"
+#include "vk/core/Device.hpp"
 
 namespace tr {
 

@@ -19,10 +19,10 @@
 #include "DefaultContext.hpp"
 #include "DefaultDebugManager.hpp"
 #include "NewRenderContext.hpp"
-#include "vk/Swapchain.hpp"
-#include "vk/Surface.hpp"
+#include "vk/core/Swapchain.hpp"
+#include "vk/core/Surface.hpp"
 #include "gfx/QueueTypes.hpp"
-#include "vk/Device.hpp"
+#include "vk/core/Device.hpp"
 #include "gfx/RenderContextConfig.hpp"
 
 #include "task/DefaultFrameManager.hpp"

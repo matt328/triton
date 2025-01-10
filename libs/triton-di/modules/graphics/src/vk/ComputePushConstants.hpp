@@ -2,12 +2,6 @@
 
 namespace tr {
 
-struct IndirectPushConstants {
-  uint32_t drawID;
-  uint64_t objectDataAddress;
-  uint64_t cameraDataAddress;
-};
-
 struct ComputePushConstants {
   uint64_t drawCommandBufferAddress;
   uint64_t gpuBufferEntryBufferAddress;

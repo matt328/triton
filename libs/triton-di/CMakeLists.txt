@@ -34,16 +34,17 @@ set(common_SRC
   modules/graphics/src/NoopDebugManager.cxx
   modules/graphics/src/NewRenderContext.cxx
 
-  modules/graphics/src/vk/Context.cxx
-  modules/graphics/src/vk/Instance.cxx
-  modules/graphics/src/vk/Surface.cxx
-  modules/graphics/src/vk/PhysicalDevice.cxx
-  modules/graphics/src/vk/Device.cxx
-  modules/graphics/src/vk/QueueTypes.cxx
   modules/graphics/src/vk/VkResourceManager.cxx
-  modules/graphics/src/vk/Swapchain.cxx
   modules/graphics/src/vk/CommandBufferManager.cxx
   modules/graphics/src/vk/MeshBufferManager.cxx
+
+  modules/graphics/src/vk/core/Context.cxx
+  modules/graphics/src/vk/core/Instance.cxx
+  modules/graphics/src/vk/core/Surface.cxx
+  modules/graphics/src/vk/core/PhysicalDevice.cxx
+  modules/graphics/src/vk/core/Device.cxx
+  modules/graphics/src/vk/core/QueueTypes.cxx
+  modules/graphics/src/vk/core/Swapchain.cxx
 
   modules/graphics/src/task/DefaultRenderScheduler.cxx
   modules/graphics/src/task/Frame.cxx
