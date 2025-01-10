@@ -108,7 +108,7 @@ public:
   [[nodiscard]] auto getPipeline(PipelineHandle handle) const -> const IPipeline&;
 
   [[nodiscard]] auto getStaticGpuData(const std::vector<RenderMeshData>& gpuBufferData)
-      -> std::vector<GpuBufferEntry>;
+      -> std::vector<GpuBufferEntry>&;
 
 private:
   struct ImageInfo {

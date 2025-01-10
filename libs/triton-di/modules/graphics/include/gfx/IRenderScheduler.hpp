@@ -18,7 +18,7 @@ public:
 
   virtual auto recordRenderTasks(Frame& frame, bool recordCommands) -> void = 0;
 
-  virtual auto endFrame(Frame& frame) const -> void = 0;
+  virtual auto endFrame(Frame& frame) -> void = 0;
 
   virtual auto executeTasks(Frame& frame) const -> void = 0;
 };

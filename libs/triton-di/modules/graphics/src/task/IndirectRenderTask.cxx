@@ -16,8 +16,8 @@ IndirectRenderTask::IndirectRenderTask(std::shared_ptr<VkResourceManager> newRes
 auto IndirectRenderTask::record(vk::raii::CommandBuffer& commandBuffer, const Frame& frame)
     -> void {
 
-  auto& objectDataBuffer = resourceManager->getBuffer(frame.getGpuObjectDataBufferHandle());
-  auto& cameraDataBuffer = resourceManager->getBuffer(frame.getCameraBufferHandle());
+  const auto& objectDataBuffer = resourceManager->getBuffer(frame.getGpuObjectDataBufferHandle());
+  const auto& cameraDataBuffer = resourceManager->getBuffer(frame.getCameraBufferHandle());
 
   pushConstants = IndirectPushConstants{.drawID = 0,
                                         .objectDataAddress = objectDataBuffer.getDeviceAddress(),

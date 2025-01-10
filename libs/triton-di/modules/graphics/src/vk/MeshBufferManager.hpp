@@ -24,7 +24,7 @@ public:
   auto removeMesh(MeshHandle meshHandle) -> void;
 
   [[nodiscard]] auto getGpuBufferEntries(const std::vector<RenderMeshData>& meshDataList)
-      -> std::vector<GpuBufferEntry>;
+      -> std::vector<GpuBufferEntry>&;
 
   [[nodiscard]] auto getVertexBufferHandle() const -> BufferHandle;
   [[nodiscard]] auto getIndexBufferHandle() const -> BufferHandle;
@@ -45,6 +45,8 @@ private:
   BufferHandle indexBufferHandle;
 
   std::vector<BufferEntry> bufferEntries;
+
+  std::vector<GpuBufferEntry> gpuBufferEntryList;
 
   auto testPrivateMethod() -> void;
 };
