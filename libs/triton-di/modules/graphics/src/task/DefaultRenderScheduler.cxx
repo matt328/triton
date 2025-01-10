@@ -10,6 +10,7 @@
 #include "task/Frame.hpp"
 #include "task/IRenderTask.hpp"
 #include "vk/MeshBufferManager.hpp"
+#include <vulkan/vulkan_enums.hpp>
 
 namespace tr {
 
@@ -138,6 +139,21 @@ DefaultRenderScheduler::DefaultRenderScheduler(
 
       frame->setCountBufferHandle(handle);
     }
+
+    // Descriptor Buffer (Textures)
+    {
+      const auto bufferSize = 24;
+
+      const auto flags = vk::BufferUsageFlagBits::eResourceDescriptorBufferEXT |
+                         vk::BufferUsageFlagBits::eSamplerDescriptorBufferEXT |
+                         vk::BufferUsageFlagBits::eShaderDeviceAddress |
+                         vk::BufferUsageFlagBits::eTransferDst;
+
+      const auto name = frame->getIndexedName("Buffer-Descriptor-Frame_");
+
+      [[maybe_unused]] const auto handle = resourceManager->createBuffer(bufferSize, flags, name);
+    }
+
     frame->setupRenderingInfo(resourceManager);
   }
 

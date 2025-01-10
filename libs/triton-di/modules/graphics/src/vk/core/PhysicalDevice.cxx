@@ -107,8 +107,8 @@ auto PhysicalDevice::createDevice() -> std::unique_ptr<vk::raii::Device> {
 
   debugManager->addDeviceConfig(createInfo);
 
-  // const auto dbFeatures =
-  // vk::PhysicalDeviceDescriptorBufferFeaturesEXT{.descriptorBuffer = true};
+  const auto dbFeatures =
+      vk::PhysicalDeviceDescriptorBufferFeaturesEXT{.descriptorBuffer = VK_TRUE};
 
   constexpr auto extendedDynamicStateFeatures =
       vk::PhysicalDeviceExtendedDynamicStateFeaturesEXT{.extendedDynamicState = VK_TRUE};
@@ -118,7 +118,8 @@ auto PhysicalDevice::createDevice() -> std::unique_ptr<vk::raii::Device> {
                              physicalVulkan12Features,
                              drawParamsFeatures,
                              dynamicRenderingFeatures,
-                             extendedDynamicStateFeatures};
+                             extendedDynamicStateFeatures,
+                             dbFeatures};
 
   return std::make_unique<vk::raii::Device>(physicalDevice->createDevice(c.get(), nullptr));
 }
