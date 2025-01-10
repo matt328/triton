@@ -30,7 +30,7 @@ public:
   [[nodiscard]] auto getRenderFinishedSemaphore() -> vk::raii::Semaphore&;
   [[nodiscard]] auto getComputeFinishedSemaphore() -> vk::raii::Semaphore&;
   [[nodiscard]] auto getInFlightFence() -> vk::raii::Fence&;
-  [[nodiscard]] auto getSwapchainImageIndex() const -> uint32_t;
+  [[nodiscard]] auto getSwapchainImageIndex() const noexcept -> uint32_t;
   [[nodiscard]] auto getRenderingInfo() const -> vk::RenderingInfo;
   [[nodiscard]] auto getDrawImageExtent() const -> vk::Extent2D;
 

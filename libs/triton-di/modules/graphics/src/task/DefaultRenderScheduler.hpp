@@ -3,6 +3,7 @@
 #include "cm/ImGuiSystem.hpp"
 #include "cm/RenderData.hpp"
 #include "gfx/RenderContextConfig.hpp"
+#include "tr/Events.hpp"
 #include "tr/IGuiSystem.hpp"
 #include "vk/CommandBufferManager.hpp"
 #include "IFrameManager.hpp"
@@ -60,6 +61,8 @@ private:
   std::vector<vk::CommandBuffer> buffers;
 
   RenderContextConfig renderConfig;
+
+  auto handleSwapchainResized(const SwapchainResized& event) -> void;
 
   static auto transitionImage(const vk::raii::CommandBuffer& cmd,
                               const vk::Image& image,

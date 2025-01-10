@@ -26,7 +26,7 @@ auto Swapchain::getImageFormat() const -> vk::Format {
 auto Swapchain::getImageExtent() const -> vk::Extent2D {
   return swapchainExtent;
 }
-auto Swapchain::getSwapchain() const -> vk::SwapchainKHR {
+auto Swapchain::getSwapchain() const noexcept -> vk::SwapchainKHR {
   return *swapchain;
 }
 
@@ -63,10 +63,7 @@ auto Swapchain::acquireNextImage(const vk::Semaphore& semaphore) const
       return ImageAcquireResult::NeedsResize;
     }
     return ImageAcquireResult::Error;
-  } catch (const std::exception& ex) {
-    Log.warn("Swapchain needs resized: {0}", ex.what());
-    return ImageAcquireResult::NeedsResize;
-  }
+  } catch (const std::exception& ex) { return ImageAcquireResult::NeedsResize; }
 }
 auto Swapchain::recreate() -> void {
   oldSwapchain = std::move(swapchain);
