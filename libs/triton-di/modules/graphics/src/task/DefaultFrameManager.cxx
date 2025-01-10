@@ -8,21 +8,22 @@
 namespace tr {
 
 DefaultFrameManager::DefaultFrameManager(
-    const RenderContextConfig& rendererConfig,
+    const RenderContextConfig& newRenderContextConfig,
     std::shared_ptr<CommandBufferManager> newCommandBufferManager,
     std::shared_ptr<Device> newDevice,
     std::shared_ptr<Swapchain> newSwapchain,
     std::shared_ptr<VkResourceManager> newResourceManager,
     std::shared_ptr<IEventBus> newEventBus,
     const std::shared_ptr<IDebugManager>& debugManager)
-    : currentFrame{0},
+    : renderConfig{newRenderContextConfig},
       commandBufferManager{std::move(newCommandBufferManager)},
       device{std::move(newDevice)},
       swapchain{std::move(newSwapchain)},
       resourceManager{std::move(newResourceManager)},
-      eventBus{std::move(newEventBus)} {
+      eventBus{std::move(newEventBus)},
+      currentFrame{0} {
 
-  for (uint8_t i = 0; i < rendererConfig.framesInFlight; ++i) {
+  for (uint8_t i = 0; i < renderConfig.framesInFlight; ++i) {
 
     auto fence = device->getVkDevice().createFence(
         vk::FenceCreateInfo{.flags = vk::FenceCreateFlagBits::eSignaled});
@@ -50,17 +51,11 @@ DefaultFrameManager::DefaultFrameManager(
                                              startCmdBufferHandle,
                                              endCmdBufferHandle,
                                              mainCmdBufferHandle));
-
-    const auto& extent = swapchain->getImageExtent();
-    eventBus->emit(SwapchainResized{
-        .width = extent.width,
-        .height = extent.height,
-    });
   }
 
   const auto drawImageExtent = vk::Extent2D{
-      .width = maths::scaleNumber(swapchain->getImageExtent().width, rendererConfig.renderScale),
-      .height = maths::scaleNumber(swapchain->getImageExtent().height, rendererConfig.renderScale)};
+      .width = maths::scaleNumber(swapchain->getImageExtent().width, renderConfig.renderScale),
+      .height = maths::scaleNumber(swapchain->getImageExtent().height, renderConfig.renderScale)};
 
   for (auto& frame : frames) {
     auto drawImageHandle =
@@ -68,6 +63,21 @@ DefaultFrameManager::DefaultFrameManager(
                                                 drawImageExtent);
     frame->setDrawImageHandle(drawImageHandle);
   }
+
+  eventBus->subscribe<SwapchainResized>([&](SwapchainResized event) {
+    const auto drawImageExtent =
+        vk::Extent2D{.width = maths::scaleNumber(event.width, renderConfig.renderScale),
+                     .height = maths::scaleNumber(event.height, renderConfig.renderScale)};
+
+    for (auto& frame : frames) {
+      resourceManager->destroyDrawImageAndView(frame->getDrawImageHandle());
+      auto drawImageHandle =
+          resourceManager->createDrawImageAndView(frame->getIndexedName("Image-Draw-Frame_"),
+                                                  drawImageExtent);
+      frame->setDrawImageHandle(drawImageHandle);
+      frame->setupRenderingInfo(resourceManager);
+    }
+  });
 }
 
 DefaultFrameManager::~DefaultFrameManager() {
@@ -98,11 +108,6 @@ auto DefaultFrameManager::acquireFrame()
 
   if (iar == ImageAcquireResult::NeedsResize) {
     swapchain->recreate();
-    eventBus->emit(SwapchainResized{
-        .width = swapchain->getImageExtent().width,
-        .height = swapchain->getImageExtent().height,
-    });
-    // TODO(matt): commandBufferManager->recreate();
   }
 
   return iar;

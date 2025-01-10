@@ -58,6 +58,7 @@ public:
       -> std::unique_ptr<vk::raii::DescriptorPool>;
 
   auto createDrawImageAndView(std::string_view imageName, vk::Extent2D extent) -> ImageHandle;
+  auto destroyDrawImageAndView(ImageHandle handle) -> void;
 
   auto createDepthImageAndView(std::string_view imageName, vk::Extent2D extent, vk::Format format)
       -> ImageHandle;

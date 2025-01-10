@@ -53,6 +53,11 @@ struct SwapchainResized {
   uint32_t height;
 };
 
+struct SwapchainCreated {
+  uint32_t width;
+  uint32_t height;
+};
+
 using EventVariant = std::variant<WindowIconified,
                                   WindowClosed,
                                   KeyEvent,
@@ -64,6 +69,7 @@ using EventVariant = std::variant<WindowIconified,
                                   PlayerMoved,
                                   PlayerScored,
                                   EntityCreated,
-                                  SwapchainResized>;
+                                  SwapchainResized,
+                                  SwapchainCreated>;
 
 }

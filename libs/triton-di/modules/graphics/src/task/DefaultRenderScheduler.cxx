@@ -1,5 +1,7 @@
 #include "DefaultRenderScheduler.hpp"
 
+#include "tr/Events.hpp"
+#include "tr/IEventBus.hpp"
 #include "tr/IGuiSystem.hpp"
 #include "vk/CommandBufferManager.hpp"
 #include "Maths.hpp"
@@ -19,20 +21,22 @@ DefaultRenderScheduler::DefaultRenderScheduler(
     std::shared_ptr<Swapchain> newSwapchain,
     std::shared_ptr<RenderTaskFactory> newRenderTaskFactory,
     std::shared_ptr<IGuiSystem> newGuiSystem,
-    const RenderContextConfig& rendererConfig)
+    const RenderContextConfig& rendererConfig,
+    const std::shared_ptr<IEventBus>& eventBus)
     : frameManager{std::move(newFrameManager)},
       commandBufferManager{std::move(newCommandBufferManager)},
       graphicsQueue{std::move(newGraphicsQueue)},
       resourceManager{std::move(newResourceManager)},
       swapchain{std::move(newSwapchain)},
       renderTaskFactory{std::move(newRenderTaskFactory)},
-      guiSystem{std::move(newGuiSystem)} {
+      guiSystem{std::move(newGuiSystem)},
+      renderConfig{rendererConfig} {
 
   buffers.resize(3);
 
   const auto drawImageExtent = vk::Extent2D{
-      .width = maths::scaleNumber(swapchain->getImageExtent().width, rendererConfig.renderScale),
-      .height = maths::scaleNumber(swapchain->getImageExtent().height, rendererConfig.renderScale)};
+      .width = maths::scaleNumber(swapchain->getImageExtent().width, renderConfig.renderScale),
+      .height = maths::scaleNumber(swapchain->getImageExtent().height, renderConfig.renderScale)};
 
   auto depthImageHandle = resourceManager->createDepthImageAndView(DepthImageName,
                                                                    drawImageExtent,
@@ -59,7 +63,7 @@ DefaultRenderScheduler::DefaultRenderScheduler(
     {
       const auto name = frame->getIndexedName("Buffer-GpuBufferEntry-Frame_");
       const auto handle = resourceManager->createBuffer(
-          sizeof(GpuBufferEntry) * rendererConfig.maxStaticObjects,
+          sizeof(GpuBufferEntry) * renderConfig.maxStaticObjects,
           vk::BufferUsageFlagBits::eStorageBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress,
           name);
 
@@ -76,7 +80,7 @@ DefaultRenderScheduler::DefaultRenderScheduler(
       const auto name = frame->getIndexedName("Buffer-DrawCommand-Frame_");
       const auto handle = resourceManager->createBuffer(
           sizeof(vk::DrawIndexedIndirectCommand) *
-              rendererConfig.maxStaticObjects, // Size this buffer to max_objects?
+              renderConfig.maxStaticObjects, // Size this buffer to max_objects?
           vk::BufferUsageFlagBits::eIndirectBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress,
           name);
       frame->setDrawCommandBufferHandle(handle);
@@ -92,7 +96,7 @@ DefaultRenderScheduler::DefaultRenderScheduler(
     {
       const auto name = frame->getIndexedName("Buffer-GpuObjectData-Frame_");
       const auto handle = resourceManager->createBuffer(
-          sizeof(GpuObjectData) * rendererConfig.maxStaticObjects,
+          sizeof(GpuObjectData) * renderConfig.maxStaticObjects,
           vk::BufferUsageFlagBits::eIndirectBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress,
           name);
       frame->setGpuObjectDataBufferHandle(handle);
@@ -139,15 +143,43 @@ DefaultRenderScheduler::DefaultRenderScheduler(
   indirectRenderTask = renderTaskFactory->createIndirectRenderTask();
   computeTask = renderTaskFactory->createComputeTask();
 
+  eventBus->subscribe<SwapchainResized>([&](const SwapchainResized& event) {
+    viewport = vk::Viewport{
+        .width = static_cast<float>(event.width),
+        .height = static_cast<float>(event.height),
+        .minDepth = 0.f,
+        .maxDepth = 1.f,
+    };
+
+    snezzor = vk::Rect2D{.offset = vk::Offset2D{.x = 0, .y = 0},
+                         .extent = vk::Extent2D{.width = event.width, .height = event.height}};
+
+    const auto drawImageExtent =
+        vk::Extent2D{.width = maths::scaleNumber(event.width, renderConfig.renderScale),
+                     .height = maths::scaleNumber(event.height, renderConfig.renderScale)};
+
+    // All frames use the same depth image so just get the .front here
+    resourceManager->destroyImage(frameManager->getFrames().front()->getDepthImageHandle());
+
+    auto depthImageHandle = resourceManager->createDepthImageAndView(DepthImageName,
+                                                                     drawImageExtent,
+                                                                     swapchain->getDepthFormat());
+    for (const auto& frame : frameManager->getFrames()) {
+      frame->setDepthImageHandle(depthImageHandle);
+      frame->setupRenderingInfo(resourceManager);
+    }
+  });
+
+  const auto extent = swapchain->getImageExtent();
+
   viewport = vk::Viewport{
-      .width = 1920,
-      .height = 1080,
+      .width = static_cast<float>(extent.width),
+      .height = static_cast<float>(extent.height),
       .minDepth = 0.f,
       .maxDepth = 1.f,
   };
 
-  snezzor = vk::Rect2D{.offset = vk::Offset2D{.x = 0, .y = 0},
-                       .extent = vk::Extent2D{.width = 1920, .height = 1080}};
+  snezzor = vk::Rect2D{.offset = vk::Offset2D{.x = 0, .y = 0}, .extent = extent};
 }
 
 DefaultRenderScheduler::~DefaultRenderScheduler() {
