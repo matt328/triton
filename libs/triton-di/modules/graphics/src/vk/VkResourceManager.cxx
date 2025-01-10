@@ -303,6 +303,11 @@ auto VkResourceManager::createDrawImageAndView(std::string_view imageName,
 
   return imageKey;
 }
+
+auto VkResourceManager::destroyDrawImageAndView(ImageHandle handle) -> void {
+  imageInfoMap.erase(handle);
+}
+
 auto VkResourceManager::createDepthImageAndView([[maybe_unused]] std::string_view imageName,
                                                 vk::Extent2D extent,
                                                 vk::Format format) -> ImageHandle {

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IFrameManager.hpp"
+#include "gfx/RenderContextConfig.hpp"
 #include "tr/IEventBus.hpp"
 
 namespace tr {
@@ -8,11 +9,9 @@ namespace tr {
 class CommandBufferManager;
 class Swapchain;
 
-struct RenderContextConfig;
-
 class DefaultFrameManager final : public IFrameManager {
 public:
-  explicit DefaultFrameManager(const RenderContextConfig& rendererConfig,
+  explicit DefaultFrameManager(const RenderContextConfig& newRenderContextConfig,
                                std::shared_ptr<CommandBufferManager> newCommandBufferManager,
                                std::shared_ptr<Device> newDevice,
                                std::shared_ptr<Swapchain> newSwapchain,
@@ -31,13 +30,14 @@ public:
   [[nodiscard]] auto getFrames() const -> const std::vector<std::unique_ptr<Frame>>& override;
 
 private:
-  size_t currentFrame;
+  RenderContextConfig renderConfig;
   std::shared_ptr<CommandBufferManager> commandBufferManager;
   std::shared_ptr<Device> device;
   std::shared_ptr<Swapchain> swapchain;
   std::shared_ptr<VkResourceManager> resourceManager;
   std::shared_ptr<IEventBus> eventBus;
 
+  size_t currentFrame;
   std::vector<std::unique_ptr<Frame>> frames;
 };
 

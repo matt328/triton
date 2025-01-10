@@ -106,6 +106,10 @@ auto Swapchain::createSwapchain() -> void {
       .clipped = VK_TRUE,
       .oldSwapchain = VK_NULL_HANDLE};
 
+  if (oldSwapchain != nullptr) {
+    swapchainCreateInfo.oldSwapchain = *oldSwapchain;
+  }
+
   const auto queueFamilyIndices = std::array{queueFamilyIndicesInfo.graphicsFamily.value(),
                                              queueFamilyIndicesInfo.presentFamily.value()};
 
@@ -146,8 +150,14 @@ auto Swapchain::createSwapchain() -> void {
     swapchainImageViews.emplace_back(device->getVkDevice(), createInfo);
   }
 
-  eventBus->emit(
-      SwapchainResized{.width = swapchainExtent.width, .height = swapchainExtent.height});
+  if (oldSwapchain != nullptr) {
+    eventBus->emit(
+        SwapchainResized{.width = swapchainExtent.width, .height = swapchainExtent.height});
+    oldSwapchain = nullptr;
+  } else {
+    eventBus->emit(
+        SwapchainCreated{.width = swapchainExtent.width, .height = swapchainExtent.height});
+  }
 }
 
 auto Swapchain::choosePresentMode(const std::vector<vk::PresentModeKHR>& availablePresentModes)

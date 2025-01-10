@@ -23,7 +23,8 @@ public:
                                   std::shared_ptr<Swapchain> newSwapchain,
                                   std::shared_ptr<RenderTaskFactory> newRenderTaskFactory,
                                   std::shared_ptr<IGuiSystem> newGuiSystem,
-                                  const RenderContextConfig& rendererConfig);
+                                  const RenderContextConfig& rendererConfig,
+                                  const std::shared_ptr<IEventBus>& eventBus);
   ~DefaultRenderScheduler() override;
 
   DefaultRenderScheduler(const DefaultRenderScheduler&) = delete;
@@ -57,6 +58,8 @@ private:
   bool tasksRecorded = false;
 
   std::vector<vk::CommandBuffer> buffers;
+
+  RenderContextConfig renderConfig;
 
   static auto transitionImage(const vk::raii::CommandBuffer& cmd,
                               const vk::Image& image,

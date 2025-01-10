@@ -32,7 +32,15 @@
 
 namespace di = boost::di;
 
+/*
+
+  TODO(matt) figure out a better way to initialize the GameplaySystem with the window size so we can
+  create the camera without having to emit a swapchain resized event.
+
+*/
+
 namespace tr {
+
 auto ComponentFactory::getContext(const FrameworkConfig& config) -> std::shared_ptr<IContext> {
 
   constexpr auto rendererConfig = RenderContextConfig{.useDescriptorBuffers = false,
