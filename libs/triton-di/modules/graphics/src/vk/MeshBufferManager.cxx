@@ -89,11 +89,12 @@ auto MeshBufferManager::removeMesh([[maybe_unused]] MeshHandle meshHandle) -> vo
 /// RenderDataSystem combines meshHandles and other data from the entities into RenderMeshData
 /// and the RenderData contains a list of them.
 auto MeshBufferManager::getGpuBufferEntries(const std::vector<RenderMeshData>& meshDataList)
-    -> std::vector<GpuBufferEntry> {
-
-  auto gpuBufferEntryList = std::vector<GpuBufferEntry>{};
+    -> std::vector<GpuBufferEntry>& {
+  ZoneNamedN(var, "mbm getGpuBufferEntries", true);
+  gpuBufferEntryList.clear();
 
   for (const auto& meshData : meshDataList) {
+    ZoneNamedN(var, "processMeshData", true);
     const auto& bufferEntry = bufferEntries[meshData.handle];
     gpuBufferEntryList.push_back(GpuBufferEntry{.indexCount = bufferEntry.indexCount,
                                                 .firstIndex = bufferEntry.firstIndex,

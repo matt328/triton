@@ -148,8 +148,8 @@ auto VkResourceManager::createIndirectBuffer(size_t size) -> BufferHandle {
   return key;
 }
 
-[[nodiscard]] auto VkResourceManager::resizeBuffer(BufferHandle handle,
-                                                   size_t newSize) -> BufferHandle {
+[[nodiscard]] auto VkResourceManager::resizeBuffer(BufferHandle handle, size_t newSize)
+    -> BufferHandle {
   ZoneNamedN(var, "Resize Buffer", true);
   auto& oldBuffer = bufferMap.at(handle);
 
@@ -385,7 +385,8 @@ auto VkResourceManager::createComputePipeline([[maybe_unused]] std::string_view 
 /// These are passed to the compute shader to get turned into DrawCommands and placed in the
 /// DrawIndexedIndirect buffer
 [[nodiscard]] auto VkResourceManager::getStaticGpuData(
-    const std::vector<RenderMeshData>& gpuBufferData) -> std::vector<GpuBufferEntry> {
+    const std::vector<RenderMeshData>& gpuBufferData) -> std::vector<GpuBufferEntry>& {
+  ZoneNamedN(var, "getGpuBufferEntries", true);
   return staticMeshBufferManager->getGpuBufferEntries(gpuBufferData);
 }
 

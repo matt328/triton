@@ -28,6 +28,8 @@ DefaultRenderScheduler::DefaultRenderScheduler(
       renderTaskFactory{std::move(newRenderTaskFactory)},
       guiSystem{std::move(newGuiSystem)} {
 
+  buffers.resize(3);
+
   const auto drawImageExtent = vk::Extent2D{
       .width = maths::scaleNumber(swapchain->getImageExtent().width, rendererConfig.renderScale),
       .height = maths::scaleNumber(swapchain->getImageExtent().height, rendererConfig.renderScale)};
@@ -152,17 +154,27 @@ DefaultRenderScheduler::~DefaultRenderScheduler() {
   Log.trace("Destroying DefaultRenderScheduler");
 }
 
-auto DefaultRenderScheduler::updatePerFrameRenderData(Frame& frame,
-                                                      const RenderData& renderData) -> void {
-  // Update GpuBufferEntriesBuffer
-  const auto gpuBufferEntryList = resourceManager->getStaticGpuData(renderData.staticGpuMeshData);
+auto DefaultRenderScheduler::updatePerFrameRenderData(Frame& frame, const RenderData& renderData)
+    -> void {
+  ZoneNamedN(var, "updatePerFrameRenderData", true);
 
-  auto& gpuBufferEntriesBuffer = resourceManager->getBuffer(frame.getGpuBufferEntryBufferHandle());
+  { // Update GpuBufferEntriesBuffer
+    ZoneNamedN(var, "getStaticGpuData", true);
+    const auto& gpuBufferEntryList =
+        resourceManager->getStaticGpuData(renderData.staticGpuMeshData);
 
-  gpuBufferEntriesBuffer.mapBuffer();
-  gpuBufferEntriesBuffer.updateBufferValue(gpuBufferEntryList.data(),
-                                           sizeof(GpuBufferEntry) * gpuBufferEntryList.size());
-  gpuBufferEntriesBuffer.unmapBuffer();
+    auto& gpuBufferEntriesBuffer =
+        resourceManager->getBuffer(frame.getGpuBufferEntryBufferHandle());
+
+    gpuBufferEntriesBuffer.mapBuffer();
+    {
+      ZoneNamedN(var, "updateBufferValue", true);
+
+      gpuBufferEntriesBuffer.updateBufferValue(gpuBufferEntryList.data(),
+                                               sizeof(GpuBufferEntry) * gpuBufferEntryList.size());
+    }
+    gpuBufferEntriesBuffer.unmapBuffer();
+  }
 
   // Update GpuObjectDataBuffer
   auto& objectDataBuffer = resourceManager->getBuffer(frame.getGpuObjectDataBufferHandle());
@@ -309,11 +321,10 @@ auto DefaultRenderScheduler::executeTasks(Frame& frame) const -> void {
   commandBuffer.end();
 }
 
-auto DefaultRenderScheduler::endFrame(Frame& frame) const -> void {
+auto DefaultRenderScheduler::endFrame(Frame& frame) -> void {
 
-  auto buffers = std::vector<vk::CommandBuffer>{
-      *commandBufferManager->getCommandBuffer(frame.getStartCommandBufferHandle()),
-  };
+  buffers.clear();
+  buffers.push_back(*commandBufferManager->getCommandBuffer(frame.getStartCommandBufferHandle()));
 
   if (tasksRecorded) {
     buffers.push_back(*commandBufferManager->getCommandBuffer(frame.getMainCommandBufferHandle()));
