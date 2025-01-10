@@ -32,6 +32,9 @@ DefaultRenderScheduler::DefaultRenderScheduler(
       guiSystem{std::move(newGuiSystem)},
       renderConfig{rendererConfig} {
 
+  eventBus->subscribe<SwapchainResized>(
+      [&](const SwapchainResized& event) { handleSwapchainResized(event); });
+
   buffers.resize(3);
 
   const auto drawImageExtent = vk::Extent2D{
@@ -143,33 +146,6 @@ DefaultRenderScheduler::DefaultRenderScheduler(
   indirectRenderTask = renderTaskFactory->createIndirectRenderTask();
   computeTask = renderTaskFactory->createComputeTask();
 
-  eventBus->subscribe<SwapchainResized>([&](const SwapchainResized& event) {
-    viewport = vk::Viewport{
-        .width = static_cast<float>(event.width),
-        .height = static_cast<float>(event.height),
-        .minDepth = 0.f,
-        .maxDepth = 1.f,
-    };
-
-    snezzor = vk::Rect2D{.offset = vk::Offset2D{.x = 0, .y = 0},
-                         .extent = vk::Extent2D{.width = event.width, .height = event.height}};
-
-    const auto drawImageExtent =
-        vk::Extent2D{.width = maths::scaleNumber(event.width, renderConfig.renderScale),
-                     .height = maths::scaleNumber(event.height, renderConfig.renderScale)};
-
-    // All frames use the same depth image so just get the .front here
-    resourceManager->destroyImage(frameManager->getFrames().front()->getDepthImageHandle());
-
-    auto depthImageHandle = resourceManager->createDepthImageAndView(DepthImageName,
-                                                                     drawImageExtent,
-                                                                     swapchain->getDepthFormat());
-    for (const auto& frame : frameManager->getFrames()) {
-      frame->setDepthImageHandle(depthImageHandle);
-      frame->setupRenderingInfo(resourceManager);
-    }
-  });
-
   const auto extent = swapchain->getImageExtent();
 
   viewport = vk::Viewport{
@@ -184,6 +160,33 @@ DefaultRenderScheduler::DefaultRenderScheduler(
 
 DefaultRenderScheduler::~DefaultRenderScheduler() {
   Log.trace("Destroying DefaultRenderScheduler");
+}
+
+auto DefaultRenderScheduler::handleSwapchainResized(const SwapchainResized& event) -> void {
+  viewport = vk::Viewport{
+      .width = static_cast<float>(event.width),
+      .height = static_cast<float>(event.height),
+      .minDepth = 0.f,
+      .maxDepth = 1.f,
+  };
+
+  snezzor = vk::Rect2D{.offset = vk::Offset2D{.x = 0, .y = 0},
+                       .extent = vk::Extent2D{.width = event.width, .height = event.height}};
+
+  const auto drawImageExtent =
+      vk::Extent2D{.width = maths::scaleNumber(event.width, renderConfig.renderScale),
+                   .height = maths::scaleNumber(event.height, renderConfig.renderScale)};
+
+  // All frames use the same depth image so just get the .front here
+  resourceManager->destroyImage(frameManager->getFrames().front()->getDepthImageHandle());
+
+  auto depthImageHandle = resourceManager->createDepthImageAndView(DepthImageName,
+                                                                   drawImageExtent,
+                                                                   swapchain->getDepthFormat());
+  for (const auto& frame : frameManager->getFrames()) {
+    frame->setDepthImageHandle(depthImageHandle);
+    frame->setupRenderingInfo(resourceManager);
+  }
 }
 
 auto DefaultRenderScheduler::updatePerFrameRenderData(Frame& frame, const RenderData& renderData)
@@ -386,13 +389,16 @@ auto DefaultRenderScheduler::endFrame(Frame& frame) -> void {
   try {
     const auto swapchainImageIndex = frame.getSwapchainImageIndex();
     const auto chain = swapchain->getSwapchain();
-    if (const auto result2 = graphicsQueue->getQueue().presentKHR(
-            vk::PresentInfoKHR{.waitSemaphoreCount = 1,
-                               .pWaitSemaphores = &*frame.getRenderFinishedSemaphore(),
-                               .swapchainCount = 1,
-                               .pSwapchains = &chain,
-                               .pImageIndices = &swapchainImageIndex});
-        result2 == vk::Result::eSuboptimalKHR) {
+
+    const auto presentInfo =
+        vk::PresentInfoKHR{.waitSemaphoreCount = 1,
+                           .pWaitSemaphores = &*frame.getRenderFinishedSemaphore(),
+                           .swapchainCount = 1,
+                           .pSwapchains = &chain,
+                           .pImageIndices = &swapchainImageIndex};
+
+    if (const auto result2 = graphicsQueue->getQueue().presentKHR(presentInfo);
+        result2 == vk::Result::eSuboptimalKHR || result2 == vk::Result::eErrorOutOfDateKHR) {
       Log.trace("Swapchain Needs Resized");
     }
   } catch (const std::exception& ex) { Log.trace("Swapchain needs recreated: {0}", ex.what()); }

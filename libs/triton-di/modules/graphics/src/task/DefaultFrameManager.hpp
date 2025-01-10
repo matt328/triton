@@ -39,6 +39,8 @@ private:
 
   size_t currentFrame;
   std::vector<std::unique_ptr<Frame>> frames;
+
+  auto handleSwapchainResized(const SwapchainResized& event) -> void;
 };
 
 }

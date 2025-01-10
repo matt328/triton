@@ -27,7 +27,7 @@ public:
 
   [[nodiscard]] auto getImageFormat() const -> vk::Format;
   [[nodiscard]] auto getImageExtent() const -> vk::Extent2D;
-  [[nodiscard]] auto getSwapchain() const -> vk::SwapchainKHR;
+  [[nodiscard]] auto getSwapchain() const noexcept -> vk::SwapchainKHR;
   [[nodiscard]] auto getSwapchainImage(uint32_t imageIndex) const -> vk::Image;
   [[nodiscard]] auto getSwapchainImageView(uint32_t imageIndex) const -> vk::ImageView;
   [[nodiscard]] auto getDepthFormat() const -> vk::Format;

@@ -5,6 +5,7 @@
 #include "systems/CameraSystem.hpp"
 #include "systems/RenderDataSystem.hpp"
 #include "systems/TransformSystem.hpp"
+#include "tr/Events.hpp"
 #include "tr/IEventBus.hpp"
 #include "tr/IGameplaySystem.hpp"
 #include "CommandQueue.hpp"
@@ -57,6 +58,9 @@ private:
 
   auto entityCreated([[maybe_unused]] entt::registry& reg,
                      [[maybe_unused]] entt::entity entity) const -> void;
+
+  auto handleSwapchainResized(const SwapchainResized& event) -> void;
+  auto handleSwapchainCreated(const SwapchainCreated& event) -> void;
 };
 
 }

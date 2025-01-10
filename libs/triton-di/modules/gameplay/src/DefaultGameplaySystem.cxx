@@ -35,17 +35,11 @@ DefaultGameplaySystem::DefaultGameplaySystem(std::shared_ptr<IEventBus> newEvent
   commandQueue =
       std::make_unique<CommandQueue<entt::registry&, const std::shared_ptr<AssetManager>&>>();
 
-  eventBus->subscribe<SwapchainResized>([&](const SwapchainResized& event) {
-    Log.trace("Handling SwapchainResized, width: {}, height: {}", event.width, event.height);
-    registry->ctx().insert_or_assign<WindowDimensions>(
-        WindowDimensions{.width = event.width, .height = event.height});
-  });
+  eventBus->subscribe<SwapchainResized>(
+      [&](const SwapchainResized& event) { handleSwapchainResized(event); });
 
-  eventBus->subscribe<SwapchainCreated>([&](const SwapchainCreated& event) {
-    Log.trace("Handling SwapchainCreated, width: {}, height: {}", event.width, event.height);
-    registry->ctx().insert_or_assign<WindowDimensions>(
-        WindowDimensions{.width = event.width, .height = event.height});
-  });
+  eventBus->subscribe<SwapchainCreated>(
+      [&](const SwapchainCreated& event) { handleSwapchainCreated(event); });
 
   // Forward
   actionSystem->mapSource(Source{Key::Up, SourceType::Boolean},
@@ -91,6 +85,16 @@ DefaultGameplaySystem::DefaultGameplaySystem(std::shared_ptr<IEventBus> newEvent
 DefaultGameplaySystem::~DefaultGameplaySystem() {
   Log.trace("Destroying Gameplay System");
   entityCreatedConnection.release();
+}
+
+auto DefaultGameplaySystem::handleSwapchainResized(const SwapchainResized& event) -> void {
+  registry->ctx().insert_or_assign<WindowDimensions>(
+      WindowDimensions{.width = event.width, .height = event.height});
+}
+
+auto DefaultGameplaySystem::handleSwapchainCreated(const SwapchainCreated& event) -> void {
+  registry->ctx().insert_or_assign<WindowDimensions>(
+      WindowDimensions{.width = event.width, .height = event.height});
 }
 
 void DefaultGameplaySystem::update() {

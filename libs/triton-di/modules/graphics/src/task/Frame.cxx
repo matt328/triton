@@ -73,7 +73,7 @@ auto Frame::getInFlightFence() -> vk::raii::Fence& {
   return inFlightFence;
 }
 
-auto Frame::getSwapchainImageIndex() const -> uint32_t {
+auto Frame::getSwapchainImageIndex() const noexcept -> uint32_t {
   return swapchainImageIndex;
 }
 

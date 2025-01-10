@@ -64,26 +64,30 @@ DefaultFrameManager::DefaultFrameManager(
     frame->setDrawImageHandle(drawImageHandle);
   }
 
-  eventBus->subscribe<SwapchainResized>([&](SwapchainResized event) {
-    const auto drawImageExtent =
-        vk::Extent2D{.width = maths::scaleNumber(event.width, renderConfig.renderScale),
-                     .height = maths::scaleNumber(event.height, renderConfig.renderScale)};
-
-    for (auto& frame : frames) {
-      resourceManager->destroyDrawImageAndView(frame->getDrawImageHandle());
-      auto drawImageHandle =
-          resourceManager->createDrawImageAndView(frame->getIndexedName("Image-Draw-Frame_"),
-                                                  drawImageExtent);
-      frame->setDrawImageHandle(drawImageHandle);
-      frame->setupRenderingInfo(resourceManager);
-    }
-  });
+  eventBus->subscribe<SwapchainResized>(
+      [&](SwapchainResized event) { handleSwapchainResized(event); });
 }
 
 DefaultFrameManager::~DefaultFrameManager() {
   Log.trace("Destroying DefaultFrameManager");
   device->waitIdle();
   frames.clear();
+}
+
+auto DefaultFrameManager::handleSwapchainResized(const SwapchainResized& event) -> void {
+
+  const auto drawImageExtent =
+      vk::Extent2D{.width = maths::scaleNumber(event.width, renderConfig.renderScale),
+                   .height = maths::scaleNumber(event.height, renderConfig.renderScale)};
+
+  for (auto& frame : frames) {
+    resourceManager->destroyDrawImageAndView(frame->getDrawImageHandle());
+    auto drawImageHandle =
+        resourceManager->createDrawImageAndView(frame->getIndexedName("Image-Draw-Frame_"),
+                                                drawImageExtent);
+    frame->setDrawImageHandle(drawImageHandle);
+    frame->setupRenderingInfo(resourceManager);
+  }
 }
 
 auto DefaultFrameManager::acquireFrame()
