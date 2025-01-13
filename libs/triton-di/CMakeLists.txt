@@ -46,6 +46,7 @@ set(common_SRC
   modules/graphics/src/vk/core/Device.cxx
   modules/graphics/src/vk/core/QueueTypes.cxx
   modules/graphics/src/vk/core/Swapchain.cxx
+  modules/graphics/src/vk/sb/DSShaderBinding.cxx
 
   modules/graphics/src/task/DefaultRenderScheduler.cxx
   modules/graphics/src/task/Frame.cxx

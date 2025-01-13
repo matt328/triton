@@ -81,9 +81,8 @@ DefaultGameplaySystem::DefaultGameplaySystem(std::shared_ptr<IEventBus> newEvent
   createTestEntity("Test Cube #1");
   createTestEntity("Test Cube #2");
 
-  createStaticModelEntity(
-      R"(c:\Users\Matt\Projects\game-assets\models\viking_room\viking_room.trm)",
-      "Viking Room");
+  createStaticModelEntity(R"(/home/matt/projects/game-assets/models/viking_room/viking_room.trm)",
+                          "Viking Room");
 }
 
 DefaultGameplaySystem::~DefaultGameplaySystem() {
