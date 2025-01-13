@@ -15,8 +15,8 @@ IndirectRenderTask::IndirectRenderTask(std::shared_ptr<VkResourceManager> newRes
       config{newConfig} {
 }
 
-auto IndirectRenderTask::record(vk::raii::CommandBuffer& commandBuffer, const Frame& frame)
-    -> void {
+auto IndirectRenderTask::record(vk::raii::CommandBuffer& commandBuffer,
+                                const Frame& frame) -> void {
 
   const auto& objectDataBuffer = resourceManager->getBuffer(frame.getGpuObjectDataBufferHandle());
   const auto& cameraDataBuffer = resourceManager->getBuffer(frame.getCameraBufferHandle());
@@ -49,13 +49,6 @@ auto IndirectRenderTask::record(vk::raii::CommandBuffer& commandBuffer, const Fr
                                               0,
                                               {0},
                                               {0});
-
-  /*
-    TODO:
-    - Still need to account for image DescriptorSetLayout in PipelineLayout
-    - Need to figure out what setDescriptorBufferOffsetsEXT needs to do
-
-  */
 
   commandBuffer.pushConstants<IndirectPushConstants>(pipeline->getPipelineLayout(),
                                                      vk::ShaderStageFlagBits::eVertex,

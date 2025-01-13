@@ -140,12 +140,6 @@ auto VkResourceManager::addDescriptorToBuffer(BufferHandle bufferHandle,
   auto getInfo = vk::DescriptorGetInfoEXT{.data = {.pCombinedImageSampler = &descriptorImageInfo}};
 
   auto& buffer = getBuffer(bufferHandle);
-  buffer.mapBuffer(); // Maybe just make this optionally return a void* to the mapped data?
-
-  /*
-    Adjust the Buffer class to support getting the address of the data. Is this address host or
-    device?  In the vulkan samples, look at the buffer->get_data() method to see what it does
-  */
 
   char* bufPtr = static_cast<char*>(buffer.getData());
 
@@ -156,8 +150,8 @@ auto VkResourceManager::addDescriptorToBuffer(BufferHandle bufferHandle,
   device->getVkDevice().getDescriptorEXT(getInfo, descriptorSize, location);
 }
 
-auto VkResourceManager::getTextureData(const as::ImageData& imageData, std::string_view name)
-    -> TextureData {
+auto VkResourceManager::getTextureData(const as::ImageData& imageData,
+                                       std::string_view name) -> TextureData {
   auto textureData = TextureData{};
   auto textureSize =
       static_cast<vk::DeviceSize>(imageData.width * imageData.height * imageData.component);
@@ -368,8 +362,8 @@ auto VkResourceManager::createIndirectBuffer(size_t size) -> BufferHandle {
   return key;
 }
 
-[[nodiscard]] auto VkResourceManager::resizeBuffer(BufferHandle handle, size_t newSize)
-    -> BufferHandle {
+[[nodiscard]] auto VkResourceManager::resizeBuffer(BufferHandle handle,
+                                                   size_t newSize) -> BufferHandle {
   ZoneNamedN(var, "Resize Buffer", true);
   auto& oldBuffer = bufferMap.at(handle);
 

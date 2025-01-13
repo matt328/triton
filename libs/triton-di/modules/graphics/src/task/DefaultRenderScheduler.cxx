@@ -11,7 +11,6 @@
 #include "task/IRenderTask.hpp"
 #include "vk/MeshBufferManager.hpp"
 #include "vk/VkResourceManager.hpp"
-#include <vulkan/vulkan_enums.hpp>
 
 namespace tr {
 
@@ -193,8 +192,8 @@ auto DefaultRenderScheduler::handleSwapchainResized(const SwapchainResized& even
   }
 }
 
-auto DefaultRenderScheduler::updatePerFrameRenderData(Frame& frame, const RenderData& renderData)
-    -> void {
+auto DefaultRenderScheduler::updatePerFrameRenderData(Frame& frame,
+                                                      const RenderData& renderData) -> void {
   ZoneNamedN(var, "updatePerFrameRenderData", true);
 
   // No need to update the descriptor buffer here since it's been updated elsewhere
