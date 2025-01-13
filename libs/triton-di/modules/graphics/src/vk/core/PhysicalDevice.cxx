@@ -1,7 +1,6 @@
 #include "PhysicalDevice.hpp"
 
 #include "Surface.hpp"
-#include <vulkan/vulkan_structs.hpp>
 
 namespace tr {
 
@@ -25,10 +24,22 @@ PhysicalDevice::PhysicalDevice(const std::shared_ptr<Instance>& instance,
   if (physicalDevice == nullptr) {
     Log.error("Failed to select a suitable physical device");
   }
+
+  auto deviceProperties =
+      physicalDevice->getProperties2KHR<vk::PhysicalDeviceProperties2KHR,
+                                        vk::PhysicalDeviceDescriptorBufferPropertiesEXT>();
+
+  descriptorBufferProperties =
+      deviceProperties.get<vk::PhysicalDeviceDescriptorBufferPropertiesEXT>();
 }
 
 PhysicalDevice::~PhysicalDevice() {
   Log.trace("Destroying PhysicalDevice");
+}
+
+auto PhysicalDevice::getDescriptorBufferProperties() const
+    -> vk::PhysicalDeviceDescriptorBufferPropertiesEXT {
+  return descriptorBufferProperties;
 }
 
 auto PhysicalDevice::createDevice() -> std::unique_ptr<vk::raii::Device> {
@@ -59,13 +70,6 @@ auto PhysicalDevice::createDevice() -> std::unique_ptr<vk::raii::Device> {
       queueCreateInfos.push_back(presentFamilyCreateInfo);
     }
   }
-
-  // auto deviceProperties =
-  //     physicalDevice->getProperties2KHR<vk::PhysicalDeviceProperties2KHR,
-  //                                       vk::PhysicalDeviceDescriptorBufferPropertiesEXT>();
-
-  // auto descriptorBufferProperties =
-  //     deviceProperties.get<vk::PhysicalDeviceDescriptorBufferPropertiesEXT>();
 
   auto dynamicRenderingFeatures = vk::PhysicalDeviceDynamicRenderingFeaturesKHR{
       .dynamicRendering = VK_TRUE,

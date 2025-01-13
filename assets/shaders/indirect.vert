@@ -12,6 +12,8 @@ layout(location = 5) in vec4 inWeights;
 layout(location = 6) in vec4 inTangents;
 
 layout(location = 0) out vec4 fragColor;
+layout(location = 1) out vec2 fragTexCoord;
+layout(location = 2) out uint textureId;
 
 layout(push_constant) uniform PushConstants {
   uint drawID;
@@ -22,7 +24,7 @@ pc;
 
 struct ObjectData {
   mat4 modelMatrix;
-  uint64_t textureId;
+  uint textureId;
   uint animationDataIndex;
   uint _padding;
 };
@@ -49,4 +51,6 @@ void main() {
 
   gl_Position = worldPos;
   fragColor = inColor;
+  fragTexCoord = inTexCoord;
+  textureId = objectDataBuffer.objectData[gl_DrawID].textureId;
 }

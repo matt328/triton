@@ -1,5 +1,6 @@
 #include "Frame.hpp"
 #include "vk/VkResourceManager.hpp"
+#include <vulkan/vulkan_core.h>
 
 namespace tr {
 
@@ -105,6 +106,10 @@ auto Frame::getCountBufferHandle() const -> BufferHandle {
   return countBuffer;
 }
 
+auto Frame::getDescriptorBufferHandle() const -> BufferHandle {
+  return descriptorBuffer;
+}
+
 auto Frame::getDepthImageHandle() const -> ImageHandle {
   return depthImageHandle;
 }
@@ -151,6 +156,10 @@ auto Frame::setCameraBufferHandle(BufferHandle handle) -> void {
 
 auto Frame::setCountBufferHandle(BufferHandle handle) -> void {
   countBuffer = handle;
+}
+
+auto Frame::setDescriptorBufferHandle(BufferHandle handle) -> void {
+  descriptorBuffer = handle;
 }
 
 auto Frame::transitionImage(const vk::raii::CommandBuffer& cmd,

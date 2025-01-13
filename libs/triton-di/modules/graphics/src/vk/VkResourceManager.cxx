@@ -1,13 +1,14 @@
 #include "VkResourceManager.hpp"
 
 #include "mem/Allocator.hpp"
+#include "mem/Image.hpp"
 #include "tr/IDebugManager.hpp"
 #include "ResourceExceptions.hpp"
 #include "mem/Buffer.hpp"
 #include "pipeline/ComputePipeline.hpp"
-#include "pipeline/IPipeline.hpp"
-#include "pipeline/IndirectPipeline.hpp"
 #include "vk/MeshBufferManager.hpp"
+#include "vk/TextureBufferManager.hpp"
+#include <vulkan/vulkan_enums.hpp>
 
 namespace tr {
 VkResourceManager::VkResourceManager(
@@ -37,22 +38,51 @@ VkResourceManager::VkResourceManager(
 
   allocator = std::make_unique<Allocator>(allocatorCreateInfo, device->getVkDevice(), debugManager);
 
+  descriptorBufferOffsetAlignment =
+      physicalDevice->getDescriptorBufferProperties().descriptorBufferOffsetAlignment;
+  descriptorSize =
+      physicalDevice->getDescriptorBufferProperties().combinedImageSamplerDescriptorSize;
+
+  createDescriptorSetLayout();
+
   staticMeshBufferManager = std::make_unique<MeshBufferManager>(this);
+
+  textureBufferManager = std::make_unique<TextureBufferManager>(this);
 }
 
 VkResourceManager::~VkResourceManager() {
   Log.trace("Destroying VkResourceManager");
 }
 
-/*
-  Todo(matt) Tomorrow refactor this method to be called just uploadStaticMesh.
-  - Add the mesh to the staticMeshBufferManager
-  - Refactor the IndirectRenderer to know to get the vertex and index buffers from
-  staticMeshBufferManager.
+auto VkResourceManager::createDescriptorSetLayout() -> void {
+  constexpr auto binding =
+      vk::DescriptorSetLayoutBinding{.binding = 0,
+                                     .descriptorType = vk::DescriptorType::eCombinedImageSampler,
+                                     .descriptorCount = MaxTextureCount,
+                                     .stageFlags = vk::ShaderStageFlagBits::eAll};
 
-  Create the impl of uploadImage method to use a TextureBufferManager.
-  - driven by descriptor buffers. heck any gpu that doesn't support Vulkan 1.3
-*/
+  static constexpr vk::DescriptorBindingFlags bindlessFlags =
+      vk::DescriptorBindingFlagBits::ePartiallyBound;
+
+  constexpr auto extendedInfo =
+      vk::DescriptorSetLayoutBindingFlagsCreateInfoEXT{.bindingCount = 1,
+                                                       .pBindingFlags = &bindlessFlags};
+
+  const auto flags = vk::DescriptorSetLayoutCreateFlagBits::eDescriptorBufferEXT;
+
+  const auto dslCreateInfo = vk::DescriptorSetLayoutCreateInfo{.pNext = &extendedInfo,
+                                                               .flags = flags,
+                                                               .bindingCount = 1,
+                                                               .pBindings = &binding};
+
+  textureDsl = std::make_unique<vk::raii::DescriptorSetLayout>(
+      device->getVkDevice().createDescriptorSetLayout(dslCreateInfo));
+  textureDslSize = textureDsl->getSizeEXT();
+
+  textureDslSize = aligned_size(textureDslSize, descriptorBufferOffsetAlignment);
+
+  textureDslOffset = textureDsl->getBindingOffsetEXT(0);
+}
 
 auto VkResourceManager::uploadStaticMesh(const GeometryData& geometryData) -> MeshHandle {
   return staticMeshBufferManager->addMesh(geometryData);
@@ -99,9 +129,182 @@ auto VkResourceManager::asyncUpload2(const GeometryData& geometryData) -> MeshHa
   }
 }
 
-auto VkResourceManager::uploadImage([[maybe_unused]] const as::ImageData& imageData)
-    -> TextureHandle {
-  return 0L;
+auto VkResourceManager::uploadImage([[maybe_unused]] const as::ImageData& imageData,
+                                    std::string_view name) -> TextureHandle {
+  return textureBufferManager->addTexture(imageData, name);
+}
+
+auto VkResourceManager::addDescriptorToBuffer(BufferHandle bufferHandle,
+                                              const vk::DescriptorImageInfo& descriptorImageInfo,
+                                              size_t slot) -> void {
+  auto getInfo = vk::DescriptorGetInfoEXT{.data = {.pCombinedImageSampler = &descriptorImageInfo}};
+
+  auto& buffer = getBuffer(bufferHandle);
+  buffer.mapBuffer(); // Maybe just make this optionally return a void* to the mapped data?
+
+  /*
+    Adjust the Buffer class to support getting the address of the data. Is this address host or
+    device?  In the vulkan samples, look at the buffer->get_data() method to see what it does
+  */
+
+  char* bufPtr = static_cast<char*>(buffer.getData());
+
+  auto* location = bufPtr + slot * textureDslSize + textureDslOffset;
+
+  // Reminder this function gets a descriptor in the device, and places it in the memory location
+  // This location happens to be mapped to a buffer.
+  device->getVkDevice().getDescriptorEXT(getInfo, descriptorSize, location);
+}
+
+auto VkResourceManager::getTextureData(const as::ImageData& imageData, std::string_view name)
+    -> TextureData {
+  auto textureData = TextureData{};
+  auto textureSize =
+      static_cast<vk::DeviceSize>(imageData.width * imageData.height * imageData.component);
+
+  // Create a Staging Buffer
+  const auto bufferCreateInfo = vk::BufferCreateInfo{.size = textureSize,
+                                                     .usage = vk::BufferUsageFlagBits::eTransferSrc,
+                                                     .sharingMode = vk::SharingMode::eExclusive};
+  const auto allocationCreateInfo =
+      vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eCpuOnly,
+                                .requiredFlags = vk::MemoryPropertyFlagBits::eHostVisible |
+                                                 vk::MemoryPropertyFlagBits::eHostCoherent};
+
+  const auto stagingBuffer =
+      allocator->createBuffer(&bufferCreateInfo, &allocationCreateInfo, name);
+
+  // Copy the texture data into the staging buffer
+  auto* const bufferData = allocator->mapMemory(*stagingBuffer);
+  memcpy(bufferData, imageData.data.data(), textureSize);
+  allocator->unmapMemory(*stagingBuffer);
+
+  // Setup buffer copy regions for each mip level
+  std::vector<vk::BufferImageCopy> bufferCopyRegions;
+
+  // hack
+  constexpr uint32_t mipLevels = 1;
+  const auto uWidth = static_cast<uint32_t>(imageData.width);
+  const auto uHeight = static_cast<uint32_t>(imageData.height);
+
+  for (uint32_t i = 0; i < mipLevels; i++) {
+    vk::DeviceSize offset{0};
+
+    const auto bufferCopyRegion =
+        vk::BufferImageCopy{.bufferOffset = offset,
+                            .imageSubresource =
+                                vk::ImageSubresourceLayers{
+                                    .aspectMask = vk::ImageAspectFlagBits::eColor,
+                                    .mipLevel = i,
+                                    .baseArrayLayer = 0,
+                                    .layerCount = 1,
+                                },
+                            .imageExtent = vk::Extent3D{.width = std::max(1u, uWidth >> i),
+                                                        .height = std::max(1u, uHeight >> i),
+                                                        .depth = 1u}};
+    bufferCopyRegions.push_back(bufferCopyRegion);
+  }
+  constexpr auto format = vk::Format::eR8G8B8A8Srgb;
+  auto imageCreateInfo = vk::ImageCreateInfo{
+      .imageType = vk::ImageType::e2D,
+      .format = format,
+      .extent = {.width = uWidth, .height = uHeight, .depth = 1u},
+      .mipLevels = mipLevels,
+      .arrayLayers = 1,
+      .samples = vk::SampleCountFlagBits::e1,
+      .tiling = vk::ImageTiling::eOptimal,
+      .usage = vk::ImageUsageFlagBits::eSampled,
+      .sharingMode = vk::SharingMode::eExclusive,
+      .initialLayout = vk::ImageLayout::eUndefined,
+  };
+  if (!(imageCreateInfo.usage & vk::ImageUsageFlagBits::eTransferDst)) {
+    imageCreateInfo.usage |= vk::ImageUsageFlagBits::eTransferDst;
+  }
+
+  constexpr auto imageAllocateCreateInfo =
+      vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eGpuOnly,
+                                .requiredFlags = vk::MemoryPropertyFlagBits::eDeviceLocal};
+
+  // TODO(matt) this has to stick around until removeTexture is called
+  textureData.image = allocator->createImage(imageCreateInfo, imageAllocateCreateInfo, name);
+
+  constexpr auto subresourceRange =
+      vk::ImageSubresourceRange{.aspectMask = vk::ImageAspectFlagBits::eColor,
+                                .baseMipLevel = 0,
+                                .levelCount = mipLevels,
+                                .layerCount = 1};
+
+  // Upload Image
+  immediateTransferContext->submit([&](const vk::raii::CommandBuffer& cmd) {
+    {
+      const auto [dstBarrier, sourceStage, dstStage] =
+          createTransitionBarrier(textureData.image->getImage(),
+                                  vk::ImageLayout::eUndefined,
+                                  vk::ImageLayout::eTransferDstOptimal,
+                                  subresourceRange);
+      cmd.pipelineBarrier(sourceStage,
+                          dstStage,
+                          vk::DependencyFlagBits::eByRegion,
+                          {},
+                          {},
+                          dstBarrier);
+    }
+    cmd.copyBufferToImage(stagingBuffer->getBuffer(),
+                          textureData.image->getImage(),
+                          vk::ImageLayout::eTransferDstOptimal,
+                          bufferCopyRegions);
+    {
+      const auto [dstBarrier, sourceStage, dstStage] =
+          createTransitionBarrier(textureData.image->getImage(),
+                                  vk::ImageLayout::eTransferDstOptimal,
+                                  vk::ImageLayout::eShaderReadOnlyOptimal,
+                                  subresourceRange);
+      cmd.pipelineBarrier(sourceStage,
+                          dstStage,
+                          vk::DependencyFlagBits::eByRegion,
+                          {},
+                          {},
+                          dstBarrier);
+    }
+  });
+
+  constexpr auto samplerInfo =
+      vk::SamplerCreateInfo{.magFilter = vk::Filter::eLinear,
+                            .minFilter = vk::Filter::eLinear,
+                            .mipmapMode = vk::SamplerMipmapMode::eLinear,
+                            .addressModeU = vk::SamplerAddressMode::eRepeat,
+                            .addressModeV = vk::SamplerAddressMode::eRepeat,
+                            .addressModeW = vk::SamplerAddressMode::eRepeat,
+                            .mipLodBias = 0.f,
+                            .anisotropyEnable = VK_TRUE,
+                            .maxAnisotropy = 1, // TODO(matt): look this up
+                            .compareEnable = VK_FALSE,
+                            .compareOp = vk::CompareOp::eAlways,
+                            .minLod = 0.f,
+                            .maxLod = 0.f,
+                            .borderColor = vk::BorderColor::eIntOpaqueBlack,
+                            .unnormalizedCoordinates = VK_FALSE};
+
+  // TODO(matt) this has to stay alive until removeTexture is called
+  textureData.sampler = *device->getVkDevice().createSampler(samplerInfo);
+
+  constexpr auto range = vk::ImageSubresourceRange{.aspectMask = vk::ImageAspectFlagBits::eColor,
+                                                   .baseMipLevel = 0,
+                                                   .levelCount = 1,
+                                                   .baseArrayLayer = 0,
+                                                   .layerCount = 1};
+
+  const auto viewInfo = vk::ImageViewCreateInfo{.image = textureData.image->getImage(),
+                                                .viewType = vk::ImageViewType::e2D,
+                                                .format = format,
+                                                .subresourceRange = range};
+
+  // TODO(matt) this also has to stay alive until removeTexture is called
+  textureData.imageView = *device->getVkDevice().createImageView(viewInfo);
+
+  textureData.layout = vk::ImageLayout::eShaderReadOnlyOptimal;
+
+  return textureData;
 }
 
 auto VkResourceManager::createGpuVertexBuffer(size_t size, std::string_view name) -> BufferHandle {
@@ -116,15 +319,32 @@ auto VkResourceManager::createGpuIndexBuffer(size_t size, std::string_view name)
   return key;
 }
 
+auto VkResourceManager::createDescriptorBuffer(size_t size, std::string_view name) -> BufferHandle {
+  const auto flags = vk::BufferUsageFlagBits::eResourceDescriptorBufferEXT |
+                     vk::BufferUsageFlagBits::eSamplerDescriptorBufferEXT |
+                     vk::BufferUsageFlagBits::eShaderDeviceAddress;
+
+  const auto bufferSize = size * textureDslSize;
+  const auto memoryUsage = vma::MemoryUsage::eCpuToGpu;
+  const auto memoryProperties = vk::MemoryPropertyFlagBits::eHostCoherent;
+
+  return createBuffer(bufferSize, flags, name, memoryUsage, memoryProperties, true);
+}
+
 auto VkResourceManager::createBuffer(size_t size,
                                      vk::Flags<vk::BufferUsageFlagBits> flags,
                                      std::string_view name,
                                      vma::MemoryUsage usage,
-                                     vk::MemoryPropertyFlags memoryProperties) -> BufferHandle {
+                                     vk::MemoryPropertyFlags memoryProperties,
+                                     bool mapped) -> BufferHandle {
   const auto bufferCreateInfo = vk::BufferCreateInfo{.size = size, .usage = flags};
 
-  const auto allocationCreateInfo =
+  auto allocationCreateInfo =
       vma::AllocationCreateInfo{.usage = usage, .requiredFlags = memoryProperties};
+
+  if (mapped) {
+    allocationCreateInfo.flags = vma::AllocationCreateFlagBits::eMapped;
+  }
 
   auto key = bufferMapKeygen.getKey();
 
@@ -148,8 +368,8 @@ auto VkResourceManager::createIndirectBuffer(size_t size) -> BufferHandle {
   return key;
 }
 
-[[nodiscard]] auto VkResourceManager::resizeBuffer(BufferHandle handle,
-                                                   size_t newSize) -> BufferHandle {
+[[nodiscard]] auto VkResourceManager::resizeBuffer(BufferHandle handle, size_t newSize)
+    -> BufferHandle {
   ZoneNamedN(var, "Resize Buffer", true);
   auto& oldBuffer = bufferMap.at(handle);
 
@@ -197,15 +417,6 @@ auto VkResourceManager::addToMesh([[maybe_unused]] const GeometryData& geometryD
     auto& vertexBuffer = getBuffer(vertexBufferHandle);
     auto& indexBuffer = getBuffer(indexBufferHandle);
 
-    /*
-      TODO(matt) I don't think any GPU synchronization is needed here. Although we are working with
-      a buffer that will simultaneously be used to render geometry, the affected regions of the
-      buffer will not be read from at the same time they're being written to. Only once the copy
-      operations are complete will the entities be added to the ECS and then potentially referenced
-      by the DrawCommand buffer. This works because the ImmediateTransferContext waits for its fence
-      before the method returns. This whole process happens in a background thread, so the main
-      thread can continue to render what it knows about.
-    */
     immediateTransferContext->submit([&](const vk::raii::CommandBuffer& cmd) {
       const auto vbCopy = vk::BufferCopy{.srcOffset = 0, .dstOffset = vertexOffset, .size = vbSize};
       cmd.copyBuffer(vbStagingBuffer->getBuffer(), vertexBuffer.getBuffer(), vbCopy);
@@ -371,6 +582,14 @@ auto VkResourceManager::getStaticMeshBuffers() const -> std::tuple<Buffer&, Buff
           *bufferMap.at(staticMeshBufferManager->getIndexBufferHandle())};
 }
 
+auto VkResourceManager::getDescriptorBuffer() const -> Buffer& {
+  return *bufferMap.at(textureBufferManager->getDescriptorBufferHandle());
+}
+
+auto VkResourceManager::getDescriptorSetLayout() -> const vk::DescriptorSetLayout* {
+  return &**textureDsl;
+}
+
 auto VkResourceManager::destroyImage(ImageHandle handle) -> void {
   imageInfoMap.erase(handle);
 }
@@ -393,6 +612,43 @@ auto VkResourceManager::createComputePipeline([[maybe_unused]] std::string_view 
     const std::vector<RenderMeshData>& gpuBufferData) -> std::vector<GpuBufferEntry>& {
   ZoneNamedN(var, "getGpuBufferEntries", true);
   return staticMeshBufferManager->getGpuBufferEntries(gpuBufferData);
+}
+
+auto VkResourceManager::createTransitionBarrier(const vk::Image& image,
+                                                const vk::ImageLayout oldLayout,
+                                                const vk::ImageLayout newLayout,
+                                                const vk::ImageSubresourceRange& subresourceRange)
+    -> TransitionBarrierInfo {
+  vk::ImageMemoryBarrier barrier{
+      .srcAccessMask = vk::AccessFlagBits::eNone,
+      .dstAccessMask = vk::AccessFlagBits::eNone,
+      .oldLayout = oldLayout,
+      .newLayout = newLayout,
+      .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+      .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+      .image = image,
+      .subresourceRange = subresourceRange,
+  };
+
+  auto sourceStage = vk::PipelineStageFlagBits::eNone;
+  auto destinationStage = vk::PipelineStageFlagBits::eNone;
+
+  if (oldLayout == vk::ImageLayout::eUndefined &&
+      newLayout == vk::ImageLayout::eTransferDstOptimal) {
+    barrier.srcAccessMask = vk::AccessFlagBits::eNone;
+    barrier.dstAccessMask = vk::AccessFlagBits::eTransferWrite;
+    sourceStage = vk::PipelineStageFlagBits::eTopOfPipe;
+    destinationStage = vk::PipelineStageFlagBits::eTransfer;
+  } else if (oldLayout == vk::ImageLayout::eTransferDstOptimal &&
+             newLayout == vk::ImageLayout::eShaderReadOnlyOptimal) {
+    barrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
+    barrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
+    sourceStage = vk::PipelineStageFlagBits::eTransfer;
+    destinationStage = vk::PipelineStageFlagBits::eFragmentShader;
+  } else {
+    throw std::invalid_argument("Unsupported layout transition");
+  }
+  return {barrier, sourceStage, destinationStage};
 }
 
 }

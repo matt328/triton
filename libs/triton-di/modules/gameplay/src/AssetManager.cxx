@@ -19,8 +19,8 @@ auto AssetManager::loadModel(std::string_view filename) -> ModelData {
 
   auto geometryData = geometryDataMap.at(geometryHandle);
 
-  auto meshHandle = resourceManager->asyncUpload2(geometryData);
-  auto textureHandle = resourceManager->uploadImage(imageDataMap.at(imageHandle));
+  auto meshHandle = resourceManager->uploadStaticMesh(geometryData);
+  auto textureHandle = resourceManager->uploadImage(imageDataMap.at(imageHandle), "ModelTexture");
 
   geometryDataMap.erase(geometryHandle);
   imageDataMap.erase(imageHandle);
@@ -43,11 +43,11 @@ auto AssetManager::createCube() -> ModelData {
   auto meshHandle = resourceManager->uploadStaticMesh(geometryData);
   geometryDataMap.erase(geometryHandle);
 
-  return ModelData{
-      .meshData =
-          MeshData{.meshHandle = meshHandle, .topology = Topology::Triangles, .textureHandle = 0},
-      .skinData = std::nullopt,
-      .animationData = std::nullopt};
+  return ModelData{.meshData = MeshData{.meshHandle = meshHandle,
+                                        .topology = Topology::Triangles,
+                                        .textureHandle = 1234},
+                   .skinData = std::nullopt,
+                   .animationData = std::nullopt};
 }
 
 auto AssetManager::generateAABB(const glm::vec3& min, const glm::vec3& max) -> GeometryHandle {
@@ -145,6 +145,7 @@ auto AssetManager::loadTrmFile(const std::filesystem::path& modelPath) -> as::Mo
         cereal::PortableBinaryInputArchive input(is);
         auto tritonModel = as::Model{};
         input(tritonModel);
+        is.close();
         return tritonModel;
       } catch (const std::exception& ex) {
         throw IOException("Error reading: " + modelPath.string() + ": ", ex);

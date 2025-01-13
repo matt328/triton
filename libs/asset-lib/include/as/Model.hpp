@@ -24,11 +24,11 @@ public:
 };
 
 struct Model {
-  std::vector<tr::as::Vertex> vertices{};
-  std::vector<uint32_t> indices{};
-  std::unordered_map<int, int> jointRemaps{};
-  std::vector<glm::mat4> inverseBindPoses{};
-  ImageData imageData{};
+  std::vector<tr::as::Vertex> vertices;
+  std::vector<uint32_t> indices;
+  std::unordered_map<int, int> jointRemaps;
+  std::vector<glm::mat4> inverseBindPoses;
+  ImageData imageData;
 
   [[nodiscard]] auto skinned() const {
     return !inverseBindPoses.empty();

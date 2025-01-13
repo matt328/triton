@@ -2,6 +2,7 @@
 #include "Instance.hpp"
 #include "QueueFamilyIndices.hpp"
 #include "SwapchainSupportDetails.hpp"
+#include <vulkan/vulkan_structs.hpp>
 
 namespace tr {
 class Surface;
@@ -28,6 +29,9 @@ public:
 
   [[nodiscard]] auto getSurfaceSize() const -> std::pair<uint32_t, uint32_t>;
 
+  [[nodiscard]] auto getDescriptorBufferProperties() const
+      -> vk::PhysicalDeviceDescriptorBufferPropertiesEXT;
+
 private:
   std::shared_ptr<Surface> surface;
   std::shared_ptr<IDebugManager> debugManager;
@@ -49,6 +53,8 @@ private:
       VK_KHR_DEVICE_GROUP_EXTENSION_NAME,
       VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME,
       VK_EXT_EXTENDED_DYNAMIC_STATE_EXTENSION_NAME};
+
+  vk::PhysicalDeviceDescriptorBufferPropertiesEXT descriptorBufferProperties;
 };
 
 auto isDeviceSuitable(const vk::raii::PhysicalDevice& possibleDevice,
