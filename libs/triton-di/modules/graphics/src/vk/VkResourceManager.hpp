@@ -12,11 +12,17 @@
 
 #include "ResourceManagerHandles.hpp"
 #include "vk/MeshBufferManager.hpp"
+#include "TextureData.hpp"
+#include <vulkan/vulkan_structs.hpp>
 
 namespace tr {
 
+using TransitionBarrierInfo =
+    std::tuple<vk::ImageMemoryBarrier, vk::PipelineStageFlagBits, vk::PipelineStageFlagBits>;
+
 class IPipeline;
 class MeshBufferManager;
+class TextureBufferManager;
 
 struct Vertex {
   glm::vec3 position;
@@ -60,19 +66,21 @@ public:
   auto createDrawImageAndView(std::string_view imageName, vk::Extent2D extent) -> ImageHandle;
   auto destroyDrawImageAndView(ImageHandle handle) -> void;
 
-  auto createDepthImageAndView(std::string_view imageName,
-                               vk::Extent2D extent,
-                               vk::Format format) -> ImageHandle;
+  auto createDepthImageAndView(std::string_view imageName, vk::Extent2D extent, vk::Format format)
+      -> ImageHandle;
 
-  auto createBuffer(size_t size,
-                    vk::Flags<vk::BufferUsageFlagBits> flags,
-                    std::string_view name,
-                    vma::MemoryUsage usage = vma::MemoryUsage::eCpuToGpu,
-                    vk::MemoryPropertyFlags memoryProperties =
-                        vk::MemoryPropertyFlagBits::eHostCoherent) -> BufferHandle;
+  auto createBuffer(
+      size_t size,
+      vk::Flags<vk::BufferUsageFlagBits> flags,
+      std::string_view name,
+      vma::MemoryUsage usage = vma::MemoryUsage::eCpuToGpu,
+      vk::MemoryPropertyFlags memoryProperties = vk::MemoryPropertyFlagBits::eHostCoherent,
+      bool mapped = false) -> BufferHandle;
 
   auto createGpuVertexBuffer(size_t size, std::string_view name) -> BufferHandle;
   auto createGpuIndexBuffer(size_t size, std::string_view name) -> BufferHandle;
+
+  auto createDescriptorBuffer(size_t size, std::string_view name) -> BufferHandle;
 
   auto createIndirectBuffer(size_t size) -> BufferHandle;
 
@@ -80,7 +88,7 @@ public:
   auto uploadStaticMesh(const GeometryData& geometryData) -> MeshHandle;
 
   auto asyncUpload2(const GeometryData& geometryData) -> MeshHandle;
-  auto uploadImage(const as::ImageData& imageData) -> TextureHandle;
+  auto uploadImage(const as::ImageData& imageData, std::string_view name) -> TextureHandle;
 
   /// Utility method to only be called by MeshBufferManagers.
   auto addToMesh(const GeometryData& geometryData,
@@ -88,6 +96,12 @@ public:
                  vk::DeviceSize vertexOffset,
                  BufferHandle indexBufferHandle,
                  vk::DeviceSize indexOffset) -> void;
+
+  auto getTextureData(const as::ImageData& imageData, std::string_view name) -> TextureData;
+
+  auto addDescriptorToBuffer(BufferHandle bufferHandle,
+                             const vk::DescriptorImageInfo& descriptorImageInfo,
+                             size_t slot) -> void;
 
   auto destroyImage(ImageHandle handle) -> void;
 
@@ -106,6 +120,10 @@ public:
   [[nodiscard]] auto getBuffer(BufferHandle handle) const -> Buffer&;
 
   [[nodiscard]] auto getStaticMeshBuffers() const -> std::tuple<Buffer&, Buffer&>;
+
+  [[nodiscard]] auto getDescriptorBuffer() const -> Buffer&;
+
+  [[nodiscard]] auto getDescriptorSetLayout() -> const vk::DescriptorSetLayout*;
 
   [[nodiscard]] auto getPipeline(PipelineHandle handle) const -> const IPipeline&;
 
@@ -137,5 +155,27 @@ private:
   std::vector<ImmutableMesh> meshList;
 
   std::unique_ptr<MeshBufferManager> staticMeshBufferManager;
+
+  std::unique_ptr<TextureBufferManager> textureBufferManager;
+
+  std::unique_ptr<vk::raii::DescriptorSetLayout> textureDsl;
+  vk::DeviceSize textureDslSize;
+  vk::DeviceSize textureDslOffset;
+
+  vk::DeviceSize descriptorBufferOffsetAlignment;
+  vk::DeviceSize descriptorSize;
+
+  auto createDescriptorSetLayout() -> void;
+
+  auto createTransitionBarrier(const vk::Image& image,
+                               vk::ImageLayout oldLayout,
+                               vk::ImageLayout newLayout,
+                               const vk::ImageSubresourceRange& subresourceRange)
+      -> TransitionBarrierInfo;
+
+  static inline auto aligned_size(VkDeviceSize value, VkDeviceSize alignment) -> vk::DeviceSize {
+    return (value + alignment - 1) & ~(alignment - 1);
+  }
 };
+
 }

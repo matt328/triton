@@ -10,7 +10,8 @@ const auto VertexShaderFile = SHADERS / "indirect.vert";
 const auto FragmentShaderFile = SHADERS / "indirect.frag";
 
 IndirectPipeline::IndirectPipeline(const std::shared_ptr<Device>& device,
-                                   const std::shared_ptr<IShaderCompiler>& shaderCompiler) {
+                                   const std::shared_ptr<IShaderCompiler>& shaderCompiler,
+                                   const std::shared_ptr<VkResourceManager>& resourceManager) {
   Log.trace("Constructing IndirectPipeline");
 
   const auto pushConstantRange = vk::PushConstantRange{
@@ -20,7 +21,9 @@ IndirectPipeline::IndirectPipeline(const std::shared_ptr<Device>& device,
   };
 
   const auto pipelineLayoutCreateInfo =
-      vk::PipelineLayoutCreateInfo{.pushConstantRangeCount = 1,
+      vk::PipelineLayoutCreateInfo{.setLayoutCount = 1,
+                                   .pSetLayouts = resourceManager->getDescriptorSetLayout(),
+                                   .pushConstantRangeCount = 1,
                                    .pPushConstantRanges = &pushConstantRange};
 
   pipelineLayout =
@@ -118,6 +121,7 @@ IndirectPipeline::IndirectPipeline(const std::shared_ptr<Device>& device,
 
   const auto pipelineCreateInfo =
       vk::GraphicsPipelineCreateInfo{.pNext = &pipelineRenderingInfo,
+                                     .flags = vk::PipelineCreateFlagBits::eDescriptorBufferEXT,
                                      .stageCount = static_cast<uint32_t>(shaderStages.size()),
                                      .pStages = shaderStages.data(),
                                      .pVertexInputState = &vertexInputStateCreateInfo,

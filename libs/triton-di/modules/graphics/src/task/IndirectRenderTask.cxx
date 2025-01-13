@@ -2,6 +2,8 @@
 #include "gfx/RenderContextConfig.hpp"
 #include "task/Frame.hpp"
 #include "vk/VkResourceManager.hpp"
+#include <vulkan/vulkan_enums.hpp>
+#include <vulkan/vulkan_structs.hpp>
 
 namespace tr {
 
@@ -30,12 +32,35 @@ auto IndirectRenderTask::record(vk::raii::CommandBuffer& commandBuffer, const Fr
   commandBuffer.bindVertexBuffers(0, vertexBuffer.getBuffer(), {0});
   commandBuffer.bindIndexBuffer(indexBuffer.getBuffer(), 0, vk::IndexType::eUint32);
 
+  const auto& descriptorBuffer = resourceManager->getDescriptorBuffer();
+
+  const auto address = descriptorBuffer.getDeviceAddress();
+  // TODO(Matt): Buffer::getUsage()
+  const auto usage = vk::BufferUsageFlagBits::eResourceDescriptorBufferEXT |
+                     vk::BufferUsageFlagBits::eSamplerDescriptorBufferEXT |
+                     vk::BufferUsageFlagBits::eShaderDeviceAddress;
+
+  const auto bindingInfo = vk::DescriptorBufferBindingInfoEXT{.address = address, .usage = usage};
+
+  commandBuffer.bindDescriptorBuffersEXT({bindingInfo});
+
+  commandBuffer.setDescriptorBufferOffsetsEXT(vk::PipelineBindPoint::eGraphics,
+                                              pipeline->getPipelineLayout(),
+                                              0,
+                                              {0},
+                                              {0});
+
+  /*
+    TODO:
+    - Still need to account for image DescriptorSetLayout in PipelineLayout
+    - Need to figure out what setDescriptorBufferOffsetsEXT needs to do
+
+  */
+
   commandBuffer.pushConstants<IndirectPushConstants>(pipeline->getPipelineLayout(),
                                                      vk::ShaderStageFlagBits::eVertex,
                                                      0,
                                                      pushConstants);
-
-  [[maybe_unused]] vk::DrawIndexedIndirectCommand f{};
 
   auto& indirectBuffer = resourceManager->getBuffer(frame.getDrawCommandBufferHandle());
   auto& countBuffer = resourceManager->getBuffer(frame.getCountBufferHandle());

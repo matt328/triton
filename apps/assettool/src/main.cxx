@@ -9,15 +9,10 @@
 #include "as/gltf/TransformParser.hpp"
 #include "GlmCereal.hpp"
 
-constexpr int ExpectedArgCount = 5;
+constexpr int ExpectedArgCount = 4;
 
 auto parseCommandLine(const std::vector<std::string>& args) {
   auto options = std::unordered_map<std::string, std::string>{};
-
-  if (args.size() != ExpectedArgCount) {
-    Log.error("Must pass {0} command line args", ExpectedArgCount);
-    throw std::runtime_error("Must pass at least 5 command line args");
-  }
 
   options["mode"] = args[1];
 
@@ -49,9 +44,12 @@ auto main(int argc, char* argv[]) -> int {
         gltfFile = absolute(gltfFile);
       }
 
-      auto skeletonFile = fs::path{options["s"]};
-      if (skeletonFile.is_relative()) {
-        skeletonFile = absolute(skeletonFile);
+      std::optional<fs::path> skeletonFile;
+      if (options.contains("s")) {
+        skeletonFile = std::make_optional(fs::path{options["s"]});
+        if (skeletonFile.value().is_relative()) {
+          skeletonFile = std::make_optional(absolute(skeletonFile.value()));
+        }
       }
 
       auto outputFile = fs::path{options["o"]};
@@ -61,7 +59,7 @@ auto main(int argc, char* argv[]) -> int {
 
       Log.info("Converting Gltf file, input: {0}, skeleton file: {1}",
                gltfFile.string(),
-               skeletonFile.string());
+               skeletonFile.has_value() ? skeletonFile.value().string() : "none provided");
 
       std::unique_ptr<as::TransformParser> transformParser =
           std::make_unique<as::gltf::TransformParser>();
@@ -102,9 +100,10 @@ auto main(int argc, char* argv[]) -> int {
             Log.error("Failed to open output file {0}", outputFile.string());
           }
         } else if (outputFile.extension() == ".trm") {
-          if (std::ofstream outputStream(outputFile); outputStream) {
+          if (std::ofstream outputStream(outputFile, std::ios::binary); outputStream) {
             cereal::PortableBinaryOutputArchive binOutput(outputStream);
             binOutput(tritonModel);
+            outputStream.close();
             Log.info("Wrote binary output file to {0}", outputFile.string());
           } else {
             Log.error("Failed to open output file {0}", outputFile.string());

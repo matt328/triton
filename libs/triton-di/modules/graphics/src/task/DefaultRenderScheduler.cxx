@@ -10,6 +10,7 @@
 #include "task/Frame.hpp"
 #include "task/IRenderTask.hpp"
 #include "vk/MeshBufferManager.hpp"
+#include "vk/VkResourceManager.hpp"
 #include <vulkan/vulkan_enums.hpp>
 
 namespace tr {
@@ -42,9 +43,10 @@ DefaultRenderScheduler::DefaultRenderScheduler(
       .width = maths::scaleNumber(swapchain->getImageExtent().width, renderConfig.renderScale),
       .height = maths::scaleNumber(swapchain->getImageExtent().height, renderConfig.renderScale)};
 
-  auto depthImageHandle = resourceManager->createDepthImageAndView(DepthImageName,
-                                                                   drawImageExtent,
-                                                                   swapchain->getDepthFormat());
+  const auto depthImageHandle =
+      resourceManager->createDepthImageAndView(DepthImageName,
+                                               drawImageExtent,
+                                               swapchain->getDepthFormat());
 
   std::vector<GpuBufferEntry> gpuBufferEntryList{};
   gpuBufferEntryList.reserve(1);
@@ -140,20 +142,6 @@ DefaultRenderScheduler::DefaultRenderScheduler(
       frame->setCountBufferHandle(handle);
     }
 
-    // Descriptor Buffer (Textures)
-    {
-      const auto bufferSize = 24;
-
-      const auto flags = vk::BufferUsageFlagBits::eResourceDescriptorBufferEXT |
-                         vk::BufferUsageFlagBits::eSamplerDescriptorBufferEXT |
-                         vk::BufferUsageFlagBits::eShaderDeviceAddress |
-                         vk::BufferUsageFlagBits::eTransferDst;
-
-      const auto name = frame->getIndexedName("Buffer-Descriptor-Frame_");
-
-      [[maybe_unused]] const auto handle = resourceManager->createBuffer(bufferSize, flags, name);
-    }
-
     frame->setupRenderingInfo(resourceManager);
   }
 
@@ -209,6 +197,10 @@ auto DefaultRenderScheduler::updatePerFrameRenderData(Frame& frame, const Render
     -> void {
   ZoneNamedN(var, "updatePerFrameRenderData", true);
 
+  // No need to update the descriptor buffer here since it's been updated elsewhere
+  // just like the vertex/index buffers
+  // ObjectData will contain a textureId, which is the index into the descriptor buffer
+
   { // Update GpuBufferEntriesBuffer
     ZoneNamedN(var, "getStaticGpuData", true);
     const auto& gpuBufferEntryList =
@@ -218,12 +210,8 @@ auto DefaultRenderScheduler::updatePerFrameRenderData(Frame& frame, const Render
         resourceManager->getBuffer(frame.getGpuBufferEntryBufferHandle());
 
     gpuBufferEntriesBuffer.mapBuffer();
-    {
-      ZoneNamedN(var, "updateBufferValue", true);
-
-      gpuBufferEntriesBuffer.updateBufferValue(gpuBufferEntryList.data(),
-                                               sizeof(GpuBufferEntry) * gpuBufferEntryList.size());
-    }
+    gpuBufferEntriesBuffer.updateBufferValue(gpuBufferEntryList.data(),
+                                             sizeof(GpuBufferEntry) * gpuBufferEntryList.size());
     gpuBufferEntriesBuffer.unmapBuffer();
   }
 

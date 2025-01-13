@@ -34,9 +34,9 @@ auto MeshBufferManager::addMesh(const GeometryData& geometryData) -> MeshHandle 
     Log.debug("Vertex Buffer load factor {} exceeded {}, resizing",
               newVertexLoadFactor,
               vertexBufferMaxLoad);
-    vertexBufferHandle =
-        resourceManager->resizeBuffer(vertexBufferHandle,
-                                      static_cast<size_t>(vertexBufferMaxSize * 1.5f));
+    vertexBufferHandle = resourceManager->resizeBuffer(
+        vertexBufferHandle,
+        static_cast<size_t>((vertexBufferMaxSize + vertexSize) * 1.5f));
     vertexBufferMaxSize *= 1.5f;
   }
 
@@ -46,7 +46,7 @@ auto MeshBufferManager::addMesh(const GeometryData& geometryData) -> MeshHandle 
               indexBufferMaxLoad);
     indexBufferHandle =
         resourceManager->resizeBuffer(indexBufferHandle,
-                                      static_cast<size_t>(indexBufferMaxSize * 1.5f));
+                                      static_cast<size_t>((indexBufferMaxSize + indexSize) * 1.5f));
     indexBufferMaxSize *= 1.5f;
   }
 
