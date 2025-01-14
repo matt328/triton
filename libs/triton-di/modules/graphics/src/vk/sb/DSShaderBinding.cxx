@@ -1,5 +1,7 @@
 #include "DSShaderBinding.hpp"
 #include "vk/core/Device.hpp"
+#include "vk/sb/DSLayout.hpp"
+#include "mem/Buffer.hpp"
 
 namespace tr {
 
@@ -21,19 +23,20 @@ namespace tr {
 DSShaderBinding::DSShaderBinding(std::shared_ptr<Device> newDevice,
                                  const vk::DescriptorPool& pool,
                                  const vk::DescriptorType descriptorType,
-                                 const vk::DescriptorSetLayout layout,
+                                 const DSLayout& layout,
+                                 const std::shared_ptr<IDebugManager>& debugManager,
                                  const std::string_view newName)
     : name{newName}, device{std::move(newDevice)}, descriptorType{descriptorType} {
 
   const auto allocInfo = vk::DescriptorSetAllocateInfo{.descriptorPool = pool,
                                                        .descriptorSetCount = 1,
-                                                       .pSetLayouts = &layout};
+                                                       .pSetLayouts = layout.getVkLayout()};
 
   try {
     vkDescriptorSet = std::make_unique<vk::raii::DescriptorSet>(
         std::move(device->getVkDevice().allocateDescriptorSets(allocInfo).front()));
+    debugManager->setObjectName(**vkDescriptorSet, newName);
   } catch (const vk::SystemError& e) { Log.warn("Descriptor Pool is full: {0}", e.what()); }
-  Helpers::setObjectName(**vkDescriptorSet, *device, name);
 }
 
 DSShaderBinding::~DSShaderBinding() {
@@ -49,7 +52,7 @@ void DSShaderBinding::bindBuffer(const uint32_t binding, const Buffer& buffer, c
                                                         .descriptorCount = 1,
                                                         .descriptorType = descriptorType,
                                                         .pBufferInfo = &bufferInfo}};
-  device->updateDescriptorSets(writes, nullptr);
+  device->getVkDevice().updateDescriptorSets(writes, nullptr);
 }
 
 void DSShaderBinding::bindImageSamplers(const uint32_t binding,
@@ -62,7 +65,7 @@ void DSShaderBinding::bindImageSamplers(const uint32_t binding,
                              .descriptorCount = static_cast<uint32_t>(imageInfo.size()),
                              .descriptorType = vk::DescriptorType::eCombinedImageSampler,
                              .pImageInfo = imageInfo.data()};
-  device->updateDescriptorSets(write, nullptr);
+  device->getVkDevice().updateDescriptorSets(write, nullptr);
 }
 
 void DSShaderBinding::bindToPipeline(const vk::raii::CommandBuffer& cmd,

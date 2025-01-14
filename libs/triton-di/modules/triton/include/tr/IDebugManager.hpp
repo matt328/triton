@@ -13,7 +13,8 @@ struct ObjectHandle {
     Image,
     ImageView,
     CommandBuffer,
-    DescriptorSetLayout
+    DescriptorSetLayout,
+    DescriptorSet,
   } type;
   union {
     vk::Semaphore semaphore;
@@ -24,6 +25,7 @@ struct ObjectHandle {
     vk::ImageView imageView;
     vk::CommandBuffer commandBuffer;
     vk::DescriptorSetLayout descriptorSetLayout;
+    vk::DescriptorSet descriptorSet;
   };
 
   ObjectHandle(const vk::Semaphore s) : type(Type::Semaphore), semaphore{s} {
@@ -42,6 +44,8 @@ struct ObjectHandle {
   }
   ObjectHandle(vk::DescriptorSetLayout i)
       : type(Type::DescriptorSetLayout), descriptorSetLayout{i} {
+  }
+  ObjectHandle(vk::DescriptorSet i) : type(Type::DescriptorSet), descriptorSet{i} {
   }
 };
 

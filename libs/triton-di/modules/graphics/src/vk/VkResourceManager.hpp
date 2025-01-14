@@ -13,7 +13,8 @@
 #include "ResourceManagerHandles.hpp"
 #include "vk/MeshBufferManager.hpp"
 #include "TextureData.hpp"
-#include <vulkan/vulkan_structs.hpp>
+#include "vk/sb/DSLayoutManager.hpp"
+#include "vk/sb/IShaderBindingFactory.hpp"
 
 namespace tr {
 
@@ -52,6 +53,8 @@ public:
                              std::shared_ptr<ImmediateTransferContext> newImmediateTransferContext,
                              std::shared_ptr<IShaderCompiler> newShaderCompiler,
                              std::shared_ptr<IDebugManager> newDebugManager,
+                             std::shared_ptr<DSLayoutManager> newLayoutManager,
+                             std::shared_ptr<IShaderBindingFactory> newShaderBindingFactory,
                              const std::shared_ptr<PhysicalDevice>& physicalDevice,
                              const std::shared_ptr<Instance>& instance);
   ~VkResourceManager();
@@ -66,8 +69,9 @@ public:
   auto createDrawImageAndView(std::string_view imageName, vk::Extent2D extent) -> ImageHandle;
   auto destroyDrawImageAndView(ImageHandle handle) -> void;
 
-  auto createDepthImageAndView(std::string_view imageName, vk::Extent2D extent, vk::Format format)
-      -> ImageHandle;
+  auto createDepthImageAndView(std::string_view imageName,
+                               vk::Extent2D extent,
+                               vk::Format format) -> ImageHandle;
 
   auto createBuffer(
       size_t size,
@@ -141,6 +145,8 @@ private:
   std::shared_ptr<ImmediateTransferContext> immediateTransferContext;
   std::shared_ptr<IShaderCompiler> shaderCompiler;
   std::shared_ptr<IDebugManager> debugManager;
+  std::shared_ptr<DSLayoutManager> layoutManager;
+  std::shared_ptr<IShaderBindingFactory> shaderBindingFactory;
 
   std::shared_ptr<Allocator> allocator;
 

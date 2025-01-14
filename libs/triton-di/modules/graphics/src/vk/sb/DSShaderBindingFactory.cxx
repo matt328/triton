@@ -1,6 +1,7 @@
 #include "DSShaderBindingFactory.hpp"
 #include "vk/core/Device.hpp"
 #include "vk/sb/DSLayoutManager.hpp"
+#include "vk/sb/DSShaderBinding.hpp"
 
 namespace tr {
 
@@ -32,12 +33,25 @@ DSShaderBindingFactory::DSShaderBindingFactory(std::shared_ptr<Device> newDevice
       device->getVkDevice().createDescriptorPool(poolInfo, nullptr));
 }
 
-auto DSShaderBindingFactory::createShaderBinding(ShaderBindingType type) const
+auto DSShaderBindingFactory::createShaderBinding(ShaderBindingType type,
+                                                 DSLayoutHandle layoutHandle)
     -> ShaderBindingHandle {
   if (type == ShaderBindingType::Textures) {
     const auto descriptorType = vk::DescriptorType::eCombinedImageSampler;
-    const auto& layout = layoutManager->getLayout(0);
+    const auto& layout = layoutManager->getLayout(layoutHandle);
+
+    auto key = keyGen.getKey();
+
+    shaderBindingMap.insert({key,
+                             std::make_unique<DSShaderBinding>(device,
+                                                               **permanentPool,
+                                                               descriptorType,
+                                                               layout,
+                                                               debugManager,
+                                                               "Texture")});
+    return key;
   }
+  return 1;
 }
 
 }

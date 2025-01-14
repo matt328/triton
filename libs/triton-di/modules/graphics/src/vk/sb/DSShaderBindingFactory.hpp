@@ -2,6 +2,7 @@
 
 #include "IShaderBindingFactory.hpp"
 #include "cm/Rando.hpp"
+#include "vk/sb/DSLayoutManager.hpp"
 
 namespace tr {
 
@@ -23,7 +24,7 @@ public:
   auto operator=(DSShaderBindingFactory&&) -> DSShaderBindingFactory& = delete;
 
   /// Allocates a new ShaderBinding
-  [[nodiscard]] auto createShaderBinding(ShaderBindingType type) const
+  [[nodiscard]] auto createShaderBinding(ShaderBindingType type, DSLayoutHandle layoutHandle)
       -> ShaderBindingHandle override;
 
 private:
@@ -31,7 +32,7 @@ private:
   std::shared_ptr<DSLayoutManager> layoutManager;
   std::shared_ptr<IDebugManager> debugManager;
 
-  MapKey keyGen{};
+  MapKey keyGen;
   std::unordered_map<ShaderBindingHandle, std::unique_ptr<IShaderBinding>> shaderBindingMap;
   std::unique_ptr<vk::raii::DescriptorPool> permanentPool;
 };
