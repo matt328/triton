@@ -3,6 +3,21 @@
 
 namespace tr {
 
+/*
+  ShaderBindings are going to have to be created from a factory so that they can be of the correct
+  implementation based on a renderConfig item (using descriptor buffers or descriptor sets)
+  The factory can be container managed, have things injected into it, and itself be injected into
+  whichever component owns the ShaderBinding, probably the ResourceManager?
+
+  Consider making them owned by the ResourceManager, and give out opaque handles to them since they
+  might be needed in different places, namely the RenderTasks, and we already inject the
+  ResourceManager into the RenderTaskFactory
+
+  I think the RenderScheduler should be what tells the ResourceManager what all ShaderBindings it
+  will need. ResourceManager will have a handful of different ShaderBindings it knows how to build,
+  and it'll just return opaque handles to them, which can then be used to return an IShaderBinding.
+*/
+
 DSShaderBinding::DSShaderBinding(std::shared_ptr<Device> newDevice,
                                  const vk::DescriptorPool& pool,
                                  const vk::DescriptorType descriptorType,
