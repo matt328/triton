@@ -1,5 +1,6 @@
 #pragma once
 
+#include "vk/sb/DSLayoutManager.hpp"
 namespace tr {
 
 class IShaderBinding;
@@ -21,7 +22,8 @@ public:
   auto operator=(const IShaderBindingFactory&) -> IShaderBindingFactory& = default;
   auto operator=(IShaderBindingFactory&&) -> IShaderBindingFactory& = delete;
 
-  [[nodiscard]] virtual auto createShaderBinding(ShaderBindingType type) const
+  [[nodiscard]] virtual auto createShaderBinding(ShaderBindingType type,
+                                                 DSLayoutHandle layoutHandle)
       -> ShaderBindingHandle = 0;
 };
 

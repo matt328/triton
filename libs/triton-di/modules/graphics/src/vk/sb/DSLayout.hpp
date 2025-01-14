@@ -18,7 +18,7 @@ public:
   DSLayout(DSLayout&&) = delete;
   auto operator=(DSLayout&&) -> DSLayout& = delete;
 
-  [[nodiscard]] auto getVkLayout() const -> const vk::DescriptorSetLayout&;
+  [[nodiscard]] auto getVkLayout() const -> const vk::DescriptorSetLayout*;
   [[nodiscard]] auto getLayoutSize() const -> vk::DeviceSize;
   [[nodiscard]] auto getAlignedSize() const -> vk::DeviceSize;
   [[nodiscard]] auto getBindingOffset(uint32_t binding) const -> vk::DeviceSize;

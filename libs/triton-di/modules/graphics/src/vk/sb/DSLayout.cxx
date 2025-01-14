@@ -12,8 +12,8 @@ DSLayout::DSLayout(std::shared_ptr<Device> newDevice,
   debugManager->setObjectName(**vkLayout, name);
 }
 
-auto DSLayout::getVkLayout() const -> const vk::DescriptorSetLayout& {
-  return **vkLayout;
+auto DSLayout::getVkLayout() const -> const vk::DescriptorSetLayout* {
+  return &**vkLayout;
 }
 
 auto DSLayout::getLayoutSize() const -> vk::DeviceSize {

@@ -8,6 +8,7 @@
 #include "pipeline/ComputePipeline.hpp"
 #include "vk/MeshBufferManager.hpp"
 #include "vk/TextureBufferManager.hpp"
+#include "vk/sb/IShaderBindingFactory.hpp"
 #include <vulkan/vulkan_enums.hpp>
 
 namespace tr {
@@ -16,12 +17,16 @@ VkResourceManager::VkResourceManager(
     std::shared_ptr<ImmediateTransferContext> newImmediateTransferContext,
     std::shared_ptr<IShaderCompiler> newShaderCompiler,
     std::shared_ptr<IDebugManager> newDebugManager,
+    std::shared_ptr<DSLayoutManager> newLayoutManager,
+    std::shared_ptr<IShaderBindingFactory> newShaderBindingFactory,
     const std::shared_ptr<PhysicalDevice>& physicalDevice,
     const std::shared_ptr<Instance>& instance)
     : device{std::move(newDevice)},
       immediateTransferContext{std::move(newImmediateTransferContext)},
       shaderCompiler{std::move(newShaderCompiler)},
-      debugManager{std::move(newDebugManager)} {
+      debugManager{std::move(newDebugManager)},
+      layoutManager{std::move(newLayoutManager)},
+      shaderBindingFactory{std::move(newShaderBindingFactory)} {
 
   constexpr auto vulkanFunctions = vma::VulkanFunctions{
       .vkGetInstanceProcAddr = vkGetInstanceProcAddr,
@@ -42,6 +47,16 @@ VkResourceManager::VkResourceManager(
       physicalDevice->getDescriptorBufferProperties().descriptorBufferOffsetAlignment;
   descriptorSize =
       physicalDevice->getDescriptorBufferProperties().combinedImageSamplerDescriptorSize;
+
+  constexpr auto binding =
+      vk::DescriptorSetLayoutBinding{.binding = 0,
+                                     .descriptorType = vk::DescriptorType::eCombinedImageSampler,
+                                     .descriptorCount = MaxTextureCount,
+                                     .stageFlags = vk::ShaderStageFlagBits::eAll};
+  const auto textureDSLHandle = layoutManager->createLayout(binding, "DescriptorSetLayout-Texture");
+
+  [[maybe_unused]] const auto textureShaderBindingHandle =
+      shaderBindingFactory->createShaderBinding(ShaderBindingType::Textures, textureDSLHandle);
 
   createDescriptorSetLayout();
 

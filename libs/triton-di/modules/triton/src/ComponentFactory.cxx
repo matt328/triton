@@ -29,6 +29,9 @@
 #include "task/DefaultRenderScheduler.hpp"
 
 #include "pipeline/SpirvShaderCompiler.hpp"
+#include "vk/sb/DSShaderBindingFactory.hpp"
+#include "vk/sb/IShaderBinding.hpp"
+#include "vk/sb/DSLayout.hpp"
 
 namespace di = boost::di;
 
@@ -41,27 +44,29 @@ auto ComponentFactory::getContext(const FrameworkConfig& config) -> std::shared_
                                                       .maxTextures = 16,
                                                       .framesInFlight = 2};
 
-  const auto injector = di::make_injector(di::bind<IDebugManager>.to<DefaultDebugManager>(),
-                                          di::bind<RenderContextConfig>.to(rendererConfig),
-                                          di::bind<IGuiSystem>.to<ImGuiSystem>(),
-                                          di::bind<IGuiAdapter>.to<ImGuiAdapter>(),
-                                          di::bind<IWindow>.to<Window>(),
-                                          di::bind<IEventBus>.to<DefaultEventBus>(),
-                                          di::bind<IRenderContext>.to<NewRenderContext>(),
-                                          di::bind<IRenderScheduler>.to<DefaultRenderScheduler>(),
-                                          di::bind<IFrameManager>.to<DefaultFrameManager>(),
-                                          di::bind<IActionSystem>.to<ActionSystem>(),
-                                          di::bind<IGameplaySystem>.to<DefaultGameplaySystem>(),
-                                          di::bind<glm::ivec2>.to(config.initialWindowSize),
-                                          di::bind<std::string>.to(config.windowTitle),
-                                          di::bind<Device>.to<Device>(),
-                                          di::bind<Surface>.to<Surface>(),
-                                          di::bind<Swapchain>.to<Swapchain>(),
-                                          di::bind<IShaderCompiler>.to<SpirvShaderCompiler>(),
-                                          di::bind<queue::Graphics>.to<queue::Graphics>(),
-                                          di::bind<queue::Transfer>.to<queue::Transfer>(),
-                                          di::bind<queue::Present>.to<queue::Present>(),
-                                          di::bind<queue::Compute>.to<queue::Compute>());
+  const auto injector =
+      di::make_injector(di::bind<IDebugManager>.to<DefaultDebugManager>(),
+                        di::bind<RenderContextConfig>.to(rendererConfig),
+                        di::bind<IGuiSystem>.to<ImGuiSystem>(),
+                        di::bind<IGuiAdapter>.to<ImGuiAdapter>(),
+                        di::bind<IWindow>.to<Window>(),
+                        di::bind<IEventBus>.to<DefaultEventBus>(),
+                        di::bind<IRenderContext>.to<NewRenderContext>(),
+                        di::bind<IRenderScheduler>.to<DefaultRenderScheduler>(),
+                        di::bind<IFrameManager>.to<DefaultFrameManager>(),
+                        di::bind<IActionSystem>.to<ActionSystem>(),
+                        di::bind<IGameplaySystem>.to<DefaultGameplaySystem>(),
+                        di::bind<glm::ivec2>.to(config.initialWindowSize),
+                        di::bind<std::string>.to(config.windowTitle),
+                        di::bind<Device>.to<Device>(),
+                        di::bind<Surface>.to<Surface>(),
+                        di::bind<Swapchain>.to<Swapchain>(),
+                        di::bind<IShaderCompiler>.to<SpirvShaderCompiler>(),
+                        di::bind<IShaderBindingFactory>.to<DSShaderBindingFactory>(),
+                        di::bind<queue::Graphics>.to<queue::Graphics>(),
+                        di::bind<queue::Transfer>.to<queue::Transfer>(),
+                        di::bind<queue::Present>.to<queue::Present>(),
+                        di::bind<queue::Compute>.to<queue::Compute>());
 
   return injector.create<std::shared_ptr<DefaultContext>>();
 }

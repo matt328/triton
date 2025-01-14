@@ -4,14 +4,17 @@
 
 namespace tr {
 
+class IDebugManager;
 class Device;
+class DSLayout;
 
 class DSShaderBinding : public IShaderBinding {
 public:
   DSShaderBinding(std::shared_ptr<Device> newDevice,
                   const vk::DescriptorPool& pool,
                   vk::DescriptorType descriptorType,
-                  vk::DescriptorSetLayout layout,
+                  const DSLayout& layout,
+                  const std::shared_ptr<IDebugManager>& debugManager,
                   std::string_view name = "Unnamed DescriptorSet");
   ~DSShaderBinding() override;
 
