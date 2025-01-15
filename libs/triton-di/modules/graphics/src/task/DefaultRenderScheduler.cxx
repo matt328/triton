@@ -244,10 +244,9 @@ auto DefaultRenderScheduler::recordRenderTasks(Frame& frame, bool recordTasks) -
     startCmd.end();
   }
 
-  if (recordTasks) {
+  {
     ZoneNamedN(var, "RenderTasks", true);
-    executeTasks(frame);
-    tasksRecorded = true;
+    executeTasks(frame, recordTasks);
   }
 
   {
@@ -285,7 +284,7 @@ auto DefaultRenderScheduler::recordRenderTasks(Frame& frame, bool recordTasks) -
   }
 }
 
-auto DefaultRenderScheduler::executeTasks(Frame& frame) const -> void {
+auto DefaultRenderScheduler::executeTasks(Frame& frame, bool recordTasks) const -> void {
 
   auto& commandBuffer = commandBufferManager->getCommandBuffer(frame.getMainCommandBufferHandle());
 
@@ -347,7 +346,7 @@ auto DefaultRenderScheduler::executeTasks(Frame& frame) const -> void {
   commandBuffer.setViewportWithCount({viewport});
   commandBuffer.setScissorWithCount({snezzor});
 
-  {
+  if (recordTasks) {
     ZoneNamedN(var, "IndirectRenderTask", true);
     indirectRenderTask->record(commandBuffer, frame);
   }
@@ -361,11 +360,7 @@ auto DefaultRenderScheduler::endFrame(Frame& frame) -> void {
 
   buffers.clear();
   buffers.push_back(*commandBufferManager->getCommandBuffer(frame.getStartCommandBufferHandle()));
-
-  if (tasksRecorded) {
-    buffers.push_back(*commandBufferManager->getCommandBuffer(frame.getMainCommandBufferHandle()));
-  }
-
+  buffers.push_back(*commandBufferManager->getCommandBuffer(frame.getMainCommandBufferHandle()));
   buffers.push_back(*commandBufferManager->getCommandBuffer(frame.getEndCommandBufferHandle()));
 
   constexpr auto waitStages =
