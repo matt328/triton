@@ -25,29 +25,39 @@ auto MeshBufferManager::addMesh(const GeometryData& geometryData) -> MeshHandle 
   const auto newVertexSize = vertexBufferCurrentSize + vertexSize;
   const auto newIndexSize = indexBufferCurrentSize + indexSize;
 
-  const auto newVertexLoadFactor =
+  auto newVertexLoadFactor =
       static_cast<float>(newVertexSize) / static_cast<float>(vertexBufferMaxSize);
-  const auto newIndexLoadFactor =
+  auto newIndexLoadFactor =
       static_cast<float>(newIndexSize) / static_cast<float>(indexBufferMaxSize);
 
-  if (newVertexLoadFactor > vertexBufferMaxLoad) {
-    Log.debug("Vertex Buffer load factor {} exceeded {}, resizing",
-              newVertexLoadFactor,
-              vertexBufferMaxLoad);
-    vertexBufferHandle = resourceManager->resizeBuffer(
-        vertexBufferHandle,
-        static_cast<size_t>((vertexBufferMaxSize + vertexSize) * 1.5f));
-    vertexBufferMaxSize *= 1.5f;
+  {
+    size_t calculatedMaxSize = vertexBufferMaxSize;
+    while (newVertexLoadFactor > vertexBufferMaxLoad) {
+      calculatedMaxSize = static_cast<size_t>(calculatedMaxSize * 1.5f);
+      newVertexLoadFactor =
+          static_cast<float>(newVertexSize) / static_cast<float>(calculatedMaxSize);
+    }
+
+    if (calculatedMaxSize != vertexBufferMaxSize) {
+      Log.debug("Resizing vertex buffer to new max size: {}", calculatedMaxSize);
+      vertexBufferHandle = resourceManager->resizeBuffer(vertexBufferHandle, calculatedMaxSize);
+      vertexBufferMaxSize = calculatedMaxSize;
+    }
   }
 
-  if (newIndexLoadFactor > indexBufferMaxLoad) {
-    Log.debug("Index Buffer load factor {} exceeded {}, resizing",
-              newIndexLoadFactor,
-              indexBufferMaxLoad);
-    indexBufferHandle =
-        resourceManager->resizeBuffer(indexBufferHandle,
-                                      static_cast<size_t>((indexBufferMaxSize + indexSize) * 1.5f));
-    indexBufferMaxSize *= 1.5f;
+  {
+    size_t calculatedIndexMaxSize = indexBufferMaxSize;
+    while (newIndexLoadFactor > indexBufferMaxLoad) {
+      calculatedIndexMaxSize = static_cast<size_t>(calculatedIndexMaxSize * 1.5f);
+      newIndexLoadFactor =
+          static_cast<float>(newIndexSize) / static_cast<float>(calculatedIndexMaxSize);
+    }
+
+    if (calculatedIndexMaxSize != indexBufferMaxSize) {
+      Log.debug("Resizing index buffer to new max size: {}", calculatedIndexMaxSize);
+      indexBufferHandle = resourceManager->resizeBuffer(indexBufferHandle, calculatedIndexMaxSize);
+      indexBufferMaxSize = calculatedIndexMaxSize;
+    }
   }
 
   resourceManager->addToMesh(geometryData,
