@@ -7,11 +7,13 @@
 #include "mem/Buffer.hpp"
 #include "pipeline/ComputePipeline.hpp"
 #include "vk/MeshBufferManager.hpp"
-#include "vk/TextureBufferManager.hpp"
+#include "vk/sb/DSLayout.hpp"
+#include "vk/sb/IShaderBinding.hpp"
 #include "vk/sb/IShaderBindingFactory.hpp"
-#include <vulkan/vulkan_enums.hpp>
+#include "vk/TextureManager.hpp"
 
 namespace tr {
+
 VkResourceManager::VkResourceManager(
     std::shared_ptr<Device> newDevice,
     std::shared_ptr<ImmediateTransferContext> newImmediateTransferContext,
@@ -43,60 +45,23 @@ VkResourceManager::VkResourceManager(
 
   allocator = std::make_unique<Allocator>(allocatorCreateInfo, device->getVkDevice(), debugManager);
 
-  descriptorBufferOffsetAlignment =
-      physicalDevice->getDescriptorBufferProperties().descriptorBufferOffsetAlignment;
-  descriptorSize =
-      physicalDevice->getDescriptorBufferProperties().combinedImageSamplerDescriptorSize;
-
   constexpr auto binding =
       vk::DescriptorSetLayoutBinding{.binding = 0,
                                      .descriptorType = vk::DescriptorType::eCombinedImageSampler,
                                      .descriptorCount = MaxTextureCount,
                                      .stageFlags = vk::ShaderStageFlagBits::eAll};
-  const auto textureDSLHandle = layoutManager->createLayout(binding, "DescriptorSetLayout-Texture");
+  textureDSLHandle = layoutManager->createLayout(binding, "DescriptorSetLayout-Texture");
 
-  [[maybe_unused]] const auto textureShaderBindingHandle =
+  textureShaderBindingHandle =
       shaderBindingFactory->createShaderBinding(ShaderBindingType::Textures, textureDSLHandle);
-
-  createDescriptorSetLayout();
 
   staticMeshBufferManager = std::make_unique<MeshBufferManager>(this);
 
-  textureBufferManager = std::make_unique<TextureBufferManager>(this);
+  textureManager = std::make_unique<TextureManager>(this);
 }
 
 VkResourceManager::~VkResourceManager() {
   Log.trace("Destroying VkResourceManager");
-}
-
-auto VkResourceManager::createDescriptorSetLayout() -> void {
-  constexpr auto binding =
-      vk::DescriptorSetLayoutBinding{.binding = 0,
-                                     .descriptorType = vk::DescriptorType::eCombinedImageSampler,
-                                     .descriptorCount = MaxTextureCount,
-                                     .stageFlags = vk::ShaderStageFlagBits::eAll};
-
-  static constexpr vk::DescriptorBindingFlags bindlessFlags =
-      vk::DescriptorBindingFlagBits::ePartiallyBound;
-
-  constexpr auto extendedInfo =
-      vk::DescriptorSetLayoutBindingFlagsCreateInfoEXT{.bindingCount = 1,
-                                                       .pBindingFlags = &bindlessFlags};
-
-  const auto flags = vk::DescriptorSetLayoutCreateFlagBits::eDescriptorBufferEXT;
-
-  const auto dslCreateInfo = vk::DescriptorSetLayoutCreateInfo{.pNext = &extendedInfo,
-                                                               .flags = flags,
-                                                               .bindingCount = 1,
-                                                               .pBindings = &binding};
-
-  textureDsl = std::make_unique<vk::raii::DescriptorSetLayout>(
-      device->getVkDevice().createDescriptorSetLayout(dslCreateInfo));
-  textureDslSize = textureDsl->getSizeEXT();
-
-  textureDslSize = aligned_size(textureDslSize, descriptorBufferOffsetAlignment);
-
-  textureDslOffset = textureDsl->getBindingOffsetEXT(0);
 }
 
 auto VkResourceManager::uploadStaticMesh(const GeometryData& geometryData) -> MeshHandle {
@@ -144,29 +109,25 @@ auto VkResourceManager::asyncUpload2(const GeometryData& geometryData) -> MeshHa
   }
 }
 
+/*
+  The process should be upload an image to the GPU in a background task which waits till the upload
+  is finished, creates a vk::DescriptorImageInfo and stores it in a host side list and returns a
+  TextureHandle, which is an index into this list. Also set a 'dirty' flag in the TextureManager.
+  At the beginning of each frame, check the dirty flag, and if it's dirty, perform the
+  WriteDescriptorSet.
+
+  Should have a TextureManager that's just a part of the ResourceManager. ResourceManager will just
+  delegate to it.
+*/
 auto VkResourceManager::uploadImage([[maybe_unused]] const as::ImageData& imageData,
                                     std::string_view name) -> TextureHandle {
-  return textureBufferManager->addTexture(imageData, name);
+  return textureManager->addTexture(imageData, name);
 }
 
-auto VkResourceManager::addDescriptorToBuffer(BufferHandle bufferHandle,
-                                              const vk::DescriptorImageInfo& descriptorImageInfo,
-                                              size_t slot) -> void {
-  auto getInfo = vk::DescriptorGetInfoEXT{.data = {.pCombinedImageSampler = &descriptorImageInfo}};
-
-  auto& buffer = getBuffer(bufferHandle);
-
-  char* bufPtr = static_cast<char*>(buffer.getData());
-
-  auto* location = bufPtr + slot * textureDslSize + textureDslOffset;
-
-  // Reminder this function gets a descriptor in the device, and places it in the memory location
-  // This location happens to be mapped to a buffer.
-  device->getVkDevice().getDescriptorEXT(getInfo, descriptorSize, location);
-}
-
-auto VkResourceManager::getTextureData(const as::ImageData& imageData,
-                                       std::string_view name) -> TextureData {
+/// Synchronously uploads the texturedata to the device, waiting until it is uploaded and available
+/// before creating and returning an image, view, and default sampler.
+auto VkResourceManager::getTextureData(const as::ImageData& imageData, std::string_view name)
+    -> TextureData {
   auto textureData = TextureData{};
   auto textureSize =
       static_cast<vk::DeviceSize>(imageData.width * imageData.height * imageData.component);
@@ -234,7 +195,6 @@ auto VkResourceManager::getTextureData(const as::ImageData& imageData,
       vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eGpuOnly,
                                 .requiredFlags = vk::MemoryPropertyFlagBits::eDeviceLocal};
 
-  // TODO(matt) this has to stick around until removeTexture is called
   textureData.image = allocator->createImage(imageCreateInfo, imageAllocateCreateInfo, name);
 
   constexpr auto subresourceRange =
@@ -295,7 +255,8 @@ auto VkResourceManager::getTextureData(const as::ImageData& imageData,
                             .unnormalizedCoordinates = VK_FALSE};
 
   // TODO(matt) this has to stay alive until removeTexture is called
-  textureData.sampler = *device->getVkDevice().createSampler(samplerInfo);
+  textureData.sampler =
+      std::make_unique<vk::raii::Sampler>(device->getVkDevice().createSampler(samplerInfo));
 
   constexpr auto range = vk::ImageSubresourceRange{.aspectMask = vk::ImageAspectFlagBits::eColor,
                                                    .baseMipLevel = 0,
@@ -308,8 +269,8 @@ auto VkResourceManager::getTextureData(const as::ImageData& imageData,
                                                 .format = format,
                                                 .subresourceRange = range};
 
-  // TODO(matt) this also has to stay alive until removeTexture is called
-  textureData.imageView = *device->getVkDevice().createImageView(viewInfo);
+  textureData.imageView =
+      std::make_unique<vk::raii::ImageView>(device->getVkDevice().createImageView(viewInfo));
 
   textureData.layout = vk::ImageLayout::eShaderReadOnlyOptimal;
 
@@ -326,18 +287,6 @@ auto VkResourceManager::createGpuIndexBuffer(size_t size, std::string_view name)
   const auto key = bufferMapKeygen.getKey();
   bufferMap.emplace(key, allocator->createGpuIndexBuffer(size, name));
   return key;
-}
-
-auto VkResourceManager::createDescriptorBuffer(size_t size, std::string_view name) -> BufferHandle {
-  const auto flags = vk::BufferUsageFlagBits::eResourceDescriptorBufferEXT |
-                     vk::BufferUsageFlagBits::eSamplerDescriptorBufferEXT |
-                     vk::BufferUsageFlagBits::eShaderDeviceAddress;
-
-  const auto bufferSize = size * textureDslSize;
-  const auto memoryUsage = vma::MemoryUsage::eCpuToGpu;
-  const auto memoryProperties = vk::MemoryPropertyFlagBits::eHostCoherent;
-
-  return createBuffer(bufferSize, flags, name, memoryUsage, memoryProperties, true);
 }
 
 auto VkResourceManager::createBuffer(size_t size,
@@ -377,8 +326,8 @@ auto VkResourceManager::createIndirectBuffer(size_t size) -> BufferHandle {
   return key;
 }
 
-[[nodiscard]] auto VkResourceManager::resizeBuffer(BufferHandle handle,
-                                                   size_t newSize) -> BufferHandle {
+[[nodiscard]] auto VkResourceManager::resizeBuffer(BufferHandle handle, size_t newSize)
+    -> BufferHandle {
   ZoneNamedN(var, "Resize Buffer", true);
   auto& oldBuffer = bufferMap.at(handle);
 
@@ -591,14 +540,6 @@ auto VkResourceManager::getStaticMeshBuffers() const -> std::tuple<Buffer&, Buff
           *bufferMap.at(staticMeshBufferManager->getIndexBufferHandle())};
 }
 
-auto VkResourceManager::getDescriptorBuffer() const -> Buffer& {
-  return *bufferMap.at(textureBufferManager->getDescriptorBufferHandle());
-}
-
-auto VkResourceManager::getDescriptorSetLayout() -> const vk::DescriptorSetLayout* {
-  return &**textureDsl;
-}
-
 auto VkResourceManager::destroyImage(ImageHandle handle) -> void {
   imageInfoMap.erase(handle);
 }
@@ -612,6 +553,21 @@ auto VkResourceManager::createComputePipeline([[maybe_unused]] std::string_view 
 
 [[nodiscard]] auto VkResourceManager::getPipeline(PipelineHandle handle) const -> const IPipeline& {
   return *pipelineMap.at(handle);
+}
+
+auto VkResourceManager::getTextureDSL() const -> const vk::DescriptorSetLayout* {
+  return layoutManager->getLayout(textureDSLHandle).getVkLayout();
+}
+
+auto VkResourceManager::getTextureShaderBinding() const -> IShaderBinding& {
+  return shaderBindingFactory->getShaderBinding(textureShaderBindingHandle);
+}
+
+auto VkResourceManager::updateShaderBindings() -> void {
+  if (textureManager->isDirty()) {
+    auto& sb = shaderBindingFactory->getShaderBinding(textureShaderBindingHandle);
+    sb.bindImageSamplers(0, textureManager->getDescriptorImageInfoList());
+  }
 }
 
 /// Gets a list of the GpuBufferEntry that the game world thinks are involved in this frame.

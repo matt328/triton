@@ -22,7 +22,7 @@ IndirectPipeline::IndirectPipeline(const std::shared_ptr<Device>& device,
 
   const auto pipelineLayoutCreateInfo =
       vk::PipelineLayoutCreateInfo{.setLayoutCount = 1,
-                                   .pSetLayouts = resourceManager->getDescriptorSetLayout(),
+                                   .pSetLayouts = resourceManager->getTextureDSL(),
                                    .pushConstantRangeCount = 1,
                                    .pPushConstantRanges = &pushConstantRange};
 
@@ -121,7 +121,7 @@ IndirectPipeline::IndirectPipeline(const std::shared_ptr<Device>& device,
 
   const auto pipelineCreateInfo =
       vk::GraphicsPipelineCreateInfo{.pNext = &pipelineRenderingInfo,
-                                     .flags = vk::PipelineCreateFlagBits::eDescriptorBufferEXT,
+                                     //  .flags = vk::PipelineCreateFlagBits::eDescriptorBufferEXT,
                                      .stageCount = static_cast<uint32_t>(shaderStages.size()),
                                      .pStages = shaderStages.data(),
                                      .pVertexInputState = &vertexInputStateCreateInfo,

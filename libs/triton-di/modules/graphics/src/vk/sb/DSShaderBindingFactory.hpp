@@ -15,7 +15,7 @@ public:
   explicit DSShaderBindingFactory(std::shared_ptr<Device> newDevice,
                                   std::shared_ptr<DSLayoutManager> newLayoutManager,
                                   std::shared_ptr<IDebugManager> newDebugManager);
-  ~DSShaderBindingFactory() override = default;
+  ~DSShaderBindingFactory();
 
   DSShaderBindingFactory(const DSShaderBindingFactory&) = delete;
   auto operator=(const DSShaderBindingFactory&) -> DSShaderBindingFactory& = delete;
@@ -27,14 +27,17 @@ public:
   [[nodiscard]] auto createShaderBinding(ShaderBindingType type, DSLayoutHandle layoutHandle)
       -> ShaderBindingHandle override;
 
+  [[nodiscard]] auto getShaderBinding(ShaderBindingHandle handle) -> IShaderBinding& override;
+
 private:
   std::shared_ptr<Device> device;
   std::shared_ptr<DSLayoutManager> layoutManager;
   std::shared_ptr<IDebugManager> debugManager;
 
   MapKey keyGen;
-  std::unordered_map<ShaderBindingHandle, std::unique_ptr<IShaderBinding>> shaderBindingMap;
   std::unique_ptr<vk::raii::DescriptorPool> permanentPool;
+
+  std::unordered_map<ShaderBindingHandle, std::unique_ptr<IShaderBinding>> shaderBindingMap;
 };
 
 }

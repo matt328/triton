@@ -192,13 +192,11 @@ auto DefaultRenderScheduler::handleSwapchainResized(const SwapchainResized& even
   }
 }
 
-auto DefaultRenderScheduler::updatePerFrameRenderData(Frame& frame,
-                                                      const RenderData& renderData) -> void {
+auto DefaultRenderScheduler::updatePerFrameRenderData(Frame& frame, const RenderData& renderData)
+    -> void {
   ZoneNamedN(var, "updatePerFrameRenderData", true);
 
-  // No need to update the descriptor buffer here since it's been updated elsewhere
-  // just like the vertex/index buffers
-  // ObjectData will contain a textureId, which is the index into the descriptor buffer
+  resourceManager->updateShaderBindings();
 
   { // Update GpuBufferEntriesBuffer
     ZoneNamedN(var, "getStaticGpuData", true);

@@ -58,7 +58,7 @@ void DSShaderBinding::bindBuffer(const uint32_t binding, const Buffer& buffer, c
 void DSShaderBinding::bindImageSamplers(const uint32_t binding,
                                         const std::vector<vk::DescriptorImageInfo>& imageInfo) {
   ZoneNamedN(a, "Updating Texture DS", true);
-  const auto write =
+  [[maybe_unused]] const auto write =
       vk::WriteDescriptorSet{.dstSet = **vkDescriptorSet,
                              .dstBinding = binding,
                              .dstArrayElement = 0,
