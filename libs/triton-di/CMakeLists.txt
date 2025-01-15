@@ -37,7 +37,7 @@ set(common_SRC
   modules/graphics/src/vk/VkResourceManager.cxx
   modules/graphics/src/vk/CommandBufferManager.cxx
   modules/graphics/src/vk/MeshBufferManager.cxx
-  modules/graphics/src/vk/TextureBufferManager.cxx
+  modules/graphics/src/vk/TextureManager.cxx
 
   modules/graphics/src/vk/core/Context.cxx
   modules/graphics/src/vk/core/Instance.cxx

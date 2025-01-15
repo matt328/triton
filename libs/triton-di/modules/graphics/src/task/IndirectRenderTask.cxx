@@ -2,8 +2,7 @@
 #include "gfx/RenderContextConfig.hpp"
 #include "task/Frame.hpp"
 #include "vk/VkResourceManager.hpp"
-#include <vulkan/vulkan_enums.hpp>
-#include <vulkan/vulkan_structs.hpp>
+#include "vk/sb/IShaderBinding.hpp"
 
 namespace tr {
 
@@ -15,8 +14,8 @@ IndirectRenderTask::IndirectRenderTask(std::shared_ptr<VkResourceManager> newRes
       config{newConfig} {
 }
 
-auto IndirectRenderTask::record(vk::raii::CommandBuffer& commandBuffer,
-                                const Frame& frame) -> void {
+auto IndirectRenderTask::record(vk::raii::CommandBuffer& commandBuffer, const Frame& frame)
+    -> void {
 
   const auto& objectDataBuffer = resourceManager->getBuffer(frame.getGpuObjectDataBufferHandle());
   const auto& cameraDataBuffer = resourceManager->getBuffer(frame.getCameraBufferHandle());
@@ -28,27 +27,16 @@ auto IndirectRenderTask::record(vk::raii::CommandBuffer& commandBuffer,
   // Bind the graphics pipeline
   commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline->getPipeline());
 
+  auto& textureShaderBinding = resourceManager->getTextureShaderBinding();
+
+  textureShaderBinding.bindToPipeline(commandBuffer,
+                                      vk::PipelineBindPoint::eGraphics,
+                                      0,
+                                      pipeline->getPipelineLayout());
+
   const auto& [vertexBuffer, indexBuffer] = resourceManager->getStaticMeshBuffers();
   commandBuffer.bindVertexBuffers(0, vertexBuffer.getBuffer(), {0});
   commandBuffer.bindIndexBuffer(indexBuffer.getBuffer(), 0, vk::IndexType::eUint32);
-
-  const auto& descriptorBuffer = resourceManager->getDescriptorBuffer();
-
-  const auto address = descriptorBuffer.getDeviceAddress();
-  // TODO(Matt): Buffer::getUsage()
-  const auto usage = vk::BufferUsageFlagBits::eResourceDescriptorBufferEXT |
-                     vk::BufferUsageFlagBits::eSamplerDescriptorBufferEXT |
-                     vk::BufferUsageFlagBits::eShaderDeviceAddress;
-
-  const auto bindingInfo = vk::DescriptorBufferBindingInfoEXT{.address = address, .usage = usage};
-
-  commandBuffer.bindDescriptorBuffersEXT({bindingInfo});
-
-  commandBuffer.setDescriptorBufferOffsetsEXT(vk::PipelineBindPoint::eGraphics,
-                                              pipeline->getPipelineLayout(),
-                                              0,
-                                              {0},
-                                              {0});
 
   commandBuffer.pushConstants<IndirectPushConstants>(pipeline->getPipelineLayout(),
                                                      vk::ShaderStageFlagBits::eVertex,

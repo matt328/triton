@@ -47,6 +47,8 @@ struct ImageDeleter {
 
 using AllocatedImagePtr = std::unique_ptr<ImageResource, ImageDeleter>;
 
+class TextureManager;
+
 class VkResourceManager {
 public:
   explicit VkResourceManager(std::shared_ptr<Device> newDevice,
@@ -69,9 +71,8 @@ public:
   auto createDrawImageAndView(std::string_view imageName, vk::Extent2D extent) -> ImageHandle;
   auto destroyDrawImageAndView(ImageHandle handle) -> void;
 
-  auto createDepthImageAndView(std::string_view imageName,
-                               vk::Extent2D extent,
-                               vk::Format format) -> ImageHandle;
+  auto createDepthImageAndView(std::string_view imageName, vk::Extent2D extent, vk::Format format)
+      -> ImageHandle;
 
   auto createBuffer(
       size_t size,
@@ -83,8 +84,6 @@ public:
 
   auto createGpuVertexBuffer(size_t size, std::string_view name) -> BufferHandle;
   auto createGpuIndexBuffer(size_t size, std::string_view name) -> BufferHandle;
-
-  auto createDescriptorBuffer(size_t size, std::string_view name) -> BufferHandle;
 
   auto createIndirectBuffer(size_t size) -> BufferHandle;
 
@@ -125,14 +124,17 @@ public:
 
   [[nodiscard]] auto getStaticMeshBuffers() const -> std::tuple<Buffer&, Buffer&>;
 
-  [[nodiscard]] auto getDescriptorBuffer() const -> Buffer&;
-
   [[nodiscard]] auto getDescriptorSetLayout() -> const vk::DescriptorSetLayout*;
 
   [[nodiscard]] auto getPipeline(PipelineHandle handle) const -> const IPipeline&;
 
+  [[nodiscard]] auto getTextureDSL() const -> const vk::DescriptorSetLayout*;
+  [[nodiscard]] auto getTextureShaderBinding() const -> IShaderBinding&;
+
   [[nodiscard]] auto getStaticGpuData(const std::vector<RenderMeshData>& gpuBufferData)
       -> std::vector<GpuBufferEntry>&;
+
+  auto updateShaderBindings() -> void;
 
 private:
   struct ImageInfo {
@@ -162,16 +164,10 @@ private:
 
   std::unique_ptr<MeshBufferManager> staticMeshBufferManager;
 
-  std::unique_ptr<TextureBufferManager> textureBufferManager;
+  std::unique_ptr<TextureManager> textureManager;
 
-  std::unique_ptr<vk::raii::DescriptorSetLayout> textureDsl;
-  vk::DeviceSize textureDslSize;
-  vk::DeviceSize textureDslOffset;
-
-  vk::DeviceSize descriptorBufferOffsetAlignment;
-  vk::DeviceSize descriptorSize;
-
-  auto createDescriptorSetLayout() -> void;
+  DSLayoutHandle textureDSLHandle;
+  ShaderBindingHandle textureShaderBindingHandle;
 
   auto createTransitionBarrier(const vk::Image& image,
                                vk::ImageLayout oldLayout,

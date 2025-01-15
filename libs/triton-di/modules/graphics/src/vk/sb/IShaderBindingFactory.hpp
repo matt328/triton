@@ -25,6 +25,8 @@ public:
   [[nodiscard]] virtual auto createShaderBinding(ShaderBindingType type,
                                                  DSLayoutHandle layoutHandle)
       -> ShaderBindingHandle = 0;
+
+  [[nodiscard]] virtual auto getShaderBinding(ShaderBindingHandle handle) -> IShaderBinding& = 0;
 };
 
 }

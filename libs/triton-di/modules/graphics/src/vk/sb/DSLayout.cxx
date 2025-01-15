@@ -7,7 +7,7 @@ DSLayout::DSLayout(std::shared_ptr<Device> newDevice,
                    const std::string_view name)
     : device{std::move(newDevice)},
       vkLayout{std::make_unique<vk::raii::DescriptorSetLayout>(
-          newDevice->getVkDevice().createDescriptorSetLayout(info))} {
+          device->getVkDevice().createDescriptorSetLayout(info))} {
 
   debugManager->setObjectName(**vkLayout, name);
 }

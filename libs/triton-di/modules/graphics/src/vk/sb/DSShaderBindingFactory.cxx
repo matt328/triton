@@ -33,6 +33,11 @@ DSShaderBindingFactory::DSShaderBindingFactory(std::shared_ptr<Device> newDevice
       device->getVkDevice().createDescriptorPool(poolInfo, nullptr));
 }
 
+DSShaderBindingFactory::~DSShaderBindingFactory() {
+  Log.trace("Destroying DSShaderBindingFactory");
+  shaderBindingMap.clear();
+}
+
 auto DSShaderBindingFactory::createShaderBinding(ShaderBindingType type,
                                                  DSLayoutHandle layoutHandle)
     -> ShaderBindingHandle {
@@ -52,6 +57,10 @@ auto DSShaderBindingFactory::createShaderBinding(ShaderBindingType type,
     return key;
   }
   return 1;
+}
+
+auto DSShaderBindingFactory::getShaderBinding(ShaderBindingHandle handle) -> IShaderBinding& {
+  return *shaderBindingMap.at(handle);
 }
 
 }
