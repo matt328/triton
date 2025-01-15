@@ -1,5 +1,6 @@
 #pragma once
 
+#include "cm/RenderData.hpp"
 #include "task/Frame.hpp"
 
 namespace tr {
@@ -20,7 +21,7 @@ public:
 
   virtual auto endFrame(Frame& frame) -> void = 0;
 
-  virtual auto executeTasks(Frame& frame) const -> void = 0;
+  virtual auto executeTasks(Frame& frame, bool recordTasks) const -> void = 0;
 };
 
 }

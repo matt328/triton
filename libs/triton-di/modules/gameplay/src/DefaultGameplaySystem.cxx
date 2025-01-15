@@ -78,14 +78,18 @@ DefaultGameplaySystem::DefaultGameplaySystem(std::shared_ptr<IEventBus> newEvent
                           StateType::Range,
                           ActionType::LookVertical);
 
-  createTestEntity("Test Cube #1");
-  createTestEntity("Test Cube #2");
+  // createTestEntity("Test Cube #1");
+  // createTestEntity("Test Cube #2");
 
+  // //
   // createStaticModelEntity(R"(/home/matt/projects/game-assets/models/viking_room/viking_room.trm)",
-  //                         "Viking Room");
-  createStaticModelEntity(
-      R"(c:\users\matt\projects\game-assets\models\viking_room\viking_room.trm)",
-      "Viking Room");
+  // //                         "Viking Room");
+  // createStaticModelEntity(
+  //     R"(c:\users\matt\projects\game-assets\models\viking_room\viking_room.trm)",
+  //     "Viking Room");
+  // createStaticModelEntity(
+  //     R"(c:\users\matt\projects\game-assets\models\viking_room\viking_room.trm)",
+  //     "Viking Room #2");
 }
 
 DefaultGameplaySystem::~DefaultGameplaySystem() {
