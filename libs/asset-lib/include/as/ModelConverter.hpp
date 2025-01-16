@@ -2,6 +2,7 @@
 
 #include <filesystem>
 #include <tiny_gltf.h>
+#include "ConverterComponents.hpp"
 
 namespace as {
 
@@ -10,7 +11,6 @@ class ITransformParser;
 class IGeometryExtractor;
 class ITextureExtractor;
 class ISkinningDataExtractor;
-class IModelLoader;
 class ISkeletonLoader;
 struct Model;
 
@@ -25,7 +25,7 @@ public:
                  std::unique_ptr<IGeometryExtractor> geometryExtractor,
                  std::unique_ptr<ITextureExtractor> textureExtractor,
                  std::unique_ptr<ISkinningDataExtractor> skinningDataExtractor,
-                 std::unique_ptr<IModelLoader> modelLoader,
+                 std::unique_ptr<IModelLoader<tinygltf::Model>> modelLoader,
                  std::unique_ptr<ISkeletonLoader> skeletonLoader);
 
   ~ModelConverter() noexcept = default;
@@ -46,8 +46,8 @@ private:
 
   std::unique_ptr<INodeParser> nodeParser;
   std::unique_ptr<ISkinningDataExtractor> skinningDataExtractor;
-  std::unique_ptr<IModelLoader> modelLoader;
+  std::unique_ptr<IModelLoader<tinygltf::Model>> modelLoader;
   std::unique_ptr<ISkeletonLoader> skeletonLoader;
 };
 
-} // namespace as
+}
