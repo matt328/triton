@@ -1,24 +1,24 @@
 #pragma once
-#include "as/gltf/TransformParser.hpp"
+#include "as/gltf/GltfTransformParser.hpp"
 
-namespace tr::as {
-class TransformParser;
-class GeometryExtractor;
-class TextureExtractor;
+namespace as {
+class ITransformParser;
+class IGeometryExtractor;
+class ITextureExtractor;
 struct Model;
-} // namespace tr::as
+} // namespace as
 namespace tinygltf {
 class Node;
 class Model;
 } // namespace tinygltf
 
-namespace tr::as::gltf {
+namespace as {
 
-class GltfNodeParser final : public NodeParser {
+class GltfNodeParser final : public INodeParser {
 public:
-  explicit GltfNodeParser(std::unique_ptr<as::TransformParser> transformParser,
-                          std::unique_ptr<as::GeometryExtractor> geometryExtractor,
-                          std::unique_ptr<as::TextureExtractor> textureExtractor);
+  explicit GltfNodeParser(std::unique_ptr<as::ITransformParser> transformParser,
+                          std::unique_ptr<as::IGeometryExtractor> geometryExtractor,
+                          std::unique_ptr<as::ITextureExtractor> textureExtractor);
   ~GltfNodeParser() noexcept override;
 
   GltfNodeParser(const GltfNodeParser&) = delete;
@@ -32,9 +32,9 @@ public:
                Model& tritonModel) override;
 
 private:
-  std::unique_ptr<as::TransformParser> transformParser;
-  std::unique_ptr<as::GeometryExtractor> geometryExtractor;
-  std::unique_ptr<as::TextureExtractor> textureExtractor;
+  std::unique_ptr<as::ITransformParser> transformParser;
+  std::unique_ptr<as::IGeometryExtractor> geometryExtractor;
+  std::unique_ptr<as::ITextureExtractor> textureExtractor;
 };
 
-} // namespace tr::as::gltf
+} // namespace as

@@ -1,11 +1,11 @@
-#include "as/gltf/SkeletonLoader.hpp"
+#include "as/gltf/GltfSkeletonLoader.hpp"
 
-namespace tr::as::gltf {
+namespace as {
 
-SkeletonLoader::~SkeletonLoader() noexcept {
+GltfSkeletonLoader::~GltfSkeletonLoader() noexcept {
 }
 
-auto SkeletonLoader::load(const std::filesystem::path& path) const -> ozz::animation::Skeleton {
+auto GltfSkeletonLoader::load(const std::filesystem::path& path) const -> ozz::animation::Skeleton {
   ozz::io::File file(path.string().c_str(), "rb");
 
   if (!file.opened()) {

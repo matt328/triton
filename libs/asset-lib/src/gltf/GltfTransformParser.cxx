@@ -1,11 +1,11 @@
-#include "as/gltf/TransformParser.hpp"
+#include "as/gltf/GltfTransformParser.hpp"
 
-namespace tr::as::gltf {
+namespace as {
 
-TransformParser::~TransformParser() noexcept {
+GltfTransformParser::~GltfTransformParser() noexcept {
 }
 
-glm::mat4 TransformParser::execute(const tinygltf::Node& node) const {
+glm::mat4 GltfTransformParser::execute(const tinygltf::Node& node) const {
   // If glft file has a matrix, we should prefer that
   if (node.matrix.size() == 16) {
     const auto floatVec = std::vector<float>{node.matrix.begin(), node.matrix.end()};

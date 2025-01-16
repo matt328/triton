@@ -5,7 +5,7 @@
 
 TEST_CASE("GeometryExtractor is tested", "[gltf]") {
 
-  auto geometryExtractor = tr::as::gltf::GeometryExtractor{};
+  auto geometryExtractor = as::GeometryExtractor{};
 
   SECTION("createGeometry processes index data correctly", "[createGeometry]") {
     tinygltf::Model model;
@@ -20,7 +20,7 @@ TEST_CASE("GeometryExtractor is tested", "[gltf]") {
       primitive.indices = 0;
 
       auto transform = glm::mat4(1.0f);
-      tr::as::Model tritonModel;
+      as::Model tritonModel;
 
       SECTION("with unsigned int indices") {
         tinygltf::Accessor accessor;
@@ -229,7 +229,7 @@ TEST_CASE("GeometryExtractor is tested", "[gltf]") {
     position++;
 
     auto transform = glm::mat4(1.0f);
-    tr::as::Model tritonModel;
+    as::Model tritonModel;
     geometryExtractor.execute(model, primitive, transform, tritonModel);
 
     // Check Vertices Position

@@ -1,6 +1,6 @@
 #include "as/gltf/GltfLoaderImpl.hpp"
 
-namespace tr::as::gltf {
+namespace as {
 
 GltfLoaderImpl::~GltfLoaderImpl() noexcept {
 }

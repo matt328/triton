@@ -3,7 +3,7 @@
 #include "catch2/matchers/catch_matchers.hpp"
 #include <catch2/catch_test_macros.hpp>
 
-class MockGltfLoader final : public trompeloeil::mock_interface<tr::as::GltfFileLoader> {
+class MockGltfLoader final : public trompeloeil::mock_interface<as::IGltfFileLoader> {
 public:
   IMPLEMENT_MOCK4(loadFromFile);
 };
@@ -18,7 +18,7 @@ TEST_CASE("ModelLoader is tested", "[ModelLoader]") {
         .LR_SIDE_EFFECT(*_3 = "warning message")
         .RETURN(false);
 
-    const auto loader = tr::as::gltf::ModelLoader{};
+    const auto loader = as::GltfModelLoader{};
 
     REQUIRE_THROWS_WITH(loader.load(&mockLoader, "some_path"), "warning message");
   }
@@ -32,7 +32,7 @@ TEST_CASE("ModelLoader is tested", "[ModelLoader]") {
         .LR_SIDE_EFFECT(*_2 = "error message")
         .RETURN(false);
 
-    const auto loader = tr::as::gltf::ModelLoader{};
+    const auto loader = as::GltfModelLoader{};
 
     REQUIRE_THROWS_WITH(loader.load(&mockLoader, "some_path"), "error message");
   }
@@ -44,7 +44,7 @@ TEST_CASE("ModelLoader is tested", "[ModelLoader]") {
 
     REQUIRE_CALL(mockLoader, loadFromFile(_, _, _, _)).RETURN(false);
 
-    const auto loader = tr::as::gltf::ModelLoader{};
+    const auto loader = as::GltfModelLoader{};
 
     REQUIRE_THROWS_WITH(loader.load(&mockLoader, "some_path"), "Failed to parse glTF file");
   }

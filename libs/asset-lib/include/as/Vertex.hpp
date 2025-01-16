@@ -4,7 +4,7 @@ inline void hash_combine(std::size_t& seed, std::size_t hash) {
   seed ^= hash + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 }
 
-namespace tr::as {
+namespace as {
 struct Vertex {
   glm::vec3 pos{};
   glm::vec3 normal{};
@@ -27,13 +27,13 @@ struct Vertex {
 }
 
 template <>
-struct fmt::formatter<tr::as::Vertex> {
+struct fmt::formatter<as::Vertex> {
   constexpr auto parse(fmt::format_parse_context& ctx) {
     return ctx.begin();
   }
 
   template <typename FormatContext>
-  auto format(const tr::as::Vertex& vert, FormatContext& ctx) {
+  auto format(const as::Vertex& vert, FormatContext& ctx) {
     return fmt::format_to(ctx.out(), "(pos: {}, {}, {})", vert.pos.x, vert.pos.y, vert.pos.z);
   }
 };
@@ -89,8 +89,8 @@ struct hash<glm::u8vec4> {
 };
 
 template <>
-struct hash<tr::as::Vertex> {
-  auto operator()(const tr::as::Vertex& vtx) const -> std::size_t {
+struct hash<as::Vertex> {
+  auto operator()(const as::Vertex& vtx) const -> std::size_t {
     std::size_t seed = 0;
     hash_combine(seed, std::hash<glm::vec3>{}(vtx.pos));
     hash_combine(seed, std::hash<glm::vec3>{}(vtx.normal));
@@ -109,7 +109,7 @@ template <typename T>
 inline auto vertexListHash(const T& vertices) -> std::size_t {
   std::size_t seed = 0;
   for (const auto& vertex : vertices) {
-    hash_combine(seed, std::hash<tr::as::Vertex>{}(vertex));
+    hash_combine(seed, std::hash<as::Vertex>{}(vertex));
   }
   return seed;
 }

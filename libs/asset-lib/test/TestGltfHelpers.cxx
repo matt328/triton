@@ -18,8 +18,8 @@
 //    MAKE_MOCK4(
 //        mockCreateGeometry,
 //        void(const tinygltf::Model&, const tinygltf::Primitive&, const glm::mat4&,
-//        tr::as::Model&));
-//    MAKE_MOCK3(mockCreateTexture, void(const tinygltf::Model&, const int, tr::as::Model&));
+//        as::Model&));
+//    MAKE_MOCK3(mockCreateTexture, void(const tinygltf::Model&, const int, as::Model&));
 // };
 //
 // TEST_CASE("GltfHelpers is tested", "[gltf]") {
@@ -31,13 +31,13 @@
 //
 //       SECTION("no transforms returns an identity", "[parseNodeTransform]") {
 //          const NodeNoTransforms mockNode;
-//          auto result = tr::as::gltf::Helpers::parseNodeTransform(mockNode);
+//          auto result = as::Helpers::parseNodeTransform(mockNode);
 //          REQUIRE(result == identity);
 //       }
 //       SECTION("translation only returns a translation matrix", "[parseNodeTransform]") {
 //          const TranslationTransforms xforms;
 //
-//          auto result2 = tr::as::gltf::Helpers::parseNodeTransform(xforms);
+//          auto result2 = as::Helpers::parseNodeTransform(xforms);
 //          auto translation = glm::translate(glm::mat4(1.f), glm::vec3{1.f, 1.f, 1.f});
 //          auto rotation = glm::mat4_cast(glm::identity<glm::quat>());
 //          auto scale = glm::scale(glm::mat4(1.f), glm::vec3(1.f, 1.f, 1.f));
@@ -49,7 +49,7 @@
 //       SECTION("rotation only returns a rotation matrix", "[parseNodeTransform]") {
 //          const RotationTransforms xforms;
 //
-//          auto result = tr::as::gltf::Helpers::parseNodeTransform(xforms);
+//          auto result = as::Helpers::parseNodeTransform(xforms);
 //          auto translation = glm::translate(glm::mat4(1.f), glm::vec3{0.f, 0.f, 0.f});
 //          auto rotation = glm::mat4_cast(glm::quat(0.0f, 0.7f, 0.7f, 0.f));
 //          auto scale = glm::scale(glm::mat4(1.f), glm::vec3(1.f, 1.f, 1.f));
@@ -61,7 +61,7 @@
 //
 //       SECTION("scale only returns a scale matrix", "[parseNodeTransform]") {
 //          const ScaleTransforms xforms;
-//          auto result = tr::as::gltf::Helpers::parseNodeTransform(xforms);
+//          auto result = as::Helpers::parseNodeTransform(xforms);
 //
 //          auto translation = glm::translate(glm::mat4(1.f), glm::vec3{0.f, 0.f, 0.f});
 //          auto rotation = glm::mat4_cast(glm::identity<glm::quat>());
@@ -74,7 +74,7 @@
 //
 //       SECTION("matrix just returns the matrix", "[parseNodeTransform]") {
 //          const MatrixTransforms xforms;
-//          auto result = tr::as::gltf::Helpers::parseNodeTransform(xforms);
+//          auto result = as::Helpers::parseNodeTransform(xforms);
 //
 //          auto expected = glm::mat4(1.0f); // Start with an identity matrix
 //          for (int i = 0; i < 4; ++i) {
@@ -100,7 +100,7 @@
 //          primitive.indices = 0;
 //
 //          glm::mat4 transform = glm::mat4(1.0f);
-//          tr::as::Model tritonModel;
+//          as::Model tritonModel;
 //
 //          SECTION("with unsigned int indices") {
 //             tinygltf::Accessor accessor;
@@ -114,7 +114,7 @@
 //             buffer.data = {1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0};
 //             model.buffers.push_back(buffer);
 //
-//             tr::as::gltf::Helpers::createGeometry(model, primitive, transform, tritonModel);
+//             as::Helpers::createGeometry(model, primitive, transform, tritonModel);
 //
 //             REQUIRE(tritonModel.indices.size() == 3);
 //             REQUIRE(tritonModel.indices[0] == 1);
@@ -134,7 +134,7 @@
 //             buffer.data = {1, 0, 2, 0, 3, 0};
 //             model.buffers.push_back(buffer);
 //
-//             tr::as::gltf::Helpers::createGeometry(model, primitive, transform, tritonModel);
+//             as::Helpers::createGeometry(model, primitive, transform, tritonModel);
 //
 //             REQUIRE(tritonModel.indices.size() == 3);
 //             REQUIRE(tritonModel.indices[0] == 1);
@@ -154,7 +154,7 @@
 //             buffer.data = {1, 2, 3};
 //             model.buffers.push_back(buffer);
 //
-//             tr::as::gltf::Helpers::createGeometry(model, primitive, transform, tritonModel);
+//             as::Helpers::createGeometry(model, primitive, transform, tritonModel);
 //
 //             REQUIRE(tritonModel.indices.size() == 3);
 //             REQUIRE(tritonModel.indices[0] == 1);
@@ -175,7 +175,7 @@
 //             model.buffers.push_back(buffer);
 //
 //             REQUIRE_THROWS(
-//                 tr::as::gltf::Helpers::createGeometry(model, primitive, transform, tritonModel));
+//                 as::Helpers::createGeometry(model, primitive, transform, tritonModel));
 //          }
 //       }
 //    }
@@ -311,8 +311,8 @@
 //       position++;
 //
 //       auto transform = glm::mat4(1.0f);
-//       tr::as::Model tritonModel;
-//       tr::as::gltf::Helpers::createGeometry(model, primitive, transform, tritonModel);
+//       as::Model tritonModel;
+//       as::Helpers::createGeometry(model, primitive, transform, tritonModel);
 //
 //       // Check Vertices Position
 //       REQUIRE(tritonModel.vertices.size() == 3);
@@ -340,11 +340,11 @@
 //    SECTION("createTexture populates imageData in given model", "[createTexture]") {
 //
 //       auto model = tinygltf::Model{};
-//       auto tritonModel = tr::as::Model{};
+//       auto tritonModel = as::Model{};
 //
 //       SECTION("model without texture places empty white image in model") {
 //          auto textureIndex = -1;
-//          tr::as::gltf::Helpers::createTexture(model, textureIndex, tritonModel);
+//          as::Helpers::createTexture(model, textureIndex, tritonModel);
 //
 //          const auto& imageData = tritonModel.imageData.data;
 //
@@ -376,7 +376,7 @@
 //          auto textureIndex = 0;
 //          model.images.push_back(image);
 //
-//          tr::as::gltf::Helpers::createTexture(model, textureIndex, tritonModel);
+//          as::Helpers::createTexture(model, textureIndex, tritonModel);
 //
 //          const auto [resultData, resultWidth, resultHeight, resultComponent] =
 //              tritonModel.imageData;
@@ -393,7 +393,7 @@
 //    SECTION("parseNode orchestrates the other functions", "[parseNode]") {
 //       auto node = tinygltf::Node{};
 //       auto model = tinygltf::Model{};
-//       auto tritonModel = tr::as::Model{};
+//       auto tritonModel = as::Model{};
 //
 //       SECTION("nodes without a mesh nor children don't parseNode") {
 //          node.mesh = -1;
@@ -405,7 +405,7 @@
 //          FORBID_CALL(mockHelpers, mockCreateGeometry(_, _, _, _));
 //          FORBID_CALL(mockHelpers, mockCreateTexture(_, _, _));
 //
-//          tr::as::gltf::Helpers::parseNode(model, node, tritonModel);
+//          as::Helpers::parseNode(model, node, tritonModel);
 //       }
 //
 //       SECTION("nodes with a mesh and texture call create*") {
@@ -436,7 +436,7 @@
 //          REQUIRE_CALL(mockHelpers, mockCreateGeometry(_, _, _, _));
 //          REQUIRE_CALL(mockHelpers, mockCreateTexture(_, 0, _));
 //
-//          tr::as::gltf::Helpers::parseNode(model, node, tritonModel);
+//          as::Helpers::parseNode(model, node, tritonModel);
 //       }
 //    }
 // };
