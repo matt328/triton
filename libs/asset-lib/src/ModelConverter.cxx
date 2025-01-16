@@ -12,7 +12,7 @@ ModelConverter::ModelConverter(std::unique_ptr<ITransformParser> transformParser
                                std::unique_ptr<IGeometryExtractor> geometryExtractor,
                                std::unique_ptr<ITextureExtractor> textureExtractor,
                                std::unique_ptr<ISkinningDataExtractor> skinningDataExtractor,
-                               std::unique_ptr<IModelLoader> modelLoader,
+                               std::unique_ptr<IModelLoader<tinygltf::Model>> modelLoader,
                                std::unique_ptr<ISkeletonLoader> skeletonLoader)
     : skinningDataExtractor{std::move(skinningDataExtractor)},
       modelLoader{std::move(modelLoader)},

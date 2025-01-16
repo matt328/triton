@@ -84,6 +84,7 @@ public:
                             const std::string& filename) -> bool = 0;
 };
 
+template <typename T>
 class IModelLoader {
 public:
   IModelLoader() = default;
@@ -93,8 +94,7 @@ public:
   auto operator=(IModelLoader&&) -> IModelLoader& = delete;
   virtual ~IModelLoader() = default;
 
-  virtual auto load(IFileLoader<tinygltf::Model>* loader, const std::filesystem::path& path) const
-      -> tinygltf::Model = 0;
+  virtual auto load(IFileLoader<T>* loader, const std::filesystem::path& path) const -> T = 0;
 };
 
 class ISkeletonLoader {

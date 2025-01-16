@@ -1,3 +1,4 @@
+#include "as/ConverterComponents.hpp"
 #include "as/Model.hpp"
 
 #include "as/ModelConverter.hpp"
@@ -8,6 +9,10 @@
 #include "as/gltf/GltfTextureExtractor.hpp"
 #include "as/gltf/GltfTransformParser.hpp"
 #include "GlmCereal.hpp"
+
+#include <di.hpp>
+
+namespace di = boost::di;
 
 auto parseCommandLine(const std::vector<std::string>& args) {
   auto options = std::unordered_map<std::string, std::string>{};
@@ -58,33 +63,19 @@ auto main(int argc, char* argv[]) -> int {
                gltfFile.string(),
                skeletonFile.has_value() ? skeletonFile.value().string() : "none provided");
 
-      std::unique_ptr<as::ITransformParser> transformParser =
-          std::make_unique<as::GltfTransformParser>();
+      const auto injector = di::make_injector(
+          di::bind<as::ITransformParser>.to<as::GltfTransformParser>(),
+          di::bind<as::IGeometryExtractor>.to<as::GltfGeometryExtractor>(),
+          di::bind<as::ITextureExtractor>.to<as::GltfTextureExtractor>(),
+          di::bind<as::ISkinningDataExtractor>.to<as::GltfSkinningDataExtractor>(),
+          di::bind<as::IModelLoader<tinygltf::Model>>.to<as::GltfModelLoader>(),
+          di::bind<as::ISkeletonLoader>.to<as::GltfSkeletonLoader>());
 
-      std::unique_ptr<as::IGeometryExtractor> geometryExtractor =
-          std::make_unique<as::GltfGeometryExtractor>();
-
-      std::unique_ptr<as::ITextureExtractor> textureExtractor =
-          std::make_unique<as::GltfTextureExtractor>();
-
-      std::unique_ptr<as::ISkinningDataExtractor> skinningDataExtractor =
-          std::make_unique<as::GltfSkinningDataExtractor>();
-
-      std::unique_ptr<as::IModelLoader> modelLoader = std::make_unique<as::GltfModelLoader>();
-
-      std::unique_ptr<as::ISkeletonLoader> skeletonLoader =
-          std::make_unique<as::GltfSkeletonLoader>();
-
-      auto modelConverter = as::ModelConverter(std::move(transformParser),
-                                               std::move(geometryExtractor),
-                                               std::move(textureExtractor),
-                                               std::move(skinningDataExtractor),
-                                               std::move(modelLoader),
-                                               std::move(skeletonLoader));
+      auto modelConverter = injector.create<std::shared_ptr<as::ModelConverter>>();
 
       {
-        modelConverter.load(as::ModelResources(gltfFile, skeletonFile));
-        auto tritonModel = modelConverter.buildTritonModel();
+        modelConverter->load({.modelPath = gltfFile, .skeletonPath = skeletonFile});
+        auto tritonModel = modelConverter->buildTritonModel();
 
         Log.info("Writing file with serialization version {0}", as::SERIAL_VERSION);
 
