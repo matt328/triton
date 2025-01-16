@@ -15,7 +15,7 @@ public:
   GltfModelLoader(GltfModelLoader&&) = delete;
   auto operator=(GltfModelLoader&&) -> GltfModelLoader& = delete;
 
-  auto load(IGltfFileLoader* loader, const std::filesystem::path& path) const
+  auto load(IFileLoader<tinygltf::Model>* loader, const std::filesystem::path& path) const
       -> tinygltf::Model override;
 };
 

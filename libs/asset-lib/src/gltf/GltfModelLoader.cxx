@@ -10,8 +10,8 @@ namespace as {
 GltfModelLoader::~GltfModelLoader() noexcept {
 }
 
-auto GltfModelLoader::load(IGltfFileLoader* loader, const std::filesystem::path& path) const
-    -> tinygltf::Model {
+auto GltfModelLoader::load(IFileLoader<tinygltf::Model>* loader,
+                           const std::filesystem::path& path) const -> tinygltf::Model {
 
   tinygltf::Model model;
   std::string err;
