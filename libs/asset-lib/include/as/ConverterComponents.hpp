@@ -69,15 +69,16 @@ public:
                        Model& tritonModel) = 0;
 };
 
-class IGltfFileLoader {
+template <typename T>
+class IFileLoader {
 public:
-  IGltfFileLoader() = default;
-  IGltfFileLoader(const IGltfFileLoader&) = delete;
-  IGltfFileLoader(IGltfFileLoader&&) = delete;
-  auto operator=(const IGltfFileLoader&) -> IGltfFileLoader& = delete;
-  auto operator=(IGltfFileLoader&&) -> IGltfFileLoader& = delete;
-  virtual ~IGltfFileLoader() = default;
-  virtual auto loadFromFile(tinygltf::Model* model,
+  IFileLoader() = default;
+  IFileLoader(const IFileLoader&) = delete;
+  IFileLoader(IFileLoader&&) = delete;
+  auto operator=(const IFileLoader&) -> IFileLoader& = delete;
+  auto operator=(IFileLoader&&) -> IFileLoader& = delete;
+  virtual ~IFileLoader() = default;
+  virtual auto loadFromFile(T* model,
                             std::string* err,
                             std::string* warn,
                             const std::string& filename) -> bool = 0;
@@ -92,7 +93,7 @@ public:
   auto operator=(IModelLoader&&) -> IModelLoader& = delete;
   virtual ~IModelLoader() = default;
 
-  virtual auto load(IGltfFileLoader* loader, const std::filesystem::path& path) const
+  virtual auto load(IFileLoader<tinygltf::Model>* loader, const std::filesystem::path& path) const
       -> tinygltf::Model = 0;
 };
 

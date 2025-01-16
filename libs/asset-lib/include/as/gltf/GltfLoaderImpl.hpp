@@ -4,7 +4,7 @@
 
 namespace as {
 
-class GltfLoaderImpl : public IGltfFileLoader {
+class GltfLoaderImpl : public IFileLoader<tinygltf::Model> {
 public:
   GltfLoaderImpl() = default;
   ~GltfLoaderImpl() noexcept override;

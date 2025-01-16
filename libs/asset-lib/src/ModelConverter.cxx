@@ -23,7 +23,7 @@ ModelConverter::ModelConverter(std::unique_ptr<ITransformParser> transformParser
 }
 void ModelConverter::load(const ModelResources& resources) {
 
-  std::unique_ptr<IGltfFileLoader> loader = std::make_unique<GltfLoaderImpl>();
+  std::unique_ptr<IFileLoader<tinygltf::Model>> loader = std::make_unique<GltfLoaderImpl>();
 
   model = modelLoader->load(loader.get(), resources.modelPath);
   if (resources.skeletonPath.has_value()) {
