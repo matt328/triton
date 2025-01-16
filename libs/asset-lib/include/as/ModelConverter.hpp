@@ -17,6 +17,7 @@ struct Model;
 struct ModelResources {
   std::filesystem::path modelPath;
   std::optional<std::filesystem::path> skeletonPath = std::nullopt;
+  std::filesystem::path outputFile;
 };
 
 class ModelConverter {
