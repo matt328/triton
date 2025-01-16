@@ -1,15 +1,13 @@
 #include "as/Model.hpp"
 
 #include "as/ModelConverter.hpp"
-#include "as/gltf/GeometryExtractor.hpp"
-#include "as/gltf/ModelLoader.hpp"
-#include "as/gltf/SkeletonLoader.hpp"
-#include "as/gltf/SkinningDataExtractor.hpp"
-#include "as/gltf/TextureExtractor.hpp"
-#include "as/gltf/TransformParser.hpp"
+#include "as/gltf/GltfGeometryExtractor.hpp"
+#include "as/gltf/GltfModelLoader.hpp"
+#include "as/gltf/GltfSkeletonLoader.hpp"
+#include "as/gltf/GltfSkinningDataExtractor.hpp"
+#include "as/gltf/GltfTextureExtractor.hpp"
+#include "as/gltf/GltfTransformParser.hpp"
 #include "GlmCereal.hpp"
-
-constexpr int ExpectedArgCount = 4;
 
 auto parseCommandLine(const std::vector<std::string>& args) {
   auto options = std::unordered_map<std::string, std::string>{};
@@ -34,7 +32,6 @@ auto main(int argc, char* argv[]) -> int {
   initLogger(spdlog::level::trace, spdlog::level::trace);
 
   namespace fs = std::filesystem;
-  namespace as = tr::as;
   try {
     if (auto options = parseCommandLine(args); options["mode"] == "gltf") {
       const auto gltfFileStr = options["f"];
@@ -61,22 +58,22 @@ auto main(int argc, char* argv[]) -> int {
                gltfFile.string(),
                skeletonFile.has_value() ? skeletonFile.value().string() : "none provided");
 
-      std::unique_ptr<as::TransformParser> transformParser =
-          std::make_unique<as::gltf::TransformParser>();
+      std::unique_ptr<as::ITransformParser> transformParser =
+          std::make_unique<as::GltfTransformParser>();
 
-      std::unique_ptr<as::GeometryExtractor> geometryExtractor =
-          std::make_unique<as::gltf::GeometryExtractor>();
+      std::unique_ptr<as::IGeometryExtractor> geometryExtractor =
+          std::make_unique<as::GltfGeometryExtractor>();
 
-      std::unique_ptr<as::TextureExtractor> textureExtractor =
-          std::make_unique<as::gltf::TextureExtractor>();
+      std::unique_ptr<as::ITextureExtractor> textureExtractor =
+          std::make_unique<as::GltfTextureExtractor>();
 
-      std::unique_ptr<as::SkinningDataExtractor> skinningDataExtractor =
-          std::make_unique<as::gltf::SkinningDataExtractor>();
+      std::unique_ptr<as::ISkinningDataExtractor> skinningDataExtractor =
+          std::make_unique<as::GltfSkinningDataExtractor>();
 
-      std::unique_ptr<as::ModelLoader> modelLoader = std::make_unique<as::gltf::ModelLoader>();
+      std::unique_ptr<as::IModelLoader> modelLoader = std::make_unique<as::GltfModelLoader>();
 
-      std::unique_ptr<as::SkeletonLoader> skeletonLoader =
-          std::make_unique<as::gltf::SkeletonLoader>();
+      std::unique_ptr<as::ISkeletonLoader> skeletonLoader =
+          std::make_unique<as::GltfSkeletonLoader>();
 
       auto modelConverter = as::ModelConverter(std::move(transformParser),
                                                std::move(geometryExtractor),
@@ -89,7 +86,7 @@ auto main(int argc, char* argv[]) -> int {
         modelConverter.load(as::ModelResources(gltfFile, skeletonFile));
         auto tritonModel = modelConverter.buildTritonModel();
 
-        Log.info("Writing file with serialization version {0}", tr::as::SERIAL_VERSION);
+        Log.info("Writing file with serialization version {0}", as::SERIAL_VERSION);
 
         if (outputFile.extension() == ".json") {
           if (std::ofstream outputStream(outputFile); outputStream) {

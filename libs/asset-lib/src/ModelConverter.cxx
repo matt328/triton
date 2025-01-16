@@ -7,23 +7,23 @@
 #include "as/gltf/GltfLoaderImpl.hpp"
 #include "as/gltf/GltfNodeParser.hpp"
 
-namespace tr::as {
-ModelConverter::ModelConverter(std::unique_ptr<TransformParser> transformParser,
-                               std::unique_ptr<GeometryExtractor> geometryExtractor,
-                               std::unique_ptr<TextureExtractor> textureExtractor,
-                               std::unique_ptr<SkinningDataExtractor> skinningDataExtractor,
-                               std::unique_ptr<ModelLoader> modelLoader,
-                               std::unique_ptr<SkeletonLoader> skeletonLoader)
+namespace as {
+ModelConverter::ModelConverter(std::unique_ptr<ITransformParser> transformParser,
+                               std::unique_ptr<IGeometryExtractor> geometryExtractor,
+                               std::unique_ptr<ITextureExtractor> textureExtractor,
+                               std::unique_ptr<ISkinningDataExtractor> skinningDataExtractor,
+                               std::unique_ptr<IModelLoader> modelLoader,
+                               std::unique_ptr<ISkeletonLoader> skeletonLoader)
     : skinningDataExtractor{std::move(skinningDataExtractor)},
       modelLoader{std::move(modelLoader)},
       skeletonLoader{std::move(skeletonLoader)} {
-  nodeParser = std::make_unique<gltf::GltfNodeParser>(std::move(transformParser),
-                                                      std::move(geometryExtractor),
-                                                      std::move(textureExtractor));
+  nodeParser = std::make_unique<GltfNodeParser>(std::move(transformParser),
+                                                std::move(geometryExtractor),
+                                                std::move(textureExtractor));
 }
 void ModelConverter::load(const ModelResources& resources) {
 
-  std::unique_ptr<GltfFileLoader> loader = std::make_unique<gltf::GltfLoaderImpl>();
+  std::unique_ptr<IGltfFileLoader> loader = std::make_unique<GltfLoaderImpl>();
 
   model = modelLoader->load(loader.get(), resources.modelPath);
   if (resources.skeletonPath.has_value()) {

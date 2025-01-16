@@ -2,9 +2,9 @@
 
 #include "as/ConverterComponents.hpp"
 
-namespace tr::as::gltf {
+namespace as {
 
-class GltfLoaderImpl : public GltfFileLoader {
+class GltfLoaderImpl : public IGltfFileLoader {
 public:
   GltfLoaderImpl() = default;
   ~GltfLoaderImpl() noexcept override;
@@ -21,4 +21,4 @@ public:
                     const std::string& filename) -> bool override;
 };
 
-} // namespace tr::as::gltf
+} // namespace as

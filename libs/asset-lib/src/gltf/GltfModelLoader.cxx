@@ -1,16 +1,16 @@
-#include "as/gltf/ModelLoader.hpp"
+#include "as/gltf/GltfModelLoader.hpp"
 
 #define TINYGLTF_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "tiny_gltf.h"
 
-namespace tr::as::gltf {
+namespace as {
 
-ModelLoader::~ModelLoader() noexcept {
+GltfModelLoader::~GltfModelLoader() noexcept {
 }
 
-auto ModelLoader::load(GltfFileLoader* loader, const std::filesystem::path& path) const
+auto GltfModelLoader::load(IGltfFileLoader* loader, const std::filesystem::path& path) const
     -> tinygltf::Model {
 
   tinygltf::Model model;

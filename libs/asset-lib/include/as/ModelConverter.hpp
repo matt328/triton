@@ -3,15 +3,15 @@
 #include <filesystem>
 #include <tiny_gltf.h>
 
-namespace tr::as {
+namespace as {
 
-class NodeParser;
-class TransformParser;
-class GeometryExtractor;
-class TextureExtractor;
-class SkinningDataExtractor;
-class ModelLoader;
-class SkeletonLoader;
+class INodeParser;
+class ITransformParser;
+class IGeometryExtractor;
+class ITextureExtractor;
+class ISkinningDataExtractor;
+class IModelLoader;
+class ISkeletonLoader;
 struct Model;
 
 struct ModelResources {
@@ -21,12 +21,12 @@ struct ModelResources {
 
 class ModelConverter {
 public:
-  ModelConverter(std::unique_ptr<TransformParser> transformParser,
-                 std::unique_ptr<GeometryExtractor> geometryExtractor,
-                 std::unique_ptr<TextureExtractor> textureExtractor,
-                 std::unique_ptr<SkinningDataExtractor> skinningDataExtractor,
-                 std::unique_ptr<ModelLoader> modelLoader,
-                 std::unique_ptr<SkeletonLoader> skeletonLoader);
+  ModelConverter(std::unique_ptr<ITransformParser> transformParser,
+                 std::unique_ptr<IGeometryExtractor> geometryExtractor,
+                 std::unique_ptr<ITextureExtractor> textureExtractor,
+                 std::unique_ptr<ISkinningDataExtractor> skinningDataExtractor,
+                 std::unique_ptr<IModelLoader> modelLoader,
+                 std::unique_ptr<ISkeletonLoader> skeletonLoader);
 
   ~ModelConverter() noexcept = default;
 
@@ -44,10 +44,10 @@ private:
   tinygltf::Model model;
   std::optional<ozz::animation::Skeleton> skeleton = std::nullopt;
 
-  std::unique_ptr<NodeParser> nodeParser;
-  std::unique_ptr<SkinningDataExtractor> skinningDataExtractor;
-  std::unique_ptr<ModelLoader> modelLoader;
-  std::unique_ptr<SkeletonLoader> skeletonLoader;
+  std::unique_ptr<INodeParser> nodeParser;
+  std::unique_ptr<ISkinningDataExtractor> skinningDataExtractor;
+  std::unique_ptr<IModelLoader> modelLoader;
+  std::unique_ptr<ISkeletonLoader> skeletonLoader;
 };
 
-} // namespace tr::as
+} // namespace as

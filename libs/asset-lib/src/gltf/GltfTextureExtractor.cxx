@@ -1,15 +1,15 @@
-#include "as/gltf/TextureExtractor.hpp"
+#include "as/gltf/GltfTextureExtractor.hpp"
 
 #include "as/Model.hpp"
 
-namespace tr::as::gltf {
+namespace as {
 
-TextureExtractor::~TextureExtractor() noexcept {
+GltfTextureExtractor::~GltfTextureExtractor() noexcept {
 }
 
-void TextureExtractor::execute(const tinygltf::Model& model,
-                               const int textureIndex,
-                               Model& tritonModel) {
+void GltfTextureExtractor::execute(const tinygltf::Model& model,
+                                   const int textureIndex,
+                                   Model& tritonModel) {
   if (textureIndex == -1) {
     tinygltf::Image image;
 

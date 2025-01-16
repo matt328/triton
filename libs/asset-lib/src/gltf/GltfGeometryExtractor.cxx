@@ -1,17 +1,17 @@
-#include "as/gltf/GeometryExtractor.hpp"
+#include "as/gltf/GltfGeometryExtractor.hpp"
 
 #include "as/Model.hpp"
 
 #include "as/Vertex.hpp"
 
-namespace tr::as::gltf {
+namespace as {
 
-GeometryExtractor::~GeometryExtractor() noexcept = default;
+GltfGeometryExtractor::~GltfGeometryExtractor() noexcept = default;
 
-void GeometryExtractor::execute(const tinygltf::Model& model,
-                                const tinygltf::Primitive& primitive,
-                                const glm::mat4& transform,
-                                Model& tritonModel) {
+void GltfGeometryExtractor::execute(const tinygltf::Model& model,
+                                    const tinygltf::Primitive& primitive,
+                                    const glm::mat4& transform,
+                                    Model& tritonModel) {
   // Load Indices
   std::vector<uint32_t> indices;
   {

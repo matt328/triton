@@ -21,8 +21,8 @@ public:
 
     auto modelData = assetManager->loadModel(modelFilename);
 
-    auto transform = Transform{.rotation = {0.f, -145.f, 0.f},
-                               .position = {2.f, -1.f, 0.f},
+    auto transform = Transform{.rotation = glm::zero<glm::vec3>(),
+                               .position = glm::zero<glm::vec3>(),
                                .transformation = glm::identity<glm::mat4>()};
 
     const auto entity = registry.create();

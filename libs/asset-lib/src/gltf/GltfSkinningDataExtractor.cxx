@@ -1,15 +1,15 @@
-#include "as/gltf/SkinningDataExtractor.hpp"
+#include "as/gltf/GltfSkinningDataExtractor.hpp"
 
 #include "as/Model.hpp"
 
-namespace tr::as::gltf {
+namespace as {
 
-SkinningDataExtractor::~SkinningDataExtractor() noexcept {
+GltfSkinningDataExtractor::~GltfSkinningDataExtractor() noexcept {
 }
 
-void SkinningDataExtractor::execute(const tinygltf::Model& model,
-                                    const ozz::animation::Skeleton& skeleton,
-                                    Model& tritonModel) {
+void GltfSkinningDataExtractor::execute(const tinygltf::Model& model,
+                                        const ozz::animation::Skeleton& skeleton,
+                                        Model& tritonModel) {
   if (model.skins.empty()) {
     throw std::runtime_error("Model file contains no skins.");
   }

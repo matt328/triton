@@ -3,11 +3,11 @@
 #include "Vertex.hpp"
 #include "BaseException.hpp"
 
-namespace tr::as {
+namespace as {
 
 constexpr uint32_t SERIAL_VERSION = 1;
 
-class SerializationException final : public BaseException {
+class SerializationException final : public tr::BaseException {
   using BaseException::BaseException;
 };
 
@@ -24,7 +24,7 @@ public:
 };
 
 struct Model {
-  std::vector<tr::as::Vertex> vertices;
+  std::vector<as::Vertex> vertices;
   std::vector<uint32_t> indices;
   std::unordered_map<int, int> jointRemaps;
   std::vector<glm::mat4> inverseBindPoses;
@@ -41,9 +41,9 @@ struct Model {
   template <class Archive>
   void serialize(Archive& archive, std::uint32_t const version) {
     if (version != 1) {
-      auto msg = fmt::format("Version mismatch in tr::as:Model, found {0}, expected {1}",
+      auto msg = fmt::format("Version mismatch in as:Model, found {0}, expected {1}",
                              version,
-                             tr::as::SERIAL_VERSION);
+                             as::SERIAL_VERSION);
       throw SerializationException(msg);
     }
     archive(vertices, indices, jointRemaps, inverseBindPoses, imageData);
@@ -51,4 +51,4 @@ struct Model {
 };
 }
 
-CEREAL_CLASS_VERSION(tr::as::Model, tr::as::SERIAL_VERSION);
+CEREAL_CLASS_VERSION(as::Model, as::SERIAL_VERSION);

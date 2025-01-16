@@ -4,10 +4,10 @@
 
 #include "as/ConverterComponents.hpp"
 
-namespace tr::as::gltf {
-GltfNodeParser::GltfNodeParser(std::unique_ptr<as::TransformParser> transformParser,
-                               std::unique_ptr<as::GeometryExtractor> geometryExtractor,
-                               std::unique_ptr<as::TextureExtractor> textureExtractor)
+namespace as {
+GltfNodeParser::GltfNodeParser(std::unique_ptr<as::ITransformParser> transformParser,
+                               std::unique_ptr<as::IGeometryExtractor> geometryExtractor,
+                               std::unique_ptr<as::ITextureExtractor> textureExtractor)
     : transformParser{std::move(transformParser)},
       geometryExtractor{std::move(geometryExtractor)},
       textureExtractor{std::move(textureExtractor)} {
@@ -35,4 +35,4 @@ void GltfNodeParser::execute(const tinygltf::Model& model,
     execute(model, localNode, tritonModel);
   }
 }
-} // namespace tr::as::gltf
+} // namespace as
