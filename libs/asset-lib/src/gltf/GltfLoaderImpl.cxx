@@ -5,10 +5,10 @@ namespace as {
 GltfLoaderImpl::~GltfLoaderImpl() noexcept {
 }
 
-bool GltfLoaderImpl::loadFromFile(tinygltf::Model* model,
+auto GltfLoaderImpl::loadFromFile(tinygltf::Model* model,
                                   std::string* err,
                                   std::string* warn,
-                                  const std::string& filename) {
+                                  const std::string& filename) -> bool {
   tinygltf::TinyGLTF loader{};
   return loader.LoadASCIIFromFile(model, err, warn, filename);
 }
