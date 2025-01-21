@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.19 FATAL_ERROR)
 
 if(POLICY CMP0019)
-   cmake_policy(SET CMP0019 NEW)
+  cmake_policy(SET CMP0019 NEW)
 endif()
 
 project(Triton LANGUAGES CXX)
@@ -26,9 +26,9 @@ add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 
 if(APPLE OR UNIX)
-   add_compile_options(-stdlib=libc++)
-   add_link_options(-fuse-ld=lld -stdlib=libc++)
-   set(CMAKE_EXE_LINKER_FLAGS "-stdlib=libc++ -lc++")
+  add_compile_options(-stdlib=libc++)
+  add_link_options(-fuse-ld=lld -stdlib=libc++)
+  set(CMAKE_EXE_LINKER_FLAGS "-stdlib=libc++ -lc++")
 endif()
 
 set(CATCH2_VERSION v3.6.0)
@@ -50,9 +50,10 @@ set(TROMPELOEIL_VERSION v48)
 set(VULKAN_MEMORY_ALLOCATOR_HPP_VERSION master)
 
 include(code-coverage)
-include(dependencies)
 include(get-imgui)
+include(dependencies)
 include(get-boost-di)
+include(get-l2dfd)
 
 add_code_coverage_all_targets()
 include(CTest)

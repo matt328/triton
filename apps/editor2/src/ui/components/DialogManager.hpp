@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ModalDialog.hpp"
+#include "dialog/ModalDialog.hpp"
 
 namespace ed {
 

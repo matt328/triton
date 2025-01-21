@@ -6,7 +6,7 @@
 #include "gp/components/Transform.hpp"
 #include "tr/GameplayEvents.hpp"
 #include "ui/components/DialogManager.hpp"
-#include "ui/components/ModalDialog.hpp"
+#include "ui/components/dialog/ModalDialog.hpp"
 #include "editors/AnimationInspector.hpp"
 #include "editors/CameraInspector.hpp"
 #include "editors/TransformInspector.hpp"

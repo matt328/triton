@@ -23,6 +23,8 @@ void Menu::render() {
   auto showAnimation = false;
   static auto show = false;
 
+  static auto fsPath = std::filesystem::path{"C:/Users/matt/Projects/game-assets/models"};
+
   if (ImGui::BeginMainMenuBar()) {
     if (ImGui::BeginMenu("File")) {
 
