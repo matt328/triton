@@ -10,6 +10,7 @@ set(editor_SRC
   src/ui/components/DialogManager.cxx
   src/ui/components/AssetViewer.cxx
   src/ui/components/EntityEditor.cxx
+  src/ui/components/FileDialog.cxx
 
   src/data/DataFacade.cxx
 )
@@ -93,6 +94,7 @@ endif()
 target_link_libraries(${PROJECT_NAME}
   PRIVATE
   BoostDI
+  L2DFD
   glfw
   cereal::cereal
   triton-di
