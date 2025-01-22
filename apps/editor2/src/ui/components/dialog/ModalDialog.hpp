@@ -14,10 +14,11 @@ using CancelFunction = std::function<void(void)>;
 
 class ModalDialog {
 public:
-  explicit ModalDialog(std::string title,
+  explicit ModalDialog(const char* icon,
+                       std::string title,
                        const OkFunction& okFunction,
                        const CancelFunction& cancelFunction)
-      : title(std::move(title)),
+      : title(std::string{icon} + title),
         onOk{std::make_optional(okFunction)},
         onCancel{std::make_optional(cancelFunction)} {
   }

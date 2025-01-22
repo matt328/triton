@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ui/assets/IconsLucide.hpp"
 namespace ed {
 
 using FileDialogOkFunction = std::function<void(const std::vector<std::filesystem::path>&)>;
@@ -79,7 +80,7 @@ public:
   auto setOnOk(const FileDialogOkFunction& fn) -> void;
 
 private:
-  std::string label{"Unlabeled FileDialog"};
+  std::string label{(std::string(ICON_LC_FOLDER) + " Open File")};
   bool isOpen{};
 
   std::optional<std::filesystem::path> initialPath = std::nullopt;

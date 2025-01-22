@@ -1,8 +1,12 @@
 #include "AssetViewer.hpp"
 #include "cm/GlmToString.hpp"
+#include "imgui.h"
 #include "ui/assets/IconsLucide.hpp"
 
 namespace ed {
+
+constexpr auto ItemIndent = 16.f;
+
 AssetViewer::AssetViewer(std::shared_ptr<DataFacade> newDataFacade,
                          std::shared_ptr<DialogManager> newDialogManager)
     : dataFacade{std::move(newDataFacade)}, dialogManager{std::move(newDialogManager)} {
@@ -41,9 +45,11 @@ void AssetViewer::render() {
     {
       ImGui::SetNextItemOpen(headerState[0]);
       if (ImGui::CollapsingHeader("Scripts")) {
+        ImGui::Indent(ItemIndent);
         ImGui::Selectable(ICON_LC_FILE_CODE " MainCharacter");
         ImGui::Selectable(ICON_LC_FILE_CODE " MillAbout");
         ImGui::Selectable(ICON_LC_FILE_CODE " IdleInPlace");
+        ImGui::Unindent(ItemIndent);
         headerState[0] = true;
       } else {
         headerState[0] = false;
@@ -53,9 +59,11 @@ void AssetViewer::render() {
     {
       ImGui::SetNextItemOpen(headerState[1]);
       if (ImGui::CollapsingHeader("Skeletons")) {
+        ImGui::Indent(ItemIndent);
         for (const auto& name : dataFacade->getSkeletons() | std::views::keys) {
           ImGui::Selectable((std::string{ICON_LC_BONE} + " " + name).c_str());
         }
+        ImGui::Unindent(ItemIndent);
         headerState[1] = true;
       } else {
         headerState[1] = false;
@@ -65,9 +73,11 @@ void AssetViewer::render() {
     {
       ImGui::SetNextItemOpen(headerState[2]);
       if (ImGui::CollapsingHeader("Animations")) {
+        ImGui::Indent(ItemIndent);
         for (const auto& name : dataFacade->getAnimations() | std::views::keys) {
           ImGui::Selectable((std::string{ICON_LC_FILE_VIDEO} + " " + name).c_str());
         }
+        ImGui::Unindent(ItemIndent);
         headerState[2] = true;
       } else {
         headerState[2] = false;
@@ -77,9 +87,11 @@ void AssetViewer::render() {
     {
       ImGui::SetNextItemOpen(headerState[3]);
       if (ImGui::CollapsingHeader("Models")) {
+        ImGui::Indent(ItemIndent);
         for (const auto& name : dataFacade->getModels() | std::views::keys) {
           ImGui::Selectable((std::string{ICON_LC_BOX} + " " + name).c_str());
         }
+        ImGui::Unindent(ItemIndent);
         headerState[3] = true;
       } else {
         headerState[3] = false;
@@ -91,7 +103,8 @@ void AssetViewer::render() {
 
 void AssetViewer::createSkeletonDialog() {
   auto dialog = std::make_unique<ModalDialog>(
-      "Skeleton",
+      ICON_LC_BONE,
+      " Skeleton",
       [&](const ModalDialog& dialog) {
         Log.trace("name: {0}, file: {1}",
                   dialog.getValue<std::string>("name").value(),
@@ -110,7 +123,8 @@ void AssetViewer::createSkeletonDialog() {
 
 void AssetViewer::createAnimationDialog() {
   auto dialog = std::make_unique<ModalDialog>(
-      "Animation",
+      ICON_LC_FILE_VIDEO,
+      " Animation",
       [&](const ModalDialog& dialog) {
         Log.trace("name: {0}, file: {1}",
                   dialog.getValue<std::string>("name").value(),
@@ -129,7 +143,8 @@ void AssetViewer::createAnimationDialog() {
 
 void AssetViewer::createModelDialog() {
   auto dialog = std::make_unique<ModalDialog>(
-      "Model",
+      ICON_LC_FILE_BOX,
+      " Model",
       [&](const ModalDialog& dialog) {
         Log.trace("name: {0}, file: {1}",
                   dialog.getValue<std::string>("name").value(),

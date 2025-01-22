@@ -52,8 +52,7 @@ auto FileDialog::render() -> void {
       }
     }
     for (size_t i = 0; i < folders.size(); ++i) {
-      const auto label =
-          std::string(ICON_LC_FOLDER) + " " + folders[i].path().stem().string().c_str();
+      const auto label = std::string(ICON_LC_FOLDER) + " " + folders[i].path().stem().string();
       if (ImGui::Selectable(label.c_str(),
                             i == folderSelectedIndex,
                             ImGuiSelectableFlags_AllowDoubleClick,

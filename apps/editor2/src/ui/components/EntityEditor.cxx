@@ -13,8 +13,8 @@
 
 namespace ed {
 
-constexpr auto DialogName = "AnimatedEntity";
-constexpr auto StaticEntityDialogName = "StaticEntity";
+constexpr auto DialogName = " AnimatedEntity";
+constexpr auto StaticEntityDialogName = " StaticEntity";
 
 EntityEditor::EntityEditor(std::shared_ptr<tr::IGameplaySystem> newGameplaySystem,
                            std::shared_ptr<DataFacade> newDataFacade,
@@ -155,7 +155,7 @@ void EntityEditor::createAnimatedEntityDialog() const {
 
   const auto onCancel = []() { Log.debug("Cancelled Dialog with no input"); };
 
-  auto dialog = std::make_unique<ModalDialog>(DialogName, onOk, onCancel);
+  auto dialog = std::make_unique<ModalDialog>(ICON_LC_PLAY, DialogName, onOk, onCancel);
 
   dialog->addControl("name", "Entity Name", std::string{"Unnamed Entity"});
 
@@ -195,7 +195,8 @@ void EntityEditor::createStaticEntityDialog() const {
 
   const auto onCancel = []() { Log.debug("Cancelled Dialog with no input"); };
 
-  auto dialog = std::make_unique<ModalDialog>(StaticEntityDialogName, onOk, onCancel);
+  auto dialog =
+      std::make_unique<ModalDialog>(ICON_LC_CUBOID, StaticEntityDialogName, onOk, onCancel);
   dialog->addControl("name", "Entity Name", std::string{"Unnamed Entity"});
   dialog->addControl("model", "Model Name", std::string{"Unnamed Model"}, modelProvider);
 
