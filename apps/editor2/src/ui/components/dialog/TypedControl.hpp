@@ -2,6 +2,7 @@
 
 #include "ControlBase.hpp"
 #include "ui/components/FileDialog.hpp"
+#include <platform_folders.h>
 
 namespace ed {
 
@@ -68,7 +69,8 @@ public:
       ImGui::SameLine(0.f, 4.f); // Standard spacing
 
       if (ImGui::Button("...", ImVec2(buttonSize, buttonSize))) {
-        fileDialog->setOpen(std::filesystem::path{R"(C:\Users\Matt\Projects\game-assets)"});
+        const auto homeDir = sago::getDataHome();
+        fileDialog->setOpen(std::filesystem::path{homeDir});
       }
 
       ImGui::SameLine();
