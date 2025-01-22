@@ -1,5 +1,6 @@
 #include "AssetViewer.hpp"
 #include "cm/GlmToString.hpp"
+#include "ui/assets/IconsLucide.hpp"
 
 namespace ed {
 AssetViewer::AssetViewer(std::shared_ptr<DataFacade> newDataFacade,
@@ -17,7 +18,7 @@ AssetViewer::~AssetViewer() {
 
 void AssetViewer::render() {
   if (const auto unsaved = dataFacade->isUnsaved() ? ImGuiWindowFlags_UnsavedDocument : 0;
-      ImGui::Begin("Asset Tree", nullptr, ImGuiWindowFlags_MenuBar | unsaved)) {
+      ImGui::Begin("Assets", nullptr, ImGuiWindowFlags_MenuBar | unsaved)) {
 
     if (ImGui::BeginMenuBar()) {
       if (ImGui::BeginMenu("Import")) {
@@ -40,9 +41,9 @@ void AssetViewer::render() {
     {
       ImGui::SetNextItemOpen(headerState[0]);
       if (ImGui::CollapsingHeader("Scripts")) {
-        ImGui::Selectable("MainCharacter");
-        ImGui::Selectable("MillAbout");
-        ImGui::Selectable("IdleInPlace");
+        ImGui::Selectable(ICON_LC_FILE_CODE " MainCharacter");
+        ImGui::Selectable(ICON_LC_FILE_CODE " MillAbout");
+        ImGui::Selectable(ICON_LC_FILE_CODE " IdleInPlace");
         headerState[0] = true;
       } else {
         headerState[0] = false;
@@ -53,7 +54,7 @@ void AssetViewer::render() {
       ImGui::SetNextItemOpen(headerState[1]);
       if (ImGui::CollapsingHeader("Skeletons")) {
         for (const auto& name : dataFacade->getSkeletons() | std::views::keys) {
-          ImGui::Selectable(name.c_str());
+          ImGui::Selectable((std::string{ICON_LC_BONE} + " " + name).c_str());
         }
         headerState[1] = true;
       } else {
@@ -65,7 +66,7 @@ void AssetViewer::render() {
       ImGui::SetNextItemOpen(headerState[2]);
       if (ImGui::CollapsingHeader("Animations")) {
         for (const auto& name : dataFacade->getAnimations() | std::views::keys) {
-          ImGui::Selectable(name.c_str());
+          ImGui::Selectable((std::string{ICON_LC_FILE_VIDEO} + " " + name).c_str());
         }
         headerState[2] = true;
       } else {
@@ -77,7 +78,7 @@ void AssetViewer::render() {
       ImGui::SetNextItemOpen(headerState[3]);
       if (ImGui::CollapsingHeader("Models")) {
         for (const auto& name : dataFacade->getModels() | std::views::keys) {
-          ImGui::Selectable(name.c_str());
+          ImGui::Selectable((std::string{ICON_LC_BOX} + " " + name).c_str());
         }
         headerState[3] = true;
       } else {
