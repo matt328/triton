@@ -76,6 +76,8 @@ public:
   auto setOpen(std::optional<std::filesystem::path> newInitialPath = std::nullopt) -> void;
   auto checkShouldOpen() -> void;
 
+  auto setOnOk(const FileDialogOkFunction& fn) -> void;
+
 private:
   std::string label{"Unlabeled FileDialog"};
   bool isOpen{};

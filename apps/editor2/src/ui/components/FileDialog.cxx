@@ -3,6 +3,7 @@
 
 #include "FileDialog.hpp"
 #include "imgui.h"
+#include "ui/assets/IconsLucide.hpp"
 
 namespace ed {
 
@@ -51,7 +52,9 @@ auto FileDialog::render() -> void {
       }
     }
     for (size_t i = 0; i < folders.size(); ++i) {
-      if (ImGui::Selectable(folders[i].path().stem().string().c_str(),
+      const auto label =
+          std::string(ICON_LC_FOLDER) + " " + folders[i].path().stem().string().c_str();
+      if (ImGui::Selectable(label.c_str(),
                             i == folderSelectedIndex,
                             ImGuiSelectableFlags_AllowDoubleClick,
                             ImVec2(ImGui::GetContentRegionAvail().x, 0))) {
@@ -91,7 +94,10 @@ auto FileDialog::render() -> void {
 
         ImGui::TableNextColumn();
 
-        if (ImGui::Selectable(entry.path().filename().string().c_str(),
+        const auto label =
+            std::string(ICON_LC_FILE) + " " + entry.path().filename().string().c_str();
+
+        if (ImGui::Selectable(label.c_str(),
                               i == fileSelectedIndex,
                               ImGuiSelectableFlags_SpanAllColumns |
                                   ImGuiSelectableFlags_AllowOverlap,
@@ -115,11 +121,11 @@ auto FileDialog::render() -> void {
       ImGui::Text("%s", files[fileSelectedIndex].path().string().c_str());
     }
 
-    if (ImGui::Button("OK")) {
+    if (ImGui::Button(ICON_LC_CHECK " OK")) {
       shouldOk = true;
     }
     ImGui::SameLine();
-    if (ImGui::Button("Cancel")) {
+    if (ImGui::Button(ICON_LC_X "Cancel")) {
       shouldCancel = true;
     }
 
@@ -141,6 +147,10 @@ auto FileDialog::render() -> void {
       onCancel.value()();
     }
   }
+}
+
+auto FileDialog::setOnOk(const FileDialogOkFunction& fn) -> void {
+  onOk = fn;
 }
 
 auto FileDialog::setOpen(std::optional<std::filesystem::path> newInitialPath) -> void {

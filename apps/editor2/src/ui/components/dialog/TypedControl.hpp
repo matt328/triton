@@ -17,6 +17,13 @@ public:
                std::optional<ValueProvider> newValueProvider = std::nullopt)
       : label(std::move(label)), value(initialValue), valueProvider{std::move(newValueProvider)} {
     fileDialog = std::make_unique<FileDialog>();
+    fileDialog->setOnOk([&](const std::vector<std::filesystem::path>& selections) {
+      if constexpr (std::is_assignable_v<T&, std::filesystem::path>) {
+        value = selections.front();
+      } else {
+        Log.trace("Shouldn't be here");
+      }
+    });
   }
 
   void render() override {
