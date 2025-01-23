@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Properties.hpp"
 #include "ui/assets/IconsLucide.hpp"
 namespace ed {
 
@@ -62,9 +63,11 @@ struct FileItem {
   bool selected{};
 };
 
+using FileFilters = std::vector<std::tuple<std::string, std::string>>;
+
 class FileDialog {
 public:
-  FileDialog() = default;
+  explicit FileDialog(std::shared_ptr<Properties> newProperties);
   ~FileDialog() = default;
 
   FileDialog(const FileDialog&) = delete;
@@ -74,12 +77,14 @@ public:
 
   auto render() -> void;
 
-  auto setOpen(std::optional<std::filesystem::path> newInitialPath = std::nullopt) -> void;
+  auto setOpen(std::optional<std::filesystem::path> newInitialPath = std::nullopt,
+               std::optional<std::string> newLabel = std::nullopt) -> void;
   auto checkShouldOpen() -> void;
 
   auto setOnOk(const FileDialogOkFunction& fn) -> void;
 
 private:
+  std::shared_ptr<Properties> properties;
   std::string label{(std::string(ICON_LC_FOLDER) + " Open File")};
   bool isOpen{};
 

@@ -1,4 +1,5 @@
 #include <optional>
+#include <platform_folders.h>
 #include <utility>
 
 #include "FileDialog.hpp"
@@ -6,6 +7,10 @@
 #include "ui/assets/IconsLucide.hpp"
 
 namespace ed {
+
+FileDialog::FileDialog(std::shared_ptr<Properties> newProperties)
+    : properties{std::move(newProperties)} {
+}
 
 auto FileDialog::render() -> void {
   if (!isOpen) {
@@ -17,11 +22,24 @@ auto FileDialog::render() -> void {
 
   if (ImGui::BeginPopupModal(label.c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
     // File Path
+    // Try initial path passed in.
     if (initialPath.has_value()) {
       if (!currentFolder.has_value()) {
         currentFolder = initialPath;
       }
+      // Try properties
+      // TODO(matt) pull properties out of here and manage saving paths externally where we know the
+      // context
+    } else if (properties->getLastOpenDialogPath().has_value()) {
+      if (!currentFolder.has_value()) {
+        currentFolder = properties->getLastOpenDialogPath();
+      }
+      // Finally use desktop
+    } else if (!currentFolder.has_value()) {
+      currentFolder = sago::getDesktopFolder();
+    }
 
+    if (currentFolder.has_value()) {
       ImGui::Text("%s", currentFolder.value().string().c_str());
     }
 
@@ -130,6 +148,7 @@ auto FileDialog::render() -> void {
     if (ImGui::Button(ICON_LC_CIRCLE_CHECK_BIG " OK", ImVec2(buttonWidth, 0.f))) {
       shouldOk = true;
     }
+
     ImGui::SameLine();
     if (ImGui::Button(ICON_LC_BAN " Cancel", ImVec2(buttonWidth, 0.f))) {
       shouldCancel = true;
@@ -140,6 +159,7 @@ auto FileDialog::render() -> void {
 
   if (shouldOk) {
     ImGui::CloseCurrentPopup();
+    properties->setLastOpenDialogPath(currentFile.value().parent_path());
     isOpen = false;
     if (onOk.has_value()) {
       onOk.value()({currentFile.value()});
@@ -159,9 +179,13 @@ auto FileDialog::setOnOk(const FileDialogOkFunction& fn) -> void {
   onOk = fn;
 }
 
-auto FileDialog::setOpen(std::optional<std::filesystem::path> newInitialPath) -> void {
+auto FileDialog::setOpen(std::optional<std::filesystem::path> newInitialPath,
+                         std::optional<std::string> newLabel) -> void {
   isOpen = true;
   initialPath = std::move(newInitialPath);
+  if (newLabel.has_value()) {
+    label = newLabel.value();
+  }
 }
 
 auto FileDialog::checkShouldOpen() -> void {

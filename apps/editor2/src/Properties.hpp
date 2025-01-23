@@ -1,3 +1,4 @@
+#include <optional>
 #include <utility>
 
 #pragma once
@@ -17,10 +18,11 @@ namespace ed {
 
 struct PropertiesData {
   std::filesystem::path recentFile{};
+  std::filesystem::path lastOpenDialogPath{};
 
   template <class T>
   void serialize(T& archive) {
-    archive(recentFile);
+    archive(recentFile, lastOpenDialogPath);
   }
 };
 
@@ -41,12 +43,16 @@ public:
       }
     }
 
-    if (std::ifstream i{path, std::ios::binary}; i.is_open()) {
-      cereal::BinaryInputArchive input(i);
-      input(propertiesData);
-      loaded = true;
-    } else {
-      Log.warn("Error reading application configuration file: {0}", path.string());
+    try {
+      if (std::ifstream i{path, std::ios::binary}; i.is_open()) {
+        cereal::BinaryInputArchive input(i);
+        input(propertiesData);
+        loaded = true;
+      } else {
+        Log.warn("Error reading application configuration file: {0}", path.string());
+      }
+    } catch (const std::exception& ex) {
+      Log.warn("Error reading application configuration file: {0}, {1}", path.string(), ex.what());
     }
     Log.debug("Loaded properties");
   }
@@ -59,9 +65,22 @@ public:
     return std::optional{propertiesData.recentFile};
   }
 
+  [[nodiscard]] auto getLastOpenDialogPath() const -> std::optional<std::filesystem::path> {
+    if (propertiesData.lastOpenDialogPath.empty()) {
+      return std::nullopt;
+    }
+    return std::optional{propertiesData.lastOpenDialogPath};
+  }
+
   auto setRecentFile(const std::filesystem::path& value) {
     auto lock = std::lock_guard(mtx);
     propertiesData.recentFile = value;
+    save();
+  }
+
+  auto setLastOpenDialogPath(const std::filesystem::path& value) {
+    auto lock = std::lock_guard(mtx);
+    propertiesData.lastOpenDialogPath = value;
     save();
   }
 

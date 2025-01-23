@@ -93,15 +93,6 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(noise)
 
-# nativefiledialog-extended
-FetchContent_Declare(
-  nativefiledialog-extended
-  GIT_REPOSITORY https://github.com/btzy/nativefiledialog-extended.git
-  GIT_TAG ${NATIVE_FILE_DIALOG_VERSION}
-  SYSTEM
-)
-FetchContent_MakeAvailable(nativefiledialog-extended)
-
 # ozz-animation
 set(BUILD_SHARED_LIBS OFF)
 set(ozz_build_tools OFF)
