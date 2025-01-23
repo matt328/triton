@@ -4,6 +4,7 @@
 #include <utility>
 
 #include "TypedControl.hpp"
+#include "imgui.h"
 
 namespace ed {
 
@@ -56,11 +57,19 @@ public:
       for (auto& [name, control] : controls) {
         control->render();
       }
-      if (ImGui::Button("OK")) {
+
+      ImGui::Separator();
+
+      auto availableWidth = ImGui::GetContentRegionAvail().x;
+      auto buttonWidth = 80.f;
+
+      ImGui::SetCursorPosX(availableWidth - buttonWidth * 2);
+
+      if (ImGui::Button(ICON_LC_CIRCLE_CHECK_BIG " OK", ImVec2(buttonWidth, 0.f))) {
         shouldOk = true;
       }
       ImGui::SameLine();
-      if (ImGui::Button("Cancel")) {
+      if (ImGui::Button(ICON_LC_BAN " Cancel", ImVec2(buttonWidth, 0.f))) {
         shouldCancel = true;
       }
 

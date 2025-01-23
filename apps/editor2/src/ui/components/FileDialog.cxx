@@ -120,11 +120,18 @@ auto FileDialog::render() -> void {
       ImGui::Text("%s", files[fileSelectedIndex].path().string().c_str());
     }
 
-    if (ImGui::Button(ICON_LC_CHECK " OK")) {
+    ImGui::Separator();
+
+    auto availableWidth = ImGui::GetContentRegionAvail().x;
+    auto buttonWidth = 80.f;
+
+    ImGui::SetCursorPosX(availableWidth - buttonWidth * 2);
+
+    if (ImGui::Button(ICON_LC_CIRCLE_CHECK_BIG " OK", ImVec2(buttonWidth, 0.f))) {
       shouldOk = true;
     }
     ImGui::SameLine();
-    if (ImGui::Button(ICON_LC_X "Cancel")) {
+    if (ImGui::Button(ICON_LC_BAN " Cancel", ImVec2(buttonWidth, 0.f))) {
       shouldCancel = true;
     }
 
