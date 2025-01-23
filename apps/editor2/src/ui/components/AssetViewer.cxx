@@ -8,8 +8,11 @@ namespace ed {
 constexpr auto ItemIndent = 16.f;
 
 AssetViewer::AssetViewer(std::shared_ptr<DataFacade> newDataFacade,
-                         std::shared_ptr<DialogManager> newDialogManager)
-    : dataFacade{std::move(newDataFacade)}, dialogManager{std::move(newDialogManager)} {
+                         std::shared_ptr<DialogManager> newDialogManager,
+                         std::shared_ptr<Properties> newProperties)
+    : dataFacade{std::move(newDataFacade)},
+      dialogManager{std::move(newDialogManager)},
+      properties{std::move(newProperties)} {
   Log.trace("Constructing AssetViewer");
   createSkeletonDialog();
   createAnimationDialog();
@@ -116,7 +119,11 @@ void AssetViewer::createSkeletonDialog() {
       []() { Log.debug("Cancelled Dialog with no input"); });
 
   dialog->addControl("name", "Skeleton Name", std::string("Unnamed Skeleton"));
-  dialog->addControl("filename", "Skeleton File", std::filesystem::path{});
+  dialog->addControl("filename",
+                     "Skeleton File",
+                     std::filesystem::path{},
+                     std::nullopt,
+                     std::make_optional(properties));
 
   dialogManager->addDialog("Skeleton", std::move(dialog));
 }
@@ -136,7 +143,11 @@ void AssetViewer::createAnimationDialog() {
       []() { Log.debug("Cancelled Dialog with no input"); });
 
   dialog->addControl("name", "Animation Name", std::string("Unnamed Animation"));
-  dialog->addControl("filename", "Animation File", std::filesystem::path{});
+  dialog->addControl("filename",
+                     "Animation File",
+                     std::filesystem::path{},
+                     std::nullopt,
+                     std::make_optional(properties));
 
   dialogManager->addDialog("Animation", std::move(dialog));
 }
@@ -155,7 +166,11 @@ void AssetViewer::createModelDialog() {
       []() { Log.debug("Cancelled Dialog with no input"); });
 
   dialog->addControl("name", "Model Name", std::string("Unnamed Model"));
-  dialog->addControl("filename", "Model File", std::filesystem::path{});
+  dialog->addControl("filename",
+                     "Model File",
+                     std::filesystem::path{},
+                     std::nullopt,
+                     std::make_optional(properties));
 
   dialogManager->addDialog("Model", std::move(dialog));
 }

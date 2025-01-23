@@ -11,6 +11,7 @@ Menu::Menu(std::shared_ptr<DataFacade> newDataFacade,
       properties{std::move(newProperties)},
       dialogManager{std::move(newDialogManager)},
       eventBus{std::move(newEventBus)} {
+  fileDialog = std::make_unique<FileDialog>(properties);
 }
 
 Menu::~Menu() {
@@ -56,17 +57,17 @@ void Menu::render() {
 
       ImGui::Separator();
       if (ImGui::MenuItem("Open Project...")) {
-        auto inPath = NFD::UniquePath{};
-        constexpr auto filterSize = static_cast<nfdfiltersize_t>(ProjectFileFilters.size());
-        if (const auto result = OpenDialog(inPath, ProjectFileFilters.data(), filterSize);
-            result == NFD_OKAY) {
-          const auto filePath = std::filesystem::path{inPath.get()};
-          dataFacade->load(filePath);
-          openFilePath = filePath;
-          properties->setRecentFile(filePath);
-        } else {
-          Log.error("File Dialog Error: ", NFD::GetError());
-        }
+        // auto inPath = NFD::UniquePath{};
+        // constexpr auto filterSize = static_cast<nfdfiltersize_t>(ProjectFileFilters.size());
+        // if (const auto result = OpenDialog(inPath, ProjectFileFilters.data(), filterSize);
+        //     result == NFD_OKAY) {
+        //   const auto filePath = std::filesystem::path{inPath.get()};
+        //   dataFacade->load(filePath);
+        //   openFilePath = filePath;
+        //   properties->setRecentFile(filePath);
+        // } else {
+        //   Log.error("File Dialog Error: ", NFD::GetError());
+        // }
       }
 
       if (ImGui::BeginMenu("Open Recent")) {
@@ -86,22 +87,22 @@ void Menu::render() {
         if (openFilePath.has_value()) {
           dataFacade->save(openFilePath.value());
         } else {
-          const auto savePath = getSavePath();
-          try {
-            if (savePath.has_value()) {
-              dataFacade->save(savePath.value());
-            }
-          } catch (const std::exception& ex) { Log.error(ex.what()); }
+          fileDialog->setOnOk([&](std::vector<std::filesystem::path> selectedFile) {
+            try {
+              dataFacade->save(selectedFile.front());
+            } catch (const std::exception& ex) { Log.error(ex.what()); }
+          });
+          fileDialog->setOpen(std::nullopt, std::string{ICON_LC_FILE} + " Save Project");
         }
       }
 
       if (ImGui::MenuItem("Save Project As...", nullptr, false, dataFacade->isUnsaved())) {
-        const auto savePath = getSavePath();
-        try {
-          if (savePath.has_value()) {
-            dataFacade->save(savePath.value());
-          }
-        } catch (const std::exception& ex) { Log.error(ex.what()); }
+        fileDialog->setOnOk([&](std::vector<std::filesystem::path> selectedFile) {
+          try {
+            dataFacade->save(selectedFile.front());
+          } catch (const std::exception& ex) { Log.error(ex.what()); }
+        });
+        fileDialog->setOpen(std::nullopt, std::string{ICON_LC_FILE} + " Save Project");
       }
 
       ImGui::Separator();
@@ -143,36 +144,29 @@ void Menu::render() {
     ImGui::Text("Unsaved changes will be lost. Are you sure?");
     ImGui::Separator();
 
-    if (ImGui::Button("Ok", ImVec2(120, 0))) {
+    auto availableWidth = ImGui::GetContentRegionAvail().x;
+    auto buttonWidth = 80.f;
+
+    ImGui::SetCursorPosX(availableWidth - buttonWidth * 2);
+
+    if (ImGui::Button(ICON_LC_CIRCLE_CHECK_BIG " OK", ImVec2(buttonWidth, 0.f))) {
       ImGui::CloseCurrentPopup();
       Log.info("Ok");
     }
     ImGui::SetItemDefaultFocus();
     ImGui::SameLine();
-    if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+    if (ImGui::Button(ICON_LC_BAN " Cancel", ImVec2(buttonWidth, 0.f))) {
       ImGui::CloseCurrentPopup();
     }
     ImGui::EndPopup();
   }
+
+  fileDialog->checkShouldOpen();
+  fileDialog->render();
+
   if (show) {
     ImGui::ShowDemoWindow(&show);
   }
-}
-
-auto Menu::getSavePath() -> std::optional<std::filesystem::path> {
-  auto outPath = NFD::UniquePath{};
-
-  const auto result = SaveDialog(outPath, ProjectFileFilters.data(), ProjectFileFilters.size());
-  if (result == NFD_OKAY) {
-    Log.debug("Success: {0}", outPath.get());
-    return std::optional{std::filesystem::path{outPath.get()}};
-  }
-  if (result == NFD_CANCEL) {
-    Log.debug("User pressed Cancel");
-    return std::nullopt;
-  }
-  Log.error("Error getting save path: {0}", NFD::GetError());
-  return std::nullopt;
 }
 
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ControlBase.hpp"
+#include "Properties.hpp"
 #include "ui/components/FileDialog.hpp"
 #include <platform_folders.h>
 
@@ -8,23 +9,32 @@ namespace ed {
 
 using ValueProvider = std::function<std::vector<std::string>(void)>;
 
+const auto SkeletonFilters = FileFilters{{"Ozz Skeleton", "ozz"}};
+
 template <typename T>
 class TypedControl : public ControlBase {
-  static constexpr auto SkeletonFilters = std::array{nfdfilteritem_t{"Ozz Skeleton", "ozz"}};
 
 public:
   TypedControl(std::string label,
                T initialValue,
-               std::optional<ValueProvider> newValueProvider = std::nullopt)
+               std::optional<ValueProvider> newValueProvider = std::nullopt,
+               std::optional<std::shared_ptr<Properties>> newProperties = std::nullopt)
       : label(std::move(label)), value(initialValue), valueProvider{std::move(newValueProvider)} {
-    fileDialog = std::make_unique<FileDialog>();
-    fileDialog->setOnOk([&](const std::vector<std::filesystem::path>& selections) {
-      if constexpr (std::is_assignable_v<T&, std::filesystem::path>) {
-        value = selections.front();
-      } else {
-        Log.trace("Shouldn't be here");
-      }
-    });
+
+    // This code is a bit janky, but maybe can fix it up later. Right now, if initialValue is of
+    // type std::filesystem::path, you MUST pass a value for Properties
+    // TODO(matt) templates like this always fall apart. Always.
+    // Maybe could have a specialized constructor?
+    if (newProperties.has_value()) {
+      fileDialog = std::make_unique<FileDialog>(newProperties.value());
+      fileDialog->setOnOk([&](const std::vector<std::filesystem::path>& selections) {
+        if constexpr (std::is_assignable_v<T&, std::filesystem::path>) {
+          value = selections.front();
+        } else {
+          Log.trace("Shouldn't be here");
+        }
+      });
+    }
   }
 
   void render() override {
@@ -70,16 +80,15 @@ public:
 
       if (ImGui::Button("...", ImVec2(buttonSize, buttonSize))) {
         const auto homeDir = sago::getDataHome();
-        fileDialog->setOpen(std::filesystem::path{homeDir});
+        fileDialog->setOpen(std::nullopt);
       }
 
       ImGui::SameLine();
       ImGui::Text("%s", label.c_str());
+
+      fileDialog->checkShouldOpen();
+      fileDialog->render();
     }
-
-    fileDialog->checkShouldOpen();
-
-    fileDialog->render();
   }
 
   [[nodiscard]] auto getValue() const -> std::any override {

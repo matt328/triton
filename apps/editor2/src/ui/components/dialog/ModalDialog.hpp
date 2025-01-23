@@ -1,8 +1,6 @@
 #pragma once
 
-#include <optional>
-#include <utility>
-
+#include "Properties.hpp"
 #include "TypedControl.hpp"
 #include "imgui.h"
 
@@ -28,8 +26,10 @@ public:
   void addControl(const std::string& name,
                   const std::string& label,
                   T initialValue,
-                  std::optional<ValueProvider> valueProvider = std::nullopt) {
-    controls[name] = std::make_unique<TypedControl<T>>(label, initialValue, valueProvider);
+                  std::optional<ValueProvider> valueProvider = std::nullopt,
+                  std::optional<std::shared_ptr<Properties>> properties = std::nullopt) {
+    controls[name] =
+        std::make_unique<TypedControl<T>>(label, initialValue, valueProvider, properties);
   }
 
   template <typename T>

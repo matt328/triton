@@ -4,6 +4,7 @@
 #include "data/DataFacade.hpp"
 #include "tr/IEventBus.hpp"
 #include "ui/components/DialogManager.hpp"
+#include "ui/components/FileDialog.hpp"
 
 namespace ed {
 
@@ -15,9 +16,9 @@ public:
                 std::shared_ptr<tr::IEventBus> newEventBus);
   ~Menu();
 
-  Menu(const Menu&) = default;
+  Menu(const Menu&) = delete;
   Menu(Menu&&) = delete;
-  auto operator=(const Menu&) -> Menu& = default;
+  auto operator=(const Menu&) -> Menu& = delete;
   auto operator=(Menu&&) -> Menu& = delete;
 
   void render();
@@ -37,14 +38,11 @@ private:
   std::shared_ptr<tr::IEventBus> eventBus;
 
   std::optional<std::filesystem::path> openFilePath;
+  std::unique_ptr<FileDialog> fileDialog;
   bool fullscreen{};
   bool enableWireframe{};
 
   std::function<void(void)> quitFn;
   std::function<void(void)> toggleFullscreenFn;
-
-  static constexpr auto ProjectFileFilters = std::array{nfdfilteritem_t{"Triton Project", "trp"}};
-
-  static auto getSavePath() -> std::optional<std::filesystem::path>;
 };
 }

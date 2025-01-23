@@ -61,7 +61,6 @@ target_precompile_headers(${PROJECT_NAME}
   <GLFW/glfw3.h>
   <imgui.h>
   <misc/cpp/imgui_stdlib.h>
-  <nfd.hpp>
   <optional>
   <platform_folders.h>
   <sstream>
@@ -98,7 +97,6 @@ target_link_libraries(${PROJECT_NAME}
   glfw
   cereal::cereal
   triton-di
-  nfd::nfd
   platform_folders
   spdlog::spdlog_header_only
   util-lib
