@@ -68,7 +68,7 @@ struct FilterItem {
   std::string displayName;
 
   [[nodiscard]] auto getString() const -> std::string {
-    return fmt::format("{} ({})", displayName, filter);
+    return fmt::format("{} (*{})", displayName, filter);
   }
 };
 
@@ -97,6 +97,7 @@ private:
 
   std::string selectedFilename;
   std::vector<FilterItem> filterItems;
+  size_t selectedFilterIndex = 0;
 
   std::optional<std::filesystem::path> initialPath = std::nullopt;
   std::optional<std::filesystem::path> currentFolder;

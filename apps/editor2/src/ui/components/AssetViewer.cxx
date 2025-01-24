@@ -120,8 +120,8 @@ void AssetViewer::createSkeletonDialog() {
       []() { Log.debug("Cancelled Dialog with no input"); });
 
   auto filterItems = {
-      FilterItem{.filter = "*.ozz", .displayName = "Ozz Skeletons"},
-      FilterItem{.filter = "*.*", .displayName = "All Files"},
+      FilterItem{.filter = ".ozz", .displayName = "Ozz Skeletons"},
+      FilterItem{.filter = ".*", .displayName = "All Files"},
   };
 
   dialog->addControl("name", "Skeleton Name", std::string("Unnamed Skeleton"));
@@ -145,8 +145,8 @@ void AssetViewer::createAnimationDialog() {
       []() { Log.debug("Cancelled Dialog with no input"); });
 
   auto filterItems = {
-      FilterItem{.filter = "*.ozz", .displayName = "Ozz Animation"},
-      FilterItem{.filter = "*.*", .displayName = "All Files"},
+      FilterItem{.filter = ".ozz", .displayName = "Ozz Animation"},
+      FilterItem{.filter = ".*", .displayName = "All Files"},
   };
 
   dialog->addControl("name", "Animation Name", std::string("Unnamed Animation"));
@@ -169,8 +169,8 @@ void AssetViewer::createModelDialog() {
       []() { Log.debug("Cancelled Dialog with no input"); });
 
   auto filterItems = {
-      FilterItem{.filter = "*.trm", .displayName = "Triton Models"},
-      FilterItem{.filter = "*.*", .displayName = "All Files"},
+      FilterItem{.filter = ".trm", .displayName = "Triton Models"},
+      FilterItem{.filter = ".*", .displayName = "All Files"},
   };
 
   dialog->addControl("name", "Model Name", std::string("Unnamed Model"));

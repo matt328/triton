@@ -21,7 +21,7 @@ inline void setupImGuiStyle() {
   style.FrameBorderSize = 0.0f;
   style.ItemSpacing = ImVec2(8.0f, 8.0f);
   style.ItemInnerSpacing = ImVec2(4.0f, 4.0f);
-  style.CellPadding = ImVec2(4.0f, 2.0f);
+  style.CellPadding = ImVec2(4.0f, 4.0f);
   style.IndentSpacing = 21.0f;
   style.ColumnsMinSpacing = 6.0f;
   style.ScrollbarSize = 14.0f;
