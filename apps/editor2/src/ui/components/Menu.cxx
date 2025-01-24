@@ -4,7 +4,7 @@
 namespace ed {
 
 const auto ProjectFilters =
-    std::vector{FilterItem{.filter = ".json", .displayName = "Editor Projects"},
+    std::vector{FilterItem{.filter = ".trp", .displayName = "Triton Projects"},
                 FilterItem{.filter = ".*", .displayName = "All Files"}};
 
 Menu::Menu(std::shared_ptr<DataFacade> newDataFacade,
