@@ -10,8 +10,12 @@
 namespace ed {
 
 FileDialog::FileDialog(std::shared_ptr<Properties> newProperties,
-                       std::vector<FilterItem> newFilterItems)
-    : properties{std::move(newProperties)}, filterItems{std::move(newFilterItems)} {
+                       std::vector<FilterItem> newFilterItems,
+                       std::string_view newUniqueName)
+    : properties{std::move(newProperties)},
+      filterItems{std::move(newFilterItems)},
+      uniqueName{newUniqueName.data()} {
+  lastPathKey = uniqueName + "lastPathKey";
 }
 
 auto FileDialog::render() -> void {
@@ -30,11 +34,11 @@ auto FileDialog::render() -> void {
         currentFolder = initialPath;
       }
       // Try properties
-      // TODO(matt) pull properties out of here and manage saving paths externally where we know the
-      // context
-    } else if (properties->getLastOpenDialogPath().has_value()) {
+    } else if (properties->get(lastPathKey).has_value()) {
       if (!currentFolder.has_value()) {
-        currentFolder = properties->getLastOpenDialogPath();
+        currentFolder = properties->get(lastPathKey).transform([](const auto& path) {
+          return std::filesystem::path{path};
+        });
       }
       // Finally use desktop
     } else if (!currentFolder.has_value()) {
@@ -210,8 +214,12 @@ auto FileDialog::render() -> void {
   }
 
   if (shouldOk) {
+    // TODO(matt) Handle save case here. currently in save case, selectedFileName will be
+    // set here not currentFile. See if open case can just use selectedFileName as well
     ImGui::CloseCurrentPopup();
-    properties->setLastOpenDialogPath(currentFile.value().parent_path());
+    if (currentFile.has_value()) {
+      properties->put(lastPathKey, currentFile.value().parent_path().string());
+    }
     isOpen = false;
     if (onOk.has_value()) {
       onOk.value()({currentFile.value()});

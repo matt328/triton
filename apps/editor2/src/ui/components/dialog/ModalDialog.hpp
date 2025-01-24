@@ -38,7 +38,7 @@ public:
                       const std::string& label,
                       std::shared_ptr<Properties> newProperties,
                       const std::vector<FilterItem>& filterItems) {
-    controls[name] = std::make_unique<FileControl>(label, newProperties, filterItems);
+    controls[name] = std::make_unique<FileControl>(name, label, newProperties, filterItems);
   }
 
   template <typename T>

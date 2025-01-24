@@ -1,9 +1,8 @@
-#include <optional>
-#include <utility>
-
 #pragma once
 
+#include <optional>
 namespace cereal {
+
 template <class Archive>
 void serialize(Archive& ar, std::filesystem::path& path) {
   std::string pathStr = path.string();
@@ -12,6 +11,7 @@ void serialize(Archive& ar, std::filesystem::path& path) {
     path = std::filesystem::path(pathStr);
   }
 }
+
 }
 
 namespace ed {
@@ -19,10 +19,11 @@ namespace ed {
 struct PropertiesData {
   std::filesystem::path recentFile{};
   std::filesystem::path lastOpenDialogPath{};
+  std::unordered_map<std::string, std::string> mapData;
 
   template <class T>
   void serialize(T& archive) {
-    archive(recentFile, lastOpenDialogPath);
+    archive(recentFile, lastOpenDialogPath, mapData);
   }
 };
 
@@ -56,7 +57,26 @@ public:
     }
     Log.debug("Loaded properties");
   }
+
   ~Properties() = default;
+
+  Properties(const Properties&) = delete;
+  Properties(Properties&&) = delete;
+  auto operator=(const Properties&) -> Properties& = delete;
+  auto operator=(Properties&&) -> Properties& = delete;
+
+  auto put(std::string_view key, std::string_view value) -> void {
+    auto lock = std::lock_guard(mtx);
+    propertiesData.mapData[key.data()] = value.data();
+    save();
+  }
+
+  [[nodiscard]] auto get(std::string_view key) const -> std::optional<std::string> {
+    if (propertiesData.mapData.contains(key.data())) {
+      return std::make_optional(propertiesData.mapData.at(key.data()));
+    }
+    return std::nullopt;
+  }
 
   [[nodiscard]] auto getRecentFile() const -> std::optional<std::filesystem::path> {
     if (propertiesData.recentFile.empty()) {

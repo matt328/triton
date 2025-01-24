@@ -4,11 +4,12 @@
 
 namespace ed {
 
-FileControl::FileControl(std::string_view newLabel,
+FileControl::FileControl(std::string_view newName,
+                         std::string_view newLabel,
                          std::shared_ptr<Properties> newProperties,
                          const std::vector<FilterItem>& filterItems)
-    : label{newLabel.data()} {
-  fileDialog = std::make_unique<FileDialog>(std::move(newProperties), filterItems);
+    : name{newName.data()}, label{newLabel.data()} {
+  fileDialog = std::make_unique<FileDialog>(std::move(newProperties), filterItems, name);
   fileDialog->setOnOk(
       [&](const std::vector<std::filesystem::path>& selections) { value = selections.front(); });
 }
