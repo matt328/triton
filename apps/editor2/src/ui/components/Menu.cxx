@@ -5,7 +5,8 @@
 namespace ed {
 
 const auto ProjectFilters =
-    std::vector{FilterItem{.filter = "*.json", .displayName = "Editor Projects"}};
+    std::vector{FilterItem{.filter = ".json", .displayName = "Editor Projects"},
+                FilterItem{.filter = ".*", .displayName = "All Files"}};
 
 Menu::Menu(std::shared_ptr<DataFacade> newDataFacade,
            std::shared_ptr<Properties> newProperties,
@@ -15,9 +16,19 @@ Menu::Menu(std::shared_ptr<DataFacade> newDataFacade,
       properties{std::move(newProperties)},
       dialogManager{std::move(newDialogManager)},
       eventBus{std::move(newEventBus)} {
-  projectOpenDialog = std::make_unique<FileDialog>(properties, ProjectFilters);
+
+  projectOpenDialog = std::make_unique<FileDialog>(properties, ProjectFilters, "project");
   projectOpenDialog->setOnOk([&](std::vector<std::filesystem::path> selectedFile) {
     try {
+      Log.trace("Open project file: {}", selectedFile.front().string());
+      dataFacade->load(selectedFile.front());
+    } catch (const std::exception& ex) { Log.error(ex.what()); }
+  });
+
+  projectSaveDialog = std::make_unique<FileDialog>(properties, ProjectFilters, "project");
+  projectSaveDialog->setOnOk([&](std::vector<std::filesystem::path> selectedFile) {
+    try {
+      Log.trace("Save project file: {}", selectedFile.front().string());
       dataFacade->save(selectedFile.front());
     } catch (const std::exception& ex) { Log.error(ex.what()); }
   });
@@ -28,12 +39,8 @@ Menu::~Menu() {
 }
 
 void Menu::render() {
-  auto b = false;
-  auto showPopup = false;
-  auto showAnimation = false;
-  static auto show = false;
-
-  static auto fsPath = std::filesystem::path{"C:/Users/matt/Projects/game-assets/models"};
+  auto showConfirmDialog = false;
+  static auto showDemoWindow = false;
 
   if (ImGui::BeginMainMenuBar()) {
     if (ImGui::BeginMenu("File")) {
@@ -50,33 +57,15 @@ void Menu::render() {
         dataFacade->createAABB();
       }
 
-      if (ImGui::MenuItem("Import Skeleton")) {
-        showPopup = true;
-      }
-
-      if (ImGui::MenuItem("Import Animation")) {
-        showAnimation = true;
-      }
-
       if (ImGui::MenuItem("New Project...")) {
         if (dataFacade->isUnsaved()) {
-          b = true;
+          showConfirmDialog = true;
         }
       }
 
       ImGui::Separator();
       if (ImGui::MenuItem("Open Project...")) {
-        // auto inPath = NFD::UniquePath{};
-        // constexpr auto filterSize = static_cast<nfdfiltersize_t>(ProjectFileFilters.size());
-        // if (const auto result = OpenDialog(inPath, ProjectFileFilters.data(), filterSize);
-        //     result == NFD_OKAY) {
-        //   const auto filePath = std::filesystem::path{inPath.get()};
-        //   dataFacade->load(filePath);
-        //   openFilePath = filePath;
-        //   properties->setRecentFile(filePath);
-        // } else {
-        //   Log.error("File Dialog Error: ", NFD::GetError());
-        // }
+        projectOpenDialog->setOpen(std::nullopt, "Open Project File");
       }
 
       if (ImGui::BeginMenu("Open Recent")) {
@@ -116,8 +105,8 @@ void Menu::render() {
         this->fullscreen = !this->fullscreen;
         toggleFullscreenFn();
       }
-      if (ImGui::MenuItem("Demo Window", nullptr, show)) {
-        show = !show;
+      if (ImGui::MenuItem("Demo Window", nullptr, showDemoWindow)) {
+        showDemoWindow = !showDemoWindow;
       }
       if (ImGui::MenuItem("Wireframe", nullptr, enableWireframe)) {
         enableWireframe = !enableWireframe;
@@ -127,15 +116,7 @@ void Menu::render() {
     ImGui::EndMainMenuBar();
   }
 
-  if (showPopup) {
-    ImGui::OpenPopup("Import Skeleton");
-  }
-
-  if (showAnimation) {
-    ImGui::OpenPopup("Import Animation");
-  }
-
-  if (b) {
+  if (showConfirmDialog) {
     ImGui::OpenPopup("Unsaved");
   }
 
@@ -163,12 +144,11 @@ void Menu::render() {
   projectOpenDialog->checkShouldOpen();
   projectOpenDialog->render();
 
-  // projectSaveDialog->checkShouldOpen();
-  // projectSaveDialog->render();
+  projectSaveDialog->checkShouldOpen();
+  projectSaveDialog->render();
 
-  if (show) {
-    ImGui::ShowDemoWindow(&show);
+  if (showDemoWindow) {
+    ImGui::ShowDemoWindow(&showDemoWindow);
   }
 }
-
 }

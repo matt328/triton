@@ -74,7 +74,9 @@ struct FilterItem {
 
 class FileDialog {
 public:
-  FileDialog(std::shared_ptr<Properties> newProperties, std::vector<FilterItem> filterItems);
+  FileDialog(std::shared_ptr<Properties> newProperties,
+             std::vector<FilterItem> filterItems,
+             std::string_view newUniqueName);
   ~FileDialog() = default;
 
   FileDialog(const FileDialog&) = delete;
@@ -92,11 +94,15 @@ public:
 
 private:
   std::shared_ptr<Properties> properties;
+  std::vector<FilterItem> filterItems;
+  std::string uniqueName{};
+
+  std::string lastPathKey;
+
   std::string label{(std::string(ICON_LC_FOLDER) + " Open File")};
   bool isOpen{};
 
   std::string selectedFilename;
-  std::vector<FilterItem> filterItems;
   size_t selectedFilterIndex = 0;
 
   std::optional<std::filesystem::path> initialPath = std::nullopt;

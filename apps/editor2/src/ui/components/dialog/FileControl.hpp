@@ -10,7 +10,8 @@ class FileDialog;
 
 class FileControl : public ControlBase {
 public:
-  explicit FileControl(std::string_view newLabel,
+  explicit FileControl(std::string_view newName,
+                       std::string_view newLabel,
                        std::shared_ptr<Properties> newProperties,
                        const std::vector<FilterItem>& filterItems);
   ~FileControl() override;
@@ -24,6 +25,7 @@ public:
   [[nodiscard]] auto getValue() const -> std::any override;
 
 private:
+  std::string name;
   std::string label;
   std::unique_ptr<FileDialog> fileDialog;
 
