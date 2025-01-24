@@ -214,8 +214,6 @@ auto FileDialog::render() -> void {
   }
 
   if (shouldOk) {
-    // TODO(matt) Handle save case here. currently in save case, selectedFileName will be
-    // set here not currentFile. See if open case can just use selectedFileName as well
     ImGui::CloseCurrentPopup();
     const auto propPath = currentFolder.value() / selectedFilename;
     Log.trace("putting property {}, value: {}", lastPathKey, currentFolder.value().string());
