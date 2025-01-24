@@ -1,6 +1,5 @@
 #include "Menu.hpp"
 #include "data/DataFacade.hpp"
-#include <winuser.h>
 
 namespace ed {
 
