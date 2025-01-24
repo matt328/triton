@@ -2,6 +2,7 @@
 #include "cm/GlmToString.hpp"
 #include "imgui.h"
 #include "ui/assets/IconsLucide.hpp"
+#include "ui/components/FileDialog.hpp"
 
 namespace ed {
 
@@ -118,12 +119,13 @@ void AssetViewer::createSkeletonDialog() {
       },
       []() { Log.debug("Cancelled Dialog with no input"); });
 
+  auto filterItems = {
+      FilterItem{.filter = "*.ozz", .displayName = "Ozz Skeletons"},
+      FilterItem{.filter = "*.*", .displayName = "All Files"},
+  };
+
   dialog->addControl("name", "Skeleton Name", std::string("Unnamed Skeleton"));
-  dialog->addControl("filename",
-                     "Skeleton File",
-                     std::filesystem::path{},
-                     std::nullopt,
-                     std::make_optional(properties));
+  dialog->addFileControl("filename", "Skeleton File", properties, filterItems);
 
   dialogManager->addDialog("Skeleton", std::move(dialog));
 }
@@ -142,12 +144,13 @@ void AssetViewer::createAnimationDialog() {
       },
       []() { Log.debug("Cancelled Dialog with no input"); });
 
+  auto filterItems = {
+      FilterItem{.filter = "*.ozz", .displayName = "Ozz Animation"},
+      FilterItem{.filter = "*.*", .displayName = "All Files"},
+  };
+
   dialog->addControl("name", "Animation Name", std::string("Unnamed Animation"));
-  dialog->addControl("filename",
-                     "Animation File",
-                     std::filesystem::path{},
-                     std::nullopt,
-                     std::make_optional(properties));
+  dialog->addFileControl("filename", "Animation File", properties, filterItems);
 
   dialogManager->addDialog("Animation", std::move(dialog));
 }
@@ -165,12 +168,13 @@ void AssetViewer::createModelDialog() {
       },
       []() { Log.debug("Cancelled Dialog with no input"); });
 
+  auto filterItems = {
+      FilterItem{.filter = "*.trm", .displayName = "Triton Models"},
+      FilterItem{.filter = "*.*", .displayName = "All Files"},
+  };
+
   dialog->addControl("name", "Model Name", std::string("Unnamed Model"));
-  dialog->addControl("filename",
-                     "Model File",
-                     std::filesystem::path{},
-                     std::nullopt,
-                     std::make_optional(properties));
+  dialog->addFileControl("filename", "Model File", properties, filterItems);
 
   dialogManager->addDialog("Model", std::move(dialog));
 }

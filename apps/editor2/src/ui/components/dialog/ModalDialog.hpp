@@ -3,6 +3,8 @@
 #include "Properties.hpp"
 #include "TypedControl.hpp"
 #include "imgui.h"
+#include "ui/components/FileDialog.hpp"
+#include "ui/components/dialog/FileControl.hpp"
 
 namespace ed {
 
@@ -30,6 +32,13 @@ public:
                   std::optional<std::shared_ptr<Properties>> properties = std::nullopt) {
     controls[name] =
         std::make_unique<TypedControl<T>>(label, initialValue, valueProvider, properties);
+  }
+
+  void addFileControl(const std::string& name,
+                      const std::string& label,
+                      std::shared_ptr<Properties> newProperties,
+                      const std::vector<FilterItem>& filterItems) {
+    controls[name] = std::make_unique<FileControl>(label, newProperties, filterItems);
   }
 
   template <typename T>
