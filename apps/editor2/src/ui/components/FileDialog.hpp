@@ -63,11 +63,18 @@ struct FileItem {
   bool selected{};
 };
 
-using FileFilters = std::vector<std::tuple<std::string, std::string>>;
+struct FilterItem {
+  std::string filter;
+  std::string displayName;
+
+  [[nodiscard]] auto getString() const -> std::string {
+    return fmt::format("{} ({})", displayName, filter);
+  }
+};
 
 class FileDialog {
 public:
-  explicit FileDialog(std::shared_ptr<Properties> newProperties);
+  FileDialog(std::shared_ptr<Properties> newProperties, std::vector<FilterItem> filterItems);
   ~FileDialog() = default;
 
   FileDialog(const FileDialog&) = delete;
@@ -87,6 +94,9 @@ private:
   std::shared_ptr<Properties> properties;
   std::string label{(std::string(ICON_LC_FOLDER) + " Open File")};
   bool isOpen{};
+
+  std::string selectedFilename;
+  std::vector<FilterItem> filterItems;
 
   std::optional<std::filesystem::path> initialPath = std::nullopt;
   std::optional<std::filesystem::path> currentFolder;

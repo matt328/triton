@@ -8,8 +8,9 @@
 
 namespace ed {
 
-FileDialog::FileDialog(std::shared_ptr<Properties> newProperties)
-    : properties{std::move(newProperties)} {
+FileDialog::FileDialog(std::shared_ptr<Properties> newProperties,
+                       std::vector<FilterItem> newFilterItems)
+    : properties{std::move(newProperties)}, filterItems{std::move(newFilterItems)} {
 }
 
 auto FileDialog::render() -> void {
@@ -67,6 +68,7 @@ auto FileDialog::render() -> void {
                           ImVec2(ImGui::GetContentRegionAvail().x, 0))) {
       if (ImGui::IsMouseDoubleClicked(0)) {
         currentFolder = currentFolder.value().parent_path();
+        selectedFilename = "";
       }
     }
     for (size_t i = 0; i < folders.size(); ++i) {
@@ -81,6 +83,7 @@ auto FileDialog::render() -> void {
           folderSelectedIndex = 0;
           fileSelectedIndex = 0;
           ImGui::SetScrollHereY(0.0f);
+          selectedFilename = "";
         } else {
           // Single Clicked
           folderSelectedIndex = i;
@@ -121,6 +124,7 @@ auto FileDialog::render() -> void {
                               ImVec2(0, 18.f))) {
           fileSelectedIndex = i;
           currentFile = files[i].path();
+          selectedFilename = currentFile->filename().string();
         }
 
         ImGui::TableNextColumn();
@@ -134,8 +138,49 @@ auto FileDialog::render() -> void {
       ImGui::EndTable();
     }
 
-    if (!files.empty() && fileSelectedIndex < files.size()) {
-      ImGui::Text("%s", files[fileSelectedIndex].path().string().c_str());
+    ImGui::AlignTextToFramePadding();
+    ImGui::Text("Filename");
+    ImGui::SameLine();
+
+    {
+      auto availableWidth = ImGui::GetContentRegionAvail().x;
+      auto dropdownWidth = 200.f;
+
+      ImGui::PushItemWidth(availableWidth - dropdownWidth - ImGui::GetStyle().ItemSpacing.x);
+      ImGui::InputText("##filename", &selectedFilename);
+
+      ImGui::SameLine();
+
+      ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x -
+                           dropdownWidth);
+
+      auto items = std::vector<std::string>{};
+      for (const auto& filterItem : filterItems) {
+        items.push_back(filterItem.getString());
+      }
+
+      static int item_selected_idx = 0; // Here we store our selection data as an index.
+
+      auto comboFlags = 0;
+
+      // Pass in the preview value visible before opening the combo (it could technically be
+      // different contents or not pulled from items[])
+      const char* combo_preview_value = items[item_selected_idx].c_str();
+
+      ImGui::SetNextItemWidth(dropdownWidth);
+      if (ImGui::BeginCombo("##filetype", combo_preview_value, comboFlags)) {
+        for (size_t n = 0; n < items.size(); n++) {
+          const bool is_selected = (item_selected_idx == n);
+          if (ImGui::Selectable(items[n].c_str(), is_selected))
+            item_selected_idx = n;
+
+          // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+          if (is_selected)
+            ImGui::SetItemDefaultFocus();
+        }
+        ImGui::EndCombo();
+        ImGui::PopItemWidth();
+      }
     }
 
     ImGui::Separator();

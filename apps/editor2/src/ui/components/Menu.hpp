@@ -38,7 +38,10 @@ private:
   std::shared_ptr<tr::IEventBus> eventBus;
 
   std::optional<std::filesystem::path> openFilePath;
-  std::unique_ptr<FileDialog> fileDialog;
+
+  std::unique_ptr<FileDialog> projectSaveDialog;
+  std::unique_ptr<FileDialog> projectOpenDialog;
+
   bool fullscreen{};
   bool enableWireframe{};
 

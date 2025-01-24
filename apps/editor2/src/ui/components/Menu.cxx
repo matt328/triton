@@ -1,7 +1,11 @@
 #include "Menu.hpp"
 #include "data/DataFacade.hpp"
+#include <winuser.h>
 
 namespace ed {
+
+const auto ProjectFilters =
+    std::vector{FilterItem{.filter = "*.json", .displayName = "Editor Projects"}};
 
 Menu::Menu(std::shared_ptr<DataFacade> newDataFacade,
            std::shared_ptr<Properties> newProperties,
@@ -11,7 +15,12 @@ Menu::Menu(std::shared_ptr<DataFacade> newDataFacade,
       properties{std::move(newProperties)},
       dialogManager{std::move(newDialogManager)},
       eventBus{std::move(newEventBus)} {
-  fileDialog = std::make_unique<FileDialog>(properties);
+  projectOpenDialog = std::make_unique<FileDialog>(properties, ProjectFilters);
+  projectOpenDialog->setOnOk([&](std::vector<std::filesystem::path> selectedFile) {
+    try {
+      dataFacade->save(selectedFile.front());
+    } catch (const std::exception& ex) { Log.error(ex.what()); }
+  });
 }
 
 Menu::~Menu() {
@@ -87,22 +96,12 @@ void Menu::render() {
         if (openFilePath.has_value()) {
           dataFacade->save(openFilePath.value());
         } else {
-          fileDialog->setOnOk([&](std::vector<std::filesystem::path> selectedFile) {
-            try {
-              dataFacade->save(selectedFile.front());
-            } catch (const std::exception& ex) { Log.error(ex.what()); }
-          });
-          fileDialog->setOpen(std::nullopt, std::string{ICON_LC_FILE} + " Save Project");
+          projectSaveDialog->setOpen(std::nullopt, std::string{ICON_LC_FILE} + " Save Project");
         }
       }
 
       if (ImGui::MenuItem("Save Project As...", nullptr, false, dataFacade->isUnsaved())) {
-        fileDialog->setOnOk([&](std::vector<std::filesystem::path> selectedFile) {
-          try {
-            dataFacade->save(selectedFile.front());
-          } catch (const std::exception& ex) { Log.error(ex.what()); }
-        });
-        fileDialog->setOpen(std::nullopt, std::string{ICON_LC_FILE} + " Save Project");
+        projectSaveDialog->setOpen(std::nullopt, std::string{ICON_LC_FILE} + " Save Project");
       }
 
       ImGui::Separator();
@@ -161,8 +160,11 @@ void Menu::render() {
     ImGui::EndPopup();
   }
 
-  fileDialog->checkShouldOpen();
-  fileDialog->render();
+  projectOpenDialog->checkShouldOpen();
+  projectOpenDialog->render();
+
+  // projectSaveDialog->checkShouldOpen();
+  // projectSaveDialog->render();
 
   if (show) {
     ImGui::ShowDemoWindow(&show);

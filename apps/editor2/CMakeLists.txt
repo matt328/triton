@@ -11,6 +11,7 @@ set(editor_SRC
   src/ui/components/AssetViewer.cxx
   src/ui/components/EntityEditor.cxx
   src/ui/components/FileDialog.cxx
+  src/ui/components/dialog/FileControl.cxx
 
   src/data/DataFacade.cxx
 )
