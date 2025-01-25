@@ -3,6 +3,7 @@
 #include "GlmCereal.hpp"
 #include "cm/EntitySystemTypes.hpp"
 #include "TaskQueue.hpp"
+#include "gp/components/Transform.hpp"
 #include "tr/IGameplaySystem.hpp"
 
 /*
@@ -61,7 +62,7 @@ struct ModelData {
 struct EntityData {
   std::string name;
   glm::vec3 position{glm::zero<glm::vec3>()};
-  glm::quat rotation{glm::identity<glm::quat>()};
+  glm::vec3 rotation{glm::zero<glm::vec3>()};
   std::string modelName;
   std::string skeleton;
   std::vector<std::string> animations;
@@ -139,6 +140,8 @@ public:
   void load(const std::filesystem::path& inputFile);
 
   void setEntityPosition(std::string_view name, const glm::vec3& newPosition);
+
+  void entityTransformUpdated(std::string_view name, const tr::Transform& transform);
 
   [[nodiscard]] auto getEntityData(std::string_view name) const -> EntityData {
     return dataStore.scene.at(name.data());

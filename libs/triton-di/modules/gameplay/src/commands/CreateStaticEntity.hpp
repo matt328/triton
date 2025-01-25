@@ -12,8 +12,11 @@ class CreateStaticEntityCommand final
     : public ICommand<entt::registry&, const std::shared_ptr<AssetManager>&> {
 public:
   explicit CreateStaticEntityCommand(const std::string_view newModelFilename,
-                                     const std::string_view newEntityName)
-      : entityName{newEntityName.data()}, modelFilename{newModelFilename.data()} {
+                                     const std::string_view newEntityName,
+                                     std::optional<Transform> newInitialTransform = std::nullopt)
+      : entityName{newEntityName.data()},
+        modelFilename{newModelFilename.data()},
+        initialTransform{newInitialTransform} {
   }
 
   void execute([[maybe_unused]] entt::registry& registry,
@@ -25,6 +28,11 @@ public:
                                .position = glm::zero<glm::vec3>(),
                                .transformation = glm::identity<glm::mat4>()};
 
+    if (initialTransform.has_value()) {
+      transform.position = initialTransform->position;
+      transform.rotation = initialTransform->rotation;
+    }
+
     const auto entity = registry.create();
     registry.emplace<Renderable>(entity, std::vector{modelData.meshData});
     registry.emplace<Transform>(entity, transform);
@@ -34,6 +42,7 @@ public:
 private:
   std::string entityName;
   std::string modelFilename;
+  std::optional<Transform> initialTransform;
 };
 
 }

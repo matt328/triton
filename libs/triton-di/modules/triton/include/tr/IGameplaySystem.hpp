@@ -2,6 +2,7 @@
 
 #include "cm/RenderData.hpp"
 #include "AnimatedModelData.hpp"
+#include "gp/components/Transform.hpp"
 
 namespace tr {
 
@@ -22,8 +23,9 @@ public:
 
   virtual void setRenderDataTransferHandler(const RenderDataTransferHandler& handler) = 0;
 
-  virtual auto createStaticModelEntity(std::string filename, std::string_view entityName)
-      -> void = 0;
+  virtual auto createStaticModelEntity(std::string filename,
+                                       std::string_view entityName,
+                                       std::optional<Transform> initialTransform) -> void = 0;
   virtual auto createAnimatedModelEntity(const AnimatedModelData& modelData) -> void = 0;
   virtual auto createTerrain() -> void = 0;
   virtual auto createDefaultCamera() -> void = 0;
