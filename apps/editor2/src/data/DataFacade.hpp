@@ -63,13 +63,18 @@ struct EntityData {
   std::string name;
   glm::vec3 position{glm::zero<glm::vec3>()};
   glm::vec3 rotation{glm::zero<glm::vec3>()};
+
   std::string modelName;
   std::string skeleton;
   std::vector<std::string> animations;
 
+  glm::vec3 camPosition{glm::zero<glm::vec3>()};
+  float yaw{0.f};
+  float pitch{0.f};
+
   template <class T>
   void serialize(T& archive) {
-    archive(name, position, rotation, modelName, skeleton, animations);
+    archive(name, position, rotation, modelName, skeleton, animations, camPosition, yaw, pitch);
   }
 };
 
@@ -138,8 +143,6 @@ public:
 
   void save(const std::filesystem::path& outputFile);
   void load(const std::filesystem::path& inputFile);
-
-  void setEntityPosition(std::string_view name, const glm::vec3& newPosition);
 
   void entityTransformUpdated(std::string_view name, const tr::Transform& transform);
 

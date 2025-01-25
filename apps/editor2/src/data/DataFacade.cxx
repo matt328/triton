@@ -147,14 +147,14 @@ void DataFacade::save(const std::filesystem::path& outputFile) {
 }
 
 void DataFacade::entityTransformUpdated(std::string_view name, const tr::Transform& transform) {
-  auto& [name2, position, rotation, modelName, skeleton, animations] =
-      dataStore.scene.at(name.data());
-  position = transform.position;
-  rotation = transform.rotation;
+  auto& entityData = dataStore.scene.at(name.data());
+  entityData.position = transform.position;
+  entityData.rotation = transform.rotation;
   unsaved = true;
 }
 
 void DataFacade::load(const std::filesystem::path& inputFile) {
+  Log.debug("Loading Project File");
   try {
     auto is = std::ifstream(inputFile, std::ios::binary);
     cereal::BinaryInputArchive input(is);
@@ -187,11 +187,4 @@ void DataFacade::load(const std::filesystem::path& inputFile) {
   } catch (const std::exception& ex) { Log.error(ex.what()); }
 }
 
-void DataFacade::setEntityPosition(std::string_view name, const glm::vec3& newPosition) {
-  auto& [name2, position, rotation, modelName, skeleton, animations] =
-      dataStore.scene.at(name.data());
-  position = newPosition;
-  unsaved = true;
-  Log.debug("need to push entity position change into engine");
-}
 }
