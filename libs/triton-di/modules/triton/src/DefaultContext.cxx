@@ -31,6 +31,7 @@ DefaultContext::DefaultContext(std::shared_ptr<IEventBus> newEventBus,
   gameplaySystem->setRenderDataTransferHandler(
       [&](const RenderData& renderData) { renderContext->setRenderData(renderData); });
 
+  Log.debug("Creating Default Camera");
   gameplaySystem->createDefaultCamera();
 }
 
