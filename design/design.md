@@ -210,11 +210,9 @@ and favor doing them in C++ where they're fast.
 
 ### Misc Stuff to research
 
-- ImGui logger output
 - ImGui entity json viewer/editor
 - ImGui Tests
 - Terrain Generation/Rendering
-- DrawIndirect
 - Lighting
 - Scripting
 

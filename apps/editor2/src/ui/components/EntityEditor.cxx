@@ -32,6 +32,14 @@ EntityEditor::EntityEditor(std::shared_ptr<tr::IGameplaySystem> newGameplaySyste
     Log.trace("EntityEditor entityCreated: {}", static_cast<long>(event.entityId));
   });
 
+  transformInspector = std::make_unique<TransformInspector>();
+
+  transformInspector->setTransformListener(
+      [&](std::string_view name, const tr::Transform& transform) {
+        dataFacade->entityTransformUpdated(name, transform);
+        Log.trace("Transform updated, entityId: {}, position.x: {}", name, transform.position.x);
+      });
+
   createAnimatedEntityDialog();
   createStaticEntityDialog();
 }
@@ -90,7 +98,7 @@ void EntityEditor::render() {
         // Transform Component
         if (auto* transform = registry->try_get<tr::Transform>(selectedEntity.value());
             transform != nullptr) {
-          renderTransformInspector(transform);
+          transformInspector->render(editorInfo->name, transform);
         }
 
         // Camera Component

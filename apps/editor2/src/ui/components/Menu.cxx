@@ -20,6 +20,7 @@ Menu::Menu(std::shared_ptr<DataFacade> newDataFacade,
   projectOpenDialog->setOnOk([&](std::vector<std::filesystem::path> selectedFile) {
     try {
       Log.trace("Open project file: {}", selectedFile.front().string());
+      openFilePath = selectedFile.front();
       dataFacade->load(selectedFile.front());
     } catch (const std::exception& ex) { Log.error(ex.what()); }
   });
@@ -29,6 +30,7 @@ Menu::Menu(std::shared_ptr<DataFacade> newDataFacade,
     try {
       Log.trace("Save project file: {}", selectedFile.front().string());
       dataFacade->save(selectedFile.front());
+      properties->setRecentFile(selectedFile.front());
     } catch (const std::exception& ex) { Log.error(ex.what()); }
   });
 }

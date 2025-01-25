@@ -65,22 +65,25 @@ void DataFacade::removeModel([[maybe_unused]] std::string_view name) {
 }
 
 void DataFacade::createStaticModel(const EntityData& entityData) noexcept {
-  dataStore.scene.insert({entityData.name, entityData});
-
   unsaved = true;
   const auto modelFilename = dataStore.models.at(entityData.modelName).filePath;
   const auto entityName = entityData.name;
 
-  const auto onComplete = [this, entityName]() {
-    const auto* const name = entityName.data();
+  const auto onComplete = [this, entityData]() {
+    dataStore.scene.insert({entityData.name, entityData});
     engineBusy = false;
-    Log.info("Finished creating entity: name: {}", name);
+    Log.info("Finished creating entity: name: {}", entityData.name);
   };
 
   engineBusy = true;
 
-  const auto task = [this, modelFilename, entityName] {
-    gameplaySystem->createStaticModelEntity(modelFilename, entityName);
+  const auto transform =
+      tr::Transform{.rotation = entityData.rotation, .position = entityData.position};
+
+  const auto task = [this, modelFilename, entityName, transform] {
+    gameplaySystem->createStaticModelEntity(modelFilename,
+                                            entityName,
+                                            std::make_optional(transform));
   };
 
   taskQueue->enqueue(task, onComplete);
@@ -141,6 +144,14 @@ void DataFacade::save(const std::filesystem::path& outputFile) {
   output(dataStore);
   Log.info("Wrote binary output file to {0}", outputFile.string());
   unsaved = false;
+}
+
+void DataFacade::entityTransformUpdated(std::string_view name, const tr::Transform& transform) {
+  auto& [name2, position, rotation, modelName, skeleton, animations] =
+      dataStore.scene.at(name.data());
+  position = transform.position;
+  rotation = transform.rotation;
+  unsaved = true;
 }
 
 void DataFacade::load(const std::filesystem::path& inputFile) {

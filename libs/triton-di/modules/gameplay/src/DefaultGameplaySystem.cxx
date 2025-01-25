@@ -149,8 +149,11 @@ void DefaultGameplaySystem::setRenderDataTransferHandler(const RenderDataTransfe
 }
 
 auto DefaultGameplaySystem::createStaticModelEntity(std::string filename,
-                                                    std::string_view entityName) -> void {
-  commandQueue->enqueue(std::make_unique<CreateStaticEntityCommand>(filename, entityName.data()));
+                                                    std::string_view entityName,
+                                                    std::optional<Transform> initialTransform)
+    -> void {
+  commandQueue->enqueue(
+      std::make_unique<CreateStaticEntityCommand>(filename, entityName.data(), initialTransform));
 }
 
 auto DefaultGameplaySystem::createAnimatedModelEntity(

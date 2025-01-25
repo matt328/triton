@@ -43,10 +43,10 @@ Manager::Manager(std::shared_ptr<Menu> newAppMenu,
   };
   Log.sinks().push_back(std::make_shared<my_sink_mt>(logFn));
 
-  if (const auto recentFile = properties->getRecentFile(); recentFile.has_value()) {
-    dataFacade->clear();
-    dataFacade->load(recentFile.value());
-  }
+  // if (const auto recentFile = properties->getRecentFile(); recentFile.has_value()) {
+  //   dataFacade->clear();
+  //   dataFacade->load(recentFile.value());
+  // }
 }
 
 Manager::~Manager() {

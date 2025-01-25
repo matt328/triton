@@ -2,6 +2,7 @@
 
 #include "gp/AssetManager.hpp"
 #include "gp/action/IActionSystem.hpp"
+#include "gp/components/Transform.hpp"
 #include "systems/CameraSystem.hpp"
 #include "systems/RenderDataSystem.hpp"
 #include "systems/TransformSystem.hpp"
@@ -29,7 +30,10 @@ public:
 
   void setRenderDataTransferHandler(const RenderDataTransferHandler& handler) override;
 
-  auto createStaticModelEntity(std::string filename, std::string_view entityName) -> void override;
+  auto createStaticModelEntity(std::string filename,
+                               std::string_view entityName,
+                               std::optional<Transform> initialTransform = std::nullopt)
+      -> void override;
   auto createAnimatedModelEntity(const AnimatedModelData& modelData) -> void override;
   auto createTerrain() -> void override;
   auto createDefaultCamera() -> void override;
