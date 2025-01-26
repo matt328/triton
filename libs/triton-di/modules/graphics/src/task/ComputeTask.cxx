@@ -24,7 +24,28 @@ auto ComputeTask::record(vk::raii::CommandBuffer& commandBuffer, const Frame& fr
 
   commandBuffer.bindPipeline(vk::PipelineBindPoint::eCompute, computePipeline.getPipeline());
 
-  // objectData buffer is included in the compute pipeline, but not used yet.
+  /*
+    - Still need to figure out a clean way to pass the actual object counts to Tasks, and to the
+    RenderScheduler in general.
+
+    - If we are doing separate draw calls, decide whether the complexity of a shared ObjectData
+    buffer and Vertex/Index buffers is worth it, or should different pipelines have their own
+    ObjectData and Vertex/Index buffers.
+    - It would be more effective to have static models be trimmed down in their ObjectData as well
+    as their vertex sizes, they don't need skinning data.
+
+    - Frames are getting a bit busy with getters and setters for Buffers. Figure out how to clean
+    that up a bit.
+
+    - Create another pipeline, render task, and ObjectDataIndex buffer for animated models.
+
+    - Adjust the compute shader so it fills out the various ObjectDataIndex buffers.
+
+    - Adjust the vertex and fragment shaders of RenderTasks so they use the ObjectDataIndexBuffer to
+    look up the Object's data.
+
+  */
+
   auto computePushConstants =
       ComputePushConstants{.drawCommandBufferAddress = drawCommandBuffer.getDeviceAddress(),
                            .gpuBufferEntryBufferAddress = gpuBufferEntryBuffer.getDeviceAddress(),

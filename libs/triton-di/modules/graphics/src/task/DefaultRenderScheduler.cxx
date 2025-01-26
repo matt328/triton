@@ -130,7 +130,7 @@ DefaultRenderScheduler::DefaultRenderScheduler(
       frame->setObjectDataIndexBufferHandle(handle);
     }
 
-    // GpuObjectDataBuffer
+    // Object Data Buffer
     {
       const auto name = frame->getIndexedName("Buffer-GpuObjectData-Frame_");
       const auto handle = resourceManager->createBuffer(

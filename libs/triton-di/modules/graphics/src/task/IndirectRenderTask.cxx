@@ -17,16 +17,17 @@ IndirectRenderTask::IndirectRenderTask(std::shared_ptr<VkResourceManager> newRes
 auto IndirectRenderTask::record(vk::raii::CommandBuffer& commandBuffer, const Frame& frame)
     -> void {
 
-  const auto& objectDataBuffer = resourceManager->getBuffer(frame.getGpuObjectDataBufferHandle());
-  const auto& cameraDataBuffer = resourceManager->getBuffer(frame.getCameraBufferHandle());
-  const auto& objectDataIndexBuffer =
-      resourceManager->getBuffer(frame.getObjectDataIndexBufferHandle());
+  const auto objectDataAddress =
+      resourceManager->getBuffer(frame.getGpuObjectDataBufferHandle()).getDeviceAddress();
+  const auto cameraDataAddress =
+      resourceManager->getBuffer(frame.getCameraBufferHandle()).getDeviceAddress();
+  const auto& objectDataIndexAddress =
+      resourceManager->getBuffer(frame.getObjectDataIndexBufferHandle()).getDeviceAddress();
 
-  pushConstants =
-      IndirectPushConstants{.drawID = 0,
-                            .objectDataAddress = objectDataBuffer.getDeviceAddress(),
-                            .cameraDataAddress = cameraDataBuffer.getDeviceAddress(),
-                            .objectDataIndexAddress = objectDataIndexBuffer.getDeviceAddress()};
+  pushConstants = IndirectPushConstants{.drawID = 0,
+                                        .objectDataAddress = objectDataAddress,
+                                        .cameraDataAddress = cameraDataAddress,
+                                        .objectDataIndexAddress = objectDataIndexAddress};
 
   // Bind the graphics pipeline
   commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline->getPipeline());
