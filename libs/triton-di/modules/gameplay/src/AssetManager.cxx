@@ -31,8 +31,71 @@ auto AssetManager::loadModel(std::string_view filename) -> ModelData {
                            .topology = Topology::Triangles,
                            .textureHandle = textureHandle,
                        },
-                   .skinData = std::nullopt,
+                   .skinData = tritonModelData.getSkinData(),
                    .animationData = std::nullopt};
+}
+
+auto AssetManager::loadSkeleton(std::string_view filename) -> SkeletonHandle {
+
+  if (const auto it = loadedSkeletons.find(filename.data()); it != loadedSkeletons.end()) {
+    return it->second;
+  }
+
+  ozz::io::File file(filename.data(), "rb");
+
+  if (!file.opened()) {
+    Log.error("Failed to open skeleton file: {0}.", filename);
+  }
+
+  ozz::io::IArchive archive(&file);
+  if (!archive.TestTag<ozz::animation::Skeleton>()) {
+    Log.error("Failed to load skeleton instance from file: {0}", filename);
+  }
+
+  auto skeleton = ozz::animation::Skeleton{};
+  archive >> skeleton;
+
+  const auto key = skeletonKey.getKey();
+
+  skeletons.emplace(key, std::move(skeleton));
+
+  loadedSkeletons.emplace(filename, key);
+
+  return key;
+}
+
+auto AssetManager::loadAnimation(std::string_view filename) -> AnimationHandle {
+  if (loadedAnimations.contains(filename.data())) {
+    return loadedAnimations.at(filename.data());
+  }
+
+  ozz::io::File file(filename.data(), "rb");
+  if (!file.opened()) {
+    Log.error("Failed to open animation file: {0}", filename);
+  }
+
+  ozz::io::IArchive archive(&file);
+  if (!archive.TestTag<ozz::animation::Animation>()) {
+    Log.error("Failed to load animation from file: {0}", filename);
+  }
+
+  auto animation = ozz::animation::Animation{};
+  archive >> animation;
+
+  const auto key = animationKey.getKey();
+  animations.emplace(key, std::move(animation));
+
+  loadedAnimations.emplace(filename, key);
+
+  return key;
+}
+
+auto AssetManager::getAnimation(AnimationHandle handle) const -> const ozz::animation::Animation& {
+  return animations.at(handle);
+}
+
+auto AssetManager::getSkeleton(SkeletonHandle handle) const -> const ozz::animation::Skeleton& {
+  return skeletons.at(handle);
 }
 
 auto AssetManager::createCube() -> ModelData {

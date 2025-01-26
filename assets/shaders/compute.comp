@@ -27,6 +27,8 @@ layout(push_constant) uniform PushConstants {
   uint64_t gpuBufferEntryBufferAddress;
   uint64_t objectDataBufferAddress;
   uint64_t countBufferAddress;
+  uint64_t objectDataIndexBufferAddress;
+  uint objectCount;
 }
 pc;
 
@@ -42,13 +44,27 @@ layout(buffer_reference, std430) buffer CountBuffer {
   uint count;
 };
 
+layout(buffer_reference, std430) buffer ObjectDataIndexBuffer {
+  uint index[];
+};
+
 void main() {
+  if (gl_GlobalInvocationID.x >= pc.objectCount) {
+    return;
+  }
+
+  CountBuffer countBuffer = CountBuffer(pc.countBufferAddress);
+
+  if (gl_GlobalInvocationID.x == 0) {
+    countBuffer.count = 0;
+  }
+
   uint index = gl_GlobalInvocationID.x;
 
   // Access the buffers via push constant device addresses
   DrawCommandBuffer drawCommands = DrawCommandBuffer(pc.drawCommandBufferAddress);
   GpuBufferEntryBuffer gpuBufferEntryData = GpuBufferEntryBuffer(pc.gpuBufferEntryBufferAddress);
-  CountBuffer countBuffer = CountBuffer(pc.countBufferAddress);
+  ObjectDataIndexBuffer dataIndexBuffer = ObjectDataIndexBuffer(pc.objectDataIndexBufferAddress);
 
   GpuBufferEntry data = gpuBufferEntryData.instanceData[index];
 
@@ -59,5 +75,7 @@ void main() {
   drawCommands.commands[index].vertexOffset = data.vertexOffset;
   drawCommands.commands[index].firstInstance = data.firstInstance;
 
-  atomicAdd(countBuffer.count, 1);
+  uint currentCount = atomicAdd(countBuffer.count, 1);
+
+  dataIndexBuffer.index[index] = currentCount;
 }

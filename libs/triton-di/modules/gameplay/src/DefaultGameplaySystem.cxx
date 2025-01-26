@@ -8,6 +8,7 @@
 #include "systems/TransformSystem.hpp"
 #include "tr/IEventBus.hpp"
 #include "commands/CreateCamera.hpp"
+#include "commands/CreateAnimatedEntity.hpp"
 
 namespace tr {
 
@@ -28,6 +29,7 @@ DefaultGameplaySystem::DefaultGameplaySystem(std::shared_ptr<IEventBus> newEvent
   cameraSystem = std::make_shared<CameraSystem>(eventBus, *registry);
   transformSystem = std::make_shared<TransformSystem>();
   renderDataSystem = std::make_shared<RenderDataSystem>();
+  animationSystem = std::make_shared<AnimationSystem>(assetManager);
 
   entityCreatedConnection =
       registry->on_construct<entt::entity>().connect<&DefaultGameplaySystem::entityCreated>(this);
@@ -129,6 +131,10 @@ void DefaultGameplaySystem::fixedUpdate() {
     ZoneNamedN(xformZone, "Transform", true);
     transformSystem->update(*registry);
   }
+  {
+    ZoneNamedN(var, "Animation", true);
+    animationSystem->update(*registry);
+  }
 }
 
 void DefaultGameplaySystem::setRenderDataTransferHandler(const RenderDataTransferHandler& handler) {
@@ -145,13 +151,7 @@ auto DefaultGameplaySystem::createStaticModelEntity(std::string filename,
 
 auto DefaultGameplaySystem::createAnimatedModelEntity(
     [[maybe_unused]] const AnimatedModelData& modelData) -> void {
-  Log.trace("gameplaySystem createAnimatedModelEntity: {0}", modelData);
-
-  // have gfx create the resources and return a handle.
-
-  // use the handle(s) to create an entity in the ECS
-
-  // return static_cast<cm::EntityType>(1);
+  commandQueue->enqueue(std::make_unique<CreateAnimatedEntity>(modelData));
 }
 
 auto DefaultGameplaySystem::createTerrain() -> void {

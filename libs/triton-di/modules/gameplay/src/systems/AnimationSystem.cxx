@@ -6,8 +6,8 @@ namespace tr {
 
 constexpr auto TimeRatio = 0.0005f;
 
-AnimationSystem::AnimationSystem(std::shared_ptr<AnimationFactory> newAnimationFactory)
-    : animationFactory{std::move(newAnimationFactory)} {
+AnimationSystem::AnimationSystem(std::shared_ptr<AssetManager> newAssetManager)
+    : assetManager{std::move(newAssetManager)} {
 }
 
 auto AnimationSystem::update(entt::registry& registry) const -> void {
@@ -27,8 +27,8 @@ auto AnimationSystem::update(entt::registry& registry) const -> void {
       }
     }
 
-    const auto& animation = animationFactory->getAnimation(animationData.animationHandle);
-    const auto& skeleton = animationFactory->getSkeleton(animationData.skeletonHandle);
+    const auto& animation = assetManager->getAnimation(animationData.animationHandle);
+    const auto& skeleton = assetManager->getSkeleton(animationData.skeletonHandle);
 
     // This should do this once, then be a no op on subsequent invocations
     animationData.context.Resize(skeleton.num_joints());

@@ -19,6 +19,7 @@ layout(push_constant) uniform PushConstants {
   uint drawID;
   uint64_t objectDataAddress;
   uint64_t cameraDataAddress;
+  uint64_t objectDataIndexAddress;
 }
 pc;
 
@@ -40,17 +41,23 @@ layout(buffer_reference, std430) readonly buffer CameraDataBuffer {
   vec4 position;
 };
 
+layout(buffer_reference, std430) readonly buffer ObjectDataIndexBuffer {
+  uint index[];
+};
+
 void main() {
 
   ObjectDataBuffer objectDataBuffer = ObjectDataBuffer(pc.objectDataAddress);
-
   CameraDataBuffer camData = CameraDataBuffer(pc.cameraDataAddress);
+  ObjectDataIndexBuffer objectDataIndexBuffer = ObjectDataIndexBuffer(pc.objectDataIndexAddress);
 
-  mat4 model = objectDataBuffer.objectData[gl_DrawID].modelMatrix;
+  uint objectIndex = objectDataIndexBuffer.index[gl_DrawID];
+
+  mat4 model = objectDataBuffer.objectData[objectIndex].modelMatrix;
   vec4 worldPos = camData.proj * camData.view * model * vec4(inPosition, 1.0);
 
   gl_Position = worldPos;
   fragColor = inColor;
   fragTexCoord = inTexCoord;
-  textureId = objectDataBuffer.objectData[gl_DrawID].textureId;
+  textureId = objectDataBuffer.objectData[objectIndex].textureId;
 }

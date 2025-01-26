@@ -1,25 +1,29 @@
 #pragma once
+#include "CommandQueue.hpp"
+#include "gp/AssetManager.hpp"
 #include "gp/components/Animation.hpp"
+#include "gp/components/Transform.hpp"
+#include "gp/components/EditorInfo.hpp"
+#include "gp/components/Renderable.hpp"
+#include "tr/AnimatedModelData.hpp"
 
 namespace tr {
 class CreateAnimatedEntity final
-    : public ICommand<entt::registry&, const std::shared_ptr<ResourceManager>&> {
+    : public ICommand<entt::registry&, const std::shared_ptr<AssetManager>&> {
 public:
   explicit CreateAnimatedEntity(AnimatedModelData newModelData)
       : animatedModelData{std::move(newModelData)} {
   }
 
   void execute(entt::registry& registry,
-               const std::shared_ptr<ResourceManager>& resourceManager) const override {
-    auto modelData =
-        resourceManager->createModel(std::filesystem::path(animatedModelData.modelFilename));
+               const std::shared_ptr<AssetManager>& assetManager) const override {
+    auto modelData = assetManager->loadModel(animatedModelData.modelFilename);
 
-    // TODO(matt) throw an exception here.
     assert(modelData.skinData.has_value());
 
     modelData.animationData = std::make_optional(AnimationData{
-        .skeletonHandle = resourceManager->loadSkeleton(animatedModelData.skeletonFilename),
-        .animationHandle = resourceManager->loadAnimation(animatedModelData.animationFilename)});
+        .skeletonHandle = assetManager->loadSkeleton(animatedModelData.skeletonFilename),
+        .animationHandle = assetManager->loadAnimation(animatedModelData.animationFilename)});
 
     const auto entity = registry.create();
     registry.emplace<Animation>(entity,

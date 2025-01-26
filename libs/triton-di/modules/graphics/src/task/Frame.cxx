@@ -106,6 +106,10 @@ auto Frame::getCountBufferHandle() const -> BufferHandle {
   return countBuffer;
 }
 
+auto Frame::getObjectDataIndexBufferHandle() const -> BufferHandle {
+  return objectDataIndexBuffer;
+}
+
 auto Frame::getDescriptorBufferHandle() const -> BufferHandle {
   return descriptorBuffer;
 }
@@ -156,6 +160,10 @@ auto Frame::setCameraBufferHandle(BufferHandle handle) -> void {
 
 auto Frame::setCountBufferHandle(BufferHandle handle) -> void {
   countBuffer = handle;
+}
+
+auto Frame::setObjectDataIndexBufferHandle(BufferHandle handle) -> void {
+  objectDataIndexBuffer = handle;
 }
 
 auto Frame::setDescriptorBufferHandle(BufferHandle handle) -> void {
