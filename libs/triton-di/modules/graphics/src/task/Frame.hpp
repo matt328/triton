@@ -40,6 +40,7 @@ public:
   [[nodiscard]] auto getCameraBufferHandle() const -> BufferHandle;
   [[nodiscard]] auto getCountBufferHandle() const -> BufferHandle;
   [[nodiscard]] auto getDescriptorBufferHandle() const -> BufferHandle;
+  [[nodiscard]] auto getObjectDataIndexBufferHandle() const -> BufferHandle;
 
   [[nodiscard]] auto getDepthImageHandle() const -> ImageHandle;
   [[nodiscard]] auto getDrawImageHandle() const -> ImageHandle;
@@ -54,6 +55,7 @@ public:
   auto setCameraBufferHandle(BufferHandle handle) -> void;
   auto setCountBufferHandle(BufferHandle handle) -> void;
   auto setDescriptorBufferHandle(BufferHandle handle) -> void;
+  auto setObjectDataIndexBufferHandle(BufferHandle handle) -> void;
 
   auto setDepthImageHandle(ImageHandle handle) -> void;
   auto setDrawImageHandle(ImageHandle handle) -> void;
@@ -78,6 +80,7 @@ private:
   BufferHandle objectDataBuffer;
   BufferHandle cameraBuffer;
   BufferHandle countBuffer;
+  BufferHandle objectDataIndexBuffer;
   BufferHandle descriptorBuffer;
 
   ImageHandle depthImageHandle;

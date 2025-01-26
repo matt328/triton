@@ -84,8 +84,7 @@ DefaultRenderScheduler::DefaultRenderScheduler(
     {
       const auto name = frame->getIndexedName("Buffer-DrawCommand-Frame_");
       const auto handle = resourceManager->createBuffer(
-          sizeof(vk::DrawIndexedIndirectCommand) *
-              renderConfig.maxStaticObjects, // Size this buffer to max_objects?
+          sizeof(vk::DrawIndexedIndirectCommand) * renderConfig.maxStaticObjects,
           vk::BufferUsageFlagBits::eIndirectBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress,
           name);
       frame->setDrawCommandBufferHandle(handle);
@@ -95,6 +94,40 @@ DefaultRenderScheduler::DefaultRenderScheduler(
       indirectCommandBuffer.mapBuffer();
       indirectCommandBuffer.updateBufferValue(&cmd, sizeof(vk::DrawIndexedIndirectCommand));
       indirectCommandBuffer.unmapBuffer();
+    }
+
+    // Object Count Buffer
+    {
+      const auto name = frame->getIndexedName("Buffer-Count-Frame_");
+      const auto handle = resourceManager->createBuffer(
+          sizeof(uint32_t),
+          vk::BufferUsageFlagBits::eIndirectBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress,
+          name);
+      auto& countBuffer = resourceManager->getBuffer(handle);
+
+      uint32_t count = 0;
+      countBuffer.mapBuffer();
+      countBuffer.updateBufferValue(&count, sizeof(uint32_t));
+      countBuffer.unmapBuffer();
+
+      frame->setCountBufferHandle(handle);
+    }
+
+    // ObjectDataIndex Buffer
+    {
+      const auto name = frame->getIndexedName("Buffer-ObjectDataIndex-Frame_");
+      const auto handle = resourceManager->createBuffer(
+          sizeof(uint32_t) * renderConfig.maxStaticObjects,
+          vk::BufferUsageFlagBits::eIndirectBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress,
+          name);
+      auto& objectDataIndexBuffer = resourceManager->getBuffer(handle);
+
+      uint32_t count = 0;
+      objectDataIndexBuffer.mapBuffer();
+      objectDataIndexBuffer.updateBufferValue(&count, sizeof(uint32_t));
+      objectDataIndexBuffer.unmapBuffer();
+
+      frame->setObjectDataIndexBufferHandle(handle);
     }
 
     // GpuObjectDataBuffer
@@ -122,23 +155,6 @@ DefaultRenderScheduler::DefaultRenderScheduler(
       cameraDataBuffer.unmapBuffer();
 
       frame->setCameraBufferHandle(handle);
-    }
-
-    // Object Count Buffer
-    {
-      const auto name = frame->getIndexedName("Buffer-Count-Frame_");
-      const auto handle = resourceManager->createBuffer(
-          sizeof(uint32_t),
-          vk::BufferUsageFlagBits::eIndirectBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress,
-          name);
-      auto& countBuffer = resourceManager->getBuffer(handle);
-
-      uint32_t count = 0;
-      countBuffer.mapBuffer();
-      countBuffer.updateBufferValue(&count, sizeof(uint32_t));
-      countBuffer.unmapBuffer();
-
-      frame->setCountBufferHandle(handle);
     }
 
     frame->setupRenderingInfo(resourceManager);
@@ -320,7 +336,7 @@ auto DefaultRenderScheduler::executeTasks(Frame& frame, bool recordTasks) const 
 
   {
     auto& countBuffer = resourceManager->getBuffer(frame.getCountBufferHandle());
-    // Insert a memory barrier for the buffer the computeTask writes to
+    // Insert a memory barrier for the count buffer the computeTask writes to
     vk::BufferMemoryBarrier countBufferBarrier{
         .srcAccessMask = vk::AccessFlagBits::eShaderWrite,
         .dstAccessMask = vk::AccessFlagBits::eIndirectCommandRead,
@@ -336,6 +352,28 @@ auto DefaultRenderScheduler::executeTasks(Frame& frame, bool recordTasks) const 
                                   vk::DependencyFlags{},
                                   nullptr,
                                   countBufferBarrier,
+                                  nullptr);
+  }
+
+  // Insert a memory barrier for the objectDataIndex buffer the computeTask writes to
+  {
+    auto& objectDataIndexBuffer =
+        resourceManager->getBuffer(frame.getObjectDataIndexBufferHandle());
+    vk::BufferMemoryBarrier barrier{
+        .srcAccessMask = vk::AccessFlagBits::eShaderWrite,
+        .dstAccessMask = vk::AccessFlagBits::eIndirectCommandRead,
+        .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+        .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+        .buffer = objectDataIndexBuffer.getBuffer(),
+        .offset = 0,
+        .size = VK_WHOLE_SIZE,
+    };
+
+    commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eComputeShader,
+                                  vk::PipelineStageFlagBits::eDrawIndirect,
+                                  vk::DependencyFlags{},
+                                  nullptr,
+                                  barrier,
                                   nullptr);
   }
 

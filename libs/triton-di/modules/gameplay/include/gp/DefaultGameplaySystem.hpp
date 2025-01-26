@@ -3,6 +3,7 @@
 #include "gp/AssetManager.hpp"
 #include "gp/action/IActionSystem.hpp"
 #include "gp/components/Transform.hpp"
+#include "systems/AnimationSystem.hpp"
 #include "systems/CameraSystem.hpp"
 #include "systems/RenderDataSystem.hpp"
 #include "systems/TransformSystem.hpp"
@@ -48,6 +49,7 @@ private:
   std::shared_ptr<CameraSystem> cameraSystem;
   std::shared_ptr<TransformSystem> transformSystem;
   std::shared_ptr<RenderDataSystem> renderDataSystem;
+  std::shared_ptr<AnimationSystem> animationSystem;
 
   RenderDataTransferHandler transferHandler;
   std::shared_ptr<entt::registry> registry;

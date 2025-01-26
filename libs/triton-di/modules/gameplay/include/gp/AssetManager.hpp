@@ -5,6 +5,7 @@
 #include "geo/GeometryData.hpp"
 #include "geo/GeometryHandles.hpp"
 #include "as/Model.hpp"
+#include <ozz/animation/runtime/skeleton.h>
 
 namespace as {
 struct Model;
@@ -47,6 +48,12 @@ public:
   /// any rendering operations.
   auto loadModel(std::string_view filename) -> ModelData;
 
+  auto loadSkeleton(std::string_view filename) -> SkeletonHandle;
+  auto loadAnimation(std::string_view filename) -> AnimationHandle;
+
+  [[nodiscard]] auto getAnimation(AnimationHandle handle) const -> const ozz::animation::Animation&;
+  [[nodiscard]] auto getSkeleton(SkeletonHandle handle) const -> const ozz::animation::Skeleton&;
+
   auto createCube() -> ModelData;
 
 private:
@@ -54,9 +61,17 @@ private:
 
   MapKey geometryKey{};
   MapKey imageKey{};
+  MapKey skeletonKey{};
+  MapKey animationKey{};
 
   std::unordered_map<GeometryHandle, GeometryData> geometryDataMap;
   std::unordered_map<ImageHandle, as::ImageData> imageDataMap;
+
+  std::unordered_map<std::string, AnimationHandle> loadedAnimations;
+  std::unordered_map<std::string, SkeletonHandle> loadedSkeletons;
+
+  std::unordered_map<AnimationHandle, ozz::animation::Animation> animations;
+  std::unordered_map<SkeletonHandle, ozz::animation::Skeleton> skeletons;
 
   /// Load a TRM file and cache its data
   /// @throws IOException if there's an error loading the file.

@@ -19,10 +19,14 @@ auto IndirectRenderTask::record(vk::raii::CommandBuffer& commandBuffer, const Fr
 
   const auto& objectDataBuffer = resourceManager->getBuffer(frame.getGpuObjectDataBufferHandle());
   const auto& cameraDataBuffer = resourceManager->getBuffer(frame.getCameraBufferHandle());
+  const auto& objectDataIndexBuffer =
+      resourceManager->getBuffer(frame.getObjectDataIndexBufferHandle());
 
-  pushConstants = IndirectPushConstants{.drawID = 0,
-                                        .objectDataAddress = objectDataBuffer.getDeviceAddress(),
-                                        .cameraDataAddress = cameraDataBuffer.getDeviceAddress()};
+  pushConstants =
+      IndirectPushConstants{.drawID = 0,
+                            .objectDataAddress = objectDataBuffer.getDeviceAddress(),
+                            .cameraDataAddress = cameraDataBuffer.getDeviceAddress(),
+                            .objectDataIndexAddress = objectDataIndexBuffer.getDeviceAddress()};
 
   // Bind the graphics pipeline
   commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline->getPipeline());

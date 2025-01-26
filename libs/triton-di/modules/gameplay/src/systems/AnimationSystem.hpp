@@ -1,11 +1,11 @@
 #pragma once
-#include <gp/AnimationFactory.hpp>
+#include "gp/AssetManager.hpp"
 
 namespace tr {
 
 class AnimationSystem {
 public:
-  explicit AnimationSystem(std::shared_ptr<AnimationFactory> newAnimationFactory);
+  explicit AnimationSystem(std::shared_ptr<AssetManager> newAssetManager);
   ~AnimationSystem() = default;
 
   AnimationSystem(const AnimationSystem&) = delete;
@@ -16,7 +16,7 @@ public:
   auto update(entt::registry& registry) const -> void;
 
 private:
-  std::shared_ptr<AnimationFactory> animationFactory;
+  std::shared_ptr<AssetManager> assetManager;
 };
 
 }
