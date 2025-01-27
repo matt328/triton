@@ -28,21 +28,20 @@ auto ComputeTask::record(vk::raii::CommandBuffer& commandBuffer, const Frame& fr
     - Still need to figure out a clean way to pass the actual object counts to Tasks, and to the
     RenderScheduler in general.
 
-    - If we are doing separate draw calls, decide whether the complexity of a shared ObjectData
-    buffer and Vertex/Index buffers is worth it, or should different pipelines have their own
-    ObjectData and Vertex/Index buffers.
-    - It would be more effective to have static models be trimmed down in their ObjectData as well
-    as their vertex sizes, they don't need skinning data.
-
     - Frames are getting a bit busy with getters and setters for Buffers. Figure out how to clean
     that up a bit.
+      - Frame class could define an enum for BufferTypes, and just have setBufferHandle(type,
+      handle) and getBufferHandle(type)
 
-    - Create another pipeline, render task, and ObjectDataIndex buffer for animated models.
+    - Adjust the asset lib to differentiate static models from animated ones so that static models
+    use the smaller vertex format, and animated models use the format including joints and weights.
+    - Might need a different file format for tsm static and tam animated when loading models, the
+    engine will need to know which type it is loading.
+    - Could also keep the file the same, but have a flag inside to differentiate between animated
+    and static. The in memory model classes would have to track this also so that the editor doesn't
+    allow attaching a skeleton and animations to a model with no skinning data.
 
-    - Adjust the compute shader so it fills out the various ObjectDataIndex buffers.
-
-    - Adjust the vertex and fragment shaders of RenderTasks so they use the ObjectDataIndexBuffer to
-    look up the Object's data.
+    - Create a utility function to create and record a memory barrier for a given buffer.
 
   */
 
@@ -58,6 +57,20 @@ auto ComputeTask::record(vk::raii::CommandBuffer& commandBuffer, const Frame& fr
                                                     vk::ShaderStageFlagBits::eCompute,
                                                     0,
                                                     computePushConstants);
+
+  commandBuffer.dispatch(1024, 1, 1);
+}
+
+auto ComputeTask::record(vk::raii::CommandBuffer& commandBuffer,
+                         const ComputePushConstants& pushConstants) -> void {
+  const auto& computePipeline = resourceManager->getPipeline(pipelineHandle);
+
+  commandBuffer.bindPipeline(vk::PipelineBindPoint::eCompute, computePipeline.getPipeline());
+
+  commandBuffer.pushConstants<ComputePushConstants>(computePipeline.getPipelineLayout(),
+                                                    vk::ShaderStageFlagBits::eCompute,
+                                                    0,
+                                                    pushConstants);
 
   commandBuffer.dispatch(1024, 1, 1);
 }
