@@ -24,3 +24,7 @@ void initLogger([[maybe_unused]] spdlog::level::level_enum debugLevel,
   Log.set_level(releaseLevel);
 #endif
 }
+
+void LogTest(std::source_location location) {
+  Log.debug("{}:{} log message here", location.file_name(), location.line());
+}
