@@ -1,7 +1,6 @@
 #include "as/gltf/GltfGeometryExtractor.hpp"
 
 #include "as/Model.hpp"
-
 #include "as/Vertex.hpp"
 
 namespace as {
@@ -49,9 +48,39 @@ void GltfGeometryExtractor::execute(const tinygltf::Model& model,
         err << "Index component type " << accessor.componentType;
         throw std::runtime_error(err.str());
     }
+    tritonModel.indices = std::move(indices);
   }
 
-  {
+  if (model.skins.empty()) {
+    std::vector<StaticVertex> vertices;
+    for (const auto& [attribute, value] : primitive.attributes) {
+      const auto& accessor = model.accessors[value];
+
+      const auto& vertexCount = accessor.count;
+      const auto& view = model.bufferViews[accessor.bufferView];
+      const auto dataOffset = accessor.byteOffset + view.byteOffset;
+      const auto& buffer = model.buffers[view.buffer];
+
+      // NOLINTNEXTLINE
+      const auto& data = reinterpret_cast<const float*>(&buffer.data[dataOffset]);
+
+      vertices.resize(vertexCount);
+
+      if (attribute == "POSITION") {
+        for (size_t i = 0; i < vertexCount; i++) {
+          auto vertexPosition = glm::make_vec3(&data[i * 3]);
+          auto tempVec = transform * glm::vec4(vertexPosition, 1.f);
+          vertices[i].position = glm::vec3(tempVec);
+        }
+      }
+      if (attribute == "TEXCOORD_0") {
+        for (size_t i = 0; i < vertexCount; i++) {
+          vertices[i].texCoord = glm::make_vec2(&data[i * 2]);
+        }
+      }
+    }
+    tritonModel.staticVertices = std::move(vertices);
+  } else {
     std::vector<Vertex> vertices;
     for (const auto& [attribute, value] : primitive.attributes) {
       const auto& accessor = model.accessors[value];
@@ -95,9 +124,7 @@ void GltfGeometryExtractor::execute(const tinygltf::Model& model,
         }
       }
     }
-
-    tritonModel.vertices = std::move(vertices);
-    tritonModel.indices = std::move(indices);
+    tritonModel.skinnedVertices = std::move(vertices);
   }
 }
 }

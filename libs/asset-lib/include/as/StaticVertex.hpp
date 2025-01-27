@@ -6,7 +6,7 @@ namespace as {
 
 struct StaticVertex {
   glm::vec3 position{};
-  glm::vec3 texCoord{};
+  glm::vec2 texCoord{};
 
   auto operator==(const StaticVertex& other) const -> bool {
     return position == other.position && texCoord == other.texCoord;
@@ -45,7 +45,7 @@ struct hash<as::StaticVertex> {
   auto operator()(const as::StaticVertex& vtx) const -> std::size_t {
     std::size_t seed = 0;
     hash_combine(seed, std::hash<glm::vec3>{}(vtx.position));
-    hash_combine(seed, std::hash<glm::vec3>{}(vtx.texCoord));
+    hash_combine(seed, std::hash<glm::vec2>{}(vtx.texCoord));
     return seed;
   }
 };

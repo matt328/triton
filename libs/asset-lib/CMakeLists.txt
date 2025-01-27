@@ -30,6 +30,7 @@ target_precompile_headers(${PROJECT_NAME}
   <glm/gtx/matrix_decompose.hpp>
   <glm/gtx/quaternion.hpp>
   <glm/gtx/string_cast.hpp>
+  <cereal/types/optional.hpp>
   <cereal/types/vector.hpp>
   <cereal/types/unordered_map.hpp>
   <cereal/types/string.hpp>

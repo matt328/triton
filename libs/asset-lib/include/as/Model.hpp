@@ -2,10 +2,12 @@
 
 #include "Vertex.hpp"
 #include "BaseException.hpp"
+#include "as/StaticVertex.hpp"
+#include "as/VertexTypes.hpp"
 
 namespace as {
 
-constexpr uint32_t SERIAL_VERSION = 1;
+constexpr uint32_t SERIAL_VERSION = 2;
 
 class SerializationException final : public tr::BaseException {
   using BaseException::BaseException;
@@ -24,7 +26,9 @@ public:
 };
 
 struct Model {
-  std::vector<as::Vertex> vertices;
+  VertexType vertexType;
+  std::optional<std::vector<as::Vertex>> skinnedVertices;
+  std::optional<std::vector<as::StaticVertex>> staticVertices;
   std::vector<uint32_t> indices;
   std::unordered_map<int, int> jointRemaps;
   std::vector<glm::mat4> inverseBindPoses;
@@ -46,7 +50,15 @@ struct Model {
                              as::SERIAL_VERSION);
       throw SerializationException(msg);
     }
-    archive(vertices, indices, jointRemaps, inverseBindPoses, imageData);
+    archive(vertexType);
+
+    if (vertexType == VertexType::Skinned) {
+      archive(skinnedVertices, jointRemaps, inverseBindPoses);
+    } else if (vertexType == VertexType::Static) {
+      archive(staticVertices);
+    }
+
+    archive(indices, imageData);
   }
 };
 }
