@@ -308,74 +308,34 @@ auto DefaultRenderScheduler::executeTasks(Frame& frame, bool recordTasks) const 
       vk::CommandBufferBeginInfo{.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse});
 
   {
-    ZoneNamedN(var, "ComputeTask", true);
-    computeTask->record(commandBuffer, frame);
-  }
-
-  {
-    auto& indirectBuffer = resourceManager->getBuffer(frame.getDrawCommandBufferHandle());
-
-    // Insert a memory barrier for the buffer the computeTask writes to
-    vk::BufferMemoryBarrier bufferMemoryBarrier{
-        .srcAccessMask = vk::AccessFlagBits::eShaderWrite,
-        .dstAccessMask = vk::AccessFlagBits::eIndirectCommandRead,
-        .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-        .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-        .buffer = indirectBuffer.getBuffer(),
-        .offset = 0,
-        .size = VK_WHOLE_SIZE,
-    };
-
-    commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eComputeShader,
-                                  vk::PipelineStageFlagBits::eDrawIndirect,
-                                  vk::DependencyFlags{},
-                                  nullptr,
-                                  bufferMemoryBarrier,
-                                  nullptr);
-  }
-
-  {
-    auto& countBuffer = resourceManager->getBuffer(frame.getCountBufferHandle());
-    // Insert a memory barrier for the count buffer the computeTask writes to
-    vk::BufferMemoryBarrier countBufferBarrier{
-        .srcAccessMask = vk::AccessFlagBits::eShaderWrite,
-        .dstAccessMask = vk::AccessFlagBits::eIndirectCommandRead,
-        .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-        .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-        .buffer = countBuffer.getBuffer(),
-        .offset = 0,
-        .size = VK_WHOLE_SIZE,
-    };
-
-    commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eComputeShader,
-                                  vk::PipelineStageFlagBits::eDrawIndirect,
-                                  vk::DependencyFlags{},
-                                  nullptr,
-                                  countBufferBarrier,
-                                  nullptr);
-  }
-
-  // Insert a memory barrier for the objectDataIndex buffer the computeTask writes to
-  {
-    auto& objectDataIndexBuffer =
+    ZoneNamedN(var, "Record Static Compute Task", true);
+    const auto& gpuBufferEntryBuffer =
+        resourceManager->getBuffer(frame.getGpuBufferEntryBufferHandle());
+    const auto& objectDataBuffer = resourceManager->getBuffer(frame.getGpuObjectDataBufferHandle());
+    const auto& drawCommandBuffer = resourceManager->getBuffer(frame.getDrawCommandBufferHandle());
+    const auto& countBuffer = resourceManager->getBuffer(frame.getCountBufferHandle());
+    const auto& objectDataIndexBuffer =
         resourceManager->getBuffer(frame.getObjectDataIndexBufferHandle());
-    vk::BufferMemoryBarrier barrier{
-        .srcAccessMask = vk::AccessFlagBits::eShaderWrite,
-        .dstAccessMask = vk::AccessFlagBits::eIndirectCommandRead,
-        .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-        .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-        .buffer = objectDataIndexBuffer.getBuffer(),
-        .offset = 0,
-        .size = VK_WHOLE_SIZE,
-    };
 
-    commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eComputeShader,
-                                  vk::PipelineStageFlagBits::eDrawIndirect,
-                                  vk::DependencyFlags{},
-                                  nullptr,
-                                  barrier,
-                                  nullptr);
+    auto computePushConstants = ComputePushConstants{
+        .drawCommandBufferAddress = drawCommandBuffer.getDeviceAddress(),
+        .gpuBufferEntryBufferAddress = gpuBufferEntryBuffer.getDeviceAddress(),
+        .objectDataBufferAddress = objectDataBuffer.getDeviceAddress(),
+        .countBufferAddress = countBuffer.getDeviceAddress(),
+        .objectDataIndexBufferAddress = objectDataIndexBuffer.getDeviceAddress(),
+        .objectCount = 2};
+    computeTask->record(commandBuffer, computePushConstants);
   }
+
+  // Record barriers for buffers written by compute tasks
+  auto& indirectBuffer = resourceManager->getBuffer(frame.getDrawCommandBufferHandle());
+  insertBarrier(commandBuffer, indirectBuffer);
+
+  auto& countBuffer = resourceManager->getBuffer(frame.getCountBufferHandle());
+  insertBarrier(commandBuffer, countBuffer);
+
+  auto& objectDataIndexBuffer = resourceManager->getBuffer(frame.getObjectDataIndexBufferHandle());
+  insertBarrier(commandBuffer, objectDataIndexBuffer);
 
   const auto renderingInfo = frame.getRenderingInfo();
 
@@ -489,4 +449,26 @@ auto DefaultRenderScheduler::copyImageToImage(const vk::raii::CommandBuffer& cmd
 
   cmd.blitImage2(blitInfo);
 }
+
+auto DefaultRenderScheduler::insertBarrier(const vk::raii::CommandBuffer& cmd, const Buffer& buffer)
+    -> void {
+  // Insert a memory barrier for the buffer the computeTask writes to
+  vk::BufferMemoryBarrier bufferMemoryBarrier{
+      .srcAccessMask = vk::AccessFlagBits::eShaderWrite,
+      .dstAccessMask = vk::AccessFlagBits::eIndirectCommandRead,
+      .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+      .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+      .buffer = buffer.getBuffer(),
+      .offset = 0,
+      .size = VK_WHOLE_SIZE,
+  };
+
+  cmd.pipelineBarrier(vk::PipelineStageFlagBits::eComputeShader,
+                      vk::PipelineStageFlagBits::eDrawIndirect,
+                      vk::DependencyFlags{},
+                      nullptr,
+                      bufferMemoryBarrier,
+                      nullptr);
+}
+
 } // namespace tr

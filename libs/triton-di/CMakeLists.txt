@@ -57,8 +57,10 @@ set(common_SRC
   modules/graphics/src/task/IndirectRenderTask.cxx
   modules/graphics/src/task/RenderTaskFactory.cxx
   modules/graphics/src/task/ComputeTask.cxx
+  modules/graphics/src/task/StaticTask.cxx
 
   modules/graphics/src/pipeline/IndirectPipeline.cxx
+  modules/graphics/src/pipeline/StaticPipeline.cxx
   modules/graphics/src/pipeline/ComputePipeline.cxx
   modules/graphics/src/pipeline/SpirvShaderCompiler.cxx
 )

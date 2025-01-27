@@ -5,9 +5,11 @@ namespace tr {
 
 RenderTaskFactory::RenderTaskFactory(std::shared_ptr<VkResourceManager> newResourceManager,
                                      std::shared_ptr<IndirectPipeline> newIndirectPipeline,
+                                     std::shared_ptr<StaticPipeline> newStaticPipeline,
                                      RenderContextConfig newConfig)
     : resourceManager{std::move(newResourceManager)},
       indirectPipeline{std::move(newIndirectPipeline)},
+      staticPipeline{std::move(newStaticPipeline)},
       config{newConfig} {
 }
 
