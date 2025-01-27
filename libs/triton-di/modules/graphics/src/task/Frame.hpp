@@ -13,6 +13,20 @@ enum class CmdBufferType : uint8_t {
   Compute
 };
 
+enum class BufferHandleType : uint8_t {
+  GpuBufferEntry = 0,
+  StaticDrawCommand,
+  StaticObjectDataBuffer,
+  StaticObjectDataIndexBuffer,
+  StaticCountBuffer,
+  DynamicDrawCommand,
+  DynamicObjectDataBuffer,
+  DynamicObjectDataIndexBuffer,
+  DynamicCountBuffer,
+  CameraBuffer,
+  DescriptorBuffer
+};
+
 class Frame {
 public:
   explicit Frame(uint8_t newIndex,
@@ -34,13 +48,7 @@ public:
   [[nodiscard]] auto getRenderingInfo() const -> vk::RenderingInfo;
   [[nodiscard]] auto getDrawImageExtent() const -> vk::Extent2D;
 
-  [[nodiscard]] auto getGpuBufferEntryBufferHandle() const -> BufferHandle;
-  [[nodiscard]] auto getDrawCommandBufferHandle() const -> BufferHandle;
-  [[nodiscard]] auto getGpuObjectDataBufferHandle() const -> BufferHandle;
-  [[nodiscard]] auto getCameraBufferHandle() const -> BufferHandle;
-  [[nodiscard]] auto getCountBufferHandle() const -> BufferHandle;
-  [[nodiscard]] auto getDescriptorBufferHandle() const -> BufferHandle;
-  [[nodiscard]] auto getObjectDataIndexBufferHandle() const -> BufferHandle;
+  [[nodiscard]] auto getBufferHandle(BufferHandleType type) const -> BufferHandle;
 
   [[nodiscard]] auto getDepthImageHandle() const -> ImageHandle;
   [[nodiscard]] auto getDrawImageHandle() const -> ImageHandle;
@@ -49,13 +57,7 @@ public:
   [[nodiscard]] auto getMainCommandBufferHandle() const -> CommandBufferHandle;
   [[nodiscard]] auto getEndCommandBufferHandle() const -> CommandBufferHandle;
 
-  auto setGpuBufferEntryBufferHandle(BufferHandle handle) -> void;
-  auto setDrawCommandBufferHandle(BufferHandle handle) -> void;
-  auto setGpuObjectDataBufferHandle(BufferHandle handle) -> void;
-  auto setCameraBufferHandle(BufferHandle handle) -> void;
-  auto setCountBufferHandle(BufferHandle handle) -> void;
-  auto setDescriptorBufferHandle(BufferHandle handle) -> void;
-  auto setObjectDataIndexBufferHandle(BufferHandle handle) -> void;
+  auto setBufferHandle(BufferHandleType type, BufferHandle handle) -> void;
 
   auto setDepthImageHandle(ImageHandle handle) -> void;
   auto setDrawImageHandle(ImageHandle handle) -> void;
@@ -75,13 +77,7 @@ private:
   uint32_t swapchainImageIndex{};
   vk::Extent2D drawImageExtent{};
 
-  BufferHandle gpuBufferEntryBuffer;
-  BufferHandle drawCommandBuffer;
-  BufferHandle objectDataBuffer;
-  BufferHandle cameraBuffer;
-  BufferHandle countBuffer;
-  BufferHandle objectDataIndexBuffer;
-  BufferHandle descriptorBuffer;
+  std::unordered_map<BufferHandleType, BufferHandle> bufferHandleMap;
 
   ImageHandle depthImageHandle;
   ImageHandle drawImageHandle;

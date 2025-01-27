@@ -72,7 +72,7 @@ DefaultRenderScheduler::DefaultRenderScheduler(
           vk::BufferUsageFlagBits::eStorageBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress,
           name);
 
-      frame->setGpuBufferEntryBufferHandle(handle);
+      frame->setBufferHandle(BufferHandleType::GpuBufferEntry, handle);
 
       auto& gpuBufferEntriesBuffer = resourceManager->getBuffer(handle);
       gpuBufferEntriesBuffer.mapBuffer();
@@ -87,7 +87,7 @@ DefaultRenderScheduler::DefaultRenderScheduler(
           sizeof(vk::DrawIndexedIndirectCommand) * renderConfig.maxStaticObjects,
           vk::BufferUsageFlagBits::eIndirectBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress,
           name);
-      frame->setDrawCommandBufferHandle(handle);
+      frame->setBufferHandle(BufferHandleType::StaticDrawCommand, handle);
       auto& indirectCommandBuffer = resourceManager->getBuffer(handle);
       auto cmd = vk::DrawIndexedIndirectCommand{};
       cmd.instanceCount = 0;
@@ -110,7 +110,7 @@ DefaultRenderScheduler::DefaultRenderScheduler(
       countBuffer.updateBufferValue(&count, sizeof(uint32_t));
       countBuffer.unmapBuffer();
 
-      frame->setCountBufferHandle(handle);
+      frame->setBufferHandle(BufferHandleType::StaticCountBuffer, handle);
     }
 
     // ObjectDataIndex Buffer
@@ -126,8 +126,7 @@ DefaultRenderScheduler::DefaultRenderScheduler(
       objectDataIndexBuffer.mapBuffer();
       objectDataIndexBuffer.updateBufferValue(&count, sizeof(uint32_t));
       objectDataIndexBuffer.unmapBuffer();
-
-      frame->setObjectDataIndexBufferHandle(handle);
+      frame->setBufferHandle(BufferHandleType::StaticObjectDataIndexBuffer, handle);
     }
 
     // Object Data Buffer
@@ -137,7 +136,7 @@ DefaultRenderScheduler::DefaultRenderScheduler(
           sizeof(GpuObjectData) * renderConfig.maxStaticObjects,
           vk::BufferUsageFlagBits::eIndirectBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress,
           name);
-      frame->setGpuObjectDataBufferHandle(handle);
+      frame->setBufferHandle(BufferHandleType::StaticObjectDataBuffer, handle);
     }
 
     // Camera Data Buffer
@@ -153,8 +152,7 @@ DefaultRenderScheduler::DefaultRenderScheduler(
       cameraDataBuffer.mapBuffer();
       cameraDataBuffer.updateBufferValue(&cameraData, sizeof(GpuCameraData));
       cameraDataBuffer.unmapBuffer();
-
-      frame->setCameraBufferHandle(handle);
+      frame->setBufferHandle(BufferHandleType::CameraBuffer, handle);
     }
 
     frame->setupRenderingInfo(resourceManager);
@@ -220,7 +218,7 @@ auto DefaultRenderScheduler::updatePerFrameRenderData(Frame& frame, const Render
         resourceManager->getStaticGpuData(renderData.staticGpuMeshData);
 
     auto& gpuBufferEntriesBuffer =
-        resourceManager->getBuffer(frame.getGpuBufferEntryBufferHandle());
+        resourceManager->getBuffer(frame.getBufferHandle(BufferHandleType::GpuBufferEntry));
 
     gpuBufferEntriesBuffer.mapBuffer();
     gpuBufferEntriesBuffer.updateBufferValue(gpuBufferEntryList.data(),
@@ -229,14 +227,16 @@ auto DefaultRenderScheduler::updatePerFrameRenderData(Frame& frame, const Render
   }
 
   // Update GpuObjectDataBuffer
-  auto& objectDataBuffer = resourceManager->getBuffer(frame.getGpuObjectDataBufferHandle());
+  auto& objectDataBuffer =
+      resourceManager->getBuffer(frame.getBufferHandle(BufferHandleType::StaticObjectDataBuffer));
   objectDataBuffer.mapBuffer();
   objectDataBuffer.updateBufferValue(renderData.objectData.data(),
                                      sizeof(GpuObjectData) * renderData.objectData.size());
   objectDataBuffer.unmapBuffer();
 
   // Update CameraDataBuffer
-  auto& cameraDataBuffer = resourceManager->getBuffer(frame.getCameraBufferHandle());
+  auto& cameraDataBuffer =
+      resourceManager->getBuffer(frame.getBufferHandle(BufferHandleType::CameraBuffer));
   cameraDataBuffer.mapBuffer();
   cameraDataBuffer.updateBufferValue(&renderData.cameraData, sizeof(GpuCameraData));
   cameraDataBuffer.unmapBuffer();
@@ -310,12 +310,15 @@ auto DefaultRenderScheduler::executeTasks(Frame& frame, bool recordTasks) const 
   {
     ZoneNamedN(var, "Record Static Compute Task", true);
     const auto& gpuBufferEntryBuffer =
-        resourceManager->getBuffer(frame.getGpuBufferEntryBufferHandle());
-    const auto& objectDataBuffer = resourceManager->getBuffer(frame.getGpuObjectDataBufferHandle());
-    const auto& drawCommandBuffer = resourceManager->getBuffer(frame.getDrawCommandBufferHandle());
-    const auto& countBuffer = resourceManager->getBuffer(frame.getCountBufferHandle());
-    const auto& objectDataIndexBuffer =
-        resourceManager->getBuffer(frame.getObjectDataIndexBufferHandle());
+        resourceManager->getBuffer(frame.getBufferHandle(BufferHandleType::GpuBufferEntry));
+    const auto& objectDataBuffer =
+        resourceManager->getBuffer(frame.getBufferHandle(BufferHandleType::StaticObjectDataBuffer));
+    const auto& drawCommandBuffer =
+        resourceManager->getBuffer(frame.getBufferHandle(BufferHandleType::StaticDrawCommand));
+    const auto& countBuffer =
+        resourceManager->getBuffer(frame.getBufferHandle(BufferHandleType::StaticCountBuffer));
+    const auto& objectDataIndexBuffer = resourceManager->getBuffer(
+        frame.getBufferHandle(BufferHandleType::StaticObjectDataIndexBuffer));
 
     auto computePushConstants = ComputePushConstants{
         .drawCommandBufferAddress = drawCommandBuffer.getDeviceAddress(),
@@ -328,13 +331,16 @@ auto DefaultRenderScheduler::executeTasks(Frame& frame, bool recordTasks) const 
   }
 
   // Record barriers for buffers written by compute tasks
-  auto& indirectBuffer = resourceManager->getBuffer(frame.getDrawCommandBufferHandle());
+  auto& indirectBuffer =
+      resourceManager->getBuffer(frame.getBufferHandle(BufferHandleType::StaticDrawCommand));
   insertBarrier(commandBuffer, indirectBuffer);
 
-  auto& countBuffer = resourceManager->getBuffer(frame.getCountBufferHandle());
+  auto& countBuffer =
+      resourceManager->getBuffer(frame.getBufferHandle(BufferHandleType::StaticCountBuffer));
   insertBarrier(commandBuffer, countBuffer);
 
-  auto& objectDataIndexBuffer = resourceManager->getBuffer(frame.getObjectDataIndexBufferHandle());
+  auto& objectDataIndexBuffer = resourceManager->getBuffer(
+      frame.getBufferHandle(BufferHandleType::StaticObjectDataIndexBuffer));
   insertBarrier(commandBuffer, objectDataIndexBuffer);
 
   const auto renderingInfo = frame.getRenderingInfo();
