@@ -61,8 +61,8 @@ auto parseConverterOptions(const std::vector<std::string>& args) {
                             .outputFile = outputFile};
 }
 
-auto writeOutputFile(const std::filesystem::path& outputFile, const as::Model& tritonModel)
-    -> bool {
+auto writeOutputFile(const std::filesystem::path& outputFile,
+                     const as::Model& tritonModel) -> bool {
   if (outputFile.extension() == ".json") {
     std::ofstream outputStream(outputFile);
     if (!outputStream) {
@@ -94,6 +94,8 @@ auto writeOutputFile(const std::filesystem::path& outputFile, const as::Model& t
 
 auto main(int argc, char* argv[]) -> int {
   initLogger(spdlog::level::trace, spdlog::level::trace);
+
+  LogTest();
 
   std::vector<std::string> args(argv, argv + argc);
 
