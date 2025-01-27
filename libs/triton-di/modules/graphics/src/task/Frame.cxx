@@ -86,32 +86,8 @@ auto Frame::getRenderingInfo() const -> vk::RenderingInfo {
   return renderingInfo;
 }
 
-auto Frame::getGpuBufferEntryBufferHandle() const -> BufferHandle {
-  return gpuBufferEntryBuffer;
-}
-
-auto Frame::getDrawCommandBufferHandle() const -> BufferHandle {
-  return drawCommandBuffer;
-}
-
-auto Frame::getGpuObjectDataBufferHandle() const -> BufferHandle {
-  return objectDataBuffer;
-}
-
-auto Frame::getCameraBufferHandle() const -> BufferHandle {
-  return cameraBuffer;
-}
-
-auto Frame::getCountBufferHandle() const -> BufferHandle {
-  return countBuffer;
-}
-
-auto Frame::getObjectDataIndexBufferHandle() const -> BufferHandle {
-  return objectDataIndexBuffer;
-}
-
-auto Frame::getDescriptorBufferHandle() const -> BufferHandle {
-  return descriptorBuffer;
+auto Frame::getBufferHandle(BufferHandleType type) const -> BufferHandle {
+  return bufferHandleMap.at(type);
 }
 
 auto Frame::getDepthImageHandle() const -> ImageHandle {
@@ -142,32 +118,8 @@ auto Frame::setSwapchainImageIndex(const uint32_t index) -> void {
   swapchainImageIndex = index;
 }
 
-auto Frame::setGpuBufferEntryBufferHandle(BufferHandle handle) -> void {
-  gpuBufferEntryBuffer = handle;
-}
-
-auto Frame::setGpuObjectDataBufferHandle(BufferHandle handle) -> void {
-  objectDataBuffer = handle;
-}
-
-auto Frame::setDrawCommandBufferHandle(BufferHandle handle) -> void {
-  drawCommandBuffer = handle;
-}
-
-auto Frame::setCameraBufferHandle(BufferHandle handle) -> void {
-  cameraBuffer = handle;
-}
-
-auto Frame::setCountBufferHandle(BufferHandle handle) -> void {
-  countBuffer = handle;
-}
-
-auto Frame::setObjectDataIndexBufferHandle(BufferHandle handle) -> void {
-  objectDataIndexBuffer = handle;
-}
-
-auto Frame::setDescriptorBufferHandle(BufferHandle handle) -> void {
-  descriptorBuffer = handle;
+auto Frame::setBufferHandle(BufferHandleType type, BufferHandle handle) -> void {
+  bufferHandleMap.insert({type, handle});
 }
 
 auto Frame::transitionImage(const vk::raii::CommandBuffer& cmd,

@@ -15,11 +15,15 @@ StaticTask::StaticTask(std::shared_ptr<VkResourceManager> newResourceManager,
 auto StaticTask::record(vk::raii::CommandBuffer& commandBuffer, const Frame& frame) -> void {
 
   const auto objectDataAddress =
-      resourceManager->getBuffer(frame.getGpuObjectDataBufferHandle()).getDeviceAddress();
+      resourceManager->getBuffer(frame.getBufferHandle(BufferHandleType::StaticObjectDataBuffer))
+          .getDeviceAddress();
   const auto cameraDataAddress =
-      resourceManager->getBuffer(frame.getCameraBufferHandle()).getDeviceAddress();
+      resourceManager->getBuffer(frame.getBufferHandle(BufferHandleType::CameraBuffer))
+          .getDeviceAddress();
   const auto& objectDataIndexAddress =
-      resourceManager->getBuffer(frame.getObjectDataIndexBufferHandle()).getDeviceAddress();
+      resourceManager
+          ->getBuffer(frame.getBufferHandle(BufferHandleType::StaticObjectDataIndexBuffer))
+          .getDeviceAddress();
 
   pushConstants = StaticPushConstants{.drawID = 0,
                                       .objectDataAddress = objectDataAddress,
@@ -45,8 +49,10 @@ auto StaticTask::record(vk::raii::CommandBuffer& commandBuffer, const Frame& fra
                                                    0,
                                                    pushConstants);
 
-  auto& indirectBuffer = resourceManager->getBuffer(frame.getDrawCommandBufferHandle());
-  auto& countBuffer = resourceManager->getBuffer(frame.getCountBufferHandle());
+  auto& indirectBuffer =
+      resourceManager->getBuffer(frame.getBufferHandle(BufferHandleType::StaticDrawCommand));
+  auto& countBuffer =
+      resourceManager->getBuffer(frame.getBufferHandle(BufferHandleType::StaticCountBuffer));
 
   commandBuffer.drawIndexedIndirectCount(indirectBuffer.getBuffer(),
                                          0,
