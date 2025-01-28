@@ -59,12 +59,14 @@ public:
 private:
   std::shared_ptr<VkResourceManager> resourceManager;
 
-  MapKey geometryKey{};
+  MapKey staticGeometryKey{};
+  MapKey skinnedGeometryKey{};
   MapKey imageKey{};
   MapKey skeletonKey{};
   MapKey animationKey{};
 
-  std::unordered_map<GeometryHandle, GeometryData> geometryDataMap;
+  std::unordered_map<GeometryHandle, SkinnedGeometryData> skinnedGeometryDataMap;
+  std::unordered_map<GeometryHandle, StaticGeometryData> staticGeometryDataMap;
   std::unordered_map<ImageHandle, as::ImageData> imageDataMap;
 
   std::unordered_map<std::string, AnimationHandle> loadedAnimations;

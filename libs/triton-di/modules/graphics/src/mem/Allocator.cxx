@@ -2,6 +2,8 @@
 #include "Buffer.hpp"
 #include "Image.hpp"
 #include "tr/IDebugManager.hpp"
+#include "vk/core/Device.hpp"
+#include "vk/core/PhysicalDevice.hpp"
 #include <vk_mem_alloc_structs.hpp>
 
 #define VMA_IMPLEMENTATION
@@ -10,11 +12,25 @@
 
 namespace tr {
 
-Allocator::Allocator(const vma::AllocatorCreateInfo& createInfo,
-                     const vk::raii::Device& device,
+Allocator::Allocator(std::shared_ptr<Device> newDevice,
+                     const std::shared_ptr<PhysicalDevice>& physicalDevice,
+                     const std::shared_ptr<Instance>& instance,
                      std::shared_ptr<IDebugManager> newDebugManager)
-    : device{device}, debugManager{std::move(newDebugManager)} {
-  allocator = std::make_shared<vma::Allocator>(createAllocator(createInfo));
+    : device{std::move(newDevice)}, debugManager{std::move(newDebugManager)} {
+
+  constexpr auto vulkanFunctions = vma::VulkanFunctions{
+      .vkGetInstanceProcAddr = vkGetInstanceProcAddr,
+      .vkGetDeviceProcAddr = vkGetDeviceProcAddr,
+  };
+
+  const auto allocatorCreateInfo = vma::AllocatorCreateInfo{
+      .flags = vma::AllocatorCreateFlagBits::eBufferDeviceAddress,
+      .physicalDevice = *physicalDevice->getVkPhysicalDevice(),
+      .device = *device->getVkDevice(),
+      .pVulkanFunctions = &vulkanFunctions,
+      .instance = instance->getVkInstance(),
+  };
+  allocator = std::make_shared<vma::Allocator>(createAllocator(allocatorCreateInfo));
 }
 
 Allocator::~Allocator() {
@@ -35,7 +51,7 @@ auto Allocator::createBuffer(const vk::BufferCreateInfo* bci,
                                     buffer,
                                     bci->size,
                                     allocation,
-                                    *device,
+                                    *device->getVkDevice(),
                                     info,
                                     bci,
                                     aci);
@@ -60,8 +76,8 @@ auto Allocator::createDescriptorBuffer(const size_t size, const std::string_view
   return createBuffer(&bci, &aci, name);
 }
 
-auto Allocator::createStagingBuffer(const size_t size,
-                                    const std::string_view& name) const -> std::unique_ptr<Buffer> {
+auto Allocator::createStagingBuffer(const size_t size, const std::string_view& name) const
+    -> std::unique_ptr<Buffer> {
 
   const auto bufferCreateInfo = vk::BufferCreateInfo{.size = size,
                                                      .usage = vk::BufferUsageFlagBits::eTransferSrc,
