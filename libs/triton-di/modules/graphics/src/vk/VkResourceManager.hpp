@@ -24,6 +24,7 @@ using TransitionBarrierInfo =
 class IPipeline;
 class MeshBufferManager;
 class TextureBufferManager;
+class BufferManager;
 
 struct Vertex {
   glm::vec3 position;
@@ -57,8 +58,8 @@ public:
                              std::shared_ptr<IDebugManager> newDebugManager,
                              std::shared_ptr<DSLayoutManager> newLayoutManager,
                              std::shared_ptr<IShaderBindingFactory> newShaderBindingFactory,
-                             const std::shared_ptr<PhysicalDevice>& physicalDevice,
-                             const std::shared_ptr<Instance>& instance);
+                             std::shared_ptr<Allocator> newAllocator,
+                             std::shared_ptr<BufferManager> newBufferManager);
   ~VkResourceManager();
   VkResourceManager(const VkResourceManager&) = delete;
   VkResourceManager(VkResourceManager&&) = delete;
@@ -73,19 +74,6 @@ public:
 
   auto createDepthImageAndView(std::string_view imageName, vk::Extent2D extent, vk::Format format)
       -> ImageHandle;
-
-  auto createBuffer(
-      size_t size,
-      vk::Flags<vk::BufferUsageFlagBits> flags,
-      std::string_view name,
-      vma::MemoryUsage usage = vma::MemoryUsage::eCpuToGpu,
-      vk::MemoryPropertyFlags memoryProperties = vk::MemoryPropertyFlagBits::eHostCoherent,
-      bool mapped = false) -> BufferHandle;
-
-  auto createGpuVertexBuffer(size_t size, std::string_view name) -> BufferHandle;
-  auto createGpuIndexBuffer(size_t size, std::string_view name) -> BufferHandle;
-
-  auto createIndirectBuffer(size_t size) -> BufferHandle;
 
   /// Add a static mesh to the MeshBufferManager for static meshes.
   auto uploadStaticMesh(const GeometryData& geometryData) -> MeshHandle;
@@ -110,8 +98,6 @@ public:
 
   auto createComputePipeline(std::string_view name) -> PipelineHandle;
 
-  [[nodiscard]] auto resizeBuffer(BufferHandle handle, size_t newSize) -> BufferHandle;
-
   [[nodiscard]] auto getImage(ImageHandle handle) const -> const vk::Image&;
 
   [[nodiscard]] auto getImageView(ImageHandle handle) const -> const vk::ImageView&;
@@ -119,8 +105,6 @@ public:
   [[nodiscard]] auto getImageExtent(ImageHandle handle) const -> const vk::Extent2D;
 
   [[nodiscard]] auto getMesh(MeshHandle handle) -> const ImmutableMesh&;
-
-  [[nodiscard]] auto getBuffer(BufferHandle handle) const -> Buffer&;
 
   [[nodiscard]] auto getStaticMeshBuffers() const -> std::tuple<Buffer&, Buffer&>;
 
@@ -149,14 +133,12 @@ private:
   std::shared_ptr<IDebugManager> debugManager;
   std::shared_ptr<DSLayoutManager> layoutManager;
   std::shared_ptr<IShaderBindingFactory> shaderBindingFactory;
-
   std::shared_ptr<Allocator> allocator;
+  std::shared_ptr<BufferManager> bufferManager;
 
   std::unordered_map<ImageHandle, ImageInfo> imageInfoMap;
-  std::unordered_map<BufferHandle, std::unique_ptr<Buffer>> bufferMap;
   std::unordered_map<PipelineHandle, std::unique_ptr<IPipeline>> pipelineMap;
 
-  MapKey bufferMapKeygen;
   MapKey imageMapKeygen;
   MapKey pipelineMapKeygen;
 

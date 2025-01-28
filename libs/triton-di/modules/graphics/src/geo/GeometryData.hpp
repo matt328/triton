@@ -1,12 +1,27 @@
 #pragma once
 
+#include "as/StaticVertex.hpp"
 #include "as/Vertex.hpp"
 
 namespace tr {
 
-class GeometryData {
+class SkinnedGeometryData {
 public:
   std::vector<as::Vertex> vertices;
+  std::vector<uint32_t> indices;
+
+  [[nodiscard]] auto vertexDataSize() const noexcept {
+    return sizeof(vertices[0]) * vertices.size();
+  }
+
+  [[nodiscard]] auto indexDataSize() const noexcept {
+    return sizeof(indices[0]) * indices.size();
+  }
+};
+
+class StaticGeometryData {
+public:
+  std::vector<as::StaticVertex> vertices;
   std::vector<uint32_t> indices;
 
   [[nodiscard]] auto vertexDataSize() const noexcept {

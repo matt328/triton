@@ -183,9 +183,22 @@ auto AssetManager::loadTrm(const std::filesystem::path& modelPath) -> TritonMode
   const auto imageHandle = imageKey.getKey();
   imageDataMap.emplace(imageHandle, tritonModel.imageData);
 
-  const auto key = geometryKey.getKey();
-  const auto geometryHandle = GeometryHandle{key, Topology::Triangles};
-  geometryDataMap.emplace(geometryHandle, GeometryData{tritonModel.vertices, tritonModel.indices});
+  auto geometryHandle = GeometryHandle{};
+  if (tritonModel.skinnedVertices.has_value()) {
+    const auto key = skinnedGeometryKey.getKey();
+    geometryHandle = GeometryHandle{key, Topology::Triangles};
+    skinnedGeometryDataMap.emplace(
+        geometryHandle,
+        SkinnedGeometryData{tritonModel.skinnedVertices.value(), tritonModel.indices});
+  } else if (tritonModel.staticVertices.has_value()) {
+    const auto key = staticGeometryKey.getKey();
+    geometryHandle = GeometryHandle{key, Topology::Triangles};
+    staticGeometryDataMap.emplace(
+        geometryHandle,
+        StaticGeometryData{tritonModel.staticVertices.value(), tritonModel.indices});
+  } else {
+    throw std::runtime_error("Model either has to be skinned or static");
+  }
 
   auto skinData = std::optional<SkinData>{};
   if (tritonModel.skinned()) {

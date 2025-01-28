@@ -21,29 +21,16 @@ VkResourceManager::VkResourceManager(
     std::shared_ptr<IDebugManager> newDebugManager,
     std::shared_ptr<DSLayoutManager> newLayoutManager,
     std::shared_ptr<IShaderBindingFactory> newShaderBindingFactory,
-    const std::shared_ptr<PhysicalDevice>& physicalDevice,
-    const std::shared_ptr<Instance>& instance)
+    std::shared_ptr<Allocator> newAllocator,
+    std::shared_ptr<BufferManager> newBufferManager)
     : device{std::move(newDevice)},
       immediateTransferContext{std::move(newImmediateTransferContext)},
       shaderCompiler{std::move(newShaderCompiler)},
       debugManager{std::move(newDebugManager)},
       layoutManager{std::move(newLayoutManager)},
-      shaderBindingFactory{std::move(newShaderBindingFactory)} {
-
-  constexpr auto vulkanFunctions = vma::VulkanFunctions{
-      .vkGetInstanceProcAddr = vkGetInstanceProcAddr,
-      .vkGetDeviceProcAddr = vkGetDeviceProcAddr,
-  };
-
-  const auto allocatorCreateInfo = vma::AllocatorCreateInfo{
-      .flags = vma::AllocatorCreateFlagBits::eBufferDeviceAddress,
-      .physicalDevice = *physicalDevice->getVkPhysicalDevice(),
-      .device = *device->getVkDevice(),
-      .pVulkanFunctions = &vulkanFunctions,
-      .instance = instance->getVkInstance(),
-  };
-
-  allocator = std::make_unique<Allocator>(allocatorCreateInfo, device->getVkDevice(), debugManager);
+      shaderBindingFactory{std::move(newShaderBindingFactory)},
+      allocator{std::move(newAllocator)},
+      bufferManager{std::move(newBufferManager)} {
 
   constexpr auto binding =
       vk::DescriptorSetLayoutBinding{.binding = 0,

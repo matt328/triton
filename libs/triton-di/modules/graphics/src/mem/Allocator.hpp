@@ -1,6 +1,7 @@
 #pragma once
 
 #include "tr/IDebugManager.hpp"
+#include "vk/core/PhysicalDevice.hpp"
 #include <vk_mem_alloc_handles.hpp>
 
 namespace tr {
@@ -16,9 +17,10 @@ class Image;
 
 class Allocator {
 public:
-  explicit Allocator(const vma::AllocatorCreateInfo& createInfo,
-                     const vk::raii::Device& device,
-                     std::shared_ptr<IDebugManager> newDebugManager);
+  Allocator(std::shared_ptr<Device> newDevice,
+            const std::shared_ptr<PhysicalDevice>& physicalDevice,
+            const std::shared_ptr<Instance>& instance,
+            std::shared_ptr<IDebugManager> newDebugManager);
   ~Allocator();
 
   Allocator(const Allocator&) = delete;
@@ -87,7 +89,7 @@ public:
   }
 
 private:
-  const vk::raii::Device& device;
+  std::shared_ptr<Device> device;
   std::shared_ptr<vma::Allocator> allocator;
   std::shared_ptr<IDebugManager> debugManager;
 };
