@@ -2,7 +2,6 @@
 
 #include "cm/Handles.hpp"
 #include "cm/Rando.hpp"
-#include "geo/GeometryData.hpp"
 #include "geo/GeometryHandles.hpp"
 #include "as/Model.hpp"
 #include <ozz/animation/runtime/skeleton.h>
@@ -12,6 +11,8 @@ struct Model;
 }
 
 namespace tr {
+
+class IGeometryData;
 
 class GeometryDataNotFoundException : public std::logic_error {
 public:
@@ -59,14 +60,12 @@ public:
 private:
   std::shared_ptr<VkResourceManager> resourceManager;
 
-  MapKey staticGeometryKey{};
-  MapKey skinnedGeometryKey{};
+  MapKey geometryKey{};
   MapKey imageKey{};
   MapKey skeletonKey{};
   MapKey animationKey{};
 
-  std::unordered_map<GeometryHandle, SkinnedGeometryData> skinnedGeometryDataMap;
-  std::unordered_map<GeometryHandle, StaticGeometryData> staticGeometryDataMap;
+  std::unordered_map<GeometryHandle, std::unique_ptr<IGeometryData>> geometryDataMap;
   std::unordered_map<ImageHandle, as::ImageData> imageDataMap;
 
   std::unordered_map<std::string, AnimationHandle> loadedAnimations;

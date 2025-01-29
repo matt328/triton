@@ -1,5 +1,7 @@
 #include "BufferManager.hpp"
 #include "ImmediateTransferContext.hpp"
+#include "ResourceExceptions.hpp"
+#include "geo/GeometryData.hpp"
 #include "mem/Allocator.hpp"
 #include "mem/Buffer.hpp"
 
@@ -87,6 +89,43 @@ auto BufferManager::createIndirectBuffer(size_t size) -> BufferHandle {
 
 [[nodiscard]] auto BufferManager::getBuffer(BufferHandle handle) const -> Buffer& {
   return *bufferMap.at(handle);
+}
+
+auto BufferManager::addToBuffer(const IGeometryData& geometryData,
+                                BufferHandle vertexBufferHandle,
+                                vk::DeviceSize vertexOffset,
+                                BufferHandle indexBufferHandle,
+                                vk::DeviceSize indexOffset) -> void {
+  const auto vbSize = geometryData.getVertexDataSize();
+  const auto ibSize = geometryData.getIndexDataSize();
+
+  try {
+    const auto vbStagingBuffer = allocator->createStagingBuffer(vbSize, "Buffer-VertexStaging");
+    void* vbData = allocator->mapMemory(*vbStagingBuffer);
+    memcpy(vbData, geometryData.getVertexData(), vbSize);
+    allocator->unmapMemory(*vbStagingBuffer);
+
+    // Prepare Index Buffer
+    const auto ibStagingBuffer = allocator->createStagingBuffer(ibSize, "Buffer-IndexStaging");
+
+    auto* const data = allocator->mapMemory(*ibStagingBuffer);
+    memcpy(data, geometryData.getIndexData(), ibSize);
+    allocator->unmapMemory(*ibStagingBuffer);
+
+    auto& vertexBuffer = getBuffer(vertexBufferHandle);
+    auto& indexBuffer = getBuffer(indexBufferHandle);
+
+    immediateTransferContext->submit([&](const vk::raii::CommandBuffer& cmd) {
+      const auto vbCopy = vk::BufferCopy{.srcOffset = 0, .dstOffset = vertexOffset, .size = vbSize};
+      cmd.copyBuffer(vbStagingBuffer->getBuffer(), vertexBuffer.getBuffer(), vbCopy);
+      const auto copy = vk::BufferCopy{.srcOffset = 0, .dstOffset = indexOffset, .size = ibSize};
+      cmd.copyBuffer(ibStagingBuffer->getBuffer(), indexBuffer.getBuffer(), copy);
+    });
+
+  } catch (const AllocationException& ex) {
+    throw ResourceUploadException(
+        fmt::format("Error allocating resources for geometry, {0}", ex.what()));
+  }
 }
 
 }

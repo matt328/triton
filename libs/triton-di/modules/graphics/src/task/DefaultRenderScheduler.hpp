@@ -24,6 +24,7 @@ public:
                                   std::shared_ptr<Swapchain> newSwapchain,
                                   std::shared_ptr<RenderTaskFactory> newRenderTaskFactory,
                                   std::shared_ptr<IGuiSystem> newGuiSystem,
+                                  std::shared_ptr<BufferManager> newBufferManager,
                                   const RenderContextConfig& rendererConfig,
                                   const std::shared_ptr<IEventBus>& eventBus);
   ~DefaultRenderScheduler() override;
@@ -47,9 +48,11 @@ private:
   std::shared_ptr<Swapchain> swapchain;
   std::shared_ptr<RenderTaskFactory> renderTaskFactory;
   std::shared_ptr<IGuiSystem> guiSystem;
+  std::shared_ptr<BufferManager> bufferManager;
 
   std::shared_ptr<IndirectRenderTask> indirectRenderTask;
   std::shared_ptr<ComputeTask> computeTask;
+  std::shared_ptr<StaticTask> staticRenderTask;
 
   std::vector<std::shared_ptr<IRenderTask>> staticRenderTasks;
 

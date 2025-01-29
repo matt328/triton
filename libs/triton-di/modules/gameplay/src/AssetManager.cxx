@@ -1,10 +1,10 @@
 #include "gp/AssetManager.hpp"
 #include "cm/Handles.hpp"
 #include "geo/GeometryHandles.hpp"
+#include "geo/SkinnedGeometryData.hpp"
+#include "geo/StaticGeometryData.hpp"
 #include "vk/VkResourceManager.hpp"
 #include "as/Model.hpp"
-
-#include "GlmCereal.hpp"
 
 namespace tr {
 AssetManager::AssetManager(std::shared_ptr<VkResourceManager> newResourceManager)
@@ -17,9 +17,9 @@ auto AssetManager::loadModel(std::string_view filename) -> ModelData {
   auto geometryHandle = tritonModelData.getGeometryHandle();
   auto imageHandle = tritonModelData.getImageHandle();
 
-  auto geometryData = geometryDataMap.at(geometryHandle);
+  auto& geometryData = geometryDataMap.at(geometryHandle);
 
-  auto meshHandle = resourceManager->uploadStaticMesh(geometryData);
+  auto meshHandle = resourceManager->uploadStaticMesh(*geometryData);
   auto textureHandle = resourceManager->uploadImage(imageDataMap.at(imageHandle), "ModelTexture");
 
   geometryDataMap.erase(geometryHandle);
@@ -101,9 +101,9 @@ auto AssetManager::getSkeleton(SkeletonHandle handle) const -> const ozz::animat
 auto AssetManager::createCube() -> ModelData {
 
   auto geometryHandle = generateAABB({-0.5f, -0.5f, -0.5f}, {0.5f, 0.5f, 0.5f});
-  auto geometryData = geometryDataMap.at(geometryHandle);
+  auto& geometryData = geometryDataMap.at(geometryHandle);
 
-  auto meshHandle = resourceManager->uploadStaticMesh(geometryData);
+  auto meshHandle = resourceManager->uploadStaticMesh(*geometryData);
   geometryDataMap.erase(geometryHandle);
 
   return ModelData{.meshData = MeshData{.meshHandle = meshHandle,
@@ -113,55 +113,56 @@ auto AssetManager::createCube() -> ModelData {
                    .animationData = std::nullopt};
 }
 
-auto AssetManager::generateAABB(const glm::vec3& min, const glm::vec3& max) -> GeometryHandle {
+auto AssetManager::generateAABB([[maybe_unused]] const glm::vec3& min,
+                                [[maybe_unused]] const glm::vec3& max) -> GeometryHandle {
 
-  auto vertices = std::vector<as::Vertex>{{{
-                                               // 0
-                                               .pos = {min.x, min.y, min.z},
-                                               .color = {0.f, 0.f, 1.f, 1.f},
-                                           },
-                                           {
-                                               // 1
-                                               .pos = {max.x, min.y, min.z},
-                                               .color = {1.f, 1.f, 0.f, 1.f},
-                                           },
-                                           {
-                                               // 2
-                                               .pos = {max.x, max.y, min.z},
-                                               .color = {0.f, 1.f, 0.f, 1.f},
-                                           },
-                                           {
-                                               // 3
-                                               .pos = {min.x, max.y, min.z},
-                                               .color = {1.f, 0.f, 0.f, 1.f},
-                                           },
-                                           {
-                                               // 4
-                                               .pos = {min.x, min.y, max.z},
-                                               .color = {0.f, 1.f, 1.f, 1.f},
-                                           },
-                                           {
-                                               // 5
-                                               .pos = {max.x, min.y, max.z},
-                                               .color = {1.f, 0.f, 1.f, 1.f},
-                                           },
-                                           {
-                                               // 6
-                                               .pos = {max.x, max.y, max.z},
-                                               .color = {1.f, 1.f, 1.f, 1.f},
-                                           },
-                                           {
-                                               // 7
-                                               .pos = {min.x, max.y, max.z},
-                                               .color = {0.f, 0.f, 0.f, 1.f},
-                                           }}};
+  // auto vertices = std::vector<as::Vertex>{{{
+  //                                              // 0
+  //                                              .pos = {min.x, min.y, min.z},
+  //                                              .color = {0.f, 0.f, 1.f, 1.f},
+  //                                          },
+  //                                          {
+  //                                              // 1
+  //                                              .pos = {max.x, min.y, min.z},
+  //                                              .color = {1.f, 1.f, 0.f, 1.f},
+  //                                          },
+  //                                          {
+  //                                              // 2
+  //                                              .pos = {max.x, max.y, min.z},
+  //                                              .color = {0.f, 1.f, 0.f, 1.f},
+  //                                          },
+  //                                          {
+  //                                              // 3
+  //                                              .pos = {min.x, max.y, min.z},
+  //                                              .color = {1.f, 0.f, 0.f, 1.f},
+  //                                          },
+  //                                          {
+  //                                              // 4
+  //                                              .pos = {min.x, min.y, max.z},
+  //                                              .color = {0.f, 1.f, 1.f, 1.f},
+  //                                          },
+  //                                          {
+  //                                              // 5
+  //                                              .pos = {max.x, min.y, max.z},
+  //                                              .color = {1.f, 0.f, 1.f, 1.f},
+  //                                          },
+  //                                          {
+  //                                              // 6
+  //                                              .pos = {max.x, max.y, max.z},
+  //                                              .color = {1.f, 1.f, 1.f, 1.f},
+  //                                          },
+  //                                          {
+  //                                              // 7
+  //                                              .pos = {min.x, max.y, max.z},
+  //                                              .color = {0.f, 0.f, 0.f, 1.f},
+  //                                          }}};
 
   std::vector<uint32_t> indices = {0, 2, 1, 0, 3, 2, 0, 4, 3, 4, 7, 3, 4, 5, 7, 5, 6, 7,
                                    5, 1, 6, 1, 2, 6, 1, 5, 4, 1, 4, 0, 7, 2, 3, 7, 6, 2};
 
   const auto key = geometryKey.getKey();
   auto geometryHandle = GeometryHandle{key, Topology::LineList};
-  geometryDataMap.emplace(geometryHandle, GeometryData{vertices, indices});
+  // geometryDataMap.emplace(geometryHandle, GeometryData{vertices, indices});
   return geometryHandle;
 }
 
@@ -185,17 +186,19 @@ auto AssetManager::loadTrm(const std::filesystem::path& modelPath) -> TritonMode
 
   auto geometryHandle = GeometryHandle{};
   if (tritonModel.skinnedVertices.has_value()) {
-    const auto key = skinnedGeometryKey.getKey();
+    const auto key = geometryKey.getKey();
     geometryHandle = GeometryHandle{key, Topology::Triangles};
-    skinnedGeometryDataMap.emplace(
+    geometryDataMap.emplace(
         geometryHandle,
-        SkinnedGeometryData{tritonModel.skinnedVertices.value(), tritonModel.indices});
+        std::make_unique<SkinnedGeometryData>(std::move(tritonModel.skinnedVertices.value()),
+                                              std::move(tritonModel.indices)));
   } else if (tritonModel.staticVertices.has_value()) {
-    const auto key = staticGeometryKey.getKey();
+    const auto key = geometryKey.getKey();
     geometryHandle = GeometryHandle{key, Topology::Triangles};
-    staticGeometryDataMap.emplace(
+    geometryDataMap.emplace(
         geometryHandle,
-        StaticGeometryData{tritonModel.staticVertices.value(), tritonModel.indices});
+        std::make_unique<StaticGeometryData>(std::move(tritonModel.staticVertices.value()),
+                                             std::move(tritonModel.indices)));
   } else {
     throw std::runtime_error("Model either has to be skinned or static");
   }

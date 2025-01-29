@@ -51,6 +51,7 @@ void GltfGeometryExtractor::execute(const tinygltf::Model& model,
     tritonModel.indices = std::move(indices);
   }
 
+  // Static Model
   if (model.skins.empty()) {
     std::vector<StaticVertex> vertices;
     for (const auto& [attribute, value] : primitive.attributes) {
@@ -81,7 +82,8 @@ void GltfGeometryExtractor::execute(const tinygltf::Model& model,
     }
     tritonModel.staticVertices = std::move(vertices);
   } else {
-    std::vector<Vertex> vertices;
+    // Skinned Model
+    std::vector<SkinnedVertex> vertices;
     for (const auto& [attribute, value] : primitive.attributes) {
       const auto& accessor = model.accessors[value];
 
@@ -99,17 +101,12 @@ void GltfGeometryExtractor::execute(const tinygltf::Model& model,
         for (size_t i = 0; i < vertexCount; i++) {
           auto vertexPosition = glm::make_vec3(&data[i * 3]);
           auto tempVec = transform * glm::vec4(vertexPosition, 1.f);
-          vertices[i].pos = glm::vec3(tempVec);
-        }
-      }
-      if (attribute == "NORMAL") {
-        for (size_t i = 0; i < vertexCount; i++) {
-          vertices[i].normal = glm::make_vec3(&data[i * 3]);
+          vertices[i].position = glm::vec3(tempVec);
         }
       }
       if (attribute == "TEXCOORD_0") {
         for (size_t i = 0; i < vertexCount; i++) {
-          vertices[i].uv = glm::make_vec2(&data[i * 2]);
+          vertices[i].texCoord = glm::make_vec2(&data[i * 2]);
         }
       }
       if (attribute == "JOINTS_0") {

@@ -12,6 +12,7 @@ class StaticTask final : public IRenderTask {
 public:
   StaticTask(std::shared_ptr<VkResourceManager> newResourceManager,
              std::shared_ptr<StaticPipeline> newPipeline,
+             std::shared_ptr<BufferManager> newBufferManager,
              RenderContextConfig newConfig);
 
   ~StaticTask() override = default;
@@ -26,6 +27,7 @@ public:
 private:
   std::shared_ptr<VkResourceManager> resourceManager;
   std::shared_ptr<StaticPipeline> pipeline;
+  std::shared_ptr<BufferManager> bufferManager;
   RenderContextConfig config;
 
   std::string drawImageResourceName;

@@ -4,19 +4,12 @@
 
 namespace tr {
 
-enum class GeometryType : uint8_t {
-  Static = 0,
-  Skinned
-};
-
 struct GeometryHandle {
   size_t handle;
   Topology topology;
-  GeometryType geometryType;
 
   auto operator==(const GeometryHandle& other) const -> bool {
-    return handle == other.handle && topology == other.topology &&
-           geometryType == other.geometryType;
+    return handle == other.handle && topology == other.topology;
   }
 };
 

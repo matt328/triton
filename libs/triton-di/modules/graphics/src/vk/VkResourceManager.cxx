@@ -39,10 +39,11 @@ VkResourceManager::VkResourceManager(
                                      .stageFlags = vk::ShaderStageFlagBits::eAll};
   textureDSLHandle = layoutManager->createLayout(binding, "DescriptorSetLayout-Texture");
 
+  // NOLINTNEXTLINE
   textureShaderBindingHandle =
       shaderBindingFactory->createShaderBinding(ShaderBindingType::Textures, textureDSLHandle);
 
-  staticMeshBufferManager = std::make_unique<MeshBufferManager>(this);
+  staticMeshBufferManager = std::make_unique<MeshBufferManager>(bufferManager);
 
   textureManager = std::make_unique<TextureManager>(this);
 }
@@ -51,31 +52,31 @@ VkResourceManager::~VkResourceManager() {
   Log.trace("Destroying VkResourceManager");
 }
 
-auto VkResourceManager::uploadStaticMesh(const GeometryData& geometryData) -> MeshHandle {
+auto VkResourceManager::uploadStaticMesh(const IGeometryData& geometryData) -> MeshHandle {
   return staticMeshBufferManager->addMesh(geometryData);
 }
 
-auto VkResourceManager::asyncUpload2(const GeometryData& geometryData) -> MeshHandle {
+auto VkResourceManager::asyncUpload2(const IGeometryData& geometryData) -> MeshHandle {
   // Prepare Vertex Buffer
-  const auto vbSize = geometryData.vertexDataSize();
-  const auto ibSize = geometryData.indexDataSize();
+  const auto vbSize = geometryData.getVertexDataSize();
+  const auto ibSize = geometryData.getIndexDataSize();
 
   try {
     const auto vbStagingBuffer = allocator->createStagingBuffer(vbSize, "Buffer-VertexStaging");
     void* vbData = allocator->mapMemory(*vbStagingBuffer);
-    memcpy(vbData, geometryData.vertices.data(), static_cast<size_t>(vbSize));
+    memcpy(vbData, geometryData.getVertexData(), vbSize);
     allocator->unmapMemory(*vbStagingBuffer);
 
     // Prepare Index Buffer
     const auto ibStagingBuffer = allocator->createStagingBuffer(ibSize, "Buffer-IndexStaging");
 
     auto* const data = allocator->mapMemory(*ibStagingBuffer);
-    memcpy(data, geometryData.indices.data(), ibSize);
+    memcpy(data, geometryData.getIndexData(), ibSize);
     allocator->unmapMemory(*ibStagingBuffer);
 
     auto vertexBuffer = allocator->createGpuVertexBuffer(vbSize, "Buffer-Vertex");
     auto indexBuffer = allocator->createGpuIndexBuffer(ibSize, "Buffer-Index");
-    const auto indicesCount = geometryData.indices.size();
+    const auto indicesCount = geometryData.getIndexCount();
 
     // Upload Buffers
     immediateTransferContext->submit([&](const vk::raii::CommandBuffer& cmd) {
@@ -264,119 +265,12 @@ auto VkResourceManager::getTextureData(const as::ImageData& imageData, std::stri
   return textureData;
 }
 
-auto VkResourceManager::createGpuVertexBuffer(size_t size, std::string_view name) -> BufferHandle {
-  const auto key = bufferMapKeygen.getKey();
-  bufferMap.emplace(key, allocator->createGpuVertexBuffer(size, name));
-  return key;
-}
-
-auto VkResourceManager::createGpuIndexBuffer(size_t size, std::string_view name) -> BufferHandle {
-  const auto key = bufferMapKeygen.getKey();
-  bufferMap.emplace(key, allocator->createGpuIndexBuffer(size, name));
-  return key;
-}
-
-auto VkResourceManager::createBuffer(size_t size,
-                                     vk::Flags<vk::BufferUsageFlagBits> flags,
-                                     std::string_view name,
-                                     vma::MemoryUsage usage,
-                                     vk::MemoryPropertyFlags memoryProperties,
-                                     bool mapped) -> BufferHandle {
-  const auto bufferCreateInfo = vk::BufferCreateInfo{.size = size, .usage = flags};
-
-  auto allocationCreateInfo =
-      vma::AllocationCreateInfo{.usage = usage, .requiredFlags = memoryProperties};
-
-  if (mapped) {
-    allocationCreateInfo.flags = vma::AllocationCreateFlagBits::eMapped;
-  }
-
-  auto key = bufferMapKeygen.getKey();
-
-  bufferMap.emplace(key, allocator->createBuffer(&bufferCreateInfo, &allocationCreateInfo, name));
-  return key;
-}
-
-auto VkResourceManager::createIndirectBuffer(size_t size) -> BufferHandle {
-  const auto bufferCreateInfo =
-      vk::BufferCreateInfo{.size = size, .usage = vk::BufferUsageFlagBits::eIndirectBuffer};
-
-  constexpr auto allocationCreateInfo =
-      vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eGpuOnly,
-                                .requiredFlags = vk::MemoryPropertyFlagBits::eDeviceLocal};
-
-  const auto key = bufferMapKeygen.getKey();
-
-  bufferMap.emplace(
-      key,
-      allocator->createBuffer(&bufferCreateInfo, &allocationCreateInfo, "Buffer-IndirectDraw"));
-  return key;
-}
-
-[[nodiscard]] auto VkResourceManager::resizeBuffer(BufferHandle handle, size_t newSize)
-    -> BufferHandle {
-  ZoneNamedN(var, "Resize Buffer", true);
-  auto& oldBuffer = bufferMap.at(handle);
-
-  auto bci = oldBuffer->getBufferCreateInfo();
-  const auto oldSize = bci.size;
-  bci.size = newSize;
-
-  auto aci = oldBuffer->getAllocationCreateInfo();
-
-  auto newBuffer = allocator->createBuffer(&bci, &aci);
-
-  immediateTransferContext->submit([&](const vk::raii::CommandBuffer& cmd) {
-    ZoneNamedN(var, "Copy Buffer", true);
-    const auto vbCopy = vk::BufferCopy{.srcOffset = 0, .dstOffset = 0, .size = oldSize};
-    cmd.copyBuffer(oldBuffer->getBuffer(), newBuffer->getBuffer(), vbCopy);
-  });
-
-  bufferMap.erase(handle);
-  const auto newHandle = bufferMapKeygen.getKey();
-  bufferMap.emplace(newHandle, std::move(newBuffer));
-  return newHandle;
-}
-
-auto VkResourceManager::addToMesh([[maybe_unused]] const GeometryData& geometryData,
-                                  [[maybe_unused]] BufferHandle vertexBufferHandle,
-                                  vk::DeviceSize vertexOffset,
-                                  [[maybe_unused]] BufferHandle indexBufferHandle,
-                                  vk::DeviceSize indexOffset) -> void {
-  const auto vbSize = geometryData.vertexDataSize();
-  const auto ibSize = geometryData.indexDataSize();
-
-  try {
-    const auto vbStagingBuffer = allocator->createStagingBuffer(vbSize, "Buffer-VertexStaging");
-    void* vbData = allocator->mapMemory(*vbStagingBuffer);
-    memcpy(vbData, geometryData.vertices.data(), static_cast<size_t>(vbSize));
-    allocator->unmapMemory(*vbStagingBuffer);
-
-    // Prepare Index Buffer
-    const auto ibStagingBuffer = allocator->createStagingBuffer(ibSize, "Buffer-IndexStaging");
-
-    auto* const data = allocator->mapMemory(*ibStagingBuffer);
-    memcpy(data, geometryData.indices.data(), ibSize);
-    allocator->unmapMemory(*ibStagingBuffer);
-
-    auto& vertexBuffer = getBuffer(vertexBufferHandle);
-    auto& indexBuffer = getBuffer(indexBufferHandle);
-
-    immediateTransferContext->submit([&](const vk::raii::CommandBuffer& cmd) {
-      const auto vbCopy = vk::BufferCopy{.srcOffset = 0, .dstOffset = vertexOffset, .size = vbSize};
-      cmd.copyBuffer(vbStagingBuffer->getBuffer(), vertexBuffer.getBuffer(), vbCopy);
-      const auto copy = vk::BufferCopy{.srcOffset = 0, .dstOffset = indexOffset, .size = ibSize};
-      cmd.copyBuffer(ibStagingBuffer->getBuffer(), indexBuffer.getBuffer(), copy);
-    });
-
-  } catch (const AllocationException& ex) {
-    throw ResourceUploadException(
-        fmt::format("Error allocating resources for geometry, {0}", ex.what()));
-  }
-}
-
 [[nodiscard]] auto VkResourceManager::getMesh(MeshHandle handle) -> const ImmutableMesh& {
   return meshList[handle];
+}
+
+[[nodiscard]] auto VkResourceManager::getStaticMeshBuffers() const -> std::tuple<Buffer&, Buffer&> {
+  return staticMeshBufferManager->getBuffers();
 }
 
 auto VkResourceManager::createDefaultDescriptorPool() const
@@ -516,15 +410,6 @@ auto VkResourceManager::getImageView(ImageHandle handle) const -> const vk::Imag
 
 auto VkResourceManager::getImageExtent(ImageHandle handle) const -> const vk::Extent2D {
   return imageInfoMap.at(handle).extent;
-}
-
-auto VkResourceManager::getBuffer(const BufferHandle handle) const -> Buffer& {
-  return *bufferMap.at(handle);
-}
-
-auto VkResourceManager::getStaticMeshBuffers() const -> std::tuple<Buffer&, Buffer&> {
-  return {*bufferMap.at(staticMeshBufferManager->getVertexBufferHandle()),
-          *bufferMap.at(staticMeshBufferManager->getIndexBufferHandle())};
 }
 
 auto VkResourceManager::destroyImage(ImageHandle handle) -> void {
