@@ -8,6 +8,7 @@ namespace tr {
 class Buffer;
 class Allocator;
 class ImmediateTransferContext;
+class IGeometryData;
 
 class BufferManager {
 public:
@@ -37,6 +38,12 @@ public:
   [[nodiscard]] auto resizeBuffer(BufferHandle handle, size_t newSize) -> BufferHandle;
 
   [[nodiscard]] auto getBuffer(BufferHandle handle) const -> Buffer&;
+
+  auto addToBuffer(const IGeometryData& geometryData,
+                   BufferHandle vertexBufferHandle,
+                   vk::DeviceSize vertexOffset,
+                   BufferHandle indexBufferHandle,
+                   vk::DeviceSize indexOffset) -> void;
 
 private:
   std::shared_ptr<Allocator> allocator;

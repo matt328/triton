@@ -15,6 +15,7 @@ public:
   RenderTaskFactory(std::shared_ptr<VkResourceManager> newResourceManager,
                     std::shared_ptr<IndirectPipeline> newIndirectPipeline,
                     std::shared_ptr<StaticPipeline> newStaticPipeline,
+                    std::shared_ptr<BufferManager> newBufferManager,
                     RenderContextConfig newConfig);
   ~RenderTaskFactory() = default;
 
@@ -32,6 +33,7 @@ private:
   std::shared_ptr<VkResourceManager> resourceManager;
   std::shared_ptr<IndirectPipeline> indirectPipeline;
   std::shared_ptr<StaticPipeline> staticPipeline;
+  std::shared_ptr<BufferManager> bufferManager;
   RenderContextConfig config;
 };
 

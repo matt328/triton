@@ -15,6 +15,7 @@ class IndirectRenderTask final : public IRenderTask {
 public:
   IndirectRenderTask(std::shared_ptr<VkResourceManager> newResourceManager,
                      std::shared_ptr<IndirectPipeline> newPipeline,
+                     std::shared_ptr<BufferManager> newBufferManager,
                      RenderContextConfig newConfig);
 
   ~IndirectRenderTask() override = default;
@@ -36,6 +37,7 @@ public:
 private:
   std::shared_ptr<VkResourceManager> resourceManager;
   std::shared_ptr<IndirectPipeline> pipeline;
+  std::shared_ptr<BufferManager> bufferManager;
   RenderContextConfig config;
 
   [[maybe_unused]] MeshHandle meshHandle = -1;

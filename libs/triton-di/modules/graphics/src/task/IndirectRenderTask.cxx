@@ -1,6 +1,7 @@
 #include "IndirectRenderTask.hpp"
 #include "gfx/RenderContextConfig.hpp"
 #include "task/Frame.hpp"
+#include "vk/BufferManager.hpp"
 #include "vk/VkResourceManager.hpp"
 #include "vk/sb/IShaderBinding.hpp"
 
@@ -8,9 +9,11 @@ namespace tr {
 
 IndirectRenderTask::IndirectRenderTask(std::shared_ptr<VkResourceManager> newResourceManager,
                                        std::shared_ptr<IndirectPipeline> newPipeline,
+                                       std::shared_ptr<BufferManager> newBufferManager,
                                        RenderContextConfig newConfig)
     : resourceManager{std::move(newResourceManager)},
       pipeline{std::move(newPipeline)},
+      bufferManager{std::move(newBufferManager)},
       config{newConfig} {
 }
 
@@ -18,14 +21,13 @@ auto IndirectRenderTask::record(vk::raii::CommandBuffer& commandBuffer, const Fr
     -> void {
 
   const auto objectDataAddress =
-      resourceManager->getBuffer(frame.getBufferHandle(BufferHandleType::StaticObjectDataBuffer))
+      bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::StaticObjectDataBuffer))
           .getDeviceAddress();
   const auto cameraDataAddress =
-      resourceManager->getBuffer(frame.getBufferHandle(BufferHandleType::CameraBuffer))
+      bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::CameraBuffer))
           .getDeviceAddress();
   const auto& objectDataIndexAddress =
-      resourceManager
-          ->getBuffer(frame.getBufferHandle(BufferHandleType::StaticObjectDataIndexBuffer))
+      bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::StaticObjectDataIndexBuffer))
           .getDeviceAddress();
 
   pushConstants = IndirectPushConstants{.drawID = 0,
@@ -53,9 +55,9 @@ auto IndirectRenderTask::record(vk::raii::CommandBuffer& commandBuffer, const Fr
                                                      pushConstants);
 
   auto& indirectBuffer =
-      resourceManager->getBuffer(frame.getBufferHandle(BufferHandleType::StaticDrawCommand));
+      bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::StaticDrawCommand));
   auto& countBuffer =
-      resourceManager->getBuffer(frame.getBufferHandle(BufferHandleType::StaticCountBuffer));
+      bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::StaticCountBuffer));
 
   commandBuffer.drawIndexedIndirectCount(indirectBuffer.getBuffer(),
                                          0,

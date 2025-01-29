@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Vertex.hpp"
 #include "BaseException.hpp"
+#include "as/SkinnedVertex.hpp"
 #include "as/StaticVertex.hpp"
 #include "as/VertexTypes.hpp"
 
@@ -27,7 +27,7 @@ public:
 
 struct Model {
   VertexType vertexType;
-  std::optional<std::vector<as::Vertex>> skinnedVertices;
+  std::optional<std::vector<as::SkinnedVertex>> skinnedVertices;
   std::optional<std::vector<as::StaticVertex>> staticVertices;
   std::vector<uint32_t> indices;
   std::unordered_map<int, int> jointRemaps;

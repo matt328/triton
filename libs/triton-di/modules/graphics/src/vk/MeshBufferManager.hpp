@@ -8,11 +8,12 @@
 
 namespace tr {
 
-class VkResourceManager;
+class BufferManager;
+class Buffer;
 
 class MeshBufferManager {
 public:
-  explicit MeshBufferManager(VkResourceManager* newResourceManager);
+  explicit MeshBufferManager(std::shared_ptr<BufferManager> newBufferManager);
   ~MeshBufferManager() = default;
 
   MeshBufferManager(const MeshBufferManager&) = delete;
@@ -20,7 +21,7 @@ public:
   auto operator=(const MeshBufferManager&) -> MeshBufferManager& = delete;
   auto operator=(MeshBufferManager&&) -> MeshBufferManager& = delete;
 
-  auto addMesh(const GeometryData& geometryData) -> MeshHandle;
+  auto addMesh(const IGeometryData& geometryData) -> MeshHandle;
   auto removeMesh(MeshHandle meshHandle) -> void;
 
   [[nodiscard]] auto getGpuBufferEntries(const std::vector<RenderMeshData>& meshDataList)
@@ -29,8 +30,10 @@ public:
   [[nodiscard]] auto getVertexBufferHandle() const -> BufferHandle;
   [[nodiscard]] auto getIndexBufferHandle() const -> BufferHandle;
 
+  [[nodiscard]] auto getBuffers() const -> std::tuple<Buffer&, Buffer&>;
+
 private:
-  VkResourceManager* resourceManager;
+  std::shared_ptr<BufferManager> bufferManager;
 
   size_t vertexBufferMaxSize;
   size_t indexBufferMaxSize;

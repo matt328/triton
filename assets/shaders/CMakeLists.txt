@@ -10,6 +10,8 @@ set(Shaders
   indirect.vert
   indirect.frag
   compute.comp
+  static.vert
+  static.frag
 )
 
 get_property(GENERATOR_IS_MULTI_CONFIG GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)

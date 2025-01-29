@@ -4,7 +4,6 @@
 #include "ImmediateTransferContext.hpp"
 #include "cm/Handles.hpp"
 #include "cm/Rando.hpp"
-#include "geo/GeometryData.hpp"
 #include "geo/Mesh.hpp"
 #include "mem/Allocator.hpp"
 #include "pipeline/IShaderCompiler.hpp"
@@ -76,13 +75,13 @@ public:
       -> ImageHandle;
 
   /// Add a static mesh to the MeshBufferManager for static meshes.
-  auto uploadStaticMesh(const GeometryData& geometryData) -> MeshHandle;
+  auto uploadStaticMesh(const IGeometryData& geometryData) -> MeshHandle;
 
-  auto asyncUpload2(const GeometryData& geometryData) -> MeshHandle;
+  auto asyncUpload2(const IGeometryData& geometryData) -> MeshHandle;
   auto uploadImage(const as::ImageData& imageData, std::string_view name) -> TextureHandle;
 
   /// Utility method to only be called by MeshBufferManagers.
-  auto addToMesh(const GeometryData& geometryData,
+  auto addToMesh(const IGeometryData& geometryData,
                  BufferHandle vertexBufferHandle,
                  vk::DeviceSize vertexOffset,
                  BufferHandle indexBufferHandle,

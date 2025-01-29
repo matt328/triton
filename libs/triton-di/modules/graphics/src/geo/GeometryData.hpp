@@ -1,27 +1,28 @@
 #pragma once
 
-#include "as/StaticVertex.hpp"
-#include "as/Vertex.hpp"
-
 namespace tr {
 
-class SkinnedGeometryData {
+class IGeometryData {
 public:
-  std::vector<as::Vertex> vertices;
-  std::vector<uint32_t> indices;
+  IGeometryData() = default;
+  virtual ~IGeometryData() = default;
 
-  [[nodiscard]] auto vertexDataSize() const noexcept {
-    return sizeof(vertices[0]) * vertices.size();
-  }
+  IGeometryData(const IGeometryData&) = default;
+  IGeometryData(IGeometryData&&) = delete;
+  auto operator=(const IGeometryData&) -> IGeometryData& = default;
+  auto operator=(IGeometryData&&) -> IGeometryData& = delete;
 
-  [[nodiscard]] auto indexDataSize() const noexcept {
-    return sizeof(indices[0]) * indices.size();
-  }
+  [[nodiscard]] virtual auto getVertexDataSize() const -> size_t = 0;
+  [[nodiscard]] virtual auto getIndexDataSize() const -> size_t = 0;
+  [[nodiscard]] virtual auto getVertexData() const -> const void* = 0;
+  [[nodiscard]] virtual auto getIndexData() const -> const void* = 0;
+  [[nodiscard]] virtual auto getIndexCount() const -> size_t = 0;
+  [[nodiscard]] virtual auto getVertexCount() const -> size_t = 0;
 };
 
-class StaticGeometryData {
-public:
-  std::vector<as::StaticVertex> vertices;
+template <typename T>
+struct GeometryData {
+  std::vector<T> vertices;
   std::vector<uint32_t> indices;
 
   [[nodiscard]] auto vertexDataSize() const noexcept {

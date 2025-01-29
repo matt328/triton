@@ -26,6 +26,8 @@ set(common_SRC
 
   modules/graphics/src/geo/VertexAttributes.cxx
   modules/graphics/src/geo/HeightField.cxx
+  modules/graphics/src/geo/SkinnedGeometryData.cxx
+  modules/graphics/src/geo/StaticGeometryData.cxx
 
   modules/graphics/src/tex/Texture.cxx
 
@@ -35,6 +37,7 @@ set(common_SRC
   modules/graphics/src/NewRenderContext.cxx
 
   modules/graphics/src/vk/VkResourceManager.cxx
+  modules/graphics/src/vk/BufferManager.cxx
   modules/graphics/src/vk/CommandBufferManager.cxx
   modules/graphics/src/vk/MeshBufferManager.cxx
   modules/graphics/src/vk/TextureManager.cxx

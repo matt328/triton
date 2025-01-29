@@ -1,26 +1,27 @@
 #include "MeshBufferManager.hpp"
 #include "as/Vertex.hpp"
 
+#include "vk/BufferManager.hpp"
 #include "vk/VkResourceManager.hpp"
 
 namespace tr {
 
-MeshBufferManager::MeshBufferManager(VkResourceManager* newResourceManager)
-    : resourceManager{newResourceManager},
+MeshBufferManager::MeshBufferManager(std::shared_ptr<BufferManager> newBufferManager)
+    : bufferManager{std::move(newBufferManager)},
       vertexBufferMaxSize(sizeof(as::Vertex) * 1024),
       indexBufferMaxSize(sizeof(uint32_t) * 1024),
       vertexBufferMaxLoad(0.8f),
       indexBufferMaxLoad(0.8f),
       vertexBufferHandle(
-          resourceManager->createGpuVertexBuffer(vertexBufferMaxSize, "Buffer-MeshVertex")),
+          bufferManager->createGpuVertexBuffer(vertexBufferMaxSize, "Buffer-MeshVertex")),
       indexBufferHandle(
-          resourceManager->createGpuIndexBuffer(indexBufferMaxSize, "Buffer-MeshIndex")) {
+          bufferManager->createGpuIndexBuffer(indexBufferMaxSize, "Buffer-MeshIndex")) {
 }
 
-auto MeshBufferManager::addMesh(const GeometryData& geometryData) -> MeshHandle {
+auto MeshBufferManager::addMesh(const IGeometryData& geometryData) -> MeshHandle {
 
-  const auto vertexSize = geometryData.vertices.size() * sizeof(as::Vertex);
-  const auto indexSize = geometryData.indices.size() * sizeof(uint32_t);
+  const auto vertexSize = geometryData.getVertexDataSize();
+  const auto indexSize = geometryData.getIndexDataSize();
 
   const auto newVertexSize = vertexBufferCurrentSize + vertexSize;
   const auto newIndexSize = indexBufferCurrentSize + indexSize;
@@ -40,7 +41,7 @@ auto MeshBufferManager::addMesh(const GeometryData& geometryData) -> MeshHandle 
 
     if (calculatedMaxSize != vertexBufferMaxSize) {
       Log.debug("Resizing vertex buffer to new max size: {}", calculatedMaxSize);
-      vertexBufferHandle = resourceManager->resizeBuffer(vertexBufferHandle, calculatedMaxSize);
+      vertexBufferHandle = bufferManager->resizeBuffer(vertexBufferHandle, calculatedMaxSize);
       vertexBufferMaxSize = calculatedMaxSize;
     }
   }
@@ -55,12 +56,12 @@ auto MeshBufferManager::addMesh(const GeometryData& geometryData) -> MeshHandle 
 
     if (calculatedIndexMaxSize != indexBufferMaxSize) {
       Log.debug("Resizing index buffer to new max size: {}", calculatedIndexMaxSize);
-      indexBufferHandle = resourceManager->resizeBuffer(indexBufferHandle, calculatedIndexMaxSize);
+      indexBufferHandle = bufferManager->resizeBuffer(indexBufferHandle, calculatedIndexMaxSize);
       indexBufferMaxSize = calculatedIndexMaxSize;
     }
   }
 
-  resourceManager->addToMesh(geometryData,
+  bufferManager->addToBuffer(geometryData,
                              vertexBufferHandle,
                              vertexBufferCurrentSize,
                              indexBufferHandle,
@@ -74,10 +75,10 @@ auto MeshBufferManager::addMesh(const GeometryData& geometryData) -> MeshHandle 
   }
 
   const auto meshHandle = bufferEntries.size();
-  bufferEntries.emplace_back(geometryData.indices.size(),
+  bufferEntries.emplace_back(geometryData.getIndexCount(),
                              indexOffset,
                              vertexOffset,
-                             geometryData.vertices.size());
+                             geometryData.getVertexCount());
 
   vertexBufferCurrentSize = newVertexSize;
   indexBufferCurrentSize = newIndexSize;
@@ -115,6 +116,11 @@ auto MeshBufferManager::getGpuBufferEntries(const std::vector<RenderMeshData>& m
   }
 
   return gpuBufferEntryList;
+}
+
+auto MeshBufferManager::getBuffers() const -> std::tuple<Buffer&, Buffer&> {
+  return {bufferManager->getBuffer(getVertexBufferHandle()),
+          bufferManager->getBuffer(getIndexBufferHandle())};
 }
 
 }
