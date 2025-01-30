@@ -60,7 +60,7 @@ include(CTest)
 
 add_subdirectory(assets)
 add_subdirectory(libs/util-lib)
-add_subdirectory(libs/triton-di)
+add_subdirectory(libs/triton)
 add_subdirectory(apps/editor2)
 add_subdirectory(apps/testarea)
 add_subdirectory(apps/assettool)
