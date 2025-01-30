@@ -20,6 +20,7 @@ layout(push_constant) uniform PushConstants {
   uint64_t objectDataAddress;
   uint64_t cameraDataAddress;
   uint64_t objectDataIndexAddress;
+  uint objectCount;
 }
 pc;
 
