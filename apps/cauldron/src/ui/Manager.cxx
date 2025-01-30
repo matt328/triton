@@ -12,6 +12,7 @@
 #include "ui/components/Dock.hpp"
 
 namespace ed {
+
 static constexpr float FontSize = 18.f;
 
 Manager::Manager(std::shared_ptr<Menu> newAppMenu,
@@ -20,14 +21,16 @@ Manager::Manager(std::shared_ptr<Menu> newAppMenu,
                  std::shared_ptr<EntityEditor> newEntityEditor,
                  std::shared_ptr<TaskQueue> newTaskQueue,
                  std::shared_ptr<Properties> newProperties,
-                 std::shared_ptr<DataFacade> newDataFacade)
+                 std::shared_ptr<DataFacade> newDataFacade,
+                 std::shared_ptr<AssetTool> newAssetTool)
     : appMenu{std::move(newAppMenu)},
       assetViewer{std::move(newAssetViewer)},
       dialogManager{std::move(newDialogManager)},
       entityEditor{std::move(newEntityEditor)},
       taskQueue{std::move(newTaskQueue)},
       properties{std::move(newProperties)},
-      dataFacade{std::move(newDataFacade)} {
+      dataFacade{std::move(newDataFacade)},
+      assetTool{std::move(newAssetTool)} {
 
   Log.trace("Constructing Manager");
   ImGuiEx::setupImGuiStyle();
@@ -67,6 +70,7 @@ void Manager::render() {
   appMenu->render();
   entityEditor->render();
   assetViewer->render();
+  assetTool->render();
 
   dialogManager->update();
 }

@@ -10,6 +10,8 @@
 
 namespace ed {
 
+class AssetTool;
+
 class Manager {
 public:
   explicit Manager(std::shared_ptr<Menu> newAppMenu,
@@ -18,7 +20,8 @@ public:
                    std::shared_ptr<EntityEditor> newEntityEditor,
                    std::shared_ptr<TaskQueue> newTaskQueue,
                    std::shared_ptr<Properties> newProperties,
-                   std::shared_ptr<DataFacade> newDataFacade);
+                   std::shared_ptr<DataFacade> newDataFacade,
+                   std::shared_ptr<AssetTool> newAssetTool);
   ~Manager();
 
   Manager(const Manager&) = delete;
@@ -38,6 +41,7 @@ private:
   std::shared_ptr<TaskQueue> taskQueue;
   std::shared_ptr<Properties> properties;
   std::shared_ptr<DataFacade> dataFacade;
+  std::shared_ptr<AssetTool> assetTool;
 
   auto setupFonts() -> void;
 };

@@ -1,5 +1,8 @@
 #pragma once
 
+#include "EntityEditor.hpp"
+#include "AssetTool.hpp"
+
 namespace ed {
 class Dock {
 public:
@@ -46,8 +49,9 @@ public:
         const auto dockIdRight =
             ImGui::DockBuilderSplitNode(dockspaceId, ImGuiDir_Down, 0.2f, nullptr, &dockspaceId);
 
-        ImGui::DockBuilderDockWindow("Entity Editor", dockIdLeft);
+        ImGui::DockBuilderDockWindow(EntityEditor::ComponentName, dockIdLeft);
         ImGui::DockBuilderDockWindow("Assets", dockIdLeft);
+        ImGui::DockBuilderDockWindow(AssetTool::ComponentName, dockIdLeft);
         ImGui::DockBuilderDockWindow("Log", dockIdRight);
 
         ImGui::DockBuilderFinish(dockspaceId);
