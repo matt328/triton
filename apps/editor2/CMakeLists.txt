@@ -99,7 +99,7 @@ target_link_libraries(${PROJECT_NAME}
   L2DFD
   glfw
   cereal::cereal
-  triton-di
+  triton
   platform_folders
   spdlog::spdlog_header_only
   util-lib

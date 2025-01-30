@@ -1,4 +1,4 @@
-project("triton-di")
+project("triton")
 
 set(common_SRC
 
