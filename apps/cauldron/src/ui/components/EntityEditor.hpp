@@ -28,6 +28,8 @@ public:
 
   void render();
 
+  static constexpr auto ComponentName = "Entity Editor";
+
 private:
   std::shared_ptr<tr::IGameplaySystem> gameplaySystem;
   std::shared_ptr<DataFacade> dataFacade;

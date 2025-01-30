@@ -8,6 +8,8 @@
 #include "tr/IEventBus.hpp"
 #include <entt/entity/fwd.hpp>
 
+#include "ui/components/AssetTool.hpp"
+
 namespace di = boost::di;
 
 // #ifdef WIN32

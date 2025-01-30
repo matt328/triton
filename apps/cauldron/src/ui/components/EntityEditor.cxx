@@ -50,7 +50,7 @@ EntityEditor::~EntityEditor() {
 
 void EntityEditor::render() {
 
-  if (ImGui::Begin("Entity Editor",
+  if (ImGui::Begin(ComponentName,
                    nullptr,
                    ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_MenuBar)) {
 
