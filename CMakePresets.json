@@ -92,34 +92,34 @@
   ],
   "buildPresets": [
     {
-      "name": "editor-debug",
-      "displayName": "Editor Debug Build",
+      "name": "debug",
+      "displayName": "Debug Build",
       "configurePreset": "debug",
       "configuration": "Debug",
       "jobs": 18,
       "targets": [
-        "editor2",
+        "Cauldron",
         "assettool"
       ]
     },
     {
-      "name": "editor-release",
-      "displayName": "Editor Release Build",
+      "name": "release",
+      "displayName": "Release Build",
       "configurePreset": "release",
       "configuration": "Release",
       "jobs": 18,
       "targets": [
-        "editor2"
+        "Cauldron"
       ]
     },
     {
-      "name": "editor-asan",
-      "displayName": "Editor Address Sanitizer Build",
+      "name": "asan",
+      "displayName": "Address Sanitizer Build",
       "configurePreset": "debug-asan",
       "configuration": "Debug",
       "jobs": 18,
       "targets": [
-        "editor2"
+        "Cauldron"
       ]
     },
     {
