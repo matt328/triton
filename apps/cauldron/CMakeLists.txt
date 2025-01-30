@@ -1,4 +1,4 @@
-project("editor2" VERSION "0.0.1" LANGUAGES CXX)
+project("Cauldron" VERSION "0.0.1" LANGUAGES CXX)
 
 set(editor_SRC
   src/main.cxx
