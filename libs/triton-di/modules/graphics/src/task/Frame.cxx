@@ -106,6 +106,10 @@ auto Frame::getEndCommandBufferHandle() const -> CommandBufferHandle {
   return endCmdBuffer;
 }
 
+auto Frame::getStaticObjectCount() const -> uint32_t {
+  return staticObjectCount;
+}
+
 auto Frame::setDepthImageHandle(const ImageHandle handle) -> void {
   depthImageHandle = handle;
 }
@@ -120,6 +124,10 @@ auto Frame::setSwapchainImageIndex(const uint32_t index) -> void {
 
 auto Frame::setBufferHandle(BufferHandleType type, BufferHandle handle) -> void {
   bufferHandleMap.insert({type, handle});
+}
+
+auto Frame::setStaticObjectCount(uint32_t newObjectCount) -> void {
+  staticObjectCount = newObjectCount;
 }
 
 auto Frame::transitionImage(const vk::raii::CommandBuffer& cmd,

@@ -209,9 +209,11 @@ auto DefaultRenderScheduler::handleSwapchainResized(const SwapchainResized& even
   }
 }
 
-auto DefaultRenderScheduler::updatePerFrameRenderData(Frame& frame, const RenderData& renderData)
-    -> void {
+auto DefaultRenderScheduler::updatePerFrameRenderData(Frame& frame,
+                                                      const RenderData& renderData) -> void {
   ZoneNamedN(var, "updatePerFrameRenderData", true);
+
+  frame.setStaticObjectCount(renderData.staticGpuMeshData.size());
 
   resourceManager->updateShaderBindings();
 
@@ -459,8 +461,8 @@ auto DefaultRenderScheduler::copyImageToImage(const vk::raii::CommandBuffer& cmd
   cmd.blitImage2(blitInfo);
 }
 
-auto DefaultRenderScheduler::insertBarrier(const vk::raii::CommandBuffer& cmd, const Buffer& buffer)
-    -> void {
+auto DefaultRenderScheduler::insertBarrier(const vk::raii::CommandBuffer& cmd,
+                                           const Buffer& buffer) -> void {
   // Insert a memory barrier for the buffer the computeTask writes to
   vk::BufferMemoryBarrier bufferMemoryBarrier{
       .srcAccessMask = vk::AccessFlagBits::eShaderWrite,

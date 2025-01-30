@@ -20,8 +20,8 @@ public:
 
   auto record(vk::raii::CommandBuffer& commandBuffer, const Frame& frame) -> void override;
 
-  auto record(vk::raii::CommandBuffer& commandBuffer, const ComputePushConstants& pushConstants)
-      -> void;
+  auto record(vk::raii::CommandBuffer& commandBuffer,
+              const ComputePushConstants& pushConstants) -> void;
 
 private:
   std::shared_ptr<VkResourceManager> resourceManager;

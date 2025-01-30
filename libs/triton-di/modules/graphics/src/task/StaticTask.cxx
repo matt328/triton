@@ -30,7 +30,8 @@ auto StaticTask::record(vk::raii::CommandBuffer& commandBuffer, const Frame& fra
   pushConstants = StaticPushConstants{.drawID = 0,
                                       .objectDataAddress = objectDataAddress,
                                       .cameraDataAddress = cameraDataAddress,
-                                      .objectDataIndexAddress = objectDataIndexAddress};
+                                      .objectDataIndexAddress = objectDataIndexAddress,
+                                      .objectCount = frame.getStaticObjectCount()};
 
   // Bind the graphics pipeline
   commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline->getPipeline());

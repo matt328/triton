@@ -27,13 +27,6 @@ public:
 
   auto record(vk::raii::CommandBuffer& commandBuffer, const Frame& frame) -> void override;
 
-  enum class ResourceSlot : uint8_t {
-    IndirectBuffer = 0,
-    InstanceBuffer,
-    CameraDataBuffer,
-    DrawCountBuffer
-  };
-
 private:
   std::shared_ptr<VkResourceManager> resourceManager;
   std::shared_ptr<IndirectPipeline> pipeline;
