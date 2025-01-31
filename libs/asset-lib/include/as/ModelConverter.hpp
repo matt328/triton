@@ -37,7 +37,11 @@ public:
   ModelConverter(ModelConverter&&) = delete;
   auto operator=(ModelConverter&&) -> ModelConverter& = delete;
 
+  auto load(const std::filesystem::path& path) -> void;
+  [[nodiscard]] auto hasSkin() const -> bool;
+  auto addSkeleton(const std::filesystem::path& path) -> void;
   void load(const ModelResources& resources);
+  [[nodiscard]] auto isReady() const -> bool;
 
   [[nodiscard]] auto buildTritonModel() const -> Model;
 

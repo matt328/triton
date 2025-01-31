@@ -77,6 +77,9 @@ public:
   /// Add a static mesh to the MeshBufferManager for static meshes.
   auto uploadStaticMesh(const IGeometryData& geometryData) -> MeshHandle;
 
+  /// Add a skinned mesh to the MeshBufferManager for skinned meshes.
+  auto uploadSkinnedMesh(const IGeometryData& geometryData) -> MeshHandle;
+
   auto asyncUpload2(const IGeometryData& geometryData) -> MeshHandle;
   auto uploadImage(const as::ImageData& imageData, std::string_view name) -> TextureHandle;
 
@@ -106,6 +109,7 @@ public:
   [[nodiscard]] auto getMesh(MeshHandle handle) -> const ImmutableMesh&;
 
   [[nodiscard]] auto getStaticMeshBuffers() const -> std::tuple<Buffer&, Buffer&>;
+  [[nodiscard]] auto getSkinnedMeshBuffers() const -> std::tuple<Buffer&, Buffer&>;
 
   [[nodiscard]] auto getDescriptorSetLayout() -> const vk::DescriptorSetLayout*;
 
@@ -144,6 +148,7 @@ private:
   std::vector<ImmutableMesh> meshList;
 
   std::unique_ptr<MeshBufferManager> staticMeshBufferManager;
+  std::unique_ptr<MeshBufferManager> skinnedMeshBufferManager;
 
   std::unique_ptr<TextureManager> textureManager;
 
