@@ -110,6 +110,10 @@ auto Frame::getStaticObjectCount() const -> uint32_t {
   return staticObjectCount;
 }
 
+auto Frame::getSkinnedObjectCount() const -> uint32_t {
+  return skinnedObjectCount;
+}
+
 auto Frame::setDepthImageHandle(const ImageHandle handle) -> void {
   depthImageHandle = handle;
 }
@@ -128,6 +132,10 @@ auto Frame::setBufferHandle(BufferHandleType type, BufferHandle handle) -> void 
 
 auto Frame::setStaticObjectCount(uint32_t newObjectCount) -> void {
   staticObjectCount = newObjectCount;
+}
+
+auto Frame::setSkinnedObjectCount(uint32_t newObjectCount) -> void {
+  skinnedObjectCount = newObjectCount;
 }
 
 auto Frame::transitionImage(const vk::raii::CommandBuffer& cmd,

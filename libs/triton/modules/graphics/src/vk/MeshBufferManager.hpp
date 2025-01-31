@@ -13,7 +13,9 @@ class Buffer;
 
 class MeshBufferManager {
 public:
-  explicit MeshBufferManager(std::shared_ptr<BufferManager> newBufferManager);
+  explicit MeshBufferManager(std::shared_ptr<BufferManager> newBufferManager,
+                             size_t vertexSize,
+                             std::string_view bufferName);
   ~MeshBufferManager() = default;
 
   MeshBufferManager(const MeshBufferManager&) = delete;

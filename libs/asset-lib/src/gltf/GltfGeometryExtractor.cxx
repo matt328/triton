@@ -81,6 +81,7 @@ void GltfGeometryExtractor::execute(const tinygltf::Model& model,
       }
     }
     tritonModel.staticVertices = std::move(vertices);
+    tritonModel.vertexType = VertexType::Static;
   } else {
     // Skinned Model
     std::vector<SkinnedVertex> vertices;
@@ -122,6 +123,7 @@ void GltfGeometryExtractor::execute(const tinygltf::Model& model,
       }
     }
     tritonModel.skinnedVertices = std::move(vertices);
+    tritonModel.vertexType = VertexType::Skinned;
   }
 }
 }

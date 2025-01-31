@@ -1,25 +1,27 @@
 #include "MeshBufferManager.hpp"
-#include "as/Vertex.hpp"
 
 #include "vk/BufferManager.hpp"
 #include "vk/VkResourceManager.hpp"
 
 namespace tr {
 
-MeshBufferManager::MeshBufferManager(std::shared_ptr<BufferManager> newBufferManager)
+MeshBufferManager::MeshBufferManager(std::shared_ptr<BufferManager> newBufferManager,
+                                     size_t vertexSize,
+                                     std::string_view bufferName)
     : bufferManager{std::move(newBufferManager)},
-      vertexBufferMaxSize(sizeof(as::Vertex) * 1024),
-      indexBufferMaxSize(sizeof(uint32_t) * 1024),
+      vertexBufferMaxSize(vertexSize * 10240),
+      indexBufferMaxSize(sizeof(uint32_t) * 10240),
       vertexBufferMaxLoad(0.8f),
       indexBufferMaxLoad(0.8f),
       vertexBufferHandle(
-          bufferManager->createGpuVertexBuffer(vertexBufferMaxSize, "Buffer-MeshVertex")),
+          bufferManager->createGpuVertexBuffer(vertexBufferMaxSize,
+                                               fmt::format("Buffer-{}-Vertex", bufferName.data()))),
       indexBufferHandle(
-          bufferManager->createGpuIndexBuffer(indexBufferMaxSize, "Buffer-MeshIndex")) {
+          bufferManager->createGpuIndexBuffer(indexBufferMaxSize,
+                                              fmt::format("Buffer-{}-Index", bufferName.data()))) {
 }
 
 auto MeshBufferManager::addMesh(const IGeometryData& geometryData) -> MeshHandle {
-
   const auto vertexSize = geometryData.getVertexDataSize();
   const auto indexSize = geometryData.getIndexDataSize();
 

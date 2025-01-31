@@ -21,14 +21,38 @@ ModelConverter::ModelConverter(std::unique_ptr<ITransformParser> transformParser
                                                 std::move(geometryExtractor),
                                                 std::move(textureExtractor));
 }
+
+auto ModelConverter::load(const std::filesystem::path& path) -> void {
+  std::unique_ptr<IFileLoader<tinygltf::Model>> loader = std::make_unique<GltfLoaderImpl>();
+  model = modelLoader->load(loader.get(), path);
+}
+
+auto ModelConverter::hasSkin() const -> bool {
+  return !model.skins.empty();
+}
+
+auto ModelConverter::addSkeleton(const std::filesystem::path& path) -> void {
+  skeleton = skeletonLoader->load(path);
+}
+
 void ModelConverter::load(const ModelResources& resources) {
 
-  std::unique_ptr<IFileLoader<tinygltf::Model>> loader = std::make_unique<GltfLoaderImpl>();
+  load(resources.modelPath);
 
-  model = modelLoader->load(loader.get(), resources.modelPath);
   if (resources.skeletonPath.has_value()) {
-    skeleton = skeletonLoader->load(*resources.skeletonPath);
+    addSkeleton(*resources.skeletonPath);
   }
+}
+
+auto ModelConverter::isReady() const -> bool {
+  const auto modelLoaded = !model.accessors.empty();
+  const auto modelHasSkin = !model.skins.empty();
+  const auto skeletonLoaded = skeleton.has_value();
+
+  const auto skinlessModelLoaded = modelLoaded && !modelHasSkin;
+  const auto skinnedModelLoaded = modelLoaded && modelHasSkin && skeletonLoaded;
+
+  return skinlessModelLoaded || skinnedModelLoaded;
 }
 
 auto ModelConverter::buildTritonModel() const -> Model {

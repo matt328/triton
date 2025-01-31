@@ -9,11 +9,11 @@ SkinnedGeometryData::SkinnedGeometryData(std::vector<as::SkinnedVertex>&& newVer
 }
 
 auto SkinnedGeometryData::getVertexDataSize() const -> size_t {
-  return sizeof(vertices[0]) * vertices.size();
+  return sizeof(as::SkinnedVertex) * vertices.size();
 }
 
 auto SkinnedGeometryData::getIndexDataSize() const -> size_t {
-  return sizeof(indices[0]) * indices.size();
+  return sizeof(uint32_t) * indices.size();
 }
 
 auto SkinnedGeometryData::getVertexData() const -> const void* {

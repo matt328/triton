@@ -52,12 +52,9 @@ IndirectPipeline::IndirectPipeline(const std::shared_ptr<Device>& device,
 
   // Vertex Input State
   auto vec = std::vector{VertexComponent::Position,
-                         VertexComponent::Normal,
                          VertexComponent::UV,
-                         VertexComponent::Color,
                          VertexComponent::Joint0,
-                         VertexComponent::Weight0,
-                         VertexComponent::Tangent};
+                         VertexComponent::Weight0};
 
   const auto vertexAttributeDescriptions =
       VertexBuilder::inputAttributeDescriptions(0, std::span(vec.begin(), vec.end()));

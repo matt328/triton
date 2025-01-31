@@ -19,11 +19,19 @@ auto AssetManager::loadModel(std::string_view filename) -> ModelData {
 
   auto& geometryData = geometryDataMap.at(geometryHandle);
 
-  auto meshHandle = resourceManager->uploadStaticMesh(*geometryData);
+  auto meshHandle = MeshHandle{};
+  if (tritonModelData.getSkinData().has_value()) {
+    meshHandle = resourceManager->uploadSkinnedMesh(*geometryData);
+  } else {
+    meshHandle = resourceManager->uploadStaticMesh(*geometryData);
+  }
+
   auto textureHandle = resourceManager->uploadImage(imageDataMap.at(imageHandle), "ModelTexture");
 
   geometryDataMap.erase(geometryHandle);
   imageDataMap.erase(imageHandle);
+
+  // Animation Data?
 
   return ModelData{.meshData =
                        MeshData{
@@ -173,13 +181,6 @@ auto AssetManager::loadTrm(const std::filesystem::path& modelPath) -> TritonMode
   Log.debug("Loading TRM File: {0}", modelPath.string());
 
   auto tritonModel = loadTrmFile(modelPath.string());
-
-  Log.debug("Joint Remaps Size: {0}", tritonModel.jointRemaps.size());
-  for (const auto& [position, sortedIndex] : tritonModel.jointRemaps) {
-    Log.debug("Joint Remap: {0}, {1}", position, sortedIndex);
-  }
-
-  Log.debug("inverseBindPoses.size(): {0}", tritonModel.inverseBindPoses.size());
 
   const auto imageHandle = imageKey.getKey();
   imageDataMap.emplace(imageHandle, tritonModel.imageData);

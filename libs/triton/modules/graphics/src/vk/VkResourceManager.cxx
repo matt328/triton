@@ -1,5 +1,6 @@
 #include "VkResourceManager.hpp"
 
+#include "as/StaticVertex.hpp"
 #include "mem/Allocator.hpp"
 #include "mem/Image.hpp"
 #include "tr/IDebugManager.hpp"
@@ -11,6 +12,7 @@
 #include "vk/sb/IShaderBinding.hpp"
 #include "vk/sb/IShaderBindingFactory.hpp"
 #include "vk/TextureManager.hpp"
+#include <memory>
 
 namespace tr {
 
@@ -43,7 +45,11 @@ VkResourceManager::VkResourceManager(
   textureShaderBindingHandle =
       shaderBindingFactory->createShaderBinding(ShaderBindingType::Textures, textureDSLHandle);
 
-  staticMeshBufferManager = std::make_unique<MeshBufferManager>(bufferManager);
+  staticMeshBufferManager =
+      std::make_unique<MeshBufferManager>(bufferManager, sizeof(as::StaticVertex), "Static");
+
+  skinnedMeshBufferManager =
+      std::make_unique<MeshBufferManager>(bufferManager, sizeof(as::SkinnedVertex), "Skinned");
 
   textureManager = std::make_unique<TextureManager>(this);
 }
@@ -54,6 +60,10 @@ VkResourceManager::~VkResourceManager() {
 
 auto VkResourceManager::uploadStaticMesh(const IGeometryData& geometryData) -> MeshHandle {
   return staticMeshBufferManager->addMesh(geometryData);
+}
+
+auto VkResourceManager::uploadSkinnedMesh(const IGeometryData& geometryData) -> MeshHandle {
+  return skinnedMeshBufferManager->addMesh(geometryData);
 }
 
 auto VkResourceManager::asyncUpload2(const IGeometryData& geometryData) -> MeshHandle {
@@ -271,6 +281,11 @@ auto VkResourceManager::getTextureData(const as::ImageData& imageData, std::stri
 
 [[nodiscard]] auto VkResourceManager::getStaticMeshBuffers() const -> std::tuple<Buffer&, Buffer&> {
   return staticMeshBufferManager->getBuffers();
+}
+
+[[nodiscard]] auto VkResourceManager::getSkinnedMeshBuffers() const
+    -> std::tuple<Buffer&, Buffer&> {
+  return skinnedMeshBufferManager->getBuffers();
 }
 
 auto VkResourceManager::createDefaultDescriptorPool() const
