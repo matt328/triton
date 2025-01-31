@@ -46,7 +46,7 @@
       "type": "lldb-dap",
       "request": "launch",
       "name": "(lldb) Launch",
-      "program": "${workspaceFolder}/build/debug/apps/cauldron/cauldron",
+      "program": "${workspaceFolder}/build/debug/apps/cauldron/Cauldron",
       "args": [
         "gltf",
         "-f=C:\\Users\\Matt\\Projects\\game-assets\\models\\viking_room\\viking_room.gltf",
