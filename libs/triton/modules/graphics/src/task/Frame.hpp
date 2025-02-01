@@ -14,17 +14,19 @@ enum class CmdBufferType : uint8_t {
 };
 
 enum class BufferHandleType : uint8_t {
-  GpuBufferEntry = 0,
+  StaticGpuBufferEntry = 0,
   StaticDrawCommand,
   StaticObjectDataBuffer,
   StaticObjectDataIndexBuffer,
   StaticCountBuffer,
+  DynamicGpuBufferEntry,
   DynamicDrawCommand,
   DynamicObjectDataBuffer,
   DynamicObjectDataIndexBuffer,
   DynamicCountBuffer,
   CameraBuffer,
-  DescriptorBuffer
+  DescriptorBuffer,
+  AnimationDataBuffer
 };
 
 class Frame {

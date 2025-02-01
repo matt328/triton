@@ -67,6 +67,12 @@ private:
 
   auto handleSwapchainResized(const SwapchainResized& event) -> void;
 
+  auto createStaticBuffers(const std::unique_ptr<Frame>& frame) -> void;
+  auto createSkinnedBuffers(const std::unique_ptr<Frame>& frame) -> void;
+
+  auto updateStaticBuffers(Frame& frame, const RenderData& renderData) -> void;
+  auto updateDynamicBuffers(Frame& frame, const RenderData& renderData) -> void;
+
   static auto transitionImage(const vk::raii::CommandBuffer& cmd,
                               const vk::Image& image,
                               vk::ImageLayout currentLayout,

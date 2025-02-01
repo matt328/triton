@@ -1,5 +1,6 @@
 #include "DefaultRenderScheduler.hpp"
 
+#include "cm/Handles.hpp"
 #include "tr/Events.hpp"
 #include "tr/IEventBus.hpp"
 #include "tr/IGuiSystem.hpp"
@@ -49,9 +50,6 @@ DefaultRenderScheduler::DefaultRenderScheduler(
                                                drawImageExtent,
                                                swapchain->getDepthFormat());
 
-  std::vector<GpuBufferEntry> gpuBufferEntryList{};
-  gpuBufferEntryList.reserve(1);
-
   const auto position = glm::vec3{0.f, 0.f, 0.f};
   const auto view = glm::lookAt(position, glm::vec3{0.f, 0.f, -5.f}, glm::vec3{0.f, 1.f, 0.f});
   const auto projection =
@@ -66,80 +64,8 @@ DefaultRenderScheduler::DefaultRenderScheduler(
 
     frame->setDepthImageHandle(depthImageHandle);
 
-    // Gpu Buffer Entry Data
-    {
-      const auto name = frame->getIndexedName("Buffer-GpuBufferEntry-Frame_");
-      const auto handle = bufferManager->createBuffer(
-          sizeof(GpuBufferEntry) * renderConfig.maxStaticObjects,
-          vk::BufferUsageFlagBits::eStorageBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress,
-          name);
-
-      frame->setBufferHandle(BufferHandleType::GpuBufferEntry, handle);
-
-      auto& gpuBufferEntriesBuffer = bufferManager->getBuffer(handle);
-      gpuBufferEntriesBuffer.mapBuffer();
-      gpuBufferEntriesBuffer.updateBufferValue(gpuBufferEntryList.data(), sizeof(GpuBufferEntry));
-      gpuBufferEntriesBuffer.unmapBuffer();
-    }
-
-    // IndirectCommandBuffer
-    {
-      const auto name = frame->getIndexedName("Buffer-DrawCommand-Frame_");
-      const auto handle = bufferManager->createBuffer(
-          sizeof(vk::DrawIndexedIndirectCommand) * renderConfig.maxStaticObjects,
-          vk::BufferUsageFlagBits::eIndirectBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress,
-          name);
-      frame->setBufferHandle(BufferHandleType::StaticDrawCommand, handle);
-      auto& indirectCommandBuffer = bufferManager->getBuffer(handle);
-      auto cmd = vk::DrawIndexedIndirectCommand{};
-      cmd.instanceCount = 0;
-      indirectCommandBuffer.mapBuffer();
-      indirectCommandBuffer.updateBufferValue(&cmd, sizeof(vk::DrawIndexedIndirectCommand));
-      indirectCommandBuffer.unmapBuffer();
-    }
-
-    // Object Count Buffer
-    {
-      const auto name = frame->getIndexedName("Buffer-Count-Frame_");
-      const auto handle = bufferManager->createBuffer(
-          sizeof(uint32_t),
-          vk::BufferUsageFlagBits::eIndirectBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress,
-          name);
-      auto& countBuffer = bufferManager->getBuffer(handle);
-
-      uint32_t count = 0;
-      countBuffer.mapBuffer();
-      countBuffer.updateBufferValue(&count, sizeof(uint32_t));
-      countBuffer.unmapBuffer();
-
-      frame->setBufferHandle(BufferHandleType::StaticCountBuffer, handle);
-    }
-
-    // ObjectDataIndex Buffer
-    {
-      const auto name = frame->getIndexedName("Buffer-ObjectDataIndex-Frame_");
-      const auto handle = bufferManager->createBuffer(
-          sizeof(uint32_t) * renderConfig.maxStaticObjects,
-          vk::BufferUsageFlagBits::eIndirectBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress,
-          name);
-      auto& objectDataIndexBuffer = bufferManager->getBuffer(handle);
-
-      uint32_t count = 0;
-      objectDataIndexBuffer.mapBuffer();
-      objectDataIndexBuffer.updateBufferValue(&count, sizeof(uint32_t));
-      objectDataIndexBuffer.unmapBuffer();
-      frame->setBufferHandle(BufferHandleType::StaticObjectDataIndexBuffer, handle);
-    }
-
-    // Object Data Buffer
-    {
-      const auto name = frame->getIndexedName("Buffer-GpuObjectData-Frame_");
-      const auto handle = bufferManager->createBuffer(
-          sizeof(GpuObjectData) * renderConfig.maxStaticObjects,
-          vk::BufferUsageFlagBits::eIndirectBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress,
-          name);
-      frame->setBufferHandle(BufferHandleType::StaticObjectDataBuffer, handle);
-    }
+    createStaticBuffers(frame);
+    createSkinnedBuffers(frame);
 
     // Camera Data Buffer
     {
@@ -182,6 +108,174 @@ DefaultRenderScheduler::~DefaultRenderScheduler() {
   Log.trace("Destroying DefaultRenderScheduler");
 }
 
+auto DefaultRenderScheduler::createStaticBuffers(const std::unique_ptr<Frame>& frame) -> void {
+  // Gpu Buffer Entry Data
+  {
+    std::vector<GpuBufferEntry> gpuBufferEntryList{};
+    gpuBufferEntryList.reserve(1);
+    const auto name = frame->getIndexedName("Buffer-StaticGpuBufferEntry-Frame_");
+    const auto handle = bufferManager->createBuffer(
+        sizeof(GpuBufferEntry) * renderConfig.maxStaticObjects,
+        vk::BufferUsageFlagBits::eStorageBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress,
+        name);
+
+    frame->setBufferHandle(BufferHandleType::StaticGpuBufferEntry, handle);
+
+    auto& gpuBufferEntriesBuffer = bufferManager->getBuffer(handle);
+    gpuBufferEntriesBuffer.mapBuffer();
+    gpuBufferEntriesBuffer.updateBufferValue(gpuBufferEntryList.data(), sizeof(GpuBufferEntry));
+    gpuBufferEntriesBuffer.unmapBuffer();
+  }
+
+  // IndirectCommandBuffer
+  {
+    const auto name = frame->getIndexedName("Buffer-DrawCommand-Frame_");
+    const auto handle = bufferManager->createBuffer(
+        sizeof(vk::DrawIndexedIndirectCommand) * renderConfig.maxStaticObjects,
+        vk::BufferUsageFlagBits::eIndirectBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress,
+        name);
+    frame->setBufferHandle(BufferHandleType::StaticDrawCommand, handle);
+    auto& indirectCommandBuffer = bufferManager->getBuffer(handle);
+    auto cmd = vk::DrawIndexedIndirectCommand{};
+    cmd.instanceCount = 0;
+    indirectCommandBuffer.mapBuffer();
+    indirectCommandBuffer.updateBufferValue(&cmd, sizeof(vk::DrawIndexedIndirectCommand));
+    indirectCommandBuffer.unmapBuffer();
+  }
+
+  // Object Count Buffer
+  {
+    const auto name = frame->getIndexedName("Buffer-Count-Frame_");
+    const auto handle = bufferManager->createBuffer(
+        sizeof(uint32_t),
+        vk::BufferUsageFlagBits::eIndirectBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress,
+        name);
+    auto& countBuffer = bufferManager->getBuffer(handle);
+
+    uint32_t count = 0;
+    countBuffer.mapBuffer();
+    countBuffer.updateBufferValue(&count, sizeof(uint32_t));
+    countBuffer.unmapBuffer();
+
+    frame->setBufferHandle(BufferHandleType::StaticCountBuffer, handle);
+  }
+
+  // ObjectDataIndex Buffer
+  {
+    const auto name = frame->getIndexedName("Buffer-ObjectDataIndex-Frame_");
+    const auto handle = bufferManager->createBuffer(
+        sizeof(uint32_t) * renderConfig.maxStaticObjects,
+        vk::BufferUsageFlagBits::eIndirectBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress,
+        name);
+    auto& objectDataIndexBuffer = bufferManager->getBuffer(handle);
+
+    uint32_t count = 0;
+    objectDataIndexBuffer.mapBuffer();
+    objectDataIndexBuffer.updateBufferValue(&count, sizeof(uint32_t));
+    objectDataIndexBuffer.unmapBuffer();
+    frame->setBufferHandle(BufferHandleType::StaticObjectDataIndexBuffer, handle);
+  }
+
+  // Object Data Buffer
+  {
+    const auto name = frame->getIndexedName("Buffer-GpuObjectData-Frame_");
+    const auto handle = bufferManager->createBuffer(
+        sizeof(GpuObjectData) * renderConfig.maxStaticObjects,
+        vk::BufferUsageFlagBits::eIndirectBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress,
+        name);
+    frame->setBufferHandle(BufferHandleType::StaticObjectDataBuffer, handle);
+  }
+}
+
+auto DefaultRenderScheduler::createSkinnedBuffers(const std::unique_ptr<Frame>& frame) -> void {
+  // Gpu Buffer Entry Data - for Compute Shader to create draw commands
+  {
+    std::vector<GpuBufferEntry> gpuBufferEntryList{};
+    gpuBufferEntryList.reserve(1);
+    const auto name = frame->getIndexedName("Buffer-SkinnedGpuBufferEntry-Frame_");
+    const auto handle = bufferManager->createBuffer(
+        sizeof(GpuBufferEntry) * renderConfig.maxDynamicObjects,
+        vk::BufferUsageFlagBits::eStorageBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress,
+        name);
+
+    frame->setBufferHandle(BufferHandleType::DynamicGpuBufferEntry, handle);
+
+    auto& gpuBufferEntriesBuffer = bufferManager->getBuffer(handle);
+    gpuBufferEntriesBuffer.mapBuffer();
+    gpuBufferEntriesBuffer.updateBufferValue(gpuBufferEntryList.data(), sizeof(GpuBufferEntry));
+    gpuBufferEntriesBuffer.unmapBuffer();
+  }
+
+  // IndirectCommandBuffer
+  {
+    const auto name = frame->getIndexedName("Buffer-DynamicDrawCommand-Frame_");
+    const auto handle = bufferManager->createBuffer(
+        sizeof(vk::DrawIndexedIndirectCommand) * renderConfig.maxDynamicObjects,
+        vk::BufferUsageFlagBits::eIndirectBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress,
+        name);
+    frame->setBufferHandle(BufferHandleType::DynamicDrawCommand, handle);
+    auto& indirectCommandBuffer = bufferManager->getBuffer(handle);
+    auto cmd = vk::DrawIndexedIndirectCommand{};
+    cmd.instanceCount = 0;
+    indirectCommandBuffer.mapBuffer();
+    indirectCommandBuffer.updateBufferValue(&cmd, sizeof(vk::DrawIndexedIndirectCommand));
+    indirectCommandBuffer.unmapBuffer();
+  }
+
+  // Object Count Buffer
+  {
+    const auto name = frame->getIndexedName("Buffer-DynamicCount-Frame_");
+    const auto handle = bufferManager->createBuffer(
+        sizeof(uint32_t),
+        vk::BufferUsageFlagBits::eIndirectBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress,
+        name);
+    auto& countBuffer = bufferManager->getBuffer(handle);
+
+    uint32_t count = 0;
+    countBuffer.mapBuffer();
+    countBuffer.updateBufferValue(&count, sizeof(uint32_t));
+    countBuffer.unmapBuffer();
+
+    frame->setBufferHandle(BufferHandleType::DynamicCountBuffer, handle);
+  }
+
+  // ObjectDataIndex Buffer
+  {
+    const auto name = frame->getIndexedName("Buffer-DynamicObjectDataIndex-Frame_");
+    const auto handle = bufferManager->createBuffer(
+        sizeof(uint32_t) * renderConfig.maxDynamicObjects,
+        vk::BufferUsageFlagBits::eIndirectBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress,
+        name);
+    auto& objectDataIndexBuffer = bufferManager->getBuffer(handle);
+
+    uint32_t count = 0;
+    objectDataIndexBuffer.mapBuffer();
+    objectDataIndexBuffer.updateBufferValue(&count, sizeof(uint32_t));
+    objectDataIndexBuffer.unmapBuffer();
+    frame->setBufferHandle(BufferHandleType::DynamicObjectDataIndexBuffer, handle);
+  }
+
+  // Object Data Buffer
+  {
+    const auto name = frame->getIndexedName("Buffer-DynamicObjectData-Frame_");
+    const auto handle = bufferManager->createBuffer(
+        sizeof(GpuObjectData) * renderConfig.maxDynamicObjects,
+        vk::BufferUsageFlagBits::eIndirectBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress,
+        name);
+    frame->setBufferHandle(BufferHandleType::DynamicObjectDataBuffer, handle);
+  }
+
+  // Animation Data Buffer
+  {
+    const auto name = frame->getIndexedName("Buffer-AnimationData-Frame_");
+    const auto bufferSize = sizeof(AnimationData) * renderConfig.maxDynamicObjects;
+    const auto flags =
+        vk::BufferUsageFlagBits::eIndirectBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress;
+    const auto handle = bufferManager->createBuffer(bufferSize, flags, name);
+    frame->setBufferHandle(BufferHandleType::AnimationDataBuffer, handle);
+  }
+}
+
 auto DefaultRenderScheduler::handleSwapchainResized(const SwapchainResized& event) -> void {
   viewport = vk::Viewport{
       .width = static_cast<float>(event.width),
@@ -209,8 +303,8 @@ auto DefaultRenderScheduler::handleSwapchainResized(const SwapchainResized& even
   }
 }
 
-auto DefaultRenderScheduler::updatePerFrameRenderData(Frame& frame,
-                                                      const RenderData& renderData) -> void {
+auto DefaultRenderScheduler::updatePerFrameRenderData(Frame& frame, const RenderData& renderData)
+    -> void {
   ZoneNamedN(var, "updatePerFrameRenderData", true);
 
   frame.setStaticObjectCount(renderData.staticGpuMeshData.size());
@@ -218,34 +312,18 @@ auto DefaultRenderScheduler::updatePerFrameRenderData(Frame& frame,
 
   resourceManager->updateShaderBindings();
 
-  { // Update GpuBufferEntriesBuffer
-    ZoneNamedN(var, "getStaticGpuData", true);
-    const auto& gpuBufferEntryList =
-        resourceManager->getStaticGpuData(renderData.staticGpuMeshData);
+  updateStaticBuffers(frame, renderData);
 
-    auto& gpuBufferEntriesBuffer =
-        bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::GpuBufferEntry));
-
-    gpuBufferEntriesBuffer.mapBuffer();
-    gpuBufferEntriesBuffer.updateBufferValue(gpuBufferEntryList.data(),
-                                             sizeof(GpuBufferEntry) * gpuBufferEntryList.size());
-    gpuBufferEntriesBuffer.unmapBuffer();
-  }
-
-  // Update GpuObjectDataBuffer
-  auto& objectDataBuffer =
-      bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::StaticObjectDataBuffer));
-  objectDataBuffer.mapBuffer();
-  objectDataBuffer.updateBufferValue(renderData.objectData.data(),
-                                     sizeof(GpuObjectData) * renderData.objectData.size());
-  objectDataBuffer.unmapBuffer();
+  updateDynamicBuffers(frame, renderData);
 
   // Update CameraDataBuffer
-  auto& cameraDataBuffer =
-      bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::CameraBuffer));
-  cameraDataBuffer.mapBuffer();
-  cameraDataBuffer.updateBufferValue(&renderData.cameraData, sizeof(GpuCameraData));
-  cameraDataBuffer.unmapBuffer();
+  {
+    auto& cameraDataBuffer =
+        bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::CameraBuffer));
+    cameraDataBuffer.mapBuffer();
+    cameraDataBuffer.updateBufferValue(&renderData.cameraData, sizeof(GpuCameraData));
+    cameraDataBuffer.unmapBuffer();
+  }
 }
 
 auto DefaultRenderScheduler::recordRenderTasks(Frame& frame, bool recordTasks) -> void {
@@ -316,7 +394,7 @@ auto DefaultRenderScheduler::executeTasks(Frame& frame, bool recordTasks) const 
   {
     ZoneNamedN(var, "Record Static Compute Task", true);
     const auto& gpuBufferEntryBuffer =
-        bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::GpuBufferEntry));
+        bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::StaticGpuBufferEntry));
     const auto& objectDataBuffer =
         bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::StaticObjectDataBuffer));
     const auto& drawCommandBuffer =
@@ -336,18 +414,58 @@ auto DefaultRenderScheduler::executeTasks(Frame& frame, bool recordTasks) const 
     computeTask->record(commandBuffer, computePushConstants);
   }
 
-  // Record barriers for buffers written by compute tasks
-  auto& indirectBuffer =
-      bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::StaticDrawCommand));
-  insertBarrier(commandBuffer, indirectBuffer);
+  {
+    ZoneNamedN(var, "Record Dynamic Compute Task", true);
+    const auto& gpuBufferEntryBuffer =
+        bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::DynamicGpuBufferEntry));
+    const auto& objectDataBuffer =
+        bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::DynamicObjectDataBuffer));
+    const auto& drawCommandBuffer =
+        bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::DynamicDrawCommand));
+    const auto& countBuffer =
+        bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::DynamicCountBuffer));
+    const auto& objectDataIndexBuffer = bufferManager->getBuffer(
+        frame.getBufferHandle(BufferHandleType::DynamicObjectDataIndexBuffer));
 
-  auto& countBuffer =
-      bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::StaticCountBuffer));
-  insertBarrier(commandBuffer, countBuffer);
+    auto computePushConstants = ComputePushConstants{
+        .drawCommandBufferAddress = drawCommandBuffer.getDeviceAddress(),
+        .gpuBufferEntryBufferAddress = gpuBufferEntryBuffer.getDeviceAddress(),
+        .objectDataBufferAddress = objectDataBuffer.getDeviceAddress(),
+        .countBufferAddress = countBuffer.getDeviceAddress(),
+        .objectDataIndexBufferAddress = objectDataIndexBuffer.getDeviceAddress(),
+        .objectCount = 2};
+    computeTask->record(commandBuffer, computePushConstants);
+  }
 
-  auto& objectDataIndexBuffer = bufferManager->getBuffer(
-      frame.getBufferHandle(BufferHandleType::StaticObjectDataIndexBuffer));
-  insertBarrier(commandBuffer, objectDataIndexBuffer);
+  // Record barriers for buffers written by Static compute tasks
+  {
+    auto& indirectBuffer =
+        bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::StaticDrawCommand));
+    insertBarrier(commandBuffer, indirectBuffer);
+
+    auto& countBuffer =
+        bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::StaticCountBuffer));
+    insertBarrier(commandBuffer, countBuffer);
+
+    auto& objectDataIndexBuffer = bufferManager->getBuffer(
+        frame.getBufferHandle(BufferHandleType::StaticObjectDataIndexBuffer));
+    insertBarrier(commandBuffer, objectDataIndexBuffer);
+  }
+
+  // Record barriers for buffers written by Dynamic compute tasks
+  {
+    auto& indirectBuffer =
+        bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::DynamicDrawCommand));
+    insertBarrier(commandBuffer, indirectBuffer);
+
+    auto& countBuffer =
+        bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::DynamicCountBuffer));
+    insertBarrier(commandBuffer, countBuffer);
+
+    auto& objectDataIndexBuffer = bufferManager->getBuffer(
+        frame.getBufferHandle(BufferHandleType::DynamicObjectDataIndexBuffer));
+    insertBarrier(commandBuffer, objectDataIndexBuffer);
+  }
 
   const auto renderingInfo = frame.getRenderingInfo();
 
@@ -358,8 +476,12 @@ auto DefaultRenderScheduler::executeTasks(Frame& frame, bool recordTasks) const 
 
   if (recordTasks) {
     ZoneNamedN(var, "IndirectRenderTask", true);
-    staticRenderTask->record(commandBuffer, frame);
-    indirectRenderTask->record(commandBuffer, frame);
+    if (frame.getStaticObjectCount() > 0) {
+      staticRenderTask->record(commandBuffer, frame);
+    }
+    if (frame.getSkinnedObjectCount() > 0) {
+      indirectRenderTask->record(commandBuffer, frame);
+    }
   }
 
   commandBuffer.endRendering();
@@ -463,8 +585,8 @@ auto DefaultRenderScheduler::copyImageToImage(const vk::raii::CommandBuffer& cmd
   cmd.blitImage2(blitInfo);
 }
 
-auto DefaultRenderScheduler::insertBarrier(const vk::raii::CommandBuffer& cmd,
-                                           const Buffer& buffer) -> void {
+auto DefaultRenderScheduler::insertBarrier(const vk::raii::CommandBuffer& cmd, const Buffer& buffer)
+    -> void {
   // Insert a memory barrier for the buffer the computeTask writes to
   vk::BufferMemoryBarrier bufferMemoryBarrier{
       .srcAccessMask = vk::AccessFlagBits::eShaderWrite,
@@ -482,6 +604,74 @@ auto DefaultRenderScheduler::insertBarrier(const vk::raii::CommandBuffer& cmd,
                       nullptr,
                       bufferMemoryBarrier,
                       nullptr);
+}
+
+auto DefaultRenderScheduler::updateStaticBuffers(Frame& frame, const RenderData& renderData)
+    -> void {
+  // Update GpuBufferEntriesBuffer
+  {
+    ZoneNamedN(var, "getStaticGpuData", true);
+    const auto& gpuBufferEntryList =
+        resourceManager->getStaticGpuData(renderData.staticGpuMeshData);
+
+    auto& gpuBufferEntriesBuffer =
+        bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::StaticGpuBufferEntry));
+
+    gpuBufferEntriesBuffer.mapBuffer();
+    gpuBufferEntriesBuffer.updateBufferValue(gpuBufferEntryList.data(),
+                                             sizeof(GpuBufferEntry) * gpuBufferEntryList.size());
+    gpuBufferEntriesBuffer.unmapBuffer();
+  }
+
+  // Update StaticObjectDataBuffer
+  {
+    auto& objectDataBuffer =
+        bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::StaticObjectDataBuffer));
+    objectDataBuffer.mapBuffer();
+    objectDataBuffer.updateBufferValue(renderData.objectData.data(),
+                                       sizeof(GpuObjectData) * renderData.objectData.size());
+    objectDataBuffer.unmapBuffer();
+  }
+}
+
+auto DefaultRenderScheduler::updateDynamicBuffers(Frame& frame, const RenderData& renderData)
+    -> void {
+  // Update GpuBufferEntriesBuffer
+  {
+    ZoneNamedN(var, "getDynamicGpuData", true);
+    const auto& gpuBufferEntryList = resourceManager->getSkinnedGpuData(renderData.skinnedMeshData);
+
+    auto& gpuBufferEntriesBuffer =
+        bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::DynamicGpuBufferEntry));
+
+    gpuBufferEntriesBuffer.mapBuffer();
+    gpuBufferEntriesBuffer.updateBufferValue(gpuBufferEntryList.data(),
+                                             sizeof(GpuBufferEntry) * gpuBufferEntryList.size());
+    gpuBufferEntriesBuffer.unmapBuffer();
+  }
+
+  // Update ObjectDataBuffer
+  {
+    const auto handle = frame.getBufferHandle(BufferHandleType::DynamicObjectDataBuffer);
+    auto& objectDataBuffer = bufferManager->getBuffer(handle);
+    const auto size =
+        sizeof(renderData.dynamicObjectData.front()) * renderData.dynamicObjectData.size();
+
+    objectDataBuffer.mapBuffer();
+    objectDataBuffer.updateBufferValue(renderData.dynamicObjectData.data(), size);
+    objectDataBuffer.unmapBuffer();
+  }
+
+  // Update AnimationDataBuffer
+  {
+    const auto handle = frame.getBufferHandle(BufferHandleType::AnimationDataBuffer);
+    auto& animationDataBuffer = bufferManager->getBuffer(handle);
+    const auto size = sizeof(renderData.animationData.front()) * renderData.animationData.size();
+
+    animationDataBuffer.mapBuffer();
+    animationDataBuffer.updateBufferValue(renderData.animationData.data(), size);
+    animationDataBuffer.unmapBuffer();
+  }
 }
 
 } // namespace tr

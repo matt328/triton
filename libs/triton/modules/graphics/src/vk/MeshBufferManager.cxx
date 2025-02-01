@@ -10,7 +10,7 @@ MeshBufferManager::MeshBufferManager(std::shared_ptr<BufferManager> newBufferMan
                                      std::string_view bufferName)
     : bufferManager{std::move(newBufferManager)},
       vertexBufferMaxSize(vertexSize * 10240),
-      indexBufferMaxSize(sizeof(uint32_t) * 10240),
+      indexBufferMaxSize(sizeof(uint32_t) * 30240),
       vertexBufferMaxLoad(0.8f),
       indexBufferMaxLoad(0.8f),
       vertexBufferHandle(

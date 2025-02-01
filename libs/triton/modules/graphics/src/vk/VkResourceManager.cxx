@@ -466,6 +466,12 @@ auto VkResourceManager::updateShaderBindings() -> void {
   return staticMeshBufferManager->getGpuBufferEntries(gpuBufferData);
 }
 
+[[nodiscard]] auto VkResourceManager::getSkinnedGpuData(
+    const std::vector<RenderMeshData>& gpuBufferData) -> std::vector<GpuBufferEntry>& {
+  ZoneNamedN(var, "getSkinnedGpuBufferEntries", true);
+  return skinnedMeshBufferManager->getGpuBufferEntries(gpuBufferData);
+}
+
 auto VkResourceManager::createTransitionBarrier(const vk::Image& image,
                                                 const vk::ImageLayout oldLayout,
                                                 const vk::ImageLayout newLayout,

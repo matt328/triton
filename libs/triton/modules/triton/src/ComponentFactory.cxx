@@ -42,6 +42,7 @@ auto ComponentFactory::getContext(const FrameworkConfig& config) -> std::shared_
 
   constexpr auto rendererConfig = RenderContextConfig{.useDescriptorBuffers = false,
                                                       .maxStaticObjects = 1024,
+                                                      .maxDynamicObjects = 1024,
                                                       .maxTextures = 16,
                                                       .framesInFlight = 2};
 

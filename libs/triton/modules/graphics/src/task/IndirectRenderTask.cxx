@@ -21,19 +21,25 @@ auto IndirectRenderTask::record(vk::raii::CommandBuffer& commandBuffer, const Fr
     -> void {
 
   const auto objectDataAddress =
-      bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::StaticObjectDataBuffer))
+      bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::DynamicObjectDataBuffer))
           .getDeviceAddress();
   const auto cameraDataAddress =
       bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::CameraBuffer))
           .getDeviceAddress();
   const auto& objectDataIndexAddress =
-      bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::StaticObjectDataIndexBuffer))
+      bufferManager
+          ->getBuffer(frame.getBufferHandle(BufferHandleType::DynamicObjectDataIndexBuffer))
           .getDeviceAddress();
 
-  pushConstants = IndirectPushConstants{.drawID = 0,
-                                        .objectDataAddress = objectDataAddress,
+  const auto handle = frame.getBufferHandle(BufferHandleType::AnimationDataBuffer);
+  const auto& animationDataBuffer = bufferManager->getBuffer(handle);
+  const auto& animationDataBufferAddress = animationDataBuffer.getDeviceAddress();
+
+  pushConstants = IndirectPushConstants{.objectDataAddress = objectDataAddress,
                                         .cameraDataAddress = cameraDataAddress,
                                         .objectDataIndexAddress = objectDataIndexAddress,
+                                        .animationDataAddress = animationDataBufferAddress,
+                                        .drawID = 0,
                                         .objectCount = frame.getSkinnedObjectCount()};
 
   // Bind the graphics pipeline
@@ -56,9 +62,9 @@ auto IndirectRenderTask::record(vk::raii::CommandBuffer& commandBuffer, const Fr
                                                      pushConstants);
 
   auto& indirectBuffer =
-      bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::StaticDrawCommand));
+      bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::DynamicDrawCommand));
   auto& countBuffer =
-      bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::StaticCountBuffer));
+      bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::DynamicCountBuffer));
 
   commandBuffer.drawIndexedIndirectCount(indirectBuffer.getBuffer(),
                                          0,
