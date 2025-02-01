@@ -10,6 +10,7 @@ namespace tr {
 struct RenderData {
   GpuCameraData cameraData{};
   std::vector<GpuObjectData> objectData;
+  std::vector<GpuObjectData> dynamicObjectData;
   std::vector<RenderMeshData> staticMeshData;
   std::vector<RenderMeshData> terrainMeshData;
   std::vector<RenderMeshData> skinnedMeshData;

@@ -71,9 +71,9 @@ auto RenderDataSystem::update(entt::registry& registry, RenderData& renderData) 
     // Add everything to the RenderData struct
     for (const auto& [meshHandle, topology, textureHandle] : renderable.meshData) {
       renderData.skinnedMeshData.emplace_back(meshHandle, topology);
-      renderData.objectData.emplace_back(transform.transformation,
-                                         textureHandle,
-                                         jointMatricesIndex);
+      renderData.dynamicObjectData.emplace_back(transform.transformation,
+                                                textureHandle,
+                                                jointMatricesIndex);
     }
 
     jointMatricesIndex += jointMatrices.size();

@@ -120,6 +120,8 @@ public:
 
   [[nodiscard]] auto getStaticGpuData(const std::vector<RenderMeshData>& gpuBufferData)
       -> std::vector<GpuBufferEntry>&;
+  [[nodiscard]] auto getSkinnedGpuData(const std::vector<RenderMeshData>& gpuBufferData)
+      -> std::vector<GpuBufferEntry>&;
 
   auto updateShaderBindings() -> void;
 

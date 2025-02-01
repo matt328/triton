@@ -13,10 +13,11 @@ layout(location = 1) out vec2 fragTexCoord;
 layout(location = 2) out uint textureId;
 
 layout(push_constant) uniform PushConstants {
-  uint drawID;
   uint64_t objectDataAddress;
   uint64_t cameraDataAddress;
   uint64_t objectDataIndexAddress;
+  uint64_t animationDataAddress;
+  uint drawID;
   uint objectCount;
 }
 pc;
@@ -30,6 +31,10 @@ struct ObjectData {
 
 layout(buffer_reference, std430) readonly buffer ObjectDataBuffer {
   ObjectData objectData[];
+};
+
+layout(buffer_reference, std430) readonly buffer AnimationDataBuffer {
+  mat4 jointMatrices[];
 };
 
 layout(buffer_reference, std430) readonly buffer CameraDataBuffer {
@@ -48,13 +53,25 @@ void main() {
   ObjectDataBuffer objectDataBuffer = ObjectDataBuffer(pc.objectDataAddress);
   CameraDataBuffer camData = CameraDataBuffer(pc.cameraDataAddress);
   ObjectDataIndexBuffer objectDataIndexBuffer = ObjectDataIndexBuffer(pc.objectDataIndexAddress);
+  AnimationDataBuffer animationData = AnimationDataBuffer(pc.animationDataAddress);
 
   uint objectIndex = objectDataIndexBuffer.index[gl_DrawID];
 
-  mat4 model = objectDataBuffer.objectData[objectIndex].modelMatrix;
-  vec4 worldPos = camData.proj * camData.view * model * vec4(inPosition, 1.0);
+  ObjectData currentObject = objectDataBuffer.objectData[objectIndex];
+
+  mat4 skinMat =
+      inWeights.x *
+          animationData.jointMatrices[currentObject.animationDataIndex + int(inJoints.x)] +
+      inWeights.y *
+          animationData.jointMatrices[currentObject.animationDataIndex + int(inJoints.y)] +
+      inWeights.z *
+          animationData.jointMatrices[currentObject.animationDataIndex + int(inJoints.z)] +
+      inWeights.w * animationData.jointMatrices[currentObject.animationDataIndex + int(inJoints.w)];
+
+  mat4 model = currentObject.modelMatrix;
+  vec4 worldPos = camData.proj * camData.view * model * skinMat * vec4(inPosition, 1.0);
 
   gl_Position = worldPos;
   fragTexCoord = inTexCoord;
-  textureId = objectDataBuffer.objectData[objectIndex].textureId;
+  textureId = currentObject.textureId;
 }
