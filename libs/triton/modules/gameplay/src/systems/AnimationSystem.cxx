@@ -4,7 +4,7 @@
 
 namespace tr {
 
-constexpr auto TimeRatio = 0.0005f;
+constexpr auto TimeRatio = 0.005f;
 
 AnimationSystem::AnimationSystem(std::shared_ptr<AssetManager> newAssetManager)
     : assetManager{std::move(newAssetManager)} {
