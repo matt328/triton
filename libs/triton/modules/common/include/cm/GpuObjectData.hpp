@@ -12,6 +12,7 @@ struct alignas(ALIGNMENT) GpuObjectData {
   glm::mat4 model{};
   TextureHandle textureId{};
   uint32_t animationDataIndex{};
+  uint32_t padding[4]{};
 };
 
 }

@@ -25,7 +25,7 @@ struct ObjectData {
   mat4 modelMatrix;
   uint textureId;
   uint animationDataIndex;
-  uint _padding;
+  uint _padding[4];
 };
 
 layout(buffer_reference, std430) readonly buffer ObjectDataBuffer {
@@ -58,14 +58,13 @@ void main() {
 
   ObjectData currentObject = objectDataBuffer.objectData[objectIndex];
 
-  mat4 skinMat =
-      inWeights.x *
-          animationData.jointMatrices[currentObject.animationDataIndex + int(inJoints.x)] +
-      inWeights.y *
-          animationData.jointMatrices[currentObject.animationDataIndex + int(inJoints.y)] +
-      inWeights.z *
-          animationData.jointMatrices[currentObject.animationDataIndex + int(inJoints.z)] +
-      inWeights.w * animationData.jointMatrices[currentObject.animationDataIndex + int(inJoints.w)];
+  int animationDataIndex = int(currentObject.animationDataIndex);
+  // int animationDataIndex = 25;
+
+  mat4 skinMat = inWeights.x * animationData.jointMatrices[animationDataIndex + int(inJoints.x)] +
+                 inWeights.y * animationData.jointMatrices[animationDataIndex + int(inJoints.y)] +
+                 inWeights.z * animationData.jointMatrices[animationDataIndex + int(inJoints.z)] +
+                 inWeights.w * animationData.jointMatrices[animationDataIndex + int(inJoints.w)];
 
   mat4 model = currentObject.modelMatrix;
   vec4 worldPos = camData.proj * camData.view * model * skinMat * vec4(inPosition, 1.0);

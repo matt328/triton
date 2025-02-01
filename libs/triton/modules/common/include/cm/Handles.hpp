@@ -1,7 +1,7 @@
 #pragma once
 
 namespace tr {
-using TextureHandle = size_t;
+using TextureHandle = uint32_t;
 
 /// Opaque Handle to a BufferEntry, which, in turn, is a handle to a region of a Vertex and Index
 /// Buffer owned by the ResourceManager
