@@ -29,7 +29,7 @@ auto StaticGeometryData::getIndexCount() const -> size_t {
 }
 
 auto StaticGeometryData::getVertexCount() const -> size_t {
-  return indices.size();
+  return vertices.size();
 }
 
 }

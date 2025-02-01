@@ -29,7 +29,7 @@ auto SkinnedGeometryData::getIndexCount() const -> size_t {
 }
 
 auto SkinnedGeometryData::getVertexCount() const -> size_t {
-  return indices.size();
+  return vertices.size();
 }
 
 }
