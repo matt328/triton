@@ -7,8 +7,8 @@ set(Shaders
   debug.frag
   skinned.vert
   skinned.frag
-  indirect.vert
-  indirect.frag
+  dynamic.vert
+  dynamic.frag
   compute.comp
   static.vert
   static.frag

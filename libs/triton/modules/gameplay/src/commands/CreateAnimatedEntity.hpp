@@ -11,8 +11,8 @@ namespace tr {
 class CreateAnimatedEntity final
     : public ICommand<entt::registry&, const std::shared_ptr<AssetManager>&> {
 public:
-  explicit CreateAnimatedEntity(AnimatedModelData newModelData)
-      : animatedModelData{std::move(newModelData)} {
+  CreateAnimatedEntity(AnimatedModelData newModelData, std::optional<Transform> newInitialTransform)
+      : animatedModelData{std::move(newModelData)}, initialTransform{newInitialTransform} {
   }
 
   void execute(entt::registry& registry,
@@ -25,18 +25,28 @@ public:
         .skeletonHandle = assetManager->loadSkeleton(animatedModelData.skeletonFilename),
         .animationHandle = assetManager->loadAnimation(animatedModelData.animationFilename)});
 
+    auto transform = Transform{.rotation = glm::zero<glm::vec3>(),
+                               .position = glm::zero<glm::vec3>(),
+                               .transformation = glm::identity<glm::mat4>()};
+
+    if (initialTransform.has_value()) {
+      transform.position = initialTransform->position;
+      transform.rotation = initialTransform->rotation;
+    }
+
     const auto entity = registry.create();
     registry.emplace<Animation>(entity,
                                 modelData.animationData->animationHandle,
                                 modelData.animationData->skeletonHandle,
                                 modelData.skinData->jointMap,
                                 modelData.skinData->inverseBindMatrices);
-    registry.emplace<Transform>(entity);
+    registry.emplace<Transform>(entity, transform);
     registry.emplace<Renderable>(entity, std::vector{modelData.meshData});
     registry.emplace<EditorInfo>(entity, animatedModelData.entityName.value_or("Unnamed Entity"));
   }
 
 private:
   AnimatedModelData animatedModelData;
+  std::optional<Transform> initialTransform;
 };
 }
