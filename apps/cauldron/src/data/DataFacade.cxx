@@ -109,8 +109,11 @@ void DataFacade::createAnimatedModel(const EntityData& entityData) {
                                                         .animationFilename = animationFilename,
                                                         .entityName = entityName};
 
-  const auto task = [this, animatedEntityData] {
-    gameplaySystem->createAnimatedModelEntity(animatedEntityData);
+  const auto transform =
+      tr::Transform{.rotation = entityData.rotation, .position = entityData.position};
+
+  const auto task = [this, animatedEntityData, transform] {
+    gameplaySystem->createAnimatedModelEntity(animatedEntityData, std::make_optional(transform));
   };
 
   taskQueue->enqueue(task, onComplete);

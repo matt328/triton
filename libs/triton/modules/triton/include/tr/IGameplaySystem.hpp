@@ -26,7 +26,8 @@ public:
   virtual auto createStaticModelEntity(std::string filename,
                                        std::string_view entityName,
                                        std::optional<Transform> initialTransform) -> void = 0;
-  virtual auto createAnimatedModelEntity(const AnimatedModelData& modelData) -> void = 0;
+  virtual auto createAnimatedModelEntity(const AnimatedModelData& modelData,
+                                         std::optional<Transform> initialTransform) -> void = 0;
   virtual auto createTerrain() -> void = 0;
   virtual auto createDefaultCamera() -> void = 0;
   virtual auto createTestEntity(std::string_view name) -> void = 0;

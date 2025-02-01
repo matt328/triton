@@ -1,13 +1,12 @@
 #include "IndirectPipeline.hpp"
 #include "IShaderCompiler.hpp"
-#include "geo/VertexAttributes.hpp"
 #include "vk/core/Device.hpp"
 #include "vk/IndirectPushConstants.hpp"
 
 namespace tr {
 
-const auto VertexShaderFile = SHADERS / "indirect.vert";
-const auto FragmentShaderFile = SHADERS / "indirect.frag";
+const auto VertexShaderFile = SHADERS / "dynamic.vert";
+const auto FragmentShaderFile = SHADERS / "dynamic.frag";
 
 IndirectPipeline::IndirectPipeline(const std::shared_ptr<Device>& device,
                                    const std::shared_ptr<IShaderCompiler>& shaderCompiler,

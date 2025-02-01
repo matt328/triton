@@ -150,9 +150,10 @@ auto DefaultGameplaySystem::createStaticModelEntity(std::string filename,
       std::make_unique<CreateStaticEntityCommand>(filename, entityName.data(), initialTransform));
 }
 
-auto DefaultGameplaySystem::createAnimatedModelEntity(
-    [[maybe_unused]] const AnimatedModelData& modelData) -> void {
-  commandQueue->enqueue(std::make_unique<CreateAnimatedEntity>(modelData));
+auto DefaultGameplaySystem::createAnimatedModelEntity(const AnimatedModelData& modelData,
+                                                      std::optional<Transform> initialTransform)
+    -> void {
+  commandQueue->enqueue(std::make_unique<CreateAnimatedEntity>(modelData, initialTransform));
 }
 
 auto DefaultGameplaySystem::createTerrain() -> void {
