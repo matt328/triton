@@ -410,7 +410,7 @@ auto DefaultRenderScheduler::executeTasks(Frame& frame, bool recordTasks) const 
         .objectDataBufferAddress = objectDataBuffer.getDeviceAddress(),
         .countBufferAddress = countBuffer.getDeviceAddress(),
         .objectDataIndexBufferAddress = objectDataIndexBuffer.getDeviceAddress(),
-        .objectCount = 2};
+        .objectCount = frame.getStaticObjectCount()};
     computeTask->record(commandBuffer, computePushConstants);
   }
 
@@ -433,7 +433,7 @@ auto DefaultRenderScheduler::executeTasks(Frame& frame, bool recordTasks) const 
         .objectDataBufferAddress = objectDataBuffer.getDeviceAddress(),
         .countBufferAddress = countBuffer.getDeviceAddress(),
         .objectDataIndexBufferAddress = objectDataIndexBuffer.getDeviceAddress(),
-        .objectCount = 1};
+        .objectCount = frame.getSkinnedObjectCount()};
     computeTask->record(commandBuffer, computePushConstants);
   }
 
