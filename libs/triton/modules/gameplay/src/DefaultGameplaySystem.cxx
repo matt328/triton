@@ -100,6 +100,7 @@ void DefaultGameplaySystem::update() {
   {
     ZoneNamedN(rd, "RenderData", true);
     renderData.objectData.clear();
+    renderData.dynamicObjectData.clear();
     renderData.staticMeshData.clear();
     renderData.terrainMeshData.clear();
     renderData.skinnedMeshData.clear();

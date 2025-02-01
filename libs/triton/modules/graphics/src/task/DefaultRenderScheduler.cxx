@@ -433,7 +433,7 @@ auto DefaultRenderScheduler::executeTasks(Frame& frame, bool recordTasks) const 
         .objectDataBufferAddress = objectDataBuffer.getDeviceAddress(),
         .countBufferAddress = countBuffer.getDeviceAddress(),
         .objectDataIndexBufferAddress = objectDataIndexBuffer.getDeviceAddress(),
-        .objectCount = 2};
+        .objectCount = 1};
     computeTask->record(commandBuffer, computePushConstants);
   }
 
