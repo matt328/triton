@@ -51,15 +51,33 @@ IndirectPipeline::IndirectPipeline(const std::shared_ptr<Device>& device,
                                         .pName = "main"});
 
   // Vertex Input State
-  auto vec = std::vector{VertexComponent::Position,
-                         VertexComponent::UV,
-                         VertexComponent::Joint0,
-                         VertexComponent::Weight0};
+  constexpr auto vertexAttributeDescriptions = std::array<vk::VertexInputAttributeDescription, 4>{
+      // Position
+      vk::VertexInputAttributeDescription{.location = 0,
+                                          .binding = 0,
+                                          .format = vk::Format::eR32G32B32Sfloat},
 
-  const auto vertexAttributeDescriptions =
-      VertexBuilder::inputAttributeDescriptions(0, std::span(vec.begin(), vec.end()));
+      // TexCoord
+      vk::VertexInputAttributeDescription{.location = 1,
+                                          .binding = 0,
+                                          .format = vk::Format::eR32G32Sfloat,
+                                          .offset = offsetof(as::SkinnedVertex, texCoord)},
 
-  const auto bindingDescription = VertexBuilder::inputBindingDescription(0);
+      // Joints
+      vk::VertexInputAttributeDescription{.location = 2,
+                                          .binding = 0,
+                                          .format = vk::Format::eR8G8B8A8Uint,
+                                          .offset = offsetof(as::SkinnedVertex, joint0)},
+      // Weights
+      vk::VertexInputAttributeDescription{.location = 3,
+                                          .binding = 0,
+                                          .format = vk::Format::eR32G32B32A32Sfloat,
+                                          .offset = offsetof(as::SkinnedVertex, weight0)}};
+
+  constexpr auto bindingDescription =
+      vk::VertexInputBindingDescription{.binding = 0,
+                                        .stride = sizeof(as::SkinnedVertex),
+                                        .inputRate = vk::VertexInputRate::eVertex};
 
   const auto vertexInputStateCreateInfo = vk::PipelineVertexInputStateCreateInfo{
       .vertexBindingDescriptionCount = 1,
