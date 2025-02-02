@@ -1,12 +1,11 @@
 name: Build
 
-on: [ push ]
+on: [push]
 
 env:
   BUILD_CONFIGURATION: Debug
 
 jobs:
-
   build-windows:
     runs-on: windows-latest
 
@@ -29,7 +28,6 @@ jobs:
           vulkan-components: Vulkan-Headers, Vulkan-Loader
           vulkan-use-cache: true
 
-
       - name: Setup Ninja
         uses: seanmiddleditch/gha-setup-ninja@master
 
@@ -38,4 +36,4 @@ jobs:
 
       - name: Build
         working-directory: ${{github.workspace}}
-        run: cmake --build --preset editor-release
+        run: cmake --build --preset release
