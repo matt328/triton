@@ -30,6 +30,7 @@ public:
                   T initialValue,
                   std::optional<ValueProvider> valueProvider = std::nullopt,
                   std::optional<std::shared_ptr<Properties>> properties = std::nullopt) {
+    controlNames.push_back(name);
     controls[name] =
         std::make_unique<TypedControl<T>>(label, initialValue, valueProvider, properties);
   }
@@ -38,6 +39,7 @@ public:
                       const std::string& label,
                       std::shared_ptr<Properties> newProperties,
                       const std::vector<FilterItem>& filterItems) {
+    controlNames.push_back(name);
     controls[name] = std::make_unique<FileControl>(name, label, newProperties, filterItems);
   }
 
@@ -63,7 +65,14 @@ public:
     bool shouldCancel{};
 
     if (ImGui::BeginPopupModal(title.c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
-      for (auto& [name, control] : controls) {
+      if (ImGui::IsKeyPressed(ImGuiKey_Escape)) {
+        shouldCancel = true;
+      }
+      if (ImGui::IsWindowAppearing()) {
+        ImGui::SetKeyboardFocusHere();
+      }
+      for (const auto& name : controlNames) {
+        const auto& control = controls[name];
         control->render();
       }
 
@@ -115,7 +124,8 @@ public:
 private:
   bool isOpen{};
   std::string title;
-  std::map<std::string, std::unique_ptr<ControlBase>> controls;
+  std::unordered_map<std::string, std::unique_ptr<ControlBase>> controls;
+  std::vector<std::string> controlNames;
   std::optional<OkFunction> onOk;
   std::optional<CancelFunction> onCancel;
 };

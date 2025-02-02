@@ -28,9 +28,13 @@ Menu::Menu(std::shared_ptr<DataFacade> newDataFacade,
   projectSaveDialog = std::make_unique<FileDialog>(properties, ProjectFilters, "project");
   projectSaveDialog->setOnOk([&](std::vector<std::filesystem::path> selectedFile) {
     try {
-      Log.trace("Save project file: {}", selectedFile.front().string());
-      dataFacade->save(selectedFile.front());
-      properties->setRecentFile(selectedFile.front());
+      auto filepath = selectedFile.front();
+      if (!filepath.has_extension()) {
+        filepath.replace_extension("trp");
+      }
+      Log.trace("Save project file: {}", filepath.string());
+      dataFacade->save(filepath);
+      properties->setRecentFile(filepath);
     } catch (const std::exception& ex) { Log.error(ex.what()); }
   });
 }

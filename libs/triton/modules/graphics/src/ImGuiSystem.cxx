@@ -1,4 +1,5 @@
 #include "cm/ImGuiSystem.hpp"
+#include "imgui.h"
 #include "tr/IWindow.hpp"
 
 #include "vk/core/Instance.hpp"
@@ -39,6 +40,9 @@ ImGuiSystem::ImGuiSystem(const std::shared_ptr<IWindow>& window,
 
   initInfo.UseDynamicRendering = true;
   initInfo.PipelineRenderingCreateInfo = createInfo;
+
+  ImGuiIO& io = ImGui::GetIO();
+  io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
   ImGui_ImplVulkan_Init(&initInfo);
 }
