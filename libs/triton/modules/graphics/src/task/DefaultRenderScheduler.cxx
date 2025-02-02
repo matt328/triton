@@ -65,7 +65,7 @@ DefaultRenderScheduler::DefaultRenderScheduler(
     frame->setDepthImageHandle(depthImageHandle);
 
     createStaticBuffers(frame);
-    createSkinnedBuffers(frame);
+    createDynamicBuffers(frame);
 
     // Camera Data Buffer
     {
@@ -180,19 +180,19 @@ auto DefaultRenderScheduler::createStaticBuffers(const std::unique_ptr<Frame>& f
   {
     const auto name = frame->getIndexedName("Buffer-GpuObjectData-Frame_");
     const auto handle = bufferManager->createBuffer(
-        sizeof(GpuObjectData) * renderConfig.maxStaticObjects,
+        sizeof(StaticGpuObjectData) * renderConfig.maxStaticObjects,
         vk::BufferUsageFlagBits::eIndirectBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress,
         name);
     frame->setBufferHandle(BufferHandleType::StaticObjectDataBuffer, handle);
   }
 }
 
-auto DefaultRenderScheduler::createSkinnedBuffers(const std::unique_ptr<Frame>& frame) -> void {
+auto DefaultRenderScheduler::createDynamicBuffers(const std::unique_ptr<Frame>& frame) -> void {
   // Gpu Buffer Entry Data - for Compute Shader to create draw commands
   {
     std::vector<GpuBufferEntry> gpuBufferEntryList{};
     gpuBufferEntryList.reserve(1);
-    const auto name = frame->getIndexedName("Buffer-SkinnedGpuBufferEntry-Frame_");
+    const auto name = frame->getIndexedName("Buffer-DynamicGpuBufferEntry-Frame_");
     const auto handle = bufferManager->createBuffer(
         sizeof(GpuBufferEntry) * renderConfig.maxDynamicObjects,
         vk::BufferUsageFlagBits::eStorageBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress,
@@ -259,7 +259,7 @@ auto DefaultRenderScheduler::createSkinnedBuffers(const std::unique_ptr<Frame>& 
   {
     const auto name = frame->getIndexedName("Buffer-DynamicObjectData-Frame_");
     const auto handle = bufferManager->createBuffer(
-        sizeof(GpuObjectData) * renderConfig.maxDynamicObjects,
+        sizeof(DynamicGpuObjectData) * renderConfig.maxDynamicObjects,
         vk::BufferUsageFlagBits::eIndirectBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress,
         name);
     frame->setBufferHandle(BufferHandleType::DynamicObjectDataBuffer, handle);
@@ -308,7 +308,7 @@ auto DefaultRenderScheduler::updatePerFrameRenderData(Frame& frame, const Render
   ZoneNamedN(var, "updatePerFrameRenderData", true);
 
   frame.setStaticObjectCount(renderData.staticGpuMeshData.size());
-  frame.setSkinnedObjectCount(renderData.skinnedMeshData.size());
+  frame.setDynamicObjectCount(renderData.dynamicMeshData.size());
 
   resourceManager->updateShaderBindings();
 
@@ -433,7 +433,7 @@ auto DefaultRenderScheduler::executeTasks(Frame& frame, bool recordTasks) const 
         .objectDataBufferAddress = objectDataBuffer.getDeviceAddress(),
         .countBufferAddress = countBuffer.getDeviceAddress(),
         .objectDataIndexBufferAddress = objectDataIndexBuffer.getDeviceAddress(),
-        .objectCount = frame.getSkinnedObjectCount()};
+        .objectCount = frame.getDynamicObjectCount()};
     computeTask->record(commandBuffer, computePushConstants);
   }
 
@@ -479,7 +479,7 @@ auto DefaultRenderScheduler::executeTasks(Frame& frame, bool recordTasks) const 
     if (frame.getStaticObjectCount() > 0) {
       staticRenderTask->record(commandBuffer, frame);
     }
-    if (frame.getSkinnedObjectCount() > 0) {
+    if (frame.getDynamicObjectCount() > 0) {
       indirectRenderTask->record(commandBuffer, frame);
     }
   }
@@ -629,7 +629,7 @@ auto DefaultRenderScheduler::updateStaticBuffers(Frame& frame, const RenderData&
         bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::StaticObjectDataBuffer));
     objectDataBuffer.mapBuffer();
     objectDataBuffer.updateBufferValue(renderData.objectData.data(),
-                                       sizeof(GpuObjectData) * renderData.objectData.size());
+                                       sizeof(StaticGpuObjectData) * renderData.objectData.size());
     objectDataBuffer.unmapBuffer();
   }
 }
@@ -639,7 +639,7 @@ auto DefaultRenderScheduler::updateDynamicBuffers(Frame& frame, const RenderData
   // Update GpuBufferEntriesBuffer
   {
     ZoneNamedN(var, "getDynamicGpuData", true);
-    const auto& gpuBufferEntryList = resourceManager->getSkinnedGpuData(renderData.skinnedMeshData);
+    const auto& gpuBufferEntryList = resourceManager->getDynamicGpuData(renderData.dynamicMeshData);
 
     auto& gpuBufferEntriesBuffer =
         bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::DynamicGpuBufferEntry));

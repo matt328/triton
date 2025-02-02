@@ -70,7 +70,7 @@ auto RenderDataSystem::update(entt::registry& registry, RenderData& renderData) 
 
     // Add everything to the RenderData struct
     for (const auto& [meshHandle, topology, textureHandle] : renderable.meshData) {
-      renderData.skinnedMeshData.emplace_back(meshHandle, topology);
+      renderData.dynamicMeshData.emplace_back(meshHandle, topology);
       renderData.dynamicObjectData.emplace_back(transform.transformation,
                                                 textureHandle,
                                                 jointMatricesIndex);

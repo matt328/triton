@@ -1,20 +1,20 @@
 #pragma once
 
 #include "GeometryData.hpp"
-#include "as/SkinnedVertex.hpp"
+#include "as/DynamicVertex.hpp"
 
 namespace tr {
 
-class SkinnedGeometryData : public IGeometryData {
+class DynamicGeometryData : public IGeometryData {
 public:
-  SkinnedGeometryData(std::vector<as::SkinnedVertex>&& newVertices,
+  DynamicGeometryData(std::vector<as::DynamicVertex>&& newVertices,
                       std::vector<uint32_t>&& newIndices);
-  ~SkinnedGeometryData() override = default;
+  ~DynamicGeometryData() override = default;
 
-  SkinnedGeometryData(const SkinnedGeometryData&) = delete;
-  SkinnedGeometryData(SkinnedGeometryData&&) = delete;
-  auto operator=(const SkinnedGeometryData&) -> SkinnedGeometryData& = delete;
-  auto operator=(SkinnedGeometryData&&) -> SkinnedGeometryData& = delete;
+  DynamicGeometryData(const DynamicGeometryData&) = delete;
+  DynamicGeometryData(DynamicGeometryData&&) = delete;
+  auto operator=(const DynamicGeometryData&) -> DynamicGeometryData& = delete;
+  auto operator=(DynamicGeometryData&&) -> DynamicGeometryData& = delete;
 
   [[nodiscard]] auto getVertexDataSize() const -> size_t override;
   [[nodiscard]] auto getIndexDataSize() const -> size_t override;
@@ -24,7 +24,7 @@ public:
   [[nodiscard]] auto getVertexCount() const -> size_t override;
 
 private:
-  std::vector<as::SkinnedVertex> vertices;
+  std::vector<as::DynamicVertex> vertices;
   std::vector<uint32_t> indices;
 };
 

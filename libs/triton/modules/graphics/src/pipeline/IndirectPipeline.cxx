@@ -60,22 +60,22 @@ IndirectPipeline::IndirectPipeline(const std::shared_ptr<Device>& device,
       vk::VertexInputAttributeDescription{.location = 1,
                                           .binding = 0,
                                           .format = vk::Format::eR32G32Sfloat,
-                                          .offset = offsetof(as::SkinnedVertex, texCoord)},
+                                          .offset = offsetof(as::DynamicVertex, texCoord)},
 
       // Joints
       vk::VertexInputAttributeDescription{.location = 2,
                                           .binding = 0,
                                           .format = vk::Format::eR8G8B8A8Uint,
-                                          .offset = offsetof(as::SkinnedVertex, joint0)},
+                                          .offset = offsetof(as::DynamicVertex, joint0)},
       // Weights
       vk::VertexInputAttributeDescription{.location = 3,
                                           .binding = 0,
                                           .format = vk::Format::eR32G32B32A32Sfloat,
-                                          .offset = offsetof(as::SkinnedVertex, weight0)}};
+                                          .offset = offsetof(as::DynamicVertex, weight0)}};
 
   constexpr auto bindingDescription =
       vk::VertexInputBindingDescription{.binding = 0,
-                                        .stride = sizeof(as::SkinnedVertex),
+                                        .stride = sizeof(as::DynamicVertex),
                                         .inputRate = vk::VertexInputRate::eVertex};
 
   const auto vertexInputStateCreateInfo = vk::PipelineVertexInputStateCreateInfo{

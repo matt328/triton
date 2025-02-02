@@ -50,7 +50,7 @@ public:
   [[nodiscard]] auto getRenderingInfo() const -> vk::RenderingInfo;
   [[nodiscard]] auto getDrawImageExtent() const -> vk::Extent2D;
   [[nodiscard]] auto getStaticObjectCount() const -> uint32_t;
-  [[nodiscard]] auto getSkinnedObjectCount() const -> uint32_t;
+  [[nodiscard]] auto getDynamicObjectCount() const -> uint32_t;
 
   [[nodiscard]] auto getBufferHandle(BufferHandleType type) const -> BufferHandle;
 
@@ -69,7 +69,7 @@ public:
   auto setSwapchainImageIndex(uint32_t index) -> void;
   auto setDrawImageExtent(vk::Extent2D extent) -> void;
   auto setStaticObjectCount(uint32_t newObjectCount) -> void;
-  auto setSkinnedObjectCount(uint32_t newObjectCount) -> void;
+  auto setDynamicObjectCount(uint32_t newObjectCount) -> void;
 
   auto setupRenderingInfo(const std::shared_ptr<VkResourceManager>& resourceManager) -> void;
 
@@ -98,7 +98,7 @@ private:
   vk::RenderingInfo renderingInfo;
 
   uint32_t staticObjectCount;
-  uint32_t skinnedObjectCount;
+  uint32_t dynamicObjectCount;
 
   static auto transitionImage(const vk::raii::CommandBuffer& cmd,
                               const vk::Image& image,

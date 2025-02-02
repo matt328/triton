@@ -1,7 +1,6 @@
 #include "as/gltf/GltfGeometryExtractor.hpp"
 
 #include "as/Model.hpp"
-#include "as/Vertex.hpp"
 
 namespace as {
 
@@ -84,7 +83,7 @@ void GltfGeometryExtractor::execute(const tinygltf::Model& model,
     tritonModel.vertexType = VertexType::Static;
   } else {
     // Skinned Model
-    std::vector<SkinnedVertex> vertices;
+    std::vector<DynamicVertex> vertices;
     for (const auto& [attribute, value] : primitive.attributes) {
       const auto& accessor = model.accessors[value];
 
@@ -122,8 +121,8 @@ void GltfGeometryExtractor::execute(const tinygltf::Model& model,
         }
       }
     }
-    tritonModel.skinnedVertices = std::move(vertices);
-    tritonModel.vertexType = VertexType::Skinned;
+    tritonModel.dynamicVertices = std::move(vertices);
+    tritonModel.vertexType = VertexType::Dynamic;
   }
 }
 }

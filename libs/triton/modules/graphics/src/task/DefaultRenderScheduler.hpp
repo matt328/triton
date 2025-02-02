@@ -68,7 +68,7 @@ private:
   auto handleSwapchainResized(const SwapchainResized& event) -> void;
 
   auto createStaticBuffers(const std::unique_ptr<Frame>& frame) -> void;
-  auto createSkinnedBuffers(const std::unique_ptr<Frame>& frame) -> void;
+  auto createDynamicBuffers(const std::unique_ptr<Frame>& frame) -> void;
 
   auto updateStaticBuffers(Frame& frame, const RenderData& renderData) -> void;
   auto updateDynamicBuffers(Frame& frame, const RenderData& renderData) -> void;

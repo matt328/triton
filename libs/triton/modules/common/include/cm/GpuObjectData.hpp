@@ -6,13 +6,18 @@ namespace tr {
 
 // Maximum size of the GpuObjectData buffer array
 constexpr auto MAX_OBJECTS = 128;
-constexpr auto ALIGNMENT = 16;
 
-struct alignas(ALIGNMENT) GpuObjectData {
+struct StaticGpuObjectData {
+  glm::mat4 model{};
+  TextureHandle textureId{};
+  std::array<uint32_t, 3> padding{};
+};
+
+struct DynamicGpuObjectData {
   glm::mat4 model{};
   TextureHandle textureId{};
   uint32_t animationDataIndex{};
-  uint32_t padding[4]{};
+  std::array<uint32_t, 2> padding{};
 };
 
 }

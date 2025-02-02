@@ -40,7 +40,7 @@ auto IndirectRenderTask::record(vk::raii::CommandBuffer& commandBuffer, const Fr
                                         .objectDataIndexAddress = objectDataIndexAddress,
                                         .animationDataAddress = animationDataBufferAddress,
                                         .drawID = 0,
-                                        .objectCount = frame.getSkinnedObjectCount()};
+                                        .objectCount = frame.getDynamicObjectCount()};
 
   // Bind the graphics pipeline
   commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline->getPipeline());
@@ -52,7 +52,7 @@ auto IndirectRenderTask::record(vk::raii::CommandBuffer& commandBuffer, const Fr
                                       0,
                                       pipeline->getPipelineLayout());
 
-  const auto& [vertexBuffer, indexBuffer] = resourceManager->getSkinnedMeshBuffers();
+  const auto& [vertexBuffer, indexBuffer] = resourceManager->getDynamicMeshBuffers();
   commandBuffer.bindVertexBuffers(0, vertexBuffer.getBuffer(), {0});
   commandBuffer.bindIndexBuffer(indexBuffer.getBuffer(), 0, vk::IndexType::eUint32);
 

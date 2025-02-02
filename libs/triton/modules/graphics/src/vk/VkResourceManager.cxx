@@ -48,8 +48,8 @@ VkResourceManager::VkResourceManager(
   staticMeshBufferManager =
       std::make_unique<MeshBufferManager>(bufferManager, sizeof(as::StaticVertex), "Static");
 
-  skinnedMeshBufferManager =
-      std::make_unique<MeshBufferManager>(bufferManager, sizeof(as::SkinnedVertex), "Skinned");
+  dynamicMeshBufferManager =
+      std::make_unique<MeshBufferManager>(bufferManager, sizeof(as::DynamicVertex), "Dynamic");
 
   textureManager = std::make_unique<TextureManager>(this);
 }
@@ -62,8 +62,8 @@ auto VkResourceManager::uploadStaticMesh(const IGeometryData& geometryData) -> M
   return staticMeshBufferManager->addMesh(geometryData);
 }
 
-auto VkResourceManager::uploadSkinnedMesh(const IGeometryData& geometryData) -> MeshHandle {
-  return skinnedMeshBufferManager->addMesh(geometryData);
+auto VkResourceManager::uploadDynamicMesh(const IGeometryData& geometryData) -> MeshHandle {
+  return dynamicMeshBufferManager->addMesh(geometryData);
 }
 
 auto VkResourceManager::asyncUpload2(const IGeometryData& geometryData) -> MeshHandle {
@@ -283,9 +283,9 @@ auto VkResourceManager::getTextureData(const as::ImageData& imageData, std::stri
   return staticMeshBufferManager->getBuffers();
 }
 
-[[nodiscard]] auto VkResourceManager::getSkinnedMeshBuffers() const
+[[nodiscard]] auto VkResourceManager::getDynamicMeshBuffers() const
     -> std::tuple<Buffer&, Buffer&> {
-  return skinnedMeshBufferManager->getBuffers();
+  return dynamicMeshBufferManager->getBuffers();
 }
 
 auto VkResourceManager::createDefaultDescriptorPool() const
@@ -466,10 +466,10 @@ auto VkResourceManager::updateShaderBindings() -> void {
   return staticMeshBufferManager->getGpuBufferEntries(gpuBufferData);
 }
 
-[[nodiscard]] auto VkResourceManager::getSkinnedGpuData(
+[[nodiscard]] auto VkResourceManager::getDynamicGpuData(
     const std::vector<RenderMeshData>& gpuBufferData) -> std::vector<GpuBufferEntry>& {
-  ZoneNamedN(var, "getSkinnedGpuBufferEntries", true);
-  return skinnedMeshBufferManager->getGpuBufferEntries(gpuBufferData);
+  ZoneNamedN(var, "getDynamicGpuBufferEntries", true);
+  return dynamicMeshBufferManager->getGpuBufferEntries(gpuBufferData);
 }
 
 auto VkResourceManager::createTransitionBarrier(const vk::Image& image,

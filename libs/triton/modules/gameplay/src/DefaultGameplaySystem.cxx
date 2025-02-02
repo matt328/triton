@@ -103,7 +103,7 @@ void DefaultGameplaySystem::update() {
     renderData.dynamicObjectData.clear();
     renderData.staticMeshData.clear();
     renderData.terrainMeshData.clear();
-    renderData.skinnedMeshData.clear();
+    renderData.dynamicMeshData.clear();
     renderData.animationData.clear();
     renderData.staticGpuMeshData.clear();
 

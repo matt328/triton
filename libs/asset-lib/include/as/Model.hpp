@@ -1,13 +1,13 @@
 #pragma once
 
 #include "BaseException.hpp"
-#include "as/SkinnedVertex.hpp"
+#include "as/DynamicVertex.hpp"
 #include "as/StaticVertex.hpp"
 #include "as/VertexTypes.hpp"
 
 namespace as {
 
-constexpr uint32_t SERIAL_VERSION = 2;
+constexpr uint32_t SERIAL_VERSION = 3;
 
 class SerializationException final : public tr::BaseException {
   using BaseException::BaseException;
@@ -27,7 +27,7 @@ public:
 
 struct Model {
   VertexType vertexType;
-  std::optional<std::vector<as::SkinnedVertex>> skinnedVertices;
+  std::optional<std::vector<as::DynamicVertex>> dynamicVertices;
   std::optional<std::vector<as::StaticVertex>> staticVertices;
   std::vector<uint32_t> indices;
   std::unordered_map<int, int> jointRemaps;
@@ -52,8 +52,8 @@ struct Model {
     }
     archive(vertexType);
 
-    if (vertexType == VertexType::Skinned) {
-      archive(skinnedVertices, jointRemaps, inverseBindPoses);
+    if (vertexType == VertexType::Dynamic) {
+      archive(dynamicVertices, jointRemaps, inverseBindPoses);
     } else if (vertexType == VertexType::Static) {
       archive(staticVertices);
     }

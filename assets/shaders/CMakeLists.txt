@@ -5,8 +5,6 @@ set(Shaders
   terrain.frag
   debug.vert
   debug.frag
-  skinned.vert
-  skinned.frag
   dynamic.vert
   dynamic.frag
   compute.comp
