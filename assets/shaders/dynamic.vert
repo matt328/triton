@@ -25,7 +25,7 @@ struct ObjectData {
   mat4 modelMatrix;
   uint textureId;
   uint animationDataIndex;
-  uint _padding[4];
+  uint _padding[2];
 };
 
 layout(buffer_reference, std430) readonly buffer ObjectDataBuffer {

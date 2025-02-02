@@ -1,7 +1,7 @@
 #include "gp/AssetManager.hpp"
 #include "cm/Handles.hpp"
 #include "geo/GeometryHandles.hpp"
-#include "geo/SkinnedGeometryData.hpp"
+#include "geo/DynamicGeometryData.hpp"
 #include "geo/StaticGeometryData.hpp"
 #include "vk/VkResourceManager.hpp"
 #include "as/Model.hpp"
@@ -21,7 +21,7 @@ auto AssetManager::loadModel(std::string_view filename) -> ModelData {
 
   auto meshHandle = MeshHandle{};
   if (tritonModelData.getSkinData().has_value()) {
-    meshHandle = resourceManager->uploadSkinnedMesh(*geometryData);
+    meshHandle = resourceManager->uploadDynamicMesh(*geometryData);
   } else {
     meshHandle = resourceManager->uploadStaticMesh(*geometryData);
   }
@@ -186,12 +186,12 @@ auto AssetManager::loadTrm(const std::filesystem::path& modelPath) -> TritonMode
   imageDataMap.emplace(imageHandle, tritonModel.imageData);
 
   auto geometryHandle = GeometryHandle{};
-  if (tritonModel.skinnedVertices.has_value()) {
+  if (tritonModel.dynamicVertices.has_value()) {
     const auto key = geometryKey.getKey();
     geometryHandle = GeometryHandle{key, Topology::Triangles};
     geometryDataMap.emplace(
         geometryHandle,
-        std::make_unique<SkinnedGeometryData>(std::move(tritonModel.skinnedVertices.value()),
+        std::make_unique<DynamicGeometryData>(std::move(tritonModel.dynamicVertices.value()),
                                               std::move(tritonModel.indices)));
   } else if (tritonModel.staticVertices.has_value()) {
     const auto key = geometryKey.getKey();
@@ -201,7 +201,7 @@ auto AssetManager::loadTrm(const std::filesystem::path& modelPath) -> TritonMode
         std::make_unique<StaticGeometryData>(std::move(tritonModel.staticVertices.value()),
                                              std::move(tritonModel.indices)));
   } else {
-    throw std::runtime_error("Model either has to be skinned or static");
+    throw std::runtime_error("Model either has to be dynamic or static");
   }
 
   auto skinData = std::optional<SkinData>{};

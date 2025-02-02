@@ -26,7 +26,7 @@ set(common_SRC
 
   modules/graphics/src/geo/VertexAttributes.cxx
   modules/graphics/src/geo/HeightField.cxx
-  modules/graphics/src/geo/SkinnedGeometryData.cxx
+  modules/graphics/src/geo/DynamicGeometryData.cxx
   modules/graphics/src/geo/StaticGeometryData.cxx
 
   modules/graphics/src/tex/Texture.cxx
