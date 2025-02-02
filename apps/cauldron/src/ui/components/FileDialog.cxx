@@ -136,11 +136,16 @@ auto FileDialog::render() -> void {
         if (ImGui::Selectable(label.c_str(),
                               i == fileSelectedIndex,
                               ImGuiSelectableFlags_SpanAllColumns |
-                                  ImGuiSelectableFlags_AllowOverlap,
+                                  ImGuiSelectableFlags_AllowOverlap |
+                                  ImGuiSelectableFlags_AllowDoubleClick,
                               ImVec2(0, 18.f))) {
           fileSelectedIndex = i;
           currentFile = filteredFiles[i].path();
           selectedFilename = currentFile->filename().string();
+          if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+            Log.debug("Double clicked file: {}", entry.path().string());
+            shouldOk = true;
+          }
         }
 
         ImGui::TableNextColumn();

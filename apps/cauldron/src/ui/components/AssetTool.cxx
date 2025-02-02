@@ -55,11 +55,14 @@ AssetTool::AssetTool(const std::shared_ptr<Properties>& properties) {
     } catch (const std::exception& ex) { Log.error(ex.what()); }
   });
 
-  outputFileDialog = std::make_unique<FileDialog>(properties, SkeletonFilters, "assettool-trm");
+  outputFileDialog = std::make_unique<FileDialog>(properties, TrmFilters, "assettool-trm");
   outputFileDialog->setOnOk([&](std::vector<std::filesystem::path> selectedFile) {
     try {
-      const auto outputFile = selectedFile.front();
+      auto outputFile = selectedFile.front();
       const auto model = modelConverter->buildTritonModel();
+      if (!outputFile.has_extension()) {
+        outputFile.replace_extension("trm");
+      }
       writeOutputFile(outputFile, model);
     } catch (const std::exception& ex) { Log.error(ex.what()); }
   });

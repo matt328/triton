@@ -15,6 +15,13 @@
 
 namespace tr {
 
+/*
+  TODO(matt) This class is becoming a hardcoded task graph. After a few more tasks have been added,
+  I'll either factor things out into a more modular design, or implement an actual task graph.
+  For now just keep adding more to this class, trying to keep things at least divided up into
+  functions.
+*/
+
 DefaultRenderScheduler::DefaultRenderScheduler(
     std::shared_ptr<IFrameManager> newFrameManager,
     std::shared_ptr<CommandBufferManager> newCommandBufferManager,
