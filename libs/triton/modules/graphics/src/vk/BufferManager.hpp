@@ -1,5 +1,6 @@
 #pragma once
 
+#include "IBufferManager.hpp"
 #include "cm/Rando.hpp"
 #include "vk/ResourceManagerHandles.hpp"
 
@@ -10,11 +11,11 @@ class Allocator;
 class ImmediateTransferContext;
 class IGeometryData;
 
-class BufferManager {
+class BufferManager : public IBufferManager {
 public:
   BufferManager(std::shared_ptr<Allocator> newAllocator,
                 std::shared_ptr<ImmediateTransferContext> newImmediateTransferContext);
-  ~BufferManager() = default;
+  ~BufferManager() override = default;
 
   BufferManager(const BufferManager&) = delete;
   BufferManager(BufferManager&&) = delete;
@@ -27,23 +28,23 @@ public:
       std::string_view name,
       vma::MemoryUsage usage = vma::MemoryUsage::eCpuToGpu,
       vk::MemoryPropertyFlags memoryProperties = vk::MemoryPropertyFlagBits::eHostCoherent,
-      bool mapped = false) -> BufferHandle;
+      bool mapped = false) -> BufferHandle override;
 
-  auto createGpuVertexBuffer(size_t size, std::string_view name) -> BufferHandle;
+  auto createGpuVertexBuffer(size_t size, std::string_view name) -> BufferHandle override;
 
-  auto createGpuIndexBuffer(size_t size, std::string_view name) -> BufferHandle;
+  auto createGpuIndexBuffer(size_t size, std::string_view name) -> BufferHandle override;
 
-  auto createIndirectBuffer(size_t size) -> BufferHandle;
+  auto createIndirectBuffer(size_t size) -> BufferHandle override;
 
-  [[nodiscard]] auto resizeBuffer(BufferHandle handle, size_t newSize) -> BufferHandle;
+  [[nodiscard]] auto resizeBuffer(BufferHandle handle, size_t newSize) -> BufferHandle override;
 
-  [[nodiscard]] auto getBuffer(BufferHandle handle) const -> Buffer&;
+  [[nodiscard]] auto getBuffer(BufferHandle handle) const -> Buffer& override;
 
   auto addToBuffer(const IGeometryData& geometryData,
                    BufferHandle vertexBufferHandle,
                    vk::DeviceSize vertexOffset,
                    BufferHandle indexBufferHandle,
-                   vk::DeviceSize indexOffset) -> void;
+                   vk::DeviceSize indexOffset) -> void override;
 
 private:
   std::shared_ptr<Allocator> allocator;

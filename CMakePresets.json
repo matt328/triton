@@ -99,7 +99,9 @@
       "jobs": 18,
       "targets": [
         "Cauldron",
-        "assettool"
+        "assettool",
+        "testarea-tests",
+        "triton-tests"
       ]
     },
     {
@@ -130,6 +132,20 @@
       "targets": [
         "asset-lib-test"
       ]
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "testarea",
+      "description": "test area tests",
+      "displayName": "Test Area",
+      "configurePreset": "debug",
+      "configuration": "Debug",
+      "filter": {
+        "include": {
+          "name": "Mocking is tested"
+        }
+      }
     }
   ]
 }

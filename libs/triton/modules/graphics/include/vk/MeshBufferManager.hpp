@@ -3,17 +3,22 @@
 #include "cm/RenderMeshData.hpp"
 #include "geo/GeometryData.hpp"
 #include "cm/Handles.hpp"
-#include "ResourceManagerHandles.hpp"
-#include "BufferEntry.hpp"
+#include "vk/ResourceManagerHandles.hpp"
+#include "vk/BufferEntry.hpp"
 
 namespace tr {
 
-class BufferManager;
+class IBufferManager;
 class Buffer;
+
+struct Block {
+  uint32_t offset;
+  uint32_t size;
+};
 
 class MeshBufferManager {
 public:
-  explicit MeshBufferManager(std::shared_ptr<BufferManager> newBufferManager,
+  explicit MeshBufferManager(std::shared_ptr<IBufferManager> newBufferManager,
                              size_t vertexSize,
                              std::string_view bufferName);
   ~MeshBufferManager() = default;
@@ -35,7 +40,7 @@ public:
   [[nodiscard]] auto getBuffers() const -> std::tuple<Buffer&, Buffer&>;
 
 private:
-  std::shared_ptr<BufferManager> bufferManager;
+  std::shared_ptr<IBufferManager> bufferManager;
 
   size_t vertexBufferMaxSize;
   size_t indexBufferMaxSize;
@@ -52,6 +57,9 @@ private:
   std::vector<BufferEntry> bufferEntries;
 
   std::vector<GpuBufferEntry> gpuBufferEntryList;
+
+  std::vector<Block> emptyIndexBlocks;
+  std::vector<Block> emptyVertexBlocks;
 
   auto testPrivateMethod() -> void;
 };

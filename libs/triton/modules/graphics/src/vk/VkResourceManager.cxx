@@ -24,7 +24,7 @@ VkResourceManager::VkResourceManager(
     std::shared_ptr<DSLayoutManager> newLayoutManager,
     std::shared_ptr<IShaderBindingFactory> newShaderBindingFactory,
     std::shared_ptr<Allocator> newAllocator,
-    std::shared_ptr<BufferManager> newBufferManager)
+    std::shared_ptr<IBufferManager> newBufferManager)
     : device{std::move(newDevice)},
       immediateTransferContext{std::move(newImmediateTransferContext)},
       shaderCompiler{std::move(newShaderCompiler)},

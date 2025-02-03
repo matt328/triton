@@ -168,10 +168,10 @@ target_include_directories(${PROJECT_NAME}
   modules/triton/include
   modules/common/include
   modules/gameplay/include
+  modules/graphics/include
   PRIVATE
   modules/common/src
   modules/gameplay/src
-  modules/graphics/include
   modules/graphics/src
   modules/triton/include
   modules/triton/src

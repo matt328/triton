@@ -1,15 +1,15 @@
 set(Shaders
-  shader.vert
-  shader.frag
-  terrain.vert
-  terrain.frag
+  compute.comp
   debug.vert
   debug.frag
   dynamic.vert
   dynamic.frag
-  compute.comp
+  shader.vert
+  shader.frag
   static.vert
   static.frag
+  terrain.vert
+  terrain.frag
 )
 
 get_property(GENERATOR_IS_MULTI_CONFIG GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
