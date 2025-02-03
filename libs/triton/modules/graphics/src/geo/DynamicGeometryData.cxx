@@ -24,11 +24,11 @@ auto DynamicGeometryData::getIndexData() const -> const void* {
   return static_cast<const void*>(indices.data());
 }
 
-auto DynamicGeometryData::getIndexCount() const -> size_t {
+auto DynamicGeometryData::getIndexCount() const -> uint32_t {
   return indices.size();
 }
 
-auto DynamicGeometryData::getVertexCount() const -> size_t {
+auto DynamicGeometryData::getVertexCount() const -> uint32_t {
   return vertices.size();
 }
 

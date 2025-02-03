@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GeometryData.hpp"
+#include "geo/GeometryData.hpp"
 #include "as/DynamicVertex.hpp"
 
 namespace tr {
@@ -20,8 +20,8 @@ public:
   [[nodiscard]] auto getIndexDataSize() const -> size_t override;
   [[nodiscard]] auto getVertexData() const -> const void* override;
   [[nodiscard]] auto getIndexData() const -> const void* override;
-  [[nodiscard]] auto getIndexCount() const -> size_t override;
-  [[nodiscard]] auto getVertexCount() const -> size_t override;
+  [[nodiscard]] auto getIndexCount() const -> uint32_t override;
+  [[nodiscard]] auto getVertexCount() const -> uint32_t override;
 
 private:
   std::vector<as::DynamicVertex> vertices;

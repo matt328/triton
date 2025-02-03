@@ -100,18 +100,19 @@ auto BufferManager::addToBuffer(const IGeometryData& geometryData,
   const auto ibSize = geometryData.getIndexDataSize();
 
   try {
+    // Prepare Vertex Staging Buffer
     const auto vbStagingBuffer = allocator->createStagingBuffer(vbSize, "Buffer-VertexStaging");
     void* vbData = allocator->mapMemory(*vbStagingBuffer);
     memcpy(vbData, geometryData.getVertexData(), vbSize);
     allocator->unmapMemory(*vbStagingBuffer);
 
-    // Prepare Index Buffer
+    // Prepare Index Staging Buffer
     const auto ibStagingBuffer = allocator->createStagingBuffer(ibSize, "Buffer-IndexStaging");
-
     auto* const data = allocator->mapMemory(*ibStagingBuffer);
     memcpy(data, geometryData.getIndexData(), ibSize);
     allocator->unmapMemory(*ibStagingBuffer);
 
+    // Destination Buffer
     auto& vertexBuffer = getBuffer(vertexBufferHandle);
     auto& indexBuffer = getBuffer(indexBufferHandle);
 

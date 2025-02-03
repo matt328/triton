@@ -16,12 +16,5 @@
       ],
       "url": "./editor/data/projects-schema.json"
     }
-  ],
-  "cmake.debugConfig": {
-    "args": [
-      "gltf",
-      "-f=C:\\Users\\Matt\\Projects\\game-assets\\models\\viking_room\\viking_room.gltf",
-      "-o=C:\\Users\\Matt\\Projects\\game-assets\\models\\viking_room\\viking_room.trm"
-    ],
-  }
+  ]
 }

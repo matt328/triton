@@ -16,8 +16,8 @@ public:
   [[nodiscard]] virtual auto getIndexDataSize() const -> size_t = 0;
   [[nodiscard]] virtual auto getVertexData() const -> const void* = 0;
   [[nodiscard]] virtual auto getIndexData() const -> const void* = 0;
-  [[nodiscard]] virtual auto getIndexCount() const -> size_t = 0;
-  [[nodiscard]] virtual auto getVertexCount() const -> size_t = 0;
+  [[nodiscard]] virtual auto getIndexCount() const -> uint32_t = 0;
+  [[nodiscard]] virtual auto getVertexCount() const -> uint32_t = 0;
 };
 
 template <typename T>

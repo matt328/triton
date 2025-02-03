@@ -1,11 +1,11 @@
-#include "MeshBufferManager.hpp"
+#include "vk/MeshBufferManager.hpp"
 
 #include "vk/BufferManager.hpp"
 #include "vk/VkResourceManager.hpp"
 
 namespace tr {
 
-MeshBufferManager::MeshBufferManager(std::shared_ptr<BufferManager> newBufferManager,
+MeshBufferManager::MeshBufferManager(std::shared_ptr<IBufferManager> newBufferManager,
                                      size_t vertexSize,
                                      std::string_view bufferName)
     : bufferManager{std::move(newBufferManager)},
@@ -22,6 +22,8 @@ MeshBufferManager::MeshBufferManager(std::shared_ptr<BufferManager> newBufferMan
 }
 
 auto MeshBufferManager::addMesh(const IGeometryData& geometryData) -> MeshHandle {
+  // Find an empty block, if one exists
+
   const auto vertexSize = geometryData.getVertexDataSize();
   const auto indexSize = geometryData.getIndexDataSize();
 
@@ -69,18 +71,18 @@ auto MeshBufferManager::addMesh(const IGeometryData& geometryData) -> MeshHandle
                              indexBufferHandle,
                              indexBufferCurrentSize);
 
-  size_t vertexOffset = 0;
-  size_t indexOffset = 0;
+  uint32_t vertexOffset = 0;
+  uint32_t indexOffset = 0;
   for (const auto& bufferEntry : bufferEntries) {
     vertexOffset += bufferEntry.vertexCount;
     indexOffset += bufferEntry.indexCount;
   }
 
   const auto meshHandle = bufferEntries.size();
-  bufferEntries.emplace_back(geometryData.getIndexCount(),
-                             indexOffset,
-                             vertexOffset,
-                             geometryData.getVertexCount());
+  bufferEntries.emplace_back(BufferEntry{.indexCount = geometryData.getIndexCount(),
+                                         .indexOffset = indexOffset,
+                                         .vertexCount = geometryData.getVertexCount(),
+                                         .vertexOffset = vertexOffset});
 
   vertexBufferCurrentSize = newVertexSize;
   indexBufferCurrentSize = newIndexSize;
@@ -97,6 +99,12 @@ auto MeshBufferManager::getIndexBufferHandle() const -> BufferHandle {
 }
 
 auto MeshBufferManager::removeMesh([[maybe_unused]] MeshHandle meshHandle) -> void {
+  auto bufferEntry = bufferEntries[meshHandle];
+  emptyIndexBlocks.emplace_back(
+      Block{.offset = bufferEntry.indexOffset, .size = bufferEntry.indexCount});
+  emptyVertexBlocks.emplace_back(
+      Block{.offset = bufferEntry.vertexOffset, .size = bufferEntry.vertexCount});
+  bufferEntries.erase(bufferEntries.begin() + meshHandle);
 }
 
 /// RenderDataSystem combines meshHandles and other data from the entities into RenderMeshData
@@ -110,7 +118,7 @@ auto MeshBufferManager::getGpuBufferEntries(const std::vector<RenderMeshData>& m
     ZoneNamedN(var, "processMeshData", true);
     const auto& bufferEntry = bufferEntries[meshData.handle];
     gpuBufferEntryList.push_back(GpuBufferEntry{.indexCount = bufferEntry.indexCount,
-                                                .firstIndex = bufferEntry.firstIndex,
+                                                .firstIndex = bufferEntry.indexOffset,
                                                 .vertexOffset = bufferEntry.vertexOffset,
                                                 .instanceCount = 1,
                                                 .firstInstance = 0,

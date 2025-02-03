@@ -9,7 +9,7 @@
 #include "pipeline/IShaderCompiler.hpp"
 #include "as/Model.hpp"
 
-#include "ResourceManagerHandles.hpp"
+#include "vk/ResourceManagerHandles.hpp"
 #include "vk/MeshBufferManager.hpp"
 #include "TextureData.hpp"
 #include "vk/sb/DSLayoutManager.hpp"
@@ -58,7 +58,7 @@ public:
                              std::shared_ptr<DSLayoutManager> newLayoutManager,
                              std::shared_ptr<IShaderBindingFactory> newShaderBindingFactory,
                              std::shared_ptr<Allocator> newAllocator,
-                             std::shared_ptr<BufferManager> newBufferManager);
+                             std::shared_ptr<IBufferManager> newBufferManager);
   ~VkResourceManager();
   VkResourceManager(const VkResourceManager&) = delete;
   VkResourceManager(VkResourceManager&&) = delete;
@@ -139,7 +139,7 @@ private:
   std::shared_ptr<DSLayoutManager> layoutManager;
   std::shared_ptr<IShaderBindingFactory> shaderBindingFactory;
   std::shared_ptr<Allocator> allocator;
-  std::shared_ptr<BufferManager> bufferManager;
+  std::shared_ptr<IBufferManager> bufferManager;
 
   std::unordered_map<ImageHandle, ImageInfo> imageInfoMap;
   std::unordered_map<PipelineHandle, std::unique_ptr<IPipeline>> pipelineMap;

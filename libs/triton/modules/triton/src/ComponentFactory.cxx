@@ -68,7 +68,8 @@ auto ComponentFactory::getContext(const FrameworkConfig& config) -> std::shared_
                         di::bind<queue::Graphics>.to<queue::Graphics>(),
                         di::bind<queue::Transfer>.to<queue::Transfer>(),
                         di::bind<queue::Present>.to<queue::Present>(),
-                        di::bind<queue::Compute>.to<queue::Compute>());
+                        di::bind<queue::Compute>.to<queue::Compute>(),
+                        di::bind<IBufferManager>.to<BufferManager>());
 
   return injector.create<std::shared_ptr<DefaultContext>>();
 }

@@ -1,4 +1,4 @@
-#include "StaticGeometryData.hpp"
+#include "geo/StaticGeometryData.hpp"
 #include "as/StaticVertex.hpp"
 
 namespace tr {
@@ -24,11 +24,11 @@ auto StaticGeometryData::getIndexData() const -> const void* {
   return static_cast<const void*>(indices.data());
 }
 
-auto StaticGeometryData::getIndexCount() const -> size_t {
+auto StaticGeometryData::getIndexCount() const -> uint32_t {
   return indices.size();
 }
 
-auto StaticGeometryData::getVertexCount() const -> size_t {
+auto StaticGeometryData::getVertexCount() const -> uint32_t {
   return vertices.size();
 }
 
