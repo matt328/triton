@@ -9,6 +9,7 @@ target_link_libraries(triton-tests
   triton
   PRIVATE
   BoostDI
+  trompeloeil::trompeloeil
   Catch2::Catch2WithMain
 )
 

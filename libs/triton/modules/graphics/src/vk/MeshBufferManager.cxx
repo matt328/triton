@@ -1,7 +1,9 @@
 #include "vk/MeshBufferManager.hpp"
 
+#include "geo/GeometryData.hpp"
 #include "vk/BufferManager.hpp"
 #include "vk/VkResourceManager.hpp"
+#include <ranges>
 
 namespace tr {
 
@@ -9,102 +11,95 @@ MeshBufferManager::MeshBufferManager(std::shared_ptr<IBufferManager> newBufferMa
                                      size_t vertexSize,
                                      std::string_view bufferName)
     : bufferManager{std::move(newBufferManager)},
-      vertexBufferMaxSize(vertexSize * 10240),
-      indexBufferMaxSize(sizeof(uint32_t) * 30240),
-      vertexBufferMaxLoad(0.8f),
-      indexBufferMaxLoad(0.8f),
-      vertexBufferHandle(
-          bufferManager->createGpuVertexBuffer(vertexBufferMaxSize,
+      vbStride(vertexSize),
+      ibStride(sizeof(uint32_t)),
+      vbMaxSize(vertexSize * 10240),
+      ibMaxSize(sizeof(uint32_t) * 30240),
+      vbMaxLoad(0.8f),
+      ibMaxLoad(0.8f),
+      vbHandle(
+          bufferManager->createGpuVertexBuffer(vbMaxSize,
                                                fmt::format("Buffer-{}-Vertex", bufferName.data()))),
-      indexBufferHandle(
-          bufferManager->createGpuIndexBuffer(indexBufferMaxSize,
+      ibHandle(
+          bufferManager->createGpuIndexBuffer(ibMaxSize,
                                               fmt::format("Buffer-{}-Index", bufferName.data()))) {
 }
 
+MeshBufferManager::~MeshBufferManager() {
+}
+
 auto MeshBufferManager::addMesh(const IGeometryData& geometryData) -> MeshHandle {
-  // Find an empty block, if one exists
 
-  const auto vertexSize = geometryData.getVertexDataSize();
-  const auto indexSize = geometryData.getIndexDataSize();
-
-  const auto newVertexSize = vertexBufferCurrentSize + vertexSize;
-  const auto newIndexSize = indexBufferCurrentSize + indexSize;
-
-  auto newVertexLoadFactor =
-      static_cast<float>(newVertexSize) / static_cast<float>(vertexBufferMaxSize);
-  auto newIndexLoadFactor =
-      static_cast<float>(newIndexSize) / static_cast<float>(indexBufferMaxSize);
-
+  // Default insert position to the 'end'
+  auto ibInsertPosition = ibMaxAllocatedOffset;
   {
-    size_t calculatedMaxSize = vertexBufferMaxSize;
-    while (newVertexLoadFactor > vertexBufferMaxLoad) {
-      calculatedMaxSize = static_cast<size_t>(calculatedMaxSize * 1.5f);
-      newVertexLoadFactor =
-          static_cast<float>(newVertexSize) / static_cast<float>(calculatedMaxSize);
-    }
-
-    if (calculatedMaxSize != vertexBufferMaxSize) {
-      Log.debug("Resizing vertex buffer to new max size: {}", calculatedMaxSize);
-      vertexBufferHandle = bufferManager->resizeBuffer(vertexBufferHandle, calculatedMaxSize);
-      vertexBufferMaxSize = calculatedMaxSize;
+    // Find an empty block and set insert position there if one is found
+    const auto emptyBlock = findEmptyBlock(geometryData, emptyIndexBlocks);
+    if (emptyBlock.has_value()) {
+      ibInsertPosition = emptyBlock->offset;
     }
   }
 
+  // Same as Index Buffer
+  auto vbInsertPosition = vbMaxAllocatedOffset;
   {
-    size_t calculatedIndexMaxSize = indexBufferMaxSize;
-    while (newIndexLoadFactor > indexBufferMaxLoad) {
-      calculatedIndexMaxSize = static_cast<size_t>(calculatedIndexMaxSize * 1.5f);
-      newIndexLoadFactor =
-          static_cast<float>(newIndexSize) / static_cast<float>(calculatedIndexMaxSize);
-    }
-
-    if (calculatedIndexMaxSize != indexBufferMaxSize) {
-      Log.debug("Resizing index buffer to new max size: {}", calculatedIndexMaxSize);
-      indexBufferHandle = bufferManager->resizeBuffer(indexBufferHandle, calculatedIndexMaxSize);
-      indexBufferMaxSize = calculatedIndexMaxSize;
+    const auto emptyBlock = findEmptyBlock(geometryData, emptyVertexBlocks);
+    if (emptyBlock.has_value()) {
+      vbInsertPosition = emptyBlock->offset;
     }
   }
 
-  bufferManager->addToBuffer(geometryData,
-                             vertexBufferHandle,
-                             vertexBufferCurrentSize,
-                             indexBufferHandle,
-                             indexBufferCurrentSize);
-
-  uint32_t vertexOffset = 0;
-  uint32_t indexOffset = 0;
-  for (const auto& bufferEntry : bufferEntries) {
-    vertexOffset += bufferEntry.vertexCount;
-    indexOffset += bufferEntry.indexCount;
+  // If we're inserting at the end, check if it will fit, if not, resize
+  const auto ibInsertPositionInBytes = ibStride * ibInsertPosition;
+  auto ibNeedsResize = ibInsertPositionInBytes + geometryData.getIndexDataSize() > ibMaxSize;
+  if (ibInsertPosition == ibMaxAllocatedOffset && ibNeedsResize) {
+    resizeIndexBuffer();
   }
 
-  const auto meshHandle = bufferEntries.size();
-  bufferEntries.emplace_back(BufferEntry{.indexCount = geometryData.getIndexCount(),
-                                         .indexOffset = indexOffset,
-                                         .vertexCount = geometryData.getVertexCount(),
-                                         .vertexOffset = vertexOffset});
+  // Same as Index buffer
+  const auto vbInsertPositionInBytes = vbStride * vbInsertPosition;
+  auto vbNeedsResize = vbInsertPositionInBytes + geometryData.getVertexDataSize() > vbMaxSize;
+  if (vbInsertPosition == vbMaxAllocatedOffset && vbNeedsResize) {
+    resizeVertexBuffer();
+  }
 
-  vertexBufferCurrentSize = newVertexSize;
-  indexBufferCurrentSize = newIndexSize;
+  // Add the data to the buffers at the determined offsets
+  bufferManager->addToBuffer(geometryData, vbHandle, vbInsertPosition, ibHandle, ibInsertPosition);
 
+  // If inserted at the end, set the new max offset
+  if (ibInsertPosition == ibMaxAllocatedOffset) {
+    ibMaxAllocatedOffset += geometryData.getIndexCount();
+  }
+  // If inserted at the end, set the new max offset
+  if (vbInsertPosition == vbMaxAllocatedOffset) {
+    vbMaxAllocatedOffset += geometryData.getVertexCount();
+  }
+
+  // Insert a bufferEntry
+  const auto meshHandle = bufferKeygen.getKey();
+  bufferEntries.insert({meshHandle,
+                        BufferEntry{.indexCount = geometryData.getIndexCount(),
+                                    .indexOffset = static_cast<uint32_t>(ibInsertPosition),
+                                    .vertexCount = geometryData.getVertexCount(),
+                                    .vertexOffset = static_cast<uint32_t>(vbInsertPosition)}});
   return meshHandle;
 }
 
 auto MeshBufferManager::getVertexBufferHandle() const -> BufferHandle {
-  return vertexBufferHandle;
+  return vbHandle;
 }
 
 auto MeshBufferManager::getIndexBufferHandle() const -> BufferHandle {
-  return indexBufferHandle;
+  return ibHandle;
 }
 
-auto MeshBufferManager::removeMesh([[maybe_unused]] MeshHandle meshHandle) -> void {
+auto MeshBufferManager::removeMesh(MeshHandle meshHandle) -> void {
   auto bufferEntry = bufferEntries[meshHandle];
   emptyIndexBlocks.emplace_back(
       Block{.offset = bufferEntry.indexOffset, .size = bufferEntry.indexCount});
   emptyVertexBlocks.emplace_back(
       Block{.offset = bufferEntry.vertexOffset, .size = bufferEntry.vertexCount});
-  bufferEntries.erase(bufferEntries.begin() + meshHandle);
+  bufferEntries.erase(meshHandle);
 }
 
 /// RenderDataSystem combines meshHandles and other data from the entities into RenderMeshData
@@ -131,6 +126,16 @@ auto MeshBufferManager::getGpuBufferEntries(const std::vector<RenderMeshData>& m
 auto MeshBufferManager::getBuffers() const -> std::tuple<Buffer&, Buffer&> {
   return {bufferManager->getBuffer(getVertexBufferHandle()),
           bufferManager->getBuffer(getIndexBufferHandle())};
+}
+
+auto MeshBufferManager::findEmptyBlock(const IGeometryData& geometryData,
+                                       const std::vector<Block>& blocks) -> std::optional<Block> {
+  for (const auto& block : blocks) {
+    if (geometryData.getIndexDataSize() <= block.size) {
+      return std::make_optional(block);
+    }
+  }
+  return std::nullopt;
 }
 
 }
