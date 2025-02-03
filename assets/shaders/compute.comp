@@ -15,10 +15,10 @@ struct GpuBufferEntry {
 };
 
 struct DrawCommand {
-  uint indexCount;
+  uint indexCount; // number of indices
   uint instanceCount;
-  uint firstIndex;
-  uint vertexOffset;
+  uint firstIndex;   // Number of the index
+  uint vertexOffset; // in number of vertices
   uint firstInstance;
 };
 

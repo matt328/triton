@@ -53,18 +53,24 @@ auto MeshBufferManager::addMesh(const IGeometryData& geometryData) -> MeshHandle
   const auto ibInsertPositionInBytes = ibStride * ibInsertPosition;
   auto ibNeedsResize = ibInsertPositionInBytes + geometryData.getIndexDataSize() > ibMaxSize;
   if (ibInsertPosition == ibMaxAllocatedOffset && ibNeedsResize) {
-    resizeIndexBuffer();
+    vbHandle = bufferManager->resizeBuffer(vbHandle, vbMaxSize * 2);
+    vbMaxSize *= 2;
   }
 
   // Same as Index buffer
   const auto vbInsertPositionInBytes = vbStride * vbInsertPosition;
   auto vbNeedsResize = vbInsertPositionInBytes + geometryData.getVertexDataSize() > vbMaxSize;
   if (vbInsertPosition == vbMaxAllocatedOffset && vbNeedsResize) {
-    resizeVertexBuffer();
+    ibHandle = bufferManager->resizeBuffer(ibHandle, ibMaxSize * 2);
+    ibMaxSize *= 2;
   }
 
   // Add the data to the buffers at the determined offsets
-  bufferManager->addToBuffer(geometryData, vbHandle, vbInsertPosition, ibHandle, ibInsertPosition);
+  bufferManager->addToBuffer(geometryData,
+                             vbHandle,
+                             vbInsertPosition * vbStride,
+                             ibHandle,
+                             ibInsertPosition * ibStride);
 
   // If inserted at the end, set the new max offset
   if (ibInsertPosition == ibMaxAllocatedOffset) {
