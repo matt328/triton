@@ -5,21 +5,6 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "(Windows) Launch",
-      "type": "cppdbg",
-      "request": "launch",
-      "program": "${workspaceFolder}/build/debug/apps/editor/editor",
-      "args": [
-        "gltf",
-        "-f=C:\\Users\\Matt\\Projects\\game-assets\\models\\viking_room\\viking_room.gltf",
-        "-o=C:\\Users\\Matt\\Projects\\game-assets\\models\\viking_room\\viking_room.trm"
-      ],
-      "cwd": "${workspaceFolder}",
-      "stopAtEntry": false,
-      "environment": [],
-      "visualizerFile": "${workspaceFolder}/.vscode/ufbx.natvis"
-    },
-    {
       "type": "lldb-dap",
       "request": "launch",
       "name": "(lldb) Launch AssetTool",
@@ -66,27 +51,21 @@
       ]
     },
     {
-      "name": "(gdb) Launch",
-      "type": "cppdbg",
+      "type": "lldb-dap",
       "request": "launch",
-      "program": "${workspaceFolder}/build/debug/apps/editor/editor",
-      "args": [],
-      "stopAtEntry": false,
+      "name": "(lldb) Launch Triton Tests",
+      "program": "${workspaceFolder}/build/debug/libs/triton/tests/triton-tests",
       "cwd": "${workspaceFolder}",
-      "environment": [],
-      "externalConsole": false,
-      "MIMode": "gdb",
-      "setupCommands": [
-        {
-          "description": "Enable pretty-printing for gdb",
-          "text": "-enable-pretty-printing",
-          "ignoreFailures": true
-        },
-        {
-          "description": "Set Disassembly Flavor to Intel",
-          "text": "-gdb-set disassembly-flavor intel",
-          "ignoreFailures": true
-        }
+      "initCommands": [
+        "type summary add glm::vec2 --summary-string \"x=${var.x}, y=${var.y}\"",
+        "type summary add glm::vec3 --summary-string \"x=${var.x}, y=${var.y}, z=${var.z}\"",
+        "type summary add glm::ivec3 --summary-string \"x=${var.x}, y=${var.y}, z=${var.z}\"",
+        "type summary add glm::vec4 --summary-string \"x=${var.x}, y=${var.y}, z=${var.z}, w=${var.w}\"",
+        "type summary add glm::quat --summary-string \"x=${var.x}, y=${var.y}, z=${var.z}, w=${var.w}\"",
+        "type summary add glm::mat2 --summary-string \"${var.value[0].x}, ${var.value[0].y} | ${var.value[1].x}, ${var.value[1].y}\"",
+        "type summary add glm::mat3 --summary-string \"${var.value[0].x}, ${var.value[0].y}, ${var.value[0].z} | ${var.value[1].x}, ${var.value[1].y}, ${var.value[1].z} | ${var.value[2].x}, ${var.value[2].y}, ${var.value[2].z}\"",
+        "type summary add glm::mat4 --summary-string \"${var.value[0].x}, ${var.value[0].y}, ${var.value[0].z}, ${var.value[0].w} | ${var.value[1].x}, ${var.value[1].y}, ${var.value[1].z}, ${var.value[1].w} | ${var.value[2].x}, ${var.value[2].y}, ${var.value[2].z}, ${var.value[2].w} | ${var.value[3].x}, ${var.value[3].y}, ${var.value[3].z}, ${var.value[3].w}\"",
+        "type summary add tr::as::Vertex --summary-string \"position: (${var.pos.x}, ${var.pos.y}, ${var.pos.z})\"",
       ]
     }
   ]
