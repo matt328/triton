@@ -21,19 +21,16 @@ inline auto generateRandomVertices(size_t count) -> std::vector<as::StaticVertex
   return vertices;
 }
 
-inline auto generateMesh(size_t vertexCount) -> tr::StaticGeometryData {
+inline auto generateMesh(size_t vertexCount, size_t indexCount) -> tr::StaticGeometryData {
   auto vertices = generateRandomVertices(vertexCount);
 
   auto indices = std::vector<uint32_t>{};
 
   // Generate indices (assuming triangle list)
-  if (vertexCount >= 3) {
-    size_t indexCount = vertexCount * 4;
-    indices.reserve(indexCount);
+  indices.reserve(indexCount);
 
-    for (size_t i = 0; i < indexCount; ++i) {
-      indices.push_back(static_cast<uint32_t>(i));
-    }
+  for (size_t i = 0; i < indexCount; ++i) {
+    indices.push_back(static_cast<uint32_t>(i));
   }
 
   return tr::StaticGeometryData(std::move(vertices), std::move(indices));

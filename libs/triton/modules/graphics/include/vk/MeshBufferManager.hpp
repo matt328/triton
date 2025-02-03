@@ -1,5 +1,6 @@
 #pragma once
 
+#include "cm/Rando.hpp"
 #include "cm/RenderMeshData.hpp"
 #include "geo/GeometryData.hpp"
 #include "cm/Handles.hpp"
@@ -16,12 +17,16 @@ struct Block {
   uint32_t size;
 };
 
+struct FilledBlock : public Block {
+  uint32_t itemCount;
+};
+
 class MeshBufferManager {
 public:
   explicit MeshBufferManager(std::shared_ptr<IBufferManager> newBufferManager,
                              size_t vertexSize,
                              std::string_view bufferName);
-  ~MeshBufferManager() = default;
+  ~MeshBufferManager();
 
   MeshBufferManager(const MeshBufferManager&) = delete;
   MeshBufferManager(MeshBufferManager&&) = delete;
@@ -42,26 +47,36 @@ public:
 private:
   std::shared_ptr<IBufferManager> bufferManager;
 
-  size_t vertexBufferMaxSize;
-  size_t indexBufferMaxSize;
+  const size_t vbStride;
+  const size_t ibStride;
 
-  size_t vertexBufferCurrentSize = 0;
-  size_t indexBufferCurrentSize = 0;
+  size_t vbMaxSize;
+  size_t ibMaxSize;
 
-  float vertexBufferMaxLoad;
-  float indexBufferMaxLoad;
+  size_t vbMaxAllocatedOffset = 0;
+  size_t ibMaxAllocatedOffset = 0;
 
-  BufferHandle vertexBufferHandle;
-  BufferHandle indexBufferHandle;
+  const float vbMaxLoad;
+  const float ibMaxLoad;
 
-  std::vector<BufferEntry> bufferEntries;
+  BufferHandle vbHandle;
+  BufferHandle ibHandle;
+
+  MapKey bufferKeygen{};
+  std::unordered_map<size_t, BufferEntry> bufferEntries;
 
   std::vector<GpuBufferEntry> gpuBufferEntryList;
 
   std::vector<Block> emptyIndexBlocks;
   std::vector<Block> emptyVertexBlocks;
 
+  std::vector<FilledBlock> filledIndexBlocks;
+  std::vector<FilledBlock> filledVertexBlocks;
+
   auto testPrivateMethod() -> void;
+
+  auto findEmptyBlock(const IGeometryData& geometryData, const std::vector<Block>& blocks)
+      -> std::optional<Block>;
 };
 
 }
