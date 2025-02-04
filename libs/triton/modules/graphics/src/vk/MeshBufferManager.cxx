@@ -3,7 +3,6 @@
 #include "geo/GeometryData.hpp"
 #include "vk/BufferManager.hpp"
 #include "vk/VkResourceManager.hpp"
-#include <ranges>
 
 namespace tr {
 
@@ -15,8 +14,6 @@ MeshBufferManager::MeshBufferManager(std::shared_ptr<IBufferManager> newBufferMa
       ibStride(sizeof(uint32_t)),
       vbMaxSize(vertexSize * 10240),
       ibMaxSize(sizeof(uint32_t) * 30240),
-      vbMaxLoad(0.8f),
-      ibMaxLoad(0.8f),
       vbHandle(
           bufferManager->createGpuVertexBuffer(vbMaxSize,
                                                fmt::format("Buffer-{}-Vertex", bufferName.data()))),
@@ -26,6 +23,7 @@ MeshBufferManager::MeshBufferManager(std::shared_ptr<IBufferManager> newBufferMa
 }
 
 MeshBufferManager::~MeshBufferManager() {
+  Log.trace("Destroying MeshBufferManager");
 }
 
 auto MeshBufferManager::addMesh(const IGeometryData& geometryData) -> MeshHandle {

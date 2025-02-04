@@ -67,13 +67,10 @@ private:
   size_t vbMaxAllocatedOffset = 0;
   size_t ibMaxAllocatedOffset = 0;
 
-  const float vbMaxLoad;
-  const float ibMaxLoad;
-
   BufferHandle vbHandle;
   BufferHandle ibHandle;
 
-  MapKey bufferKeygen{};
+  MapKey bufferKeygen;
   std::unordered_map<size_t, BufferEntry> bufferEntries;
 
   std::vector<GpuBufferEntry> gpuBufferEntryList;
@@ -81,14 +78,12 @@ private:
   BlockContainer emptyIndexBlocks;
   BlockContainer emptyVertexBlocks;
 
-  auto testPrivateMethod() -> void;
-
-  auto findEmptyBlock(uint32_t requiredSize, BlockContainer& blocks)
+  static auto findEmptyBlock(uint32_t requiredSize, BlockContainer& blocks)
       -> std::optional<std::reference_wrapper<Block>>;
 
-  auto mergeFreeBlocks(BlockContainer& blocks) -> void;
+  static auto mergeFreeBlocks(BlockContainer& blocks) -> void;
 
-  auto mergeWithNeighbors(BlockContainer::iterator it, BlockContainer& blocks) -> void;
+  static auto mergeWithNeighbors(BlockContainer::iterator it, BlockContainer& blocks) -> void;
 };
 
 }

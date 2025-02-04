@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ControlBase.hpp"
-#include "Properties.hpp"
 #include <platform_folders.h>
 
 namespace ed {
@@ -14,8 +13,7 @@ class TypedControl : public ControlBase {
 public:
   TypedControl(std::string label,
                T initialValue,
-               std::optional<ValueProvider> newValueProvider = std::nullopt,
-               std::optional<std::shared_ptr<Properties>> newProperties = std::nullopt)
+               std::optional<ValueProvider> newValueProvider = std::nullopt)
       : label(std::move(label)), value(initialValue), valueProvider{std::move(newValueProvider)} {
   }
 
