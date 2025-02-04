@@ -28,11 +28,9 @@ public:
   void addControl(const std::string& name,
                   const std::string& label,
                   T initialValue,
-                  std::optional<ValueProvider> valueProvider = std::nullopt,
-                  std::optional<std::shared_ptr<Properties>> properties = std::nullopt) {
+                  std::optional<ValueProvider> valueProvider = std::nullopt) {
     controlNames.push_back(name);
-    controls[name] =
-        std::make_unique<TypedControl<T>>(label, initialValue, valueProvider, properties);
+    controls[name] = std::make_unique<TypedControl<T>>(label, initialValue, valueProvider);
   }
 
   void addFileControl(const std::string& name,
@@ -40,7 +38,8 @@ public:
                       std::shared_ptr<Properties> newProperties,
                       const std::vector<FilterItem>& filterItems) {
     controlNames.push_back(name);
-    controls[name] = std::make_unique<FileControl>(name, label, newProperties, filterItems);
+    controls[name] =
+        std::make_unique<FileControl>(name, label, std::move(newProperties), filterItems);
   }
 
   template <typename T>
