@@ -13,13 +13,24 @@ class IBufferManager;
 class Buffer;
 
 struct Block {
+
   uint32_t offset;
   uint32_t size;
+  auto operator==(const Block& other) const -> bool {
+    return offset == other.offset && size == other.size;
+  }
 };
 
-struct FilledBlock : public Block {
-  uint32_t itemCount;
+struct BlockComparator {
+  auto operator()(const Block& a, const Block& b) const -> bool {
+    if (a.size != b.size) {
+      return a.size < b.size;
+    }
+    return a.offset < b.offset;
+  }
 };
+
+using BlockContainer = std::set<Block, BlockComparator>;
 
 class MeshBufferManager {
 public:
@@ -67,16 +78,17 @@ private:
 
   std::vector<GpuBufferEntry> gpuBufferEntryList;
 
-  std::vector<Block> emptyIndexBlocks;
-  std::vector<Block> emptyVertexBlocks;
-
-  std::vector<FilledBlock> filledIndexBlocks;
-  std::vector<FilledBlock> filledVertexBlocks;
+  BlockContainer emptyIndexBlocks;
+  BlockContainer emptyVertexBlocks;
 
   auto testPrivateMethod() -> void;
 
-  auto findEmptyBlock(const IGeometryData& geometryData, const std::vector<Block>& blocks)
-      -> std::optional<Block>;
+  auto findEmptyBlock(uint32_t requiredSize, BlockContainer& blocks)
+      -> std::optional<std::reference_wrapper<Block>>;
+
+  auto mergeFreeBlocks(BlockContainer& blocks) -> void;
+
+  auto mergeWithNeighbors(BlockContainer::iterator it, BlockContainer& blocks) -> void;
 };
 
 }

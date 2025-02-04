@@ -25,6 +25,51 @@ public:
   IMPLEMENT_MOCK5(addToBuffer);
 };
 
+TEST_CASE("MeshBuffer Merge Empty Blocks", "[mesh]") {
+  {
+    const auto geometryData = generateMesh(50, 50);
+
+    std::shared_ptr<MockBufferManager> mockBufferManager = std::make_shared<MockBufferManager>();
+
+    trompeloeil::sequence seq;
+
+    const auto vbh = 1;
+    const auto ibh = 2;
+
+    ALLOW_CALL(*mockBufferManager, createGpuVertexBuffer(204800, "Buffer-name-Vertex")).RETURN(vbh);
+    ALLOW_CALL(*mockBufferManager, createGpuIndexBuffer(120960, "Buffer-name-Index")).RETURN(ibh);
+    ALLOW_CALL(*mockBufferManager, addToBuffer(_, vbh, 0, ibh, 0)).IN_SEQUENCE(seq);
+    ALLOW_CALL(*mockBufferManager, addToBuffer(_, vbh, 1000, ibh, 200)).IN_SEQUENCE(seq);
+    ALLOW_CALL(*mockBufferManager, addToBuffer(_, vbh, 2000, ibh, 400)).IN_SEQUENCE(seq);
+
+    const auto injector = di::make_injector(di::bind<tr::IBufferManager>.to(mockBufferManager),
+                                            di::bind<size_t>.to(sizeof(as::StaticVertex)),
+                                            di::bind<std::string_view>.to("name"));
+
+    auto meshBufferManager = injector.create<std::unique_ptr<tr::MeshBufferManager>>();
+
+    auto renderMeshDataList = std::vector<tr::RenderMeshData>{};
+
+    const auto mesh1 = meshBufferManager->addMesh(geometryData);
+    renderMeshDataList.push_back(tr::RenderMeshData{.handle = mesh1});
+
+    const auto mesh2 = meshBufferManager->addMesh(geometryData);
+    renderMeshDataList.push_back(tr::RenderMeshData{.handle = mesh2});
+
+    const auto mesh3 = meshBufferManager->addMesh(geometryData);
+    renderMeshDataList.push_back(tr::RenderMeshData{.handle = mesh3});
+
+    meshBufferManager->removeMesh(mesh1);
+    meshBufferManager->removeMesh(mesh2);
+
+    const auto bufferEntries = meshBufferManager->getGpuBufferEntries(renderMeshDataList);
+
+    REQUIRE(bufferEntries.size() == 1);
+
+    meshBufferManager = nullptr;
+  }
+}
+
 TEST_CASE("MeshBuffer Remove Mesh", "[mesh]") {
   {
     const auto geometryData = generateMesh(100, 300);
@@ -42,7 +87,9 @@ TEST_CASE("MeshBuffer Remove Mesh", "[mesh]") {
     ALLOW_CALL(*mockBufferManager, createGpuIndexBuffer(120960, "Buffer-name-Index")).RETURN(ibh);
     ALLOW_CALL(*mockBufferManager, addToBuffer(_, vbh, 0, ibh, 0)).IN_SEQUENCE(seq);
     ALLOW_CALL(*mockBufferManager, addToBuffer(_, vbh, 2000, ibh, 1200)).IN_SEQUENCE(seq);
+    // Remove the first one here
     ALLOW_CALL(*mockBufferManager, addToBuffer(_, vbh, 0, ibh, 0)).IN_SEQUENCE(seq);
+    ALLOW_CALL(*mockBufferManager, addToBuffer(_, vbh, 1000, ibh, 600)).IN_SEQUENCE(seq);
 
     const auto injector = di::make_injector(di::bind<tr::IBufferManager>.to(mockBufferManager),
                                             di::bind<size_t>.to(sizeof(as::StaticVertex)),
@@ -52,21 +99,24 @@ TEST_CASE("MeshBuffer Remove Mesh", "[mesh]") {
 
     auto renderMeshDataList = std::vector<tr::RenderMeshData>{};
 
-    const auto result = meshBufferManager->addMesh(geometryData);
-    renderMeshDataList.push_back(tr::RenderMeshData{.handle = result});
+    const auto mesh1 = meshBufferManager->addMesh(geometryData);
+    renderMeshDataList.push_back(tr::RenderMeshData{.handle = mesh1});
 
-    const auto result2 = meshBufferManager->addMesh(geometryData2);
-    renderMeshDataList.push_back(tr::RenderMeshData{.handle = result2});
+    const auto mesh2 = meshBufferManager->addMesh(geometryData2);
+    renderMeshDataList.push_back(tr::RenderMeshData{.handle = mesh2});
 
-    meshBufferManager->removeMesh(result);
+    meshBufferManager->removeMesh(mesh1);
     renderMeshDataList.erase(renderMeshDataList.begin());
 
-    const auto result3 = meshBufferManager->addMesh(geometryData3);
-    renderMeshDataList.push_back(tr::RenderMeshData{.handle = result3});
+    const auto mesh3 = meshBufferManager->addMesh(geometryData3);
+    renderMeshDataList.push_back(tr::RenderMeshData{.handle = mesh3});
+
+    const auto mesh4 = meshBufferManager->addMesh(geometryData3);
+    renderMeshDataList.push_back(tr::RenderMeshData{.handle = mesh4});
 
     const auto bufferEntries = meshBufferManager->getGpuBufferEntries(renderMeshDataList);
 
-    REQUIRE(bufferEntries.size() == 2);
+    REQUIRE(bufferEntries.size() == 3);
 
     REQUIRE(bufferEntries[0].indexCount == 600);
     REQUIRE(bufferEntries[0].firstIndex == 300);
@@ -81,6 +131,13 @@ TEST_CASE("MeshBuffer Remove Mesh", "[mesh]") {
     REQUIRE(bufferEntries[1].instanceCount == 1);
     REQUIRE(bufferEntries[1].firstInstance == 0);
     REQUIRE(bufferEntries[1].padding == 0);
+
+    REQUIRE(bufferEntries[2].indexCount == 150);
+    REQUIRE(bufferEntries[2].firstIndex == 150);
+    REQUIRE(bufferEntries[2].vertexOffset == 50);
+    REQUIRE(bufferEntries[2].instanceCount == 1);
+    REQUIRE(bufferEntries[2].firstInstance == 0);
+    REQUIRE(bufferEntries[2].padding == 0);
 
     meshBufferManager = nullptr;
   }
