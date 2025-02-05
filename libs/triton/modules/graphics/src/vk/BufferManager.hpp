@@ -46,6 +46,9 @@ public:
                    BufferHandle indexBufferHandle,
                    vk::DeviceSize indexOffset) -> void override;
 
+  auto addToSingleBuffer(const void* data, size_t size, BufferHandle handle, vk::DeviceSize offset)
+      -> void override;
+
 private:
   std::shared_ptr<Allocator> allocator;
   std::shared_ptr<ImmediateTransferContext> immediateTransferContext;

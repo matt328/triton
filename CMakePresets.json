@@ -101,7 +101,8 @@
         "Cauldron",
         "assettool",
         "testarea-tests",
-        "triton-tests"
+        "triton-tests",
+        "testarea"
       ]
     },
     {

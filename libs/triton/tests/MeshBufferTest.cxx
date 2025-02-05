@@ -23,6 +23,7 @@ public:
   IMPLEMENT_MOCK2(resizeBuffer);
   IMPLEMENT_CONST_MOCK1(getBuffer);
   IMPLEMENT_MOCK5(addToBuffer);
+  IMPLEMENT_MOCK4(addToSingleBuffer);
 };
 
 TEST_CASE("MeshBuffer Merge Empty Blocks", "[mesh]") {

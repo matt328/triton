@@ -129,4 +129,27 @@ auto BufferManager::addToBuffer(const IGeometryData& geometryData,
   }
 }
 
+auto BufferManager::addToSingleBuffer(const void* data,
+                                      size_t size,
+                                      BufferHandle handle,
+                                      vk::DeviceSize offset) -> void {
+  try {
+    // TODO(matt): make staging buffers long lived instead of allocating all the time
+    const auto stagingBuffer = allocator->createStagingBuffer(size, "Buffer-Staging");
+    void* bufferData = allocator->mapMemory(*stagingBuffer);
+    memcpy(bufferData, data, size);
+    allocator->unmapMemory(*stagingBuffer);
+
+    auto& vertexBuffer = getBuffer(handle);
+
+    immediateTransferContext->submit([&](const vk::raii::CommandBuffer& cmd) {
+      const auto copy = vk::BufferCopy{.srcOffset = 0, .dstOffset = offset, .size = size};
+      cmd.copyBuffer(stagingBuffer->getBuffer(), vertexBuffer.getBuffer(), copy);
+    });
+  } catch (const AllocationException& ex) {
+    throw ResourceUploadException(
+        fmt::format("Error allocating resources for geometry, {0}", ex.what()));
+  }
+}
+
 }

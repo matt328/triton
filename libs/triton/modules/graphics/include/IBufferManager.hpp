@@ -40,6 +40,11 @@ public:
                            vk::DeviceSize vertexOffset,
                            BufferHandle indexBufferHandle,
                            vk::DeviceSize indexOffset) -> void = 0;
+
+  virtual auto addToSingleBuffer(const void* data,
+                                 size_t size,
+                                 BufferHandle handle,
+                                 vk::DeviceSize offset) -> void = 0;
 };
 
 }
