@@ -13,7 +13,6 @@ class IBufferManager;
 class Buffer;
 
 struct Block {
-
   uint32_t offset;
   uint32_t size;
   auto operator==(const Block& other) const -> bool {
@@ -34,9 +33,9 @@ using BlockContainer = std::set<Block, BlockComparator>;
 
 class MeshBufferManager {
 public:
-  explicit MeshBufferManager(std::shared_ptr<IBufferManager> newBufferManager,
-                             size_t vertexSize,
-                             std::string_view bufferName);
+  MeshBufferManager(std::shared_ptr<IBufferManager> newBufferManager,
+                    size_t vertexSize,
+                    std::string_view bufferName);
   ~MeshBufferManager();
 
   MeshBufferManager(const MeshBufferManager&) = delete;
@@ -80,8 +79,6 @@ private:
 
   static auto findEmptyBlock(uint32_t requiredSize, BlockContainer& blocks)
       -> std::optional<std::reference_wrapper<Block>>;
-
-  static auto mergeFreeBlocks(BlockContainer& blocks) -> void;
 
   static auto mergeWithNeighbors(BlockContainer::iterator it, BlockContainer& blocks) -> void;
 };

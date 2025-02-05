@@ -23,6 +23,7 @@ set(common_SRC
   modules/graphics/src/mem/Allocator.cxx
   modules/graphics/src/mem/Buffer.cxx
   modules/graphics/src/mem/Image.cxx
+  modules/graphics/src/mem/ArenaBuffer.cxx
 
   modules/graphics/src/geo/VertexAttributes.cxx
   modules/graphics/src/geo/HeightField.cxx

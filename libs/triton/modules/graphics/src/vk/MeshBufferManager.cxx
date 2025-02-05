@@ -212,27 +212,4 @@ auto MeshBufferManager::findEmptyBlock(uint32_t requiredSize, BlockContainer& bl
   return std::ref(const_cast<Block&>(*it));
 }
 
-auto MeshBufferManager::mergeFreeBlocks(BlockContainer& blocks) -> void {
-
-  if (blocks.empty()) {
-    return;
-  }
-
-  auto it = blocks.begin();
-  while (it != blocks.end()) {
-    auto next = std::next(it);
-    if (next != blocks.end() && it->offset + it->size == next->offset) {
-      // Merge blocks
-      Block mergedBlock{.offset = it->offset, .size = it->size + next->size};
-
-      // Erase both old blocks and insert merged block
-      it = blocks.erase(it);
-      it = blocks.erase(it);
-      it = blocks.insert(it, mergedBlock);
-    } else {
-      ++it;
-    }
-  }
-}
-
 }

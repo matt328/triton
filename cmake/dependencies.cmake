@@ -19,6 +19,15 @@ endif()
 set(CMAKE_WARN_DEPRECATED OFF CACHE BOOL "" FORCE)
 set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS ON CACHE INTERNAL "" FORCE)
 
+# TLSF
+FetchContent_Declare(
+  TLSF
+  GIT_REPOSITORY https://github.com/mattconte/tlsf.git
+  GIT_TAG master
+  SYSTEM
+)
+FetchContent_MakeAvailable(TLSF)
+
 # Catch2
 set(CATCH_INSTALL_DOCS OFF)
 FetchContent_Declare(

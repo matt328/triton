@@ -16,6 +16,7 @@ target_link_libraries(${PROJECT_NAME}
   PRIVATE
   BoostDI
   util-lib
+  tlsf
 )
 
 # Main target settings
