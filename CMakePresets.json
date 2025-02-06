@@ -106,6 +106,20 @@
       ]
     },
     {
+      "name": "debug-coverage",
+      "displayName": "Debug Build With Coverage",
+      "configurePreset": "debug-coverage",
+      "jobs": 18,
+      "targets": [
+        "Cauldron",
+        "assettool",
+        "testarea-tests",
+        "triton-tests",
+        "triton-tests-coverage",
+        "testarea"
+      ]
+    },
+    {
       "name": "release",
       "displayName": "Release Build",
       "configurePreset": "release",
@@ -137,16 +151,11 @@
   ],
   "testPresets": [
     {
-      "name": "testarea",
-      "description": "test area tests",
-      "displayName": "Test Area",
+      "name": "Triton Tests",
+      "description": "Triton Tests",
+      "displayName": "Triton Tests",
       "configurePreset": "debug",
-      "configuration": "Debug",
-      "filter": {
-        "include": {
-          "name": "Mocking is tested"
-        }
-      }
+      "configuration": "Debug"
     }
   ]
 }

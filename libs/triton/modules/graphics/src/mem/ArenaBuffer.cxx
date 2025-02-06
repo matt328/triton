@@ -3,40 +3,39 @@
 namespace tr {
 
 ArenaBuffer::ArenaBuffer(std::shared_ptr<IBufferManager> newBufferManager,
-                         size_t newItemStride,
-                         size_t initialBufferSize,
-                         std::string_view bufferName)
+                         ArenaBufferCreateInfo createInfo)
     : bufferManager{std::move(newBufferManager)},
-      capacity(initialBufferSize),
-      itemStride{newItemStride} {
-  bufferHandle =
-      bufferManager->createGpuVertexBuffer(capacity,
-                                           fmt::format("Buffer-{}-Vertex", bufferName.data()));
+      capacity(createInfo.initialBufferSize),
+      itemStride{createInfo.newItemStride} {
+  bufferHandle = bufferManager->createGpuVertexBuffer(
+      capacity,
+      fmt::format("Buffer-{}-Vertex", createInfo.bufferName.data()));
 }
 
 ArenaBuffer::~ArenaBuffer() {
   Log.trace("Destroying Arena Buffer");
 }
 
-auto ArenaBuffer::insertData([[maybe_unused]] void* data, size_t size) -> BufferRegion {
+auto ArenaBuffer::insertData(void* data, size_t size) -> BufferRegion {
 
   auto insertPosition = maxOffset;
   auto itemCount = (size / itemStride);
 
-  auto region = findEmptyRegion(size);
-  if (region.has_value()) {
-    insertPosition = region.value().get().offset;
+  auto regionIt = freeList.lower_bound(BufferRegion{.offset = 0, .size = size});
+
+  if (regionIt != freeList.end()) {
+    insertPosition = regionIt->offset;
 
     // Either shrink or remove the no longer empty region
-    auto newRegionSize = region.value().get().size - itemCount;
+    auto newRegionSize = regionIt->size - itemCount;
 
     if (newRegionSize == 0) {
-      auto it = std::find(freeList.begin(), freeList.end(), *region);
-      freeList.erase(it);
+      freeList.erase(regionIt);
     } else {
-      auto newOffset = region.value().get().offset + itemCount;
-      region.value().get().offset = newOffset;
-      region.value().get().size = newRegionSize;
+      auto newBufferRegion =
+          BufferRegion{.offset = regionIt->offset + itemCount, .size = newRegionSize};
+      freeList.erase(regionIt);
+      freeList.insert(newBufferRegion);
     }
   }
 
@@ -61,25 +60,22 @@ auto ArenaBuffer::insertData([[maybe_unused]] void* data, size_t size) -> Buffer
   return BufferRegion{.offset = insertPosition, .size = size};
 }
 
-auto ArenaBuffer::removeData([[maybe_unused]] const BufferRegion& bufferIndex) -> void {
+auto ArenaBuffer::removeData(const BufferRegion& bufferIndex) -> void {
+  bufferManager->removeData(bufferHandle, bufferIndex.offset, bufferIndex.size);
+  auto it = std::find(freeList.begin(), freeList.end(), bufferIndex);
+  freeList.erase(it);
 }
 
 auto ArenaBuffer::getBuffer() const -> Buffer& {
   return bufferManager->getBuffer(bufferHandle);
 }
 
-auto ArenaBuffer::findEmptyRegion(size_t requiredSize)
-    -> std::optional<std::reference_wrapper<BufferRegion>> {
-
+auto ArenaBuffer::findEmptyRegion(size_t requiredSize) -> RegionContainer::iterator {
   auto it = freeList.lower_bound(BufferRegion{.offset = 0, .size = requiredSize});
-  if (it == freeList.end()) {
-    return std::nullopt;
-  }
-
-  return std::ref(const_cast<BufferRegion&>(*it));
+  return it;
 }
 
-auto ArenaBuffer::mergeWithNeighbors(RegionContainer::iterator it) -> void {
+auto ArenaBuffer::mergeWithNeighbors(const RegionContainer::iterator& it) -> void {
 
   if (it == freeList.end()) {
     return;

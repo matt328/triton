@@ -7,12 +7,15 @@ namespace tr {
 
 using RegionContainer = std::set<BufferRegion, BufferRegionComparator>;
 
+struct ArenaBufferCreateInfo {
+  size_t newItemStride;
+  size_t initialBufferSize;
+  std::string_view bufferName;
+};
+
 class ArenaBuffer {
 public:
-  ArenaBuffer(std::shared_ptr<IBufferManager> newBufferManager,
-              size_t newItemStride,
-              size_t initialBufferSize,
-              std::string_view bufferName);
+  ArenaBuffer(std::shared_ptr<IBufferManager> newBufferManager, ArenaBufferCreateInfo createInfo);
   ~ArenaBuffer();
 
   ArenaBuffer(const ArenaBuffer&) = delete;
@@ -35,8 +38,8 @@ private:
   size_t maxOffset{};
   size_t itemStride;
 
-  auto findEmptyRegion(size_t requiredSize) -> std::optional<std::reference_wrapper<BufferRegion>>;
-  auto mergeWithNeighbors(RegionContainer::iterator it) -> void;
+  auto findEmptyRegion(size_t requiredSize) -> RegionContainer::iterator;
+  auto mergeWithNeighbors(const RegionContainer::iterator& it) -> void;
 };
 
 }

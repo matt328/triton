@@ -152,4 +152,9 @@ auto BufferManager::addToSingleBuffer(const void* data,
   }
 }
 
+auto BufferManager::removeData([[maybe_unused]] BufferHandle handle,
+                               [[maybe_unused]] vk::DeviceSize offset,
+                               [[maybe_unused]] size_t size) -> void {
+}
+
 }
