@@ -45,6 +45,7 @@ public:
                                  size_t size,
                                  BufferHandle handle,
                                  vk::DeviceSize offset) -> void = 0;
+  virtual auto removeData(BufferHandle handle, vk::DeviceSize offset, size_t size) -> void = 0;
 };
 
 }

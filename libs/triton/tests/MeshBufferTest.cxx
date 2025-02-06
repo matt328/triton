@@ -21,6 +21,7 @@ public:
   IMPLEMENT_MOCK2(createGpuIndexBuffer);
   IMPLEMENT_MOCK1(createIndirectBuffer);
   IMPLEMENT_MOCK2(resizeBuffer);
+  IMPLEMENT_MOCK3(removeData);
   IMPLEMENT_CONST_MOCK1(getBuffer);
   IMPLEMENT_MOCK5(addToBuffer);
   IMPLEMENT_MOCK4(addToSingleBuffer);
@@ -37,11 +38,12 @@ TEST_CASE("MeshBuffer Merge Empty Blocks", "[mesh]") {
     const auto vbh = 1;
     const auto ibh = 2;
 
-    ALLOW_CALL(*mockBufferManager, createGpuVertexBuffer(204800, "Buffer-name-Vertex")).RETURN(vbh);
-    ALLOW_CALL(*mockBufferManager, createGpuIndexBuffer(120960, "Buffer-name-Index")).RETURN(ibh);
-    ALLOW_CALL(*mockBufferManager, addToBuffer(_, vbh, 0, ibh, 0)).IN_SEQUENCE(seq);
-    ALLOW_CALL(*mockBufferManager, addToBuffer(_, vbh, 1000, ibh, 200)).IN_SEQUENCE(seq);
-    ALLOW_CALL(*mockBufferManager, addToBuffer(_, vbh, 2000, ibh, 400)).IN_SEQUENCE(seq);
+    REQUIRE_CALL(*mockBufferManager, createGpuVertexBuffer(204800, "Buffer-name-Vertex"))
+        .RETURN(vbh);
+    REQUIRE_CALL(*mockBufferManager, createGpuIndexBuffer(120960, "Buffer-name-Index")).RETURN(ibh);
+    REQUIRE_CALL(*mockBufferManager, addToBuffer(_, vbh, 0, ibh, 0)).IN_SEQUENCE(seq);
+    REQUIRE_CALL(*mockBufferManager, addToBuffer(_, vbh, 1000, ibh, 200)).IN_SEQUENCE(seq);
+    REQUIRE_CALL(*mockBufferManager, addToBuffer(_, vbh, 2000, ibh, 400)).IN_SEQUENCE(seq);
 
     const auto injector = di::make_injector(di::bind<tr::IBufferManager>.to(mockBufferManager),
                                             di::bind<size_t>.to(sizeof(as::StaticVertex)),
@@ -84,13 +86,14 @@ TEST_CASE("MeshBuffer Remove Mesh", "[mesh]") {
     const auto vbh = 1;
     const auto ibh = 2;
 
-    ALLOW_CALL(*mockBufferManager, createGpuVertexBuffer(204800, "Buffer-name-Vertex")).RETURN(vbh);
-    ALLOW_CALL(*mockBufferManager, createGpuIndexBuffer(120960, "Buffer-name-Index")).RETURN(ibh);
-    ALLOW_CALL(*mockBufferManager, addToBuffer(_, vbh, 0, ibh, 0)).IN_SEQUENCE(seq);
-    ALLOW_CALL(*mockBufferManager, addToBuffer(_, vbh, 2000, ibh, 1200)).IN_SEQUENCE(seq);
+    REQUIRE_CALL(*mockBufferManager, createGpuVertexBuffer(204800, "Buffer-name-Vertex"))
+        .RETURN(vbh);
+    REQUIRE_CALL(*mockBufferManager, createGpuIndexBuffer(120960, "Buffer-name-Index")).RETURN(ibh);
+    REQUIRE_CALL(*mockBufferManager, addToBuffer(_, vbh, 0, ibh, 0)).IN_SEQUENCE(seq);
+    REQUIRE_CALL(*mockBufferManager, addToBuffer(_, vbh, 2000, ibh, 1200)).IN_SEQUENCE(seq);
     // Remove the first one here
-    ALLOW_CALL(*mockBufferManager, addToBuffer(_, vbh, 0, ibh, 0)).IN_SEQUENCE(seq);
-    ALLOW_CALL(*mockBufferManager, addToBuffer(_, vbh, 1000, ibh, 600)).IN_SEQUENCE(seq);
+    REQUIRE_CALL(*mockBufferManager, addToBuffer(_, vbh, 0, ibh, 0)).IN_SEQUENCE(seq);
+    REQUIRE_CALL(*mockBufferManager, addToBuffer(_, vbh, 1000, ibh, 600)).IN_SEQUENCE(seq);
 
     const auto injector = di::make_injector(di::bind<tr::IBufferManager>.to(mockBufferManager),
                                             di::bind<size_t>.to(sizeof(as::StaticVertex)),
@@ -159,10 +162,10 @@ TEST_CASE("MeshBuffer Add Mesh", "[meshbuffer]") {
     const auto vbh = 1;
     const auto ibh = 2;
 
-    ALLOW_CALL(*mBuffer, createGpuVertexBuffer(204800, "Buffer-name-Vertex")).RETURN(vbh);
-    ALLOW_CALL(*mBuffer, createGpuIndexBuffer(120960, "Buffer-name-Index")).RETURN(ibh);
-    ALLOW_CALL(*mBuffer, addToBuffer(_, vbh, 0, ibh, 0)).IN_SEQUENCE(seq);
-    ALLOW_CALL(*mBuffer, addToBuffer(_, vbh, 2000, ibh, 1200)).IN_SEQUENCE(seq);
+    REQUIRE_CALL(*mBuffer, createGpuVertexBuffer(204800, "Buffer-name-Vertex")).RETURN(vbh);
+    REQUIRE_CALL(*mBuffer, createGpuIndexBuffer(120960, "Buffer-name-Index")).RETURN(ibh);
+    REQUIRE_CALL(*mBuffer, addToBuffer(_, vbh, 0, ibh, 0)).IN_SEQUENCE(seq);
+    REQUIRE_CALL(*mBuffer, addToBuffer(_, vbh, 2000, ibh, 1200)).IN_SEQUENCE(seq);
 
     const auto injector = di::make_injector(di::bind<tr::IBufferManager>.to(mBuffer),
                                             di::bind<size_t>.to(sizeof(as::StaticVertex)),
