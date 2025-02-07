@@ -38,7 +38,6 @@ private:
   size_t maxOffset{};
   size_t itemStride;
 
-  auto findEmptyRegion(size_t requiredSize) -> RegionContainer::iterator;
   auto mergeWithNeighbors(const RegionContainer::iterator& it) -> void;
 };
 

@@ -62,17 +62,12 @@ auto ArenaBuffer::insertData(void* data, size_t size) -> BufferRegion {
 
 auto ArenaBuffer::removeData(const BufferRegion& bufferIndex) -> void {
   bufferManager->removeData(bufferHandle, bufferIndex.offset, bufferIndex.size);
-  auto it = std::find(freeList.begin(), freeList.end(), bufferIndex);
-  freeList.erase(it);
+  auto [it, s] = freeList.insert(bufferIndex);
+  mergeWithNeighbors(it);
 }
 
 auto ArenaBuffer::getBuffer() const -> Buffer& {
   return bufferManager->getBuffer(bufferHandle);
-}
-
-auto ArenaBuffer::findEmptyRegion(size_t requiredSize) -> RegionContainer::iterator {
-  auto it = freeList.lower_bound(BufferRegion{.offset = 0, .size = requiredSize});
-  return it;
 }
 
 auto ArenaBuffer::mergeWithNeighbors(const RegionContainer::iterator& it) -> void {
@@ -84,23 +79,20 @@ auto ArenaBuffer::mergeWithNeighbors(const RegionContainer::iterator& it) -> voi
   auto prev = (it == freeList.begin()) ? freeList.end() : std::prev(it);
   auto next = std::next(it);
 
-  bool merged = false;
   auto mergedBlock = *it;
 
   if (prev != freeList.end() && prev->offset + prev->size == it->offset) {
     mergedBlock.offset = prev->offset;
     mergedBlock.size += prev->size;
-    freeList.erase(prev);
-    merged = true;
+    freeList.erase(prev); // Avoid reinsertion
   }
 
   if (next != freeList.end() && it->offset + it->size == next->offset) {
     mergedBlock.size += next->size;
     freeList.erase(next);
-    merged = true;
   }
 
-  if (merged) {
+  if (mergedBlock.size != it->size) { // Only modify if merging happened
     freeList.erase(it);
     freeList.insert(mergedBlock);
   }
