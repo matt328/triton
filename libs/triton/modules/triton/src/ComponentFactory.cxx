@@ -33,6 +33,7 @@
 #include "vk/sb/IShaderBinding.hpp"
 #include "vk/sb/DSLayout.hpp"
 #include "vk/BufferManager.hpp"
+#include "geo/GeometryData.hpp"
 
 namespace di = boost::di;
 
