@@ -1,5 +1,4 @@
 set(test_SRC
-  MeshBufferTest.cxx
   ArenaBufferTest.cxx
 
   ../modules/common/src/ImGuiAdapter.cxx
@@ -32,7 +31,6 @@ set(test_SRC
   ../modules/graphics/src/vk/VkResourceManager.cxx
   ../modules/graphics/src/vk/BufferManager.cxx
   ../modules/graphics/src/vk/CommandBufferManager.cxx
-  ../modules/graphics/src/vk/MeshBufferManager.cxx
   ../modules/graphics/src/vk/TextureManager.cxx
   ../modules/graphics/src/vk/core/Context.cxx
   ../modules/graphics/src/vk/core/Instance.cxx
@@ -45,6 +43,7 @@ set(test_SRC
   ../modules/graphics/src/vk/sb/DSShaderBindingFactory.cxx
   ../modules/graphics/src/vk/sb/DSLayoutManager.cxx
   ../modules/graphics/src/vk/sb/DSLayout.cxx
+  ../modules/graphics/src/vk/ArenaGeometryBuffer.cxx
   ../modules/graphics/src/task/DefaultRenderScheduler.cxx
   ../modules/graphics/src/task/Frame.cxx
   ../modules/graphics/src/task/DefaultFrameManager.cxx

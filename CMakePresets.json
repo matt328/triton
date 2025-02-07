@@ -2,16 +2,6 @@
   "version": 6,
   "configurePresets": [
     {
-      "name": "vs-debug",
-      "displayName": "VS Debug",
-      "description": "VS Standard Debug config for local development",
-      "generator": "Visual Studio 17 2022",
-      "binaryDir": "build/debug-vs",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug"
-      }
-    },
-    {
       "name": "debug",
       "displayName": "Debug",
       "description": "Standard Debug config for local development",
@@ -23,38 +13,6 @@
         "CMAKE_CXX_COMPILER": "clang",
         "CMAKE_CXX_FLAGS": "-Wall -g -Wextra -Weffc++ -std=c++23 -O0",
         "CMAKE_C_FLAGS": "-Wall -g -Wextra -Weffc++ -O0"
-      }
-    },
-    {
-      "name": "debug-asan",
-      "displayName": "Debug[ASAN]",
-      "description": "Debug Config using clang and asan (currently doesn't work)",
-      "generator": "Ninja",
-      "binaryDir": "build/debug-asan",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug",
-        "CMAKE_C_COMPILER": "clang",
-        "CMAKE_CXX_COMPILER": "clang",
-        "CMAKE_CXX_FLAGS": "-fsanitize=address -Wall -Wextra -Weffc++",
-        "CMAKE_C_FLAGS": "-fsanitize=address -Wall -Wextra -Weffc++",
-        "CMAKE_EXE_LINKER_FLAGS": "-fsanitize=address",
-        "CMAKE_SHARED_LINKER_FLAGS": "-fsanitize=address",
-        "CMAKE_MODULE_LINKER_FLAGS": "-fsanitize=address"
-      }
-    },
-    {
-      "name": "debug-asan-msvc",
-      "displayName": "Debug[ASAN MSVC]",
-      "description": "Debug config using msvc and asan",
-      "generator": "Visual Studio 17 2022",
-      "binaryDir": "build/debug-asan-msvc",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug",
-        "CMAKE_CXX_FLAGS": "/fsanitize=address",
-        "CMAKE_C_FLAGS": "/fsanitize=address",
-        "CMAKE_EXE_LINKER_FLAGS": "/fsanitize=address",
-        "CMAKE_SHARED_LINKER_FLAGS": "/fsanitize=address",
-        "CMAKE_MODULE_LINKER_FLAGS": "/fsanitize=address"
       }
     },
     {
@@ -128,34 +86,6 @@
       "targets": [
         "Cauldron"
       ]
-    },
-    {
-      "name": "asan",
-      "displayName": "Address Sanitizer Build",
-      "configurePreset": "debug-asan",
-      "configuration": "Debug",
-      "jobs": 18,
-      "targets": [
-        "Cauldron"
-      ]
-    },
-    {
-      "name": "asset-lib-test",
-      "displayName": "Asset Lib Tests build",
-      "configurePreset": "debug-coverage",
-      "configuration": "Debug",
-      "targets": [
-        "asset-lib-test"
-      ]
-    }
-  ],
-  "testPresets": [
-    {
-      "name": "Triton Tests",
-      "description": "Triton Tests",
-      "displayName": "Triton Tests",
-      "configurePreset": "debug",
-      "configuration": "Debug"
     }
   ]
 }

@@ -11,7 +11,6 @@
 #include "as/Model.hpp"
 
 #include "vk/ResourceManagerHandles.hpp"
-#include "vk/MeshBufferManager.hpp"
 #include "TextureData.hpp"
 #include "vk/sb/DSLayoutManager.hpp"
 #include "vk/sb/IShaderBindingFactory.hpp"

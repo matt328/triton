@@ -1,6 +1,7 @@
 #include "VkResourceManager.hpp"
 
 #include "as/StaticVertex.hpp"
+#include "geo/GeometryData.hpp"
 #include "mem/Allocator.hpp"
 #include "mem/Image.hpp"
 #include "tr/IDebugManager.hpp"
@@ -8,12 +9,10 @@
 #include "mem/Buffer.hpp"
 #include "pipeline/ComputePipeline.hpp"
 #include "vk/ArenaGeometryBuffer.hpp"
-#include "vk/MeshBufferManager.hpp"
 #include "vk/sb/DSLayout.hpp"
 #include "vk/sb/IShaderBinding.hpp"
 #include "vk/sb/IShaderBindingFactory.hpp"
 #include "vk/TextureManager.hpp"
-#include <memory>
 
 namespace tr {
 
