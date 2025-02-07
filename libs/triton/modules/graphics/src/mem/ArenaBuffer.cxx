@@ -7,16 +7,22 @@ ArenaBuffer::ArenaBuffer(std::shared_ptr<IBufferManager> newBufferManager,
     : bufferManager{std::move(newBufferManager)},
       capacity(createInfo.initialBufferSize),
       itemStride{createInfo.newItemStride} {
-  bufferHandle = bufferManager->createGpuVertexBuffer(
-      capacity,
-      fmt::format("Buffer-{}-Vertex", createInfo.bufferName.data()));
+  if (createInfo.bufferType == BufferType::Vertex) {
+    bufferHandle = bufferManager->createGpuVertexBuffer(
+        capacity,
+        fmt::format("Buffer-{}-Vertex", createInfo.bufferName.data()));
+  } else if (createInfo.bufferType == BufferType::Index) {
+    bufferHandle = bufferManager->createGpuIndexBuffer(
+        capacity,
+        fmt::format("Buffer-{}-Vertex", createInfo.bufferName.data()));
+  }
 }
 
 ArenaBuffer::~ArenaBuffer() {
   Log.trace("Destroying Arena Buffer");
 }
 
-auto ArenaBuffer::insertData(void* data, size_t size) -> BufferRegion {
+auto ArenaBuffer::insertData(const void* data, size_t size) -> BufferRegion {
 
   auto insertPosition = maxOffset;
   auto itemCount = (size / itemStride);

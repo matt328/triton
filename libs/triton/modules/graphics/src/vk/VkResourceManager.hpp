@@ -1,4 +1,5 @@
 #pragma once
+#include "vk/ArenaGeometryBuffer.hpp"
 #include "vk/core/Device.hpp"
 #include "tr/IDebugManager.hpp"
 #include "ImmediateTransferContext.hpp"
@@ -149,8 +150,8 @@ private:
 
   std::vector<ImmutableMesh> meshList;
 
-  std::unique_ptr<MeshBufferManager> staticMeshBufferManager;
-  std::unique_ptr<MeshBufferManager> dynamicMeshBufferManager;
+  std::unique_ptr<ArenaGeometryBuffer> staticMeshBuffer;
+  std::unique_ptr<ArenaGeometryBuffer> dynamicMeshBuffer;
 
   std::unique_ptr<TextureManager> textureManager;
 

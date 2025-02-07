@@ -7,6 +7,7 @@
 #include "ResourceExceptions.hpp"
 #include "mem/Buffer.hpp"
 #include "pipeline/ComputePipeline.hpp"
+#include "vk/ArenaGeometryBuffer.hpp"
 #include "vk/MeshBufferManager.hpp"
 #include "vk/sb/DSLayout.hpp"
 #include "vk/sb/IShaderBinding.hpp"
@@ -45,11 +46,16 @@ VkResourceManager::VkResourceManager(
   textureShaderBindingHandle =
       shaderBindingFactory->createShaderBinding(ShaderBindingType::Textures, textureDSLHandle);
 
-  staticMeshBufferManager =
-      std::make_unique<MeshBufferManager>(bufferManager, sizeof(as::StaticVertex), "Static");
+  const auto smbci = ArenaGeometryBufferCreateInfo{.vertexSize = sizeof(as::StaticVertex),
+                                                   .indexSize = sizeof(uint32_t),
+                                                   .bufferName = "StaticGeometry"};
+  staticMeshBuffer = std::make_unique<ArenaGeometryBuffer>(bufferManager, smbci);
 
-  dynamicMeshBufferManager =
-      std::make_unique<MeshBufferManager>(bufferManager, sizeof(as::DynamicVertex), "Dynamic");
+  const auto dmbci = ArenaGeometryBufferCreateInfo{.vertexSize = sizeof(as::DynamicVertex),
+                                                   .indexSize = sizeof(uint32_t),
+                                                   .bufferName = "DynamicGeometry"};
+
+  dynamicMeshBuffer = std::make_unique<ArenaGeometryBuffer>(bufferManager, dmbci);
 
   textureManager = std::make_unique<TextureManager>(this);
 }
@@ -59,11 +65,11 @@ VkResourceManager::~VkResourceManager() {
 }
 
 auto VkResourceManager::uploadStaticMesh(const IGeometryData& geometryData) -> MeshHandle {
-  return staticMeshBufferManager->addMesh(geometryData);
+  return staticMeshBuffer->addMesh(geometryData);
 }
 
 auto VkResourceManager::uploadDynamicMesh(const IGeometryData& geometryData) -> MeshHandle {
-  return dynamicMeshBufferManager->addMesh(geometryData);
+  return dynamicMeshBuffer->addMesh(geometryData);
 }
 
 auto VkResourceManager::asyncUpload2(const IGeometryData& geometryData) -> MeshHandle {
@@ -280,12 +286,12 @@ auto VkResourceManager::getTextureData(const as::ImageData& imageData, std::stri
 }
 
 [[nodiscard]] auto VkResourceManager::getStaticMeshBuffers() const -> std::tuple<Buffer&, Buffer&> {
-  return staticMeshBufferManager->getBuffers();
+  return staticMeshBuffer->getBuffers();
 }
 
 [[nodiscard]] auto VkResourceManager::getDynamicMeshBuffers() const
     -> std::tuple<Buffer&, Buffer&> {
-  return dynamicMeshBufferManager->getBuffers();
+  return dynamicMeshBuffer->getBuffers();
 }
 
 auto VkResourceManager::createDefaultDescriptorPool() const
@@ -463,13 +469,13 @@ auto VkResourceManager::updateShaderBindings() -> void {
 [[nodiscard]] auto VkResourceManager::getStaticGpuData(
     const std::vector<RenderMeshData>& gpuBufferData) -> std::vector<GpuBufferEntry>& {
   ZoneNamedN(var, "getGpuBufferEntries", true);
-  return staticMeshBufferManager->getGpuBufferEntries(gpuBufferData);
+  return staticMeshBuffer->getGpuBufferEntries(gpuBufferData);
 }
 
 [[nodiscard]] auto VkResourceManager::getDynamicGpuData(
     const std::vector<RenderMeshData>& gpuBufferData) -> std::vector<GpuBufferEntry>& {
   ZoneNamedN(var, "getDynamicGpuBufferEntries", true);
-  return dynamicMeshBufferManager->getGpuBufferEntries(gpuBufferData);
+  return dynamicMeshBuffer->getGpuBufferEntries(gpuBufferData);
 }
 
 auto VkResourceManager::createTransitionBarrier(const vk::Image& image,

@@ -41,6 +41,7 @@ set(common_SRC
   modules/graphics/src/vk/BufferManager.cxx
   modules/graphics/src/vk/CommandBufferManager.cxx
   modules/graphics/src/vk/MeshBufferManager.cxx
+  modules/graphics/src/vk/ArenaGeometryBuffer.cxx
   modules/graphics/src/vk/TextureManager.cxx
 
   modules/graphics/src/vk/core/Context.cxx

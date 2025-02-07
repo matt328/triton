@@ -7,9 +7,15 @@ namespace tr {
 
 using RegionContainer = std::set<BufferRegion, BufferRegionComparator>;
 
+enum class BufferType : uint8_t {
+  Vertex = 0,
+  Index
+};
+
 struct ArenaBufferCreateInfo {
   size_t newItemStride;
   size_t initialBufferSize;
+  BufferType bufferType;
   std::string_view bufferName;
 };
 
@@ -23,7 +29,7 @@ public:
   auto operator=(const ArenaBuffer&) -> ArenaBuffer& = delete;
   auto operator=(ArenaBuffer&&) -> ArenaBuffer& = delete;
 
-  auto insertData(void* data, size_t size) -> BufferRegion;
+  auto insertData(const void* data, size_t size) -> BufferRegion;
   auto removeData(const BufferRegion& bufferIndex) -> void;
 
   [[nodiscard]] auto getBuffer() const -> Buffer&;
