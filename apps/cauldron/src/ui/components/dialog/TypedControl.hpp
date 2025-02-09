@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ControlBase.hpp"
-#include <platform_folders.h>
 
 namespace ed {
 

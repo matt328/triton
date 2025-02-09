@@ -2,7 +2,7 @@
 
 #include "tr/IDebugManager.hpp"
 #include "vk/core/PhysicalDevice.hpp"
-#include <vk_mem_alloc_handles.hpp>
+#include <vulkan-memory-allocator-hpp/vk_mem_alloc_handles.hpp>
 
 namespace tr {
 

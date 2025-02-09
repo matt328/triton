@@ -122,7 +122,8 @@ target_precompile_headers(${PROJECT_NAME}
   <tracy/TracyC.h>
   <typeindex>
   <variant>
-  <vk_mem_alloc.hpp>
+  <vma/vk_mem_alloc.h>
+  <vulkan-memory-allocator-hpp/vk_mem_alloc.hpp>
   <vulkan/vulkan_raii.hpp>
   <tracy/TracyVulkan.hpp>
   <ozz/animation/runtime/sampling_job.h>
@@ -145,27 +146,34 @@ target_precompile_headers(${PROJECT_NAME}
   <vector>
 )
 
+find_package(EnTT CONFIG REQUIRED)
+find_package(glfw3 CONFIG REQUIRED)
+find_package(glm CONFIG REQUIRED)
+find_package(glslang CONFIG REQUIRED)
+find_package(imgui CONFIG REQUIRED)
+find_package(Tracy CONFIG REQUIRED)
 find_package(unofficial-noise CONFIG REQUIRED)
 find_package(unofficial-noiseutils CONFIG REQUIRED)
+find_package(unofficial-vulkan-memory-allocator-hpp CONFIG REQUIRED)
 
 target_link_libraries(${PROJECT_NAME}
   PUBLIC
   asset-lib
+  BoostDI
   EnTT::EnTT
   glfw
   glm
-  imgui_custom
+  glslang::glslang
+  glslang::glslang-default-resource-limits
+  glslang::SPIRV
+  imgui::imgui
   Tracy::TracyClient
   util-lib
+  unofficial::VulkanMemoryAllocator-Hpp::VulkanMemoryAllocator-Hpp
   ${Vulkan_LIBRARIES}
-  VulkanMemoryAllocator-Hpp
   PRIVATE
   unofficial::noise::noise
   unofficial::noiseutils::noiseutils
-  BoostDI
-  glslang
-  glslang-default-resource-limits
-  SPIRV
 )
 
 target_include_directories(${PROJECT_NAME}

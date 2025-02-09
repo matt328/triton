@@ -4,11 +4,11 @@
 #include "tr/IDebugManager.hpp"
 #include "vk/core/Device.hpp"
 #include "vk/core/PhysicalDevice.hpp"
-#include <vk_mem_alloc_structs.hpp>
+#include <vulkan-memory-allocator-hpp/vk_mem_alloc_structs.hpp>
 
 #define VMA_IMPLEMENTATION
-#include <vk_mem_alloc.h>
-#include <vk_mem_alloc.hpp>
+#include <vma/vk_mem_alloc.h>
+#include <vulkan-memory-allocator-hpp/vk_mem_alloc.hpp>
 
 namespace tr {
 

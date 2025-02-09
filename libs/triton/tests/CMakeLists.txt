@@ -112,7 +112,8 @@ target_precompile_headers(triton-tests
   <tracy/TracyC.h>
   <typeindex>
   <variant>
-  <vk_mem_alloc.hpp>
+  <vma/vk_mem_alloc.h>
+  <vulkan-memory-allocator-hpp/vk_mem_alloc.hpp>
   <vulkan/vulkan_raii.hpp>
   <tracy/TracyVulkan.hpp>
   <ozz/animation/runtime/sampling_job.h>
@@ -134,6 +135,11 @@ target_precompile_headers(triton-tests
   <unordered_map>
   <vector>
 )
+
+find_package(Catch2 CONFIG REQUIRED)
+find_package(Tracy CONFIG REQUIRED)
+find_package(EnTT CONFIG REQUIRED)
+find_package(trompeloeil CONFIG REQUIRED)
 
 target_link_libraries(triton-tests
   PUBLIC
