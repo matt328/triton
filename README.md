@@ -12,7 +12,6 @@ Dependency management uses vanilla CMake using FetchContent but for now the Vulk
 
 ### Build Steps
 
-1. Install the [Vulkan SDK](https://vulkan.lunarg.com/) and make sure the env var `VULKAN_SDK` gets set appropriately on your system
 1. Install [CMake](https://cmake.org/download/).  Make sure `cmake` is on your path.
 1. For Windows, install [LLVM](https://github.com/llvm/llvm-project/releases/)
 1. For Linux you can probably `sudo apt install llvm`.
@@ -20,7 +19,12 @@ Dependency management uses vanilla CMake using FetchContent but for now the Vulk
 1. Make sure `clang` and `clang++` are on your path.
 1. Download [Ninja](https://github.com/ninja-build/ninja/releases). Make sure `ninja` is on your path.
 1. Clone the repo
+1. `git submodule init`
+1. `git submodule update`
+1. `./vcpkg/bootstrap-vcpkg.exe`
+1. TODO: Add ozz-animation library as a submodule, and run the command to build and install it into the vendor directory. Should be able to not source control ozz-animation's binaries.
 1. `cmake --preset debug`
+1. The output of the configure command will tell you about an environment variable that needs set regarding the Vulkan validation layers. Set this environment variable.
 1. `cmake --build --preset debug`
 
 ## Testing

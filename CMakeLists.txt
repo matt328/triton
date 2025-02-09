@@ -12,8 +12,6 @@ cmake_policy(SET CMP0077 NEW)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake;")
 
-include(FetchContent)
-
 set(ENABLE_ALL_WARNINGS ON)
 set(ENABLE_EFFECTIVE_CXX ON)
 include(compiler-options)
