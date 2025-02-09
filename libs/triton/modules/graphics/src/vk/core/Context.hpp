@@ -18,6 +18,8 @@ public:
   [[nodiscard]] auto createInstance(const vk::InstanceCreateInfo& createInfo) const
       -> std::unique_ptr<vk::raii::Instance>;
 
+  [[nodiscard]] auto getVulkanVersion() const -> std::string;
+
 private:
   std::unique_ptr<vk::raii::Context> context;
 };
