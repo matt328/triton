@@ -3,7 +3,41 @@
   "version-string": "0.1.0",
   "builtin-baseline": "67a300519ea09dbf02b4d06982e781a01b617b93",
   "dependencies": [
-    "libnoise"
+    "catch2",
+    "cereal",
+    "entt",
+    "glfw3",
+    "glm",
+    "glslang",
+    "libnoise",
+    "platform-folders",
+    "spdlog",
+    "tinygltf",
+    "tracy",
+    "trompeloeil",
+    "vulkan-memory-allocator",
+    "vulkan-memory-allocator-hpp",
+    {
+      "name": "imgui",
+      "features": [
+        "glfw-binding",
+        "vulkan-binding",
+        "docking-experimental"
+      ]
+    }
   ],
-  "overrides": []
+  "overrides": [
+    {
+      "name": "glm",
+      "version": "0.9.9.8"
+    },
+    {
+      "name": "vulkan-memory-allocator-hpp",
+      "version": "3.0.1.1#1"
+    },
+    {
+      "name": "vulkan-memory-allocator",
+      "version": "3.0.1#4"
+    }
+  ]
 }

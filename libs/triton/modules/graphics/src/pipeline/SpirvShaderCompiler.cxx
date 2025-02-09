@@ -1,6 +1,6 @@
 #include "SpirvShaderCompiler.hpp"
 
-#include <SPIRV/GlslangToSpv.h>
+#include <glslang/SPIRV/GlslangToSpv.h>
 #include <glslang/Public/ShaderLang.h>
 
 namespace tr {

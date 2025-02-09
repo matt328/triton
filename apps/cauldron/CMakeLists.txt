@@ -64,9 +64,9 @@ target_precompile_headers(${PROJECT_NAME}
   <functional>
   <GLFW/glfw3.h>
   <imgui.h>
-  <misc/cpp/imgui_stdlib.h>
+  <imgui_stdlib.h>
   <optional>
-  <platform_folders.h>
+  <sago/platform_folders.h>
   <sstream>
   <fstream>
   <imgui.h>
@@ -94,16 +94,22 @@ if(WIN32)
   # set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,/subsystem:windows")
 endif()
 
+find_package(cereal CONFIG REQUIRED)
+find_package(glfw3 CONFIG REQUIRED)
+find_package(imgui CONFIG REQUIRED)
+find_package(platform_folders CONFIG REQUIRED)
+find_package(spdlog CONFIG REQUIRED)
+
 target_link_libraries(${PROJECT_NAME}
   PRIVATE
   BoostDI
-  glfw
   cereal::cereal
-  triton
-  platform_folders
+  glfw
+  imgui::imgui
+  sago::platform_folders
   spdlog::spdlog_header_only
+  triton
   util-lib
-  imgui_custom
   Vulkan::Vulkan
 )
 
