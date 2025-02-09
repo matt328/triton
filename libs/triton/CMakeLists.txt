@@ -145,6 +145,9 @@ target_precompile_headers(${PROJECT_NAME}
   <vector>
 )
 
+find_package(unofficial-noise CONFIG REQUIRED)
+find_package(unofficial-noiseutils CONFIG REQUIRED)
+
 target_link_libraries(${PROJECT_NAME}
   PUBLIC
   asset-lib
@@ -157,10 +160,11 @@ target_link_libraries(${PROJECT_NAME}
   ${Vulkan_LIBRARIES}
   VulkanMemoryAllocator-Hpp
   PRIVATE
+  unofficial::noise::noise
+  unofficial::noiseutils::noiseutils
   BoostDI
   glslang
   glslang-default-resource-limits
-  libnoise
   SPIRV
 )
 

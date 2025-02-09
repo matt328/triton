@@ -97,7 +97,6 @@ endif()
 target_link_libraries(${PROJECT_NAME}
   PRIVATE
   BoostDI
-  L2DFD
   glfw
   cereal::cereal
   triton
