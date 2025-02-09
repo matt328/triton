@@ -14,6 +14,8 @@ set(assetlib_SRC
 
 add_library(${PROJECT_NAME} STATIC ${assetlib_SRC})
 
+find_package(Ozz REQUIRED)
+
 target_compile_definitions(${PROJECT_NAME}
   PRIVATE
   TINYGLTF_NO_STB_IMAGE_WRITE
@@ -41,7 +43,7 @@ target_precompile_headers(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
   PUBLIC
   cereal::cereal
-  ozz_animation
+  ${OZZ_LIBRARIES}
   tinygltf
   glm
   PRIVATE
@@ -51,6 +53,7 @@ target_link_libraries(${PROJECT_NAME}
 target_include_directories(${PROJECT_NAME}
   PUBLIC
   include
+  ${OZZ_INCLUDE_DIRS}
   PRIVATE
   src
 )

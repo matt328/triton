@@ -1,6 +1,7 @@
 # Dependency Management
 
 include(FetchContent)
+include(ExternalProject)
 
 # Backup original flags
 set(old_cxx_flags "${CMAKE_CXX_FLAGS}")
@@ -18,15 +19,6 @@ endif()
 
 set(CMAKE_WARN_DEPRECATED OFF CACHE BOOL "" FORCE)
 set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS ON CACHE INTERNAL "" FORCE)
-
-# TLSF
-FetchContent_Declare(
-  TLSF
-  GIT_REPOSITORY https://github.com/mattconte/tlsf.git
-  GIT_TAG master
-  SYSTEM
-)
-FetchContent_MakeAvailable(TLSF)
 
 # Catch2
 set(CATCH_INSTALL_DOCS OFF)
@@ -92,34 +84,6 @@ FetchContent_Declare(
   SYSTEM
 )
 FetchContent_MakeAvailable(glslang)
-
-# libnoise
-FetchContent_Declare(
-  noise
-  GIT_REPOSITORY https://github.com/eXpl0it3r/libnoise.git
-  GIT_TAG ${LIBNOISE_VERSION}
-  SYSTEM
-)
-FetchContent_MakeAvailable(noise)
-
-# ozz-animation
-set(BUILD_SHARED_LIBS OFF)
-set(ozz_build_tools OFF)
-set(ozz_build_fbx OFF)
-set(ozz_build_samples OFF)
-set(ozz_build_howtos OFF)
-set(ozz_build_tests OFF)
-set(ozz_build_msvc_rt_dll ON)
-FetchContent_Declare(
-  ozz-animation
-  GIT_REPOSITORY https://github.com/guillaumeblanc/ozz-animation.git
-  GIT_TAG ${OZZ_ANIMATION_VERSION}
-  SYSTEM
-  CMAKE_ARGS
-  -DCMAKE_CXX_FLAGS_INIT=/D_CRT_SECURE_NO_WARNINGS
-  -DCMAKE_C_FLAGS_INIT=/D_CRT_SECURE_NO_WARNINGS
-)
-FetchContent_MakeAvailable(ozz-animation)
 
 # platform_folders
 FetchContent_Declare(

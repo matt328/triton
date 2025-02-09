@@ -1,0 +1,9 @@
+{
+  "name": "triton",
+  "version-string": "0.1.0",
+  "builtin-baseline": "67a300519ea09dbf02b4d06982e781a01b617b93",
+  "dependencies": [
+    "libnoise"
+  ],
+  "overrides": []
+}
