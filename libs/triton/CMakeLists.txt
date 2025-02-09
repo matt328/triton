@@ -156,6 +156,8 @@ find_package(unofficial-noise CONFIG REQUIRED)
 find_package(unofficial-noiseutils CONFIG REQUIRED)
 find_package(unofficial-vulkan-memory-allocator-hpp CONFIG REQUIRED)
 
+find_package(Vulkan REQUIRED)
+
 target_link_libraries(${PROJECT_NAME}
   PUBLIC
   asset-lib
