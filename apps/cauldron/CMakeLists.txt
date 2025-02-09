@@ -21,14 +21,11 @@ set(editor_SRC
 
 add_executable(${PROJECT_NAME} ${editor_SRC})
 
-find_package(Vulkan REQUIRED)
-
 configure_file(src/config.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/config.h)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   target_compile_definitions(${PROJECT_NAME}
     PUBLIC
-
     BUILD_TYPE_DEBUG
   )
 endif()
@@ -110,7 +107,6 @@ target_link_libraries(${PROJECT_NAME}
   spdlog::spdlog_header_only
   triton
   util-lib
-  Vulkan::Vulkan
 )
 
 target_include_directories(${PROJECT_NAME}

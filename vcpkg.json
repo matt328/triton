@@ -17,6 +17,11 @@
     "trompeloeil",
     "vulkan-memory-allocator",
     "vulkan-memory-allocator-hpp",
+    "vulkan-loader",
+    "spirv-headers",
+    "spirv-tools",
+    "vulkan-validationlayers",
+    "vulkan-utility-libraries",
     {
       "name": "imgui",
       "features": [
@@ -32,12 +37,36 @@
       "version": "0.9.9.8"
     },
     {
+      "name": "spirv-headers",
+      "version": "1.4.304.0"
+    },
+    {
+      "name": "spirv-tools",
+      "version": "1.4.304.0"
+    },
+    {
+      "name": "vulkan-headers",
+      "version": "1.4.304.0"
+    },
+    {
+      "name": "vulkan-loader",
+      "version": "1.4.304.0"
+    },
+    {
+      "name": "vulkan-utility-libraries",
+      "version": "1.4.304.0"
+    },
+    {
+      "name": "vulkan-validationlayers",
+      "version": "1.4.304.0"
+    },
+    {
       "name": "vulkan-memory-allocator-hpp",
-      "version": "3.0.1.1#1"
+      "version": "3.1.0"
     },
     {
       "name": "vulkan-memory-allocator",
-      "version": "3.0.1#4"
+      "version": "3.1.0"
     }
   ]
 }

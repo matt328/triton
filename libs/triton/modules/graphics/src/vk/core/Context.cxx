@@ -3,6 +3,11 @@
 namespace tr {
 Context::Context() {
   context = std::make_unique<vk::raii::Context>();
+  auto version = context->enumerateInstanceVersion();
+  Log.trace("Vulkan version: {}.{}.{}",
+            VK_VERSION_MAJOR(version),
+            VK_VERSION_MINOR(version),
+            VK_VERSION_PATCH(version));
 }
 
 Context::~Context() {
