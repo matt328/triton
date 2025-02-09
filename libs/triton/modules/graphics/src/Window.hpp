@@ -34,6 +34,8 @@ private:
 
   void pollEvents() override;
 
+  void setVulkanVersion(std::string_view version) override;
+
   static void errorCallback(int code, const char* description);
   static void windowIconifiedCallback(GLFWwindow* window, int iconified);
   static void windowCloseCallback(GLFWwindow* window);

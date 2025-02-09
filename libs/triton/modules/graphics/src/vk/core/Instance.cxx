@@ -33,6 +33,8 @@ Instance::Instance(std::shared_ptr<Context> newContext,
 
   instance = context->createInstance(instanceCreateInfo);
 
+  window->setVulkanVersion(context->getVulkanVersion());
+
   debugManager->initializeInstance(*instance);
 }
 

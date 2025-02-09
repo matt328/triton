@@ -92,6 +92,16 @@ void Window::pollEvents() {
   glfwPollEvents();
 }
 
+void Window::setVulkanVersion(std::string_view version) {
+  const auto* const currentTitle = glfwGetWindowTitle(window);
+  auto newWindowTitle = std::string{currentTitle};
+  newWindowTitle += " ";
+  newWindowTitle += "Vulkan ";
+  newWindowTitle += version.data();
+
+  glfwSetWindowTitle(window, newWindowTitle.c_str());
+}
+
 void Window::errorCallback(int code, const char* description) {
   Log.critical("GLFW Error Code: {}, description: {}", code, description);
   throw std::runtime_error("GLFW Error. See log output for details");

@@ -31,7 +31,7 @@ private:
 
   std::unique_ptr<vk::raii::Instance> instance;
 
-  auto getInstanceExtensions() const -> std::vector<const char*>;
+  [[nodiscard]] auto getInstanceExtensions() const -> std::vector<const char*>;
   static auto isPortabilityRequired(std::span<const char*> extensionNames) -> bool;
 };
 

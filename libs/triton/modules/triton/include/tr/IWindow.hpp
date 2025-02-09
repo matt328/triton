@@ -13,5 +13,6 @@ public:
 
   virtual auto getNativeWindow() -> void* = 0;
   virtual void pollEvents() = 0;
+  virtual void setVulkanVersion(std::string_view version) = 0;
 };
 }
