@@ -164,7 +164,7 @@ target_link_libraries(${PROJECT_NAME}
   BoostDI
   EnTT::EnTT
   glfw
-  glm
+  glm::glm
   glslang::glslang
   glslang::glslang-default-resource-limits
   glslang::SPIRV

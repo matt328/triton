@@ -49,7 +49,7 @@ find_path(TINYGLTF_INCLUDE_DIRS "tiny_gltf.h")
 target_link_libraries(${PROJECT_NAME}
   PUBLIC
   cereal::cereal
-  glm
+  glm::glm
   ${OZZ_LIBRARIES}
   PRIVATE
   util-lib
