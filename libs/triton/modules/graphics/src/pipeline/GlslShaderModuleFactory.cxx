@@ -1,21 +1,21 @@
-#include "SpirvShaderCompiler.hpp"
+#include "GlslShaderModuleFactory.hpp"
 
 #include <SPIRV/GlslangToSpv.h>
 #include <glslang/Public/ShaderLang.h>
 
 namespace tr {
 
-SpirvShaderCompiler::SpirvShaderCompiler(std::shared_ptr<Device> newDevice)
+GlslShaderModuleFactory::GlslShaderModuleFactory(std::shared_ptr<Device> newDevice)
     : device{std::move(newDevice)} {
   Log.trace("Constructed SpirvShaderCompiler");
   glslang::InitializeProcess();
 }
 
-SpirvShaderCompiler::~SpirvShaderCompiler() {
+GlslShaderModuleFactory::~GlslShaderModuleFactory() {
   glslang::FinalizeProcess();
 }
 
-[[nodiscard]] auto SpirvShaderCompiler::createShaderModule(
+[[nodiscard]] auto GlslShaderModuleFactory::createShaderModule(
     vk::ShaderStageFlagBits shaderType,
     const std::filesystem::path& filename) const -> vk::raii::ShaderModule {
   const auto vertexSpirv = compileShader(shaderType, readShaderFile(filename).data());
@@ -26,7 +26,7 @@ SpirvShaderCompiler::~SpirvShaderCompiler() {
   return device->getVkDevice().createShaderModule(vertexShaderCreateInfo);
 }
 
-auto SpirvShaderCompiler::readShaderFile(const std::filesystem::path& filename) -> std::string {
+auto GlslShaderModuleFactory::readShaderFile(const std::filesystem::path& filename) -> std::string {
   if (std::ifstream file(filename.string().data(), std::ios::binary); file.is_open()) {
     file.seekg(0, std::ios::end);
 
@@ -41,13 +41,12 @@ auto SpirvShaderCompiler::readShaderFile(const std::filesystem::path& filename) 
     file.close();
     return shaderCode;
   }
-  std::stringstream ss;
-  ss << "Failed to read shader from file " << filename.string().data();
-  throw std::runtime_error(ss.str());
+
+  throw std::runtime_error("Failed to read shader from file " + filename.string());
 }
 
-auto SpirvShaderCompiler::compileShader(const vk::ShaderStageFlagBits shaderType,
-                                        const char* shaderCode) -> std::vector<uint32_t> {
+auto GlslShaderModuleFactory::compileShader(const vk::ShaderStageFlagBits shaderType,
+                                            const char* shaderCode) -> std::vector<uint32_t> {
   const EShLanguage stage = findLanguage(shaderType);
 
   glslang::TShader shader(stage);
@@ -80,7 +79,7 @@ auto SpirvShaderCompiler::compileShader(const vk::ShaderStageFlagBits shaderType
   return spirv;
 }
 
-auto SpirvShaderCompiler::initResources() -> TBuiltInResource {
+auto GlslShaderModuleFactory::initResources() -> TBuiltInResource {
   TBuiltInResource resources{};
   resources.maxLights = 32;
   resources.maxClipPlanes = 6;
@@ -186,7 +185,8 @@ auto SpirvShaderCompiler::initResources() -> TBuiltInResource {
   return resources;
 }
 
-auto SpirvShaderCompiler::findLanguage(const vk::ShaderStageFlagBits shaderType) -> EShLanguage {
+auto GlslShaderModuleFactory::findLanguage(const vk::ShaderStageFlagBits shaderType)
+    -> EShLanguage {
   switch (shaderType) {
     case vk::ShaderStageFlagBits::eVertex:
       return EShLangVertex;

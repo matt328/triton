@@ -66,7 +66,7 @@ set(common_SRC
   modules/graphics/src/pipeline/IndirectPipeline.cxx
   modules/graphics/src/pipeline/StaticPipeline.cxx
   modules/graphics/src/pipeline/ComputePipeline.cxx
-  modules/graphics/src/pipeline/SpirvShaderCompiler.cxx
+  modules/graphics/src/pipeline/SpirvShaderModuleFactory.cxx
 )
 
 add_library(${PROJECT_NAME} STATIC ${common_SRC})

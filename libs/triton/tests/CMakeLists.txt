@@ -54,7 +54,7 @@ set(test_SRC
   ../modules/graphics/src/pipeline/IndirectPipeline.cxx
   ../modules/graphics/src/pipeline/StaticPipeline.cxx
   ../modules/graphics/src/pipeline/ComputePipeline.cxx
-  ../modules/graphics/src/pipeline/SpirvShaderCompiler.cxx
+  ../modules/graphics/src/pipeline/GlslShaderModuleFactory.cxx
 )
 
 add_executable(triton-tests ${test_SRC})
@@ -148,10 +148,7 @@ target_link_libraries(triton-tests
   VulkanMemoryAllocator-Hpp
   PRIVATE
   BoostDI
-  glslang
-  glslang-default-resource-limits
   libnoise
-  SPIRV
   trompeloeil::trompeloeil
   Catch2::Catch2WithMain
 )
