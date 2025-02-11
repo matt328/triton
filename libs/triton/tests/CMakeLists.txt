@@ -112,7 +112,7 @@ target_precompile_headers(triton-tests
   <tracy/TracyC.h>
   <typeindex>
   <variant>
-  <vma/vk_mem_alloc.h>
+  <vk_mem_alloc.h>
   <vulkan-memory-allocator-hpp/vk_mem_alloc.hpp>
   <vulkan/vulkan_raii.hpp>
   <tracy/TracyVulkan.hpp>
