@@ -28,7 +28,7 @@
 #include "task/DefaultFrameManager.hpp"
 #include "task/DefaultRenderScheduler.hpp"
 
-#include "pipeline/SpirvShaderCompiler.hpp"
+#include "pipeline/SpirvShaderModuleFactory.hpp"
 #include "vk/sb/DSShaderBindingFactory.hpp"
 #include "vk/sb/IShaderBinding.hpp"
 #include "vk/sb/DSLayout.hpp"
@@ -64,7 +64,7 @@ auto ComponentFactory::getContext(const FrameworkConfig& config) -> std::shared_
                         di::bind<Device>.to<Device>(),
                         di::bind<Surface>.to<Surface>(),
                         di::bind<Swapchain>.to<Swapchain>(),
-                        di::bind<IShaderCompiler>.to<SpirvShaderCompiler>(),
+                        di::bind<IShaderModuleFactory>.to<SpirvShaderModuleFactory>(),
                         di::bind<IShaderBindingFactory>.to<DSShaderBindingFactory>(),
                         di::bind<queue::Graphics>.to<queue::Graphics>(),
                         di::bind<queue::Transfer>.to<queue::Transfer>(),

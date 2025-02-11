@@ -19,7 +19,7 @@ namespace tr {
 VkResourceManager::VkResourceManager(
     std::shared_ptr<Device> newDevice,
     std::shared_ptr<ImmediateTransferContext> newImmediateTransferContext,
-    std::shared_ptr<IShaderCompiler> newShaderCompiler,
+    std::shared_ptr<IShaderModuleFactory> newShaderCompiler,
     std::shared_ptr<IDebugManager> newDebugManager,
     std::shared_ptr<DSLayoutManager> newLayoutManager,
     std::shared_ptr<IShaderBindingFactory> newShaderBindingFactory,
