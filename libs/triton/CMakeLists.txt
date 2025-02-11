@@ -66,7 +66,7 @@ set(common_SRC
   modules/graphics/src/pipeline/IndirectPipeline.cxx
   modules/graphics/src/pipeline/StaticPipeline.cxx
   modules/graphics/src/pipeline/ComputePipeline.cxx
-  modules/graphics/src/pipeline/SpirvShaderCompiler.cxx
+  modules/graphics/src/pipeline/SpirvShaderModuleFactory.cxx
 )
 
 add_library(${PROJECT_NAME} STATIC ${common_SRC})
@@ -149,7 +149,6 @@ target_precompile_headers(${PROJECT_NAME}
 find_package(EnTT CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
-find_package(glslang CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
 find_package(Tracy CONFIG REQUIRED)
 find_package(unofficial-noise CONFIG REQUIRED)
@@ -165,9 +164,6 @@ target_link_libraries(${PROJECT_NAME}
   EnTT::EnTT
   glfw
   glm::glm
-  glslang::glslang
-  glslang::glslang-default-resource-limits
-  glslang::SPIRV
   imgui::imgui
   Tracy::TracyClient
   util-lib

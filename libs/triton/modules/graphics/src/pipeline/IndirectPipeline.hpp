@@ -5,14 +5,14 @@
 
 namespace tr {
 
-class IShaderCompiler;
+class IShaderModuleFactory;
 class Device;
 class VkResourceManager;
 
 class IndirectPipeline : public IPipeline {
 public:
   IndirectPipeline(const std::shared_ptr<Device>& device,
-                   const std::shared_ptr<IShaderCompiler>& shaderCompiler,
+                   const std::shared_ptr<IShaderModuleFactory>& shaderCompiler,
                    const std::shared_ptr<VkResourceManager>& resourceManager);
   ~IndirectPipeline() override = default;
 
