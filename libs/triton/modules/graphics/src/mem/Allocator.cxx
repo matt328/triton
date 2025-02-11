@@ -7,7 +7,7 @@
 #include <vulkan-memory-allocator-hpp/vk_mem_alloc_structs.hpp>
 
 #define VMA_IMPLEMENTATION
-#include <vma/vk_mem_alloc.h>
+#include <vk_mem_alloc.h>
 #include <vulkan-memory-allocator-hpp/vk_mem_alloc.hpp>
 
 namespace tr {

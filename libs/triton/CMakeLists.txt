@@ -122,7 +122,7 @@ target_precompile_headers(${PROJECT_NAME}
   <tracy/TracyC.h>
   <typeindex>
   <variant>
-  <vma/vk_mem_alloc.h>
+  <vk_mem_alloc.h>
   <vulkan-memory-allocator-hpp/vk_mem_alloc.hpp>
   <vulkan/vulkan_raii.hpp>
   <tracy/TracyVulkan.hpp>
@@ -170,8 +170,8 @@ target_link_libraries(${PROJECT_NAME}
   unofficial::VulkanMemoryAllocator-Hpp::VulkanMemoryAllocator-Hpp
   ${Vulkan_LIBRARIES}
   PRIVATE
-  unofficial::noise::noise
-  unofficial::noiseutils::noiseutils
+  unofficial::noise::noise-static
+  unofficial::noiseutils::noiseutils-static
 )
 
 target_include_directories(${PROJECT_NAME}

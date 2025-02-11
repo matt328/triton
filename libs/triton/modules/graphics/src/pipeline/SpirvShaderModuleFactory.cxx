@@ -20,7 +20,7 @@ auto SpirvShaderModuleFactory::createShaderModule(
 }
 
 auto SpirvShaderModuleFactory::readSPIRVFile(const std::string& filename) -> std::vector<uint32_t> {
-  std::ifstream file(filename, std::ios::binary);
+  std::ifstream file(filename, std::ios::binary | std::ios::ate);
 
   if (!file) {
     throw std::runtime_error("Failed to open SPIR-V file: " + filename);
