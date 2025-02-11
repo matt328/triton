@@ -7,7 +7,7 @@
 #include "cm/Rando.hpp"
 #include "geo/Mesh.hpp"
 #include "mem/Allocator.hpp"
-#include "pipeline/IShaderCompiler.hpp"
+#include "pipeline/IShaderModuleFactory.hpp"
 #include "as/Model.hpp"
 
 #include "vk/ResourceManagerHandles.hpp"
@@ -53,7 +53,7 @@ class VkResourceManager {
 public:
   explicit VkResourceManager(std::shared_ptr<Device> newDevice,
                              std::shared_ptr<ImmediateTransferContext> newImmediateTransferContext,
-                             std::shared_ptr<IShaderCompiler> newShaderCompiler,
+                             std::shared_ptr<IShaderModuleFactory> newShaderCompiler,
                              std::shared_ptr<IDebugManager> newDebugManager,
                              std::shared_ptr<DSLayoutManager> newLayoutManager,
                              std::shared_ptr<IShaderBindingFactory> newShaderBindingFactory,
@@ -134,7 +134,7 @@ private:
 
   std::shared_ptr<Device> device;
   std::shared_ptr<ImmediateTransferContext> immediateTransferContext;
-  std::shared_ptr<IShaderCompiler> shaderCompiler;
+  std::shared_ptr<IShaderModuleFactory> shaderCompiler;
   std::shared_ptr<IDebugManager> debugManager;
   std::shared_ptr<DSLayoutManager> layoutManager;
   std::shared_ptr<IShaderBindingFactory> shaderBindingFactory;

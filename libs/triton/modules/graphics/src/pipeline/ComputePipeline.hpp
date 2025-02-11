@@ -5,13 +5,13 @@
 namespace tr {
 
 class Device;
-class IShaderCompiler;
+class IShaderModuleFactory;
 
 class ComputePipeline : public IPipeline {
 
 public:
   ComputePipeline(const std::shared_ptr<Device>& device,
-                  const std::shared_ptr<IShaderCompiler>& shaderCompiler);
+                  const std::shared_ptr<IShaderModuleFactory>& shaderCompiler);
   ~ComputePipeline() override = default;
 
   ComputePipeline(const ComputePipeline&) = delete;

@@ -1,5 +1,5 @@
 #include "IndirectPipeline.hpp"
-#include "IShaderCompiler.hpp"
+#include "IShaderModuleFactory.hpp"
 #include "vk/core/Device.hpp"
 #include "vk/IndirectPushConstants.hpp"
 
@@ -9,7 +9,7 @@ const auto VertexShaderFile = SHADERS / "dynamic.vert";
 const auto FragmentShaderFile = SHADERS / "dynamic.frag";
 
 IndirectPipeline::IndirectPipeline(const std::shared_ptr<Device>& device,
-                                   const std::shared_ptr<IShaderCompiler>& shaderCompiler,
+                                   const std::shared_ptr<IShaderModuleFactory>& shaderCompiler,
                                    const std::shared_ptr<VkResourceManager>& resourceManager) {
   Log.trace("Constructing IndirectPipeline");
 

@@ -1,6 +1,6 @@
 #include "ComputePipeline.hpp"
 #include "vk/core/Device.hpp"
-#include "pipeline/IShaderCompiler.hpp"
+#include "pipeline/IShaderModuleFactory.hpp"
 #include "vk/ComputePushConstants.hpp"
 
 namespace tr {
@@ -8,7 +8,7 @@ namespace tr {
 const auto ShaderFile = SHADERS / "compute.comp";
 
 ComputePipeline::ComputePipeline(const std::shared_ptr<Device>& device,
-                                 const std::shared_ptr<IShaderCompiler>& shaderCompiler) {
+                                 const std::shared_ptr<IShaderModuleFactory>& shaderCompiler) {
   Log.trace("Constructing ComputePipeline");
 
   const auto pushConstantRange = vk::PushConstantRange{

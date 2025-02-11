@@ -2,19 +2,19 @@
 
 #include <glslang/Public/ShaderLang.h>
 
-#include "IShaderCompiler.hpp"
+#include "IShaderModuleFactory.hpp"
 #include "vk/core/Device.hpp"
 
 namespace tr {
-class SpirvShaderCompiler : public IShaderCompiler {
+class GlslShaderModuleFactory : public IShaderModuleFactory {
 public:
-  explicit SpirvShaderCompiler(std::shared_ptr<Device> newDevice);
-  ~SpirvShaderCompiler();
+  explicit GlslShaderModuleFactory(std::shared_ptr<Device> newDevice);
+  ~GlslShaderModuleFactory();
 
-  SpirvShaderCompiler(const SpirvShaderCompiler&) = default;
-  SpirvShaderCompiler(SpirvShaderCompiler&&) = delete;
-  auto operator=(const SpirvShaderCompiler&) -> SpirvShaderCompiler& = default;
-  auto operator=(SpirvShaderCompiler&&) -> SpirvShaderCompiler& = delete;
+  GlslShaderModuleFactory(const GlslShaderModuleFactory&) = default;
+  GlslShaderModuleFactory(GlslShaderModuleFactory&&) = delete;
+  auto operator=(const GlslShaderModuleFactory&) -> GlslShaderModuleFactory& = default;
+  auto operator=(GlslShaderModuleFactory&&) -> GlslShaderModuleFactory& = delete;
 
   [[nodiscard]] auto createShaderModule(vk::ShaderStageFlagBits shaderType,
                                         const std::filesystem::path& filename) const

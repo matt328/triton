@@ -8,7 +8,6 @@
     "entt",
     "glfw3",
     "glm",
-    "glslang",
     "libnoise",
     "platform-folders",
     "spdlog",
