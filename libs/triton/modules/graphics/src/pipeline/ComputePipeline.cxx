@@ -5,7 +5,7 @@
 
 namespace tr {
 
-const auto ShaderFile = SHADERS / "compute.comp";
+const auto ShaderFile = SHADERS / "compute.comp.spv";
 
 ComputePipeline::ComputePipeline(const std::shared_ptr<Device>& device,
                                  const std::shared_ptr<IShaderModuleFactory>& shaderCompiler) {

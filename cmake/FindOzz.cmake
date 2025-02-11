@@ -5,7 +5,7 @@ find_path(OZZ_INCLUDE_DIR
 )
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-  set(CMAKE_FIND_LIBRARY_SUFFIXES "_d.so" "_d.a" "_d.lib")
+  set(CMAKE_FIND_LIBRARY_SUFFIXES "_d.so" "_d.a" "_d.lib" ".so" ".a" ".lib")
 endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")

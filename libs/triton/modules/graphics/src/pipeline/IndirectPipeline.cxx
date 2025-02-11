@@ -5,8 +5,8 @@
 
 namespace tr {
 
-const auto VertexShaderFile = SHADERS / "dynamic.vert";
-const auto FragmentShaderFile = SHADERS / "dynamic.frag";
+const auto VertexShaderFile = SHADERS / "dynamic.vert.spv";
+const auto FragmentShaderFile = SHADERS / "dynamic.frag.spv";
 
 IndirectPipeline::IndirectPipeline(const std::shared_ptr<Device>& device,
                                    const std::shared_ptr<IShaderModuleFactory>& shaderCompiler,
