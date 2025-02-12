@@ -23,7 +23,7 @@ struct MeshData {
 };
 
 struct SkinData {
-  std::unordered_map<int, int> jointMap;
+  std::map<int, int> jointMap;
   std::vector<glm::mat4> inverseBindMatrices;
 };
 

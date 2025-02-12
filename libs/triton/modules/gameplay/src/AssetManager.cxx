@@ -188,7 +188,7 @@ auto AssetManager::loadTrm(const std::filesystem::path& modelPath) -> TritonMode
   auto geometryHandle = GeometryHandle{};
   if (tritonModel.dynamicVertices.has_value()) {
     const auto key = geometryKey.getKey();
-    geometryHandle = GeometryHandle{key, Topology::Triangles};
+    geometryHandle = GeometryHandle{.handle = key, .topology = Topology::Triangles};
     geometryDataMap.emplace(
         geometryHandle,
         std::make_unique<DynamicGeometryData>(std::move(tritonModel.dynamicVertices.value()),
