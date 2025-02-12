@@ -1,4 +1,5 @@
 #pragma once
+#include "cm/Handles.hpp"
 #include "ozz/base/maths/soa_transform.h"
 
 namespace tr {
@@ -6,7 +7,7 @@ namespace tr {
 struct Animation {
   Animation(const AnimationHandle animationHandle,
             const SkeletonHandle skeletonHandle,
-            std::unordered_map<int, int> jointMap,
+            std::map<int, int> jointMap,
             std::vector<glm::mat4> inverseBindMatrices)
       : animationHandle{animationHandle},
         skeletonHandle{skeletonHandle},
@@ -21,7 +22,7 @@ struct Animation {
   bool playing{true};
   std::string currentAnimationName;
 
-  std::unordered_map<int, int> jointMap;
+  std::map<int, int> jointMap;
   std::vector<glm::mat4> inverseBindMatrices;
 
   float timeRatio{};

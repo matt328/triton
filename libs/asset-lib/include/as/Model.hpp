@@ -7,7 +7,7 @@
 
 namespace as {
 
-constexpr uint32_t SERIAL_VERSION = 3;
+constexpr uint32_t SERIAL_VERSION = 4;
 
 class SerializationException final : public tr::BaseException {
   using BaseException::BaseException;
@@ -30,7 +30,7 @@ struct Model {
   std::optional<std::vector<as::DynamicVertex>> dynamicVertices;
   std::optional<std::vector<as::StaticVertex>> staticVertices;
   std::vector<uint32_t> indices;
-  std::unordered_map<int, int> jointRemaps;
+  std::map<int, int> jointRemaps;
   std::vector<glm::mat4> inverseBindPoses;
   ImageData imageData;
 
