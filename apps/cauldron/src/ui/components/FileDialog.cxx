@@ -1,3 +1,8 @@
+#include <filesystem>
+#include <optional>
+#include <platform_folders.h>
+#include <utility>
+
 #include "FileDialog.hpp"
 #include "imgui.h"
 #include "ui/assets/IconsLucide.hpp"
