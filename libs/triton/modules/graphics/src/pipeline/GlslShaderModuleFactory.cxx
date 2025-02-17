@@ -1,6 +1,6 @@
 #include "GlslShaderModuleFactory.hpp"
 
-#include <glslang/SPIRV/GlslangToSpv.h>
+#include <SPIRV/GlslangToSpv.h>
 #include <glslang/Public/ShaderLang.h>
 
 namespace tr {

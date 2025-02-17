@@ -21,11 +21,14 @@ set(editor_SRC
 
 add_executable(${PROJECT_NAME} ${editor_SRC})
 
+find_package(Vulkan REQUIRED)
+
 configure_file(src/config.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/config.h)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   target_compile_definitions(${PROJECT_NAME}
     PUBLIC
+
     BUILD_TYPE_DEBUG
   )
 endif()
@@ -61,9 +64,9 @@ target_precompile_headers(${PROJECT_NAME}
   <functional>
   <GLFW/glfw3.h>
   <imgui.h>
-  <imgui_stdlib.h>
+  <misc/cpp/imgui_stdlib.h>
   <optional>
-  <sago/platform_folders.h>
+  <platform_folders.h>
   <sstream>
   <fstream>
   <imgui.h>
@@ -91,22 +94,18 @@ if(WIN32)
   # set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,/subsystem:windows")
 endif()
 
-find_package(cereal CONFIG REQUIRED)
-find_package(glfw3 CONFIG REQUIRED)
-find_package(imgui CONFIG REQUIRED)
-find_package(platform_folders CONFIG REQUIRED)
-find_package(spdlog CONFIG REQUIRED)
-
 target_link_libraries(${PROJECT_NAME}
   PRIVATE
   BoostDI
-  cereal::cereal
+  L2DFD
   glfw
-  imgui::imgui
-  sago::platform_folders
-  spdlog::spdlog_header_only
+  cereal::cereal
   triton
+  platform_folders
+  spdlog::spdlog_header_only
   util-lib
+  imgui_custom
+  Vulkan::Vulkan
 )
 
 target_include_directories(${PROJECT_NAME}

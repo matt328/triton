@@ -14,12 +14,9 @@ set(assetlib_SRC
 
 add_library(${PROJECT_NAME} STATIC ${assetlib_SRC})
 
-find_package(Ozz REQUIRED)
-
 target_compile_definitions(${PROJECT_NAME}
   PRIVATE
   TINYGLTF_NO_STB_IMAGE_WRITE
-  GLM_ENABLE_EXPERIMENTAL
 )
 
 target_precompile_headers(${PROJECT_NAME}
@@ -41,16 +38,12 @@ target_precompile_headers(${PROJECT_NAME}
   <ozz/base/io/archive.h>
 )
 
-find_package(cereal CONFIG REQUIRED)
-find_package(glm CONFIG REQUIRED)
-
-find_path(TINYGLTF_INCLUDE_DIRS "tiny_gltf.h")
-
 target_link_libraries(${PROJECT_NAME}
   PUBLIC
   cereal::cereal
-  glm::glm
-  ${OZZ_LIBRARIES}
+  ozz_animation
+  tinygltf
+  glm
   PRIVATE
   util-lib
 )
@@ -58,10 +51,8 @@ target_link_libraries(${PROJECT_NAME}
 target_include_directories(${PROJECT_NAME}
   PUBLIC
   include
-  ${OZZ_INCLUDE_DIRS}
   PRIVATE
   src
-  ${TINYGLTF_INCLUDE_DIRS}
 )
 
 target_code_coverage(${PROJECT_NAME})

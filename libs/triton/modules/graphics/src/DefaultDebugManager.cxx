@@ -146,3 +146,5 @@ auto DefaultDebugManager::debugCallbackFn(
   return VK_FALSE;
 }
 }
+
+// Send rick a chg thing.
