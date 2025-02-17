@@ -42,9 +42,9 @@ private:
   vk::DebugUtilsMessengerCreateInfoEXT debugCreateInfo;
 
   static auto debugCallbackFn(
-      [[maybe_unused]] vk::DebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-      [[maybe_unused]] vk::Flags<vk::DebugUtilsMessageTypeFlagBitsEXT> messageType,
-      [[maybe_unused]] const vk::DebugUtilsMessengerCallbackDataEXT* pCallbackData,
+      [[maybe_unused]] VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+      [[maybe_unused]] VkDebugUtilsMessageTypeFlagsEXT messageType,
+      [[maybe_unused]] const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
       [[maybe_unused]] void* pUserData) -> VkBool32;
 };
 
