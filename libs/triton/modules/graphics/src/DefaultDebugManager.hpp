@@ -41,25 +41,11 @@ private:
   std::unique_ptr<vk::raii::DebugUtilsMessengerEXT> debugCallback;
   vk::DebugUtilsMessengerCreateInfoEXT debugCreateInfo;
 
-  // I don't like this, but this was a breaking change in Vulkan 1.4.303 -> 1.4.304.
-  // Linux (Manjaro) only has 1.4.303 in its repos, while there is no SDK installer for 1.4.303
-  // only 1.4.304 so for now just keep this switch here until Manjaro updates
-
-#ifdef WIN32
   static auto debugCallbackFn(
       [[maybe_unused]] vk::DebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
       [[maybe_unused]] vk::DebugUtilsMessageTypeFlagsEXT messageType,
       [[maybe_unused]] const vk::DebugUtilsMessengerCallbackDataEXT* pCallbackData,
       [[maybe_unused]] void* pUserData) -> VkBool32;
-#endif
-
-#ifdef __linux__
-  static auto debugCallbackFn(
-      [[maybe_unused]] VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-      [[maybe_unused]] VkDebugUtilsMessageTypeFlagsEXT messageType,
-      [[maybe_unused]] const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
-      [[maybe_unused]] void* pUserData) -> VkBool32;
-#endif
 };
 
 }
