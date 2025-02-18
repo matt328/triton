@@ -2,7 +2,7 @@
 
 #include "ImGuiStyle.hpp"
 #include "assets/RobotoRegular.h"
-#include "assets/SourceCodePro.h"
+#include "assets/JetBrainsMono.hpp"
 #include "assets/IconsLucide.hpp"
 #include "assets/Lucide.hpp"
 
@@ -91,8 +91,8 @@ auto Manager::setupFonts() -> void {
   static const ImWchar iconRanges[] = {ICON_MIN_LC, ICON_MAX_LC, 0};
   fontAtlas->AddFontFromMemoryTTF(lucide_ttf, lucide_ttf_len, 18.f, &lucideConfig, iconRanges);
 
-  sauce = fontAtlas->AddFontFromMemoryTTF(SourceCodePro_Regular_ttf,
-                                          SourceCodePro_Regular_ttf_len,
+  sauce = fontAtlas->AddFontFromMemoryTTF(JetBrainsMono,
+                                          JetBrainsMonoLength,
                                           FontSize,
                                           &config,
                                           ranges);
