@@ -136,6 +136,19 @@ auto DefaultDebugManager::setObjectName(const ObjectHandle& handle, std::string_
   }
 }
 
+#ifdef WIN32
+auto DefaultDebugManager::debugCallbackFn(
+    [[maybe_unused]] vk::DebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+    [[maybe_unused]] vk::DebugUtilsMessageTypeFlagsEXT messageType,
+    const vk::DebugUtilsMessengerCallbackDataEXT* pCallbackData,
+    [[maybe_unused]] void* pUserData) -> VkBool32 {
+
+  Log.trace("Validation Layer: {0}", pCallbackData->pMessage);
+  return VK_FALSE;
+}
+#endif
+
+#ifdef __linux__
 auto DefaultDebugManager::debugCallbackFn(
     [[maybe_unused]] VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
     [[maybe_unused]] VkDebugUtilsMessageTypeFlagsEXT messageType,
@@ -145,4 +158,5 @@ auto DefaultDebugManager::debugCallbackFn(
   Log.trace("Validation Layer: {0}", pCallbackData->pMessage);
   return VK_FALSE;
 }
+#endif
 }
