@@ -41,11 +41,21 @@ private:
   std::unique_ptr<vk::raii::DebugUtilsMessengerEXT> debugCallback;
   vk::DebugUtilsMessengerCreateInfoEXT debugCreateInfo;
 
+#ifdef WIN32
+  static auto debugCallbackFn(
+      [[maybe_unused]] vk::DebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+      [[maybe_unused]] vk::DebugUtilsMessageTypeFlagsEXT messageType,
+      [[maybe_unused]] const vk::DebugUtilsMessengerCallbackDataEXT* pCallbackData,
+      [[maybe_unused]] void* pUserData) -> VkBool32;
+#endif
+
+#ifdef __linux__
   static auto debugCallbackFn(
       [[maybe_unused]] VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
       [[maybe_unused]] VkDebugUtilsMessageTypeFlagsEXT messageType,
       [[maybe_unused]] const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
       [[maybe_unused]] void* pUserData) -> VkBool32;
+#endif
 };
 
 }
