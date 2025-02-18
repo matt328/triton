@@ -95,6 +95,11 @@ void EntityEditor::render() {
         }
         ImGui::Text("%s", editorInfo->name.c_str());
 
+        auto buttonWidth = 120.f;
+        if (ImGui::Button(ICON_LC_X " Delete", ImVec2(buttonWidth, 0.f))) {
+          dataFacade->deleteEntity(selectedEntity.value());
+        }
+
         // Transform Component
         if (auto* transform = registry->try_get<tr::Transform>(selectedEntity.value());
             transform != nullptr) {
