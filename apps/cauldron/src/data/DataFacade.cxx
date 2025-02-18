@@ -119,6 +119,9 @@ void DataFacade::createAnimatedModel(const EntityData& entityData) {
   taskQueue->enqueue(task, onComplete);
 }
 
+auto DataFacade::deleteEntity(tr::EntityType entityType) noexcept -> void {
+}
+
 void DataFacade::addAnimationToEntity([[maybe_unused]] std::string_view entityName,
                                       [[maybe_unused]] std::string_view animationName) {
   auto& entityData = dataStore.scene.at(entityName.data());

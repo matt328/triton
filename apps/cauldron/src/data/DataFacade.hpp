@@ -134,6 +134,8 @@ public:
 
   void createAnimatedModel(const EntityData& entityData);
 
+  auto deleteEntity(tr::EntityType entityType) noexcept -> void;
+
   void addAnimationToEntity(std::string_view entityName, std::string_view animationName);
 
   void setEntitySkeleton(std::string_view entityName, std::string_view skeletonName);
