@@ -57,7 +57,6 @@ private:
 
   mutable TracyLockable(std::shared_mutex, registryMutex);
 
-  std::unique_ptr<CommandQueue<entt::registry&, const std::shared_ptr<AssetManager>&>> commandQueue;
   std::unique_ptr<CommandExecutor<entt::registry&, const std::shared_ptr<AssetManager>&>>
       commandExecutor;
 
