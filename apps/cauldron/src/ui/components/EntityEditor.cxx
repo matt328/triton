@@ -83,6 +83,7 @@ void EntityEditor::render() {
     ImGui::EndChild();
     ImGui::SameLine();
 
+    bool del = false;
     // Right
     {
       // Header
@@ -97,7 +98,7 @@ void EntityEditor::render() {
 
         auto buttonWidth = 120.f;
         if (ImGui::Button(ICON_LC_X " Delete", ImVec2(buttonWidth, 0.f))) {
-          dataFacade->deleteEntity(selectedEntity.value());
+          del = true;
         }
 
         // Transform Component
@@ -116,6 +117,11 @@ void EntityEditor::render() {
         if (auto* animation = registry->try_get<tr::Animation>(selectedEntity.value());
             animation != nullptr) {
           renderAnimationInspector(animation);
+        }
+
+        if (del) {
+          dataFacade->deleteEntity(selectedEntity.value());
+          selectedEntity = std::nullopt;
         }
 
       } else {

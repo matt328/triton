@@ -1,5 +1,6 @@
 #pragma once
 
+#include "cm/EntitySystemTypes.hpp"
 #include "cm/RenderData.hpp"
 #include "AnimatedModelData.hpp"
 #include "gp/components/Transform.hpp"
@@ -31,6 +32,7 @@ public:
   virtual auto createTerrain() -> void = 0;
   virtual auto createDefaultCamera() -> void = 0;
   virtual auto createTestEntity(std::string_view name) -> void = 0;
+  virtual auto removeEntity(tr::EntityType entity) -> void = 0;
   [[nodiscard]] virtual auto getRegistry() const -> std::shared_ptr<entt::registry> = 0;
 };
 }

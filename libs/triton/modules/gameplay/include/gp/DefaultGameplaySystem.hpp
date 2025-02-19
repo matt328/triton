@@ -39,6 +39,7 @@ public:
   auto createTerrain() -> void override;
   auto createDefaultCamera() -> void override;
   auto createTestEntity(std::string_view name) -> void override;
+  auto removeEntity(tr::EntityType entity) -> void override;
   auto getRegistry() const -> std::shared_ptr<entt::registry> override;
 
 private:
@@ -57,6 +58,8 @@ private:
   mutable TracyLockable(std::shared_mutex, registryMutex);
 
   std::unique_ptr<CommandQueue<entt::registry&, const std::shared_ptr<AssetManager>&>> commandQueue;
+  std::unique_ptr<CommandExecutor<entt::registry&, const std::shared_ptr<AssetManager>&>>
+      commandExecutor;
 
   entt::connection entityCreatedConnection;
 
