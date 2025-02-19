@@ -32,12 +32,7 @@
       "request": "launch",
       "name": "(lldb) Launch",
       "program": "${workspaceFolder}/build/debug/apps/cauldron/Cauldron",
-      "args": [
-        "gltf",
-        "-f=C:\\Users\\Matt\\Projects\\game-assets\\models\\viking_room\\viking_room.gltf",
-        "-o=C:\\Users\\Matt\\Projects\\game-assets\\models\\viking_room\\viking_room.trm"
-      ],
-      "cwd": "${workspaceFolder}",
+      "cwd": "${workspaceFolder}/build/debug/apps/cauldron/",
       "initCommands": [
         "type summary add glm::vec2 --summary-string \"x=${var.x}, y=${var.y}\"",
         "type summary add glm::vec3 --summary-string \"x=${var.x}, y=${var.y}, z=${var.z}\"",

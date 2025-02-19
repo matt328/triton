@@ -33,4 +33,23 @@ public:
 private:
   std::queue<std::unique_ptr<ICommand<Args...>>> commands;
 };
+
+template <typename... Args>
+class CommandExecutor {
+public:
+  explicit CommandExecutor(Args&&... args) : storedArgs(std::forward<Args>(args)...) {
+  }
+
+  void execute(std::unique_ptr<ICommand<Args...>> command) {
+    std::apply(
+        [&](auto&&... unpackedArgs) {
+          command->execute(std::forward<decltype(unpackedArgs)>(unpackedArgs)...);
+        },
+        storedArgs);
+  }
+
+private:
+  std::tuple<Args...> storedArgs;
+};
+
 }

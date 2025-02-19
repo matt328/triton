@@ -37,6 +37,11 @@ DefaultGameplaySystem::DefaultGameplaySystem(std::shared_ptr<IEventBus> newEvent
   commandQueue =
       std::make_unique<CommandQueue<entt::registry&, const std::shared_ptr<AssetManager>&>>();
 
+  commandExecutor =
+      std::make_unique<CommandExecutor<entt::registry&, const std::shared_ptr<AssetManager>&>>(
+          *registry,
+          assetManager);
+
   eventBus->subscribe<SwapchainResized>(
       [&](const SwapchainResized& event) { handleSwapchainResized(event); });
 
@@ -120,6 +125,16 @@ void DefaultGameplaySystem::fixedUpdate() {
   std::unique_lock<LockableBase(std::shared_mutex)> lock(registryMutex);
   LockMark(registryMutex);
 
+  /*
+    TODO(matt) Make processing command queue async again. Currently the tasks just enqueue a task
+    then bail, leaving processCommands to be called later on the main thread.
+
+    CommandQueue was only a thing to organize the code into smaller files so this file woulnd't get
+    large and have a bunch of different concerns.
+
+    Refactor CommandQueue into an 'EntityFactory' that takes Commands and executes them immediately.
+  */
+
   {
     ZoneNamedN(z, "Gameplay Command Queue", true);
     commandQueue->processCommands(*registry, assetManager);
@@ -146,7 +161,7 @@ auto DefaultGameplaySystem::createStaticModelEntity(std::string filename,
                                                     std::string_view entityName,
                                                     std::optional<Transform> initialTransform)
     -> void {
-  commandQueue->enqueue(
+  commandExecutor->execute(
       std::make_unique<CreateStaticEntityCommand>(filename, entityName.data(), initialTransform));
 }
 
@@ -178,6 +193,10 @@ auto DefaultGameplaySystem::createDefaultCamera() -> void {
 auto DefaultGameplaySystem::createTestEntity([[maybe_unused]] std::string_view name) -> void {
   Log.trace("Creating test entity: {}", name.data());
   commandQueue->enqueue(std::make_unique<CreateTestEntityCommand>(name));
+}
+
+auto DefaultGameplaySystem::removeEntity(tr::EntityType entity) -> void {
+  registry->destroy(entity);
 }
 
 auto DefaultGameplaySystem::getRegistry() const -> std::shared_ptr<entt::registry> {

@@ -120,6 +120,7 @@ void DataFacade::createAnimatedModel(const EntityData& entityData) {
 }
 
 auto DataFacade::deleteEntity(tr::EntityType entityType) noexcept -> void {
+  gameplaySystem->removeEntity(entityType);
 }
 
 void DataFacade::addAnimationToEntity([[maybe_unused]] std::string_view entityName,
