@@ -23,7 +23,6 @@ set(test_SRC
   ../modules/graphics/src/geo/HeightField.cxx
   ../modules/graphics/src/geo/DynamicGeometryData.cxx
   ../modules/graphics/src/geo/StaticGeometryData.cxx
-  ../modules/graphics/src/tex/Texture.cxx
   ../modules/graphics/src/DefaultDebugManager.cxx
   ../modules/graphics/src/ImGuiSystem.cxx
   ../modules/graphics/src/NoopDebugManager.cxx

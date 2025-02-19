@@ -53,6 +53,7 @@ auto ArenaBuffer::insertData(const void* data, size_t size) -> BufferRegion {
     while (newCapacity < capacity + size) {
       newCapacity *= 2;
     }
+    Log.trace("Resizing Buffer, new capacity: {}", newCapacity);
     bufferHandle = bufferManager->resizeBuffer(bufferHandle, newCapacity);
     capacity = newCapacity;
   }

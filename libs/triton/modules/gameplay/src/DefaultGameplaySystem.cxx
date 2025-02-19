@@ -34,9 +34,6 @@ DefaultGameplaySystem::DefaultGameplaySystem(std::shared_ptr<IEventBus> newEvent
   entityCreatedConnection =
       registry->on_construct<entt::entity>().connect<&DefaultGameplaySystem::entityCreated>(this);
 
-  commandQueue =
-      std::make_unique<CommandQueue<entt::registry&, const std::shared_ptr<AssetManager>&>>();
-
   commandExecutor =
       std::make_unique<CommandExecutor<entt::registry&, const std::shared_ptr<AssetManager>&>>(
           *registry,
@@ -124,21 +121,6 @@ void DefaultGameplaySystem::update() {
 void DefaultGameplaySystem::fixedUpdate() {
   std::unique_lock<LockableBase(std::shared_mutex)> lock(registryMutex);
   LockMark(registryMutex);
-
-  /*
-    TODO(matt) Make processing command queue async again. Currently the tasks just enqueue a task
-    then bail, leaving processCommands to be called later on the main thread.
-
-    CommandQueue was only a thing to organize the code into smaller files so this file woulnd't get
-    large and have a bunch of different concerns.
-
-    Refactor CommandQueue into an 'EntityFactory' that takes Commands and executes them immediately.
-  */
-
-  {
-    ZoneNamedN(z, "Gameplay Command Queue", true);
-    commandQueue->processCommands(*registry, assetManager);
-  }
   {
     ZoneNamedN(camZone, "CameraSystem", true);
     cameraSystem->fixedUpdate(*registry);
@@ -168,7 +150,7 @@ auto DefaultGameplaySystem::createStaticModelEntity(std::string filename,
 auto DefaultGameplaySystem::createAnimatedModelEntity(const AnimatedModelData& modelData,
                                                       std::optional<Transform> initialTransform)
     -> void {
-  commandQueue->enqueue(std::make_unique<CreateAnimatedEntity>(modelData, initialTransform));
+  commandExecutor->execute(std::make_unique<CreateAnimatedEntity>(modelData, initialTransform));
 }
 
 auto DefaultGameplaySystem::createTerrain() -> void {
@@ -187,12 +169,12 @@ auto DefaultGameplaySystem::createDefaultCamera() -> void {
       .position = DefaultPosition,
   };
 
-  commandQueue->enqueue(std::make_unique<CreateCamera>(cameraInfo));
+  commandExecutor->execute(std::make_unique<CreateCamera>(cameraInfo));
 }
 
 auto DefaultGameplaySystem::createTestEntity([[maybe_unused]] std::string_view name) -> void {
   Log.trace("Creating test entity: {}", name.data());
-  commandQueue->enqueue(std::make_unique<CreateTestEntityCommand>(name));
+  commandExecutor->execute(std::make_unique<CreateTestEntityCommand>(name));
 }
 
 auto DefaultGameplaySystem::removeEntity(tr::EntityType entity) -> void {
