@@ -24,6 +24,9 @@ public:
   auto createTransferCommandBuffer() -> CommandBufferHandle;
 
   auto getCommandBuffer(CommandBufferHandle handle) -> vk::raii::CommandBuffer&;
+  /// Transfer CommandBuffers are more effective if used once and freed, so callers should let this
+  /// go out of scope after it's been submitted, and request a fresh one each time.
+  auto getTransferCommandBuffer() -> vk::raii::CommandBuffer;
 
 private:
   std::shared_ptr<Device> device;

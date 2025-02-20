@@ -310,8 +310,8 @@ auto DefaultRenderScheduler::handleSwapchainResized(const SwapchainResized& even
   }
 }
 
-auto DefaultRenderScheduler::updatePerFrameRenderData(Frame& frame, const RenderData& renderData)
-    -> void {
+auto DefaultRenderScheduler::updatePerFrameRenderData(Frame& frame,
+                                                      const RenderData& renderData) -> void {
   ZoneNamedN(var, "updatePerFrameRenderData", true);
 
   frame.setStaticObjectCount(renderData.staticGpuMeshData.size());
@@ -544,6 +544,7 @@ auto DefaultRenderScheduler::transitionImage(const vk::raii::CommandBuffer& cmd,
                                              const vk::Image& image,
                                              vk::ImageLayout currentLayout,
                                              vk::ImageLayout newLayout) -> void {
+  ZoneNamedN(var, "transitionImage", true);
   const auto barrier = vk::ImageMemoryBarrier{
       .srcAccessMask = vk::AccessFlagBits::eMemoryWrite,
       .dstAccessMask = vk::AccessFlagBits::eMemoryWrite | vk::AccessFlagBits::eMemoryRead,
@@ -566,6 +567,7 @@ auto DefaultRenderScheduler::copyImageToImage(const vk::raii::CommandBuffer& cmd
                                               const vk::Image destination,
                                               const vk::Extent2D srcSize,
                                               const vk::Extent2D dstSize) -> void {
+  ZoneNamedN(var, "copyImage", true);
   const auto blitRegion = vk::ImageBlit2{
       .srcSubresource = {.aspectMask = vk::ImageAspectFlagBits::eColor, .layerCount = 1},
       .srcOffsets = std::array{vk::Offset3D{},
@@ -592,8 +594,8 @@ auto DefaultRenderScheduler::copyImageToImage(const vk::raii::CommandBuffer& cmd
   cmd.blitImage2(blitInfo);
 }
 
-auto DefaultRenderScheduler::insertBarrier(const vk::raii::CommandBuffer& cmd, const Buffer& buffer)
-    -> void {
+auto DefaultRenderScheduler::insertBarrier(const vk::raii::CommandBuffer& cmd,
+                                           const Buffer& buffer) -> void {
   // Insert a memory barrier for the buffer the computeTask writes to
   vk::BufferMemoryBarrier bufferMemoryBarrier{
       .srcAccessMask = vk::AccessFlagBits::eShaderWrite,
@@ -613,8 +615,8 @@ auto DefaultRenderScheduler::insertBarrier(const vk::raii::CommandBuffer& cmd, c
                       nullptr);
 }
 
-auto DefaultRenderScheduler::updateStaticBuffers(Frame& frame, const RenderData& renderData)
-    -> void {
+auto DefaultRenderScheduler::updateStaticBuffers(Frame& frame,
+                                                 const RenderData& renderData) -> void {
   // Update GpuBufferEntriesBuffer
   {
     ZoneNamedN(var, "getStaticGpuData", true);
@@ -641,8 +643,8 @@ auto DefaultRenderScheduler::updateStaticBuffers(Frame& frame, const RenderData&
   }
 }
 
-auto DefaultRenderScheduler::updateDynamicBuffers(Frame& frame, const RenderData& renderData)
-    -> void {
+auto DefaultRenderScheduler::updateDynamicBuffers(Frame& frame,
+                                                  const RenderData& renderData) -> void {
   // Update GpuBufferEntriesBuffer
   {
     ZoneNamedN(var, "getDynamicGpuData", true);

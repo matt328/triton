@@ -54,35 +54,46 @@ auto ImGuiSystem::setRenderCallback(std::function<void(void)> newRenderFn) -> vo
 auto ImGuiSystem::render(vk::raii::CommandBuffer& commandBuffer,
                          const vk::ImageView& swapchainImageView,
                          const vk::Extent2D& swapchainExtent) -> void {
-  ImGui_ImplVulkan_NewFrame();
-  ImGui_ImplGlfw_NewFrame();
-  ImGui::NewFrame();
-  renderFn();
-  ImGui::Render();
-
   ZoneNamedN(imguiZone, "Render ImGui", true);
-  const auto colorAttachment = vk::RenderingAttachmentInfo{
-      .imageView = swapchainImageView,
-      .imageLayout = vk::ImageLayout::eColorAttachmentOptimal,
-      .loadOp = vk::AttachmentLoadOp::eLoad,
-      .storeOp = vk::AttachmentStoreOp::eStore,
-  };
 
-  const auto renderInfo = vk::RenderingInfo{
-      .renderArea = vk::Rect2D{.offset = {.x = 0, .y = 0}, .extent = swapchainExtent},
-      .layerCount = 1,
-      .colorAttachmentCount = 1,
-      .pColorAttachments = &colorAttachment,
-  };
+  {
+    ZoneNamedN(var, "ImGui::NewFrame", true);
+    ImGui_ImplVulkan_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+  }
+  renderFn();
 
-  commandBuffer.beginRendering(renderInfo);
-
-  auto* dd = ImGui::GetDrawData();
-  if (dd != nullptr) {
-    ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), *commandBuffer);
+  {
+    ZoneNamedN(var, "ImGui::Render", true);
+    ImGui::Render();
   }
 
-  commandBuffer.endRendering();
+  {
+    ZoneNamedN(var, "ImGuiRecordCommandBuffer", true);
+    const auto colorAttachment = vk::RenderingAttachmentInfo{
+        .imageView = swapchainImageView,
+        .imageLayout = vk::ImageLayout::eColorAttachmentOptimal,
+        .loadOp = vk::AttachmentLoadOp::eLoad,
+        .storeOp = vk::AttachmentStoreOp::eStore,
+    };
+
+    const auto renderInfo = vk::RenderingInfo{
+        .renderArea = vk::Rect2D{.offset = {.x = 0, .y = 0}, .extent = swapchainExtent},
+        .layerCount = 1,
+        .colorAttachmentCount = 1,
+        .pColorAttachments = &colorAttachment,
+    };
+
+    commandBuffer.beginRendering(renderInfo);
+
+    auto* dd = ImGui::GetDrawData();
+    if (dd != nullptr) {
+      ImGui_ImplVulkan_RenderDrawData(dd, *commandBuffer);
+    }
+
+    commandBuffer.endRendering();
+  }
 }
 
 ImGuiSystem::~ImGuiSystem() {

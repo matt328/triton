@@ -4,6 +4,7 @@ namespace tr::queue {
 Graphics::Graphics(const std::shared_ptr<Device>& device)
     : queueFamilyIndex(device->getGraphicsQueueFamily()) {
   queue = device->createGraphicsQueue();
+  Log.trace("Graphics queue family: {}", queueFamilyIndex);
 }
 
 auto Graphics::getQueue() const -> vk::raii::Queue& {
@@ -17,6 +18,7 @@ auto Graphics::getFamily() const -> uint32_t {
 Present::Present(const std::shared_ptr<Device>& device)
     : queueFamilyIndex(device->getPresentQueueFamily()) {
   queue = device->createPresentQueue();
+  Log.trace("Present queue family: {}", queueFamilyIndex);
 }
 
 auto Present::getQueue() const -> vk::raii::Queue& {
@@ -30,6 +32,7 @@ auto Present::getFamily() const -> uint32_t {
 Transfer::Transfer(const std::shared_ptr<Device>& device)
     : queueFamilyIndex(device->getTransferQueueFamily()) {
   queue = device->createTransferQueue();
+  Log.trace("Transfer queue family: {}", queueFamilyIndex);
 }
 
 auto Transfer::getQueue() const -> vk::raii::Queue& {
@@ -43,6 +46,7 @@ auto Transfer::getFamily() const -> uint32_t {
 Compute::Compute(const std::shared_ptr<Device>& device)
     : queueFamilyIndex(device->getComputeQueueFamily()) {
   queue = device->createComputeQueue();
+  Log.trace("Compute queue family: {}", queueFamilyIndex);
 }
 
 auto Compute::getQueue() const -> vk::raii::Queue& {

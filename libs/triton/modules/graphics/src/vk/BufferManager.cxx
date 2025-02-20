@@ -62,8 +62,8 @@ auto BufferManager::createIndirectBuffer(size_t size) -> BufferHandle {
   return key;
 }
 
-[[nodiscard]] auto BufferManager::resizeBuffer(BufferHandle handle, size_t newSize)
-    -> BufferHandle {
+[[nodiscard]] auto BufferManager::resizeBuffer(BufferHandle handle,
+                                               size_t newSize) -> BufferHandle {
   ZoneNamedN(var, "Resize Buffer", true);
   auto& oldBuffer = bufferMap.at(handle);
 
@@ -82,10 +82,11 @@ auto BufferManager::createIndirectBuffer(size_t size) -> BufferHandle {
     cmd.copyBuffer(oldBuffer->getBuffer(), newBuffer->getBuffer(), vbCopy);
   });
 
-  Log.trace("Erasing old buffer");
+  Log.trace("Erasing old buffer {}", handle);
   bufferMap.erase(handle);
   const auto newHandle = bufferMapKeygen.getKey();
   bufferMap.emplace(newHandle, std::move(newBuffer));
+  Log.trace("Emplacing new buffer {}", newHandle);
   return newHandle;
 }
 

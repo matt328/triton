@@ -71,6 +71,24 @@ auto PhysicalDevice::createDevice() -> std::unique_ptr<vk::raii::Device> {
     }
   }
 
+  // If Transfer queue family is different from graphics
+  if (deviceQueueFamilyIndices.graphicsFamily.value() !=
+      deviceQueueFamilyIndices.transferFamily.value()) {
+    Log.trace("Creating Device with transfer queue family: {}",
+              deviceQueueFamilyIndices.transferFamily.value());
+    // Transfer Queue(s)
+    if (deviceQueueFamilyIndices.transferFamily.has_value() &&
+        deviceQueueFamilyIndices.transferFamilyCount.has_value()) {
+
+      const auto transferFamilyCreateInfo = vk::DeviceQueueCreateInfo{
+          .queueFamilyIndex = deviceQueueFamilyIndices.transferFamily.value(),
+          .queueCount = deviceQueueFamilyIndices.transferFamilyCount.value(),
+          .pQueuePriorities = deviceQueueFamilyIndices.transferFamilyPriorities.data()};
+
+      queueCreateInfos.push_back(transferFamilyCreateInfo);
+    }
+  }
+
   auto dynamicRenderingFeatures = vk::PhysicalDeviceDynamicRenderingFeaturesKHR{
       .dynamicRendering = VK_TRUE,
   };
@@ -130,9 +148,11 @@ auto PhysicalDevice::createDevice() -> std::unique_ptr<vk::raii::Device> {
 auto PhysicalDevice::getVkPhysicalDevice() const -> vk::raii::PhysicalDevice& {
   return *physicalDevice;
 }
+
 auto PhysicalDevice::getQueueFamilyIndices() const -> QueueFamilyIndices {
   return deviceQueueFamilyIndices;
 }
+
 auto PhysicalDevice::querySwapchainSupport() const -> SwapchainSupportDetails {
   const auto details = SwapchainSupportDetails{
       .capabilities = physicalDevice->getSurfaceCapabilitiesKHR(*surface->getVkSurface()),
@@ -176,44 +196,72 @@ auto findQueueFamilies(const vk::raii::PhysicalDevice& possibleDevice,
 
   const auto queueFamilies = possibleDevice.getQueueFamilyProperties();
 
-  // Find a graphics queue
+  std::optional<uint32_t> graphicsFamilyIndex; // Store for fallback
+  std::optional<uint32_t> computeFamilyIndex;
+  std::optional<uint32_t> transferFamilyIndex;
 
-  for (int i = 0; const auto& queueFamily : queueFamilies) {
+  for (uint32_t i = 0; i < queueFamilies.size(); i++) {
+    const auto& queueFamily = queueFamilies[i];
+
     if (queueFamily.queueFlags & vk::QueueFlagBits::eGraphics) {
-      queueFamilyIndices.graphicsFamily = i;
-      queueFamilyIndices.graphicsFamilyCount = queueFamily.queueCount;
-      queueFamilyIndices.graphicsFamilyPriorities.resize(queueFamily.queueCount, 0.f);
-      queueFamilyIndices.graphicsFamilyPriorities[0] = 1.f;
+      if (!queueFamilyIndices.graphicsFamily.has_value()) {
+        queueFamilyIndices.graphicsFamily = i;
+        queueFamilyIndices.graphicsFamilyCount = queueFamily.queueCount;
+        queueFamilyIndices.graphicsFamilyPriorities.assign(queueFamily.queueCount, 0.f);
+        queueFamilyIndices.graphicsFamilyPriorities[0] = 1.f;
+        graphicsFamilyIndex = i; // Store for fallback
+      }
     }
 
     if (possibleDevice.getSurfaceSupportKHR(i, *surface) != 0u) {
-      queueFamilyIndices.presentFamily = i;
-      queueFamilyIndices.presentFamilyCount = queueFamily.queueCount;
-      queueFamilyIndices.presentFamilyPriorities.resize(queueFamily.queueCount, 0.f);
-      queueFamilyIndices.presentFamilyPriorities[0] = 1.f;
+      if (!queueFamilyIndices.presentFamily.has_value()) {
+        queueFamilyIndices.presentFamily = i;
+        queueFamilyIndices.presentFamilyCount = queueFamily.queueCount;
+        queueFamilyIndices.presentFamilyPriorities.assign(queueFamily.queueCount, 0.f);
+        queueFamilyIndices.presentFamilyPriorities[0] = 1.f;
+      }
     }
 
-    if (queueFamily.queueFlags & vk::QueueFlagBits::eTransfer) {
-      queueFamilyIndices.transferFamily = i;
-      queueFamilyIndices.transferFamilyCount = queueFamily.queueCount;
-      queueFamilyIndices.transferFamilyPriorities.resize(queueFamily.queueCount, 0.f);
-      queueFamilyIndices.transferFamilyPriorities[0] = 1.f;
+    if ((queueFamily.queueFlags & vk::QueueFlagBits::eCompute) &&
+        !(queueFamily.queueFlags & vk::QueueFlagBits::eGraphics)) {
+      if (!queueFamilyIndices.computeFamily.has_value()) {
+        queueFamilyIndices.computeFamily = i;
+        queueFamilyIndices.computeFamilyCount = queueFamily.queueCount;
+        queueFamilyIndices.computeFamilyPriorities.assign(queueFamily.queueCount, 0.f);
+        queueFamilyIndices.computeFamilyPriorities[0] = 1.f;
+        computeFamilyIndex = i;
+      }
     }
 
-    if ((queueFamily.queueFlags & vk::QueueFlagBits::eCompute)) {
-      queueFamilyIndices.computeFamily = i;
-      queueFamilyIndices.computeFamilyCount = queueFamily.queueCount;
-      queueFamilyIndices.computeFamilyPriorities.resize(queueFamily.queueCount, 0.f);
-      queueFamilyIndices.computeFamilyPriorities[0] = 1.f;
+    if ((queueFamily.queueFlags & vk::QueueFlagBits::eTransfer) &&
+        !(queueFamily.queueFlags & vk::QueueFlagBits::eGraphics) &&
+        !(queueFamily.queueFlags & vk::QueueFlagBits::eCompute)) {
+      if (!queueFamilyIndices.transferFamily.has_value()) {
+        queueFamilyIndices.transferFamily = i;
+        queueFamilyIndices.transferFamilyCount = queueFamily.queueCount;
+        queueFamilyIndices.transferFamilyPriorities.assign(queueFamily.queueCount, 0.f);
+        queueFamilyIndices.transferFamilyPriorities[0] = 1.f;
+        transferFamilyIndex = i;
+      }
     }
-
-    if (queueFamilyIndices.isComplete()) {
-      break;
-    }
-    i++;
   }
+
+  // **Fallbacks if needed**
+  if (!queueFamilyIndices.computeFamily.has_value() && graphicsFamilyIndex.has_value()) {
+    queueFamilyIndices.computeFamily = graphicsFamilyIndex;
+    queueFamilyIndices.computeFamilyCount = queueFamilyIndices.graphicsFamilyCount;
+    queueFamilyIndices.computeFamilyPriorities = queueFamilyIndices.graphicsFamilyPriorities;
+  }
+
+  if (!queueFamilyIndices.transferFamily.has_value() && graphicsFamilyIndex.has_value()) {
+    queueFamilyIndices.transferFamily = graphicsFamilyIndex;
+    queueFamilyIndices.transferFamilyCount = queueFamilyIndices.graphicsFamilyCount;
+    queueFamilyIndices.transferFamilyPriorities = queueFamilyIndices.graphicsFamilyPriorities;
+  }
+
   return queueFamilyIndices;
 }
+
 auto checkDeviceExtensionSupport(const vk::raii::PhysicalDevice& possibleDevice,
                                  const std::vector<char const*>& desiredDeviceExtensions) -> bool {
   const auto availableExtensions = possibleDevice.enumerateDeviceExtensionProperties();

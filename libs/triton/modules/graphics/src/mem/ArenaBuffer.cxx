@@ -53,8 +53,9 @@ auto ArenaBuffer::insertData(const void* data, size_t size) -> BufferRegion {
     while (newCapacity < capacity + size) {
       newCapacity *= 2;
     }
-    Log.trace("Resizing Buffer, new capacity: {}", newCapacity);
+    Log.trace("Resizing Buffer {}, new capacity: {}", bufferHandle, newCapacity);
     bufferHandle = bufferManager->resizeBuffer(bufferHandle, newCapacity);
+    Log.trace("Resized BufferHandle: {}", bufferHandle);
     capacity = newCapacity;
   }
 
@@ -74,6 +75,7 @@ auto ArenaBuffer::removeData(const BufferRegion& bufferIndex) -> void {
 }
 
 auto ArenaBuffer::getBuffer() const -> Buffer& {
+  Log.trace("Getting Buffer {}", bufferHandle);
   return bufferManager->getBuffer(bufferHandle);
 }
 
