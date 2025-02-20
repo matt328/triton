@@ -19,20 +19,20 @@ ImmediateTransferContext::ImmediateTransferContext(
       fence(std::make_unique<vk::raii::Fence>(
           device->getVkDevice().createFence(vk::FenceCreateInfo{}))) {
 
-  auto& commandBuffer = commandBufferManager->getCommandBuffer(commandBufferHandle);
+  // auto& commandBuffer = commandBufferManager->getCommandBuffer(commandBufferHandle);
 
-  tracyContext = tracy::CreateVkContext(*physicalDevice->getVkPhysicalDevice(),
-                                        *device->getVkDevice(),
-                                        *transferQueue->getQueue(),
-                                        *commandBuffer,
-                                        nullptr,
-                                        nullptr),
+  // tracyContext = tracy::CreateVkContext(*physicalDevice->getVkPhysicalDevice(),
+  //                                       *device->getVkDevice(),
+  //                                       *transferQueue->getQueue(),
+  //                                       *commandBuffer,
+  //                                       nullptr,
+  //                                       nullptr),
 
-  tracyContext->Name(name.data(), name.length());
+  // tracyContext->Name(name.data(), name.length());
 }
 
 ImmediateTransferContext::~ImmediateTransferContext() {
-  TracyVkDestroy(tracyContext);
+  // TracyVkDestroy(tracyContext);
 }
 void ImmediateTransferContext::submit(
     std::function<void(vk::raii::CommandBuffer& cmd)>&& fn) const {
@@ -52,9 +52,9 @@ void ImmediateTransferContext::submit(
 
   commandBuffer.begin(cmdBeginInfo);
   {
-    TracyVkZone(tracyContext, *commandBuffer, "Immediate Transfer");
+    // TracyVkZone(tracyContext, *commandBuffer, "Immediate Transfer");
     fn(commandBuffer);
-    TracyVkCollect(tracyContext, *commandBuffer);
+    // TracyVkCollect(tracyContext, *commandBuffer);
   }
   commandBuffer.end();
 
@@ -68,7 +68,9 @@ void ImmediateTransferContext::submit(
     Log.warn("Timeout waiting for fence during immediate submit");
   }
   device->getVkDevice().resetFences(**fence);
-  commandBuffer.reset();
+  // Don't reset this command buffer, abstract it so the
+  // commandBufferManager->getTransferCommandBuffer() method allocates a fresh one each time
+  // commandBuffer.reset();
   Log.trace("ImmediateTransferContext submit finished");
 }
 

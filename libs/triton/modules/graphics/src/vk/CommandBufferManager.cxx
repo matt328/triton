@@ -19,7 +19,6 @@ CommandBufferManager::CommandBufferManager(std::shared_ptr<Device> newDevice,
   debugManager->setObjectName(**graphicsCommandPool, "CommandPool-Graphics");
 
   const auto transferCommandPoolCreateInfo = vk::CommandPoolCreateInfo{
-      .flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
       .queueFamilyIndex = device->getTransferQueueFamily(),
   };
 

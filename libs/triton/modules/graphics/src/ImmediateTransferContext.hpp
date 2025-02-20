@@ -40,7 +40,7 @@ private:
 
   CommandBufferHandle commandBufferHandle;
 
-  tracy::VkCtx* tracyContext;
+  // tracy::VkCtx* tracyContext;
   std::unique_ptr<vk::raii::Fence> fence = nullptr;
 };
 }
