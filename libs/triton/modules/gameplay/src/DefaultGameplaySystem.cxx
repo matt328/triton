@@ -143,6 +143,8 @@ auto DefaultGameplaySystem::createStaticModelEntity(std::string filename,
                                                     std::string_view entityName,
                                                     std::optional<Transform> initialTransform)
     -> void {
+  std::unique_lock<LockableBase(std::shared_mutex)> lock(registryMutex);
+  LockMark(registryMutex);
   commandExecutor->execute(
       std::make_unique<CreateStaticEntityCommand>(filename, entityName.data(), initialTransform));
 }
@@ -150,7 +152,38 @@ auto DefaultGameplaySystem::createStaticModelEntity(std::string filename,
 auto DefaultGameplaySystem::createAnimatedModelEntity(const AnimatedModelData& modelData,
                                                       std::optional<Transform> initialTransform)
     -> void {
-  commandExecutor->execute(std::make_unique<CreateAnimatedEntity>(modelData, initialTransform));
+
+  auto loadedModelData = assetManager->loadModel(modelData.modelFilename);
+
+  assert(loadedModelData.skinData.has_value());
+
+  loadedModelData.animationData = std::make_optional(
+      AnimationData{.skeletonHandle = assetManager->loadSkeleton(modelData.skeletonFilename),
+                    .animationHandle = assetManager->loadAnimation(modelData.animationFilename)});
+
+  auto transform = Transform{.rotation = glm::zero<glm::vec3>(),
+                             .position = glm::zero<glm::vec3>(),
+                             .transformation = glm::identity<glm::mat4>()};
+
+  if (initialTransform.has_value()) {
+    transform.position = initialTransform->position;
+    transform.rotation = initialTransform->rotation;
+  }
+
+  {
+    std::unique_lock<LockableBase(std::shared_mutex)> lock(registryMutex);
+    LockMark(registryMutex);
+
+    const auto entity = registry->create();
+    registry->emplace<Animation>(entity,
+                                 loadedModelData.animationData->animationHandle,
+                                 loadedModelData.animationData->skeletonHandle,
+                                 loadedModelData.skinData->jointMap,
+                                 loadedModelData.skinData->inverseBindMatrices);
+    registry->emplace<Transform>(entity, transform);
+    registry->emplace<Renderable>(entity, std::vector{loadedModelData.meshData});
+    registry->emplace<EditorInfo>(entity, modelData.entityName.value_or("Unnamed Entity"));
+  }
 }
 
 auto DefaultGameplaySystem::createTerrain() -> void {

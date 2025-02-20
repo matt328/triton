@@ -75,12 +75,14 @@ auto BufferManager::createIndirectBuffer(size_t size) -> BufferHandle {
 
   auto newBuffer = allocator->createBuffer(&bci, &aci);
 
+  Log.trace("Submitting buffer copy to immediateTransferContext");
   immediateTransferContext->submit([&](const vk::raii::CommandBuffer& cmd) {
     ZoneNamedN(var, "Copy Buffer", true);
     const auto vbCopy = vk::BufferCopy{.srcOffset = 0, .dstOffset = 0, .size = oldSize};
     cmd.copyBuffer(oldBuffer->getBuffer(), newBuffer->getBuffer(), vbCopy);
   });
 
+  Log.trace("Erasing old buffer");
   bufferMap.erase(handle);
   const auto newHandle = bufferMapKeygen.getKey();
   bufferMap.emplace(newHandle, std::move(newBuffer));
