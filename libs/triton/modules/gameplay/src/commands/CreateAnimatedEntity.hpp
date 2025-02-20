@@ -17,11 +17,11 @@ public:
 
   void execute(entt::registry& registry,
                const std::shared_ptr<AssetManager>& assetManager) const override {
-    auto modelData = assetManager->loadModel(animatedModelData.modelFilename);
+    auto loadedModelData = assetManager->loadModel(animatedModelData.modelFilename);
 
-    assert(modelData.skinData.has_value());
+    assert(loadedModelData.skinData.has_value());
 
-    modelData.animationData = std::make_optional(AnimationData{
+    loadedModelData.animationData = std::make_optional(AnimationData{
         .skeletonHandle = assetManager->loadSkeleton(animatedModelData.skeletonFilename),
         .animationHandle = assetManager->loadAnimation(animatedModelData.animationFilename)});
 
@@ -36,12 +36,12 @@ public:
 
     const auto entity = registry.create();
     registry.emplace<Animation>(entity,
-                                modelData.animationData->animationHandle,
-                                modelData.animationData->skeletonHandle,
-                                modelData.skinData->jointMap,
-                                modelData.skinData->inverseBindMatrices);
+                                loadedModelData.animationData->animationHandle,
+                                loadedModelData.animationData->skeletonHandle,
+                                loadedModelData.skinData->jointMap,
+                                loadedModelData.skinData->inverseBindMatrices);
     registry.emplace<Transform>(entity, transform);
-    registry.emplace<Renderable>(entity, std::vector{modelData.meshData});
+    registry.emplace<Renderable>(entity, std::vector{loadedModelData.meshData});
     registry.emplace<EditorInfo>(entity, animatedModelData.entityName.value_or("Unnamed Entity"));
   }
 

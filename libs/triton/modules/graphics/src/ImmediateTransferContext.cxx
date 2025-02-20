@@ -10,7 +10,7 @@ ImmediateTransferContext::ImmediateTransferContext(
     std::shared_ptr<PhysicalDevice> newPhysicalDevice,
     std::shared_ptr<queue::Transfer> newTransferQueue,
     std::shared_ptr<CommandBufferManager> newCommandBufferManager,
-    const std::string_view& name)
+    [[maybe_unused]] const std::string_view& name)
     : device{std::move(newDevice)},
       physicalDevice{std::move(newPhysicalDevice)},
       transferQueue{std::move(newTransferQueue)},
@@ -34,9 +34,16 @@ ImmediateTransferContext::ImmediateTransferContext(
 ImmediateTransferContext::~ImmediateTransferContext() {
   TracyVkDestroy(tracyContext);
 }
-
 void ImmediateTransferContext::submit(
     std::function<void(vk::raii::CommandBuffer& cmd)>&& fn) const {
+
+  const auto currentThreadId = std::this_thread::get_id();
+
+  std::ostringstream oss;
+  oss << currentThreadId;
+
+  Log.trace("ImmediateTransferContext submitting on thread {}", oss.str());
+
   ZoneNamedN(immediateContextZone, "Immediate Transfer", true);
   constexpr vk::CommandBufferBeginInfo cmdBeginInfo{
       .flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit};
@@ -62,5 +69,7 @@ void ImmediateTransferContext::submit(
   }
   device->getVkDevice().resetFences(**fence);
   commandBuffer.reset();
+  Log.trace("ImmediateTransferContext submit finished");
 }
+
 }
