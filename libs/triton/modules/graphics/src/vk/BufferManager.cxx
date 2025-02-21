@@ -8,9 +8,34 @@
 namespace tr {
 
 BufferManager::BufferManager(std::shared_ptr<Allocator> newAllocator,
-                             std::shared_ptr<ImmediateTransferContext> newImmediateTransferContext)
+                             std::shared_ptr<ImmediateTransferContext> newImmediateTransferContext,
+                             std::shared_ptr<Device> newDevice,
+                             const std::shared_ptr<IEventBus>& eventBus)
     : allocator{std::move(newAllocator)},
-      immediateTransferContext{std::move(newImmediateTransferContext)} {
+      immediateTransferContext{std::move(newImmediateTransferContext)},
+      device{std::move(newDevice)} {
+
+  eventBus->subscribe<FrameEndEvent>(
+      [&](const FrameEndEvent& event) { cleanupBuffers(event.fence); });
+}
+
+// TODO(matt) Move this to a different thread
+auto BufferManager::cleanupBuffers(const vk::Fence& fence) -> void {
+  if (unusedBuffers.empty()) {
+    return;
+  }
+
+  {
+    ZoneNamedN(var, "Buffer Cleanup Fence Wait", true);
+    if (const auto result = device->getVkDevice().waitForFences(fence, 1u, UINT64_MAX);
+        result != vk::Result::eSuccess) {
+      Log.warn("Timeout waiting for fence during immediate submit");
+    }
+  }
+  for (const auto& handle : unusedBuffers) {
+    bufferMap.erase(handle);
+  }
+  unusedBuffers.clear();
 }
 
 auto BufferManager::createBuffer(size_t size,
@@ -83,7 +108,17 @@ auto BufferManager::createIndirectBuffer(size_t size) -> BufferHandle {
   });
 
   Log.trace("Erasing old buffer {}", handle);
-  bufferMap.erase(handle);
+  TracyMessageL("Erasing old buffer");
+  {
+    ZoneNamedN(var, "Erasing Buffer", true);
+
+    // TODO(matt): figure out how to ensure the graphics queue is not using this buffer before
+    // erasing it.
+    // Either map out some fence to buffer, or do some deferred erase that waits a few frames or
+    // something.
+    unusedBuffers.push_back(handle);
+  }
+  TracyMessageL("Old Buffer Erased");
   const auto newHandle = bufferMapKeygen.getKey();
   bufferMap.emplace(newHandle, std::move(newBuffer));
   Log.trace("Emplacing new buffer {}", newHandle);

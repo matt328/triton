@@ -38,8 +38,6 @@ private:
   std::shared_ptr<queue::Transfer> transferQueue;
   std::shared_ptr<CommandBufferManager> commandBufferManager;
 
-  CommandBufferHandle commandBufferHandle;
-
   // tracy::VkCtx* tracyContext;
   std::unique_ptr<vk::raii::Fence> fence = nullptr;
 };

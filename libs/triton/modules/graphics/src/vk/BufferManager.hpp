@@ -2,7 +2,9 @@
 
 #include "IBufferManager.hpp"
 #include "cm/Rando.hpp"
+#include "tr/IEventBus.hpp"
 #include "vk/ResourceManagerHandles.hpp"
+#include "vk/core/Device.hpp"
 
 namespace tr {
 
@@ -14,7 +16,9 @@ class IGeometryData;
 class BufferManager : public IBufferManager {
 public:
   BufferManager(std::shared_ptr<Allocator> newAllocator,
-                std::shared_ptr<ImmediateTransferContext> newImmediateTransferContext);
+                std::shared_ptr<ImmediateTransferContext> newImmediateTransferContext,
+                std::shared_ptr<Device> newDevice,
+                const std::shared_ptr<IEventBus>& eventBus);
   ~BufferManager() override = default;
 
   BufferManager(const BufferManager&) = delete;
@@ -46,17 +50,23 @@ public:
                    BufferHandle indexBufferHandle,
                    vk::DeviceSize indexOffset) -> void override;
 
-  auto addToSingleBuffer(const void* data, size_t size, BufferHandle handle, vk::DeviceSize offset)
-      -> void override;
+  auto addToSingleBuffer(const void* data,
+                         size_t size,
+                         BufferHandle handle,
+                         vk::DeviceSize offset) -> void override;
 
   auto removeData(BufferHandle handle, vk::DeviceSize offset, size_t size) -> void override;
+
+  auto cleanupBuffers(const vk::Fence& fence) -> void;
 
 private:
   std::shared_ptr<Allocator> allocator;
   std::shared_ptr<ImmediateTransferContext> immediateTransferContext;
+  std::shared_ptr<Device> device;
 
   MapKey bufferMapKeygen;
   std::unordered_map<BufferHandle, std::unique_ptr<Buffer>> bufferMap;
+  std::vector<BufferHandle> unusedBuffers;
 };
 
 }

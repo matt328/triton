@@ -58,7 +58,9 @@ public:
                              std::shared_ptr<DSLayoutManager> newLayoutManager,
                              std::shared_ptr<IShaderBindingFactory> newShaderBindingFactory,
                              std::shared_ptr<Allocator> newAllocator,
-                             std::shared_ptr<IBufferManager> newBufferManager);
+                             std::shared_ptr<IBufferManager> newBufferManager,
+                             std::shared_ptr<queue::Graphics> newGraphicsQueue,
+                             std::shared_ptr<queue::Transfer> newTransferQueue);
   ~VkResourceManager();
   VkResourceManager(const VkResourceManager&) = delete;
   VkResourceManager(VkResourceManager&&) = delete;
@@ -71,8 +73,9 @@ public:
   auto createDrawImageAndView(std::string_view imageName, vk::Extent2D extent) -> ImageHandle;
   auto destroyDrawImageAndView(ImageHandle handle) -> void;
 
-  auto createDepthImageAndView(std::string_view imageName, vk::Extent2D extent, vk::Format format)
-      -> ImageHandle;
+  auto createDepthImageAndView(std::string_view imageName,
+                               vk::Extent2D extent,
+                               vk::Format format) -> ImageHandle;
 
   /// Add a static mesh to the MeshBufferManager for static meshes.
   auto uploadStaticMesh(const IGeometryData& geometryData) -> MeshHandle;
@@ -140,6 +143,8 @@ private:
   std::shared_ptr<IShaderBindingFactory> shaderBindingFactory;
   std::shared_ptr<Allocator> allocator;
   std::shared_ptr<IBufferManager> bufferManager;
+  std::shared_ptr<queue::Graphics> graphicsQueue;
+  std::shared_ptr<queue::Transfer> transferQueue;
 
   std::unordered_map<ImageHandle, ImageInfo> imageInfoMap;
   std::unordered_map<PipelineHandle, std::unique_ptr<IPipeline>> pipelineMap;
@@ -157,10 +162,12 @@ private:
   DSLayoutHandle textureDSLHandle;
   ShaderBindingHandle textureShaderBindingHandle;
 
-  auto createTransitionBarrier(const vk::Image& image,
-                               vk::ImageLayout oldLayout,
-                               vk::ImageLayout newLayout,
-                               const vk::ImageSubresourceRange& subresourceRange)
+  static auto createTransitionBarrier(const vk::Image& image,
+                                      vk::ImageLayout oldLayout,
+                                      vk::ImageLayout newLayout,
+                                      const vk::ImageSubresourceRange& subresourceRange,
+                                      uint32_t srcQueueFamily = VK_QUEUE_FAMILY_IGNORED,
+                                      uint32_t dstQueueFamily = VK_QUEUE_FAMILY_IGNORED)
       -> TransitionBarrierInfo;
 
   static inline auto aligned_size(VkDeviceSize value, VkDeviceSize alignment) -> vk::DeviceSize {

@@ -24,7 +24,9 @@ VkResourceManager::VkResourceManager(
     std::shared_ptr<DSLayoutManager> newLayoutManager,
     std::shared_ptr<IShaderBindingFactory> newShaderBindingFactory,
     std::shared_ptr<Allocator> newAllocator,
-    std::shared_ptr<IBufferManager> newBufferManager)
+    std::shared_ptr<IBufferManager> newBufferManager,
+    std::shared_ptr<queue::Graphics> newGraphicsQueue,
+    std::shared_ptr<queue::Transfer> newTransferQueue)
     : device{std::move(newDevice)},
       immediateTransferContext{std::move(newImmediateTransferContext)},
       shaderCompiler{std::move(newShaderCompiler)},
@@ -32,7 +34,9 @@ VkResourceManager::VkResourceManager(
       layoutManager{std::move(newLayoutManager)},
       shaderBindingFactory{std::move(newShaderBindingFactory)},
       allocator{std::move(newAllocator)},
-      bufferManager{std::move(newBufferManager)} {
+      bufferManager{std::move(newBufferManager)},
+      graphicsQueue{std::move(newGraphicsQueue)},
+      transferQueue{std::move(newTransferQueue)} {
 
   constexpr auto binding =
       vk::DescriptorSetLayoutBinding{.binding = 0,
@@ -129,8 +133,8 @@ auto VkResourceManager::uploadImage([[maybe_unused]] const as::ImageData& imageD
 
 /// Synchronously uploads the texturedata to the device, waiting until it is uploaded and available
 /// before creating and returning an image, view, and default sampler.
-auto VkResourceManager::getTextureData(const as::ImageData& imageData, std::string_view name)
-    -> TextureData {
+auto VkResourceManager::getTextureData(const as::ImageData& imageData,
+                                       std::string_view name) -> TextureData {
   auto textureData = TextureData{};
   auto textureSize =
       static_cast<vk::DeviceSize>(imageData.width * imageData.height * imageData.component);
@@ -206,6 +210,10 @@ auto VkResourceManager::getTextureData(const as::ImageData& imageData, std::stri
                                 .levelCount = mipLevels,
                                 .layerCount = 1};
 
+  /* TODO(matt) Need the transfer and graphics queues up in here to make sure we transition the
+     ownership of the image we're uploading from the transfer queue to the graphics queue
+  */
+
   // Upload Image
   immediateTransferContext->submit([&](const vk::raii::CommandBuffer& cmd) {
     {
@@ -214,8 +222,9 @@ auto VkResourceManager::getTextureData(const as::ImageData& imageData, std::stri
                                   vk::ImageLayout::eUndefined,
                                   vk::ImageLayout::eTransferDstOptimal,
                                   subresourceRange);
+
       cmd.pipelineBarrier(sourceStage,
-                          dstStage,
+                          vk::PipelineStageFlagBits::eTransfer,
                           vk::DependencyFlagBits::eByRegion,
                           {},
                           {},
@@ -230,9 +239,11 @@ auto VkResourceManager::getTextureData(const as::ImageData& imageData, std::stri
           createTransitionBarrier(textureData.image->getImage(),
                                   vk::ImageLayout::eTransferDstOptimal,
                                   vk::ImageLayout::eShaderReadOnlyOptimal,
-                                  subresourceRange);
-      cmd.pipelineBarrier(sourceStage,
-                          dstStage,
+                                  subresourceRange,
+                                  transferQueue->getFamily(),
+                                  graphicsQueue->getFamily());
+      cmd.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer,
+                          vk::PipelineStageFlagBits::eBottomOfPipe,
                           vk::DependencyFlagBits::eByRegion,
                           {},
                           {},
@@ -480,15 +491,16 @@ auto VkResourceManager::updateShaderBindings() -> void {
 auto VkResourceManager::createTransitionBarrier(const vk::Image& image,
                                                 const vk::ImageLayout oldLayout,
                                                 const vk::ImageLayout newLayout,
-                                                const vk::ImageSubresourceRange& subresourceRange)
-    -> TransitionBarrierInfo {
+                                                const vk::ImageSubresourceRange& subresourceRange,
+                                                uint32_t srcQueueFamily,
+                                                uint32_t dstQueueFamily) -> TransitionBarrierInfo {
   vk::ImageMemoryBarrier barrier{
       .srcAccessMask = vk::AccessFlagBits::eNone,
       .dstAccessMask = vk::AccessFlagBits::eNone,
       .oldLayout = oldLayout,
       .newLayout = newLayout,
-      .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-      .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+      .srcQueueFamilyIndex = srcQueueFamily,
+      .dstQueueFamilyIndex = dstQueueFamily,
       .image = image,
       .subresourceRange = subresourceRange,
   };
