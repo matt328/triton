@@ -15,7 +15,6 @@ ImmediateTransferContext::ImmediateTransferContext(
       physicalDevice{std::move(newPhysicalDevice)},
       transferQueue{std::move(newTransferQueue)},
       commandBufferManager{std::move(newCommandBufferManager)},
-      commandBufferHandle(commandBufferManager->createTransferCommandBuffer()),
       fence(std::make_unique<vk::raii::Fence>(
           device->getVkDevice().createFence(vk::FenceCreateInfo{}))) {
 
@@ -44,11 +43,13 @@ void ImmediateTransferContext::submit(
 
   Log.trace("ImmediateTransferContext submitting on thread {}", oss.str());
 
+  TracyMessageL("ImmediateContext Begin");
+
   ZoneNamedN(immediateContextZone, "Immediate Transfer", true);
   constexpr vk::CommandBufferBeginInfo cmdBeginInfo{
       .flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit};
 
-  auto& commandBuffer = commandBufferManager->getCommandBuffer(commandBufferHandle);
+  auto commandBuffer = commandBufferManager->getTransferCommandBuffer();
 
   commandBuffer.begin(cmdBeginInfo);
   {
@@ -68,10 +69,8 @@ void ImmediateTransferContext::submit(
     Log.warn("Timeout waiting for fence during immediate submit");
   }
   device->getVkDevice().resetFences(**fence);
-  // Don't reset this command buffer, abstract it so the
-  // commandBufferManager->getTransferCommandBuffer() method allocates a fresh one each time
-  // commandBuffer.reset();
-  Log.trace("ImmediateTransferContext submit finished");
+
+  TracyMessageL("Immediate Context Finished");
 }
 
 }

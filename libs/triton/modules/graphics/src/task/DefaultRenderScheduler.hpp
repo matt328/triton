@@ -26,7 +26,7 @@ public:
                                   std::shared_ptr<IGuiSystem> newGuiSystem,
                                   std::shared_ptr<BufferManager> newBufferManager,
                                   const RenderContextConfig& rendererConfig,
-                                  const std::shared_ptr<IEventBus>& eventBus);
+                                  std::shared_ptr<IEventBus> newEventBus);
   ~DefaultRenderScheduler() override;
 
   DefaultRenderScheduler(const DefaultRenderScheduler&) = delete;
@@ -49,6 +49,7 @@ private:
   std::shared_ptr<RenderTaskFactory> renderTaskFactory;
   std::shared_ptr<IGuiSystem> guiSystem;
   std::shared_ptr<BufferManager> bufferManager;
+  std::shared_ptr<IEventBus> eventBus;
 
   std::shared_ptr<IndirectRenderTask> indirectRenderTask;
   std::shared_ptr<ComputeTask> computeTask;

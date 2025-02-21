@@ -32,7 +32,7 @@ DefaultRenderScheduler::DefaultRenderScheduler(
     std::shared_ptr<IGuiSystem> newGuiSystem,
     std::shared_ptr<BufferManager> newBufferManager,
     const RenderContextConfig& rendererConfig,
-    const std::shared_ptr<IEventBus>& eventBus)
+    std::shared_ptr<IEventBus> newEventBus)
     : frameManager{std::move(newFrameManager)},
       commandBufferManager{std::move(newCommandBufferManager)},
       graphicsQueue{std::move(newGraphicsQueue)},
@@ -41,6 +41,7 @@ DefaultRenderScheduler::DefaultRenderScheduler(
       renderTaskFactory{std::move(newRenderTaskFactory)},
       guiSystem{std::move(newGuiSystem)},
       bufferManager{std::move(newBufferManager)},
+      eventBus{std::move(newEventBus)},
       renderConfig{rendererConfig} {
 
   eventBus->subscribe<SwapchainResized>(
@@ -517,7 +518,9 @@ auto DefaultRenderScheduler::endFrame(Frame& frame) -> void {
   };
 
   try {
-    graphicsQueue->getQueue().submit(submitInfo, *frame.getInFlightFence());
+    const auto fence = *frame.getInFlightFence();
+    graphicsQueue->getQueue().submit(submitInfo, fence);
+    eventBus->emit(FrameEndEvent{fence});
   } catch (const std::exception& ex) {
     Log.error("Failed to submit command buffer submission {}", ex.what());
   }

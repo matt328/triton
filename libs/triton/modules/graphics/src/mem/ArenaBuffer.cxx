@@ -75,7 +75,6 @@ auto ArenaBuffer::removeData(const BufferRegion& bufferIndex) -> void {
 }
 
 auto ArenaBuffer::getBuffer() const -> Buffer& {
-  Log.trace("Getting Buffer {}", bufferHandle);
   return bufferManager->getBuffer(bufferHandle);
 }
 

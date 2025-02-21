@@ -19,6 +19,7 @@ CommandBufferManager::CommandBufferManager(std::shared_ptr<Device> newDevice,
   debugManager->setObjectName(**graphicsCommandPool, "CommandPool-Graphics");
 
   const auto transferCommandPoolCreateInfo = vk::CommandPoolCreateInfo{
+      .flags = vk::CommandPoolCreateFlagBits::eTransient,
       .queueFamilyIndex = device->getTransferQueueFamily(),
   };
 
@@ -56,6 +57,14 @@ auto CommandBufferManager::createTransferCommandBuffer() -> CommandBufferHandle 
 [[nodiscard]] auto CommandBufferManager::getCommandBuffer(CommandBufferHandle handle)
     -> vk::raii::CommandBuffer& {
   return commandBufferMap.at(handle);
+}
+
+auto CommandBufferManager::getTransferCommandBuffer() -> vk::raii::CommandBuffer {
+  const auto allocInfo = vk::CommandBufferAllocateInfo{.commandPool = *transferCommandPool,
+                                                       .level = vk::CommandBufferLevel::ePrimary,
+                                                       .commandBufferCount = 1};
+  auto commandBuffers = device->getVkDevice().allocateCommandBuffers(allocInfo);
+  return std::move(commandBuffers.front());
 }
 
 }
