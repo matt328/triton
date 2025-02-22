@@ -25,7 +25,7 @@ public:
   auto operator=(const IndirectRenderTask&) -> IndirectRenderTask& = delete;
   auto operator=(IndirectRenderTask&&) -> IndirectRenderTask& = delete;
 
-  auto record(vk::raii::CommandBuffer& commandBuffer, const Frame& frame) -> void override;
+  auto record(vk::raii::CommandBuffer& commandBuffer, const Frame* frame) -> void override;
 
 private:
   std::shared_ptr<VkResourceManager> resourceManager;

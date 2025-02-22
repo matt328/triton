@@ -17,8 +17,7 @@ public:
   auto operator=(const IFrameManager&) -> IFrameManager& = delete;
   auto operator=(IFrameManager&&) -> IFrameManager& = delete;
 
-  virtual auto acquireFrame()
-      -> std::variant<std::reference_wrapper<Frame>, ImageAcquireResult> = 0;
+  virtual auto acquireFrame() -> std::variant<Frame*, ImageAcquireResult> = 0;
   [[nodiscard]] virtual auto getFrames() const -> const std::vector<std::unique_ptr<Frame>>& = 0;
 };
 

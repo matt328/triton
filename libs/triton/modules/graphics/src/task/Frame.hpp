@@ -42,10 +42,10 @@ public:
 
   [[nodiscard]] auto getIndexedName(std::string_view input) const -> std::string;
   [[nodiscard]] auto getIndex() const -> uint8_t;
-  [[nodiscard]] auto getImageAvailableSemaphore() -> vk::raii::Semaphore&;
-  [[nodiscard]] auto getRenderFinishedSemaphore() -> vk::raii::Semaphore&;
-  [[nodiscard]] auto getComputeFinishedSemaphore() -> vk::raii::Semaphore&;
-  [[nodiscard]] auto getInFlightFence() -> vk::raii::Fence&;
+  [[nodiscard]] auto getImageAvailableSemaphore() const -> const vk::raii::Semaphore&;
+  [[nodiscard]] auto getRenderFinishedSemaphore() const -> const vk::raii::Semaphore&;
+  [[nodiscard]] auto getComputeFinishedSemaphore() const -> const vk::raii::Semaphore&;
+  [[nodiscard]] auto getInFlightFence() const -> const vk::raii::Fence&;
   [[nodiscard]] auto getSwapchainImageIndex() const noexcept -> uint32_t;
   [[nodiscard]] auto getRenderingInfo() const -> vk::RenderingInfo;
   [[nodiscard]] auto getDrawImageExtent() const -> vk::Extent2D;

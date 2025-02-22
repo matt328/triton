@@ -34,11 +34,6 @@ DefaultGameplaySystem::DefaultGameplaySystem(std::shared_ptr<IEventBus> newEvent
   entityCreatedConnection =
       registry->on_construct<entt::entity>().connect<&DefaultGameplaySystem::entityCreated>(this);
 
-  commandExecutor =
-      std::make_unique<CommandExecutor<entt::registry&, const std::shared_ptr<AssetManager>&>>(
-          *registry,
-          assetManager);
-
   eventBus->subscribe<SwapchainResized>(
       [&](const SwapchainResized& event) { handleSwapchainResized(event); });
 
@@ -109,18 +104,12 @@ void DefaultGameplaySystem::update() {
     renderData.animationData.clear();
     renderData.staticGpuMeshData.clear();
 
-    {
-      std::unique_lock<LockableBase(std::shared_mutex)> lock(registryMutex);
-      LockMark(registryMutex);
-      renderDataSystem->update(*registry, renderData);
-    }
+    renderDataSystem->update(*registry, renderData);
   }
   transferHandler(renderData);
 }
 
 void DefaultGameplaySystem::fixedUpdate() {
-  std::unique_lock<LockableBase(std::shared_mutex)> lock(registryMutex);
-  LockMark(registryMutex);
   {
     ZoneNamedN(camZone, "CameraSystem", true);
     cameraSystem->fixedUpdate(*registry);
@@ -143,10 +132,25 @@ auto DefaultGameplaySystem::createStaticModelEntity(std::string filename,
                                                     std::string_view entityName,
                                                     std::optional<Transform> initialTransform)
     -> void {
-  std::unique_lock<LockableBase(std::shared_mutex)> lock(registryMutex);
-  LockMark(registryMutex);
-  commandExecutor->execute(
-      std::make_unique<CreateStaticEntityCommand>(filename, entityName.data(), initialTransform));
+  auto modelData = assetManager->loadModel(filename);
+
+  auto transform = Transform{.rotation = glm::zero<glm::vec3>(),
+                             .position = glm::zero<glm::vec3>(),
+                             .transformation = glm::identity<glm::mat4>()};
+
+  if (initialTransform.has_value()) {
+    transform.position = initialTransform->position;
+    transform.rotation = initialTransform->rotation;
+  }
+
+  {
+    std::unique_lock<LockableBase(std::shared_mutex)> lock(registryMutex);
+    LockMark(registryMutex);
+    const auto entity = registry->create();
+    registry->emplace<Renderable>(entity, std::vector{modelData.meshData});
+    registry->emplace<Transform>(entity, transform);
+    registry->emplace<EditorInfo>(entity, entityName.data());
+  }
 }
 
 auto DefaultGameplaySystem::createAnimatedModelEntity(const AnimatedModelData& modelData,
@@ -164,15 +168,14 @@ auto DefaultGameplaySystem::createAnimatedModelEntity(const AnimatedModelData& m
   auto transform = Transform{.rotation = glm::zero<glm::vec3>(),
                              .position = glm::zero<glm::vec3>(),
                              .transformation = glm::identity<glm::mat4>()};
-
-  if (initialTransform.has_value()) {
-    transform.position = initialTransform->position;
-    transform.rotation = initialTransform->rotation;
-  }
-
   {
     std::unique_lock<LockableBase(std::shared_mutex)> lock(registryMutex);
     LockMark(registryMutex);
+
+    if (initialTransform.has_value()) {
+      transform.position = initialTransform->position;
+      transform.rotation = initialTransform->rotation;
+    }
 
     const auto entity = registry->create();
     registry->emplace<Animation>(entity,
@@ -202,15 +205,41 @@ auto DefaultGameplaySystem::createDefaultCamera() -> void {
       .position = DefaultPosition,
   };
 
-  commandExecutor->execute(std::make_unique<CreateCamera>(cameraInfo));
+  {
+    std::unique_lock<LockableBase(std::shared_mutex)> lock(registryMutex);
+    LockMark(registryMutex);
+
+    const auto entity = registry->create();
+    registry->emplace<Camera>(entity,
+                              cameraInfo.width,
+                              cameraInfo.height,
+                              cameraInfo.fov,
+                              cameraInfo.nearClip,
+                              cameraInfo.farClip,
+                              cameraInfo.position);
+    registry->emplace<EditorInfo>(entity, "Default Camera");
+    registry->ctx().insert_or_assign<CurrentCamera>(CurrentCamera{entity});
+  }
 }
 
 auto DefaultGameplaySystem::createTestEntity([[maybe_unused]] std::string_view name) -> void {
   Log.trace("Creating test entity: {}", name.data());
-  commandExecutor->execute(std::make_unique<CreateTestEntityCommand>(name));
+  auto modelData = assetManager->createCube();
+
+  {
+    std::unique_lock<LockableBase(std::shared_mutex)> lock(registryMutex);
+    LockMark(registryMutex);
+
+    const auto entity = registry->create();
+    registry->emplace<Renderable>(entity, std::vector{modelData.meshData});
+    registry->emplace<EditorInfo>(entity, name.data());
+    registry->emplace<Transform>(entity);
+  }
 }
 
 auto DefaultGameplaySystem::removeEntity(tr::EntityType entity) -> void {
+  std::unique_lock<LockableBase(std::shared_mutex)> lock(registryMutex);
+  LockMark(registryMutex);
   registry->destroy(entity);
 }
 

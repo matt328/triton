@@ -37,6 +37,8 @@ private:
   std::shared_ptr<tr::IEventBus> eventBus;
   std::shared_ptr<entt::registry> registry;
 
+  mutable TracySharedLockableN(std::shared_mutex, registryMutex, "EntityEditor");
+
   std::optional<tr::EntityType> selectedEntity{std::nullopt};
 
   std::unique_ptr<TransformInspector> transformInspector;

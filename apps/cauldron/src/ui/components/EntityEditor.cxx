@@ -37,7 +37,6 @@ EntityEditor::EntityEditor(std::shared_ptr<tr::IGameplaySystem> newGameplaySyste
   transformInspector->setTransformListener(
       [&](std::string_view name, const tr::Transform& transform) {
         dataFacade->entityTransformUpdated(name, transform);
-        Log.trace("Transform updated, entityId: {}, position.x: {}", name, transform.position.x);
       });
 
   createAnimatedEntityDialog();
@@ -89,6 +88,10 @@ void EntityEditor::render() {
       // Header
       ImGui::BeginChild("item view", ImVec2(0, 0), ImGuiChildFlags_Border);
       if (selectedEntity.has_value()) {
+
+        std::shared_lock<SharedLockableBase(std::shared_mutex)> lock(registryMutex);
+        LockMark(registryMutex);
+
         // Editor Info Component
         auto* editorInfo = registry->try_get<tr::EditorInfo>(selectedEntity.value());
         if (editorInfo == nullptr) {

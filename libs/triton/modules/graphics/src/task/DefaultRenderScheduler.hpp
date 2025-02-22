@@ -34,11 +34,11 @@ public:
   auto operator=(const DefaultRenderScheduler&) -> DefaultRenderScheduler& = delete;
   auto operator=(DefaultRenderScheduler&&) -> DefaultRenderScheduler& = delete;
 
-  auto updatePerFrameRenderData(Frame& frame, const RenderData& renderData) -> void override;
+  auto updatePerFrameRenderData(Frame* frame, const RenderData& renderData) -> void override;
 
-  auto executeTasks(Frame& frame, bool recordTasks) const -> void override;
-  auto recordRenderTasks(Frame& frame, bool recordTasks) -> void override;
-  auto endFrame(Frame& frame) -> void override;
+  auto executeTasks(Frame* frame, bool recordTasks) const -> void override;
+  auto recordRenderTasks(Frame* frame, bool recordTasks) -> void override;
+  auto endFrame(Frame* frame) -> void override;
 
 private:
   std::shared_ptr<IFrameManager> frameManager;
@@ -71,8 +71,8 @@ private:
   auto createStaticBuffers(const std::unique_ptr<Frame>& frame) -> void;
   auto createDynamicBuffers(const std::unique_ptr<Frame>& frame) -> void;
 
-  auto updateStaticBuffers(Frame& frame, const RenderData& renderData) -> void;
-  auto updateDynamicBuffers(Frame& frame, const RenderData& renderData) -> void;
+  auto updateStaticBuffers(Frame* frame, const RenderData& renderData) -> void;
+  auto updateDynamicBuffers(Frame* frame, const RenderData& renderData) -> void;
 
   static auto transitionImage(const vk::raii::CommandBuffer& cmd,
                               const vk::Image& image,

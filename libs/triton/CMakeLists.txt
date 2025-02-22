@@ -114,6 +114,7 @@ target_precompile_headers(${PROJECT_NAME}
   <mutex>
   <random>
   <set>
+  <shared_mutex>
   <stb_image.h>
   <thread>
   <tracy/Tracy.hpp>
@@ -138,7 +139,6 @@ target_precompile_headers(${PROJECT_NAME}
   <ozz/base/io/archive.h>
   <ozz/base/io/stream.h>
   <queue>
-  <shared_mutex>
   <unordered_map>
   <vector>
 )

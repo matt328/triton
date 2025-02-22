@@ -90,22 +90,36 @@ auto DefaultFrameManager::handleSwapchainResized(const SwapchainResized& event) 
   }
 }
 
-auto DefaultFrameManager::acquireFrame()
-    -> std::variant<std::reference_wrapper<Frame>, ImageAcquireResult> {
-  const auto& frame = frames[currentFrame];
+auto DefaultFrameManager::acquireFrame() -> std::variant<Frame*, ImageAcquireResult> {
+  currentFrame = (currentFrame + 1) % frames.size();
+  auto* frame = frames[currentFrame].get();
 
-  if (const auto res =
-          device->getVkDevice().waitForFences(*frame->getInFlightFence(), vk::True, UINT64_MAX);
-      res != vk::Result::eSuccess) {
-    throw std::runtime_error("Error Waiting for in flight fence");
+  const std::string msg = fmt::format("Waiting for fence for frame {}", currentFrame);
+  TracyMessage(msg.data(), msg.size());
+
+  {
+    ZoneNamedN(var, "waitForFences", true);
+    const uint64_t timeout = 1'000'000; // 1ms
+    vk::Result res;
+    do {
+      res = device->getVkDevice().waitForFences(*frame->getInFlightFence(), vk::True, timeout);
+    } while (res == vk::Result::eTimeout);
+
+    if (res == vk::Result::eSuccess) {
+      device->getVkDevice().resetFences(*frame->getInFlightFence());
+    }
   }
 
-  const auto result = swapchain->acquireNextImage(frame->getImageAvailableSemaphore());
+  std::variant<uint32_t, ImageAcquireResult> result{};
+
+  {
+    ZoneNamedN(var, "acquireNextImage", true);
+    result = swapchain->acquireNextImage(frame->getImageAvailableSemaphore());
+  }
+
   if (std::holds_alternative<uint32_t>(result)) {
     frame->setSwapchainImageIndex(std::get<uint32_t>(result));
-    currentFrame = (currentFrame + 1) % frames.size();
-    device->getVkDevice().resetFences(*frame->getInFlightFence());
-    return *frame;
+    return frame;
   }
 
   const auto iar = std::get<ImageAcquireResult>(result);

@@ -68,11 +68,11 @@ void DefaultContext::run() {
       continue;
     }
 
-    while (accumulator >= dt) {
+    do {
       gameplaySystem->fixedUpdate();
       t += dt;
       accumulator -= dt;
-    }
+    } while (accumulator >= dt);
 
     [[maybe_unused]] const auto alpha = accumulator / dt;
 

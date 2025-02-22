@@ -4,6 +4,9 @@
 namespace tr {
 
 auto TransformSystem::update(entt::registry& registry) -> void {
+  std::unique_lock<SharedLockableBase(std::shared_mutex)> lock(registryMutex);
+  LockMark(registryMutex);
+
   for (const auto view = registry.view<Transform>(); auto [entity, transform] : view.each()) {
     {
       ZoneNamedN(update, "Update Entity", true);

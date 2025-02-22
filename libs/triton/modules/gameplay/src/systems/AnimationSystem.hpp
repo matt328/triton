@@ -17,6 +17,7 @@ public:
 
 private:
   std::shared_ptr<AssetManager> assetManager;
+  mutable TracyLockableN(std::shared_mutex, registryMutex, "AnimationSystem");
 };
 
 }

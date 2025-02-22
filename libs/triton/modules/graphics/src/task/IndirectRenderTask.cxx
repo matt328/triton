@@ -17,21 +17,21 @@ IndirectRenderTask::IndirectRenderTask(std::shared_ptr<VkResourceManager> newRes
       config{newConfig} {
 }
 
-auto IndirectRenderTask::record(vk::raii::CommandBuffer& commandBuffer, const Frame& frame)
+auto IndirectRenderTask::record(vk::raii::CommandBuffer& commandBuffer, const Frame* frame)
     -> void {
 
   const auto objectDataAddress =
-      bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::DynamicObjectDataBuffer))
+      bufferManager->getBuffer(frame->getBufferHandle(BufferHandleType::DynamicObjectDataBuffer))
           .getDeviceAddress();
   const auto cameraDataAddress =
-      bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::CameraBuffer))
+      bufferManager->getBuffer(frame->getBufferHandle(BufferHandleType::CameraBuffer))
           .getDeviceAddress();
   const auto& objectDataIndexAddress =
       bufferManager
-          ->getBuffer(frame.getBufferHandle(BufferHandleType::DynamicObjectDataIndexBuffer))
+          ->getBuffer(frame->getBufferHandle(BufferHandleType::DynamicObjectDataIndexBuffer))
           .getDeviceAddress();
 
-  const auto handle = frame.getBufferHandle(BufferHandleType::AnimationDataBuffer);
+  const auto handle = frame->getBufferHandle(BufferHandleType::AnimationDataBuffer);
   const auto& animationDataBuffer = bufferManager->getBuffer(handle);
   const auto& animationDataBufferAddress = animationDataBuffer.getDeviceAddress();
 
@@ -40,7 +40,7 @@ auto IndirectRenderTask::record(vk::raii::CommandBuffer& commandBuffer, const Fr
                                         .objectDataIndexAddress = objectDataIndexAddress,
                                         .animationDataAddress = animationDataBufferAddress,
                                         .drawID = 0,
-                                        .objectCount = frame.getDynamicObjectCount()};
+                                        .objectCount = frame->getDynamicObjectCount()};
 
   // Bind the graphics pipeline
   commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline->getPipeline());
@@ -62,9 +62,9 @@ auto IndirectRenderTask::record(vk::raii::CommandBuffer& commandBuffer, const Fr
                                                      pushConstants);
 
   auto& indirectBuffer =
-      bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::DynamicDrawCommand));
+      bufferManager->getBuffer(frame->getBufferHandle(BufferHandleType::DynamicDrawCommand));
   auto& countBuffer =
-      bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::DynamicCountBuffer));
+      bufferManager->getBuffer(frame->getBufferHandle(BufferHandleType::DynamicCountBuffer));
 
   commandBuffer.drawIndexedIndirectCount(indirectBuffer.getBuffer(),
                                          0,

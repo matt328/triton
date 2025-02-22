@@ -14,21 +14,26 @@ NewRenderContext::~NewRenderContext() {
 
 /// This gets called directly after setRenderData
 void NewRenderContext::renderNextFrame() {
-  const auto result = frameManager->acquireFrame();
 
-  if (std::holds_alternative<std::reference_wrapper<Frame>>(result)) {
-    const auto& frame = std::get<std::reference_wrapper<Frame>>(result);
-    renderScheduler->updatePerFrameRenderData(frame, renderData);
-    renderScheduler->recordRenderTasks(frame,
-                                       !renderData.staticGpuMeshData.empty() ||
-                                           !renderData.dynamicMeshData.empty());
-    renderScheduler->endFrame(frame);
-    return;
-  }
+  {
+    const auto result = frameManager->acquireFrame();
 
-  if (const auto acquireResult = std::get<ImageAcquireResult>(result);
-      acquireResult == ImageAcquireResult::Error) {
-    Log.warn("Failed to acquire swapchain image");
+    if (std::holds_alternative<Frame*>(result)) {
+      auto frame = std::get<Frame*>(result);
+      { renderScheduler->updatePerFrameRenderData(frame, renderData); }
+      {
+        renderScheduler->recordRenderTasks(frame,
+                                           !renderData.staticGpuMeshData.empty() ||
+                                               !renderData.dynamicMeshData.empty());
+      }
+      { renderScheduler->endFrame(frame); }
+      return;
+    }
+
+    if (const auto acquireResult = std::get<ImageAcquireResult>(result);
+        acquireResult == ImageAcquireResult::Error) {
+      Log.warn("Failed to acquire swapchain image");
+    }
   }
 }
 

@@ -11,6 +11,10 @@ AnimationSystem::AnimationSystem(std::shared_ptr<AssetManager> newAssetManager)
 }
 
 auto AnimationSystem::update(entt::registry& registry) const -> void {
+
+  std::unique_lock<LockableBase(std::shared_mutex)> lock(registryMutex);
+  LockMark(registryMutex);
+
   for (const auto view = registry.view<Animation>(); auto [entity, animationData] : view.each()) {
 
     if (animationData.renderBindPose) {

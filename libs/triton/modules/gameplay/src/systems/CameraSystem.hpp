@@ -12,17 +12,19 @@ public:
   explicit CameraSystem(const std::shared_ptr<IEventBus>& eventBus, entt::registry& registry);
   ~CameraSystem();
 
-  CameraSystem(const CameraSystem&) = default;
+  CameraSystem(const CameraSystem&) = delete;
   CameraSystem(CameraSystem&&) = delete;
-  auto operator=(const CameraSystem&) -> CameraSystem& = default;
+  auto operator=(const CameraSystem&) -> CameraSystem& = delete;
   auto operator=(CameraSystem&&) -> CameraSystem& = delete;
 
-  static void fixedUpdate(entt::registry& registry);
+  void fixedUpdate(entt::registry& registry);
 
 private:
-  static auto handleAction(const Action& action, entt::registry& registry) -> void;
+  auto handleAction(const Action& action, entt::registry& registry) -> void;
   static auto handleStateAction(const Action& action, Camera& cam) -> void;
   static auto handleRangeAction(const Action& action, Camera& cam) -> void;
+
+  mutable TracyLockableN(std::shared_mutex, registryMutex, "CameraSystem");
 };
 
 }
