@@ -26,7 +26,7 @@ public:
   auto operator=(const DefaultFrameManager&) -> DefaultFrameManager& = delete;
   auto operator=(DefaultFrameManager&&) -> DefaultFrameManager& = delete;
 
-  auto acquireFrame() -> std::variant<std::reference_wrapper<Frame>, ImageAcquireResult> override;
+  auto acquireFrame() -> std::variant<Frame*, ImageAcquireResult> override;
 
   [[nodiscard]] auto getFrames() const -> const std::vector<std::unique_ptr<Frame>>& override;
 

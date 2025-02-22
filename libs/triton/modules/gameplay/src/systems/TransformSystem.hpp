@@ -12,7 +12,10 @@ public:
   TransformSystem(TransformSystem&&) = delete;
   auto operator=(TransformSystem&&) -> TransformSystem& = delete;
 
-  static auto update(entt::registry& registry) -> void;
+  auto update(entt::registry& registry) -> void;
+
+private:
+  mutable TracySharedLockableN(std::shared_mutex, registryMutex, "CameraSystem");
 };
 
 }

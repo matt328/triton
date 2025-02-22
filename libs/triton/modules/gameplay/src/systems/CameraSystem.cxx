@@ -18,6 +18,8 @@ CameraSystem::~CameraSystem() {
 }
 
 auto CameraSystem::handleAction(const Action& action, entt::registry& registry) -> void {
+  std::unique_lock<LockableBase(std::shared_mutex)> lock(registryMutex);
+  LockMark(registryMutex);
   for (const auto view = registry.view<Camera>(); auto [entity, cam] : view.each()) {
     if (action.stateType == StateType::State) {
       handleStateAction(action, cam);
@@ -63,6 +65,9 @@ auto CameraSystem::handleRangeAction(const Action& action, Camera& cam) -> void 
 }
 
 void CameraSystem::fixedUpdate(entt::registry& registry) {
+  std::unique_lock<LockableBase(std::shared_mutex)> lock(registryMutex);
+  LockMark(registryMutex);
+
   const auto view = registry.view<Camera>();
 
   const auto [width, height] = registry.ctx().get<const WindowDimensions>();

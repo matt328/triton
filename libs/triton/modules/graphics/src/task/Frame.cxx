@@ -58,19 +58,19 @@ auto Frame::getIndex() const -> uint8_t {
   return index;
 }
 
-auto Frame::getImageAvailableSemaphore() -> vk::raii::Semaphore& {
+auto Frame::getImageAvailableSemaphore() const -> const vk::raii::Semaphore& {
   return imageAvailableSemaphore;
 }
 
-auto Frame::getRenderFinishedSemaphore() -> vk::raii::Semaphore& {
+auto Frame::getRenderFinishedSemaphore() const -> const vk::raii::Semaphore& {
   return renderFinishedSemaphore;
 }
 
-auto Frame::getComputeFinishedSemaphore() -> vk::raii::Semaphore& {
+auto Frame::getComputeFinishedSemaphore() const -> const vk::raii::Semaphore& {
   return computeFinishedSemaphore;
 }
 
-auto Frame::getInFlightFence() -> vk::raii::Fence& {
+auto Frame::getInFlightFence() const -> const vk::raii::Fence& {
   return inFlightFence;
 }
 

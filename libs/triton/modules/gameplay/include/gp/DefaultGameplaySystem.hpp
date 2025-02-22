@@ -10,7 +10,6 @@
 #include "tr/Events.hpp"
 #include "tr/IEventBus.hpp"
 #include "tr/IGameplaySystem.hpp"
-#include "CommandQueue.hpp"
 
 namespace tr {
 
@@ -55,10 +54,7 @@ private:
   RenderDataTransferHandler transferHandler;
   std::shared_ptr<entt::registry> registry;
 
-  mutable TracyLockable(std::shared_mutex, registryMutex);
-
-  std::unique_ptr<CommandExecutor<entt::registry&, const std::shared_ptr<AssetManager>&>>
-      commandExecutor;
+  mutable TracyLockableN(std::shared_mutex, registryMutex, "GameplaySystem");
 
   entt::connection entityCreatedConnection;
 

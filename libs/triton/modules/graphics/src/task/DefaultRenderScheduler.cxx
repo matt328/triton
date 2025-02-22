@@ -311,12 +311,12 @@ auto DefaultRenderScheduler::handleSwapchainResized(const SwapchainResized& even
   }
 }
 
-auto DefaultRenderScheduler::updatePerFrameRenderData(Frame& frame,
-                                                      const RenderData& renderData) -> void {
+auto DefaultRenderScheduler::updatePerFrameRenderData(Frame* frame, const RenderData& renderData)
+    -> void {
   ZoneNamedN(var, "updatePerFrameRenderData", true);
 
-  frame.setStaticObjectCount(renderData.staticGpuMeshData.size());
-  frame.setDynamicObjectCount(renderData.dynamicMeshData.size());
+  frame->setStaticObjectCount(renderData.staticGpuMeshData.size());
+  frame->setDynamicObjectCount(renderData.dynamicMeshData.size());
 
   resourceManager->updateShaderBindings();
 
@@ -327,25 +327,25 @@ auto DefaultRenderScheduler::updatePerFrameRenderData(Frame& frame,
   // Update CameraDataBuffer
   {
     auto& cameraDataBuffer =
-        bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::CameraBuffer));
+        bufferManager->getBuffer(frame->getBufferHandle(BufferHandleType::CameraBuffer));
     cameraDataBuffer.mapBuffer();
     cameraDataBuffer.updateBufferValue(&renderData.cameraData, sizeof(GpuCameraData));
     cameraDataBuffer.unmapBuffer();
   }
 }
 
-auto DefaultRenderScheduler::recordRenderTasks(Frame& frame, bool recordTasks) -> void {
+auto DefaultRenderScheduler::recordRenderTasks(Frame* frame, bool recordTasks) -> void {
   tasksRecorded = false;
   ZoneNamedN(var, "Record Command Buffers", true);
   {
     ZoneNamedN(var, "Start", true);
     const auto& startCmd =
-        commandBufferManager->getCommandBuffer(frame.getStartCommandBufferHandle());
+        commandBufferManager->getCommandBuffer(frame->getStartCommandBufferHandle());
     startCmd.begin(
         vk::CommandBufferBeginInfo{.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse});
 
     transitionImage(startCmd,
-                    resourceManager->getImage(frame.getDrawImageHandle()),
+                    resourceManager->getImage(frame->getDrawImageHandle()),
                     vk::ImageLayout::eUndefined,
                     vk::ImageLayout::eColorAttachmentOptimal);
 
@@ -359,32 +359,32 @@ auto DefaultRenderScheduler::recordRenderTasks(Frame& frame, bool recordTasks) -
 
   {
     ZoneNamedN(var, "End", true);
-    auto& endCmd = commandBufferManager->getCommandBuffer(frame.getEndCommandBufferHandle());
+    auto& endCmd = commandBufferManager->getCommandBuffer(frame->getEndCommandBufferHandle());
     endCmd.begin(
         vk::CommandBufferBeginInfo{.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse});
 
     transitionImage(endCmd,
-                    resourceManager->getImage(frame.getDrawImageHandle()),
+                    resourceManager->getImage(frame->getDrawImageHandle()),
                     vk::ImageLayout::eColorAttachmentOptimal,
                     vk::ImageLayout::eTransferSrcOptimal);
 
     transitionImage(endCmd,
-                    swapchain->getSwapchainImage(frame.getSwapchainImageIndex()),
+                    swapchain->getSwapchainImage(frame->getSwapchainImageIndex()),
                     vk::ImageLayout::eUndefined,
                     vk::ImageLayout::eTransferDstOptimal);
 
     copyImageToImage(endCmd,
-                     resourceManager->getImage(frame.getDrawImageHandle()),
-                     swapchain->getSwapchainImage(frame.getSwapchainImageIndex()),
-                     resourceManager->getImageExtent(frame.getDrawImageHandle()),
+                     resourceManager->getImage(frame->getDrawImageHandle()),
+                     swapchain->getSwapchainImage(frame->getSwapchainImageIndex()),
+                     resourceManager->getImageExtent(frame->getDrawImageHandle()),
                      swapchain->getImageExtent());
 
     guiSystem->render(endCmd,
-                      swapchain->getSwapchainImageView(frame.getSwapchainImageIndex()),
+                      swapchain->getSwapchainImageView(frame->getSwapchainImageIndex()),
                       swapchain->getImageExtent());
 
     transitionImage(endCmd,
-                    swapchain->getSwapchainImage(frame.getSwapchainImageIndex()),
+                    swapchain->getSwapchainImage(frame->getSwapchainImageIndex()),
                     vk::ImageLayout::eTransferDstOptimal,
                     vk::ImageLayout::ePresentSrcKHR);
 
@@ -392,9 +392,9 @@ auto DefaultRenderScheduler::recordRenderTasks(Frame& frame, bool recordTasks) -
   }
 }
 
-auto DefaultRenderScheduler::executeTasks(Frame& frame, bool recordTasks) const -> void {
+auto DefaultRenderScheduler::executeTasks(Frame* frame, bool recordTasks) const -> void {
 
-  auto& commandBuffer = commandBufferManager->getCommandBuffer(frame.getMainCommandBufferHandle());
+  auto& commandBuffer = commandBufferManager->getCommandBuffer(frame->getMainCommandBufferHandle());
 
   commandBuffer.begin(
       vk::CommandBufferBeginInfo{.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse});
@@ -402,15 +402,15 @@ auto DefaultRenderScheduler::executeTasks(Frame& frame, bool recordTasks) const 
   {
     ZoneNamedN(var, "Record Static Compute Task", true);
     const auto& gpuBufferEntryBuffer =
-        bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::StaticGpuBufferEntry));
+        bufferManager->getBuffer(frame->getBufferHandle(BufferHandleType::StaticGpuBufferEntry));
     const auto& objectDataBuffer =
-        bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::StaticObjectDataBuffer));
+        bufferManager->getBuffer(frame->getBufferHandle(BufferHandleType::StaticObjectDataBuffer));
     const auto& drawCommandBuffer =
-        bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::StaticDrawCommand));
+        bufferManager->getBuffer(frame->getBufferHandle(BufferHandleType::StaticDrawCommand));
     const auto& countBuffer =
-        bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::StaticCountBuffer));
+        bufferManager->getBuffer(frame->getBufferHandle(BufferHandleType::StaticCountBuffer));
     const auto& objectDataIndexBuffer = bufferManager->getBuffer(
-        frame.getBufferHandle(BufferHandleType::StaticObjectDataIndexBuffer));
+        frame->getBufferHandle(BufferHandleType::StaticObjectDataIndexBuffer));
 
     auto computePushConstants = ComputePushConstants{
         .drawCommandBufferAddress = drawCommandBuffer.getDeviceAddress(),
@@ -418,22 +418,22 @@ auto DefaultRenderScheduler::executeTasks(Frame& frame, bool recordTasks) const 
         .objectDataBufferAddress = objectDataBuffer.getDeviceAddress(),
         .countBufferAddress = countBuffer.getDeviceAddress(),
         .objectDataIndexBufferAddress = objectDataIndexBuffer.getDeviceAddress(),
-        .objectCount = frame.getStaticObjectCount()};
+        .objectCount = frame->getStaticObjectCount()};
     computeTask->record(commandBuffer, computePushConstants);
   }
 
   {
     ZoneNamedN(var, "Record Dynamic Compute Task", true);
     const auto& gpuBufferEntryBuffer =
-        bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::DynamicGpuBufferEntry));
+        bufferManager->getBuffer(frame->getBufferHandle(BufferHandleType::DynamicGpuBufferEntry));
     const auto& objectDataBuffer =
-        bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::DynamicObjectDataBuffer));
+        bufferManager->getBuffer(frame->getBufferHandle(BufferHandleType::DynamicObjectDataBuffer));
     const auto& drawCommandBuffer =
-        bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::DynamicDrawCommand));
+        bufferManager->getBuffer(frame->getBufferHandle(BufferHandleType::DynamicDrawCommand));
     const auto& countBuffer =
-        bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::DynamicCountBuffer));
+        bufferManager->getBuffer(frame->getBufferHandle(BufferHandleType::DynamicCountBuffer));
     const auto& objectDataIndexBuffer = bufferManager->getBuffer(
-        frame.getBufferHandle(BufferHandleType::DynamicObjectDataIndexBuffer));
+        frame->getBufferHandle(BufferHandleType::DynamicObjectDataIndexBuffer));
 
     auto computePushConstants = ComputePushConstants{
         .drawCommandBufferAddress = drawCommandBuffer.getDeviceAddress(),
@@ -441,41 +441,41 @@ auto DefaultRenderScheduler::executeTasks(Frame& frame, bool recordTasks) const 
         .objectDataBufferAddress = objectDataBuffer.getDeviceAddress(),
         .countBufferAddress = countBuffer.getDeviceAddress(),
         .objectDataIndexBufferAddress = objectDataIndexBuffer.getDeviceAddress(),
-        .objectCount = frame.getDynamicObjectCount()};
+        .objectCount = frame->getDynamicObjectCount()};
     computeTask->record(commandBuffer, computePushConstants);
   }
 
   // Record barriers for buffers written by Static compute tasks
   {
     auto& indirectBuffer =
-        bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::StaticDrawCommand));
+        bufferManager->getBuffer(frame->getBufferHandle(BufferHandleType::StaticDrawCommand));
     insertBarrier(commandBuffer, indirectBuffer);
 
     auto& countBuffer =
-        bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::StaticCountBuffer));
+        bufferManager->getBuffer(frame->getBufferHandle(BufferHandleType::StaticCountBuffer));
     insertBarrier(commandBuffer, countBuffer);
 
     auto& objectDataIndexBuffer = bufferManager->getBuffer(
-        frame.getBufferHandle(BufferHandleType::StaticObjectDataIndexBuffer));
+        frame->getBufferHandle(BufferHandleType::StaticObjectDataIndexBuffer));
     insertBarrier(commandBuffer, objectDataIndexBuffer);
   }
 
   // Record barriers for buffers written by Dynamic compute tasks
   {
     auto& indirectBuffer =
-        bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::DynamicDrawCommand));
+        bufferManager->getBuffer(frame->getBufferHandle(BufferHandleType::DynamicDrawCommand));
     insertBarrier(commandBuffer, indirectBuffer);
 
     auto& countBuffer =
-        bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::DynamicCountBuffer));
+        bufferManager->getBuffer(frame->getBufferHandle(BufferHandleType::DynamicCountBuffer));
     insertBarrier(commandBuffer, countBuffer);
 
     auto& objectDataIndexBuffer = bufferManager->getBuffer(
-        frame.getBufferHandle(BufferHandleType::DynamicObjectDataIndexBuffer));
+        frame->getBufferHandle(BufferHandleType::DynamicObjectDataIndexBuffer));
     insertBarrier(commandBuffer, objectDataIndexBuffer);
   }
 
-  const auto renderingInfo = frame.getRenderingInfo();
+  const auto renderingInfo = frame->getRenderingInfo();
 
   commandBuffer.beginRendering(renderingInfo);
 
@@ -484,10 +484,10 @@ auto DefaultRenderScheduler::executeTasks(Frame& frame, bool recordTasks) const 
 
   if (recordTasks) {
     ZoneNamedN(var, "IndirectRenderTask", true);
-    if (frame.getStaticObjectCount() > 0) {
+    if (frame->getStaticObjectCount() > 0) {
       staticRenderTask->record(commandBuffer, frame);
     }
-    if (frame.getDynamicObjectCount() > 0) {
+    if (frame->getDynamicObjectCount() > 0) {
       indirectRenderTask->record(commandBuffer, frame);
     }
   }
@@ -497,28 +497,31 @@ auto DefaultRenderScheduler::executeTasks(Frame& frame, bool recordTasks) const 
   commandBuffer.end();
 }
 
-auto DefaultRenderScheduler::endFrame(Frame& frame) -> void {
+auto DefaultRenderScheduler::endFrame(Frame* frame) -> void {
 
   buffers.clear();
-  buffers.push_back(*commandBufferManager->getCommandBuffer(frame.getStartCommandBufferHandle()));
-  buffers.push_back(*commandBufferManager->getCommandBuffer(frame.getMainCommandBufferHandle()));
-  buffers.push_back(*commandBufferManager->getCommandBuffer(frame.getEndCommandBufferHandle()));
+  buffers.push_back(*commandBufferManager->getCommandBuffer(frame->getStartCommandBufferHandle()));
+  buffers.push_back(*commandBufferManager->getCommandBuffer(frame->getMainCommandBufferHandle()));
+  buffers.push_back(*commandBufferManager->getCommandBuffer(frame->getEndCommandBufferHandle()));
 
   constexpr auto waitStages =
       std::array<vk::PipelineStageFlags, 1>{vk::PipelineStageFlagBits::eColorAttachmentOutput};
 
   const auto submitInfo = vk::SubmitInfo{
       .waitSemaphoreCount = 1,
-      .pWaitSemaphores = &*frame.getImageAvailableSemaphore(),
+      .pWaitSemaphores = &*frame->getImageAvailableSemaphore(),
       .pWaitDstStageMask = waitStages.data(),
       .commandBufferCount = static_cast<uint32_t>(buffers.size()),
       .pCommandBuffers = buffers.data(),
       .signalSemaphoreCount = 1,
-      .pSignalSemaphores = &*frame.getRenderFinishedSemaphore(),
+      .pSignalSemaphores = &*frame->getRenderFinishedSemaphore(),
   };
 
+  std::string msg = fmt::format("Submitting Queue for frame {}", frame->getIndex());
+  TracyMessage(msg.data(), msg.size());
+
   try {
-    const auto fence = *frame.getInFlightFence();
+    const auto fence = *frame->getInFlightFence();
     graphicsQueue->getQueue().submit(submitInfo, fence);
     eventBus->emit(FrameEndEvent{fence});
   } catch (const std::exception& ex) {
@@ -526,16 +529,18 @@ auto DefaultRenderScheduler::endFrame(Frame& frame) -> void {
   }
 
   try {
-    const auto swapchainImageIndex = frame.getSwapchainImageIndex();
+    const auto swapchainImageIndex = frame->getSwapchainImageIndex();
     const auto chain = swapchain->getSwapchain();
 
     const auto presentInfo =
         vk::PresentInfoKHR{.waitSemaphoreCount = 1,
-                           .pWaitSemaphores = &*frame.getRenderFinishedSemaphore(),
+                           .pWaitSemaphores = &*frame->getRenderFinishedSemaphore(),
                            .swapchainCount = 1,
                            .pSwapchains = &chain,
                            .pImageIndices = &swapchainImageIndex};
 
+    std::string msg = fmt::format("Presenting frame {}", frame->getIndex());
+    TracyMessage(msg.data(), msg.size());
     if (const auto result2 = graphicsQueue->getQueue().presentKHR(presentInfo);
         result2 == vk::Result::eSuboptimalKHR || result2 == vk::Result::eErrorOutOfDateKHR) {
       Log.trace("Swapchain Needs Resized");
@@ -597,8 +602,8 @@ auto DefaultRenderScheduler::copyImageToImage(const vk::raii::CommandBuffer& cmd
   cmd.blitImage2(blitInfo);
 }
 
-auto DefaultRenderScheduler::insertBarrier(const vk::raii::CommandBuffer& cmd,
-                                           const Buffer& buffer) -> void {
+auto DefaultRenderScheduler::insertBarrier(const vk::raii::CommandBuffer& cmd, const Buffer& buffer)
+    -> void {
   // Insert a memory barrier for the buffer the computeTask writes to
   vk::BufferMemoryBarrier bufferMemoryBarrier{
       .srcAccessMask = vk::AccessFlagBits::eShaderWrite,
@@ -618,8 +623,8 @@ auto DefaultRenderScheduler::insertBarrier(const vk::raii::CommandBuffer& cmd,
                       nullptr);
 }
 
-auto DefaultRenderScheduler::updateStaticBuffers(Frame& frame,
-                                                 const RenderData& renderData) -> void {
+auto DefaultRenderScheduler::updateStaticBuffers(Frame* frame, const RenderData& renderData)
+    -> void {
   // Update GpuBufferEntriesBuffer
   {
     ZoneNamedN(var, "getStaticGpuData", true);
@@ -627,7 +632,7 @@ auto DefaultRenderScheduler::updateStaticBuffers(Frame& frame,
         resourceManager->getStaticGpuData(renderData.staticGpuMeshData);
 
     auto& gpuBufferEntriesBuffer =
-        bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::StaticGpuBufferEntry));
+        bufferManager->getBuffer(frame->getBufferHandle(BufferHandleType::StaticGpuBufferEntry));
 
     gpuBufferEntriesBuffer.mapBuffer();
     gpuBufferEntriesBuffer.updateBufferValue(gpuBufferEntryList.data(),
@@ -638,7 +643,7 @@ auto DefaultRenderScheduler::updateStaticBuffers(Frame& frame,
   // Update StaticObjectDataBuffer
   {
     auto& objectDataBuffer =
-        bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::StaticObjectDataBuffer));
+        bufferManager->getBuffer(frame->getBufferHandle(BufferHandleType::StaticObjectDataBuffer));
     objectDataBuffer.mapBuffer();
     objectDataBuffer.updateBufferValue(renderData.objectData.data(),
                                        sizeof(StaticGpuObjectData) * renderData.objectData.size());
@@ -646,15 +651,15 @@ auto DefaultRenderScheduler::updateStaticBuffers(Frame& frame,
   }
 }
 
-auto DefaultRenderScheduler::updateDynamicBuffers(Frame& frame,
-                                                  const RenderData& renderData) -> void {
+auto DefaultRenderScheduler::updateDynamicBuffers(Frame* frame, const RenderData& renderData)
+    -> void {
   // Update GpuBufferEntriesBuffer
   {
     ZoneNamedN(var, "getDynamicGpuData", true);
     const auto& gpuBufferEntryList = resourceManager->getDynamicGpuData(renderData.dynamicMeshData);
 
     auto& gpuBufferEntriesBuffer =
-        bufferManager->getBuffer(frame.getBufferHandle(BufferHandleType::DynamicGpuBufferEntry));
+        bufferManager->getBuffer(frame->getBufferHandle(BufferHandleType::DynamicGpuBufferEntry));
 
     gpuBufferEntriesBuffer.mapBuffer();
     gpuBufferEntriesBuffer.updateBufferValue(gpuBufferEntryList.data(),
@@ -664,7 +669,7 @@ auto DefaultRenderScheduler::updateDynamicBuffers(Frame& frame,
 
   // Update ObjectDataBuffer
   {
-    const auto handle = frame.getBufferHandle(BufferHandleType::DynamicObjectDataBuffer);
+    const auto handle = frame->getBufferHandle(BufferHandleType::DynamicObjectDataBuffer);
     auto& objectDataBuffer = bufferManager->getBuffer(handle);
     const auto size =
         sizeof(renderData.dynamicObjectData.front()) * renderData.dynamicObjectData.size();
@@ -676,7 +681,7 @@ auto DefaultRenderScheduler::updateDynamicBuffers(Frame& frame,
 
   // Update AnimationDataBuffer
   {
-    const auto handle = frame.getBufferHandle(BufferHandleType::AnimationDataBuffer);
+    const auto handle = frame->getBufferHandle(BufferHandleType::AnimationDataBuffer);
     auto& animationDataBuffer = bufferManager->getBuffer(handle);
     const auto size = sizeof(renderData.animationData.front()) * renderData.animationData.size();
 

@@ -14,7 +14,7 @@ public:
   auto operator=(const IRenderTask&) -> IRenderTask& = delete;
   auto operator=(IRenderTask&&) -> IRenderTask& = delete;
 
-  virtual auto record(vk::raii::CommandBuffer& commandBuffer, const Frame& frame) -> void = 0;
+  virtual auto record(vk::raii::CommandBuffer& commandBuffer, const Frame* frame) -> void = 0;
 };
 
 }

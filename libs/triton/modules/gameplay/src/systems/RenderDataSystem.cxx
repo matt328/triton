@@ -13,6 +13,9 @@ namespace tr {
 
 auto RenderDataSystem::update(entt::registry& registry, RenderData& renderData) -> void {
 
+  std::shared_lock<SharedLockableBase(std::shared_mutex)> lock(registryMutex);
+  LockMark(registryMutex);
+
   if (!registry.ctx().contains<const CurrentCamera>()) {
     Log.trace("Context doesn't contain current camera");
     return;

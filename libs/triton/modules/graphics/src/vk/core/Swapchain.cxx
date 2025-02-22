@@ -160,7 +160,7 @@ auto Swapchain::createSwapchain() -> void {
 auto Swapchain::choosePresentMode(const std::vector<vk::PresentModeKHR>& availablePresentModes)
     -> vk::PresentModeKHR {
   for (const auto& availablePresentMode : availablePresentModes) {
-    if (availablePresentMode == vk::PresentModeKHR::eFifo) {
+    if (availablePresentMode == vk::PresentModeKHR::eMailbox) {
       return availablePresentMode;
     }
   }
