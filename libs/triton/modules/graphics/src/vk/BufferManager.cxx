@@ -4,38 +4,47 @@
 #include "geo/GeometryData.hpp"
 #include "mem/Allocator.hpp"
 #include "mem/Buffer.hpp"
+#include "cm/TaskQueue.hpp"
 
 namespace tr {
 
 BufferManager::BufferManager(std::shared_ptr<Allocator> newAllocator,
                              std::shared_ptr<ImmediateTransferContext> newImmediateTransferContext,
                              std::shared_ptr<Device> newDevice,
+                             std::shared_ptr<TaskQueue> newTaskQueue,
                              const std::shared_ptr<IEventBus>& eventBus)
     : allocator{std::move(newAllocator)},
       immediateTransferContext{std::move(newImmediateTransferContext)},
-      device{std::move(newDevice)} {
+      device{std::move(newDevice)},
+      taskQueue{std::move(newTaskQueue)} {
 
-  eventBus->subscribe<FrameEndEvent>(
-      [&](const FrameEndEvent& event) { cleanupBuffers(event.fence); });
-}
-
-// TODO(matt) Move this to a different thread
-auto BufferManager::cleanupBuffers(const vk::Fence& fence) -> void {
-  if (unusedBuffers.empty()) {
-    return;
-  }
-
-  {
-    ZoneNamedN(var, "Buffer Cleanup Fence Wait", true);
-    if (const auto result = device->getVkDevice().waitForFences(fence, vk::True, UINT64_MAX);
-        result != vk::Result::eSuccess) {
-      Log.warn("Timeout waiting for fence during Buffer Cleanup");
+  eventBus->subscribe<FrameEndEvent>([&](const FrameEndEvent& event) {
+    if (unusedBuffers.empty() || clearInProgress) {
+      return;
     }
-  }
-  for (const auto& handle : unusedBuffers) {
-    bufferMap.erase(handle);
-  }
-  unusedBuffers.clear();
+
+    const auto onComplete = [this]() {
+      for (const auto& handle : unusedBuffers) {
+        bufferMap.erase(handle);
+      }
+      unusedBuffers.clear();
+      clearInProgress = false;
+    };
+
+    const auto task = [this, event] {
+      Log.trace("clearInProgress = true");
+      ZoneNamedN(var, "Buffer Cleanup Fence Wait", true);
+      if (const auto result =
+              device->getVkDevice().waitForFences(event.fence, vk::True, UINT64_MAX);
+          result != vk::Result::eSuccess) {
+        Log.warn("Timeout waiting for fence during Buffer Cleanup");
+      }
+    };
+
+    Log.trace("Enqueueing Task");
+    clearInProgress = true;
+    taskQueue->enqueue(task, onComplete);
+  });
 }
 
 auto BufferManager::createBuffer(size_t size,

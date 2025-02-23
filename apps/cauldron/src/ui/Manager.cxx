@@ -59,7 +59,6 @@ Manager::~Manager() {
 
 void Manager::render() {
   ZoneNamedN(guiRender, "Gui Render", true);
-  taskQueue->processCompleteTasks();
   Dock::render();
 
   appLog->font = sauce;

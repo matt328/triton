@@ -1,5 +1,6 @@
 #include "DefaultContext.hpp"
 
+#include "cm/TaskQueue.hpp"
 #include "tr/IGuiSystem.hpp"
 #include "tr/IWindow.hpp"
 #include "tr/IEventBus.hpp"
@@ -69,6 +70,8 @@ void DefaultContext::run() {
       std::this_thread::sleep_for(std::chrono::milliseconds(SleepMillis));
       continue;
     }
+
+    taskQueue->processCompleteTasks();
 
     do {
       gameplaySystem->fixedUpdate();
