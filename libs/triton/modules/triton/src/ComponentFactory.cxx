@@ -34,6 +34,7 @@
 #include "vk/sb/DSLayout.hpp"
 #include "vk/BufferManager.hpp"
 #include "geo/GeometryData.hpp"
+#include "cm/TaskQueue.hpp"
 
 namespace di = boost::di;
 
@@ -46,6 +47,8 @@ auto ComponentFactory::getContext(const FrameworkConfig& config) -> std::shared_
                                                       .maxDynamicObjects = 1024,
                                                       .maxTextures = 16,
                                                       .framesInFlight = 2};
+
+  constexpr auto taskQueueConfig = tr::TaskQueueConfig{.maxQueueSize = 3};
 
   const auto injector =
       di::make_injector(di::bind<IDebugManager>.to<DefaultDebugManager>(),
@@ -70,7 +73,8 @@ auto ComponentFactory::getContext(const FrameworkConfig& config) -> std::shared_
                         di::bind<queue::Transfer>.to<queue::Transfer>(),
                         di::bind<queue::Present>.to<queue::Present>(),
                         di::bind<queue::Compute>.to<queue::Compute>(),
-                        di::bind<IBufferManager>.to<BufferManager>());
+                        di::bind<IBufferManager>.to<BufferManager>(),
+                        di::bind<tr::TaskQueueConfig>.to(taskQueueConfig));
 
   return injector.create<std::shared_ptr<DefaultContext>>();
 }

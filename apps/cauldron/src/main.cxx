@@ -45,20 +45,19 @@ auto main() -> int {
         .windowTitle = windowTitle.str(),
     };
 
-    constexpr auto taskQueueConfig = tr::TaskQueueConfig{.maxQueueSize = 3};
-
     auto context = tr::ComponentFactory::getContext(frameworkConfig);
     auto gameplaySystem = context->getGameplaySystem();
     auto guiSystem = context->getGuiSystem();
     auto eventSystem = context->getEventSystem();
     auto registry = gameplaySystem->getRegistry();
+    auto taskQueue = context->getTaskQueue();
 
     const auto injector = di::make_injector(di::bind<tr::IContext>.to(context),
                                             di::bind<tr::IGuiSystem>.to(guiSystem),
                                             di::bind<tr::IEventBus>.to(eventSystem),
                                             di::bind<tr::IGameplaySystem>.to<>(gameplaySystem),
+                                            di::bind<tr::TaskQueue>.to<>(taskQueue),
                                             di::bind<std::filesystem::path>.to<>(propertiesPath),
-                                            di::bind<tr::TaskQueueConfig>.to(taskQueueConfig),
                                             di::bind<entt::registry>.to(registry));
 
     auto application = injector.create<std::shared_ptr<ed::Application>>();

@@ -4,8 +4,8 @@ namespace tr {
 
 class IGuiSystem;
 class IEventBus;
-
 class IGameplaySystem;
+class TaskQueue;
 
 class IContext {
 public:
@@ -22,6 +22,7 @@ public:
   virtual auto getGameplaySystem() -> std::shared_ptr<IGameplaySystem> = 0;
   virtual auto getGuiSystem() -> std::shared_ptr<IGuiSystem> = 0;
   virtual auto getEventSystem() -> std::shared_ptr<IEventBus> = 0;
+  virtual auto getTaskQueue() -> std::shared_ptr<TaskQueue> = 0;
 };
 
 }
