@@ -15,12 +15,14 @@ DefaultContext::DefaultContext(std::shared_ptr<IEventBus> newEventBus,
                                std::shared_ptr<IRenderContext> newRenderContext,
                                std::shared_ptr<tr::IWindow> newWindow,
                                std::shared_ptr<IGuiSystem> newGuiSystem,
-                               std::shared_ptr<IGameplaySystem> newGameplaySystem)
+                               std::shared_ptr<IGameplaySystem> newGameplaySystem,
+                               std::shared_ptr<TaskQueue> newTaskQueue)
     : eventBus{std::move(newEventBus)},
       renderContext{std::move(newRenderContext)},
       window{std::move(newWindow)},
       guiSystem{std::move(newGuiSystem)},
-      gameplaySystem{std::move(newGameplaySystem)} {
+      gameplaySystem{std::move(newGameplaySystem)},
+      taskQueue{std::move(newTaskQueue)} {
 
   Log.trace("Constructing Default Context");
 
@@ -100,6 +102,10 @@ auto DefaultContext::getGuiSystem() -> std::shared_ptr<IGuiSystem> {
 
 auto DefaultContext::getEventSystem() -> std::shared_ptr<IEventBus> {
   return eventBus;
+}
+
+auto DefaultContext::getTaskQueue() -> std::shared_ptr<TaskQueue> {
+  return taskQueue;
 }
 
 }
