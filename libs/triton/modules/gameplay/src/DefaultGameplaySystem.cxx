@@ -110,6 +110,7 @@ void DefaultGameplaySystem::update() {
 }
 
 void DefaultGameplaySystem::fixedUpdate() {
+  ZoneNamedN(var, "FixedUpdate", true);
   {
     ZoneNamedN(camZone, "CameraSystem", true);
     cameraSystem->fixedUpdate(*registry);

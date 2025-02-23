@@ -42,7 +42,7 @@ void DefaultContext::run() {
   using Clock = std::chrono::steady_clock;
   using namespace std::literals;
   auto constexpr MaxFrameTime = 250ms;
-  auto constexpr dt = std::chrono::duration<int64_t, std::ratio<1, 90>>{1};
+  auto constexpr dt = std::chrono::duration<int64_t, std::ratio<1, 240>>{1};
   using duration = decltype(Clock::duration{} + dt);
   using time_point = std::chrono::time_point<Clock, duration>;
 
@@ -74,12 +74,17 @@ void DefaultContext::run() {
     taskQueue->processCompleteTasks();
 
     do {
+      TracyPlot("dt", dt.count());
+      TracyPlot("accumulator", accumulator.count());
+
       gameplaySystem->fixedUpdate();
       t += dt;
       accumulator -= dt;
     } while (accumulator >= dt);
 
     [[maybe_unused]] const auto alpha = accumulator / dt;
+    TracyPlot("alpha", alpha);
+    // fixedUpdateLerp(alpha);? how to interpolate based on alpha here?
 
     {
       ZoneNamedN(z, "Gameplay Update", true);
