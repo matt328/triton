@@ -2,7 +2,7 @@
 
 #include "GlmCereal.hpp"
 #include "cm/EntitySystemTypes.hpp"
-#include "TaskQueue.hpp"
+#include "cm/TaskQueue.hpp"
 #include "gp/components/Transform.hpp"
 #include "tr/IGameplaySystem.hpp"
 
@@ -26,8 +26,6 @@ class IGameplaySystem;
 }
 
 namespace ed {
-
-class TaskQueue;
 
 struct SkeletonData {
   std::string name;
@@ -108,7 +106,7 @@ class FutureMonitor;
 class DataFacade {
 public:
   explicit DataFacade(std::shared_ptr<tr::IGameplaySystem> newGameplaySystem,
-                      std::shared_ptr<TaskQueue> newTaskQueue);
+                      std::shared_ptr<tr::TaskQueue> newTaskQueue);
   ~DataFacade();
 
   DataFacade(const DataFacade&) = delete;
@@ -178,7 +176,7 @@ public:
 
 private:
   std::shared_ptr<tr::IGameplaySystem> gameplaySystem;
-  std::shared_ptr<TaskQueue> taskQueue;
+  std::shared_ptr<tr::TaskQueue> taskQueue;
 
   bool unsaved{};
   bool engineBusy{};

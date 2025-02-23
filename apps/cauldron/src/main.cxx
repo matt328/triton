@@ -3,7 +3,7 @@
 
 #include "tr/ComponentFactory.hpp"
 #include "Properties.hpp"
-#include "TaskQueue.hpp"
+#include "cm/TaskQueue.hpp"
 #include "TracyDefines.hpp"
 #include "tr/IEventBus.hpp"
 #include <entt/entity/fwd.hpp>
@@ -45,7 +45,7 @@ auto main() -> int {
         .windowTitle = windowTitle.str(),
     };
 
-    constexpr auto taskQueueConfig = ed::TaskQueueConfig{.maxQueueSize = 3};
+    constexpr auto taskQueueConfig = tr::TaskQueueConfig{.maxQueueSize = 3};
 
     auto context = tr::ComponentFactory::getContext(frameworkConfig);
     auto gameplaySystem = context->getGameplaySystem();
@@ -58,7 +58,7 @@ auto main() -> int {
                                             di::bind<tr::IEventBus>.to(eventSystem),
                                             di::bind<tr::IGameplaySystem>.to<>(gameplaySystem),
                                             di::bind<std::filesystem::path>.to<>(propertiesPath),
-                                            di::bind<ed::TaskQueueConfig>.to(taskQueueConfig),
+                                            di::bind<tr::TaskQueueConfig>.to(taskQueueConfig),
                                             di::bind<entt::registry>.to(registry));
 
     auto application = injector.create<std::shared_ptr<ed::Application>>();
