@@ -1,13 +1,13 @@
 #include "DataFacade.hpp"
 
-#include "TaskQueue.hpp"
+#include "cm/TaskQueue.hpp"
 
 #include "tr/IGameplaySystem.hpp"
 
 namespace ed {
 
 DataFacade::DataFacade(std::shared_ptr<tr::IGameplaySystem> newGameplaySystem,
-                       std::shared_ptr<TaskQueue> newTaskQueue)
+                       std::shared_ptr<tr::TaskQueue> newTaskQueue)
     : gameplaySystem{std::move(newGameplaySystem)}, taskQueue{std::move(newTaskQueue)} {
   Log.trace("Creating DataFacade");
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace ed {
+namespace tr {
 
 constexpr size_t DefaultMaxQueueSize = 2;
 
@@ -28,8 +28,9 @@ public:
   auto operator=(TaskQueue&&) -> TaskQueue& = delete;
 
   template <class F, class... Args, class OnComplete>
-  auto enqueue(F&& f, OnComplete&& onComplete, Args&&... args)
-      -> std::future<std::invoke_result_t<F&&, Args&&...>> {
+  auto enqueue(F&& f,
+               OnComplete&& onComplete,
+               Args&&... args) -> std::future<std::invoke_result_t<F&&, Args&&...>> {
     using ReturnType = std::invoke_result_t<F&&, Args&&...>;
 
     auto task = std::make_shared<std::packaged_task<ReturnType()>>(

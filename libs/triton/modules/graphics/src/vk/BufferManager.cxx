@@ -27,9 +27,9 @@ auto BufferManager::cleanupBuffers(const vk::Fence& fence) -> void {
 
   {
     ZoneNamedN(var, "Buffer Cleanup Fence Wait", true);
-    if (const auto result = device->getVkDevice().waitForFences(fence, 1u, UINT64_MAX);
+    if (const auto result = device->getVkDevice().waitForFences(fence, vk::True, UINT64_MAX);
         result != vk::Result::eSuccess) {
-      Log.warn("Timeout waiting for fence during immediate submit");
+      Log.warn("Timeout waiting for fence during Buffer Cleanup");
     }
   }
   for (const auto& handle : unusedBuffers) {

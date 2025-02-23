@@ -105,6 +105,7 @@ target_precompile_headers(${PROJECT_NAME}
   <fstream>
   <format>
   <functional>
+  <future>
   <glm/glm.hpp>
   <glm/gtx/string_cast.hpp>
   <glm/detail/qualifier.hpp>
