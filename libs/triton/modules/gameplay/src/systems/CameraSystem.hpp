@@ -1,5 +1,6 @@
 #pragma once
 
+#include "gp/EntityService.hpp"
 #include "gp/components/Camera.hpp"
 #include "tr/IEventBus.hpp"
 
@@ -9,7 +10,8 @@ struct Action;
 
 class CameraSystem {
 public:
-  explicit CameraSystem(const std::shared_ptr<IEventBus>& eventBus, entt::registry& registry);
+  explicit CameraSystem(const std::shared_ptr<IEventBus>& eventBus,
+                        std::shared_ptr<EntityService> newEntityService);
   ~CameraSystem();
 
   CameraSystem(const CameraSystem&) = delete;
@@ -17,14 +19,14 @@ public:
   auto operator=(const CameraSystem&) -> CameraSystem& = delete;
   auto operator=(CameraSystem&&) -> CameraSystem& = delete;
 
-  void fixedUpdate(entt::registry& registry);
+  void fixedUpdate();
 
 private:
-  auto handleAction(const Action& action, entt::registry& registry) -> void;
+  auto handleAction(const Action& action) -> void;
   static auto handleStateAction(const Action& action, Camera& cam) -> void;
   static auto handleRangeAction(const Action& action, Camera& cam) -> void;
 
-  mutable TracyLockableN(std::shared_mutex, registryMutex, "CameraSystem");
+  std::shared_ptr<EntityService> entityService;
 };
 
 }

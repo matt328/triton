@@ -1,6 +1,4 @@
 #include "gp/DefaultGameplaySystem.hpp"
-#include "commands/CreateStaticEntity.hpp"
-#include "commands/CreateTestEntity.hpp"
 #include "gp/action/IActionSystem.hpp"
 #include "gp/components/Resources.hpp"
 #include "systems/CameraSystem.hpp"
@@ -8,7 +6,6 @@
 #include "systems/TransformSystem.hpp"
 #include "tr/IEventBus.hpp"
 #include "commands/CreateCamera.hpp"
-#include "commands/CreateAnimatedEntity.hpp"
 
 namespace tr {
 
@@ -19,20 +16,23 @@ constexpr auto DefaultPosition = glm::vec3{0.f, 0.f, 5.f};
 
 DefaultGameplaySystem::DefaultGameplaySystem(std::shared_ptr<IEventBus> newEventBus,
                                              std::shared_ptr<AssetManager> newAssetManager,
-                                             std::shared_ptr<IActionSystem> newActionSystem)
+                                             std::shared_ptr<IActionSystem> newActionSystem,
+                                             std::shared_ptr<CameraSystem> newCameraSystem,
+                                             std::shared_ptr<TransformSystem> newTransformSystem,
+                                             std::shared_ptr<AnimationSystem> newAnimationSystem,
+                                             std::shared_ptr<RenderDataSystem> newRenderDataSystem,
+                                             std::shared_ptr<EntityService> newEntityService)
     : eventBus{std::move(newEventBus)},
       assetManager{std::move(newAssetManager)},
-      actionSystem{std::move(newActionSystem)} {
+      actionSystem{std::move(newActionSystem)},
+      cameraSystem{std::move(newCameraSystem)},
+      transformSystem{std::move(newTransformSystem)},
+      animationSystem{std::move(newAnimationSystem)},
+      renderDataSystem{std::move(newRenderDataSystem)},
+      entityService{std::move(newEntityService)} {
 
-  registry = std::make_shared<entt::registry>();
-
-  cameraSystem = std::make_shared<CameraSystem>(eventBus, *registry);
-  transformSystem = std::make_shared<TransformSystem>();
-  renderDataSystem = std::make_shared<RenderDataSystem>();
-  animationSystem = std::make_shared<AnimationSystem>(assetManager);
-
-  entityCreatedConnection =
-      registry->on_construct<entt::entity>().connect<&DefaultGameplaySystem::entityCreated>(this);
+  entityCreatedConnection = entityService->registerEntityCreated(
+      [this](entt::registry& reg, entt::entity entity) { entityCreated(reg, entity); });
 
   eventBus->subscribe<SwapchainResized>(
       [&](const SwapchainResized& event) { handleSwapchainResized(event); });
@@ -84,12 +84,12 @@ DefaultGameplaySystem::~DefaultGameplaySystem() {
 }
 
 auto DefaultGameplaySystem::handleSwapchainResized(const SwapchainResized& event) -> void {
-  registry->ctx().insert_or_assign<WindowDimensions>(
+  entityService->updateWindowDimensions(
       WindowDimensions{.width = event.width, .height = event.height});
 }
 
 auto DefaultGameplaySystem::handleSwapchainCreated(const SwapchainCreated& event) -> void {
-  registry->ctx().insert_or_assign<WindowDimensions>(
+  entityService->updateWindowDimensions(
       WindowDimensions{.width = event.width, .height = event.height});
 }
 
@@ -104,7 +104,7 @@ void DefaultGameplaySystem::update() {
     renderData.animationData.clear();
     renderData.staticGpuMeshData.clear();
 
-    renderDataSystem->update(*registry, renderData);
+    renderDataSystem->update(renderData);
   }
   transferHandler(renderData);
 }
@@ -113,15 +113,15 @@ void DefaultGameplaySystem::fixedUpdate() {
   ZoneNamedN(var, "FixedUpdate", true);
   {
     ZoneNamedN(camZone, "CameraSystem", true);
-    cameraSystem->fixedUpdate(*registry);
+    cameraSystem->fixedUpdate();
   }
   {
     ZoneNamedN(xformZone, "Transform", true);
-    transformSystem->update(*registry);
+    transformSystem->update();
   }
   {
     ZoneNamedN(var, "Animation", true);
-    animationSystem->update(*registry);
+    animationSystem->update();
   }
 }
 
@@ -144,14 +144,7 @@ auto DefaultGameplaySystem::createStaticModelEntity(std::string filename,
     transform.rotation = initialTransform->rotation;
   }
 
-  {
-    std::unique_lock<LockableBase(std::shared_mutex)> lock(registryMutex);
-    LockMark(registryMutex);
-    const auto entity = registry->create();
-    registry->emplace<Renderable>(entity, std::vector{modelData.meshData});
-    registry->emplace<Transform>(entity, transform);
-    registry->emplace<EditorInfo>(entity, entityName.data());
-  }
+  entityService->createStaticEntity(std::vector{modelData.meshData}, transform, entityName);
 }
 
 auto DefaultGameplaySystem::createAnimatedModelEntity(const AnimatedModelData& modelData,
@@ -170,23 +163,14 @@ auto DefaultGameplaySystem::createAnimatedModelEntity(const AnimatedModelData& m
                              .position = glm::zero<glm::vec3>(),
                              .transformation = glm::identity<glm::mat4>()};
   {
-    std::unique_lock<LockableBase(std::shared_mutex)> lock(registryMutex);
-    LockMark(registryMutex);
-
     if (initialTransform.has_value()) {
       transform.position = initialTransform->position;
       transform.rotation = initialTransform->rotation;
     }
 
-    const auto entity = registry->create();
-    registry->emplace<Animation>(entity,
-                                 loadedModelData.animationData->animationHandle,
-                                 loadedModelData.animationData->skeletonHandle,
-                                 loadedModelData.skinData->jointMap,
-                                 loadedModelData.skinData->inverseBindMatrices);
-    registry->emplace<Transform>(entity, transform);
-    registry->emplace<Renderable>(entity, std::vector{loadedModelData.meshData});
-    registry->emplace<EditorInfo>(entity, modelData.entityName.value_or("Unnamed Entity"));
+    entityService->createDynamicEntity(loadedModelData,
+                                       transform,
+                                       modelData.entityName.value_or("Unnamed Entity"));
   }
 }
 
@@ -195,63 +179,34 @@ auto DefaultGameplaySystem::createTerrain() -> void {
 }
 
 auto DefaultGameplaySystem::createDefaultCamera() -> void {
-  const auto [width, height] = registry->ctx().get<const WindowDimensions>();
-
   auto cameraInfo = CameraInfo{
-      .width = width,
-      .height = height,
       .fov = DefaultFOV,
       .nearClip = DefaultNearClip,
       .farClip = DefaultFarClip,
       .position = DefaultPosition,
   };
 
-  {
-    std::unique_lock<LockableBase(std::shared_mutex)> lock(registryMutex);
-    LockMark(registryMutex);
-
-    const auto entity = registry->create();
-    registry->emplace<Camera>(entity,
-                              cameraInfo.width,
-                              cameraInfo.height,
-                              cameraInfo.fov,
-                              cameraInfo.nearClip,
-                              cameraInfo.farClip,
-                              cameraInfo.position);
-    registry->emplace<EditorInfo>(entity, "Default Camera");
-    registry->ctx().insert_or_assign<CurrentCamera>(CurrentCamera{entity});
-  }
+  entityService->createCamera(cameraInfo, "Default Camera");
 }
 
 auto DefaultGameplaySystem::createTestEntity([[maybe_unused]] std::string_view name) -> void {
   Log.trace("Creating test entity: {}", name.data());
   auto modelData = assetManager->createCube();
-
-  {
-    std::unique_lock<LockableBase(std::shared_mutex)> lock(registryMutex);
-    LockMark(registryMutex);
-
-    const auto entity = registry->create();
-    registry->emplace<Renderable>(entity, std::vector{modelData.meshData});
-    registry->emplace<EditorInfo>(entity, name.data());
-    registry->emplace<Transform>(entity);
-  }
+  entityService->createStaticEntity(std::vector{modelData.meshData}, Transform{}, name);
 }
 
 auto DefaultGameplaySystem::removeEntity(tr::EntityType entity) -> void {
-  std::unique_lock<LockableBase(std::shared_mutex)> lock(registryMutex);
-  LockMark(registryMutex);
-  registry->destroy(entity);
-}
-
-auto DefaultGameplaySystem::getRegistry() const -> std::shared_ptr<entt::registry> {
-  return registry;
+  entityService->removeEntity(entity);
 }
 
 auto DefaultGameplaySystem::entityCreated([[maybe_unused]] entt::registry& reg,
                                           [[maybe_unused]] entt::entity entity) const -> void {
   Log.trace("Entity Created: {}", static_cast<uint32_t>(entity));
   eventBus->emit(EntityCreated{entity});
+}
+
+auto DefaultGameplaySystem::getEntityService() const -> std::shared_ptr<EntityService> {
+  return entityService;
 }
 
 }

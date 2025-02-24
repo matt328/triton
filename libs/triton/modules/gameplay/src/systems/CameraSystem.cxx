@@ -9,24 +9,25 @@ constexpr auto CameraSpeed = .010f;
 constexpr auto MouseSensitivity = 0.025f;
 constexpr auto PitchExtent = 89.f;
 
-CameraSystem::CameraSystem(const std::shared_ptr<IEventBus>& eventBus, entt::registry& registry) {
-  eventBus->subscribe<Action>([&](const Action& action) { handleAction(action, registry); });
+CameraSystem::CameraSystem(const std::shared_ptr<IEventBus>& eventBus,
+                           std::shared_ptr<EntityService> newEntityService)
+    : entityService{std::move(newEntityService)} {
+  eventBus->subscribe<Action>([&](const Action& action) { handleAction(action); });
 }
 
 CameraSystem::~CameraSystem() {
   Log.trace("Destroying CameraSystem");
 }
 
-auto CameraSystem::handleAction(const Action& action, entt::registry& registry) -> void {
-  std::unique_lock<LockableBase(std::shared_mutex)> lock(registryMutex);
-  LockMark(registryMutex);
-  for (const auto view = registry.view<Camera>(); auto [entity, cam] : view.each()) {
+auto CameraSystem::handleAction(const Action& action) -> void {
+
+  entityService->updateCameraActions([action]([[maybe_unused]] entt::entity entity, Camera& cam) {
     if (action.stateType == StateType::State) {
       handleStateAction(action, cam);
     } else if (action.stateType == StateType::Range) {
       handleRangeAction(action, cam);
     }
-  }
+  });
 }
 
 auto CameraSystem::handleStateAction(const Action& action, Camera& cam) -> void {
@@ -64,36 +65,30 @@ auto CameraSystem::handleRangeAction(const Action& action, Camera& cam) -> void 
   }
 }
 
-void CameraSystem::fixedUpdate(entt::registry& registry) {
-  std::unique_lock<LockableBase(std::shared_mutex)> lock(registryMutex);
-  LockMark(registryMutex);
+void CameraSystem::fixedUpdate() {
 
-  const auto view = registry.view<Camera>();
+  entityService->updateCameras(
+      [](int width, int height, [[maybe_unused]] entt::entity entity, Camera& cam) {
+        auto direction = glm::vec3{cos(glm::radians(cam.yaw)) * cos(glm::radians(cam.pitch)),
+                                   sin(glm::radians(cam.pitch)),
+                                   sin(glm::radians(cam.yaw)) * cos(glm::radians(cam.pitch))};
 
-  const auto [width, height] = registry.ctx().get<const WindowDimensions>();
+        cam.front = normalize(direction);
+        cam.right = normalize(cross(cam.front, glm::vec3(0.0f, 1.0f, 0.0f)));
 
-  for (auto [entity, cam] : view.each()) {
+        glm::mat3 const rotationMatrix{cam.right, worldUp, cam.front};
 
-    auto direction = glm::vec3{cos(glm::radians(cam.yaw)) * cos(glm::radians(cam.pitch)),
-                               sin(glm::radians(cam.pitch)),
-                               sin(glm::radians(cam.yaw)) * cos(glm::radians(cam.pitch))};
+        const auto rotatedVelocity = rotationMatrix * cam.velocity;
 
-    cam.front = normalize(direction);
-    cam.right = normalize(cross(cam.front, glm::vec3(0.0f, 1.0f, 0.0f)));
+        cam.position += rotatedVelocity;
 
-    glm::mat3 const rotationMatrix{cam.right, worldUp, cam.front};
+        cam.view = lookAt(cam.position, cam.position + cam.front, {0.f, 1.f, 0.f});
 
-    const auto rotatedVelocity = rotationMatrix * cam.velocity;
-
-    cam.position += rotatedVelocity;
-
-    cam.view = lookAt(cam.position, cam.position + cam.front, {0.f, 1.f, 0.f});
-
-    const float aspect = static_cast<float>(width) / static_cast<float>(height);
-    cam.projection = glm::perspective(glm::radians(cam.fov), aspect, cam.nearClip, cam.farClip);
-    // Apparently everyone except me knew glm was for OpenGL and you have to adjust these
-    // matrices for Vulkan
-    cam.projection[1][1] *= -1;
-  }
+        const float aspect = static_cast<float>(width) / static_cast<float>(height);
+        cam.projection = glm::perspective(glm::radians(cam.fov), aspect, cam.nearClip, cam.farClip);
+        // Apparently everyone except me knew glm was for OpenGL and you have to adjust these
+        // matrices for Vulkan
+        cam.projection[1][1] *= -1;
+      });
 }
 }

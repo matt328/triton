@@ -17,7 +17,6 @@ DataFacade::~DataFacade() {
 }
 
 void DataFacade::update() const {
-  // taskQueue->processCompleteTasks();
 }
 
 void DataFacade::clear() {

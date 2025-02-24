@@ -3,11 +3,13 @@
 
 namespace tr {
 
-auto TransformSystem::update(entt::registry& registry) -> void {
-  std::unique_lock<SharedLockableBase(std::shared_mutex)> lock(registryMutex);
-  LockMark(registryMutex);
+TransformSystem::TransformSystem(std::shared_ptr<EntityService> newEntityService)
+    : entityService{std::move(newEntityService)} {
+}
 
-  for (const auto view = registry.view<Transform>(); auto [entity, transform] : view.each()) {
+auto TransformSystem::update() -> void {
+
+  entityService->updateTransforms([]([[maybe_unused]] entt::entity entity, Transform& transform) {
     {
       ZoneNamedN(update, "Update Entity", true);
       // Create combined rotation matrix
@@ -36,6 +38,6 @@ auto TransformSystem::update(entt::registry& registry) -> void {
         transform.transformation = translationMatrix * rotationMatrix;
       }
     }
-  }
+  });
 }
 }

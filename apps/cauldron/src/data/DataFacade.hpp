@@ -101,12 +101,10 @@ struct DataStore {
   }
 };
 
-class FutureMonitor;
-
 class DataFacade {
 public:
-  explicit DataFacade(std::shared_ptr<tr::IGameplaySystem> newGameplaySystem,
-                      std::shared_ptr<tr::TaskQueue> newTaskQueue);
+  DataFacade(std::shared_ptr<tr::IGameplaySystem> newGameplaySystem,
+             std::shared_ptr<tr::TaskQueue> newTaskQueue);
   ~DataFacade();
 
   DataFacade(const DataFacade&) = delete;

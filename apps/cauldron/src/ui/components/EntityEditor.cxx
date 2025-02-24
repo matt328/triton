@@ -20,12 +20,12 @@ EntityEditor::EntityEditor(std::shared_ptr<tr::IGameplaySystem> newGameplaySyste
                            std::shared_ptr<DataFacade> newDataFacade,
                            std::shared_ptr<DialogManager> newDialogManager,
                            std::shared_ptr<tr::IEventBus> newEventBus,
-                           std::shared_ptr<entt::registry> newRegistry)
+                           std::shared_ptr<tr::EntityService> newEntityService)
     : gameplaySystem{std::move(newGameplaySystem)},
       dataFacade{std::move(newDataFacade)},
       dialogManager{std::move(newDialogManager)},
       eventBus{std::move(newEventBus)},
-      registry{std::move(newRegistry)} {
+      entityService{std::move(newEntityService)} {
   Log.trace("Creating EntityEditor");
 
   eventBus->subscribe<tr::EntityCreated>([](const tr::EntityCreated& event) {
@@ -71,13 +71,12 @@ void EntityEditor::render() {
                       ImVec2(150, 0),
                       ImGuiChildFlags_Border | ImGuiChildFlags_ResizeX);
 
-    auto view = registry->view<tr::EditorInfo>();
-    for (auto [entity, editorInfo] : view.each()) {
+    entityService->forEachEditorInfo([this](tr::EntityType entity, tr::EditorInfo& editorInfo) {
       if (ImGui::Selectable(editorInfo.name.c_str(), entity == selectedEntity)) {
         Log.trace("Selected Entity: {}", editorInfo.name);
         selectedEntity = entity;
       }
-    }
+    });
 
     ImGui::EndChild();
     ImGui::SameLine();
@@ -168,11 +167,18 @@ void EntityEditor::createAnimatedEntityDialog() const {
   };
 
   const auto onOk = [&](const ModalDialog& dialog) {
-    dataFacade->createAnimatedModel(
-        EntityData{.name = dialog.getValue<std::string>("name").value(),
-                   .modelName = dialog.getValue<std::string>("model").value(),
-                   .skeleton = dialog.getValue<std::string>("skeleton").value(),
-                   .animations = {dialog.getValue<std::string>("animation").value()}});
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<float> dis(-25.f, 25.f);
+
+    for (int i = 0; i < 50; ++i) {
+      dataFacade->createAnimatedModel(
+          EntityData{.name = fmt::format("{} {}", dialog.getValue<std::string>("name").value(), i),
+                     .position = glm::vec3{dis(gen), dis(gen), dis(gen)},
+                     .modelName = dialog.getValue<std::string>("model").value(),
+                     .skeleton = dialog.getValue<std::string>("skeleton").value(),
+                     .animations = {dialog.getValue<std::string>("animation").value()}});
+    }
   };
 
   const auto onCancel = []() { Log.debug("Cancelled Dialog with no input"); };

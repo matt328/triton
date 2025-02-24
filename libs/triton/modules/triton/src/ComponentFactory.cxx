@@ -48,7 +48,7 @@ auto ComponentFactory::getContext(const FrameworkConfig& config) -> std::shared_
                                                       .maxTextures = 16,
                                                       .framesInFlight = 2};
 
-  constexpr auto taskQueueConfig = tr::TaskQueueConfig{.maxQueueSize = 3};
+  constexpr auto taskQueueConfig = tr::TaskQueueConfig{.maxQueueSize = 100};
 
   const auto injector =
       di::make_injector(di::bind<IDebugManager>.to<DefaultDebugManager>(),
