@@ -1,10 +1,11 @@
 #pragma once
 
+#include "gp/EntityService.hpp"
 namespace tr {
 
 class TransformSystem {
 public:
-  explicit TransformSystem() = default;
+  explicit TransformSystem(std::shared_ptr<EntityService> newEntityService);
   ~TransformSystem() = default;
 
   TransformSystem(const TransformSystem&) = delete;
@@ -12,10 +13,10 @@ public:
   TransformSystem(TransformSystem&&) = delete;
   auto operator=(TransformSystem&&) -> TransformSystem& = delete;
 
-  auto update(entt::registry& registry) -> void;
+  auto update() -> void;
 
 private:
-  mutable TracySharedLockableN(std::shared_mutex, registryMutex, "CameraSystem");
+  std::shared_ptr<EntityService> entityService;
 };
 
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "gp/EntityService.hpp"
 namespace tr {
 
 struct RenderData;
@@ -8,7 +9,7 @@ struct RenderData;
 /// Guards registry access with a shared lock since it only reads.
 class RenderDataSystem {
 public:
-  RenderDataSystem() = default;
+  explicit RenderDataSystem(std::shared_ptr<EntityService> newEntityService);
   ~RenderDataSystem() = default;
 
   RenderDataSystem(const RenderDataSystem& other) = delete;
@@ -16,11 +17,11 @@ public:
   auto operator=(const RenderDataSystem& other) -> RenderDataSystem& = delete;
   auto operator=(RenderDataSystem&& other) noexcept -> RenderDataSystem& = delete;
 
-  auto update(entt::registry& registry, RenderData& renderData) -> void;
+  auto update(RenderData& renderData) -> void;
 
 private:
+  std::shared_ptr<EntityService> entityService;
   auto convertOzzToGlm(const ozz::math::Float4x4& ozzMatrix) -> glm::mat4;
-  mutable TracySharedLockableN(std::shared_mutex, registryMutex, "RenderDataSystem");
 };
 
 }

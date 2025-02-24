@@ -6,22 +6,19 @@ namespace tr {
 
 constexpr auto TimeRatio = 0.005f;
 
-AnimationSystem::AnimationSystem(std::shared_ptr<AssetManager> newAssetManager)
-    : assetManager{std::move(newAssetManager)} {
+AnimationSystem::AnimationSystem(std::shared_ptr<AssetManager> newAssetManager,
+                                 std::shared_ptr<EntityService> newEntityService)
+    : assetManager{std::move(newAssetManager)}, entityService{std::move(newEntityService)} {
 }
 
-auto AnimationSystem::update(entt::registry& registry) const -> void {
+auto AnimationSystem::update() const -> void {
 
-  std::unique_lock<LockableBase(std::shared_mutex)> lock(registryMutex);
-  LockMark(registryMutex);
-
-  for (const auto view = registry.view<Animation>(); auto [entity, animationData] : view.each()) {
-
+  const auto animationFn = [this]([[maybe_unused]] entt::entity entity, Animation& animationData) {
     if (animationData.renderBindPose) {
       for (auto& model : animationData.models) {
         model = ozz::math::Float4x4::identity();
       }
-      continue;
+      return;
     }
 
     if (animationData.playing) {
@@ -55,7 +52,9 @@ auto AnimationSystem::update(entt::registry& registry) const -> void {
     if (!ltmJob.Run()) {
       Log.warn("ltm job fail");
     }
-  }
+  };
+
+  entityService->updateAnimations(animationFn);
 }
 
 }

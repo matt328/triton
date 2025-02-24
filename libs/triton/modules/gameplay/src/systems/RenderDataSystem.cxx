@@ -11,31 +11,24 @@
 
 namespace tr {
 
-auto RenderDataSystem::update(entt::registry& registry, RenderData& renderData) -> void {
+RenderDataSystem::RenderDataSystem(std::shared_ptr<EntityService> newEntityService)
+    : entityService{std::move(newEntityService)} {};
 
-  std::shared_lock<SharedLockableBase(std::shared_mutex)> lock(registryMutex);
-  LockMark(registryMutex);
+auto RenderDataSystem::update(RenderData& renderData) -> void {
 
-  if (!registry.ctx().contains<const CurrentCamera>()) {
-    Log.trace("Context doesn't contain current camera");
-    return;
-  }
+  const auto camFn = [](RenderData& renderData, const Camera& cam) {
+    renderData.cameraData = GpuCameraData{.view = cam.view,
+                                          .proj = cam.projection,
+                                          .viewProj = cam.view * cam.projection};
+  };
 
-  const auto cameraEntity = registry.ctx().get<const CurrentCamera>();
-  const auto cam = registry.get<Camera>(cameraEntity.currentCamera);
-
-  renderData.cameraData = GpuCameraData{.view = cam.view,
-                                        .proj = cam.projection,
-                                        .viewProj = cam.view * cam.projection};
-
-  // Static Models and Terrain
-  for (const auto view = registry.view<Renderable, Transform>(entt::exclude<Animation>);
-       const auto& [entity, renderable, transform] : view.each()) {
-
-    const auto isTerrainEntity = registry.any_of<TerrainMarker>(entity);
-
+  const auto staticFn = [](RenderData& renderData,
+                           bool isTerrain,
+                           entt::entity,
+                           const Renderable& renderable,
+                           const Transform& transform) {
     for (const auto& [meshHandle, topology, textureHandle] : renderable.meshData) {
-      if (isTerrainEntity) {
+      if (isTerrain) {
         if (topology == Topology::Triangles) {
           renderData.terrainMeshData.emplace_back(meshHandle, Topology::Triangles);
         } else if (topology == Topology::LineList) {
@@ -48,13 +41,20 @@ auto RenderDataSystem::update(entt::registry& registry, RenderData& renderData) 
         renderData.objectData.emplace_back(transform.transformation, textureHandle);
       }
     }
-  }
+  };
 
-  // Animated Models
-  const auto animationsView = registry.view<Animation, Renderable, Transform>();
   uint32_t jointMatricesIndex = 0;
-  for (const auto& [entity, animationData, renderable, transform] : animationsView.each()) {
+
+  const auto dynamicFn = [&jointMatricesIndex, this](RenderData& renderData,
+                                                     [[maybe_unused]] entt::entity entity,
+                                                     const Animation& animationData,
+                                                     const Renderable& renderable,
+                                                     const Transform& transform) {
     // Convert the jointMap into a list of join matrices the gpu needs
+    if (animationData.models.empty()) {
+      Log.trace("Models are empty, skipping for now");
+      return;
+    }
     auto jointMatrices = std::vector<glm::mat4>{};
     jointMatrices.resize(animationData.jointMap.size());
     int index = 0;
@@ -80,7 +80,9 @@ auto RenderDataSystem::update(entt::registry& registry, RenderData& renderData) 
     }
 
     jointMatricesIndex += jointMatrices.size();
-  }
+  };
+
+  entityService->updateRenderDataCamera(camFn, staticFn, dynamicFn, renderData);
 }
 
 auto RenderDataSystem::convertOzzToGlm(const ozz::math::Float4x4& ozzMatrix) -> glm::mat4 {

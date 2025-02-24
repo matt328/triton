@@ -16,6 +16,7 @@ set(common_SRC
   modules/gameplay/src/AnimationFactory.cxx
   modules/gameplay/src/DefaultGameplaySystem.cxx
   modules/gameplay/src/AssetManager.cxx
+  modules/gameplay/src/EntityService.cxx
 
   modules/graphics/src/ImmediateTransferContext.cxx
   modules/graphics/src/Window.cxx

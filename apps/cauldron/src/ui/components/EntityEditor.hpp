@@ -18,7 +18,7 @@ public:
                std::shared_ptr<DataFacade> newDataFacade,
                std::shared_ptr<DialogManager> newDialogManager,
                std::shared_ptr<tr::IEventBus> newEventBus,
-               std::shared_ptr<entt::registry> newRegistry);
+               std::shared_ptr<tr::EntityService> newEntityService);
   ~EntityEditor();
 
   EntityEditor(const EntityEditor&) = delete;
@@ -35,7 +35,7 @@ private:
   std::shared_ptr<DataFacade> dataFacade;
   std::shared_ptr<DialogManager> dialogManager;
   std::shared_ptr<tr::IEventBus> eventBus;
-  std::shared_ptr<entt::registry> registry;
+  std::shared_ptr<tr::EntityService> entityService;
 
   mutable TracySharedLockableN(std::shared_mutex, registryMutex, "EntityEditor");
 

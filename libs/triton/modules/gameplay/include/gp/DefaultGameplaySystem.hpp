@@ -17,7 +17,12 @@ class DefaultGameplaySystem : public IGameplaySystem {
 public:
   DefaultGameplaySystem(std::shared_ptr<IEventBus> newEventBus,
                         std::shared_ptr<AssetManager> newAssetManager,
-                        std::shared_ptr<IActionSystem> newActionSystem);
+                        std::shared_ptr<IActionSystem> newActionSystem,
+                        std::shared_ptr<CameraSystem> newCameraSystem,
+                        std::shared_ptr<TransformSystem> newTransformSystem,
+                        std::shared_ptr<AnimationSystem> newAnimationSystem,
+                        std::shared_ptr<RenderDataSystem> newRenderDataSystem,
+                        std::shared_ptr<EntityService> entityService);
   ~DefaultGameplaySystem() override;
 
   DefaultGameplaySystem(const DefaultGameplaySystem&) = delete;
@@ -39,7 +44,7 @@ public:
   auto createDefaultCamera() -> void override;
   auto createTestEntity(std::string_view name) -> void override;
   auto removeEntity(tr::EntityType entity) -> void override;
-  auto getRegistry() const -> std::shared_ptr<entt::registry> override;
+  auto getEntityService() const -> std::shared_ptr<EntityService> override;
 
 private:
   std::shared_ptr<IEventBus> eventBus;
@@ -48,11 +53,11 @@ private:
 
   std::shared_ptr<CameraSystem> cameraSystem;
   std::shared_ptr<TransformSystem> transformSystem;
-  std::shared_ptr<RenderDataSystem> renderDataSystem;
   std::shared_ptr<AnimationSystem> animationSystem;
+  std::shared_ptr<RenderDataSystem> renderDataSystem;
+  std::shared_ptr<EntityService> entityService;
 
   RenderDataTransferHandler transferHandler;
-  std::shared_ptr<entt::registry> registry;
 
   mutable TracyLockableN(std::shared_mutex, registryMutex, "GameplaySystem");
 

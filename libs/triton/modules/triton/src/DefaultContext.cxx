@@ -71,16 +71,15 @@ void DefaultContext::run() {
       continue;
     }
 
-    taskQueue->processCompleteTasks();
-
     do {
       TracyPlot("dt", dt.count());
       TracyPlot("accumulator", accumulator.count());
-
       gameplaySystem->fixedUpdate();
       t += dt;
       accumulator -= dt;
     } while (accumulator >= dt);
+
+    taskQueue->processCompleteTasks();
 
     [[maybe_unused]] const auto alpha = accumulator / dt;
     TracyPlot("alpha", alpha);

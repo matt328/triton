@@ -49,7 +49,7 @@ auto main() -> int {
     auto gameplaySystem = context->getGameplaySystem();
     auto guiSystem = context->getGuiSystem();
     auto eventSystem = context->getEventSystem();
-    auto registry = gameplaySystem->getRegistry();
+    auto entityService = gameplaySystem->getEntityService();
     auto taskQueue = context->getTaskQueue();
 
     const auto injector = di::make_injector(di::bind<tr::IContext>.to(context),
@@ -58,7 +58,7 @@ auto main() -> int {
                                             di::bind<tr::IGameplaySystem>.to<>(gameplaySystem),
                                             di::bind<tr::TaskQueue>.to<>(taskQueue),
                                             di::bind<std::filesystem::path>.to<>(propertiesPath),
-                                            di::bind<entt::registry>.to(registry));
+                                            di::bind<tr::EntityService>.to(entityService));
 
     auto application = injector.create<std::shared_ptr<ed::Application>>();
 

@@ -1,11 +1,13 @@
 #pragma once
 #include "gp/AssetManager.hpp"
+#include "gp/EntityService.hpp"
 
 namespace tr {
 
 class AnimationSystem {
 public:
-  explicit AnimationSystem(std::shared_ptr<AssetManager> newAssetManager);
+  explicit AnimationSystem(std::shared_ptr<AssetManager> newAssetManager,
+                           std::shared_ptr<EntityService> newEntityService);
   ~AnimationSystem() = default;
 
   AnimationSystem(const AnimationSystem&) = delete;
@@ -13,11 +15,11 @@ public:
   auto operator=(const AnimationSystem&) -> AnimationSystem& = delete;
   auto operator=(AnimationSystem&&) -> AnimationSystem& = delete;
 
-  auto update(entt::registry& registry) const -> void;
+  auto update() const -> void;
 
 private:
   std::shared_ptr<AssetManager> assetManager;
-  mutable TracyLockableN(std::shared_mutex, registryMutex, "AnimationSystem");
+  std::shared_ptr<EntityService> entityService;
 };
 
 }
