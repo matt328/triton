@@ -66,17 +66,19 @@ void EntityEditor::render() {
       ImGui::EndMenuBar();
     }
 
+    std::vector<std::tuple<std::string, tr::EntityType>> entities = dataFacade.getEntityNames();
+
     // Left
     ImGui::BeginChild("left pane",
                       ImVec2(150, 0),
                       ImGuiChildFlags_Border | ImGuiChildFlags_ResizeX);
 
-    entityService->forEachEditorInfo([this](tr::EntityType entity, tr::EditorInfo& editorInfo) {
-      if (ImGui::Selectable(editorInfo.name.c_str(), entity == selectedEntity)) {
-        Log.trace("Selected Entity: {}", editorInfo.name);
-        selectedEntity = entity;
+    for (const auto& [entityId, entityName] : entities) {
+      if (ImGui::Selectable(entityName.c_str(), entityId == selectedEntity)) {
+        Log.trace("Selected Entity: {}", entityName.name);
+        selectedEntity = entityId;
       }
-    });
+    }
 
     ImGui::EndChild();
     ImGui::SameLine();
@@ -88,15 +90,10 @@ void EntityEditor::render() {
       ImGui::BeginChild("item view", ImVec2(0, 0), ImGuiChildFlags_Border);
       if (selectedEntity.has_value()) {
 
-        std::shared_lock<SharedLockableBase(std::shared_mutex)> lock(registryMutex);
-        LockMark(registryMutex);
+        auto& entityData = dataFacade->getEntityData(selectedEntity.value());
 
         // Editor Info Component
-        auto* editorInfo = registry->try_get<tr::EditorInfo>(selectedEntity.value());
-        if (editorInfo == nullptr) {
-          return;
-        }
-        ImGui::Text("%s", editorInfo->name.c_str());
+        ImGui::Text("%s", entityData.name.c_str());
 
         auto buttonWidth = 120.f;
         if (ImGui::Button(ICON_LC_X " Delete", ImVec2(buttonWidth, 0.f))) {
@@ -104,10 +101,7 @@ void EntityEditor::render() {
         }
 
         // Transform Component
-        if (auto* transform = registry->try_get<tr::Transform>(selectedEntity.value());
-            transform != nullptr) {
-          transformInspector->render(editorInfo->name, transform);
-        }
+        transformInspector->render(entityData.name, entityData.transform);
 
         // Camera Component
         if (auto* camera = registry->try_get<tr::Camera>(selectedEntity.value());
