@@ -73,7 +73,7 @@ void DefaultContext::run() {
 
     do {
       TracyPlot("dt", dt.count());
-      TracyPlot("accumulator", accumulator.count());
+      TracyPlot("accumulator", static_cast<long>(accumulator.count()));
       gameplaySystem->fixedUpdate();
       t += dt;
       accumulator -= dt;
@@ -82,7 +82,7 @@ void DefaultContext::run() {
     taskQueue->processCompleteTasks();
 
     [[maybe_unused]] const auto alpha = accumulator / dt;
-    TracyPlot("alpha", alpha);
+    TracyPlot("alpha", static_cast<long>(alpha));
     // fixedUpdateLerp(alpha);? how to interpolate based on alpha here?
 
     {
