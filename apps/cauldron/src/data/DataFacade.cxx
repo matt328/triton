@@ -48,7 +48,8 @@ void DataFacade::removeSkeleton([[maybe_unused]] std::string_view name) {
 }
 
 void DataFacade::addAnimation(std::string_view name, const std::filesystem::path& path) {
-  dataStore.animations.insert({name.data(), AnimationData{name.data(), path.string()}});
+  dataStore.animations.insert(
+      {name.data(), AnimationData{.name = name.data(), .filePath = path.string()}});
   unsaved = true;
 }
 
@@ -56,7 +57,7 @@ void DataFacade::removeAnimation([[maybe_unused]] std::string_view name) {
 }
 
 void DataFacade::addModel(std::string_view name, const std::filesystem::path& path) {
-  dataStore.models.insert({name.data(), ModelData{name.data(), path.string()}});
+  dataStore.models.insert({name.data(), ModelData{.name = name.data(), .filePath = path.string()}});
   unsaved = true;
 }
 

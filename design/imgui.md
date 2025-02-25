@@ -54,3 +54,22 @@ render(const std::shared_ptr<vk::raii::CommandBuffer>& commandBuffer,
    commandBuffer->endRendering();
 }
 ```
+
+## Synchronization
+
+- Should be able to edit entities values from the editor such that access to them is synchronized by the EntityService.
+
+- Editor side data store stores all the initial values that get stored in the project file.
+- Can the editor just edit these initial values, and push them to the game world once per frame?
+- Syncs back from the game world to the UI:
+  - While a behavior component is present and active, component editor is read only, reads and displays values from the game world. IE Can't change an entity's position while it's being updated by a behavior.
+
+Edit mode:
+
+- Load data into store only.
+- Keep a list of dirty store items.
+- At the end of each frame, sync the store item with the game world, whether it means creating, updating, or deleting it.
+  - Dirty List
+  - Deleted List
+  - Created List?
+- Inspectors will work on store data only, marking edited entities dirty.
