@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GlmCereal.hpp"
+#include "cm/EntitySystemTypes.hpp"
 
 namespace ed {
 
@@ -70,6 +71,8 @@ struct DataStore {
 
   // Scene
   std::unordered_map<std::string, EntityData> scene;
+
+  std::unordered_map<std::string, tr::EntityType> entityNameMap;
 
   template <class T>
   void serialize(T& archive) {

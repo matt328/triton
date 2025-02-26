@@ -119,7 +119,7 @@ auto EntityService::createStaticEntity(std::vector<MeshData> meshData,
 
 auto EntityService::createDynamicEntity(ModelData modelData,
                                         Transform transform,
-                                        std::string_view name) -> void {
+                                        std::string_view name) -> tr::EntityType {
 
   std::unique_lock<SharedLockableBase(std::shared_mutex)> lock(registryMutex);
   LockMark(registryMutex);
@@ -133,6 +133,8 @@ auto EntityService::createDynamicEntity(ModelData modelData,
   registry->emplace<Transform>(entity, transform);
   registry->emplace<Renderable>(entity, std::vector{modelData.meshData});
   registry->emplace<EditorInfo>(entity, name.data());
+
+  return entity;
 }
 
 auto EntityService::createCamera(CameraInfo cameraInfo,

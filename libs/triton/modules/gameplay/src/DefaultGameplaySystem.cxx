@@ -149,7 +149,7 @@ auto DefaultGameplaySystem::createStaticModelEntity(std::string filename,
 
 auto DefaultGameplaySystem::createAnimatedModelEntity(const AnimatedModelData& modelData,
                                                       std::optional<Transform> initialTransform)
-    -> void {
+    -> tr::EntityType {
 
   auto loadedModelData = assetManager->loadModel(modelData.modelFilename);
 
@@ -162,16 +162,15 @@ auto DefaultGameplaySystem::createAnimatedModelEntity(const AnimatedModelData& m
   auto transform = Transform{.rotation = glm::zero<glm::vec3>(),
                              .position = glm::zero<glm::vec3>(),
                              .transformation = glm::identity<glm::mat4>()};
-  {
-    if (initialTransform.has_value()) {
-      transform.position = initialTransform->position;
-      transform.rotation = initialTransform->rotation;
-    }
 
-    entityService->createDynamicEntity(loadedModelData,
-                                       transform,
-                                       modelData.entityName.value_or("Unnamed Entity"));
+  if (initialTransform.has_value()) {
+    transform.position = initialTransform->position;
+    transform.rotation = initialTransform->rotation;
   }
+
+  return entityService->createDynamicEntity(loadedModelData,
+                                            transform,
+                                            modelData.entityName.value_or("Unnamed Entity"));
 }
 
 auto DefaultGameplaySystem::createTerrain() -> void {

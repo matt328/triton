@@ -17,7 +17,7 @@ public:
   auto operator=(const TransformInspector&) -> TransformInspector& = delete;
   auto operator=(TransformInspector&&) -> TransformInspector& = delete;
 
-  auto render(std::string_view name, tr::Transform* transform) -> void;
+  auto render(std::string_view name, glm::vec3* position, glm::vec3* rotation) -> void;
 
   auto setTransformListener(const TransformListener& newListener) -> void;
 

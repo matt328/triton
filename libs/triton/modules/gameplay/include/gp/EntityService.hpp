@@ -60,7 +60,9 @@ public:
                           Transform transform,
                           std::string_view name) -> void;
 
-  auto createDynamicEntity(ModelData modelData, Transform transform, std::string_view name) -> void;
+  auto createDynamicEntity(ModelData modelData,
+                           Transform transform,
+                           std::string_view name) -> tr::EntityType;
 
   auto createCamera(CameraInfo cameraInfo, std::string_view name, bool setDefault = true) -> void;
 

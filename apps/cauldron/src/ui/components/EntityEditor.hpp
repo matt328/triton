@@ -39,7 +39,7 @@ private:
 
   mutable TracySharedLockableN(std::shared_mutex, registryMutex, "EntityEditor");
 
-  std::optional<tr::EntityType> selectedEntity{std::nullopt};
+  std::optional<std::string> selectedEntity{std::nullopt};
 
   std::unique_ptr<TransformInspector> transformInspector;
 

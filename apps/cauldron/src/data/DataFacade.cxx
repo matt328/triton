@@ -90,7 +90,6 @@ void DataFacade::createStaticModel(const EntityData& entityData) noexcept {
 }
 
 void DataFacade::createAnimatedModel(const EntityData& entityData) {
-  dataStore.scene.insert({entityData.name, entityData});
   unsaved = true;
 
   const auto modelFilename = dataStore.models.at(entityData.modelName).filePath;
@@ -98,8 +97,10 @@ void DataFacade::createAnimatedModel(const EntityData& entityData) {
   const auto animationFilename = dataStore.animations.at(entityData.animations[0]).filePath;
   const auto entityName = entityData.name;
 
-  const auto onComplete = [this, entityName]() {
+  const auto onComplete = [this, entityName, entityData](tr::EntityType entityId) {
     ZoneNamedN(z, "Create Entity", true);
+    dataStore.entityNameMap.insert({entityName, entityId});
+    dataStore.scene.insert({entityName, entityData});
     engineBusy = false;
   };
   engineBusy = true;
@@ -113,7 +114,8 @@ void DataFacade::createAnimatedModel(const EntityData& entityData) {
       tr::Transform{.rotation = entityData.rotation, .position = entityData.position};
 
   const auto task = [this, animatedEntityData, transform] {
-    gameplaySystem->createAnimatedModelEntity(animatedEntityData, std::make_optional(transform));
+    return gameplaySystem->createAnimatedModelEntity(animatedEntityData,
+                                                     std::make_optional(transform));
   };
 
   taskQueue->enqueue(task, onComplete);
@@ -192,6 +194,14 @@ void DataFacade::load(const std::filesystem::path& inputFile) {
 
     unsaved = false;
   } catch (const std::exception& ex) { Log.error(ex.what()); }
+}
+
+auto DataFacade::getEntityNames() -> std::vector<std::tuple<std::string, tr::EntityType>> {
+  auto names = std::vector<std::tuple<std::string, tr::EntityType>>{};
+  for (const auto& [name, _] : dataStore.scene) {
+    names.emplace_back(name, dataStore.entityNameMap.at(name));
+  }
+  return names;
 }
 
 }

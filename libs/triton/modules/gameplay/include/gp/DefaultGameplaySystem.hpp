@@ -39,7 +39,8 @@ public:
                                std::string_view entityName,
                                std::optional<Transform> initialTransform) -> void override;
   auto createAnimatedModelEntity(const AnimatedModelData& modelData,
-                                 std::optional<Transform> initialTransform) -> void override;
+                                 std::optional<Transform> initialTransform)
+      -> tr::EntityType override;
   auto createTerrain() -> void override;
   auto createDefaultCamera() -> void override;
   auto createTestEntity(std::string_view name) -> void override;

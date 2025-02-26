@@ -70,7 +70,9 @@ public:
 
   void entityTransformUpdated(std::string_view name, const tr::Transform& transform);
 
-  [[nodiscard]] auto getEntityData(std::string_view name) const -> EntityData {
+  auto getEntityNames() -> std::vector<std::tuple<std::string, tr::EntityType>>;
+
+  [[nodiscard]] auto getEntityData(std::string_view name) -> EntityData& {
     return dataStore.scene.at(name.data());
   }
 
@@ -105,7 +107,6 @@ private:
   bool unsaved{};
   bool engineBusy{};
   DataStore dataStore;
-  std::unordered_map<std::string, tr::EntityType> entityNameMap;
 };
 
 } // namespace ed::data
