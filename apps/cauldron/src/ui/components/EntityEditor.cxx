@@ -66,17 +66,17 @@ void EntityEditor::render() {
       ImGui::EndMenuBar();
     }
 
-    std::vector<std::tuple<std::string, tr::EntityType>> entities = dataFacade.getEntityNames();
+    const auto entities = dataFacade->getEntityNames();
 
     // Left
     ImGui::BeginChild("left pane",
                       ImVec2(150, 0),
                       ImGuiChildFlags_Border | ImGuiChildFlags_ResizeX);
 
-    for (const auto& [entityId, entityName] : entities) {
-      if (ImGui::Selectable(entityName.c_str(), entityId == selectedEntity)) {
-        Log.trace("Selected Entity: {}", entityName.name);
-        selectedEntity = entityId;
+    for (const auto& [entityName, entityId] : entities) {
+      if (ImGui::Selectable(entityName.c_str(), entityName == selectedEntity)) {
+        Log.trace("Selected Entity: {}", entityName);
+        selectedEntity = entityName;
       }
     }
 
@@ -101,24 +101,24 @@ void EntityEditor::render() {
         }
 
         // Transform Component
-        transformInspector->render(entityData.name, entityData.transform);
+        transformInspector->render(entityData.name, &entityData.position, &entityData.rotation);
 
-        // Camera Component
-        if (auto* camera = registry->try_get<tr::Camera>(selectedEntity.value());
-            camera != nullptr) {
-          renderCameraInspector(camera);
-        }
+        // // Camera Component
+        // if (auto* camera = registry->try_get<tr::Camera>(selectedEntity.value());
+        //     camera != nullptr) {
+        //   renderCameraInspector(camera);
+        // }
 
-        // Animation Component
-        if (auto* animation = registry->try_get<tr::Animation>(selectedEntity.value());
-            animation != nullptr) {
-          renderAnimationInspector(animation);
-        }
+        // // Animation Component
+        // if (auto* animation = registry->try_get<tr::Animation>(selectedEntity.value());
+        //     animation != nullptr) {
+        //   renderAnimationInspector(animation);
+        // }
 
-        if (del) {
-          dataFacade->deleteEntity(selectedEntity.value());
-          selectedEntity = std::nullopt;
-        }
+        // if (del) {
+        //   dataFacade->deleteEntity(selectedEntity.value());
+        //   selectedEntity = std::nullopt;
+        // }
 
       } else {
         ImGui::Text("No Entity Selected");

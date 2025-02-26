@@ -29,7 +29,8 @@ public:
                                        std::string_view entityName,
                                        std::optional<Transform> initialTransform) -> void = 0;
   virtual auto createAnimatedModelEntity(const AnimatedModelData& modelData,
-                                         std::optional<Transform> initialTransform) -> void = 0;
+                                         std::optional<Transform> initialTransform)
+      -> tr::EntityType = 0;
   virtual auto createTerrain() -> void = 0;
   virtual auto createDefaultCamera() -> void = 0;
   virtual auto createTestEntity(std::string_view name) -> void = 0;
