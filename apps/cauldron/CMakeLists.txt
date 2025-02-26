@@ -14,8 +14,6 @@ set(editor_SRC
   src/ui/components/AssetTool.cxx
   src/ui/components/dialog/FileControl.cxx
 
-  src/ui/components/editors/TransformInspector.cxx
-
   src/data/DataFacade.cxx
 )
 

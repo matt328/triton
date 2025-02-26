@@ -1,28 +1,18 @@
 #pragma once
 
-#include "gp/components/Transform.hpp"
-
 namespace ed {
 
-using TransformListener =
-    std::function<void(std::string_view name, const tr::Transform& transform)>;
-
-class TransformInspector {
-public:
-  TransformInspector() = default;
-  ~TransformInspector() = default;
-
-  TransformInspector(const TransformInspector&) = delete;
-  TransformInspector(TransformInspector&&) = delete;
-  auto operator=(const TransformInspector&) -> TransformInspector& = delete;
-  auto operator=(TransformInspector&&) -> TransformInspector& = delete;
-
-  auto render(std::string_view name, glm::vec3* position, glm::vec3* rotation) -> void;
-
-  auto setTransformListener(const TransformListener& newListener) -> void;
-
-private:
-  TransformListener listener;
-};
+inline auto renderTransformInspector(std::string_view name,
+                                     glm::vec3* position,
+                                     glm::vec3* rotation) -> void {
+  if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
+    if (ImGui::DragFloat3("Position##Transform", glm::value_ptr(*position), 0.5f)) {
+      // listener(name, *transform);
+    }
+    if (ImGui::DragFloat3("Rotation##Transform", glm::value_ptr(*rotation), 0.5f)) {
+      // listener(name, *transform);
+    }
+  }
+}
 
 }
