@@ -41,8 +41,6 @@ private:
 
   std::optional<std::string> selectedEntity{std::nullopt};
 
-  std::unique_ptr<TransformInspector> transformInspector;
-
   void createAnimatedEntityDialog() const;
   void createStaticEntityDialog() const;
 };

@@ -1,9 +1,5 @@
 #include "EntityEditor.hpp"
 
-#include "gp/components/Animation.hpp"
-#include "gp/components/Camera.hpp"
-#include "gp/components/EditorInfo.hpp"
-#include "gp/components/Transform.hpp"
 #include "tr/GameplayEvents.hpp"
 #include "ui/components/DialogManager.hpp"
 #include "ui/components/dialog/ModalDialog.hpp"
@@ -31,13 +27,6 @@ EntityEditor::EntityEditor(std::shared_ptr<tr::IGameplaySystem> newGameplaySyste
   eventBus->subscribe<tr::EntityCreated>([](const tr::EntityCreated& event) {
     Log.trace("EntityEditor entityCreated: {}", static_cast<long>(event.entityId));
   });
-
-  transformInspector = std::make_unique<TransformInspector>();
-
-  transformInspector->setTransformListener(
-      [&](std::string_view name, const tr::Transform& transform) {
-        dataFacade->entityTransformUpdated(name, transform);
-      });
 
   createAnimatedEntityDialog();
   createStaticEntityDialog();
@@ -101,7 +90,7 @@ void EntityEditor::render() {
         }
 
         // Transform Component
-        transformInspector->render(entityData.name, &entityData.position, &entityData.rotation);
+        renderTransformInspector(entityData.name, &entityData.position, &entityData.rotation);
 
         // // Camera Component
         // if (auto* camera = registry->try_get<tr::Camera>(selectedEntity.value());
