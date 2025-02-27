@@ -35,10 +35,19 @@ struct ModelData {
   }
 };
 
-struct EntityData {
-  std::string name;
+struct Orientation {
   glm::vec3 position{glm::zero<glm::vec3>()};
   glm::vec3 rotation{glm::zero<glm::vec3>()};
+
+  template <class T>
+  void serialize(T& archive) {
+    archive(position, rotation);
+  }
+};
+
+struct EntityData {
+  std::string name;
+  Orientation orientation;
 
   std::string modelName;
   std::string skeleton;
@@ -50,7 +59,7 @@ struct EntityData {
 
   template <class T>
   void serialize(T& archive) {
-    archive(name, position, rotation, modelName, skeleton, animations, camPosition, yaw, pitch);
+    archive(name, orientation, modelName, skeleton, animations, camPosition, yaw, pitch);
   }
 };
 

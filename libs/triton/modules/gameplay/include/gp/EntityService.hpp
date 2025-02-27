@@ -71,6 +71,8 @@ public:
   auto forEachEditorInfo(
       const std::function<void(tr::EntityType entity, EditorInfo& editorInfo)>& fn) -> void;
 
+  auto setTransform(tr::EntityType entityId, Transform transform) -> void;
+
 private:
   std::unique_ptr<entt::registry> registry;
   mutable TracySharedLockableN(std::shared_mutex, registryMutex, "EntityService");

@@ -72,6 +72,10 @@ public:
 
   auto getEntityNames() -> std::vector<std::tuple<std::string, tr::EntityType>>;
 
+  [[nodiscard]] auto getEntityId(std::string_view name) const -> tr::EntityType {
+    return dataStore.entityNameMap.at(name.data());
+  }
+
   [[nodiscard]] auto getEntityData(std::string_view name) -> EntityData& {
     return dataStore.scene.at(name.data());
   }

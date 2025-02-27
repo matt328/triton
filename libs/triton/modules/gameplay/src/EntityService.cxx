@@ -178,4 +178,13 @@ auto EntityService::removeEntity(EntityType entity) -> void {
   registry->destroy(entity);
 }
 
+auto EntityService::setTransform(tr::EntityType entityId, Transform transform) -> void {
+  std::unique_lock<SharedLockableBase(std::shared_mutex)> lock(registryMutex);
+  LockMark(registryMutex);
+  registry->patch<Transform>(entityId, [transform](Transform& t) {
+    t.position = transform.position;
+    t.rotation = transform.position;
+  });
+}
+
 }
