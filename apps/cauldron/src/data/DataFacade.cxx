@@ -77,8 +77,8 @@ void DataFacade::createStaticModel(const EntityData& entityData) noexcept {
 
   engineBusy = true;
 
-  const auto transform =
-      tr::Transform{.rotation = entityData.rotation, .position = entityData.position};
+  const auto transform = tr::Transform{.rotation = entityData.orientation.rotation,
+                                       .position = entityData.orientation.position};
 
   const auto task = [this, modelFilename, entityName, transform] {
     gameplaySystem->createStaticModelEntity(modelFilename,
@@ -110,8 +110,8 @@ void DataFacade::createAnimatedModel(const EntityData& entityData) {
                                                         .animationFilename = animationFilename,
                                                         .entityName = entityName};
 
-  const auto transform =
-      tr::Transform{.rotation = entityData.rotation, .position = entityData.position};
+  const auto transform = tr::Transform{.rotation = entityData.orientation.rotation,
+                                       .position = entityData.orientation.position};
 
   const auto task = [this, animatedEntityData, transform] {
     return gameplaySystem->createAnimatedModelEntity(animatedEntityData,
@@ -157,8 +157,8 @@ void DataFacade::save(const std::filesystem::path& outputFile) {
 
 void DataFacade::entityTransformUpdated(std::string_view name, const tr::Transform& transform) {
   auto& entityData = dataStore.scene.at(name.data());
-  entityData.position = transform.position;
-  entityData.rotation = transform.rotation;
+  entityData.orientation.position = transform.position;
+  entityData.orientation.rotation = transform.rotation;
   unsaved = true;
 }
 

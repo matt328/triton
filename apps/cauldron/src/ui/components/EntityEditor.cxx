@@ -90,7 +90,15 @@ void EntityEditor::render() {
         }
 
         // Transform Component
-        renderTransformInspector(entityData.name, &entityData.position, &entityData.rotation);
+        renderTransformInspector(entityData.name,
+                                 &entityData.orientation,
+                                 [this](std::string_view name, Orientation orientation) {
+                                   const auto entityId = dataFacade->getEntityId(name);
+                                   entityService->setTransform(
+                                       entityId,
+                                       tr::Transform{.rotation = orientation.rotation,
+                                                     .position = orientation.position});
+                                 });
 
         // // Camera Component
         // if (auto* camera = registry->try_get<tr::Camera>(selectedEntity.value());
@@ -155,12 +163,12 @@ void EntityEditor::createAnimatedEntityDialog() const {
     std::uniform_real_distribution<float> dis(-25.f, 25.f);
 
     for (int i = 0; i < 50; ++i) {
-      dataFacade->createAnimatedModel(
-          EntityData{.name = fmt::format("{} {}", dialog.getValue<std::string>("name").value(), i),
-                     .position = glm::vec3{dis(gen), dis(gen), dis(gen)},
-                     .modelName = dialog.getValue<std::string>("model").value(),
-                     .skeleton = dialog.getValue<std::string>("skeleton").value(),
-                     .animations = {dialog.getValue<std::string>("animation").value()}});
+      dataFacade->createAnimatedModel(EntityData{
+          .name = fmt::format("{} {}", dialog.getValue<std::string>("name").value(), i),
+          .orientation = Orientation{.position = glm::vec3{dis(gen), dis(gen), dis(gen)}},
+          .modelName = dialog.getValue<std::string>("model").value(),
+          .skeleton = dialog.getValue<std::string>("skeleton").value(),
+          .animations = {dialog.getValue<std::string>("animation").value()}});
     }
   };
 
@@ -199,6 +207,7 @@ void EntityEditor::createStaticEntityDialog() const {
   const auto onOk = [&](const ModalDialog& dialog) {
     dataFacade->createStaticModel(
         EntityData{.name = dialog.getValue<std::string>("name").value(),
+                   .orientation = {},
                    .modelName = dialog.getValue<std::string>("model").value(),
                    .skeleton = "",
                    .animations = {}});
