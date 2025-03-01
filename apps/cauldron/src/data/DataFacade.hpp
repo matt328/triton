@@ -56,7 +56,7 @@ public:
 
   void createAnimatedModel(const EntityData& entityData);
 
-  auto deleteEntity(tr::EntityType entityType) noexcept -> void;
+  auto deleteEntity(std::string_view entityName) noexcept -> void;
 
   void addAnimationToEntity(std::string_view entityName, std::string_view animationName);
 

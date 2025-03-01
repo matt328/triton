@@ -3,8 +3,6 @@
 #include "tr/GameplayEvents.hpp"
 #include "ui/components/DialogManager.hpp"
 #include "ui/components/dialog/ModalDialog.hpp"
-#include "editors/AnimationInspector.hpp"
-#include "editors/CameraInspector.hpp"
 #include "editors/TransformInspector.hpp"
 
 namespace ed {
@@ -118,10 +116,12 @@ void EntityEditor::render() {
         //   renderAnimationInspector(animation);
         // }
 
-        // if (del) {
-        //   dataFacade->deleteEntity(selectedEntity.value());
-        //   selectedEntity = std::nullopt;
-        // }
+        if (del) {
+          const auto entityId = dataFacade->getEntityId(selectedEntity.value());
+          dataFacade->deleteEntity(selectedEntity.value());
+          entityService->removeEntity(entityId);
+          selectedEntity = std::nullopt;
+        }
 
       } else {
         ImGui::Text("No Entity Selected");
