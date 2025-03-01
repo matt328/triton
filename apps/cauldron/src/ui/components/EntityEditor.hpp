@@ -5,7 +5,6 @@
 #include "tr/IGameplaySystem.hpp"
 #include "data/DataFacade.hpp"
 #include "ui/components/DialogManager.hpp"
-#include "ui/components/editors/TransformInspector.hpp"
 #include <entt/entity/fwd.hpp>
 
 namespace ed {
@@ -36,8 +35,6 @@ private:
   std::shared_ptr<DialogManager> dialogManager;
   std::shared_ptr<tr::IEventBus> eventBus;
   std::shared_ptr<tr::EntityService> entityService;
-
-  mutable TracySharedLockableN(std::shared_mutex, registryMutex, "EntityEditor");
 
   std::optional<std::string> selectedEntity{std::nullopt};
 

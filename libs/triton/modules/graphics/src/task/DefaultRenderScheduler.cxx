@@ -276,7 +276,7 @@ auto DefaultRenderScheduler::createDynamicBuffers(const std::unique_ptr<Frame>& 
   // Animation Data Buffer
   {
     const auto name = frame->getIndexedName("Buffer-AnimationData-Frame_");
-    const auto bufferSize = sizeof(AnimationData) * renderConfig.maxDynamicObjects;
+    const auto bufferSize = sizeof(GpuAnimationData) * renderConfig.maxDynamicObjects;
     const auto flags =
         vk::BufferUsageFlagBits::eIndirectBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress;
     const auto handle = bufferManager->createBuffer(bufferSize, flags, name);
@@ -311,8 +311,8 @@ auto DefaultRenderScheduler::handleSwapchainResized(const SwapchainResized& even
   }
 }
 
-auto DefaultRenderScheduler::updatePerFrameRenderData(Frame* frame, const RenderData& renderData)
-    -> void {
+auto DefaultRenderScheduler::updatePerFrameRenderData(Frame* frame,
+                                                      const RenderData& renderData) -> void {
   ZoneNamedN(var, "updatePerFrameRenderData", true);
 
   frame->setStaticObjectCount(renderData.staticGpuMeshData.size());
@@ -602,8 +602,8 @@ auto DefaultRenderScheduler::copyImageToImage(const vk::raii::CommandBuffer& cmd
   cmd.blitImage2(blitInfo);
 }
 
-auto DefaultRenderScheduler::insertBarrier(const vk::raii::CommandBuffer& cmd, const Buffer& buffer)
-    -> void {
+auto DefaultRenderScheduler::insertBarrier(const vk::raii::CommandBuffer& cmd,
+                                           const Buffer& buffer) -> void {
   // Insert a memory barrier for the buffer the computeTask writes to
   vk::BufferMemoryBarrier bufferMemoryBarrier{
       .srcAccessMask = vk::AccessFlagBits::eShaderWrite,
@@ -623,8 +623,8 @@ auto DefaultRenderScheduler::insertBarrier(const vk::raii::CommandBuffer& cmd, c
                       nullptr);
 }
 
-auto DefaultRenderScheduler::updateStaticBuffers(Frame* frame, const RenderData& renderData)
-    -> void {
+auto DefaultRenderScheduler::updateStaticBuffers(Frame* frame,
+                                                 const RenderData& renderData) -> void {
   // Update GpuBufferEntriesBuffer
   {
     ZoneNamedN(var, "getStaticGpuData", true);
@@ -651,8 +651,8 @@ auto DefaultRenderScheduler::updateStaticBuffers(Frame* frame, const RenderData&
   }
 }
 
-auto DefaultRenderScheduler::updateDynamicBuffers(Frame* frame, const RenderData& renderData)
-    -> void {
+auto DefaultRenderScheduler::updateDynamicBuffers(Frame* frame,
+                                                  const RenderData& renderData) -> void {
   // Update GpuBufferEntriesBuffer
   {
     ZoneNamedN(var, "getDynamicGpuData", true);

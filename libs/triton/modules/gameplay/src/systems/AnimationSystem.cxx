@@ -52,9 +52,34 @@ auto AnimationSystem::update() const -> void {
     if (!ltmJob.Run()) {
       Log.warn("ltm job fail");
     }
+
+    animationData.jointMatrices.resize(animationData.jointMap.size());
+    int index = 0;
+    for (const auto& [position, jointId] : animationData.jointMap) {
+      auto inverseBindMatrix = animationData.inverseBindMatrices[index];
+      if (animationData.renderBindPose) {
+        inverseBindMatrix = glm::identity<glm::mat4>();
+      }
+      animationData.jointMatrices[position] =
+          convertOzzToGlm(animationData.models[jointId]) * inverseBindMatrix;
+      ++index;
+    }
   };
 
   entityService->updateAnimations(animationFn);
+}
+
+auto AnimationSystem::convertOzzToGlm(const ozz::math::Float4x4& ozzMatrix) const -> glm::mat4 {
+  glm::mat4 glmMatrix{};
+
+  for (int i = 0; i < 4; ++i) {
+    std::array<float, 4> temp{};
+    ozz::math::StorePtrU(ozzMatrix.cols[i], temp.data());
+    for (int j = 0; j < 4; ++j) {
+      glmMatrix[i][j] = temp[j];
+    }
+  }
+  return glmMatrix;
 }
 
 }

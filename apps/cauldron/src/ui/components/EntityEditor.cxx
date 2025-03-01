@@ -160,9 +160,9 @@ void EntityEditor::createAnimatedEntityDialog() const {
   const auto onOk = [&](const ModalDialog& dialog) {
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_real_distribution<float> dis(-25.f, 25.f);
+    std::uniform_real_distribution<float> dis(-5.f, 5.f);
 
-    for (int i = 0; i < 50; ++i) {
+    for (int i = 0; i < dialog.getValue<int>("count"); ++i) {
       dataFacade->createAnimatedModel(EntityData{
           .name = fmt::format("{} {}", dialog.getValue<std::string>("name").value(), i),
           .orientation = Orientation{.position = glm::vec3{dis(gen), dis(gen), dis(gen)}},
@@ -190,6 +190,9 @@ void EntityEditor::createAnimatedEntityDialog() const {
                      std::string{"Unnamed Animation"},
                      animationsProvider);
 
+  const int defaultCount = 10;
+  dialog->addControl("count", "Count", defaultCount);
+
   dialogManager->addDialog(DialogName, std::move(dialog));
 }
 
@@ -205,12 +208,17 @@ void EntityEditor::createStaticEntityDialog() const {
   };
 
   const auto onOk = [&](const ModalDialog& dialog) {
-    dataFacade->createStaticModel(
-        EntityData{.name = dialog.getValue<std::string>("name").value(),
-                   .orientation = {},
-                   .modelName = dialog.getValue<std::string>("model").value(),
-                   .skeleton = "",
-                   .animations = {}});
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<float> dis(-5.f, 5.f);
+    for (int i = 0; i < dialog.getValue<int>("count"); ++i) {
+      dataFacade->createStaticModel(EntityData{
+          .name = fmt::format("{} {}", dialog.getValue<std::string>("name").value(), i),
+          .orientation = Orientation{.position = glm::vec3{dis(gen), dis(gen), dis(gen)}},
+          .modelName = dialog.getValue<std::string>("model").value(),
+          .skeleton = "",
+          .animations = {}});
+    }
   };
 
   const auto onCancel = []() { Log.debug("Cancelled Dialog with no input"); };
@@ -219,6 +227,8 @@ void EntityEditor::createStaticEntityDialog() const {
       std::make_unique<ModalDialog>(ICON_LC_CUBOID, StaticEntityDialogName, onOk, onCancel);
   dialog->addControl("name", "Entity Name", std::string{"Unnamed Entity"});
   dialog->addControl("model", "Model Name", std::string{"Unnamed Model"}, modelProvider);
+  const int defaultCount = 10;
+  dialog->addControl("count", "Count", defaultCount);
 
   dialogManager->addDialog(StaticEntityDialogName, std::move(dialog));
 }

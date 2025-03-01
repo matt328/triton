@@ -2,6 +2,7 @@
 
 #include "cm/EntitySystemTypes.hpp"
 #include "cm/RenderData.hpp"
+#include "gp/AssetManager.hpp"
 #include "gp/components/Animation.hpp"
 #include "gp/components/Camera.hpp"
 #include "gp/components/EditorInfo.hpp"
@@ -29,7 +30,7 @@ using EntityCreatedFn = std::function<void(entt::registry&, entt::entity)>;
 
 class EntityService {
 public:
-  EntityService();
+  EntityService(std::shared_ptr<AssetManager> newAssetManager);
   ~EntityService();
 
   EntityService(const EntityService&) = delete;
@@ -58,7 +59,7 @@ public:
 
   auto createStaticEntity(std::vector<MeshData> meshData,
                           Transform transform,
-                          std::string_view name) -> void;
+                          std::string_view name) -> tr::EntityType;
 
   auto createDynamicEntity(ModelData modelData,
                            Transform transform,
@@ -74,6 +75,8 @@ public:
   auto setTransform(tr::EntityType entityId, Transform transform) -> void;
 
 private:
+  std::shared_ptr<AssetManager> assetManager;
+
   std::unique_ptr<entt::registry> registry;
   mutable TracySharedLockableN(std::shared_mutex, registryMutex, "EntityService");
 

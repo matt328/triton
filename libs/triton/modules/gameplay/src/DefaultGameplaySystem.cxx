@@ -132,7 +132,7 @@ void DefaultGameplaySystem::setRenderDataTransferHandler(const RenderDataTransfe
 auto DefaultGameplaySystem::createStaticModelEntity(std::string filename,
                                                     std::string_view entityName,
                                                     std::optional<Transform> initialTransform)
-    -> void {
+    -> tr::EntityType {
   auto modelData = assetManager->loadModel(filename);
 
   auto transform = Transform{.rotation = glm::zero<glm::vec3>(),
@@ -144,7 +144,7 @@ auto DefaultGameplaySystem::createStaticModelEntity(std::string filename,
     transform.rotation = initialTransform->rotation;
   }
 
-  entityService->createStaticEntity(std::vector{modelData.meshData}, transform, entityName);
+  return entityService->createStaticEntity(std::vector{modelData.meshData}, transform, entityName);
 }
 
 auto DefaultGameplaySystem::createAnimatedModelEntity(const AnimatedModelData& modelData,
@@ -200,7 +200,6 @@ auto DefaultGameplaySystem::removeEntity(tr::EntityType entity) -> void {
 
 auto DefaultGameplaySystem::entityCreated([[maybe_unused]] entt::registry& reg,
                                           [[maybe_unused]] entt::entity entity) const -> void {
-  Log.trace("Entity Created: {}", static_cast<uint32_t>(entity));
   eventBus->emit(EntityCreated{entity});
 }
 

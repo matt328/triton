@@ -27,7 +27,8 @@ public:
 
   virtual auto createStaticModelEntity(std::string filename,
                                        std::string_view entityName,
-                                       std::optional<Transform> initialTransform) -> void = 0;
+                                       std::optional<Transform> initialTransform)
+      -> tr::EntityType = 0;
   virtual auto createAnimatedModelEntity(const AnimatedModelData& modelData,
                                          std::optional<Transform> initialTransform)
       -> tr::EntityType = 0;

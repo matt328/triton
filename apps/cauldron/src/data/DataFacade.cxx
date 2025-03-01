@@ -69,8 +69,9 @@ void DataFacade::createStaticModel(const EntityData& entityData) noexcept {
   const auto modelFilename = dataStore.models.at(entityData.modelName).filePath;
   const auto entityName = entityData.name;
 
-  const auto onComplete = [this, entityData]() {
+  const auto onComplete = [this, entityName, entityData](tr::EntityType entityId) {
     dataStore.scene.insert({entityData.name, entityData});
+    dataStore.entityNameMap.insert({entityName, entityId});
     engineBusy = false;
     Log.info("Finished creating entity: name: {}", entityData.name);
   };
@@ -81,9 +82,9 @@ void DataFacade::createStaticModel(const EntityData& entityData) noexcept {
                                        .position = entityData.orientation.position};
 
   const auto task = [this, modelFilename, entityName, transform] {
-    gameplaySystem->createStaticModelEntity(modelFilename,
-                                            entityName,
-                                            std::make_optional(transform));
+    return gameplaySystem->createStaticModelEntity(modelFilename,
+                                                   entityName,
+                                                   std::make_optional(transform));
   };
 
   taskQueue->enqueue(task, onComplete);
@@ -98,7 +99,6 @@ void DataFacade::createAnimatedModel(const EntityData& entityData) {
   const auto entityName = entityData.name;
 
   const auto onComplete = [this, entityName, entityData](tr::EntityType entityId) {
-    ZoneNamedN(z, "Create Entity", true);
     dataStore.entityNameMap.insert({entityName, entityId});
     dataStore.scene.insert({entityName, entityData});
     engineBusy = false;

@@ -45,29 +45,14 @@ auto RenderDataSystem::update(RenderData& renderData) -> void {
 
   uint32_t jointMatricesIndex = 0;
 
-  const auto dynamicFn = [&jointMatricesIndex, this](RenderData& renderData,
-                                                     [[maybe_unused]] entt::entity entity,
-                                                     const Animation& animationData,
-                                                     const Renderable& renderable,
-                                                     const Transform& transform) {
-    // Convert the jointMap into a list of join matrices the gpu needs
-    if (animationData.models.empty()) {
-      Log.trace("Models are empty, skipping for now");
-      return;
-    }
-    auto jointMatrices = std::vector<glm::mat4>{};
-    jointMatrices.resize(animationData.jointMap.size());
-    int index = 0;
-    for (const auto& [position, jointId] : animationData.jointMap) {
-      auto inverseBindMatrix = animationData.inverseBindMatrices[index];
-      if (animationData.renderBindPose) {
-        inverseBindMatrix = glm::identity<glm::mat4>();
-      }
-      jointMatrices[position] = convertOzzToGlm(animationData.models[jointId]) * inverseBindMatrix;
-      ++index;
-    }
-
-    for (const auto jointMatrix : jointMatrices) {
+  const auto dynamicFn = [&jointMatricesIndex](RenderData& renderData,
+                                               [[maybe_unused]] entt::entity entity,
+                                               const Animation& animationData,
+                                               const Renderable& renderable,
+                                               const Transform& transform) {
+    int64_t size = animationData.jointMatrices.size();
+    TracyPlot("jointMatrices size", size);
+    for (const auto jointMatrix : animationData.jointMatrices) {
       renderData.animationData.push_back({jointMatrix});
     }
 
@@ -79,22 +64,10 @@ auto RenderDataSystem::update(RenderData& renderData) -> void {
                                                 jointMatricesIndex);
     }
 
-    jointMatricesIndex += jointMatrices.size();
+    jointMatricesIndex += animationData.jointMatrices.size();
   };
 
   entityService->updateRenderDataCamera(camFn, staticFn, dynamicFn, renderData);
 }
 
-auto RenderDataSystem::convertOzzToGlm(const ozz::math::Float4x4& ozzMatrix) -> glm::mat4 {
-  glm::mat4 glmMatrix{};
-
-  for (int i = 0; i < 4; ++i) {
-    std::array<float, 4> temp{};
-    ozz::math::StorePtrU(ozzMatrix.cols[i], temp.data());
-    for (int j = 0; j < 4; ++j) {
-      glmMatrix[i][j] = temp[j];
-    }
-  }
-  return glmMatrix;
-}
 }
