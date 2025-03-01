@@ -5,7 +5,8 @@
 
 namespace tr {
 
-EntityService::EntityService() {
+EntityService::EntityService(std::shared_ptr<AssetManager> newAssetManager)
+    : assetManager{std::move(newAssetManager)} {
   registry = std::make_unique<entt::registry>();
 }
 
@@ -96,7 +97,6 @@ auto EntityService::updateRenderDataCamera(const CamFn& camUpdateFn,
 
 auto EntityService::entityCreated([[maybe_unused]] entt::registry& reg,
                                   [[maybe_unused]] entt::entity entity) const -> void {
-  Log.trace("Entity Created: {}", static_cast<uint32_t>(entity));
   entityCreatedFn(reg, entity);
 }
 
@@ -108,18 +108,21 @@ auto EntityService::updateWindowDimensions(WindowDimensions windowDimensions) ->
 
 auto EntityService::createStaticEntity(std::vector<MeshData> meshData,
                                        Transform transform,
-                                       std::string_view name) -> void {
+                                       std::string_view name) -> tr::EntityType {
   std::unique_lock<SharedLockableBase(std::shared_mutex)> lock(registryMutex);
   LockMark(registryMutex);
   const auto entity = registry->create();
   registry->emplace<Renderable>(entity, meshData);
   registry->emplace<Transform>(entity, transform);
   registry->emplace<EditorInfo>(entity, name.data());
+  return entity;
 }
 
 auto EntityService::createDynamicEntity(ModelData modelData,
                                         Transform transform,
                                         std::string_view name) -> tr::EntityType {
+
+  const auto& skeleton = assetManager->getSkeleton(modelData.animationData->skeletonHandle);
 
   std::unique_lock<SharedLockableBase(std::shared_mutex)> lock(registryMutex);
   LockMark(registryMutex);
@@ -129,7 +132,9 @@ auto EntityService::createDynamicEntity(ModelData modelData,
                                modelData.animationData->animationHandle,
                                modelData.animationData->skeletonHandle,
                                modelData.skinData->jointMap,
-                               modelData.skinData->inverseBindMatrices);
+                               modelData.skinData->inverseBindMatrices,
+                               skeleton.num_joints(),
+                               skeleton.num_soa_joints());
   registry->emplace<Transform>(entity, transform);
   registry->emplace<Renderable>(entity, std::vector{modelData.meshData});
   registry->emplace<EditorInfo>(entity, name.data());
@@ -183,7 +188,7 @@ auto EntityService::setTransform(tr::EntityType entityId, Transform transform) -
   LockMark(registryMutex);
   registry->patch<Transform>(entityId, [transform](Transform& t) {
     t.position = transform.position;
-    t.rotation = transform.position;
+    t.rotation = transform.rotation;
   });
 }
 

@@ -37,7 +37,8 @@ public:
 
   auto createStaticModelEntity(std::string filename,
                                std::string_view entityName,
-                               std::optional<Transform> initialTransform) -> void override;
+                               std::optional<Transform> initialTransform)
+      -> tr::EntityType override;
   auto createAnimatedModelEntity(const AnimatedModelData& modelData,
                                  std::optional<Transform> initialTransform)
       -> tr::EntityType override;
@@ -59,8 +60,6 @@ private:
   std::shared_ptr<EntityService> entityService;
 
   RenderDataTransferHandler transferHandler;
-
-  mutable TracyLockableN(std::shared_mutex, registryMutex, "GameplaySystem");
 
   entt::connection entityCreatedConnection;
 

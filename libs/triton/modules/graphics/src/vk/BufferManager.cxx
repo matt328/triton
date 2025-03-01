@@ -32,7 +32,6 @@ BufferManager::BufferManager(std::shared_ptr<Allocator> newAllocator,
     };
 
     const auto task = [this, event] {
-      Log.trace("clearInProgress = true");
       ZoneNamedN(var, "Buffer Cleanup Fence Wait", true);
       if (const auto result =
               device->getVkDevice().waitForFences(event.fence, vk::True, UINT64_MAX);
@@ -41,7 +40,6 @@ BufferManager::BufferManager(std::shared_ptr<Allocator> newAllocator,
       }
     };
 
-    Log.trace("Enqueueing Task");
     clearInProgress = true;
     taskQueue->enqueue(task, onComplete);
   });
@@ -109,28 +107,19 @@ auto BufferManager::createIndirectBuffer(size_t size) -> BufferHandle {
 
   auto newBuffer = allocator->createBuffer(&bci, &aci);
 
-  Log.trace("Submitting buffer copy to immediateTransferContext");
   immediateTransferContext->submit([&](const vk::raii::CommandBuffer& cmd) {
     ZoneNamedN(var, "Copy Buffer", true);
     const auto vbCopy = vk::BufferCopy{.srcOffset = 0, .dstOffset = 0, .size = oldSize};
     cmd.copyBuffer(oldBuffer->getBuffer(), newBuffer->getBuffer(), vbCopy);
   });
 
-  Log.trace("Erasing old buffer {}", handle);
-  TracyMessageL("Erasing old buffer");
   {
     ZoneNamedN(var, "Erasing Buffer", true);
-
-    // TODO(matt): figure out how to ensure the graphics queue is not using this buffer before
-    // erasing it.
-    // Either map out some fence to buffer, or do some deferred erase that waits a few frames or
-    // something.
     unusedBuffers.push_back(handle);
   }
   TracyMessageL("Old Buffer Erased");
   const auto newHandle = bufferMapKeygen.getKey();
   bufferMap.emplace(newHandle, std::move(newBuffer));
-  Log.trace("Emplacing new buffer {}", newHandle);
   return newHandle;
 }
 

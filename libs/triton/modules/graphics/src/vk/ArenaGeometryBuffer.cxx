@@ -10,7 +10,7 @@ ArenaGeometryBuffer::ArenaGeometryBuffer(std::shared_ptr<IBufferManager> newBuff
 
   const auto vbAci = ArenaBufferCreateInfo{
       .newItemStride = createInfo.vertexSize,
-      .initialBufferSize = 10240,
+      .initialBufferSize = 8192000,
       .bufferType = BufferType::Vertex,
       .bufferName = createInfo.bufferName,
   };
@@ -18,7 +18,7 @@ ArenaGeometryBuffer::ArenaGeometryBuffer(std::shared_ptr<IBufferManager> newBuff
 
   const auto ibAci = ArenaBufferCreateInfo{
       .newItemStride = createInfo.indexSize,
-      .initialBufferSize = 10240,
+      .initialBufferSize = 819200,
       .bufferType = BufferType::Index,
       .bufferName = createInfo.bufferName,
   };

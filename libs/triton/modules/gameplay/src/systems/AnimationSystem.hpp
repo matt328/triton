@@ -20,6 +20,8 @@ public:
 private:
   std::shared_ptr<AssetManager> assetManager;
   std::shared_ptr<EntityService> entityService;
+
+  auto convertOzzToGlm(const ozz::math::Float4x4& ozzMatrix) const -> glm::mat4;
 };
 
 }

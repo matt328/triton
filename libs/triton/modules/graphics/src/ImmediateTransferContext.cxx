@@ -35,14 +35,6 @@ ImmediateTransferContext::~ImmediateTransferContext() {
 }
 void ImmediateTransferContext::submit(
     std::function<void(vk::raii::CommandBuffer& cmd)>&& fn) const {
-
-  const auto currentThreadId = std::this_thread::get_id();
-
-  std::ostringstream oss;
-  oss << currentThreadId;
-
-  Log.trace("ImmediateTransferContext submitting on thread {}", oss.str());
-
   TracyMessageL("ImmediateContext Begin");
 
   ZoneNamedN(immediateContextZone, "Immediate Transfer", true);
