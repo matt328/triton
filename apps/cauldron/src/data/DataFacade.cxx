@@ -121,8 +121,9 @@ void DataFacade::createAnimatedModel(const EntityData& entityData) {
   taskQueue->enqueue(task, onComplete);
 }
 
-auto DataFacade::deleteEntity(tr::EntityType entityType) noexcept -> void {
-  gameplaySystem->removeEntity(entityType);
+auto DataFacade::deleteEntity(std::string_view name) noexcept -> void {
+  dataStore.scene.erase(name.data());
+  dataStore.entityNameMap.erase(name.data());
 }
 
 void DataFacade::addAnimationToEntity([[maybe_unused]] std::string_view entityName,
