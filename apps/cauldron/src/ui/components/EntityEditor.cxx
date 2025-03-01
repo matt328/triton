@@ -90,15 +90,21 @@ void EntityEditor::render() {
         }
 
         // Transform Component
-        renderTransformInspector(entityData.name,
-                                 &entityData.orientation,
-                                 [this](std::string_view name, Orientation orientation) {
-                                   const auto entityId = dataFacade->getEntityId(name);
-                                   entityService->setTransform(
-                                       entityId,
-                                       tr::Transform{.rotation = orientation.rotation,
-                                                     .position = orientation.position});
-                                 });
+
+        const auto transformCallback = [this](std::string_view name, Orientation orientation) {
+          const auto entityId = dataFacade->getEntityId(name);
+          entityService->setTransform(
+              entityId,
+              tr::Transform{.rotation = orientation.rotation, .position = orientation.position});
+        };
+
+        renderTransformInspector(entityData.name, &entityData.orientation, transformCallback);
+
+        /*
+          None of the other components yet have much functionality that makes sense to be changed
+          from the editor. As more of the gameplay module is implemented, more requirements for
+          these component editors will be realized.
+        */
 
         // // Camera Component
         // if (auto* camera = registry->try_get<tr::Camera>(selectedEntity.value());
