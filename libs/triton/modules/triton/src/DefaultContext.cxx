@@ -86,7 +86,13 @@ void DefaultContext::run() {
 
     {
       ZoneNamedN(z, "Gameplay Update", true);
+      // Updates the RenderData and sets it in the RenderContext
       gameplaySystem->update();
+    }
+
+    {
+      ZoneNamedN(z, "RenderContext Update Terrain System", true);
+      renderContext->updateTerrainSystem();
     }
 
     {

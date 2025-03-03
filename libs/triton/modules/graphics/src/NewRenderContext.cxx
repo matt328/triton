@@ -12,6 +12,9 @@ NewRenderContext::~NewRenderContext() {
   Log.trace("Destroying NewRenderContext");
 }
 
+void NewRenderContext::updateTerrainSystem() {
+}
+
 /// This gets called directly after setRenderData
 void NewRenderContext::renderNextFrame() {
 
@@ -19,7 +22,7 @@ void NewRenderContext::renderNextFrame() {
     const auto result = frameManager->acquireFrame();
 
     if (std::holds_alternative<Frame*>(result)) {
-      auto frame = std::get<Frame*>(result);
+      auto* frame = std::get<Frame*>(result);
       { renderScheduler->updatePerFrameRenderData(frame, renderData); }
       {
         renderScheduler->recordRenderTasks(frame,

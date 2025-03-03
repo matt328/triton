@@ -35,6 +35,7 @@ set(common_SRC
   modules/graphics/src/ImGuiSystem.cxx
   modules/graphics/src/NoopDebugManager.cxx
   modules/graphics/src/NewRenderContext.cxx
+  modules/graphics/src/TerrainManager.cxx
 
   modules/graphics/src/vk/VkResourceManager.cxx
   modules/graphics/src/vk/BufferManager.cxx
@@ -61,10 +62,12 @@ set(common_SRC
   modules/graphics/src/task/RenderTaskFactory.cxx
   modules/graphics/src/task/ComputeTask.cxx
   modules/graphics/src/task/StaticTask.cxx
+  modules/graphics/src/task/TerrainTask.cxx
 
   modules/graphics/src/pipeline/IndirectPipeline.cxx
   modules/graphics/src/pipeline/StaticPipeline.cxx
   modules/graphics/src/pipeline/ComputePipeline.cxx
+  modules/graphics/src/pipeline/TerrainPipeline.cxx
   modules/graphics/src/pipeline/SpirvShaderModuleFactory.cxx
 )
 

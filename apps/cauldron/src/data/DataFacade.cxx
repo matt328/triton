@@ -140,12 +140,24 @@ void DataFacade::setEntitySkeleton([[maybe_unused]] std::string_view entityName,
   unsaved = true;
 }
 
-void DataFacade::createTerrain([[maybe_unused]] std::string_view terrainName) {
-  const std::function<void()> task = [&] { gameplaySystem->createTerrain(); };
+void DataFacade::createTerrain(std::string_view terrainName, glm::vec3 terrainSize) {
 
-  std::function<void()> const onComplete = [this]() { engineBusy = false; };
+  const auto task = [this, &terrainName, terrainSize] {
+    return gameplaySystem->createTerrain(terrainName, terrainSize);
+  };
+
+  const auto onComplete = [this, terrainName, terrainSize](tr::EntityType entityId) {
+    dataStore.entityNameMap.insert({terrainName.data(), entityId});
+    dataStore.terrainMap.insert({terrainName.data(),
+                                 TerrainData{
+                                     .name = terrainName.data(),
+                                     .terrainSize = terrainSize,
+                                 }});
+    engineBusy = false;
+  };
+
   engineBusy = true;
-  auto result = taskQueue->enqueue(task, onComplete);
+  taskQueue->enqueue(task, onComplete);
 }
 
 void DataFacade::save(const std::filesystem::path& outputFile) {
@@ -202,6 +214,11 @@ auto DataFacade::getEntityNames() -> std::vector<std::tuple<std::string, tr::Ent
   for (const auto& [name, _] : dataStore.scene) {
     names.emplace_back(name, dataStore.entityNameMap.at(name));
   }
+
+  for (const auto& [name, _] : dataStore.terrainMap) {
+    names.emplace_back(name, dataStore.entityNameMap.at(name));
+  }
+
   return names;
 }
 

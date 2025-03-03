@@ -26,7 +26,12 @@ enum class BufferHandleType : uint8_t {
   DynamicCountBuffer,
   CameraBuffer,
   DescriptorBuffer,
-  AnimationDataBuffer
+  AnimationDataBuffer,
+  TerrainGpuBufferEntry,
+  TerrainChunkDrawCommand,
+  TerrainChunkData,
+  TerrainChunkDataIndex,
+  TerrainChunkCount,
 };
 
 class Frame {
@@ -51,6 +56,7 @@ public:
   [[nodiscard]] auto getDrawImageExtent() const -> vk::Extent2D;
   [[nodiscard]] auto getStaticObjectCount() const -> uint32_t;
   [[nodiscard]] auto getDynamicObjectCount() const -> uint32_t;
+  [[nodiscard]] auto getTerrainChunkCount() const -> uint32_t;
 
   [[nodiscard]] auto getBufferHandle(BufferHandleType type) const -> BufferHandle;
 
@@ -68,8 +74,10 @@ public:
 
   auto setSwapchainImageIndex(uint32_t index) -> void;
   auto setDrawImageExtent(vk::Extent2D extent) -> void;
+
   auto setStaticObjectCount(uint32_t newObjectCount) -> void;
   auto setDynamicObjectCount(uint32_t newObjectCount) -> void;
+  auto setTerrainChunkCount(uint32_t newObjectCount) -> void;
 
   auto setupRenderingInfo(const std::shared_ptr<VkResourceManager>& resourceManager) -> void;
 
@@ -99,6 +107,7 @@ private:
 
   uint32_t staticObjectCount;
   uint32_t dynamicObjectCount;
+  uint32_t terrainChunkCount;
 
   static auto transitionImage(const vk::raii::CommandBuffer& cmd,
                               const vk::Image& image,

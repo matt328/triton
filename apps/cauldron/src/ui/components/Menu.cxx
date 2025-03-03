@@ -54,10 +54,6 @@ void Menu::render() {
         dialogManager->setOpen("Test Dialog");
       }
 
-      if (ImGui::MenuItem("Create Terrain")) {
-        dataFacade->createTerrain("Test Terrain");
-      }
-
       if (ImGui::MenuItem("Create Box")) {
         dataFacade->createAABB();
       }

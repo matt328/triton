@@ -1,4 +1,5 @@
 #include "RenderTaskFactory.hpp"
+#include "TerrainTask.hpp"
 #include "gfx/RenderContextConfig.hpp"
 #include "task/StaticTask.hpp"
 
@@ -29,6 +30,10 @@ auto RenderTaskFactory::createComputeTask() -> std::unique_ptr<ComputeTask> {
 
 auto RenderTaskFactory::createStaticTask() -> std::unique_ptr<StaticTask> {
   return std::make_unique<StaticTask>(resourceManager, staticPipeline, bufferManager, config);
+}
+
+auto RenderTaskFactory::createTerrainTask() -> std::unique_ptr<TerrainTask> {
+  return std::make_unique<TerrainTask>(resourceManager, staticPipeline, bufferManager, config);
 }
 
 }

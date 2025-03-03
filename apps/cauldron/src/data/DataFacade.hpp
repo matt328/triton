@@ -62,7 +62,7 @@ public:
 
   void setEntitySkeleton(std::string_view entityName, std::string_view skeletonName);
 
-  void createTerrain(std::string_view terrainName);
+  void createTerrain(std::string_view terrainName, glm::vec3 terrainSize);
   void createAABB();
 
   void save(const std::filesystem::path& outputFile);
@@ -76,8 +76,12 @@ public:
     return dataStore.entityNameMap.at(name.data());
   }
 
-  [[nodiscard]] auto getEntityData(std::string_view name) -> EntityData& {
-    return dataStore.scene.at(name.data());
+  [[nodiscard]] auto getEntityData(std::string_view name) -> EntityData* {
+    if (dataStore.scene.contains(name.data())) {
+      return &dataStore.scene.at(name.data());
+    } else {
+      return nullptr;
+    }
   }
 
   [[nodiscard]] auto isUnsaved() const {

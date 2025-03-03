@@ -13,6 +13,12 @@ struct StaticGpuObjectData {
   std::array<uint32_t, 3> padding{};
 };
 
+struct TerrainGpuObjectData {
+  glm::mat4 model{};
+  TextureHandle textureId{};
+  std::array<uint32_t, 3> padding{};
+};
+
 struct DynamicGpuObjectData {
   glm::mat4 model{};
   TextureHandle textureId{};

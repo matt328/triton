@@ -1,5 +1,6 @@
 #pragma once
 
+#include "TerrainManager.hpp"
 #include "gp/AssetManager.hpp"
 #include "gp/action/IActionSystem.hpp"
 #include "gp/components/Transform.hpp"
@@ -22,7 +23,8 @@ public:
                         std::shared_ptr<TransformSystem> newTransformSystem,
                         std::shared_ptr<AnimationSystem> newAnimationSystem,
                         std::shared_ptr<RenderDataSystem> newRenderDataSystem,
-                        std::shared_ptr<EntityService> entityService);
+                        std::shared_ptr<EntityService> entityService,
+                        std::shared_ptr<TerrainManager> newTerrainManager);
   ~DefaultGameplaySystem() override;
 
   DefaultGameplaySystem(const DefaultGameplaySystem&) = delete;
@@ -42,22 +44,22 @@ public:
   auto createAnimatedModelEntity(const AnimatedModelData& modelData,
                                  std::optional<Transform> initialTransform)
       -> tr::EntityType override;
-  auto createTerrain() -> void override;
+  auto createTerrain(std::string_view name, glm::vec3 terrainSize) -> tr::EntityType override;
   auto createDefaultCamera() -> void override;
   auto createTestEntity(std::string_view name) -> void override;
   auto removeEntity(tr::EntityType entity) -> void override;
-  auto getEntityService() const -> std::shared_ptr<EntityService> override;
+  [[nodiscard]] auto getEntityService() const -> std::shared_ptr<EntityService> override;
 
 private:
   std::shared_ptr<IEventBus> eventBus;
   std::shared_ptr<AssetManager> assetManager;
   std::shared_ptr<IActionSystem> actionSystem;
-
   std::shared_ptr<CameraSystem> cameraSystem;
   std::shared_ptr<TransformSystem> transformSystem;
   std::shared_ptr<AnimationSystem> animationSystem;
   std::shared_ptr<RenderDataSystem> renderDataSystem;
   std::shared_ptr<EntityService> entityService;
+  std::shared_ptr<TerrainManager> terrainManager;
 
   RenderDataTransferHandler transferHandler;
 

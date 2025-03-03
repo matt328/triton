@@ -74,6 +74,7 @@ DefaultRenderScheduler::DefaultRenderScheduler(
 
     createStaticBuffers(frame);
     createDynamicBuffers(frame);
+    createTerrainBuffers(frame);
 
     // Camera Data Buffer
     {
@@ -99,6 +100,7 @@ DefaultRenderScheduler::DefaultRenderScheduler(
   indirectRenderTask = renderTaskFactory->createIndirectRenderTask();
   computeTask = renderTaskFactory->createComputeTask();
   staticRenderTask = renderTaskFactory->createStaticTask();
+  terrainTask = renderTaskFactory->createTerrainTask();
 
   const auto extent = swapchain->getImageExtent();
 
@@ -284,6 +286,85 @@ auto DefaultRenderScheduler::createDynamicBuffers(const std::unique_ptr<Frame>& 
   }
 }
 
+auto DefaultRenderScheduler::createTerrainBuffers(const std::unique_ptr<Frame>& frame) -> void {
+  // GpuBufferEntryList
+  {
+    std::vector<GpuBufferEntry> gpuBufferEntryList{};
+    gpuBufferEntryList.reserve(1);
+    const auto name = frame->getIndexedName("Buffer-TerrainChunkGpuBufferEntry-Frame_");
+    const auto handle = bufferManager->createBuffer(
+        sizeof(GpuBufferEntry) * renderConfig.maxTerrainChunks,
+        vk::BufferUsageFlagBits::eStorageBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress,
+        name);
+
+    frame->setBufferHandle(BufferHandleType::TerrainGpuBufferEntry, handle);
+
+    auto& gpuBufferEntriesBuffer = bufferManager->getBuffer(handle);
+    gpuBufferEntriesBuffer.mapBuffer();
+    gpuBufferEntriesBuffer.updateBufferValue(gpuBufferEntryList.data(), sizeof(GpuBufferEntry));
+    gpuBufferEntriesBuffer.unmapBuffer();
+  }
+
+  // TerrainChunk CommandBuffer
+  {
+    const auto name = frame->getIndexedName("Buffer-TerrainChunkDrawCommand-Frame_");
+    const auto handle = bufferManager->createBuffer(
+        sizeof(vk::DrawIndexedIndirectCommand) * renderConfig.maxTerrainChunks,
+        vk::BufferUsageFlagBits::eIndirectBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress,
+        name);
+    frame->setBufferHandle(BufferHandleType::TerrainChunkDrawCommand, handle);
+    auto& indirectCommandBuffer = bufferManager->getBuffer(handle);
+    auto cmd = vk::DrawIndexedIndirectCommand{};
+    cmd.instanceCount = 0;
+    indirectCommandBuffer.mapBuffer();
+    indirectCommandBuffer.updateBufferValue(&cmd, sizeof(vk::DrawIndexedIndirectCommand));
+    indirectCommandBuffer.unmapBuffer();
+  }
+
+  // TerrainChunk Count Buffer
+  {
+    const auto name = frame->getIndexedName("Buffer-TerrainChunkCount-Frame_");
+    const auto handle = bufferManager->createBuffer(
+        sizeof(uint32_t),
+        vk::BufferUsageFlagBits::eIndirectBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress,
+        name);
+    auto& countBuffer = bufferManager->getBuffer(handle);
+
+    uint32_t count = 0;
+    countBuffer.mapBuffer();
+    countBuffer.updateBufferValue(&count, sizeof(uint32_t));
+    countBuffer.unmapBuffer();
+
+    frame->setBufferHandle(BufferHandleType::TerrainChunkCount, handle);
+  }
+
+  // TerrainChunk Index Buffer
+  {
+    const auto name = frame->getIndexedName("Buffer-TerrainChunkDataIndex-Frame_");
+    const auto handle = bufferManager->createBuffer(
+        sizeof(uint32_t) * renderConfig.maxTerrainChunks,
+        vk::BufferUsageFlagBits::eIndirectBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress,
+        name);
+    auto& objectDataIndexBuffer = bufferManager->getBuffer(handle);
+
+    uint32_t count = 0;
+    objectDataIndexBuffer.mapBuffer();
+    objectDataIndexBuffer.updateBufferValue(&count, sizeof(uint32_t));
+    objectDataIndexBuffer.unmapBuffer();
+    frame->setBufferHandle(BufferHandleType::TerrainChunkDataIndex, handle);
+  }
+
+  // Terrain Chunk Data Buffer
+  {
+    const auto name = frame->getIndexedName("Buffer-TerrainChunkData-Frame_");
+    const auto handle = bufferManager->createBuffer(
+        sizeof(DynamicGpuObjectData) * renderConfig.maxTerrainChunks,
+        vk::BufferUsageFlagBits::eIndirectBuffer | vk::BufferUsageFlagBits::eShaderDeviceAddress,
+        name);
+    frame->setBufferHandle(BufferHandleType::TerrainChunkData, handle);
+  }
+}
+
 auto DefaultRenderScheduler::handleSwapchainResized(const SwapchainResized& event) -> void {
   viewport = vk::Viewport{
       .width = static_cast<float>(event.width),
@@ -323,6 +404,8 @@ auto DefaultRenderScheduler::updatePerFrameRenderData(Frame* frame,
   updateStaticBuffers(frame, renderData);
 
   updateDynamicBuffers(frame, renderData);
+
+  updateTerrainBuffers(frame, renderData);
 
   // Update CameraDataBuffer
   {
@@ -423,6 +506,21 @@ auto DefaultRenderScheduler::executeTasks(Frame* frame, bool recordTasks) const 
   }
 
   {
+    ZoneNamedN(var, "Record Static Compute Barriers", true);
+    auto& indirectBuffer =
+        bufferManager->getBuffer(frame->getBufferHandle(BufferHandleType::StaticDrawCommand));
+    insertBarrier(commandBuffer, indirectBuffer);
+
+    auto& countBuffer =
+        bufferManager->getBuffer(frame->getBufferHandle(BufferHandleType::StaticCountBuffer));
+    insertBarrier(commandBuffer, countBuffer);
+
+    auto& objectDataIndexBuffer = bufferManager->getBuffer(
+        frame->getBufferHandle(BufferHandleType::StaticObjectDataIndexBuffer));
+    insertBarrier(commandBuffer, objectDataIndexBuffer);
+  }
+
+  {
     ZoneNamedN(var, "Record Dynamic Compute Task", true);
     const auto& gpuBufferEntryBuffer =
         bufferManager->getBuffer(frame->getBufferHandle(BufferHandleType::DynamicGpuBufferEntry));
@@ -445,23 +543,8 @@ auto DefaultRenderScheduler::executeTasks(Frame* frame, bool recordTasks) const 
     computeTask->record(commandBuffer, computePushConstants);
   }
 
-  // Record barriers for buffers written by Static compute tasks
   {
-    auto& indirectBuffer =
-        bufferManager->getBuffer(frame->getBufferHandle(BufferHandleType::StaticDrawCommand));
-    insertBarrier(commandBuffer, indirectBuffer);
-
-    auto& countBuffer =
-        bufferManager->getBuffer(frame->getBufferHandle(BufferHandleType::StaticCountBuffer));
-    insertBarrier(commandBuffer, countBuffer);
-
-    auto& objectDataIndexBuffer = bufferManager->getBuffer(
-        frame->getBufferHandle(BufferHandleType::StaticObjectDataIndexBuffer));
-    insertBarrier(commandBuffer, objectDataIndexBuffer);
-  }
-
-  // Record barriers for buffers written by Dynamic compute tasks
-  {
+    ZoneNamedN(var, "Record Dynamic Compute Barriers", true);
     auto& indirectBuffer =
         bufferManager->getBuffer(frame->getBufferHandle(BufferHandleType::DynamicDrawCommand));
     insertBarrier(commandBuffer, indirectBuffer);
@@ -472,6 +555,44 @@ auto DefaultRenderScheduler::executeTasks(Frame* frame, bool recordTasks) const 
 
     auto& objectDataIndexBuffer = bufferManager->getBuffer(
         frame->getBufferHandle(BufferHandleType::DynamicObjectDataIndexBuffer));
+    insertBarrier(commandBuffer, objectDataIndexBuffer);
+  }
+
+  {
+    ZoneNamedN(var, "Record Terrain Compute Task", true);
+    const auto& gpuBufferEntryBuffer =
+        bufferManager->getBuffer(frame->getBufferHandle(BufferHandleType::TerrainGpuBufferEntry));
+    const auto& objectDataBuffer =
+        bufferManager->getBuffer(frame->getBufferHandle(BufferHandleType::TerrainChunkData));
+    const auto& drawCommandBuffer =
+        bufferManager->getBuffer(frame->getBufferHandle(BufferHandleType::TerrainChunkDrawCommand));
+    const auto& countBuffer =
+        bufferManager->getBuffer(frame->getBufferHandle(BufferHandleType::TerrainChunkCount));
+    const auto& objectDataIndexBuffer =
+        bufferManager->getBuffer(frame->getBufferHandle(BufferHandleType::TerrainChunkDataIndex));
+
+    auto computePushConstants = ComputePushConstants{
+        .drawCommandBufferAddress = drawCommandBuffer.getDeviceAddress(),
+        .gpuBufferEntryBufferAddress = gpuBufferEntryBuffer.getDeviceAddress(),
+        .objectDataBufferAddress = objectDataBuffer.getDeviceAddress(),
+        .countBufferAddress = countBuffer.getDeviceAddress(),
+        .objectDataIndexBufferAddress = objectDataIndexBuffer.getDeviceAddress(),
+        .objectCount = frame->getStaticObjectCount()};
+    computeTask->record(commandBuffer, computePushConstants);
+  }
+
+  {
+    ZoneNamedN(var, "Record Terrain Compute Barriers", true);
+    auto& indirectBuffer =
+        bufferManager->getBuffer(frame->getBufferHandle(BufferHandleType::TerrainChunkDrawCommand));
+    insertBarrier(commandBuffer, indirectBuffer);
+
+    auto& countBuffer =
+        bufferManager->getBuffer(frame->getBufferHandle(BufferHandleType::TerrainChunkCount));
+    insertBarrier(commandBuffer, countBuffer);
+
+    auto& objectDataIndexBuffer =
+        bufferManager->getBuffer(frame->getBufferHandle(BufferHandleType::TerrainChunkDataIndex));
     insertBarrier(commandBuffer, objectDataIndexBuffer);
   }
 
@@ -489,6 +610,9 @@ auto DefaultRenderScheduler::executeTasks(Frame* frame, bool recordTasks) const 
     }
     if (frame->getDynamicObjectCount() > 0) {
       indirectRenderTask->record(commandBuffer, frame);
+    }
+    if (frame->getTerrainChunkCount() > 0) {
+      terrainTask->record(commandBuffer, frame);
     }
   }
 
@@ -691,4 +815,31 @@ auto DefaultRenderScheduler::updateDynamicBuffers(Frame* frame,
   }
 }
 
-} // namespace tr
+auto DefaultRenderScheduler::updateTerrainBuffers(Frame* frame,
+                                                  const RenderData& renderData) -> void {
+  {
+    ZoneNamedN(var, "Update Terrain GPU Data", true);
+    const auto& gpuBufferEntryList = resourceManager->getTerrainGpuData(renderData.terrainMeshData);
+
+    auto& gpuBufferEntriesBuffer =
+        bufferManager->getBuffer(frame->getBufferHandle(BufferHandleType::TerrainGpuBufferEntry));
+
+    gpuBufferEntriesBuffer.mapBuffer();
+    gpuBufferEntriesBuffer.updateBufferValue(gpuBufferEntryList.data(),
+                                             sizeof(GpuBufferEntry) * gpuBufferEntryList.size());
+    gpuBufferEntriesBuffer.unmapBuffer();
+  }
+
+  {
+    ZoneNamedN(var, "Update Terrain GPU Data", true);
+    auto& objectDataBuffer =
+        bufferManager->getBuffer(frame->getBufferHandle(BufferHandleType::TerrainChunkData));
+    objectDataBuffer.mapBuffer();
+    objectDataBuffer.updateBufferValue(renderData.terrainObjectData.data(),
+                                       sizeof(TerrainGpuObjectData) *
+                                           renderData.terrainObjectData.size());
+    objectDataBuffer.unmapBuffer();
+  }
+}
+
+}

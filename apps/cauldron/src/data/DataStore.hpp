@@ -65,10 +65,10 @@ struct EntityData {
 
 struct TerrainData {
   std::string name;
-
+  glm::vec3 terrainSize;
   template <class T>
   void serialize(T& archive) {
-    archive(name);
+    archive(name, terrainSize);
   }
 };
 
@@ -80,6 +80,9 @@ struct DataStore {
 
   // Scene
   std::unordered_map<std::string, EntityData> scene;
+
+  // Terrain
+  std::unordered_map<std::string, TerrainData> terrainMap;
 
   std::unordered_map<std::string, tr::EntityType> entityNameMap;
 

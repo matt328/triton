@@ -1,5 +1,6 @@
 #pragma once
 
+#include "TerrainTask.hpp"
 #include "gfx/RenderContextConfig.hpp"
 #include "pipeline/IndirectPipeline.hpp"
 #include "pipeline/StaticPipeline.hpp"
@@ -28,6 +29,7 @@ public:
   auto createIndirectRenderTask() -> std::unique_ptr<IndirectRenderTask>;
   auto createComputeTask() -> std::unique_ptr<ComputeTask>;
   auto createStaticTask() -> std::unique_ptr<StaticTask>;
+  auto createTerrainTask() -> std::unique_ptr<TerrainTask>;
 
 private:
   std::shared_ptr<VkResourceManager> resourceManager;
