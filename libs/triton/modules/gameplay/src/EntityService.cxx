@@ -162,12 +162,24 @@ auto EntityService::createTerrain(std::string_view name,
   registry->emplace<TerrainDefinition>(entity, terrainSize);
   registry->emplace<EditorInfo>(entity, name.data());
 
+  // Create an entity for each chunk
+  for (const auto& chunk : chunks) {
+    const auto entity = registry->create();
+    const auto chunkName = fmt::format("{} Chunk({}, {}, {})",
+                                       name.data(),
+                                       chunk.location.x,
+                                       chunk.location.y,
+                                       chunk.location.z);
+    registry->emplace<EditorInfo>(entity, chunkName);
+    registry->emplace<TerrainChunk>(entity, chunk.location, chunk.size);
+  }
+  // TODO(matt): should return the definition entity, or a list of all created entities?
+
   return entity;
 }
 
-auto EntityService::createCamera(CameraInfo cameraInfo,
-                                 std::string_view name,
-                                 bool setDefault) -> void {
+auto EntityService::createCamera(CameraInfo cameraInfo, std::string_view name, bool setDefault)
+    -> void {
 
   std::unique_lock<SharedLockableBase(std::shared_mutex)> lock(registryMutex);
   LockMark(registryMutex);
