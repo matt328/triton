@@ -21,7 +21,8 @@ DefaultGameplaySystem::DefaultGameplaySystem(std::shared_ptr<IEventBus> newEvent
                                              std::shared_ptr<TransformSystem> newTransformSystem,
                                              std::shared_ptr<AnimationSystem> newAnimationSystem,
                                              std::shared_ptr<RenderDataSystem> newRenderDataSystem,
-                                             std::shared_ptr<EntityService> newEntityService)
+                                             std::shared_ptr<EntityService> newEntityService,
+                                             std::shared_ptr<TerrainManager> newTerrainManager)
     : eventBus{std::move(newEventBus)},
       assetManager{std::move(newAssetManager)},
       actionSystem{std::move(newActionSystem)},
@@ -29,7 +30,8 @@ DefaultGameplaySystem::DefaultGameplaySystem(std::shared_ptr<IEventBus> newEvent
       transformSystem{std::move(newTransformSystem)},
       animationSystem{std::move(newAnimationSystem)},
       renderDataSystem{std::move(newRenderDataSystem)},
-      entityService{std::move(newEntityService)} {
+      entityService{std::move(newEntityService)},
+      terrainManager{std::move(newTerrainManager)} {
 
   entityCreatedConnection = entityService->registerEntityCreated(
       [this](entt::registry& reg, entt::entity entity) { entityCreated(reg, entity); });
@@ -173,8 +175,14 @@ auto DefaultGameplaySystem::createAnimatedModelEntity(const AnimatedModelData& m
                                             modelData.entityName.value_or("Unnamed Entity"));
 }
 
-auto DefaultGameplaySystem::createTerrain() -> void {
-  Log.trace("Creating terrain");
+auto DefaultGameplaySystem::createTerrain(std::string_view name,
+                                          glm::vec3 terrainSize) -> tr::EntityType {
+
+  terrainManager->registerTerrain(name, terrainSize);
+
+  const auto& chunks = terrainManager->getChunks(name);
+
+  return entityService->createTerrain(name, terrainSize, chunks);
 }
 
 auto DefaultGameplaySystem::createDefaultCamera() -> void {

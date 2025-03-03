@@ -1,4 +1,4 @@
-#include "StaticPipeline.hpp"
+#include "TerrainPipeline.hpp"
 #include "as/StaticVertex.hpp"
 #include "vk/StaticPushConstants.hpp"
 #include "vk/VkResourceManager.hpp"
@@ -6,13 +6,13 @@
 
 namespace tr {
 
-const auto VertexShaderFile = SHADERS / "static.vert.spv";
-const auto FragmentShaderFile = SHADERS / "static.frag.spv";
+const auto VertexShaderFile = SHADERS / "terrain.vert.spv";
+const auto FragmentShaderFile = SHADERS / "terrain.frag.spv";
 
-StaticPipeline::StaticPipeline(const std::shared_ptr<Device>& device,
-                               const std::shared_ptr<IShaderModuleFactory>& shaderCompiler,
-                               const std::shared_ptr<VkResourceManager>& resourceManager) {
-  Log.trace("Constructing StaticPipeline");
+TerrainPipeline::TerrainPipeline(const std::shared_ptr<Device>& device,
+                                 const std::shared_ptr<IShaderModuleFactory>& shaderCompiler,
+                                 const std::shared_ptr<VkResourceManager>& resourceManager) {
+  Log.trace("Constructing TerrainPipeline");
 
   // Pipeline Layout
   const auto pushConstantRange = vk::PushConstantRange{
@@ -142,10 +142,10 @@ StaticPipeline::StaticPipeline(const std::shared_ptr<Device>& device,
                                                   pipelineCreateInfo);
 }
 
-auto StaticPipeline::getPipeline() const -> vk::Pipeline {
+auto TerrainPipeline::getPipeline() const -> vk::Pipeline {
   return **pipeline;
 }
-auto StaticPipeline::getPipelineLayout() const -> vk::PipelineLayout {
+auto TerrainPipeline::getPipelineLayout() const -> vk::PipelineLayout {
   return **pipelineLayout;
 }
 

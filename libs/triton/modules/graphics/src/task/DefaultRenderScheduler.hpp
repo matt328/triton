@@ -1,5 +1,6 @@
 #pragma once
 
+#include "TerrainTask.hpp"
 #include "cm/ImGuiSystem.hpp"
 #include "cm/RenderData.hpp"
 #include "gfx/RenderContextConfig.hpp"
@@ -54,6 +55,7 @@ private:
   std::shared_ptr<IndirectRenderTask> indirectRenderTask;
   std::shared_ptr<ComputeTask> computeTask;
   std::shared_ptr<StaticTask> staticRenderTask;
+  std::shared_ptr<TerrainTask> terrainTask;
 
   std::vector<std::shared_ptr<IRenderTask>> staticRenderTasks;
 
@@ -70,9 +72,11 @@ private:
 
   auto createStaticBuffers(const std::unique_ptr<Frame>& frame) -> void;
   auto createDynamicBuffers(const std::unique_ptr<Frame>& frame) -> void;
+  auto createTerrainBuffers(const std::unique_ptr<Frame>& frame) -> void;
 
   auto updateStaticBuffers(Frame* frame, const RenderData& renderData) -> void;
   auto updateDynamicBuffers(Frame* frame, const RenderData& renderData) -> void;
+  auto updateTerrainBuffers(Frame* frame, const RenderData& renderData) -> void;
 
   static auto transitionImage(const vk::raii::CommandBuffer& cmd,
                               const vk::Image& image,

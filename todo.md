@@ -1,10 +1,5 @@
 # TODO
 
-- Remove entities and renderables
-  - renderer should support this. just need to add to gameworld and cauldron
-
-- Figure out why the graphics thread stalls when loading assets.
-
 - Need to clean up and document project configurations.
   - When building without testing, test executables and their dependencies shouldn't even be included
   - Document how to run unit tests and coverage without all the magic vscode jank.

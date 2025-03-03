@@ -113,6 +113,7 @@ public:
 
   [[nodiscard]] auto getStaticMeshBuffers() const -> std::tuple<Buffer&, Buffer&>;
   [[nodiscard]] auto getDynamicMeshBuffers() const -> std::tuple<Buffer&, Buffer&>;
+  [[nodiscard]] auto getTerrainMeshBuffers() const -> std::tuple<Buffer&, Buffer&>;
 
   [[nodiscard]] auto getDescriptorSetLayout() -> const vk::DescriptorSetLayout*;
 
@@ -124,6 +125,8 @@ public:
   [[nodiscard]] auto getStaticGpuData(const std::vector<RenderMeshData>& gpuBufferData)
       -> std::vector<GpuBufferEntry>&;
   [[nodiscard]] auto getDynamicGpuData(const std::vector<RenderMeshData>& gpuBufferData)
+      -> std::vector<GpuBufferEntry>&;
+  [[nodiscard]] auto getTerrainGpuData(const std::vector<RenderMeshData>& gpuBufferData)
       -> std::vector<GpuBufferEntry>&;
 
   auto updateShaderBindings() -> void;
@@ -156,6 +159,7 @@ private:
 
   std::unique_ptr<ArenaGeometryBuffer> staticMeshBuffer;
   std::unique_ptr<ArenaGeometryBuffer> dynamicMeshBuffer;
+  std::unique_ptr<ArenaGeometryBuffer> terrainMeshBuffer;
 
   std::unique_ptr<TextureManager> textureManager;
 

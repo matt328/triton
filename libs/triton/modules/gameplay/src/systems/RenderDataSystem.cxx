@@ -7,7 +7,7 @@
 #include "gp/components/Resources.hpp"
 #include "gp/components/Transform.hpp"
 #include "gp/components/Animation.hpp"
-#include "gp/components/TerrainMarker.hpp"
+#include "gp/components/TerrainDefinition.hpp"
 
 namespace tr {
 
@@ -23,28 +23,22 @@ auto RenderDataSystem::update(RenderData& renderData) -> void {
   };
 
   const auto staticFn = [](RenderData& renderData,
-                           bool isTerrain,
                            entt::entity,
                            const Renderable& renderable,
                            const Transform& transform) {
     for (const auto& [meshHandle, topology, textureHandle] : renderable.meshData) {
-      if (isTerrain) {
-        if (topology == Topology::Triangles) {
-          renderData.terrainMeshData.emplace_back(meshHandle, Topology::Triangles);
-        } else if (topology == Topology::LineList) {
-          renderData.staticMeshData.emplace_back(meshHandle, topology);
-          renderData.objectData.emplace_back(transform.transformation, textureHandle);
-        }
-      } else {
-        // TODO(matt) figure out a better name for MeshData and RenderMeshData
-        renderData.staticGpuMeshData.emplace_back(meshHandle, topology);
-        renderData.objectData.emplace_back(transform.transformation, textureHandle);
-      }
+      renderData.staticGpuMeshData.emplace_back(meshHandle, topology);
+      renderData.objectData.emplace_back(transform.transformation, textureHandle);
     }
   };
 
-  uint32_t jointMatricesIndex = 0;
+  const auto terrainFn =
+      [](RenderData& renderData, entt::entity, const TerrainDefinition& terrainDefinition) {
+        renderData.terrainDefinition =
+            GpuTerrainDefinition{.terrainSize = terrainDefinition.terrainSize};
+      };
 
+  uint32_t jointMatricesIndex = 0;
   const auto dynamicFn = [&jointMatricesIndex](RenderData& renderData,
                                                [[maybe_unused]] entt::entity entity,
                                                const Animation& animationData,
@@ -67,7 +61,7 @@ auto RenderDataSystem::update(RenderData& renderData) -> void {
     jointMatricesIndex += animationData.jointMatrices.size();
   };
 
-  entityService->updateRenderDataCamera(camFn, staticFn, dynamicFn, renderData);
+  entityService->updateRenderData(camFn, staticFn, dynamicFn, terrainFn, renderData);
 }
 
 }

@@ -1,6 +1,8 @@
 #include "gp/EntityService.hpp"
+#include "TerrainManager.hpp"
 #include "gp/components/EditorInfo.hpp"
 #include "gp/components/Resources.hpp"
+#include "gp/components/TerrainChunk.hpp"
 #include "gp/components/TerrainMarker.hpp"
 
 namespace tr {
@@ -64,10 +66,12 @@ auto EntityService::updateTransforms(const std::function<void(entt::entity, Tran
   }
 }
 
-auto EntityService::updateRenderDataCamera(const CamFn& camUpdateFn,
-                                           const StaticUpdateFn& staticFn,
-                                           const DynamicUpdateFn& dynamicFn,
-                                           RenderData& renderData) -> void {
+/// Pulls data from the ECS Components and converts it into the RenderData struct
+auto EntityService::updateRenderData(const CamFn& camUpdateFn,
+                                     const StaticUpdateFn& staticFn,
+                                     const DynamicUpdateFn& dynamicFn,
+                                     const TerrainUpdateFn& terrainFn,
+                                     RenderData& renderData) -> void {
 
   std::unique_lock<SharedLockableBase(std::shared_mutex)> lock(registryMutex);
   LockMark(registryMutex);
@@ -82,16 +86,22 @@ auto EntityService::updateRenderDataCamera(const CamFn& camUpdateFn,
 
   camUpdateFn(renderData, cam);
 
+  // Process Static Objects
   for (const auto view = registry->view<Renderable, Transform>(entt::exclude<Animation>);
        const auto& [entity, renderable, transform] : view.each()) {
-    const auto isTerrainEntity = registry->any_of<TerrainMarker>(entity);
-    staticFn(renderData, isTerrainEntity, entity, renderable, transform);
+    staticFn(renderData, entity, renderable, transform);
   }
 
+  // Process Dynamic Objects
   const auto animationsView = registry->view<Animation, Renderable, Transform>();
-
   for (const auto& [entity, animationData, renderable, transform] : animationsView.each()) {
     dynamicFn(renderData, entity, animationData, renderable, transform);
+  }
+
+  // Process Terrain Entities
+  const auto terrainView = registry->view<TerrainDefinition>();
+  for (const auto& [entity, terrainDefinition] : terrainView.each()) {
+    terrainFn(renderData, entity, terrainDefinition);
   }
 }
 
@@ -137,6 +147,19 @@ auto EntityService::createDynamicEntity(ModelData modelData,
                                skeleton.num_soa_joints());
   registry->emplace<Transform>(entity, transform);
   registry->emplace<Renderable>(entity, std::vector{modelData.meshData});
+  registry->emplace<EditorInfo>(entity, name.data());
+
+  return entity;
+}
+
+auto EntityService::createTerrain(std::string_view name,
+                                  glm::vec3 terrainSize,
+                                  const std::vector<ChunkDefinition>& chunks) -> tr::EntityType {
+  std::unique_lock<SharedLockableBase(std::shared_mutex)> lock(registryMutex);
+  LockMark(registryMutex);
+
+  const auto entity = registry->create();
+  registry->emplace<TerrainDefinition>(entity, terrainSize);
   registry->emplace<EditorInfo>(entity, name.data());
 
   return entity;

@@ -114,6 +114,10 @@ auto Frame::getDynamicObjectCount() const -> uint32_t {
   return dynamicObjectCount;
 }
 
+auto Frame::getTerrainChunkCount() const -> uint32_t {
+  return terrainChunkCount;
+}
+
 auto Frame::setDepthImageHandle(const ImageHandle handle) -> void {
   depthImageHandle = handle;
 }
@@ -136,6 +140,10 @@ auto Frame::setStaticObjectCount(uint32_t newObjectCount) -> void {
 
 auto Frame::setDynamicObjectCount(uint32_t newObjectCount) -> void {
   dynamicObjectCount = newObjectCount;
+}
+
+auto Frame::setTerrainChunkCount(uint32_t newObjectCount) -> void {
+  terrainChunkCount = newObjectCount;
 }
 
 auto Frame::transitionImage(const vk::raii::CommandBuffer& cmd,

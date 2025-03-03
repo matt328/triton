@@ -1,5 +1,6 @@
 #pragma once
 
+#include "TerrainManager.hpp"
 #include "cm/EntitySystemTypes.hpp"
 #include "cm/RenderData.hpp"
 #include "gp/AssetManager.hpp"
@@ -9,16 +10,14 @@
 #include "gp/components/Renderable.hpp"
 #include "gp/components/Resources.hpp"
 #include "gp/components/Transform.hpp"
+#include "gp/components/TerrainDefinition.hpp"
 
 namespace tr {
 
 using CamFn = std::function<void(RenderData& renderData, const Camera&)>;
 
-using StaticUpdateFn = std::function<void(RenderData& renderData,
-                                          bool isTerrain,
-                                          entt::entity,
-                                          const Renderable&,
-                                          const Transform&)>;
+using StaticUpdateFn =
+    std::function<void(RenderData& renderData, entt::entity, const Renderable&, const Transform&)>;
 
 using DynamicUpdateFn = std::function<void(RenderData& renderData,
                                            entt::entity,
@@ -26,11 +25,13 @@ using DynamicUpdateFn = std::function<void(RenderData& renderData,
                                            const Renderable&,
                                            const Transform&)>;
 
+using TerrainUpdateFn = std::function<void(RenderData&, entt::entity, const TerrainDefinition&)>;
+
 using EntityCreatedFn = std::function<void(entt::registry&, entt::entity)>;
 
 class EntityService {
 public:
-  EntityService(std::shared_ptr<AssetManager> newAssetManager);
+  explicit EntityService(std::shared_ptr<AssetManager> newAssetManager);
   ~EntityService();
 
   EntityService(const EntityService&) = delete;
@@ -48,10 +49,11 @@ public:
 
   auto updateTransforms(const std::function<void(entt::entity, Transform&)>& fn) -> void;
 
-  auto updateRenderDataCamera(const CamFn& camUpdateFn,
-                              const StaticUpdateFn& staticFn,
-                              const DynamicUpdateFn& dynamicFn,
-                              RenderData& renderData) -> void;
+  auto updateRenderData(const CamFn& camUpdateFn,
+                        const StaticUpdateFn& staticFn,
+                        const DynamicUpdateFn& dynamicFn,
+                        const TerrainUpdateFn& terrainFn,
+                        RenderData& renderData) -> void;
 
   auto registerEntityCreated(const EntityCreatedFn& fn) -> entt::connection;
 
@@ -64,6 +66,10 @@ public:
   auto createDynamicEntity(ModelData modelData,
                            Transform transform,
                            std::string_view name) -> tr::EntityType;
+
+  auto createTerrain(std::string_view name,
+                     glm::vec3 terrainSize,
+                     const std::vector<ChunkDefinition>& chunks) -> tr::EntityType;
 
   auto createCamera(CameraInfo cameraInfo, std::string_view name, bool setDefault = true) -> void;
 

@@ -48,6 +48,9 @@ void EntityEditor::render() {
         if (ImGui::MenuItem("Animated Model...")) {
           dialogManager->setOpen(DialogName);
         }
+        if (ImGui::MenuItem("Terrain")) {
+          dataFacade->createTerrain("terrain", glm::vec3{9.f, 9.f, 9.f});
+        }
         ImGui::EndMenu();
       }
       ImGui::EndMenuBar();
@@ -77,45 +80,47 @@ void EntityEditor::render() {
       ImGui::BeginChild("item view", ImVec2(0, 0), ImGuiChildFlags_Border);
       if (selectedEntity.has_value()) {
 
-        auto& entityData = dataFacade->getEntityData(selectedEntity.value());
+        auto* entityData = dataFacade->getEntityData(selectedEntity.value());
 
-        // Editor Info Component
-        ImGui::Text("%s", entityData.name.c_str());
+        if (entityData != nullptr) {
 
-        auto buttonWidth = 120.f;
-        if (ImGui::Button(ICON_LC_X " Delete", ImVec2(buttonWidth, 0.f))) {
-          del = true;
+          // Editor Info Component
+          ImGui::Text("%s", entityData->name.c_str());
+
+          auto buttonWidth = 120.f;
+          if (ImGui::Button(ICON_LC_X " Delete", ImVec2(buttonWidth, 0.f))) {
+            del = true;
+          }
+
+          // Transform Component
+
+          const auto transformCallback = [this](std::string_view name, Orientation orientation) {
+            const auto entityId = dataFacade->getEntityId(name);
+            entityService->setTransform(
+                entityId,
+                tr::Transform{.rotation = orientation.rotation, .position = orientation.position});
+          };
+
+          renderTransformInspector(entityData->name, &entityData->orientation, transformCallback);
+
+          /*
+            None of the other components yet have much functionality that makes sense to be changed
+            from the editor. As more of the gameplay module is implemented, more requirements for
+            these component editors will be realized.
+          */
+
+          // // Camera Component
+          // if (auto* camera = registry->try_get<tr::Camera>(selectedEntity.value());
+          //     camera != nullptr) {
+          //   renderCameraInspector(camera);
+          // }
+
+          // // Animation Component
+          // if (auto* animation = registry->try_get<tr::Animation>(selectedEntity.value());
+          //     animation != nullptr) {
+          //   renderAnimationInspector(animation);
+          // }
         }
-
-        // Transform Component
-
-        const auto transformCallback = [this](std::string_view name, Orientation orientation) {
-          const auto entityId = dataFacade->getEntityId(name);
-          entityService->setTransform(
-              entityId,
-              tr::Transform{.rotation = orientation.rotation, .position = orientation.position});
-        };
-
-        renderTransformInspector(entityData.name, &entityData.orientation, transformCallback);
-
-        /*
-          None of the other components yet have much functionality that makes sense to be changed
-          from the editor. As more of the gameplay module is implemented, more requirements for
-          these component editors will be realized.
-        */
-
-        // // Camera Component
-        // if (auto* camera = registry->try_get<tr::Camera>(selectedEntity.value());
-        //     camera != nullptr) {
-        //   renderCameraInspector(camera);
-        // }
-
-        // // Animation Component
-        // if (auto* animation = registry->try_get<tr::Animation>(selectedEntity.value());
-        //     animation != nullptr) {
-        //   renderAnimationInspector(animation);
-        // }
-
         if (del) {
           const auto entityId = dataFacade->getEntityId(selectedEntity.value());
           dataFacade->deleteEntity(selectedEntity.value());

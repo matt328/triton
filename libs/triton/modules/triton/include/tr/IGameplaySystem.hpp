@@ -32,7 +32,7 @@ public:
   virtual auto createAnimatedModelEntity(const AnimatedModelData& modelData,
                                          std::optional<Transform> initialTransform)
       -> tr::EntityType = 0;
-  virtual auto createTerrain() -> void = 0;
+  virtual auto createTerrain(std::string_view name, glm::vec3 terrainSize) -> tr::EntityType = 0;
   virtual auto createDefaultCamera() -> void = 0;
   virtual auto createTestEntity(std::string_view name) -> void = 0;
   virtual auto removeEntity(tr::EntityType entity) -> void = 0;

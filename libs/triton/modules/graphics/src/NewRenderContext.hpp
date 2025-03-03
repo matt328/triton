@@ -16,6 +16,7 @@ public:
   auto operator=(const NewRenderContext&) -> NewRenderContext& = delete;
   auto operator=(NewRenderContext&&) -> NewRenderContext& = delete;
 
+  void updateTerrainSystem() override;
   void renderNextFrame() override;
   void waitIdle() override;
   void setRenderData(const RenderData& renderData) override;

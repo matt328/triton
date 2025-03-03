@@ -1,6 +1,7 @@
 #include "VkResourceManager.hpp"
 
 #include "as/StaticVertex.hpp"
+#include "as/TerrainVertex.hpp"
 #include "geo/GeometryData.hpp"
 #include "mem/Allocator.hpp"
 #include "mem/Image.hpp"
@@ -59,6 +60,13 @@ VkResourceManager::VkResourceManager(
                                                    .bufferName = "DynamicGeometry"};
 
   dynamicMeshBuffer = std::make_unique<ArenaGeometryBuffer>(bufferManager, dmbci);
+
+  const auto terrainBufferCreateInfo =
+      ArenaGeometryBufferCreateInfo{.vertexSize = sizeof(as::TerrainVertex),
+                                    .indexSize = sizeof(uint32_t),
+                                    .bufferName = "TerrainGeometry"};
+
+  terrainMeshBuffer = std::make_unique<ArenaGeometryBuffer>(bufferManager, terrainBufferCreateInfo);
 
   textureManager = std::make_unique<TextureManager>(this);
 }
@@ -304,6 +312,11 @@ auto VkResourceManager::getTextureData(const as::ImageData& imageData,
   return dynamicMeshBuffer->getBuffers();
 }
 
+[[nodiscard]] auto VkResourceManager::getTerrainMeshBuffers() const
+    -> std::tuple<Buffer&, Buffer&> {
+  return terrainMeshBuffer->getBuffers();
+}
+
 auto VkResourceManager::createDefaultDescriptorPool() const
     -> std::unique_ptr<vk::raii::DescriptorPool> {
   static constexpr auto poolSizes = std::array{
@@ -480,6 +493,12 @@ auto VkResourceManager::updateShaderBindings() -> void {
     const std::vector<RenderMeshData>& gpuBufferData) -> std::vector<GpuBufferEntry>& {
   ZoneNamedN(var, "getGpuBufferEntries", true);
   return staticMeshBuffer->getGpuBufferEntries(gpuBufferData);
+}
+
+[[nodiscard]] auto VkResourceManager::getTerrainGpuData(
+    const std::vector<RenderMeshData>& gpuBufferData) -> std::vector<GpuBufferEntry>& {
+  ZoneNamedN(var, "getGpuBufferEntries", true);
+  return terrainMeshBuffer->getGpuBufferEntries(gpuBufferData);
 }
 
 [[nodiscard]] auto VkResourceManager::getDynamicGpuData(
