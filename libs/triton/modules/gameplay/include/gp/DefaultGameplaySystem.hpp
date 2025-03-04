@@ -1,6 +1,5 @@
 #pragma once
 
-#include "TerrainManager.hpp"
 #include "gp/AssetManager.hpp"
 #include "gp/action/IActionSystem.hpp"
 #include "gp/components/Transform.hpp"
@@ -13,6 +12,8 @@
 #include "tr/IGameplaySystem.hpp"
 
 namespace tr {
+
+class TerrainManager;
 
 class DefaultGameplaySystem : public IGameplaySystem {
 public:

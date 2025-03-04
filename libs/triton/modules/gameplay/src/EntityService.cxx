@@ -1,5 +1,5 @@
 #include "gp/EntityService.hpp"
-#include "TerrainManager.hpp"
+#include "tr/TerrainManager.hpp"
 #include "gp/components/EditorInfo.hpp"
 #include "gp/components/Resources.hpp"
 #include "gp/components/TerrainChunk.hpp"
@@ -178,9 +178,8 @@ auto EntityService::createTerrain(std::string_view name,
   return {.definitionId = entity, .chunkData = chunkResults};
 }
 
-auto EntityService::createCamera(CameraInfo cameraInfo,
-                                 std::string_view name,
-                                 bool setDefault) -> void {
+auto EntityService::createCamera(CameraInfo cameraInfo, std::string_view name, bool setDefault)
+    -> void {
 
   std::unique_lock<SharedLockableBase(std::shared_mutex)> lock(registryMutex);
   LockMark(registryMutex);

@@ -1,4 +1,4 @@
-#include "SdfGenerator.hpp"
+#include "tr/SdfGenerator.hpp"
 
 namespace tr {
 

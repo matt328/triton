@@ -35,6 +35,8 @@
 #include "vk/BufferManager.hpp"
 #include "geo/GeometryData.hpp"
 #include "cm/TaskQueue.hpp"
+#include "tr/TerrainManager.hpp"
+#include "tr/SdfGenerator.hpp"
 
 namespace di = boost::di;
 

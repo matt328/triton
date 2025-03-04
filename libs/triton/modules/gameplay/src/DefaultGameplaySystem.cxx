@@ -6,6 +6,7 @@
 #include "systems/TransformSystem.hpp"
 #include "tr/IEventBus.hpp"
 #include "commands/CreateCamera.hpp"
+#include "tr/TerrainManager.hpp"
 
 namespace tr {
 
@@ -175,8 +176,8 @@ auto DefaultGameplaySystem::createAnimatedModelEntity(const AnimatedModelData& m
                                             modelData.entityName.value_or("Unnamed Entity"));
 }
 
-auto DefaultGameplaySystem::createTerrain(std::string_view name,
-                                          glm::vec3 terrainSize) -> TerrainResult {
+auto DefaultGameplaySystem::createTerrain(std::string_view name, glm::vec3 terrainSize)
+    -> TerrainResult {
   terrainManager->registerTerrain(name, terrainSize);
   const auto& chunks = terrainManager->getChunks(name);
   return entityService->createTerrain(name, terrainSize, chunks);
