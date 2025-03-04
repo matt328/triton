@@ -66,6 +66,9 @@ struct EntityData {
 struct TerrainData {
   std::string name;
   glm::vec3 terrainSize;
+
+  std::vector<tr::EntityType> chunkIds;
+
   template <class T>
   void serialize(T& archive) {
     archive(name, terrainSize);

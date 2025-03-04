@@ -79,9 +79,15 @@ public:
   [[nodiscard]] auto getEntityData(std::string_view name) -> EntityData* {
     if (dataStore.scene.contains(name.data())) {
       return &dataStore.scene.at(name.data());
-    } else {
-      return nullptr;
     }
+    return nullptr;
+  }
+
+  [[nodiscard]] auto getTerrainData(std::string_view name) -> TerrainData* {
+    if (dataStore.terrainMap.contains(name.data())) {
+      return &dataStore.terrainMap.at(name.data());
+    }
+    return nullptr;
   }
 
   [[nodiscard]] auto isUnsaved() const {

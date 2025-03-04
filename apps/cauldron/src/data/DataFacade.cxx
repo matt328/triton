@@ -146,13 +146,18 @@ void DataFacade::createTerrain(std::string_view terrainName, glm::vec3 terrainSi
     return gameplaySystem->createTerrain(terrainName, terrainSize);
   };
 
-  const auto onComplete = [this, terrainName, terrainSize](tr::EntityType entityId) {
-    dataStore.entityNameMap.insert({terrainName.data(), entityId});
-    dataStore.terrainMap.insert({terrainName.data(),
-                                 TerrainData{
-                                     .name = terrainName.data(),
-                                     .terrainSize = terrainSize,
-                                 }});
+  const auto onComplete = [this, terrainName, terrainSize](const tr::TerrainResult& result) {
+    dataStore.entityNameMap.emplace(terrainName, result.definitionId);
+    dataStore.terrainMap.emplace(
+        terrainName,
+        TerrainData{.name = std::string{terrainName},
+                    .terrainSize = terrainSize,
+                    .chunkIds = std::ranges::to<std::vector>(std::views::keys(result.chunkData))});
+
+    for (const auto& [id, name] : result.chunkData) {
+      dataStore.entityNameMap.emplace(name, id);
+    }
+
     engineBusy = false;
   };
 
@@ -221,5 +226,4 @@ auto DataFacade::getEntityNames() -> std::vector<std::tuple<std::string, tr::Ent
 
   return names;
 }
-
 }

@@ -154,7 +154,7 @@ auto EntityService::createDynamicEntity(ModelData modelData,
 
 auto EntityService::createTerrain(std::string_view name,
                                   glm::vec3 terrainSize,
-                                  const std::vector<ChunkDefinition>& chunks) -> tr::EntityType {
+                                  const std::vector<ChunkDefinition>& chunks) -> TerrainResult {
   std::unique_lock<SharedLockableBase(std::shared_mutex)> lock(registryMutex);
   LockMark(registryMutex);
 
@@ -163,6 +163,7 @@ auto EntityService::createTerrain(std::string_view name,
   registry->emplace<EditorInfo>(entity, name.data());
 
   // Create an entity for each chunk
+  auto chunkResults = std::unordered_map<tr::EntityType, std::string>{};
   for (const auto& chunk : chunks) {
     const auto entity = registry->create();
     const auto chunkName = fmt::format("{} Chunk({}, {}, {})",
@@ -172,14 +173,14 @@ auto EntityService::createTerrain(std::string_view name,
                                        chunk.location.z);
     registry->emplace<EditorInfo>(entity, chunkName);
     registry->emplace<TerrainChunk>(entity, chunk.location, chunk.size);
+    chunkResults.insert({entity, name.data()});
   }
-  // TODO(matt): should return the definition entity, or a list of all created entities?
-
-  return entity;
+  return {.definitionId = entity, .chunkData = chunkResults};
 }
 
-auto EntityService::createCamera(CameraInfo cameraInfo, std::string_view name, bool setDefault)
-    -> void {
+auto EntityService::createCamera(CameraInfo cameraInfo,
+                                 std::string_view name,
+                                 bool setDefault) -> void {
 
   std::unique_lock<SharedLockableBase(std::shared_mutex)> lock(registryMutex);
   LockMark(registryMutex);
