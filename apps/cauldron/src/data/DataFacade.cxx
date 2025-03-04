@@ -142,7 +142,7 @@ void DataFacade::setEntitySkeleton([[maybe_unused]] std::string_view entityName,
 
 void DataFacade::createTerrain(std::string_view terrainName, glm::vec3 terrainSize) {
 
-  const auto task = [this, &terrainName, terrainSize] {
+  const auto task = [this, terrainName, terrainSize] {
     return gameplaySystem->createTerrain(terrainName, terrainSize);
   };
 

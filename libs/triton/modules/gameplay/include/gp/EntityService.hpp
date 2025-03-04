@@ -1,6 +1,6 @@
 #pragma once
 
-#include "TerrainManager.hpp"
+#include "tr/TerrainManager.hpp"
 #include "cm/EntitySystemTypes.hpp"
 #include "cm/RenderData.hpp"
 #include "gp/AssetManager.hpp"
@@ -68,9 +68,8 @@ public:
                           Transform transform,
                           std::string_view name) -> tr::EntityType;
 
-  auto createDynamicEntity(ModelData modelData,
-                           Transform transform,
-                           std::string_view name) -> tr::EntityType;
+  auto createDynamicEntity(ModelData modelData, Transform transform, std::string_view name)
+      -> tr::EntityType;
 
   auto createTerrain(std::string_view name,
                      glm::vec3 terrainSize,

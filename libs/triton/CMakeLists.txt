@@ -8,6 +8,7 @@ set(common_SRC
   modules/triton/src/DefaultContext.cxx
   modules/triton/src/DefaultEventBus.cxx
   modules/triton/src/TerrainManager.cxx
+  modules/triton/src/SdfGenerator.cxx
 
   modules/gameplay/src/ActionSystem.cxx
   modules/gameplay/src/systems/CameraSystem.cxx
