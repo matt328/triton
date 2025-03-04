@@ -83,7 +83,6 @@ void EntityEditor::render() {
         auto* entityData = dataFacade->getEntityData(selectedEntity.value());
 
         if (entityData != nullptr) {
-
           // Editor Info Component
           ImGui::Text("%s", entityData->name.c_str());
 
@@ -92,42 +91,53 @@ void EntityEditor::render() {
             del = true;
           }
 
-          // Transform Component
-
           const auto transformCallback = [this](std::string_view name, Orientation orientation) {
             const auto entityId = dataFacade->getEntityId(name);
             entityService->setTransform(
                 entityId,
                 tr::Transform{.rotation = orientation.rotation, .position = orientation.position});
           };
-
           renderTransformInspector(entityData->name, &entityData->orientation, transformCallback);
-
-          /*
-            None of the other components yet have much functionality that makes sense to be changed
-            from the editor. As more of the gameplay module is implemented, more requirements for
-            these component editors will be realized.
-          */
-
-          // // Camera Component
-          // if (auto* camera = registry->try_get<tr::Camera>(selectedEntity.value());
-          //     camera != nullptr) {
-          //   renderCameraInspector(camera);
-          // }
-
-          // // Animation Component
-          // if (auto* animation = registry->try_get<tr::Animation>(selectedEntity.value());
-          //     animation != nullptr) {
-          //   renderAnimationInspector(animation);
-          // }
         }
+
+        // Terrain Controls
+        const auto* terrainData = dataFacade->getTerrainData(selectedEntity.value());
+        if (terrainData != nullptr) {
+          for (const auto id : terrainData->chunkIds) {
+            // TODO(matt): Change this to a select when there are more chunks
+            ImGui::Text("Chunk ID: %i", id);
+
+            /* TODO(matt): Tomorrow:
+
+              First we need some parameters to generate an SDF.
+              Probably need an SDF Manager, and a struct of parameters that can evolve into a
+              piecewise function definition that the SDF Manager can use to generate the SDF.
+              It probably won't generate the entire SDF all at once, but rather expose and API to
+              sample a continuous function to produce a coeherent SDF. For now hard code the terrain
+              manager to pass an empty struct to the SDFManager to configure it, then the SDF
+              Manager should provide an API to quickly sample the field at various coordinates.
+              Hardcode the sdf manager to produce a simple horizontal plane at a a Y value given
+              supplied in the empty struct mentioned earlier.
+              - Based on the current chunk's location, allow the UI to step through one cell at a
+              time and generate the vertices needed for the cell.
+              - Render debug indicators such as the bounds of the current cell itself, vertices as
+              points and the actual surface itself.
+              - Allow the UI to see the cells that are not completely air or matter in a list, and
+              selecting a cell highlights these debug indicators on the 3d view.
+              - This should be a useful tool throughout most of the terrain implementation process
+              - The UI should also include debug info about the current cell and possibly each cell
+              corner such as the equivalance class and all that.
+
+             */
+          }
+        }
+
         if (del) {
           const auto entityId = dataFacade->getEntityId(selectedEntity.value());
           dataFacade->deleteEntity(selectedEntity.value());
           entityService->removeEntity(entityId);
           selectedEntity = std::nullopt;
         }
-
       } else {
         ImGui::Text("No Entity Selected");
       }

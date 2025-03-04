@@ -14,6 +14,11 @@
 
 namespace tr {
 
+struct TerrainResult {
+  tr::EntityType definitionId;
+  std::unordered_map<tr::EntityType, std::string> chunkData;
+};
+
 using CamFn = std::function<void(RenderData& renderData, const Camera&)>;
 
 using StaticUpdateFn =
@@ -69,7 +74,7 @@ public:
 
   auto createTerrain(std::string_view name,
                      glm::vec3 terrainSize,
-                     const std::vector<ChunkDefinition>& chunks) -> tr::EntityType;
+                     const std::vector<ChunkDefinition>& chunks) -> TerrainResult;
 
   auto createCamera(CameraInfo cameraInfo, std::string_view name, bool setDefault = true) -> void;
 

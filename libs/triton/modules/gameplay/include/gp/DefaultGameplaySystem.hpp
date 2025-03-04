@@ -44,7 +44,7 @@ public:
   auto createAnimatedModelEntity(const AnimatedModelData& modelData,
                                  std::optional<Transform> initialTransform)
       -> tr::EntityType override;
-  auto createTerrain(std::string_view name, glm::vec3 terrainSize) -> tr::EntityType override;
+  auto createTerrain(std::string_view name, glm::vec3 terrainSize) -> TerrainResult override;
   auto createDefaultCamera() -> void override;
   auto createTestEntity(std::string_view name) -> void override;
   auto removeEntity(tr::EntityType entity) -> void override;

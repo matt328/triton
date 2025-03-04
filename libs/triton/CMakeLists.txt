@@ -7,6 +7,7 @@ set(common_SRC
   modules/triton/src/ComponentFactory.cxx
   modules/triton/src/DefaultContext.cxx
   modules/triton/src/DefaultEventBus.cxx
+  modules/triton/src/TerrainManager.cxx
 
   modules/gameplay/src/ActionSystem.cxx
   modules/gameplay/src/systems/CameraSystem.cxx
@@ -35,7 +36,6 @@ set(common_SRC
   modules/graphics/src/ImGuiSystem.cxx
   modules/graphics/src/NoopDebugManager.cxx
   modules/graphics/src/NewRenderContext.cxx
-  modules/graphics/src/TerrainManager.cxx
 
   modules/graphics/src/vk/VkResourceManager.cxx
   modules/graphics/src/vk/BufferManager.cxx

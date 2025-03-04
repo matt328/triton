@@ -176,12 +176,9 @@ auto DefaultGameplaySystem::createAnimatedModelEntity(const AnimatedModelData& m
 }
 
 auto DefaultGameplaySystem::createTerrain(std::string_view name,
-                                          glm::vec3 terrainSize) -> tr::EntityType {
-
+                                          glm::vec3 terrainSize) -> TerrainResult {
   terrainManager->registerTerrain(name, terrainSize);
-
   const auto& chunks = terrainManager->getChunks(name);
-
   return entityService->createTerrain(name, terrainSize, chunks);
 }
 
@@ -192,7 +189,6 @@ auto DefaultGameplaySystem::createDefaultCamera() -> void {
       .farClip = DefaultFarClip,
       .position = DefaultPosition,
   };
-
   entityService->createCamera(cameraInfo, "Default Camera");
 }
 
