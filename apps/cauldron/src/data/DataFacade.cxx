@@ -1,6 +1,7 @@
 #include "DataFacade.hpp"
 
 #include "cm/TaskQueue.hpp"
+#include "cm/TerrainCreateInfo.hpp"
 
 #include "tr/IGameplaySystem.hpp"
 
@@ -142,23 +143,25 @@ void DataFacade::setEntitySkeleton([[maybe_unused]] std::string_view entityName,
 
 void DataFacade::createTerrain(std::string_view terrainName, glm::vec3 terrainSize) {
 
-  const auto task = [this, terrainName, terrainSize] {
-    return gameplaySystem->createTerrain(terrainName,
-                                         tr::SdfCreateInfo{.height = 0.5f},
-                                         terrainSize);
+  const auto task = [this, terrainName] {
+    const auto tci = tr::TerrainCreateInfo{.name = terrainName.data(),
+                                           .sdfCreateInfo = tr::SdfCreateInfo{.height = 0.5f},
+                                           .chunkCount = glm::ivec3(1, 1, 1),
+                                           .chunkSize = glm::ivec3(5, 5, 5)};
+    return gameplaySystem->createTerrain(tci);
   };
 
-  const auto onComplete = [this, terrainName, terrainSize](const tr::TerrainDefinition& result) {
-    dataStore.entityNameMap.emplace(terrainName, result.definitionId);
-    dataStore.terrainMap.emplace(
-        terrainName,
-        TerrainData{.name = std::string{terrainName},
-                    .terrainSize = terrainSize,
-                    .chunkIds = std::ranges::to<std::vector>(std::views::keys(result.chunkData))});
+  const auto onComplete = [this, terrainName, terrainSize](const tr::TerrainResult2& result) {
+    dataStore.entityNameMap.emplace(terrainName, result.entityId);
+    // TODO(matt): Decide what goes in the datastore
+    // dataStore.terrainMap.emplace(terrainName,
+    //                              TerrainData{.name = std::string{terrainName},
+    //                                          .terrainSize = terrainSize,
+    //                                          .chunkIds = result.chunks});
 
-    for (const auto& [id, name] : result.chunkData) {
-      dataStore.entityNameMap.emplace(name, id);
-    }
+    // for (const auto& [id, name] : result.chunkData) {
+    //   dataStore.entityNameMap.emplace(name, id);
+    // }
 
     engineBusy = false;
   };
