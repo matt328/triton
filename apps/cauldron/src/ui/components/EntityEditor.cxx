@@ -107,6 +107,17 @@ void EntityEditor::render() {
             // TODO(matt): Change this to a select when there are more chunks
             ImGui::Text("Chunk ID: %i", id);
 
+            static auto cellPosition = glm::ivec3{0, 0, 0};
+
+            if (ImGui::DragInt3("Position##Chunk", glm::value_ptr(cellPosition), 1)) {}
+            if (ImGui::Button("Triangulate Cell")) {
+              gameplaySystem->triangulateChunk(id, cellPosition);
+            }
+
+            if (ImGui::Button("Triangulate All")) {
+              gameplaySystem->triangulateChunk(id);
+            }
+
             /* TODO(matt): Tomorrow:
 
               First we need some parameters to generate an SDF.

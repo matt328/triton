@@ -143,10 +143,12 @@ void DataFacade::setEntitySkeleton([[maybe_unused]] std::string_view entityName,
 void DataFacade::createTerrain(std::string_view terrainName, glm::vec3 terrainSize) {
 
   const auto task = [this, terrainName, terrainSize] {
-    return gameplaySystem->createTerrain(terrainName, terrainSize);
+    return gameplaySystem->createTerrain(terrainName,
+                                         tr::SdfCreateInfo{.height = 0.5f},
+                                         terrainSize);
   };
 
-  const auto onComplete = [this, terrainName, terrainSize](const tr::TerrainResult& result) {
+  const auto onComplete = [this, terrainName, terrainSize](const tr::TerrainDefinition& result) {
     dataStore.entityNameMap.emplace(terrainName, result.definitionId);
     dataStore.terrainMap.emplace(
         terrainName,
