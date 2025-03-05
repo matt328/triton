@@ -1,13 +1,11 @@
 #pragma once
 
+#include "SdfGenerator.hpp"
+#include "cm/TerrainCreateInfo.hpp"
+
 namespace tr {
 
-class SdfGenerator;
-
-struct ChunkDefinition {
-  glm::ivec3 size;
-  glm::ivec3 location;
-};
+class SurfaceExtractor;
 
 class TerrainManager {
 public:
@@ -19,13 +17,16 @@ public:
   auto operator=(const TerrainManager&) -> TerrainManager& = delete;
   auto operator=(TerrainManager&&) -> TerrainManager& = delete;
 
-  auto registerTerrain(std::string_view name, glm::vec3 size) -> void;
-
-  auto getChunks(std::string_view name) -> std::vector<ChunkDefinition>&;
+  auto registerTerrain(const TerrainCreateInfo& createInfo) -> TerrainResult2&;
 
 private:
   std::shared_ptr<SdfGenerator> sdfGenerator;
+  std::shared_ptr<SurfaceExtractor> surfaceExtractor;
 
-  std::unordered_map<std::string, std::vector<ChunkDefinition>> terrainMap;
+  MapKey terrainKeygen;
+  MapKey chunkKeygen;
+
+  std::unordered_map<TerrainHandle, TerrainResult2> terrainMap;
+  std::unordered_map<ChunkHandle, ChunkResult> chunkMap;
 };
 }

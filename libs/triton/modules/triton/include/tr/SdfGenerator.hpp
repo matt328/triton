@@ -1,11 +1,10 @@
 #pragma once
 
 #include "cm/Rando.hpp"
-#include "tr/SdfCreateInfo.hpp"
+#include "cm/SdfCreateInfo.hpp"
+#include "cm/TerrainResult.hpp"
 
 namespace tr {
-
-using SdfHandle = uint64_t;
 
 class SdfGenerator {
 public:

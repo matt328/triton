@@ -7,7 +7,7 @@
 #include "gp/components/Resources.hpp"
 #include "gp/components/Transform.hpp"
 #include "gp/components/Animation.hpp"
-#include "gp/components/TerrainDefinition.hpp"
+#include "gp/components/TerrainComponent.hpp"
 
 namespace tr {
 
@@ -32,11 +32,11 @@ auto RenderDataSystem::update(RenderData& renderData) -> void {
     }
   };
 
-  const auto terrainFn =
-      [](RenderData& renderData, entt::entity, const TerrainDefinition& terrainDefinition) {
-        renderData.terrainDefinition =
-            GpuTerrainDefinition{.terrainSize = terrainDefinition.terrainSize};
-      };
+  const auto terrainFn = [](RenderData& renderData,
+                            entt::entity,
+                            [[maybe_unused]] const TerrainComponent& terrainComponent) {
+    renderData.terrainDefinition = GpuTerrainDefinition{.terrainSize = glm::vec3(0.f, 0.f, 0.f)};
+  };
 
   uint32_t jointMatricesIndex = 0;
   const auto dynamicFn = [&jointMatricesIndex](RenderData& renderData,

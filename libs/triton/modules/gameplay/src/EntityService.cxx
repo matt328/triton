@@ -1,4 +1,5 @@
 #include "gp/EntityService.hpp"
+#include "gp/components/TerrainComponent.hpp"
 #include "tr/TerrainManager.hpp"
 #include "gp/components/EditorInfo.hpp"
 #include "gp/components/Resources.hpp"
@@ -152,34 +153,49 @@ auto EntityService::createDynamicEntity(ModelData modelData,
   return entity;
 }
 
-auto EntityService::createTerrain(std::string_view name,
-                                  glm::vec3 terrainSize,
-                                  const std::vector<ChunkDefinition>& chunks) -> TerrainResult {
+/* TODO(matt): Tomorrow, un-f all of this confusion.
+
+  TerrainManager has its internal structs it uses.
+  When creating a terrain, you ask the terrain manager to create one with the given params. It
+  creates it and adds a number of chunks. It should put all chunks into a single map, not inside the
+  TerrainDefinition. Only put a vector of chunkhandles inside the TerrainDefinition.
+
+  TerrainManager
+
+  UI -> GameplaySystem -> TerrainManager(Create) -> GameplaySystem -> EntityService -> UI
+
+  The issue is the UI needs a TerrainName,EntityId,TerrainHandle, and a list of
+  ChunkName,ChunkEntityId,ChunkHandle in order to poke at the terrain and the chunk.
+
+  Also for each Chunk, the UI needs to know how many cells, which it can determine, chunkSize - 2.
+*/
+
+/*
+  DataStore can organize and index these by whatever makes most sense, probably name->TerrainData,
+  and name->ChunkData
+*/
+
+auto EntityService::createTerrain(TerrainResult2& terrainResult) -> void {
   std::unique_lock<SharedLockableBase(std::shared_mutex)> lock(registryMutex);
   LockMark(registryMutex);
 
-  const auto entity = registry->create();
-  registry->emplace<TerrainDefinition>(entity, terrainSize);
-  registry->emplace<EditorInfo>(entity, name.data());
-
   // Create an entity for each chunk
-  auto chunkResults = std::unordered_map<tr::EntityType, std::string>{};
-  for (const auto& chunk : chunks) {
+  for (const auto& chunk : terrainResult.chunks) {
     const auto entity = registry->create();
-    const auto chunkName = fmt::format("{} Chunk({}, {}, {})",
-                                       name.data(),
-                                       chunk.location.x,
-                                       chunk.location.y,
-                                       chunk.location.z);
+    const auto chunkName =
+        fmt::format("Chunk({}, {}, {})", chunk.location.x, chunk.location.y, chunk.location.z);
     registry->emplace<EditorInfo>(entity, chunkName);
-    registry->emplace<TerrainChunk>(entity, chunk.location, chunk.size);
-    chunkResults.insert({entity, name.data()});
+    registry->emplace<ChunkComponent>(entity, chunk.location, chunk.size);
   }
-  return {.definitionId = entity, .chunkData = chunkResults};
+
+  const auto entity = registry->create();
+  registry->emplace<TerrainComponent>(entity, terrainResult.name, terrainResult.terrainHandle, );
+  registry->emplace<EditorInfo>(entity, fmt::format("Terrain {}", terrainDefinition.terrainHandle));
 }
 
-auto EntityService::createCamera(CameraInfo cameraInfo, std::string_view name, bool setDefault)
-    -> void {
+auto EntityService::createCamera(CameraInfo cameraInfo,
+                                 std::string_view name,
+                                 bool setDefault) -> void {
 
   std::unique_lock<SharedLockableBase(std::shared_mutex)> lock(registryMutex);
   LockMark(registryMutex);

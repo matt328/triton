@@ -176,11 +176,10 @@ auto DefaultGameplaySystem::createAnimatedModelEntity(const AnimatedModelData& m
                                             modelData.entityName.value_or("Unnamed Entity"));
 }
 
-auto DefaultGameplaySystem::createTerrain(std::string_view name, glm::vec3 terrainSize)
-    -> TerrainResult {
-  terrainManager->registerTerrain(name, terrainSize);
-  const auto& chunks = terrainManager->getChunks(name);
-  return entityService->createTerrain(name, terrainSize, chunks);
+auto DefaultGameplaySystem::createTerrain(const TerrainCreateInfo& createInfo) -> TerrainResult2& {
+  auto& terrainResult = terrainManager->registerTerrain(createInfo);
+  entityService->createTerrain(terrainResult);
+  return terrainResult;
 }
 
 auto DefaultGameplaySystem::createDefaultCamera() -> void {
@@ -210,6 +209,12 @@ auto DefaultGameplaySystem::entityCreated([[maybe_unused]] entt::registry& reg,
 
 auto DefaultGameplaySystem::getEntityService() const -> std::shared_ptr<EntityService> {
   return entityService;
+}
+
+auto DefaultGameplaySystem::triangulateChunk(tr::EntityType terrainId,
+                                             tr::EntityType chunkId,
+                                             glm::ivec3 cellPosition) -> void {
+  terrainManager->triangulateChunk(terrainId, chunkId, cellPosition);
 }
 
 }

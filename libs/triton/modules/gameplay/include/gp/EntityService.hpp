@@ -10,7 +10,6 @@
 #include "gp/components/Renderable.hpp"
 #include "gp/components/Resources.hpp"
 #include "gp/components/Transform.hpp"
-#include "gp/components/TerrainDefinition.hpp"
 
 namespace tr {
 
@@ -68,12 +67,11 @@ public:
                           Transform transform,
                           std::string_view name) -> tr::EntityType;
 
-  auto createDynamicEntity(ModelData modelData, Transform transform, std::string_view name)
-      -> tr::EntityType;
+  auto createDynamicEntity(ModelData modelData,
+                           Transform transform,
+                           std::string_view name) -> tr::EntityType;
 
-  auto createTerrain(std::string_view name,
-                     glm::vec3 terrainSize,
-                     const std::vector<ChunkDefinition>& chunks) -> TerrainResult;
+  auto createTerrain(TerrainResult& terrainDefinition) -> void;
 
   auto createCamera(CameraInfo cameraInfo, std::string_view name, bool setDefault = true) -> void;
 

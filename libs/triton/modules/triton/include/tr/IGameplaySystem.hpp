@@ -32,10 +32,14 @@ public:
   virtual auto createAnimatedModelEntity(const AnimatedModelData& modelData,
                                          std::optional<Transform> initialTransform)
       -> tr::EntityType = 0;
-  virtual auto createTerrain(std::string_view name, glm::vec3 terrainSize) -> TerrainResult = 0;
+  virtual auto createTerrain(const TerrainCreateInfo& createInfo) -> TerrainResult2& = 0;
   virtual auto createDefaultCamera() -> void = 0;
   virtual auto createTestEntity(std::string_view name) -> void = 0;
   virtual auto removeEntity(tr::EntityType entity) -> void = 0;
   [[nodiscard]] virtual auto getEntityService() const -> std::shared_ptr<EntityService> = 0;
+
+  virtual auto triangulateChunk(tr::EntityType terrainId,
+                                tr::EntityType chunkId,
+                                glm::ivec3 cellPosition) -> void = 0;
 };
 }
