@@ -19,6 +19,10 @@ public:
 
   auto registerTerrain(const TerrainCreateInfo& createInfo) -> TerrainResult2&;
 
+  auto triangulateChunk(TerrainHandle terrainHandle,
+                        ChunkHandle chunkHandle,
+                        glm::ivec3 location) -> void;
+
 private:
   std::shared_ptr<SdfGenerator> sdfGenerator;
   std::shared_ptr<SurfaceExtractor> surfaceExtractor;

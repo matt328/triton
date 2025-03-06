@@ -103,43 +103,46 @@ void EntityEditor::render() {
         // Terrain Controls
         const auto* terrainData = dataFacade->getTerrainData(selectedEntity.value());
         if (terrainData != nullptr) {
-          for (const auto id : terrainData->chunkIds) {
-            // TODO(matt): Change this to a select when there are more chunks
-            ImGui::Text("Chunk ID: %i", id);
-
-            static auto cellPosition = glm::ivec3{0, 0, 0};
-
-            if (ImGui::DragInt3("Position##Chunk", glm::value_ptr(cellPosition), 1)) {}
-            if (ImGui::Button("Triangulate Cell")) {
-              gameplaySystem->triangulateChunk(id, cellPosition);
+          const auto terrainId = terrainData->entityId;
+          static int selectedChunkIndex = 0;
+          const auto chunkLabel =
+              fmt::format("Chunk ({},{},{})",
+                          terrainData->chunkData[selectedChunkIndex].location.x,
+                          terrainData->chunkData[selectedChunkIndex].location.y,
+                          terrainData->chunkData[selectedChunkIndex].location.z);
+          if (ImGui::BeginCombo("Select Chunk", chunkLabel.c_str())) {
+            for (int i = 0; i < terrainData->chunkData.size(); ++i) {
+              const auto& chunk = terrainData->chunkData[i];
+              bool isSelected = (i == selectedChunkIndex);
+              std::string label = "Chunk (" + std::to_string(chunk.location.x) + "," +
+                                  std::to_string(chunk.location.y) + "," +
+                                  std::to_string(chunk.location.z) + ")";
+              if (ImGui::Selectable(label.c_str(), isSelected)) {
+                selectedChunkIndex = i; // Update selected chunk
+              }
+              if (isSelected) {
+                ImGui::SetItemDefaultFocus();
+              }
             }
+            ImGui::EndCombo();
+          }
+          // Get the selected chunk
+          const auto& selectedChunk = terrainData->chunkData[selectedChunkIndex];
 
-            if (ImGui::Button("Triangulate All")) {
-              gameplaySystem->triangulateChunk(id);
-            }
+          ImGui::Text("Chunk (%i, %i, %i)",
+                      selectedChunk.location.x,
+                      selectedChunk.location.y,
+                      selectedChunk.location.z);
 
-            /* TODO(matt): Tomorrow:
+          static glm::ivec3 cellPosition = {0, 0, 0};
+          ImGui::DragInt3("Position##Chunk", glm::value_ptr(cellPosition), 1);
 
-              First we need some parameters to generate an SDF.
-              Probably need an SDF Manager, and a struct of parameters that can evolve into a
-              piecewise function definition that the SDF Manager can use to generate the SDF.
-              It probably won't generate the entire SDF all at once, but rather expose and API to
-              sample a continuous function to produce a coeherent SDF. For now hard code the terrain
-              manager to pass an empty struct to the SDFManager to configure it, then the SDF
-              Manager should provide an API to quickly sample the field at various coordinates.
-              Hardcode the sdf manager to produce a simple horizontal plane at a a Y value given
-              supplied in the empty struct mentioned earlier.
-              - Based on the current chunk's location, allow the UI to step through one cell at a
-              time and generate the vertices needed for the cell.
-              - Render debug indicators such as the bounds of the current cell itself, vertices as
-              points and the actual surface itself.
-              - Allow the UI to see the cells that are not completely air or matter in a list, and
-              selecting a cell highlights these debug indicators on the 3d view.
-              - This should be a useful tool throughout most of the terrain implementation process
-              - The UI should also include debug info about the current cell and possibly each cell
-              corner such as the equivalance class and all that.
+          if (ImGui::Button("Triangulate Cell")) {
+            gameplaySystem->triangulateChunk(terrainId, selectedChunk.entityId, cellPosition);
+          }
 
-             */
+          if (ImGui::Button("Triangulate All")) {
+            gameplaySystem->triangulateChunk(terrainId, selectedChunk.entityId, cellPosition);
           }
         }
 

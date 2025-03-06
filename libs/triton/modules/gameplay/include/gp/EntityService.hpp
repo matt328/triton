@@ -1,5 +1,6 @@
 #pragma once
 
+#include "gp/components/TerrainComponent.hpp"
 #include "tr/TerrainManager.hpp"
 #include "cm/EntitySystemTypes.hpp"
 #include "cm/RenderData.hpp"
@@ -29,7 +30,7 @@ using DynamicUpdateFn = std::function<void(RenderData& renderData,
                                            const Renderable&,
                                            const Transform&)>;
 
-using TerrainUpdateFn = std::function<void(RenderData&, entt::entity, const TerrainDefinition&)>;
+using TerrainUpdateFn = std::function<void(RenderData&, entt::entity, const TerrainComponent&)>;
 
 using EntityCreatedFn = std::function<void(entt::registry&, entt::entity)>;
 
@@ -71,7 +72,7 @@ public:
                            Transform transform,
                            std::string_view name) -> tr::EntityType;
 
-  auto createTerrain(TerrainResult& terrainDefinition) -> void;
+  auto createTerrain(TerrainResult2& terrainResult) -> void;
 
   auto createCamera(CameraInfo cameraInfo, std::string_view name, bool setDefault = true) -> void;
 
@@ -81,6 +82,9 @@ public:
       const std::function<void(tr::EntityType entity, EditorInfo& editorInfo)>& fn) -> void;
 
   auto setTransform(tr::EntityType entityId, Transform transform) -> void;
+
+  auto getTerrainHandle(tr::EntityType terrainId) -> TerrainHandle;
+  auto getChunkHandle(tr::EntityType chunkId) -> ChunkHandle;
 
 private:
   std::shared_ptr<AssetManager> assetManager;
