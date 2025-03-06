@@ -71,9 +71,9 @@ auto TerrainManager::triangulateChunk([[maybe_unused]] TerrainHandle terrainHand
 
   const auto terrainGeometryData = TerrainGeometryData{std::move(vertices), std::move(indices)};
 
-  auto meshHandle = resourceManager->uploadStaticMesh(terrainGeometryData);
+  // auto meshHandle = resourceManager->uploadStaticMesh(terrainGeometryData);
 
-  entityService->addMeshToTerrainChunk(terrain.entityId, chunk.entityId, meshHandle);
+  // entityService->addMeshToTerrainChunk(terrain.entityId, chunk.entityId, meshHandle);
 
   // Should this use the standard static mesh geometry buffer, or should the resource manager know
   // how to handle terrain geometry differently?
