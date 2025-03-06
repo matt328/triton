@@ -63,11 +63,17 @@ struct EntityData {
   }
 };
 
+struct ChunkData {
+  tr::EntityType entityId;
+  glm::ivec3 location;
+};
+
 struct TerrainData {
   std::string name;
   glm::vec3 terrainSize;
 
-  std::vector<tr::EntityType> chunkIds;
+  std::vector<ChunkData> chunkData;
+  tr::EntityType entityId;
 
   template <class T>
   void serialize(T& archive) {

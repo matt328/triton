@@ -11,6 +11,7 @@ struct ChunkResult {
   std::string name;
   ChunkHandle chunkHandle;
   glm::ivec3 location;
+  glm::ivec3 size;
   std::optional<tr::EntityType> entityId = std::nullopt;
 };
 

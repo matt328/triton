@@ -4,7 +4,6 @@
 #include "gp/components/EditorInfo.hpp"
 #include "gp/components/Resources.hpp"
 #include "gp/components/TerrainChunk.hpp"
-#include "gp/components/TerrainMarker.hpp"
 
 namespace tr {
 
@@ -100,9 +99,9 @@ auto EntityService::updateRenderData(const CamFn& camUpdateFn,
   }
 
   // Process Terrain Entities
-  const auto terrainView = registry->view<TerrainDefinition>();
-  for (const auto& [entity, terrainDefinition] : terrainView.each()) {
-    terrainFn(renderData, entity, terrainDefinition);
+  const auto terrainView = registry->view<TerrainComponent>();
+  for (const auto& [entity, terrain] : terrainView.each()) {
+    terrainFn(renderData, entity, terrain);
   }
 }
 
@@ -153,6 +152,16 @@ auto EntityService::createDynamicEntity(ModelData modelData,
   return entity;
 }
 
+auto EntityService::getTerrainHandle(tr::EntityType terrainId) -> TerrainHandle {
+  const auto terrainComponent = registry->get<TerrainComponent>(terrainId);
+  return terrainComponent.handle;
+}
+
+auto EntityService::getChunkHandle(tr::EntityType chunkId) -> ChunkHandle {
+  const auto chunkComponent = registry->get<ChunkComponent>(chunkId);
+  return chunkComponent.handle;
+}
+
 /* TODO(matt): Tomorrow, un-f all of this confusion.
 
   TerrainManager has its internal structs it uses.
@@ -179,18 +188,26 @@ auto EntityService::createTerrain(TerrainResult2& terrainResult) -> void {
   std::unique_lock<SharedLockableBase(std::shared_mutex)> lock(registryMutex);
   LockMark(registryMutex);
 
+  auto chunkEntityIds = std::vector<tr::EntityType>{};
+
   // Create an entity for each chunk
-  for (const auto& chunk : terrainResult.chunks) {
+  for (auto& chunk : terrainResult.chunks) {
     const auto entity = registry->create();
+    chunk.entityId = entity;
+    chunkEntityIds.push_back(entity);
     const auto chunkName =
         fmt::format("Chunk({}, {}, {})", chunk.location.x, chunk.location.y, chunk.location.z);
     registry->emplace<EditorInfo>(entity, chunkName);
-    registry->emplace<ChunkComponent>(entity, chunk.location, chunk.size);
+    registry->emplace<ChunkComponent>(entity, chunk.location, chunk.size, chunk.chunkHandle);
   }
 
   const auto entity = registry->create();
-  registry->emplace<TerrainComponent>(entity, terrainResult.name, terrainResult.terrainHandle, );
-  registry->emplace<EditorInfo>(entity, fmt::format("Terrain {}", terrainDefinition.terrainHandle));
+  terrainResult.entityId = entity;
+  registry->emplace<TerrainComponent>(entity,
+                                      terrainResult.name,
+                                      terrainResult.terrainHandle,
+                                      chunkEntityIds);
+  registry->emplace<EditorInfo>(entity, terrainResult.name);
 }
 
 auto EntityService::createCamera(CameraInfo cameraInfo,

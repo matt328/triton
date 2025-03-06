@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "DataFacade.hpp"
 
 #include "cm/TaskQueue.hpp"
@@ -146,22 +148,40 @@ void DataFacade::createTerrain(std::string_view terrainName, glm::vec3 terrainSi
   const auto task = [this, terrainName] {
     const auto tci = tr::TerrainCreateInfo{.name = terrainName.data(),
                                            .sdfCreateInfo = tr::SdfCreateInfo{.height = 0.5f},
-                                           .chunkCount = glm::ivec3(1, 1, 1),
+                                           .chunkCount = glm::ivec3(3, 3, 3),
                                            .chunkSize = glm::ivec3(5, 5, 5)};
     return gameplaySystem->createTerrain(tci);
   };
 
   const auto onComplete = [this, terrainName, terrainSize](const tr::TerrainResult2& result) {
-    dataStore.entityNameMap.emplace(terrainName, result.entityId);
-    // TODO(matt): Decide what goes in the datastore
-    // dataStore.terrainMap.emplace(terrainName,
-    //                              TerrainData{.name = std::string{terrainName},
-    //                                          .terrainSize = terrainSize,
-    //                                          .chunkIds = result.chunks});
+    // Register the Terrain's name -> entityId
+    dataStore.entityNameMap.emplace(terrainName, result.entityId.value());
 
-    // for (const auto& [id, name] : result.chunkData) {
-    //   dataStore.entityNameMap.emplace(name, id);
-    // }
+    auto chunkIds = std::vector<ChunkData>{};
+    chunkIds.reserve(result.chunks.size());
+    std::ranges::transform(result.chunks.begin(),
+                           result.chunks.end(),
+                           std::back_inserter(chunkIds),
+                           [](const tr::ChunkResult& chunk) {
+                             return ChunkData{.entityId = chunk.entityId.value(),
+                                              .location = chunk.location};
+                           });
+
+    std::ranges::sort(chunkIds, [](const ChunkData& a, const ChunkData& b) {
+      return std::tie(a.location.z, a.location.y, a.location.x) <
+             std::tie(b.location.z, b.location.y, b.location.x);
+    });
+
+    dataStore.terrainMap.emplace(terrainName,
+                                 TerrainData{.name = std::string{terrainName},
+                                             .terrainSize = terrainSize,
+                                             .chunkData = chunkIds,
+                                             .entityId = result.entityId.value()});
+
+    // Register each Chunk's name -> id
+    for (const auto& chunk : result.chunks) {
+      dataStore.entityNameMap.emplace(chunk.name, chunk.entityId.value());
+    }
 
     engineBusy = false;
   };

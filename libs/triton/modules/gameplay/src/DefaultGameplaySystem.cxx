@@ -203,7 +203,7 @@ auto DefaultGameplaySystem::removeEntity(tr::EntityType entity) -> void {
 }
 
 auto DefaultGameplaySystem::entityCreated([[maybe_unused]] entt::registry& reg,
-                                          [[maybe_unused]] entt::entity entity) const -> void {
+                                          entt::entity entity) const -> void {
   eventBus->emit(EntityCreated{entity});
 }
 
@@ -214,7 +214,9 @@ auto DefaultGameplaySystem::getEntityService() const -> std::shared_ptr<EntitySe
 auto DefaultGameplaySystem::triangulateChunk(tr::EntityType terrainId,
                                              tr::EntityType chunkId,
                                              glm::ivec3 cellPosition) -> void {
-  terrainManager->triangulateChunk(terrainId, chunkId, cellPosition);
+  const auto terrainHandle = entityService->getTerrainHandle(terrainId);
+  const auto chunkHandle = entityService->getChunkHandle(chunkId);
+  terrainManager->triangulateChunk(terrainHandle, chunkHandle, cellPosition);
 }
 
 }
