@@ -37,6 +37,7 @@
 #include "cm/TaskQueue.hpp"
 #include "tr/TerrainManager.hpp"
 #include "tr/SdfGenerator.hpp"
+#include "tr/SurfaceExtractor.hpp"
 
 namespace di = boost::di;
 

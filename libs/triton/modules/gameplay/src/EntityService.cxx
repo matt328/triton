@@ -162,28 +162,6 @@ auto EntityService::getChunkHandle(tr::EntityType chunkId) -> ChunkHandle {
   return chunkComponent.handle;
 }
 
-/* TODO(matt): Tomorrow, un-f all of this confusion.
-
-  TerrainManager has its internal structs it uses.
-  When creating a terrain, you ask the terrain manager to create one with the given params. It
-  creates it and adds a number of chunks. It should put all chunks into a single map, not inside the
-  TerrainDefinition. Only put a vector of chunkhandles inside the TerrainDefinition.
-
-  TerrainManager
-
-  UI -> GameplaySystem -> TerrainManager(Create) -> GameplaySystem -> EntityService -> UI
-
-  The issue is the UI needs a TerrainName,EntityId,TerrainHandle, and a list of
-  ChunkName,ChunkEntityId,ChunkHandle in order to poke at the terrain and the chunk.
-
-  Also for each Chunk, the UI needs to know how many cells, which it can determine, chunkSize - 2.
-*/
-
-/*
-  DataStore can organize and index these by whatever makes most sense, probably name->TerrainData,
-  and name->ChunkData
-*/
-
 auto EntityService::createTerrain(TerrainResult2& terrainResult) -> void {
   std::unique_lock<SharedLockableBase(std::shared_mutex)> lock(registryMutex);
   LockMark(registryMutex);

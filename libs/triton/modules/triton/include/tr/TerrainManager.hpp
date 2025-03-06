@@ -2,6 +2,7 @@
 
 #include "SdfGenerator.hpp"
 #include "cm/TerrainCreateInfo.hpp"
+#include "as/TerrainVertex.hpp"
 
 namespace tr {
 
@@ -9,7 +10,8 @@ class SurfaceExtractor;
 
 class TerrainManager {
 public:
-  explicit TerrainManager(std::shared_ptr<SdfGenerator> newSdfGenerator);
+  explicit TerrainManager(std::shared_ptr<SdfGenerator> newSdfGenerator,
+                          std::shared_ptr<SurfaceExtractor> newSurfaceExtractor);
   ~TerrainManager();
 
   TerrainManager(const TerrainManager&) = delete;

@@ -1,11 +1,14 @@
 #include "tr/TerrainManager.hpp"
 #include "tr/SdfGenerator.hpp"
 #include "cm/GlmToString.hpp"
+#include "tr/SurfaceExtractor.hpp"
+#include "geo/TerrainGeometryData.hpp"
 
 namespace tr {
 
-TerrainManager::TerrainManager(std::shared_ptr<SdfGenerator> newSdfGenerator)
-    : sdfGenerator{std::move(newSdfGenerator)} {
+TerrainManager::TerrainManager(std::shared_ptr<SdfGenerator> newSdfGenerator,
+                               std::shared_ptr<SurfaceExtractor> newSurfaceExtractor)
+    : sdfGenerator{std::move(newSdfGenerator)}, surfaceExtractor{std::move(newSurfaceExtractor)} {
 }
 
 TerrainManager::~TerrainManager() {
@@ -48,13 +51,32 @@ auto TerrainManager::registerTerrain(const TerrainCreateInfo& createInfo) -> Ter
 
 auto TerrainManager::triangulateChunk([[maybe_unused]] TerrainHandle terrainHandle,
                                       [[maybe_unused]] ChunkHandle chunkHandle,
-                                      [[maybe_unused]] glm::ivec3 location) -> void {
+                                      [[maybe_unused]] glm::ivec3 cellLocation) -> void {
   Log.trace("Triangulating Chunk TerrainHandle: {}, ChunkHandle: {}, location: ({},{},{})",
             terrainHandle,
             chunkHandle,
-            location.x,
-            location.y,
-            location.z);
+            cellLocation.x,
+            cellLocation.y,
+            cellLocation.z);
+
+  const auto terrain = terrainMap.at(terrainHandle);
+  const auto chunk = chunkMap.at(chunkHandle);
+
+  auto vertices = std::vector<as::TerrainVertex>{};
+  auto indices = std::vector<uint32_t>{};
+
+  surfaceExtractor->extractSurface(sdfGenerator, terrain.sdfHandle, chunk, vertices, indices);
+
+  Log.trace("Vertices: {}, indices: {}", vertices.size(), indices.size());
+
+  const auto terrainGeometryData = TerrainGeometryData{std::move(vertices), std::move(indices)};
+
+  auto meshHandle = resourceManager->uploadStaticMesh(terrainGeometryData);
+
+  entityService->addMeshToTerrainChunk(terrain.entityId, chunk.entityId, meshHandle);
+
+  // Should this use the standard static mesh geometry buffer, or should the resource manager know
+  // how to handle terrain geometry differently?
 }
 
 }
