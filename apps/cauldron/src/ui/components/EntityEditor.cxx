@@ -104,14 +104,14 @@ void EntityEditor::render() {
         const auto* terrainData = dataFacade->getTerrainData(selectedEntity.value());
         if (terrainData != nullptr) {
           const auto terrainId = terrainData->entityId;
-          static int selectedChunkIndex = 0;
+          static size_t selectedChunkIndex = 0;
           const auto chunkLabel =
               fmt::format("Chunk ({},{},{})",
                           terrainData->chunkData[selectedChunkIndex].location.x,
                           terrainData->chunkData[selectedChunkIndex].location.y,
                           terrainData->chunkData[selectedChunkIndex].location.z);
           if (ImGui::BeginCombo("Select Chunk", chunkLabel.c_str())) {
-            for (int i = 0; i < terrainData->chunkData.size(); ++i) {
+            for (size_t i = 0; i < terrainData->chunkData.size(); ++i) {
               const auto& chunk = terrainData->chunkData[i];
               bool isSelected = (i == selectedChunkIndex);
               std::string label = "Chunk (" + std::to_string(chunk.location.x) + "," +

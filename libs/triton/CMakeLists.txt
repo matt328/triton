@@ -33,6 +33,7 @@ set(common_SRC
   modules/graphics/src/geo/HeightField.cxx
   modules/graphics/src/geo/DynamicGeometryData.cxx
   modules/graphics/src/geo/StaticGeometryData.cxx
+  modules/graphics/src/geo/TerrainGeometryData.cxx
 
   modules/graphics/src/DefaultDebugManager.cxx
   modules/graphics/src/ImGuiSystem.cxx
@@ -120,6 +121,7 @@ target_precompile_headers(${PROJECT_NAME}
   <map>
   <mutex>
   <random>
+  <ranges>
   <set>
   <shared_mutex>
   <stb_image.h>
