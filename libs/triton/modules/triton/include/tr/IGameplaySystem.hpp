@@ -3,6 +3,7 @@
 #include "cm/EntitySystemTypes.hpp"
 #include "cm/RenderData.hpp"
 #include "AnimatedModelData.hpp"
+#include "cm/TerrainCreateInfo.hpp"
 #include "gp/components/Transform.hpp"
 #include "gp/EntityService.hpp"
 

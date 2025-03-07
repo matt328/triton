@@ -1,6 +1,7 @@
 #include "tr/SurfaceExtractor.hpp"
 #include "tr/SdfGenerator.hpp"
-
+#include "cm/GlmToString.hpp"
+// NOLINTBEGIN
 namespace tr {
 
 SurfaceExtractor::SurfaceExtractor() {
@@ -14,6 +15,7 @@ auto SurfaceExtractor::extractSurface(const std::shared_ptr<SdfGenerator>& sdfGe
                                       const ChunkResult& chunk,
                                       std::vector<as::TerrainVertex>& vertices,
                                       std::vector<uint32_t>& indices) -> void {
+  cache = RegularCellCache{static_cast<size_t>(chunk.size.x)};
   /// World coordinates of the lower front left cell
   auto min = glm::ivec3(chunk.location.x * chunk.size.x,
                         chunk.location.y * chunk.size.y,
@@ -51,8 +53,10 @@ auto SurfaceExtractor::extractCellVertices(const std::shared_ptr<SdfGenerator>& 
     corner[currentCorner] = value;
   }
 
-  // TODO(matt): given the sdf values at the corners, I don't think the case code is not being
-  // generated correctly
+  /* TODO(matt): given the sdf values at the corners, I don't think the case code is not being
+    Ehh I think the case code is being generated correctly, just the 8th vertex, the second vertex
+    of the second cell has a value of 0,y,0, instead of 1,y,1.
+  */
 
   /// The corner value in the SDF being non-negative means outside, negative means inside
   /// This code packs only the corner values' sign bits into a single 8 bit value which is how
@@ -97,6 +101,9 @@ auto SurfaceExtractor::extractCellVertices(const std::shared_ptr<SdfGenerator>& 
     // bit value 1 = -x, bit value 2 = -y bit value 4 = -z bit value 8 means create new
     // vertex
     uint8_t dirPrev = edge >> 4;
+    if ((dirPrev & 8) != 0) {
+      Log.debug("dirPrev={}", std::bitset<8>(dirPrev).to_string());
+    }
 
     uint8_t cellCornerIndex1 = vertexLocation & 0x0F;
     uint8_t cellCornerIndex0 = (vertexLocation >> 4) & 0x0F;
@@ -114,17 +121,22 @@ auto SurfaceExtractor::extractCellVertices(const std::shared_ptr<SdfGenerator>& 
     [[maybe_unused]] float t1 = u / 256.F;
 
     int index = -1;
+
     // If cellCornderIndex1 is 7, that means this cell does not own the vertex. And if the
     // dirPrev (which comes from the tables) & this edge's direction mask is itself, that
     // means the vertex in question could have already been generated, so we have to check.
     if (cellCornerIndex1 != 7 && (dirPrev & directionMask) == dirPrev) {
       const auto reuseCell = cache.getReusedIndex(cellPosition, dirPrev);
       index = reuseCell.vertices[reuseIndex];
+      Log.debug("{}: reuseIndex: {}, index: {}", cellPosition, reuseIndex, index);
     }
 
     if (index == -1) {
-      // The cube in dirPrev did not generate a vertex on the edge we are needing one
+      // The cell in dirPrev did not generate a vertex on the edge we are needing one
       // so generate one.
+      if (!(dirPrev & 8)) {
+        Log.warn("dirPrev 8 not set but still creating vertex");
+      }
       index = generateVertex(vertices,
                              cellVertices,
                              currentCellPosition,
@@ -138,8 +150,15 @@ auto SurfaceExtractor::extractCellVertices(const std::shared_ptr<SdfGenerator>& 
 
     if ((dirPrev & 8) != 0) {
       // dirPrev having bit 8 set means create a new vertex
-      uint16_t lastAddedVertexIndex = 0;
+      uint16_t lastAddedVertexIndex = index;
       cache.setReusableIndex(cellPosition, reuseIndex, lastAddedVertexIndex);
+    } else {
+      Log.warn("Skipping setReusableIndex for cell {}: dirPrev={}, cellCornerIndex0={}, "
+               "cellCornerIndex1={}",
+               cellPosition,
+               std::bitset<8>(dirPrev).to_string(),
+               cellCornerIndex0,
+               cellCornerIndex1);
     }
     mappedIndices.push_back(index);
   }
@@ -168,7 +187,6 @@ auto SurfaceExtractor::generateVertex(std::vector<as::TerrainVertex>& vertices,
   auto vertex = as::TerrainVertex{};
   vertex.position = result;
   auto size = vertices.size();
-  Log.debug("Vertex: {0}", vertex);
   vertices.push_back(vertex);
 
   cellVertices.push_back(vertex);
@@ -177,3 +195,4 @@ auto SurfaceExtractor::generateVertex(std::vector<as::TerrainVertex>& vertices,
 }
 
 }
+// NOLINTEND

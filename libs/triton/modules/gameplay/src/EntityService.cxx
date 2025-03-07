@@ -1,6 +1,5 @@
 #include "gp/EntityService.hpp"
 #include "gp/components/TerrainComponent.hpp"
-#include "tr/TerrainManager.hpp"
 #include "gp/components/EditorInfo.hpp"
 #include "gp/components/Resources.hpp"
 #include "gp/components/TerrainChunk.hpp"
@@ -99,9 +98,9 @@ auto EntityService::updateRenderData(const CamFn& camUpdateFn,
   }
 
   // Process Terrain Entities
-  const auto terrainView = registry->view<TerrainComponent>();
-  for (const auto& [entity, terrain] : terrainView.each()) {
-    terrainFn(renderData, entity, terrain);
+  const auto terrainView = registry->view<ChunkComponent, Renderable>();
+  for (const auto& [entity, chunk, renderable] : terrainView.each()) {
+    terrainFn(renderData, entity, chunk, renderable);
   }
 }
 
@@ -236,6 +235,19 @@ auto EntityService::setTransform(tr::EntityType entityId, Transform transform) -
     t.position = transform.position;
     t.rotation = transform.rotation;
   });
+}
+
+auto EntityService::addMeshToTerrainChunk([[maybe_unused]] tr::EntityType terrainId,
+                                          tr::EntityType chunkId,
+                                          MeshHandle meshHandle) -> void {
+  const auto meshDataList = {MeshData{
+      .meshHandle = meshHandle,
+      .topology = Topology::LineList,
+      .textureHandle = 0,
+  }};
+  std::unique_lock<SharedLockableBase(std::shared_mutex)> lock(registryMutex);
+  LockMark(registryMutex);
+  registry->emplace<Renderable>(chunkId, meshDataList);
 }
 
 }

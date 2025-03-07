@@ -216,7 +216,7 @@ auto DefaultGameplaySystem::triangulateChunk(tr::EntityType terrainId,
                                              glm::ivec3 cellPosition) -> void {
   const auto terrainHandle = entityService->getTerrainHandle(terrainId);
   const auto chunkHandle = entityService->getChunkHandle(chunkId);
-  terrainManager->triangulateChunk(terrainHandle, chunkHandle, cellPosition);
+  terrainManager->triangulateChunk(terrainHandle, chunkHandle, chunkId, cellPosition);
 }
 
 }

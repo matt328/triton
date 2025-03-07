@@ -83,6 +83,10 @@ auto VkResourceManager::uploadDynamicMesh(const IGeometryData& geometryData) -> 
   return dynamicMeshBuffer->addMesh(geometryData);
 }
 
+auto VkResourceManager::uploadTerrainMesh(const IGeometryData& geometryData) -> MeshHandle {
+  return terrainMeshBuffer->addMesh(geometryData);
+}
+
 auto VkResourceManager::asyncUpload2(const IGeometryData& geometryData) -> MeshHandle {
   // Prepare Vertex Buffer
   const auto vbSize = geometryData.getVertexDataSize();

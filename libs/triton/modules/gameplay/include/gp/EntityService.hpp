@@ -1,7 +1,7 @@
 #pragma once
 
+#include "gp/components/TerrainChunk.hpp"
 #include "gp/components/TerrainComponent.hpp"
-#include "tr/TerrainManager.hpp"
 #include "cm/EntitySystemTypes.hpp"
 #include "cm/RenderData.hpp"
 #include "gp/AssetManager.hpp"
@@ -30,7 +30,8 @@ using DynamicUpdateFn = std::function<void(RenderData& renderData,
                                            const Renderable&,
                                            const Transform&)>;
 
-using TerrainUpdateFn = std::function<void(RenderData&, entt::entity, const TerrainComponent&)>;
+using TerrainUpdateFn =
+    std::function<void(RenderData&, entt::entity, const ChunkComponent&, const Renderable&)>;
 
 using EntityCreatedFn = std::function<void(entt::registry&, entt::entity)>;
 
@@ -85,6 +86,10 @@ public:
 
   auto getTerrainHandle(tr::EntityType terrainId) -> TerrainHandle;
   auto getChunkHandle(tr::EntityType chunkId) -> ChunkHandle;
+
+  auto addMeshToTerrainChunk(tr::EntityType terrainId,
+                             tr::EntityType chunkId,
+                             MeshHandle meshHandle) -> void;
 
 private:
   std::shared_ptr<AssetManager> assetManager;

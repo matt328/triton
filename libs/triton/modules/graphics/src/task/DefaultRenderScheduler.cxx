@@ -398,6 +398,7 @@ auto DefaultRenderScheduler::updatePerFrameRenderData(Frame* frame,
 
   frame->setStaticObjectCount(renderData.staticGpuMeshData.size());
   frame->setDynamicObjectCount(renderData.dynamicMeshData.size());
+  frame->setTerrainChunkCount(renderData.terrainMeshData.size());
 
   resourceManager->updateShaderBindings();
 
@@ -577,7 +578,7 @@ auto DefaultRenderScheduler::executeTasks(Frame* frame, bool recordTasks) const 
         .objectDataBufferAddress = objectDataBuffer.getDeviceAddress(),
         .countBufferAddress = countBuffer.getDeviceAddress(),
         .objectDataIndexBufferAddress = objectDataIndexBuffer.getDeviceAddress(),
-        .objectCount = frame->getStaticObjectCount()};
+        .objectCount = frame->getTerrainChunkCount()};
     computeTask->record(commandBuffer, computePushConstants);
   }
 

@@ -27,7 +27,8 @@ void NewRenderContext::renderNextFrame() {
       {
         renderScheduler->recordRenderTasks(frame,
                                            !renderData.staticGpuMeshData.empty() ||
-                                               !renderData.dynamicMeshData.empty());
+                                               !renderData.dynamicMeshData.empty() ||
+                                               !renderData.terrainMeshData.empty());
       }
       { renderScheduler->endFrame(frame); }
       return;

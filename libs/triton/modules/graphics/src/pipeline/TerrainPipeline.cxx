@@ -79,7 +79,7 @@ TerrainPipeline::TerrainPipeline(const std::shared_ptr<Device>& device,
 
   // Rasterizer
   constexpr auto rasterizer = vk::PipelineRasterizationStateCreateInfo{
-      .polygonMode = vk::PolygonMode::eFill,
+      .polygonMode = vk::PolygonMode::eLine,
       .cullMode = vk::CullModeFlagBits::eBack,
       .frontFace = vk::FrontFace::eCounterClockwise,
       .lineWidth = 1.f,
