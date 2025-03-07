@@ -34,7 +34,7 @@ public:
                       std::vector<uint32_t>& indices) -> void;
 
 private:
-  RegularCellCache cache{5 * 10};
+  RegularCellCache cache{0};
 
   auto extractCellVertices(const std::shared_ptr<SdfGenerator>& sdfGenerator,
                            SdfHandle sdfHandle,

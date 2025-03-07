@@ -149,7 +149,7 @@ void DataFacade::createTerrain(std::string_view terrainName, glm::vec3 terrainSi
     const auto tci = tr::TerrainCreateInfo{.name = terrainName.data(),
                                            .sdfCreateInfo = tr::SdfCreateInfo{.height = 0.5f},
                                            .chunkCount = glm::ivec3(3, 3, 3),
-                                           .chunkSize = glm::ivec3(5, 5, 5)};
+                                           .chunkSize = glm::ivec3(6, 6, 6)};
     return gameplaySystem->createTerrain(tci);
   };
 

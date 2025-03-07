@@ -7,8 +7,13 @@
 namespace tr {
 
 TerrainManager::TerrainManager(std::shared_ptr<SdfGenerator> newSdfGenerator,
-                               std::shared_ptr<SurfaceExtractor> newSurfaceExtractor)
-    : sdfGenerator{std::move(newSdfGenerator)}, surfaceExtractor{std::move(newSurfaceExtractor)} {
+                               std::shared_ptr<SurfaceExtractor> newSurfaceExtractor,
+                               std::shared_ptr<VkResourceManager> newResourceManager,
+                               std::shared_ptr<EntityService> newEntityService)
+    : sdfGenerator{std::move(newSdfGenerator)},
+      surfaceExtractor{std::move(newSurfaceExtractor)},
+      resourceManager{std::move(newResourceManager)},
+      entityService{std::move(newEntityService)} {
 }
 
 TerrainManager::~TerrainManager() {
@@ -51,6 +56,7 @@ auto TerrainManager::registerTerrain(const TerrainCreateInfo& createInfo) -> Ter
 
 auto TerrainManager::triangulateChunk([[maybe_unused]] TerrainHandle terrainHandle,
                                       [[maybe_unused]] ChunkHandle chunkHandle,
+                                      tr::EntityType chunkEntityId,
                                       [[maybe_unused]] glm::ivec3 cellLocation) -> void {
   Log.trace("Triangulating Chunk TerrainHandle: {}, ChunkHandle: {}, location: ({},{},{})",
             terrainHandle,
@@ -60,7 +66,9 @@ auto TerrainManager::triangulateChunk([[maybe_unused]] TerrainHandle terrainHand
             cellLocation.z);
 
   const auto terrain = terrainMap.at(terrainHandle);
-  const auto chunk = chunkMap.at(chunkHandle);
+  auto chunk = chunkMap.at(chunkHandle);
+
+  chunk.entityId = chunkEntityId;
 
   auto vertices = std::vector<as::TerrainVertex>{};
   auto indices = std::vector<uint32_t>{};
@@ -71,9 +79,11 @@ auto TerrainManager::triangulateChunk([[maybe_unused]] TerrainHandle terrainHand
 
   const auto terrainGeometryData = TerrainGeometryData{std::move(vertices), std::move(indices)};
 
-  // auto meshHandle = resourceManager->uploadStaticMesh(terrainGeometryData);
+  auto meshHandle = resourceManager->uploadTerrainMesh(terrainGeometryData);
 
-  // entityService->addMeshToTerrainChunk(terrain.entityId, chunk.entityId, meshHandle);
+  entityService->addMeshToTerrainChunk(terrain.entityId.value(),
+                                       chunk.entityId.value(),
+                                       meshHandle);
 
   // Should this use the standard static mesh geometry buffer, or should the resource manager know
   // how to handle terrain geometry differently?

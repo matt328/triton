@@ -34,8 +34,15 @@ auto RenderDataSystem::update(RenderData& renderData) -> void {
 
   const auto terrainFn = [](RenderData& renderData,
                             entt::entity,
-                            [[maybe_unused]] const TerrainComponent& terrainComponent) {
-    renderData.terrainDefinition = GpuTerrainDefinition{.terrainSize = glm::vec3(0.f, 0.f, 0.f)};
+                            const ChunkComponent& chunkComponent,
+                            const Renderable& renderable) {
+    const auto worldLocation = chunkComponent.location * chunkComponent.dimensions;
+    const auto transformation = glm::translate(glm::mat4(1.f), glm::vec3(worldLocation));
+
+    for (const auto& [meshHandle, topology, textureHandle] : renderable.meshData) {
+      renderData.terrainMeshData.emplace_back(meshHandle, topology);
+      renderData.terrainObjectData.emplace_back(transformation, textureHandle);
+    }
   };
 
   uint32_t jointMatricesIndex = 0;

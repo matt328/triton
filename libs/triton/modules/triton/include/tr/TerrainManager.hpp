@@ -3,6 +3,8 @@
 #include "SdfGenerator.hpp"
 #include "cm/TerrainCreateInfo.hpp"
 #include "as/TerrainVertex.hpp"
+#include "gp/EntityService.hpp"
+#include "vk/VkResourceManager.hpp"
 
 namespace tr {
 
@@ -11,7 +13,9 @@ class SurfaceExtractor;
 class TerrainManager {
 public:
   explicit TerrainManager(std::shared_ptr<SdfGenerator> newSdfGenerator,
-                          std::shared_ptr<SurfaceExtractor> newSurfaceExtractor);
+                          std::shared_ptr<SurfaceExtractor> newSurfaceExtractor,
+                          std::shared_ptr<VkResourceManager> newResourceManager,
+                          std::shared_ptr<EntityService> newEntityService);
   ~TerrainManager();
 
   TerrainManager(const TerrainManager&) = delete;
@@ -23,11 +27,14 @@ public:
 
   auto triangulateChunk(TerrainHandle terrainHandle,
                         ChunkHandle chunkHandle,
+                        tr::EntityType chunkEntityId,
                         glm::ivec3 location) -> void;
 
 private:
   std::shared_ptr<SdfGenerator> sdfGenerator;
   std::shared_ptr<SurfaceExtractor> surfaceExtractor;
+  std::shared_ptr<VkResourceManager> resourceManager;
+  std::shared_ptr<EntityService> entityService;
 
   MapKey terrainKeygen;
   MapKey chunkKeygen;

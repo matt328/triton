@@ -1,4 +1,6 @@
 #pragma once
+// NOLINTBEGIN
+#include "cm/GlmToString.hpp"
 
 namespace tr {
 
@@ -27,10 +29,16 @@ public:
     int dx = pos.x - rx;
     int dy = pos.y - ry;
     int dz = pos.z - rz;
-    return cache[dx & 1][dy * chunkSize + dz];
+
+    const auto index = cache[dx & 1][dy * chunkSize + dz];
+    return index;
   }
 
   void setReusableIndex(glm::ivec3 pos, int8_t reuseIndex, uint16_t p) {
+    Log.trace("setReusableIndex: Cell {}: reuseIndex: {}, lastAddedVertexIndex: {}",
+              pos,
+              reuseIndex,
+              p);
     cache[pos.x & 1][pos.y * chunkSize + pos.z].vertices[reuseIndex] = p;
   }
 
@@ -395,3 +403,4 @@ const std::array<std::array<uint16_t, 12>, 256> regularVertexData = {
      {}}};
 
 }
+// NOLINTEND

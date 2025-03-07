@@ -83,6 +83,9 @@ public:
   /// Add a Dynamic mesh to the MeshBufferManager for dynamic meshes.
   auto uploadDynamicMesh(const IGeometryData& geometryData) -> MeshHandle;
 
+  /// Add a Terrain Mesh to the MeshBufferManager for terrain chunk meshes.
+  auto uploadTerrainMesh(const IGeometryData& geometryData) -> MeshHandle;
+
   auto asyncUpload2(const IGeometryData& geometryData) -> MeshHandle;
   auto uploadImage(const as::ImageData& imageData, std::string_view name) -> TextureHandle;
 
