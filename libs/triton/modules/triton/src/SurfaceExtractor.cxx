@@ -94,7 +94,7 @@ auto SurfaceExtractor::extractCellVertices(const std::shared_ptr<SdfGenerator>& 
     /// Edge information is encoded in the high nibble of regularVertexData
     uint8_t edge = vertexLocation >> 8;
     /// Reuse information from the low nibble, this is the index of the vertex in the
-    /// preceeding cell (cube) to use
+    /// preceeding cell to use
     uint8_t reuseIndex = edge & 0xF;
 
     // Directions to the preceeding cell (cube) are in the high nibble.
@@ -102,7 +102,7 @@ auto SurfaceExtractor::extractCellVertices(const std::shared_ptr<SdfGenerator>& 
     // vertex
     uint8_t dirPrev = edge >> 4;
     if ((dirPrev & 8) != 0) {
-      Log.debug("dirPrev={}", std::bitset<8>(dirPrev).to_string());
+      Log.debug("cell={}, dirPrev={}", cellPosition, std::bitset<8>(dirPrev).to_string());
     }
 
     uint8_t cellCornerIndex1 = vertexLocation & 0x0F;
@@ -121,22 +121,20 @@ auto SurfaceExtractor::extractCellVertices(const std::shared_ptr<SdfGenerator>& 
     [[maybe_unused]] float t1 = u / 256.F;
 
     int index = -1;
+    int lastAddedIndex = index;
 
-    // If cellCornderIndex1 is 7, that means this cell does not own the vertex. And if the
-    // dirPrev (which comes from the tables) & this edge's direction mask is itself, that
-    // means the vertex in question could have already been generated, so we have to check.
-    if (cellCornerIndex1 != 7 && (dirPrev & directionMask) == dirPrev) {
+    // If cellCornerIndex1 is 7, that means this cell does not own the vertex.
+    const auto cellOwnsVertex = cellCornerIndex1 == 7;
+    const auto previousCellExists = (dirPrev & directionMask) == dirPrev;
+
+    if (!cellOwnsVertex && previousCellExists) {
       const auto reuseCell = cache.getReusedIndex(cellPosition, dirPrev);
       index = reuseCell.vertices[reuseIndex];
       Log.debug("{}: reuseIndex: {}, index: {}", cellPosition, reuseIndex, index);
     }
 
+    // The previous cell either doesn't exist, or doesn't have a vertex on this edge
     if (index == -1) {
-      // The cell in dirPrev did not generate a vertex on the edge we are needing one
-      // so generate one.
-      if (!(dirPrev & 8)) {
-        Log.warn("dirPrev 8 not set but still creating vertex");
-      }
       index = generateVertex(vertices,
                              cellVertices,
                              currentCellPosition,
@@ -146,15 +144,13 @@ auto SurfaceExtractor::extractCellVertices(const std::shared_ptr<SdfGenerator>& 
                              cellCornerIndex1,
                              distance0,
                              distance1);
+      lastAddedIndex = index;
     }
 
     if ((dirPrev & 8) != 0) {
-      // dirPrev having bit 8 set means create a new vertex
-      uint16_t lastAddedVertexIndex = index;
-      cache.setReusableIndex(cellPosition, reuseIndex, lastAddedVertexIndex);
+      cache.setReusableIndex(cellPosition, reuseIndex, lastAddedIndex);
     } else {
-      Log.warn("Skipping setReusableIndex for cell {}: dirPrev={}, cellCornerIndex0={}, "
-               "cellCornerIndex1={}",
+      Log.warn("Skipping setReusableIndex for cell {}: dirPrev={}, edge={}-{}",
                cellPosition,
                std::bitset<8>(dirPrev).to_string(),
                cellCornerIndex0,
