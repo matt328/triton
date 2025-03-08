@@ -36,6 +36,37 @@ public:
 private:
   RegularCellCache cache{0};
 
+  static auto swapBits(uint8_t x) -> uint8_t {
+    uint8_t bit2 = (x >> 2) & 1; // Extract bit 2
+    uint8_t bit3 = (x >> 3) & 1; // Extract bit 3
+
+    // Clear bits 2 and 3 in x
+    x &= ~(1 << 2);
+    x &= ~(1 << 3);
+
+    // Set bits 2 and 3 with swapped values
+    x |= (bit2 << 3);
+    x |= (bit3 << 2);
+
+    return x;
+  }
+
+  static auto highByte(uint16_t input) -> uint8_t {
+    return input >> 8;
+  }
+
+  static auto lowByte(uint16_t input) -> uint8_t {
+    return input & 0xFF;
+  }
+
+  static auto lowNibble(uint8_t input) -> uint8_t {
+    return input & 0xF;
+  }
+
+  static auto highNibble(uint8_t input) -> uint8_t {
+    return input >> 4;
+  }
+
   auto extractCellVertices(const std::shared_ptr<SdfGenerator>& sdfGenerator,
                            SdfHandle sdfHandle,
                            glm::ivec3 min,

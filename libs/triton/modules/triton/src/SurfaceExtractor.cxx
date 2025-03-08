@@ -21,6 +21,14 @@ auto SurfaceExtractor::extractSurface(const std::shared_ptr<SdfGenerator>& sdfGe
                         chunk.location.y * chunk.size.y,
                         chunk.location.z * chunk.size.z);
 
+  /* TODO(matt):
+    P17 of the pdf shows we need to have access to one more cell in each of the 3 directions, even
+    though we aren't triangulating these cells, they have to be there so we can know where the
+    vertices lie on the edges
+
+    so make sure to populate the cell grid
+  */
+
   // The algorithm starts from the lower front left, +x, then +z, creating a single 'layer' then
   // proceeds to the higher layers
   for (int yCoord = 0; yCoord < chunk.size.y - 1; ++yCoord) {
@@ -41,6 +49,7 @@ auto SurfaceExtractor::extractCellVertices(const std::shared_ptr<SdfGenerator>& 
                                            std::vector<uint32_t>& indices) -> void {
   auto currentCellPosition = min + cellPosition;
 
+  // Z and Y swapped here, need to swap dirPrev in order to stay consistent
   int8_t directionMask = (cellPosition.x > 0 ? 1 : 0) | ((cellPosition.z > 0 ? 1 : 0) << 1) |
                          ((cellPosition.y > 0 ? 1 : 0) << 2);
 
@@ -90,71 +99,95 @@ auto SurfaceExtractor::extractCellVertices(const std::shared_ptr<SdfGenerator>& 
   auto cellVertices = std::vector<as::TerrainVertex>{};
 
   for (uint8_t vli = 0; vli < vertexCount; ++vli) {
-    auto vertexLocation = vertexLocations[vli];
-    /// Edge information is encoded in the high nibble of regularVertexData
-    uint8_t edge = vertexLocation >> 8;
-    /// Reuse information from the low nibble, this is the index of the vertex in the
-    /// preceeding cell to use
-    uint8_t reuseIndex = edge & 0xF;
+    auto vertexLocationInfo = vertexLocations[vli];
+    uint8_t edgeInfo = highByte(vertexLocationInfo);
 
-    // Directions to the preceeding cell (cube) are in the high nibble.
-    // bit value 1 = -x, bit value 2 = -y bit value 4 = -z bit value 8 means create new
-    // vertex
-    uint8_t dirPrev = edge >> 4;
-    if ((dirPrev & 8) != 0) {
-      Log.debug("cell={}, dirPrev={}", cellPosition, std::bitset<8>(dirPrev).to_string());
-    }
+    /// Index of the vertex to be reused from the 'previous' cell.
+    uint8_t reuseIndex = lowNibble(edgeInfo);
 
-    uint8_t cellCornerIndex1 = vertexLocation & 0x0F;
-    uint8_t cellCornerIndex0 = (vertexLocation >> 4) & 0x0F;
+    // Todo(matt) the table data swaps y and z. Need to account for this in the dirPrev
 
-    int8_t distance0 = corner[cellCornerIndex0];
-    int8_t distance1 = corner[cellCornerIndex1];
+    /// How to reach the preceeding cell.
+    /// 0001 -> -x, 0010 -> -z 0100 -> -y, and 1000 -> no previous cell contains a reusable vertex
+    uint8_t dirPrev = swapBits(highNibble(edgeInfo));
 
-    // Calculate distance from distance1 that the sign change occurs, ie the surface exists,
-    // in the range of 0-256
-    int32_t t = (distance1 << 8) / (distance1 - distance0);
+    // Extract the indices of the corners of the cell to define the edge of the cell this vertex
+    // lies on
+    uint8_t cornerIndices = lowByte(vertexLocationInfo);
+    uint8_t upperCellCornerIndex = lowNibble(cornerIndices);
+    uint8_t lowerCellCornerIndex = highNibble(cornerIndices);
+
+    Log.debug("Cell={} Edge={}-{}, reuseIndex={}, dirPrev={}",
+              cellPosition,
+              lowerCellCornerIndex,
+              upperCellCornerIndex,
+              reuseIndex,
+              std::bitset<8>(dirPrev).to_string());
+
+    int8_t lowerDistanceToSurface = corner[lowerCellCornerIndex];
+    int8_t upperDistanceToSurface = corner[upperCellCornerIndex];
+
+    // Calculate t0 and t1, which are the fractional distances, scaled to [0,1] from each corner of
+    // the y location of the surface
+    int32_t t = (upperDistanceToSurface << 8) / (upperDistanceToSurface - lowerDistanceToSurface);
     int32_t u = 0x0100 - t; // compliment of t
 
     // scale each value into [0,1]
     float t0 = t / 256.F;
     [[maybe_unused]] float t1 = u / 256.F;
 
-    int index = -1;
-    int lastAddedIndex = index;
+    int index = INVALID_INDEX;
 
-    // If cellCornerIndex1 is 7, that means this cell does not own the vertex.
-    const auto cellOwnsVertex = cellCornerIndex1 == 7;
+    // If upperCellCornerIndex is 7, that means this cell must own the vertex, no previous cell
+    // could have generated a vertex here as we have not visited any cells yet that have edges in
+    // common with this edge
+    const auto cellOwnsVertex = upperCellCornerIndex == 7;
     const auto previousCellExists = (dirPrev & directionMask) == dirPrev;
 
+    // Check to see if a vertex has already been created on a previous cell's shared edge
     if (!cellOwnsVertex && previousCellExists) {
+
       const auto reuseCell = cache.getReusedIndex(cellPosition, dirPrev);
       index = reuseCell.vertices[reuseIndex];
-      Log.debug("{}: reuseIndex: {}, index: {}", cellPosition, reuseIndex, index);
+      if (index != INVALID_INDEX) {
+        Log.debug("Found reused vertex, cell={}: reuseIndex={}, index={}, dirPrev={}",
+                  cellPosition,
+                  reuseIndex,
+                  index,
+                  std::bitset<8>(dirPrev).to_string());
+      } else {
+        Log.warn("Expected but did not find cached vertex: cell={}: reuseIndex={}, index={}",
+                 cellPosition,
+                 reuseIndex,
+                 index);
+      }
+    } else {
+      Log.warn("Previous Cell did not exist");
     }
 
-    // The previous cell either doesn't exist, or doesn't have a vertex on this edge
-    if (index == -1) {
+    // Did not find a previously generated vertex, so we must generate one
+    if (index == INVALID_INDEX) {
+      Log.debug("Generating Vertex for cell={}, edge={}-{}",
+                cellPosition,
+                lowerCellCornerIndex,
+                upperCellCornerIndex);
       index = generateVertex(vertices,
                              cellVertices,
                              currentCellPosition,
                              cellPosition,
                              t0,
-                             cellCornerIndex0,
-                             cellCornerIndex1,
-                             distance0,
-                             distance1);
-      lastAddedIndex = index;
-    }
+                             lowerCellCornerIndex,
+                             upperCellCornerIndex,
+                             lowerDistanceToSurface,
+                             upperDistanceToSurface);
 
-    if ((dirPrev & 8) != 0) {
-      cache.setReusableIndex(cellPosition, reuseIndex, lastAddedIndex);
-    } else {
-      Log.warn("Skipping setReusableIndex for cell {}: dirPrev={}, edge={}-{}",
-               cellPosition,
-               std::bitset<8>(dirPrev).to_string(),
-               cellCornerIndex0,
-               cellCornerIndex1);
+      if (lowerCellCornerIndex == 3) {
+        Log.trace("setReusableIndex: Cell {}: reuseIndex: {}, index: {}",
+                  cellPosition,
+                  reuseIndex,
+                  index);
+        cache.setReusableIndex(cellPosition, reuseIndex, index);
+      }
     }
     mappedIndices.push_back(index);
   }

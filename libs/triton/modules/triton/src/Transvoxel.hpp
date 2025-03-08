@@ -4,10 +4,12 @@
 
 namespace tr {
 
+static constexpr uint16_t INVALID_INDEX = std::numeric_limits<uint16_t>::max();
+
 struct ReuseCell {
   std::vector<uint16_t> vertices;
   explicit ReuseCell(size_t size) {
-    vertices.resize(size, -1);
+    vertices.resize(size, INVALID_INDEX);
   }
 };
 
@@ -30,16 +32,13 @@ public:
     int dy = pos.y - ry;
     int dz = pos.z - rz;
 
-    const auto index = cache[dx & 1][dy * chunkSize + dz];
-    return index;
+    Log.debug("Returning ReuseCell at [{},{},{}]", dx, dy, dz);
+    const auto cell = cache[dy & 1][dx * chunkSize + dz];
+    return cell;
   }
 
   void setReusableIndex(glm::ivec3 pos, int8_t reuseIndex, uint16_t p) {
-    Log.trace("setReusableIndex: Cell {}: reuseIndex: {}, lastAddedVertexIndex: {}",
-              pos,
-              reuseIndex,
-              p);
-    cache[pos.x & 1][pos.y * chunkSize + pos.z].vertices[reuseIndex] = p;
+    cache[pos.y & 1][pos.x * chunkSize + pos.z].vertices[reuseIndex] = p;
   }
 
 private:
