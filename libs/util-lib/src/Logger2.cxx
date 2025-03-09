@@ -14,8 +14,10 @@ void initLogger([[maybe_unused]] spdlog::level::level_enum debugLevel,
 
   spdlog::init_thread_pool(8192, 1);
 
+  auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>("logs/my_log.txt", true);
+
   Log = spdlog::async_logger("core",
-                             console_sink,
+                             {console_sink, file_sink},
                              spdlog::thread_pool(),
                              spdlog::async_overflow_policy::block);
 #ifdef _DEBUG
