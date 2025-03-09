@@ -17,9 +17,12 @@ auto SurfaceExtractor::extractSurface(const std::shared_ptr<SdfGenerator>& sdfGe
                                       std::vector<uint32_t>& indices) -> void {
   cache = RegularCellCache{static_cast<size_t>(chunk.size.x)};
   /// World coordinates of the lower front left cell
-  auto min = glm::ivec3(chunk.location.x * chunk.size.x,
-                        chunk.location.y * chunk.size.y,
-                        chunk.location.z * chunk.size.z);
+  const auto voxelSize = sdfGenerator->getVoxelSize(sdfHandle);
+  auto worldBlockMin = glm::vec3(chunk.location.x * chunk.size.x,
+                                 chunk.location.y * chunk.size.y,
+                                 chunk.location.z * chunk.size.z) *
+                       voxelSize;
+  ;
 
   /* TODO(matt):
     P17 of the pdf shows we need to have access to one more cell in each of the 3 directions, even
@@ -34,8 +37,14 @@ auto SurfaceExtractor::extractSurface(const std::shared_ptr<SdfGenerator>& sdfGe
   for (int yCoord = 0; yCoord < chunk.size.y - 1; ++yCoord) {
     for (int zCoord = 0; zCoord < chunk.size.z - 1; ++zCoord) {
       for (int xCoord = 0; xCoord < chunk.size.x - 1; ++xCoord) {
-        auto cellPosition = glm::ivec3(xCoord, yCoord, zCoord);
-        extractCellVertices(sdfGenerator, sdfHandle, min, cellPosition, vertices, indices);
+        auto blockCellPosition = glm::ivec3(xCoord, yCoord, zCoord);
+        auto worldCellPosition = worldBlockMin + (glm::vec3(blockCellPosition) * voxelSize);
+        extractCellVertices(sdfGenerator,
+                            sdfHandle,
+                            worldCellPosition,
+                            blockCellPosition,
+                            vertices,
+                            indices);
       }
     }
   }
@@ -43,29 +52,36 @@ auto SurfaceExtractor::extractSurface(const std::shared_ptr<SdfGenerator>& sdfGe
 
 auto SurfaceExtractor::extractCellVertices(const std::shared_ptr<SdfGenerator>& sdfGenerator,
                                            SdfHandle sdfHandle,
-                                           glm::ivec3 min,
-                                           glm::ivec3 cellPosition,
+                                           glm::vec3 worldCellPosition,
+                                           glm::ivec3 blockCellPosition,
                                            std::vector<as::TerrainVertex>& vertices,
                                            std::vector<uint32_t>& indices) -> void {
-  auto currentCellPosition = min + cellPosition;
+
+  const auto voxelSize = sdfGenerator->getVoxelSize(sdfHandle);
 
   // Z and Y swapped here, need to swap dirPrev in order to stay consistent
-  int8_t directionMask = (cellPosition.x > 0 ? 1 : 0) | ((cellPosition.z > 0 ? 1 : 0) << 1) |
-                         ((cellPosition.y > 0 ? 1 : 0) << 2);
+  int8_t directionMask = (blockCellPosition.x > 0 ? 1 : 0) |
+                         ((blockCellPosition.z > 0 ? 1 : 0) << 1) |
+                         ((blockCellPosition.y > 0 ? 1 : 0) << 2);
 
   // Sample the SDF's values at each corner of the current cell
   std::array<int8_t, 8> corner{};
   for (int8_t currentCorner = 0; currentCorner < 8; ++currentCorner) {
-    const auto cornerPosition = currentCellPosition + CornerIndex[currentCorner];
-    const auto value = sdfGenerator->sampleSdf(sdfHandle, cornerPosition);
-    assert(value != 0);
+    const auto cornerPosition = worldCellPosition + (CornerIndex[currentCorner] * voxelSize);
+    const auto value = sdfGenerator->sampleSdf(sdfHandle, glm::vec3(cornerPosition));
+    // assert(value != 0);
     corner[currentCorner] = value;
   }
 
-  /* TODO(matt): given the sdf values at the corners, I don't think the case code is not being
-    Ehh I think the case code is being generated correctly, just the 8th vertex, the second vertex
-    of the second cell has a value of 0,y,0, instead of 1,y,1.
-  */
+  Log.debug("corner {},{},{},{},{},{},{},{}",
+            corner[0],
+            corner[1],
+            corner[2],
+            corner[3],
+            corner[4],
+            corner[5],
+            corner[6],
+            corner[7]);
 
   /// The corner value in the SDF being non-negative means outside, negative means inside
   /// This code packs only the corner values' sign bits into a single 8 bit value which is how
@@ -85,6 +101,16 @@ auto SurfaceExtractor::extractCellVertices(const std::shared_ptr<SdfGenerator>& 
   if (!validCell) {
     return;
   }
+  Log.debug("corner {},{},{},{},{},{},{},{}",
+            corner[0],
+            corner[1],
+            corner[2],
+            corner[3],
+            corner[4],
+            corner[5],
+            corner[6],
+            corner[7]);
+  Log.debug("Corner Position: {}", worldCellPosition + CornerIndex[0]);
 
   auto equivalenceClassIndex = regularCellClass[caseCode];
   auto equivalenceClass = regularCellData[equivalenceClassIndex];
@@ -105,8 +131,6 @@ auto SurfaceExtractor::extractCellVertices(const std::shared_ptr<SdfGenerator>& 
     /// Index of the vertex to be reused from the 'previous' cell.
     uint8_t reuseIndex = lowNibble(edgeInfo);
 
-    // Todo(matt) the table data swaps y and z. Need to account for this in the dirPrev
-
     /// How to reach the preceeding cell.
     /// 0001 -> -x, 0010 -> -z 0100 -> -y, and 1000 -> no previous cell contains a reusable vertex
     uint8_t dirPrev = swapBits(highNibble(edgeInfo));
@@ -114,22 +138,22 @@ auto SurfaceExtractor::extractCellVertices(const std::shared_ptr<SdfGenerator>& 
     // Extract the indices of the corners of the cell to define the edge of the cell this vertex
     // lies on
     uint8_t cornerIndices = lowByte(vertexLocationInfo);
-    uint8_t upperCellCornerIndex = lowNibble(cornerIndices);
-    uint8_t lowerCellCornerIndex = highNibble(cornerIndices);
+    uint8_t cornerIndex0 = lowNibble(cornerIndices);
+    uint8_t cornerIndex1 = highNibble(cornerIndices);
 
     Log.debug("Cell={} Edge={}-{}, reuseIndex={}, dirPrev={}",
-              cellPosition,
-              lowerCellCornerIndex,
-              upperCellCornerIndex,
+              blockCellPosition,
+              cornerIndex1,
+              cornerIndex0,
               reuseIndex,
               std::bitset<8>(dirPrev).to_string());
 
-    int8_t lowerDistanceToSurface = corner[lowerCellCornerIndex];
-    int8_t upperDistanceToSurface = corner[upperCellCornerIndex];
+    int8_t distance1 = corner[cornerIndex1];
+    int8_t distance0 = corner[cornerIndex0];
 
     // Calculate t0 and t1, which are the fractional distances, scaled to [0,1] from each corner of
     // the y location of the surface
-    int32_t t = (upperDistanceToSurface << 8) / (upperDistanceToSurface - lowerDistanceToSurface);
+    int32_t t = (distance0 << 8) / (distance0 - distance1);
     int32_t u = 0x0100 - t; // compliment of t
 
     // scale each value into [0,1]
@@ -141,23 +165,23 @@ auto SurfaceExtractor::extractCellVertices(const std::shared_ptr<SdfGenerator>& 
     // If upperCellCornerIndex is 7, that means this cell must own the vertex, no previous cell
     // could have generated a vertex here as we have not visited any cells yet that have edges in
     // common with this edge
-    const auto cellOwnsVertex = upperCellCornerIndex == 7;
+    const auto cellOwnsVertex = cornerIndex0 == 7;
     const auto previousCellExists = (dirPrev & directionMask) == dirPrev;
 
     // Check to see if a vertex has already been created on a previous cell's shared edge
     if (!cellOwnsVertex && previousCellExists) {
 
-      const auto reuseCell = cache.getReusedIndex(cellPosition, dirPrev);
+      const auto reuseCell = cache.getReusedIndex(blockCellPosition, dirPrev);
       index = reuseCell.vertices[reuseIndex];
       if (index != INVALID_INDEX) {
         Log.debug("Found reused vertex, cell={}: reuseIndex={}, index={}, dirPrev={}",
-                  cellPosition,
+                  blockCellPosition,
                   reuseIndex,
                   index,
                   std::bitset<8>(dirPrev).to_string());
       } else {
         Log.warn("Expected but did not find cached vertex: cell={}: reuseIndex={}, index={}",
-                 cellPosition,
+                 blockCellPosition,
                  reuseIndex,
                  index);
       }
@@ -168,25 +192,25 @@ auto SurfaceExtractor::extractCellVertices(const std::shared_ptr<SdfGenerator>& 
     // Did not find a previously generated vertex, so we must generate one
     if (index == INVALID_INDEX) {
       Log.debug("Generating Vertex for cell={}, edge={}-{}",
-                cellPosition,
-                lowerCellCornerIndex,
-                upperCellCornerIndex);
+                blockCellPosition,
+                cornerIndex1,
+                cornerIndex0);
       index = generateVertex(vertices,
                              cellVertices,
-                             currentCellPosition,
-                             cellPosition,
+                             worldCellPosition,
                              t0,
-                             lowerCellCornerIndex,
-                             upperCellCornerIndex,
-                             lowerDistanceToSurface,
-                             upperDistanceToSurface);
+                             cornerIndex1,
+                             cornerIndex0,
+                             distance1,
+                             distance0,
+                             voxelSize);
 
-      if (lowerCellCornerIndex == 3) {
+      if (cornerIndex1 == 3) {
         Log.trace("setReusableIndex: Cell {}: reuseIndex: {}, index: {}",
-                  cellPosition,
+                  blockCellPosition,
                   reuseIndex,
                   index);
-        cache.setReusableIndex(cellPosition, reuseIndex, index);
+        cache.setReusableIndex(blockCellPosition, reuseIndex, index);
       }
     }
     mappedIndices.push_back(index);
@@ -200,16 +224,16 @@ auto SurfaceExtractor::extractCellVertices(const std::shared_ptr<SdfGenerator>& 
 
 auto SurfaceExtractor::generateVertex(std::vector<as::TerrainVertex>& vertices,
                                       std::vector<as::TerrainVertex>& cellVertices,
-                                      glm::ivec3& offsetPosition,
-                                      [[maybe_unused]] glm::ivec3& cellPosition,
+                                      glm::vec3& offsetPosition,
                                       float t,
                                       uint8_t corner0,
                                       uint8_t corner1,
                                       [[maybe_unused]] int8_t distance0,
-                                      [[maybe_unused]] int8_t distance1) -> int {
-  auto iP0 = (offsetPosition + CornerIndex[corner0]);
+                                      [[maybe_unused]] int8_t distance1,
+                                      float voxelSize) -> int {
+  auto iP0 = (offsetPosition + CornerIndex[corner0] * voxelSize);
   auto P0 = glm::vec3(iP0);
-  auto iP1 = (offsetPosition + CornerIndex[corner1]);
+  auto iP1 = (offsetPosition + CornerIndex[corner1] * voxelSize);
   auto P1 = glm::vec3(iP1);
 
   auto result = glm::mix(P0, P1, t);

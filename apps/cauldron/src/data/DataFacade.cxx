@@ -146,10 +146,21 @@ void DataFacade::setEntitySkeleton([[maybe_unused]] std::string_view entityName,
 void DataFacade::createTerrain(std::string_view terrainName, glm::vec3 terrainSize) {
 
   const auto task = [this, terrainName] {
+    const auto boxInfo = tr::SdfCreateInfo{
+        .shapeType = tr::ShapeType::Box,
+        .voxelSize = .1f,
+        .center = glm::vec3(0.75f, 0.75f, 0.75f),
+        .size = .4f,
+    };
+    const auto planeInfo = tr::SdfCreateInfo{
+        .shapeType = tr::ShapeType::Plane,
+        .voxelSize = .1f,
+        .height = .048f,
+    };
     const auto tci = tr::TerrainCreateInfo{.name = terrainName.data(),
-                                           .sdfCreateInfo = tr::SdfCreateInfo{.height = 0.5f},
+                                           .sdfCreateInfo = planeInfo,
                                            .chunkCount = glm::ivec3(3, 3, 3),
-                                           .chunkSize = glm::ivec3(4, 4, 4)};
+                                           .chunkSize = glm::ivec3(16, 16, 16)};
     return gameplaySystem->createTerrain(tci);
   };
 
