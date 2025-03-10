@@ -10,6 +10,7 @@ set(common_SRC
   modules/triton/src/TerrainManager.cxx
   modules/triton/src/SdfGenerator.cxx
   modules/triton/src/SurfaceExtractor.cxx
+  modules/triton/src/TransvoxelTerrainSystem.cxx
 
   modules/gameplay/src/ActionSystem.cxx
   modules/gameplay/src/systems/CameraSystem.cxx

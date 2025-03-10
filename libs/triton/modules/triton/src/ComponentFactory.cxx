@@ -19,6 +19,7 @@
 #include "DefaultContext.hpp"
 #include "DefaultDebugManager.hpp"
 #include "NewRenderContext.hpp"
+#include "tr/TransvoxelTerrainSystem.hpp"
 #include "vk/core/Swapchain.hpp"
 #include "vk/core/Surface.hpp"
 #include "gfx/QueueTypes.hpp"
@@ -80,7 +81,7 @@ auto ComponentFactory::getContext(const FrameworkConfig& config) -> std::shared_
                         di::bind<queue::Compute>.to<queue::Compute>(),
                         di::bind<IBufferManager>.to<BufferManager>(),
                         di::bind<tr::TaskQueueConfig>.to(taskQueueConfig),
-                        di::bind<tr::ITerrainSystem>.to<tr::TerrainManager>());
+                        di::bind<tr::ITerrainSystem>.to<tr::TransvoxelTerrainSystem>());
 
   return injector.create<std::shared_ptr<DefaultContext>>();
 }

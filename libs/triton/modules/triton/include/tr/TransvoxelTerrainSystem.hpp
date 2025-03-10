@@ -27,10 +27,10 @@ private:
   std::shared_ptr<IDensityGenerator> densityGenerator;
 
   MapKey terrainKeygen;
-  MapKey chunkKeygen;
+  MapKey blockKeygen;
 
   std::unordered_map<TerrainHandle, TerrainResult2> terrainMap;
-  std::unordered_map<BlockHandle, BlockResult> chunkMap;
+  std::unordered_map<BlockHandle, BlockResult> blockMap;
 };
 
 }
