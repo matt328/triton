@@ -168,17 +168,17 @@ void DataFacade::createTerrain(std::string_view terrainName, glm::vec3 terrainSi
     // Register the Terrain's name -> entityId
     dataStore.entityNameMap.emplace(terrainName, result.entityId.value());
 
-    auto chunkIds = std::vector<ChunkData>{};
+    auto chunkIds = std::vector<BlockData>{};
     chunkIds.reserve(result.chunks.size());
     std::ranges::transform(result.chunks.begin(),
                            result.chunks.end(),
                            std::back_inserter(chunkIds),
-                           [](const tr::ChunkResult& chunk) {
-                             return ChunkData{.entityId = chunk.entityId.value(),
+                           [](const tr::BlockResult& chunk) {
+                             return BlockData{.entityId = chunk.entityId.value(),
                                               .location = chunk.location};
                            });
 
-    std::ranges::sort(chunkIds, [](const ChunkData& a, const ChunkData& b) {
+    std::ranges::sort(chunkIds, [](const BlockData& a, const BlockData& b) {
       return std::tie(a.location.z, a.location.y, a.location.x) <
              std::tie(b.location.z, b.location.y, b.location.x);
     });

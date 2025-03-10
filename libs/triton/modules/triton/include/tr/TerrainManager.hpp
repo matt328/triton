@@ -5,12 +5,13 @@
 #include "as/TerrainVertex.hpp"
 #include "gp/EntityService.hpp"
 #include "vk/VkResourceManager.hpp"
+#include "ITerrainSystem.hpp"
 
 namespace tr {
 
 class SurfaceExtractor;
 
-class TerrainManager {
+class TerrainManager : public ITerrainSystem {
 public:
   explicit TerrainManager(std::shared_ptr<SdfGenerator> newSdfGenerator,
                           std::shared_ptr<SurfaceExtractor> newSurfaceExtractor,
@@ -23,12 +24,12 @@ public:
   auto operator=(const TerrainManager&) -> TerrainManager& = delete;
   auto operator=(TerrainManager&&) -> TerrainManager& = delete;
 
-  auto registerTerrain(const TerrainCreateInfo& createInfo) -> TerrainResult2&;
+  auto registerTerrain(const TerrainCreateInfo& createInfo) -> TerrainResult2& override;
 
-  auto triangulateChunk(TerrainHandle terrainHandle,
-                        ChunkHandle chunkHandle,
+  auto triangulateBlock(TerrainHandle terrainHandle,
+                        BlockHandle chunkHandle,
                         tr::EntityType chunkEntityId,
-                        glm::ivec3 location) -> void;
+                        glm::ivec3 location) -> void override;
 
 private:
   std::shared_ptr<SdfGenerator> sdfGenerator;
@@ -40,6 +41,6 @@ private:
   MapKey chunkKeygen;
 
   std::unordered_map<TerrainHandle, TerrainResult2> terrainMap;
-  std::unordered_map<ChunkHandle, ChunkResult> chunkMap;
+  std::unordered_map<ChunkHandle, BlockResult> chunkMap;
 };
 }

@@ -23,7 +23,7 @@ DefaultGameplaySystem::DefaultGameplaySystem(std::shared_ptr<IEventBus> newEvent
                                              std::shared_ptr<AnimationSystem> newAnimationSystem,
                                              std::shared_ptr<RenderDataSystem> newRenderDataSystem,
                                              std::shared_ptr<EntityService> newEntityService,
-                                             std::shared_ptr<TerrainManager> newTerrainManager)
+                                             std::shared_ptr<ITerrainSystem> newTerrainSystem)
     : eventBus{std::move(newEventBus)},
       assetManager{std::move(newAssetManager)},
       actionSystem{std::move(newActionSystem)},
@@ -32,7 +32,7 @@ DefaultGameplaySystem::DefaultGameplaySystem(std::shared_ptr<IEventBus> newEvent
       animationSystem{std::move(newAnimationSystem)},
       renderDataSystem{std::move(newRenderDataSystem)},
       entityService{std::move(newEntityService)},
-      terrainManager{std::move(newTerrainManager)} {
+      terrainSystem{std::move(newTerrainSystem)} {
 
   entityCreatedConnection = entityService->registerEntityCreated(
       [this](entt::registry& reg, entt::entity entity) { entityCreated(reg, entity); });
@@ -177,7 +177,7 @@ auto DefaultGameplaySystem::createAnimatedModelEntity(const AnimatedModelData& m
 }
 
 auto DefaultGameplaySystem::createTerrain(const TerrainCreateInfo& createInfo) -> TerrainResult2& {
-  auto& terrainResult = terrainManager->registerTerrain(createInfo);
+  auto& terrainResult = terrainSystem->registerTerrain(createInfo);
   entityService->createTerrain(terrainResult);
   return terrainResult;
 }
@@ -211,12 +211,13 @@ auto DefaultGameplaySystem::getEntityService() const -> std::shared_ptr<EntitySe
   return entityService;
 }
 
+// This method is just debug. Eventually push this down into the TerrainSystem
 auto DefaultGameplaySystem::triangulateChunk(tr::EntityType terrainId,
                                              tr::EntityType chunkId,
                                              glm::ivec3 cellPosition) -> void {
   const auto terrainHandle = entityService->getTerrainHandle(terrainId);
   const auto chunkHandle = entityService->getChunkHandle(chunkId);
-  terrainManager->triangulateChunk(terrainHandle, chunkHandle, chunkId, cellPosition);
+  terrainSystem->triangulateBlock(terrainHandle, chunkHandle, chunkId, cellPosition);
 }
 
 }

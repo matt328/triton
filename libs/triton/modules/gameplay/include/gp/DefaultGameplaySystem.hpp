@@ -10,10 +10,9 @@
 #include "tr/Events.hpp"
 #include "tr/IEventBus.hpp"
 #include "tr/IGameplaySystem.hpp"
+#include "tr/ITerrainSystem.hpp"
 
 namespace tr {
-
-class TerrainManager;
 
 class DefaultGameplaySystem : public IGameplaySystem {
 public:
@@ -25,7 +24,7 @@ public:
                         std::shared_ptr<AnimationSystem> newAnimationSystem,
                         std::shared_ptr<RenderDataSystem> newRenderDataSystem,
                         std::shared_ptr<EntityService> entityService,
-                        std::shared_ptr<TerrainManager> newTerrainManager);
+                        std::shared_ptr<ITerrainSystem> newTerrainSystem);
   ~DefaultGameplaySystem() override;
 
   DefaultGameplaySystem(const DefaultGameplaySystem&) = delete;
@@ -64,7 +63,7 @@ private:
   std::shared_ptr<AnimationSystem> animationSystem;
   std::shared_ptr<RenderDataSystem> renderDataSystem;
   std::shared_ptr<EntityService> entityService;
-  std::shared_ptr<TerrainManager> terrainManager;
+  std::shared_ptr<ITerrainSystem> terrainSystem;
 
   RenderDataTransferHandler transferHandler;
 

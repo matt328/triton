@@ -63,7 +63,7 @@ struct EntityData {
   }
 };
 
-struct ChunkData {
+struct BlockData {
   tr::EntityType entityId;
   glm::ivec3 location;
 };
@@ -72,7 +72,7 @@ struct TerrainData {
   std::string name;
   glm::vec3 terrainSize;
 
-  std::vector<ChunkData> chunkData;
+  std::vector<BlockData> chunkData;
   tr::EntityType entityId;
 
   template <class T>
