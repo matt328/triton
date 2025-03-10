@@ -8,14 +8,16 @@ namespace tr {
 
 class SdfGenerator;
 
-constexpr std::array<glm::vec3, 8> CornerIndex = {glm::vec3(0, 0, 0),
-                                                  glm::vec3(1, 0, 0),
-                                                  glm::vec3(0, 0, 1),
-                                                  glm::vec3(1, 0, 1),
-                                                  glm::vec3(0, 1, 0),
-                                                  glm::vec3(1, 1, 0),
-                                                  glm::vec3(0, 1, 1),
-                                                  glm::vec3(1, 1, 1)};
+constexpr std::array<glm::vec3, 8> CornerIndex = {
+    glm::vec3(0, 0, 0), // 0         6---------7
+    glm::vec3(1, 0, 0), // 1        /|        /|
+    glm::vec3(0, 0, 1), // 2	     / |       / |  Corners
+    glm::vec3(1, 0, 1), // 3	    4---------5  |
+    glm::vec3(0, 1, 0), // 4	    |  2------|--3
+    glm::vec3(1, 1, 0), // 5	    | /       | /   y z
+    glm::vec3(0, 1, 1), // 6	    |/        |/    |/
+    glm::vec3(1, 1, 1)  // 7	    0---------1     o--x
+};
 
 class SurfaceExtractor {
 public:
