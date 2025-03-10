@@ -5,9 +5,10 @@
 namespace tr {
 using SdfHandle = uint64_t;
 using ChunkHandle = uint64_t;
+using BlockHandle = uint64_t;
 using TerrainHandle = uint64_t;
 
-struct ChunkResult {
+struct BlockResult {
   std::string name;
   ChunkHandle chunkHandle;
   glm::ivec3 location;
@@ -21,7 +22,7 @@ struct TerrainResult2 {
   std::string name;
   TerrainHandle terrainHandle;
   SdfHandle sdfHandle;
-  std::vector<ChunkResult> chunks;
+  std::vector<BlockResult> chunks;
   std::optional<tr::EntityType> entityId = std::nullopt;
 };
 }

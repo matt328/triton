@@ -30,7 +30,7 @@ auto TerrainManager::registerTerrain(const TerrainCreateInfo& createInfo) -> Ter
         const auto location = glm::ivec3(x, y, z);
         const auto name = fmt::format("Chunk ({}, {}, {})", location.x, location.y, location.z);
         chunkMap.emplace(chunkHandle,
-                         ChunkResult{.name = name,
+                         BlockResult{.name = name,
                                      .chunkHandle = chunkHandle,
                                      .location = location,
                                      .size = createInfo.chunkSize});
@@ -38,7 +38,7 @@ auto TerrainManager::registerTerrain(const TerrainCreateInfo& createInfo) -> Ter
     }
   }
 
-  const auto chunks = std::vector<ChunkResult>(std::ranges::begin(chunkMap | std::views::values),
+  const auto chunks = std::vector<BlockResult>(std::ranges::begin(chunkMap | std::views::values),
                                                std::ranges::end(chunkMap | std::views::values));
 
   const auto sdfHandle = sdfGenerator->registerSdf(createInfo.sdfCreateInfo);
@@ -54,7 +54,7 @@ auto TerrainManager::registerTerrain(const TerrainCreateInfo& createInfo) -> Ter
   return terrainMap.at(terrainHandle);
 }
 
-auto TerrainManager::triangulateChunk([[maybe_unused]] TerrainHandle terrainHandle,
+auto TerrainManager::triangulateBlock([[maybe_unused]] TerrainHandle terrainHandle,
                                       [[maybe_unused]] ChunkHandle chunkHandle,
                                       tr::EntityType chunkEntityId,
                                       [[maybe_unused]] glm::ivec3 cellLocation) -> void {

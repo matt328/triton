@@ -38,6 +38,7 @@
 #include "tr/TerrainManager.hpp"
 #include "tr/SdfGenerator.hpp"
 #include "tr/SurfaceExtractor.hpp"
+#include "tr/ITerrainSystem.hpp"
 
 namespace di = boost::di;
 
@@ -78,7 +79,8 @@ auto ComponentFactory::getContext(const FrameworkConfig& config) -> std::shared_
                         di::bind<queue::Present>.to<queue::Present>(),
                         di::bind<queue::Compute>.to<queue::Compute>(),
                         di::bind<IBufferManager>.to<BufferManager>(),
-                        di::bind<tr::TaskQueueConfig>.to(taskQueueConfig));
+                        di::bind<tr::TaskQueueConfig>.to(taskQueueConfig),
+                        di::bind<tr::ITerrainSystem>.to<tr::TerrainManager>());
 
   return injector.create<std::shared_ptr<DefaultContext>>();
 }

@@ -31,7 +31,7 @@ public:
 
   auto extractSurface(const std::shared_ptr<SdfGenerator>& sdfGenerator,
                       SdfHandle sdfHandle,
-                      const ChunkResult& chunk,
+                      const BlockResult& chunk,
                       std::vector<as::TerrainVertex>& vertices,
                       std::vector<uint32_t>& indices) -> void;
 
