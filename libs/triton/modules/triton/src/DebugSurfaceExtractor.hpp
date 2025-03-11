@@ -5,6 +5,30 @@
 
 namespace tr {
 
+constexpr auto Padding = glm::ivec3(1, 1, 1);
+
+struct BlockContext {
+  std::shared_ptr<IDensityGenerator> generator;
+  CellCache* cellCache;
+  glm::vec3 worldCellPosition;
+  glm::vec3 blockCellPosition;
+  std::vector<as::TerrainVertex>& vertices;
+  std::vector<uint32_t>& indices;
+  glm::vec3 worldBlockMin;
+  uint32_t blockSize;
+  uint8_t lod;
+  uint8_t lodScale;
+};
+
+struct VertexContext {
+  uint8_t reuseIndex;
+  float distance0;
+  float distance1;
+  uint8_t cornerIndex0;
+  uint8_t cornerIndex1;
+  bool isCacheable;
+};
+
 class DebugSurfaceExtractor : public ISurfaceExtractor {
 public:
   DebugSurfaceExtractor() = default;
@@ -15,14 +39,9 @@ public:
                       std::vector<uint32_t>& indices) -> void override;
 
 private:
-  auto extractCellVertices(const std::shared_ptr<IDensityGenerator>& generator,
-                           glm::vec3 worldCellPosition,
-                           glm::ivec3 blockCellPosition,
-                           CellCache& cellCache,
-                           std::vector<as::TerrainVertex>& vertices,
-                           std::vector<uint32_t>& indices) -> void;
+  auto extractCellVertices(BlockContext& ctx) -> void;
 
-  auto generateVertex(std::vector<as::TerrainVertex>& vertices, uint8_t reuseIndex) -> int;
+  auto generateVertex(const BlockContext& bCtx, VertexContext& vCtx) -> int;
 };
 
 }
