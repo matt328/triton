@@ -1,5 +1,7 @@
 #pragma once
 
+#include "CellCache.hpp"
+#include "ISurfaceExtractor.hpp"
 #include "as/TerrainVertex.hpp"
 #include "cm/TerrainResult.hpp"
 #include "Transvoxel.hpp"
@@ -8,18 +10,7 @@ namespace tr {
 
 class SdfGenerator;
 
-constexpr std::array<glm::vec3, 8> CornerIndex = {
-    glm::vec3(0, 0, 0), // 0         6---------7
-    glm::vec3(1, 0, 0), // 1        /|        /|
-    glm::vec3(0, 0, 1), // 2	     / |       / |  Corners
-    glm::vec3(1, 0, 1), // 3	    4---------5  |
-    glm::vec3(0, 1, 0), // 4	    |  2------|--3
-    glm::vec3(1, 1, 0), // 5	    | /       | /   y z
-    glm::vec3(0, 1, 1), // 6	    |/        |/    |/
-    glm::vec3(1, 1, 1)  // 7	    0---------1     o--x
-};
-
-class SurfaceExtractor {
+class SurfaceExtractor : ISurfaceExtractor {
 public:
   SurfaceExtractor();
   ~SurfaceExtractor();
@@ -36,7 +27,7 @@ public:
                       std::vector<uint32_t>& indices) -> void;
 
 private:
-  RegularCellCache cache{0};
+  CellCache cache{0};
 
   static auto swapBits(uint8_t x) -> uint8_t {
     uint8_t bit2 = (x >> 2) & 1; // Extract bit 2

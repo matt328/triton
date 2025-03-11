@@ -7,10 +7,9 @@ set(common_SRC
   modules/triton/src/ComponentFactory.cxx
   modules/triton/src/DefaultContext.cxx
   modules/triton/src/DefaultEventBus.cxx
-  modules/triton/src/TerrainManager.cxx
   modules/triton/src/SdfGenerator.cxx
-  modules/triton/src/SurfaceExtractor.cxx
-  modules/triton/src/TransvoxelTerrainSystem.cxx
+  modules/triton/src/DebugTerrainSystem.cxx
+  modules/triton/src/DebugSurfaceExtractor.cxx
 
   modules/gameplay/src/ActionSystem.cxx
   modules/gameplay/src/systems/CameraSystem.cxx
