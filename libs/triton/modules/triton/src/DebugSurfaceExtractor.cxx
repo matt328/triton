@@ -21,29 +21,30 @@ auto DebugSurfaceExtractor::extractSurface(
       for (int xCoord = 0; xCoord < block.size.x - 1; ++xCoord) {
         auto blockCellPosition = glm::ivec3(xCoord, yCoord, zCoord);
         auto worldCellPosition = worldBlockMin + glm::vec3(blockCellPosition);
-        extractCellVertices(generator,
-                            worldCellPosition,
-                            blockCellPosition,
-                            cellCache,
-                            vertices,
-                            indices);
+
+        auto ctx = BlockContext{.generator = generator,
+                                .cellCache = &cellCache,
+                                .worldCellPosition = worldCellPosition,
+                                .blockCellPosition = blockCellPosition,
+                                .vertices = vertices,
+                                .indices = indices,
+                                .worldBlockMin = worldBlockMin,
+                                .blockSize = static_cast<uint32_t>(block.size.x),
+                                .lod = 1,
+                                .lodScale = 1 << 1};
+
+        extractCellVertices(ctx);
       }
     }
   }
 }
 
-auto DebugSurfaceExtractor::extractCellVertices(const std::shared_ptr<IDensityGenerator>& generator,
-                                                glm::vec3 worldCellPosition,
-                                                glm::ivec3 blockCellPosition,
-                                                CellCache& cellCache,
-                                                std::vector<as::TerrainVertex>& vertices,
-                                                [[maybe_unused]] std::vector<uint32_t>& indices)
-    -> void {
+auto DebugSurfaceExtractor::extractCellVertices(BlockContext& ctx) -> void {
   // Sample the SDF's values at each corner of the current cell
   std::array<float, 8> corner{};
   for (int8_t currentCorner = 0; currentCorner < 8; ++currentCorner) {
-    const auto cornerPosition = worldCellPosition + (CornerIndex[currentCorner]);
-    corner[currentCorner] = generator->getValue(glm::vec3(cornerPosition));
+    const auto cornerPosition = ctx.worldCellPosition + (CornerIndex[currentCorner]);
+    corner[currentCorner] = ctx.generator->getValue(glm::vec3(cornerPosition));
   }
 
   /// The corner value in the SDF being non-negative means outside, negative means inside
@@ -61,9 +62,9 @@ auto DebugSurfaceExtractor::extractCellVertices(const std::shared_ptr<IDensityGe
     return;
   }
 
-  int8_t directionMask = (blockCellPosition.x > 0 ? 1 : 0) |
-                         ((blockCellPosition.z > 0 ? 1 : 0) << 1) |
-                         ((blockCellPosition.y > 0 ? 1 : 0) << 2);
+  int8_t directionMask = (ctx.blockCellPosition.x > 0 ? 1 : 0) |
+                         ((ctx.blockCellPosition.z > 0 ? 1 : 0) << 1) |
+                         ((ctx.blockCellPosition.y > 0 ? 1 : 0) << 2);
 
   // Decode the data from Lengyel's tables
   auto equivalenceClassIndex = regularCellClass[caseCode];
@@ -97,8 +98,8 @@ auto DebugSurfaceExtractor::extractCellVertices(const std::shared_ptr<IDensityGe
     uint8_t cornerIndex0 = lowNibble(cornerIndices);
     uint8_t cornerIndex1 = highNibble(cornerIndices);
 
-    int8_t distance0 = corner[cornerIndex0];
-    int8_t distance1 = corner[cornerIndex1];
+    auto distance0 = corner[cornerIndex0];
+    auto distance1 = corner[cornerIndex1];
 
     // If the value is on a surface, need to cache it in a consistent manner or else subsequent
     // cells might not find it? Still a little unclear on the details.
@@ -117,22 +118,136 @@ auto DebugSurfaceExtractor::extractCellVertices(const std::shared_ptr<IDensityGe
     int index = INVALID_INDEX;
 
     if (isCacheable) {
-      const auto entry = cellCache.getReusedIndex(blockCellPosition, dirPrev);
+      const auto entry = ctx.cellCache->getReusedIndex(ctx.blockCellPosition, dirPrev);
       index = entry.vertices[reuseIndex];
     }
 
     if (!isCacheable || index == INVALID_INDEX) {
-      index = generateVertex(vertices, reuseIndex);
+      auto vCtx = VertexContext{
+          .reuseIndex = reuseIndex,
+          .distance0 = distance0,
+          .distance1 = distance1,
+          .cornerIndex0 = cornerIndex0,
+          .cornerIndex1 = cornerIndex1,
+          .isCacheable = isCacheable,
+      };
+      index = generateVertex(ctx, vCtx);
     }
   }
 }
 
-auto DebugSurfaceExtractor::generateVertex(std::vector<as::TerrainVertex>& vertices,
-                                           uint8_t reuseIndex) -> int {
-  auto index = vertices.size();
+auto DebugSurfaceExtractor::generateVertex(const BlockContext& bCtx, VertexContext& vCtx) -> int {
+  auto index = bCtx.vertices.size();
+  int lod = 1;
+  auto vertexPosition = glm::vec3{};
+  auto normal = glm::vec3{};
+  uint32_t vertBoundaryMask = 0;
 
-  if (reuseIndex == 0) { // Vertex lies on an edge
+  if (vCtx.reuseIndex == 0) { // Vertex lies on an edge
+    glm::ivec3 cornerOffset =
+        vCtx.distance0 == 0 ? CornerIndex[vCtx.cornerIndex0] : CornerIndex[vCtx.cornerIndex1];
+
+    vertexPosition = bCtx.worldCellPosition + glm::vec3(cornerOffset);
+
+    if (bCtx.lod > 0) {
+      vertBoundaryMask =
+          ((vertexPosition.x == 0 ? 1 : 0) | (vertexPosition.y == 0 ? 2 : 0) |
+           (vertexPosition.z == 0 ? 4 : 0) | (vertexPosition.x == bCtx.blockSize ? 8 : 0) |
+           (vertexPosition.y == bCtx.blockSize ? 16 : 0) |
+           (vertexPosition.z == bCtx.blockSize ? 32 : 0));
+    }
+
+    vertexPosition += Padding;
+
+    {
+      const auto x = vertexPosition.x;
+      const auto y = vertexPosition.y;
+      const auto z = vertexPosition.z;
+      normal =
+          glm::vec3(bCtx.generator->getValue(x - 1, y, z) - bCtx.generator->getValue(x + 1, y, z),
+                    bCtx.generator->getValue(x, y - 1, z) - bCtx.generator->getValue(x, y + 1, z),
+                    bCtx.generator->getValue(x, y, z - 1) - bCtx.generator->getValue(x, y, z + 1));
+    }
+
+    bCtx.vertices.push_back(
+        as::TerrainVertex{.position = vertexPosition, .texCoord = glm::ivec2(0, 0)});
+
+    if (vCtx.isCacheable) {
+      bCtx.cellCache->setReusableIndex(bCtx.blockCellPosition, vCtx.reuseIndex, index);
+    }
+  } else {
+    auto vertexLocalPos0 = bCtx.blockCellPosition + CornerIndex[vCtx.cornerIndex0];
+    auto vertexLocalPos1 = bCtx.blockCellPosition + CornerIndex[vCtx.cornerIndex1];
+
+    auto vertexLocalPos0Float = glm::vec3(vertexLocalPos0);
+    auto vertexLocalPos1Float = glm::vec3(vertexLocalPos1);
+
+    for (int i = 0; i < lod; ++i) {
+      auto midPointLocal = (vertexLocalPos0Float + vertexLocalPos1Float) * 0.5f;
+      auto midPointWorld = bCtx.worldBlockMin + midPointLocal * static_cast<float>(bCtx.lodScale);
+      auto midpointDistance = bCtx.generator->getValue(midPointWorld);
+
+      if (std::signbit(vCtx.distance0) == std::signbit(midpointDistance)) {
+        vertexLocalPos0Float = midPointLocal;
+        vCtx.distance0 = midpointDistance;
+      } else {
+        vertexLocalPos1Float = midPointLocal;
+        vCtx.distance1 = midpointDistance;
+      }
+    }
+
+    auto t0 = vCtx.distance1 / (vCtx.distance1 - vCtx.distance0);
+    auto t1 = 1 - t0;
+
+    auto vertexPosition = vertexLocalPos0Float * t0 + vertexLocalPos1Float * t1;
+
+    auto vertPosX0 = vertexLocalPos0.x;
+    auto vertPosY0 = vertexLocalPos0.y;
+    auto vertPosZ0 = vertexLocalPos0.z;
+
+    auto vertPosX1 = vertexLocalPos1.x;
+    auto vertPosY1 = vertexLocalPos1.y;
+    auto vertPosZ1 = vertexLocalPos1.z;
+
+    if (bCtx.lod > 0) {
+      vertBoundaryMask = (((vertPosX0 == 0 || vertPosX1 == 0) ? 1 : 0) |
+                          ((vertPosY0 == 0 || vertPosY1 == 0) ? 2 : 0) |
+                          ((vertPosZ0 == 0 || vertPosZ1 == 0) ? 4 : 0) |
+                          ((vertPosX0 == bCtx.blockSize || vertPosX1 == bCtx.blockSize) ? 8 : 0) |
+                          ((vertPosY0 == bCtx.blockSize || vertPosY1 == bCtx.blockSize) ? 16 : 0) |
+                          ((vertPosZ0 == bCtx.blockSize || vertPosZ1 == bCtx.blockSize) ? 32 : 0));
+    }
+
+    vertPosX0 += Padding.x;
+    vertPosY0 += Padding.y;
+    vertPosZ0 += Padding.z;
+
+    vertPosX1 += Padding.x;
+    vertPosY1 += Padding.y;
+    vertPosZ1 += Padding.z;
+
+    auto normal0 = glm::vec3(bCtx.generator->getValue(vertPosX0 - 1, vertPosY0, vertPosZ0) -
+                                 bCtx.generator->getValue(vertPosX0 + 1, vertPosY0, vertPosZ0),
+                             bCtx.generator->getValue(vertPosX0, vertPosY0 - 1, vertPosZ0) -
+                                 bCtx.generator->getValue(vertPosX0, vertPosY0 + 1, vertPosZ0),
+                             bCtx.generator->getValue(vertPosX0, vertPosY0, vertPosZ0 - 1) -
+                                 bCtx.generator->getValue(vertPosX0, vertPosY0, vertPosZ0 + 1));
+
+    auto normal1 = glm::vec3(bCtx.generator->getValue(vertPosX1 - 1, vertPosY1, vertPosZ1) -
+                                 bCtx.generator->getValue(vertPosX1 + 1, vertPosY1, vertPosZ1),
+                             bCtx.generator->getValue(vertPosX1, vertPosY1 - 1, vertPosZ1) -
+                                 bCtx.generator->getValue(vertPosX1, vertPosY1 + 1, vertPosZ1),
+                             bCtx.generator->getValue(vertPosX1, vertPosY1, vertPosZ1 - 1) -
+                                 bCtx.generator->getValue(vertPosX1, vertPosY1, vertPosZ1 + 1));
+
+    normal = normal0 + normal1;
+
+    if (vCtx.cornerIndex1 == 7) {
+      bCtx.cellCache->setReusableIndex(bCtx.blockCellPosition, vCtx.reuseIndex, index);
+    }
   }
+
+  normal = glm::normalize(normal);
 
   return index;
 }

@@ -12,5 +12,6 @@ public:
   auto operator=(IDensityGenerator&&) -> IDensityGenerator& = delete;
 
   virtual auto getValue(glm::vec3 position) -> float = 0;
+  virtual auto getValue(float x, float y, float z) -> float = 0;
 };
 }
