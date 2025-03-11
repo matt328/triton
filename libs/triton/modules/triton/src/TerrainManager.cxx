@@ -21,6 +21,9 @@ TerrainManager::~TerrainManager() {
 
 /// Returns a reference to the TerrainDefinition for the gameplay system to use since it won't be
 /// modified after its created.
+/// TODO(Matt): This function should return the MeshHandle to the GamePlaySystem so the gameplay
+/// system can call the entity service and the TerrainSystem doesn't need to know about
+/// EntityService
 auto TerrainManager::registerTerrain(const TerrainCreateInfo& createInfo) -> TerrainResult2& {
 
   for (int z = 0; z < createInfo.chunkCount.z; ++z) {
@@ -84,9 +87,6 @@ auto TerrainManager::triangulateBlock([[maybe_unused]] TerrainHandle terrainHand
   entityService->addMeshToTerrainChunk(terrain.entityId.value(),
                                        chunk.entityId.value(),
                                        meshHandle);
-
-  // Should this use the standard static mesh geometry buffer, or should the resource manager know
-  // how to handle terrain geometry differently?
 }
 
 }

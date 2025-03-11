@@ -19,7 +19,7 @@
 #include "DefaultContext.hpp"
 #include "DefaultDebugManager.hpp"
 #include "NewRenderContext.hpp"
-#include "tr/TransvoxelTerrainSystem.hpp"
+#include "tr/DebugTerrainSystem.hpp"
 #include "vk/core/Swapchain.hpp"
 #include "vk/core/Surface.hpp"
 #include "gfx/QueueTypes.hpp"
@@ -38,7 +38,6 @@
 #include "cm/TaskQueue.hpp"
 #include "tr/TerrainManager.hpp"
 #include "tr/SdfGenerator.hpp"
-#include "tr/SurfaceExtractor.hpp"
 #include "tr/ITerrainSystem.hpp"
 
 namespace di = boost::di;
@@ -81,7 +80,7 @@ auto ComponentFactory::getContext(const FrameworkConfig& config) -> std::shared_
                         di::bind<queue::Compute>.to<queue::Compute>(),
                         di::bind<IBufferManager>.to<BufferManager>(),
                         di::bind<tr::TaskQueueConfig>.to(taskQueueConfig),
-                        di::bind<tr::ITerrainSystem>.to<tr::TransvoxelTerrainSystem>());
+                        di::bind<tr::ITerrainSystem>.to<tr::DebugTerrainSystem>());
 
   return injector.create<std::shared_ptr<DefaultContext>>();
 }

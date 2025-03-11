@@ -1,4 +1,5 @@
 #include "tr/SurfaceExtractor.hpp"
+#include "CellCache.hpp"
 #include "tr/SdfGenerator.hpp"
 #include "cm/GlmToString.hpp"
 // NOLINTBEGIN
@@ -15,7 +16,7 @@ auto SurfaceExtractor::extractSurface(const std::shared_ptr<SdfGenerator>& sdfGe
                                       const BlockResult& chunk,
                                       std::vector<as::TerrainVertex>& vertices,
                                       std::vector<uint32_t>& indices) -> void {
-  cache = RegularCellCache{static_cast<size_t>(chunk.size.x)};
+  cache = CellCache{static_cast<size_t>(chunk.size.x)};
   /// World coordinates of the lower front left cell
   const auto voxelSize = sdfGenerator->getVoxelSize(sdfHandle);
   auto worldBlockMin = glm::vec3(chunk.location.x * chunk.size.x,
@@ -23,14 +24,6 @@ auto SurfaceExtractor::extractSurface(const std::shared_ptr<SdfGenerator>& sdfGe
                                  chunk.location.z * chunk.size.z) *
                        voxelSize;
   ;
-
-  /* TODO(matt):
-    P17 of the pdf shows we need to have access to one more cell in each of the 3 directions, even
-    though we aren't triangulating these cells, they have to be there so we can know where the
-    vertices lie on the edges
-
-    so make sure to populate the cell grid
-  */
 
   // The algorithm starts from the lower front left, +x, then +z, creating a single 'layer' then
   // proceeds to the higher layers
