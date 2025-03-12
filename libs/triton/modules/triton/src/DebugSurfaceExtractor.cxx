@@ -57,7 +57,7 @@ auto DebugSurfaceExtractor::extractCellVertices(BlockContext& ctx) -> void {
 
   // can bail on the whole cell right here with this check
   // 0 means the whole cell is either above or below, in either case, no verts are generated
-  auto validCell = caseCode == 0 || caseCode == 255;
+  auto validCell = caseCode != 0 && caseCode != 255;
   if (!validCell) {
     return;
   }
@@ -71,14 +71,15 @@ auto DebugSurfaceExtractor::extractCellVertices(BlockContext& ctx) -> void {
   auto equivalenceClass = regularCellData[equivalenceClassIndex];
 
   const auto vertexCount = equivalenceClass.getVertexCount();
-  [[maybe_unused]] const auto triangleCount = equivalenceClass.getTriangleCount();
-  [[maybe_unused]] const auto vertexSequence = equivalenceClass.getVertexIndex();
+  const auto triangleCount = equivalenceClass.getTriangleCount();
+  const auto vertexSequence = equivalenceClass.getVertexIndex();
 
   auto mappedIndices = std::vector<uint16_t>{};
 
   const auto vertexLocations = regularVertexData[caseCode];
 
   auto cellVertices = std::vector<as::TerrainVertex>{};
+  auto cellIndices = std::vector<uint32_t>{};
 
   for (uint8_t vli = 0; vli < vertexCount; ++vli) {
     auto vertexLocationInfo = vertexLocations[vli];
@@ -132,7 +133,19 @@ auto DebugSurfaceExtractor::extractCellVertices(BlockContext& ctx) -> void {
           .isCacheable = isCacheable,
       };
       index = generateVertex(ctx, vCtx);
+      cellIndices.push_back(index);
     }
+  }
+
+  auto indexCount = triangleCount * 3;
+  for (uint32_t i = 0; i < indexCount; i += 3) {
+    auto ia = cellIndices[vertexSequence[i + 0]];
+    auto ib = cellIndices[vertexSequence[i + 1]];
+    auto ic = cellIndices[vertexSequence[i + 2]];
+
+    ctx.indices.push_back(ia);
+    ctx.indices.push_back(ib);
+    ctx.indices.push_back(ic);
   }
 }
 
@@ -199,7 +212,7 @@ auto DebugSurfaceExtractor::generateVertex(const BlockContext& bCtx, VertexConte
     auto t0 = vCtx.distance1 / (vCtx.distance1 - vCtx.distance0);
     auto t1 = 1 - t0;
 
-    auto vertexPosition = vertexLocalPos0Float * t0 + vertexLocalPos1Float * t1;
+    vertexPosition = vertexLocalPos0Float * t0 + vertexLocalPos1Float * t1;
 
     auto vertPosX0 = vertexLocalPos0.x;
     auto vertPosY0 = vertexLocalPos0.y;
@@ -248,6 +261,12 @@ auto DebugSurfaceExtractor::generateVertex(const BlockContext& bCtx, VertexConte
   }
 
   normal = glm::normalize(normal);
+
+  if (vertBoundaryMask > 0) {}
+
+  bCtx.vertices.push_back(
+      as::TerrainVertex{.position = vertexPosition * static_cast<float>(bCtx.lodScale),
+                        .texCoord = glm::ivec2{0, 0}});
 
   return index;
 }

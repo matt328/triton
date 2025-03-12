@@ -6,14 +6,13 @@
 #include "systems/TransformSystem.hpp"
 #include "tr/IEventBus.hpp"
 #include "commands/CreateCamera.hpp"
-#include "tr/TerrainManager.hpp"
 
 namespace tr {
 
 constexpr auto DefaultFOV = 60.f;
 constexpr auto DefaultNearClip = 0.1f;
 constexpr auto DefaultFarClip = 10000.f;
-constexpr auto DefaultPosition = glm::vec3{0.f, 0.f, 5.f};
+constexpr auto DefaultPosition = glm::vec3{0.f, 7.f, 5.f};
 
 DefaultGameplaySystem::DefaultGameplaySystem(std::shared_ptr<IEventBus> newEventBus,
                                              std::shared_ptr<AssetManager> newAssetManager,
