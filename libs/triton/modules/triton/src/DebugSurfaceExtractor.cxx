@@ -143,9 +143,9 @@ auto DebugSurfaceExtractor::extractCellVertices(BlockContext& ctx) -> void {
     auto ib = cellIndices[vertexSequence[i + 1]];
     auto ic = cellIndices[vertexSequence[i + 2]];
 
-    ctx.indices.push_back(ia);
-    ctx.indices.push_back(ib);
     ctx.indices.push_back(ic);
+    ctx.indices.push_back(ib);
+    ctx.indices.push_back(ia);
   }
 }
 
