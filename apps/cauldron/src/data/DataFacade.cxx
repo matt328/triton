@@ -146,6 +146,10 @@ void DataFacade::setEntitySkeleton([[maybe_unused]] std::string_view entityName,
 void DataFacade::createTerrain(std::string_view terrainName, glm::vec3 terrainSize) {
 
   const auto task = [this, terrainName] {
+    auto sphereInfo = tr::SdfCreateInfo{};
+    sphereInfo.shapeType = tr::ShapeType::Sphere;
+    sphereInfo.shapeInfo = tr::SphereInfo{.center = glm::vec3(5.f, 5.f, 5.f), .radius = 1.5f};
+
     auto boxInfo = tr::SdfCreateInfo{};
     boxInfo.shapeType = tr::ShapeType::Box;
     boxInfo.shapeInfo = tr::BoxInfo{.center = glm::vec3(5.f, 5.f, 5.f), .size = 1.5f};

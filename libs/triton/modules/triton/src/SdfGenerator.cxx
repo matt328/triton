@@ -17,6 +17,11 @@ auto SdfGenerator::registerGenerator(SdfCreateInfo createInfo) -> GeneratorHandl
     generatorMap.emplace(key, std::make_shared<BoxGenerator>(info.center, info.size));
   }
 
+  if (createInfo.shapeType == ShapeType::Sphere) {
+    const auto info = createInfo.get<SphereInfo>();
+    generatorMap.emplace(key, std::make_shared<BoxGenerator>(info.center, info.radius));
+  }
+
   return key;
 }
 
