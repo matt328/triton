@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IDensityGenerator.hpp"
+#include "cm/GlmToString.hpp"
 
 namespace tr {
 class PlaneGenerator : public IDensityGenerator {
@@ -9,7 +10,7 @@ public:
   }
 
   auto getValue(glm::vec3 position) -> float override {
-    return glm::dot(position, normal) + height;
+    return -(position.y - height);
   }
 
   auto getValue(float x, float y, float z) -> float override {
@@ -17,7 +18,7 @@ public:
   }
 
 private:
-  glm::vec3 normal = glm::vec3(0.f, 1.f, 0.f);
+  [[maybe_unused]] glm::vec3 normal = glm::vec3(0.f, 1.f, 0.f);
   float height;
 };
 
