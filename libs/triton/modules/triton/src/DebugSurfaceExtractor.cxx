@@ -78,7 +78,6 @@ auto DebugSurfaceExtractor::extractCellVertices(BlockContext& ctx) -> void {
 
   const auto vertexLocations = regularVertexData[caseCode];
 
-  auto cellVertices = std::vector<as::TerrainVertex>{};
   auto cellIndices = std::vector<uint32_t>{};
 
   for (uint8_t vli = 0; vli < vertexCount; ++vli) {
