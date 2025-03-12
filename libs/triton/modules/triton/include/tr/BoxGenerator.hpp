@@ -10,8 +10,7 @@ public:
   }
 
   auto getValue(glm::vec3 position) -> float override {
-    glm::vec3 q = glm::abs(position - center) - radius;
-    return glm::length(glm::max(q, 0.0f)) + glm::min(glm::max(q.x, glm::max(q.y, q.z)), 0.0f);
+    return glm::length(position - center) - radius;
   }
 
   auto getValue(float x, float y, float z) -> float override {
