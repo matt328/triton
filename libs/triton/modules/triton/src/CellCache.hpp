@@ -20,22 +20,24 @@ public:
     }
   }
 
-  auto getReusedIndex(glm::ivec3 pos, int8_t dir) -> CellCacheEntry {
-    int rx = dir & 0x01;
-    int rz = (dir >> 1) & 0x01;
-    int ry = (dir >> 2) & 0x01;
+  auto getReusedIndex(glm::ivec3 pos, uint8_t dir) -> CellCacheEntry {
+    size_t rx = dir & 0x01u;
+    size_t rz = (static_cast<size_t>(dir) >> 1u) & 0x01u;
+    size_t ry = (static_cast<size_t>(dir) >> 2u) & 0x01u;
 
-    int dx = pos.x - rx;
-    int dy = pos.y - ry;
-    int dz = pos.z - rz;
+    size_t dx = pos.x - rx;
+    size_t dy = pos.y - ry;
+    size_t dz = pos.z - rz;
 
-    Log.debug("Returning CellCacheEntry at [{},{},{}]", dx, dy, dz);
-    const auto cell = cache[dy & 1][dx * chunkSize + dz];
+    // Reminder: dy & 1 here flips between even and odd so it only caches the current 'deck' and the
+    // one previous to it.
+
+    const auto cell = cache[dy & 1u][(dx * chunkSize) + dz];
     return cell;
   }
 
   void setReusableIndex(glm::ivec3 pos, int8_t reuseIndex, uint16_t p) {
-    cache[pos.y & 1][pos.x * chunkSize + pos.z].vertices[reuseIndex] = p;
+    cache[pos.y & 1u][pos.x * chunkSize + pos.z].vertices[reuseIndex] = p;
   }
 
 private:

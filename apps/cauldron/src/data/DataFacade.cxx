@@ -148,14 +148,14 @@ void DataFacade::createTerrain(std::string_view terrainName, glm::vec3 terrainSi
   const auto task = [this, terrainName] {
     auto boxInfo = tr::SdfCreateInfo{};
     boxInfo.shapeType = tr::ShapeType::Box;
-    boxInfo.shapeInfo = tr::BoxInfo{.center = glm::vec3(0.75f, 0.75f, 0.75f), .size = 4.f};
+    boxInfo.shapeInfo = tr::BoxInfo{.center = glm::vec3(5.f, 5.f, 5.f), .size = 1.5f};
 
     auto planeInfo = tr::SdfCreateInfo{};
     planeInfo.shapeType = tr::ShapeType::Plane;
     planeInfo.shapeInfo = tr::PlaneInfo{.height = 5.f, .normal = glm::vec3(0.f, 1.f, 0.f)};
 
     const auto tci = tr::TerrainCreateInfo{.name = terrainName.data(),
-                                           .sdfCreateInfo = planeInfo,
+                                           .sdfCreateInfo = boxInfo,
                                            .chunkCount = glm::ivec3(3, 3, 3),
                                            .chunkSize = glm::ivec3(16, 16, 16)};
     return gameplaySystem->createTerrain(tci);
