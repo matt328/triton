@@ -1,5 +1,6 @@
 #include "tr/DebugTerrainSystem.hpp"
 #include "DebugSurfaceExtractor.hpp"
+#include "LinearOctree.hpp"
 #include "as/TerrainVertex.hpp"
 #include "geo/TerrainGeometryData.hpp"
 #include "gp/EntityService.hpp"
@@ -35,6 +36,8 @@ auto DebugTerrainSystem::registerTerrain(const TerrainCreateInfo& createInfo) ->
       }
     }
   }
+  auto ocTree = LinearOctree(glm::ivec3(0, 0, 0), 4096, 8);
+  ocTree.debug();
 
   const auto chunks = std::vector<BlockResult>(std::ranges::begin(blockMap | std::views::values),
                                                std::ranges::end(blockMap | std::views::values));
