@@ -1,5 +1,7 @@
 #pragma once
 
+#include "cm/GlmToString.hpp"
+
 namespace tr {
 
 struct OctreeNode {
@@ -14,6 +16,16 @@ public:
   /// These indices correspond to a 3-bit value, where each bit represents whether the position is
   /// in the positive or negative half of the node along a given axis.
   size_t locCode;
+
+  auto debug() const -> void {
+    std::string indent(depth, ' ');
+    Log.debug("{} position={}, extents={}, depth={}, locCode{}",
+              indent,
+              position,
+              extents,
+              depth,
+              locCode);
+  }
 };
 
 }

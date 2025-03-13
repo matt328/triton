@@ -1,8 +1,10 @@
 #pragma once
 
+#include "OctreeNode.hpp"
+
 namespace tr {
 
-struct OctreeNode;
+constexpr uint8_t MaxChildren = 8;
 
 class LinearOctree {
 public:
@@ -14,12 +16,15 @@ public:
   auto operator=(const LinearOctree&) -> LinearOctree& = delete;
   auto operator=(LinearOctree&&) -> LinearOctree& = delete;
 
-  auto getRootNode() -> OctreeNode&;
-  auto nodeHasChildren(const OctreeNode& node) -> bool;
-  auto getChild(const OctreeNode& node, uint8_t index) -> OctreeNode&;
-  auto getNodeAt(glm::ivec3 position) -> OctreeNode&;
+  [[nodiscard]] auto getRootNode() const -> const OctreeNode&;
+  [[nodiscard]] auto nodeHasChildren(const OctreeNode& node) const -> bool;
+  [[nodiscard]] auto getChild(const OctreeNode& node, uint8_t index) const -> const OctreeNode&;
+  [[nodiscard]] auto getNodeAt(glm::ivec3 position) const -> const OctreeNode&;
   auto removeNode(size_t locCode) -> void;
   auto splitNode(const OctreeNode& node) -> void;
+
+  auto debug() const -> void;
+  auto debugNode(const OctreeNode& node) const -> void;
 
 private:
   std::unordered_map<size_t, OctreeNode> nodeMap;
