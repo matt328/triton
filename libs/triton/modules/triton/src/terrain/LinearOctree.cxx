@@ -2,11 +2,14 @@
 
 namespace tr {
 
-LinearOctree::LinearOctree(glm::ivec3 newRootPosition, uint32_t newRootSize, uint32_t newRootDepth)
+LinearOctree::LinearOctree(glm::ivec3 newRootPosition, uint32_t newRootSize, uint32_t blockSize)
     : rootPosition{newRootPosition},
       rootSize{newRootSize},
-      rootDepth{newRootDepth},
-      leafSize{rootSize >> rootDepth} {
+      rootDepth(static_cast<int>(std::round(std::log2(newRootSize / blockSize)))),
+      leafSize{blockSize} {
+
+  Log.trace("Octree worldSize={}, blockSize={}, rootDepth={}", rootSize, leafSize, rootDepth);
+
   createRootNode();
 }
 

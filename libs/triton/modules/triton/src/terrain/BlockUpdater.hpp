@@ -48,6 +48,7 @@ public:
   auto operator=(BlockUpdater&&) -> BlockUpdater& = delete;
 
   auto execute() -> void;
+  auto debug() -> void;
 
 private:
   std::shared_ptr<LinearOctree> octree;
@@ -64,3 +65,23 @@ private:
 };
 
 }
+
+template <>
+struct fmt::formatter<tr::BlockUpdate> {
+  constexpr auto parse(format_parse_context& ctx) -> format_parse_context::iterator {
+    return ctx.begin();
+  }
+
+  template <typename FormatContext>
+  auto format(const tr::BlockUpdate& bu, FormatContext& ctx) -> FormatContext::iterator {
+    return fmt::format_to(
+        ctx.out(),
+        "BlockUpdate {{ Type: {}, Position: ({}, {}, {}), LOD: {}, NeighborsMask: {:06b} }}",
+        static_cast<int>(bu.updateType),
+        bu.position.x,
+        bu.position.y,
+        bu.position.z,
+        bu.lod,
+        bu.neighborsMask);
+  }
+};
