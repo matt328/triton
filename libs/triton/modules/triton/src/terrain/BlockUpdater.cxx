@@ -146,9 +146,7 @@ auto BlockUpdater::canRender(const OctreeNode& node) -> bool {
 }
 
 auto BlockUpdater::debug() -> void {
-  for (const auto blockUpdate : blockUpdates) {
-    Log.debug("blockUpdates={}", blockUpdate);
-  }
+  Log.debug("blockUpdates.size={}", blockUpdates.size());
 }
 
 }
