@@ -25,6 +25,7 @@ public:
 
   auto debug() const -> void;
   auto debugNode(const OctreeNode& node) const -> void;
+  [[nodiscard]] auto getLeafSize() const -> uint32_t;
 
 private:
   std::unordered_map<size_t, OctreeNode> nodeMap;
