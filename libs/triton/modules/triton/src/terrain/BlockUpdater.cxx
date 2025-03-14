@@ -101,9 +101,6 @@ auto BlockUpdater::getChunkUpdates(const OctreeNode& fromNode) -> void {
       activeNodesNeighbors.erase(fromNode.position);
     }
     if (!octree->nodeHasChildren(fromNode)) {
-      if (fromNode.depth == 0) {
-        Log.warn("Splitting node when depth=0");
-      }
       octree->splitNode(fromNode);
     }
 
@@ -144,10 +141,6 @@ auto BlockUpdater::canRender(const OctreeNode& node) -> bool {
   auto minDist = std::max({distx, disty, distz});
 
   auto compareDist = octree->getLeafSize() * 1.5f * static_cast<float>(1u << node.depth);
-
-  Log.debug("node.position={}", node.position);
-
-  Log.debug("compareDist={}, minDist={}", compareDist, minDist);
 
   return minDist > compareDist;
 }

@@ -8,8 +8,6 @@ LinearOctree::LinearOctree(glm::ivec3 newRootPosition, uint32_t newRootSize, uin
       rootDepth(static_cast<int>(std::round(std::log2(newRootSize / blockSize)))),
       leafSize{blockSize} {
 
-  Log.trace("Octree worldSize={}, blockSize={}, rootDepth={}", rootSize, leafSize, rootDepth);
-
   createRootNode();
 }
 
@@ -85,15 +83,16 @@ auto LinearOctree::splitNode(const OctreeNode& node) -> void {
 
   for (uint8_t i = 0; i < MaxChildren; ++i) {
     const auto locCode = (node.locCode << 3u) | i;
-    nodeMap.emplace(locCode,
-                    OctreeNode{
-                        .position = glm::ivec3(childExtents * ((i & 1u) > 0 ? 1 : -1),
-                                               childExtents * ((i & 2u) > 0 ? 1 : -1),
-                                               childExtents * ((i & 4u) > 0 ? 1 : -1)),
-                        .extents = childExtents,
-                        .depth = childDepth,
-                        .locCode = locCode,
-                    });
+    nodeMap.emplace(
+        locCode,
+        OctreeNode{
+            .position = node.position + glm::ivec3(childExtents * ((i & 1u) > 0 ? 1 : -1),
+                                                   childExtents * ((i & 2u) > 0 ? 1 : -1),
+                                                   childExtents * ((i & 4u) > 0 ? 1 : -1)),
+            .extents = childExtents,
+            .depth = childDepth,
+            .locCode = locCode,
+        });
   }
 }
 
