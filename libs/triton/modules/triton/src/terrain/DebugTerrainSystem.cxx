@@ -4,6 +4,7 @@
 #include "as/TerrainVertex.hpp"
 #include "geo/TerrainGeometryData.hpp"
 #include "gp/EntityService.hpp"
+#include "terrain/BlockUpdater.hpp"
 #include "tr/SdfGenerator.hpp"
 #include "vk/VkResourceManager.hpp"
 
@@ -36,8 +37,12 @@ auto DebugTerrainSystem::registerTerrain(const TerrainCreateInfo& createInfo) ->
       }
     }
   }
-  auto ocTree = LinearOctree(glm::ivec3(0, 0, 0), 4096, 8);
-  ocTree.debug();
+  auto ocTree = std::make_shared<LinearOctree>(glm::ivec3(0, 0, 0), 4096, 32);
+  ocTree->debug();
+
+  auto blockUpdater = std::make_shared<BlockUpdater>(ocTree, glm::vec3(0, 0, 0));
+  blockUpdater->execute();
+  blockUpdater->debug();
 
   const auto chunks = std::vector<BlockResult>(std::ranges::begin(blockMap | std::views::values),
                                                std::ranges::end(blockMap | std::views::values));

@@ -8,7 +8,7 @@ constexpr uint8_t MaxChildren = 8;
 
 class LinearOctree {
 public:
-  LinearOctree(glm::ivec3 newRootPosition, uint32_t newRootSize, uint32_t newRootDepth);
+  LinearOctree(glm::ivec3 newRootPosition, uint32_t newRootSize, uint32_t blockSize);
   ~LinearOctree() = default;
 
   LinearOctree(const LinearOctree&) = delete;
