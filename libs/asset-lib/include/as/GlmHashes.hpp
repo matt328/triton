@@ -29,6 +29,18 @@ struct hash<glm::vec3> {
 };
 
 template <>
+struct hash<glm::ivec3> {
+  auto operator()(const glm::ivec3& vec) const -> std::size_t {
+    std::size_t seed = 0;
+    std::hash<int> hasher;
+    hash_combine(seed, hasher(vec.x));
+    hash_combine(seed, hasher(vec.y));
+    hash_combine(seed, hasher(vec.z));
+    return seed;
+  }
+};
+
+template <>
 struct hash<glm::vec4> {
   auto operator()(const glm::vec4& vec) const -> std::size_t {
     std::size_t seed = 0;

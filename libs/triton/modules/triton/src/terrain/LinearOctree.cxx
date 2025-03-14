@@ -54,6 +54,10 @@ auto LinearOctree::getChild(const OctreeNode& node, uint8_t index) const -> cons
   return nodeMap.at(node.locCode << 3u | index);
 }
 
+auto LinearOctree::getLeafSize() const -> uint32_t {
+  return leafSize;
+}
+
 auto LinearOctree::getNodeAt(glm::ivec3 position) const -> const OctreeNode& {
   const auto* currentNode = &getRootNode();
   while (nodeHasChildren(*currentNode)) {
