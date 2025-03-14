@@ -40,7 +40,7 @@ auto DebugTerrainSystem::registerTerrain(const TerrainCreateInfo& createInfo) ->
   auto ocTree = std::make_shared<LinearOctree>(glm::ivec3(0, 0, 0), 4096, 32);
   ocTree->debug();
 
-  auto blockUpdater = std::make_shared<BlockUpdater>(ocTree, glm::vec3(0, 0, 0));
+  auto blockUpdater = std::make_shared<BlockUpdater>(ocTree, glm::vec3(6, 5, 4));
   blockUpdater->execute();
   blockUpdater->debug();
 
