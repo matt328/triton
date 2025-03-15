@@ -10,6 +10,7 @@ BlockUpdater::BlockUpdater(std::shared_ptr<LinearOctree> newOctree, glm::vec3 ta
 auto BlockUpdater::execute() -> void {
   getChunkUpdates(octree->getRootNode());
   buildTransitionMasks();
+  std::ranges::sort(blockUpdates, BlockUpdateComparator{});
 }
 
 auto BlockUpdater::buildTransitionMasks() -> void {
