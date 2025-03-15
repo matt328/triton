@@ -1,33 +1,37 @@
-[2025-03-13 10:29:50.096] [core] [info] Console is now ready for logging!
-[2025-03-13 10:29:50.096] [core] [trace] Constructing DefaultEventBus
-[2025-03-13 10:29:50.096] [core] [trace] Constructing DefaultDebugManager
-[2025-03-13 10:29:50.096] [core] [trace] Constructing Window
-[2025-03-13 10:29:50.162] [core] [trace] Validation Layer: Validation Information: [ WARNING-CreateInstance-status-message ] Object 0: handle = 0x618cecf3dfc0, type = VK_OBJECT_TYPE_INSTANCE; | MessageID = 0x23dfd876 | vkCreateInstance(): Khronos Validation Layer Active:
+[2025-03-15 11:04:35.016] [core] [info] Console is now ready for logging!
+[2025-03-15 11:04:35.019] [core] [trace] Constructing DefaultDebugManager
+[2025-03-15 11:04:35.019] [core] [trace] Constructing DefaultEventBus
+[2025-03-15 11:04:35.019] [core] [trace] Constructing Window
+[2025-03-15 11:04:35.151] [core] [trace] Validation Layer: Validation Information: [ WARNING-CreateInstance-status-message ] Object 0: handle = 0x1b2a5cdaf50, type = VK_OBJECT_TYPE_INSTANCE; | MessageID = 0x23dfd876 | vkCreateInstance(): Khronos Validation Layer Active:
     Current Enables: None.
     Current Disables: None.
 
-[2025-03-13 10:29:50.163] [core] [trace] Created Surface
-[2025-03-13 10:29:50.176] [core] [info] Using physical device: NVIDIA RTX 2000 Ada Generation Laptop GPU
-[2025-03-13 10:29:50.176] [core] [trace] Creating Device with transfer queue family: 1
-[2025-03-13 10:29:50.503] [core] [trace] Transfer queue family: 1
-[2025-03-13 10:29:50.503] [core] [trace] Constructing DSShaderBindingFactory
-[2025-03-13 10:29:50.504] [core] [trace] Graphics queue family: 0
-[2025-03-13 10:29:50.504] [core] [warning] Object type not supported for setting name
-[2025-03-13 10:29:50.504] [core] [warning] Object type not supported for setting name
-[2025-03-13 10:29:50.506] [core] [trace] Constructing IndirectPipeline
-[2025-03-13 10:29:50.507] [core] [critical] Failed to open SPIR-V file: /home/matt/projects/matt/triton/assets/shaders/dynamic.vert.spv
-[2025-03-13 10:29:50.507] [core] [trace] Destroying DefaultFrameManager
-[2025-03-13 10:29:50.509] [core] [trace] Destroying VkResourceManager
-[2025-03-13 10:29:50.509] [core] [trace] Destroying ArenaGeometryBuffer
-[2025-03-13 10:29:50.509] [core] [trace] Destroying Arena Buffer
-[2025-03-13 10:29:50.509] [core] [trace] Destroying Arena Buffer
-[2025-03-13 10:29:50.509] [core] [trace] Destroying ArenaGeometryBuffer
-[2025-03-13 10:29:50.509] [core] [trace] Destroying Arena Buffer
-[2025-03-13 10:29:50.509] [core] [trace] Destroying Arena Buffer
-[2025-03-13 10:29:50.509] [core] [trace] Destroying ArenaGeometryBuffer
-[2025-03-13 10:29:50.509] [core] [trace] Destroying Arena Buffer
-[2025-03-13 10:29:50.509] [core] [trace] Destroying Arena Buffer
-[2025-03-13 10:29:50.510] [core] [debug] Destroying Allocator
-[2025-03-13 10:29:50.510] [core] [trace] Destroying DSShaderBindingFactory
-[2025-03-13 10:29:50.510] [core] [trace] Destroying ShaderBinding: Texture
-[2025-03-13 10:29:50.510] [core] [trace] Destroying Swapchain
+[2025-03-15 11:04:35.153] [core] [trace] Created Surface
+[2025-03-15 11:04:35.160] [core] [info] Using physical device: NVIDIA GeForce RTX 3060
+[2025-03-15 11:04:35.160] [core] [trace] Creating Device with transfer queue family: 1
+[2025-03-15 11:04:35.374] [core] [trace] Transfer queue family: 1
+[2025-03-15 11:04:35.375] [core] [trace] Graphics queue family: 0
+[2025-03-15 11:04:35.375] [core] [trace] Constructing DSShaderBindingFactory
+[2025-03-15 11:04:35.375] [core] [warning] Object type not supported for setting name
+[2025-03-15 11:04:35.376] [core] [warning] Object type not supported for setting name
+[2025-03-15 11:04:35.378] [core] [debug] Creating ActionSystem
+[2025-03-15 11:04:35.531] [core] [trace] Creating ImGuiSystem
+[2025-03-15 11:04:35.534] [core] [trace] Constructing StaticPipeline
+[2025-03-15 11:04:35.536] [core] [critical] Failed to open SPIR-V file: C:\Users\Matt\Projects\triton\assets\shaders\static.vert.spv
+[2025-03-15 11:04:35.536] [core] [trace] Destroying ImGuiSystem
+[2025-03-15 11:04:35.536] [core] [trace] Destroying Swapchain
+[2025-03-15 11:04:35.542] [core] [trace] Destroying Gameplay System
+[2025-03-15 11:04:35.542] [core] [trace] Destroying CameraSystem
+[2025-03-15 11:04:35.543] [core] [trace] Destroying VkResourceManager
+[2025-03-15 11:04:35.543] [core] [trace] Destroying ArenaGeometryBuffer
+[2025-03-15 11:04:35.543] [core] [trace] Destroying Arena Buffer
+[2025-03-15 11:04:35.543] [core] [trace] Destroying Arena Buffer
+[2025-03-15 11:04:35.543] [core] [trace] Destroying ArenaGeometryBuffer
+[2025-03-15 11:04:35.544] [core] [trace] Destroying Arena Buffer
+[2025-03-15 11:04:35.544] [core] [trace] Destroying Arena Buffer
+[2025-03-15 11:04:35.544] [core] [trace] Destroying ArenaGeometryBuffer
+[2025-03-15 11:04:35.544] [core] [trace] Destroying Arena Buffer
+[2025-03-15 11:04:35.545] [core] [trace] Destroying Arena Buffer
+[2025-03-15 11:04:35.545] [core] [trace] Destroying DSShaderBindingFactory
+[2025-03-15 11:04:35.545] [core] [trace] Destroying ShaderBinding: Texture
+[2025-03-15 11:04:35.546] [core] [debug] Destroying Allocator

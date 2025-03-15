@@ -59,17 +59,6 @@ auto DebugTerrainSystem::registerTerrain(const TerrainCreateInfo& createInfo) ->
   return terrainMap.at(terrainHandle);
 };
 
-/*
-  TODO:
-    - Implement triangulateBlock so it returns a LoadedTerrainData which is just a MeshData for now.
-      - Eventually this will have texturing information, etc in it.
-    - DebugTerrainSystem exposes the triangulate block method so blocks can be triangulated on
-      demand
-    - Changing getting Sdf values to get the generator and call get() on that.
-    - Also a MultipleLodTerrainSystem will be responsible for consulting a LodSystem and
-      triangulating its own blocks.
-
-*/
 auto DebugTerrainSystem::triangulateBlock([[maybe_unused]] TerrainHandle terrainHandle,
                                           [[maybe_unused]] BlockHandle blockHandle,
                                           [[maybe_unused]] tr::EntityType blockEntityId,
