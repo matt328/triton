@@ -13,7 +13,7 @@ public:
   auto operator=(const IRenderContext&) -> IRenderContext& = default;
   auto operator=(IRenderContext&&) -> IRenderContext& = delete;
 
-  virtual void updateTerrainSystem() = 0;
+  virtual void update() = 0;
   virtual void renderNextFrame() = 0;
   virtual void waitIdle() = 0;
 

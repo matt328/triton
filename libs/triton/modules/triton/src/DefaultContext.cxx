@@ -91,8 +91,8 @@ void DefaultContext::run() {
     }
 
     {
-      ZoneNamedN(z, "RenderContext Update Terrain System", true);
-      renderContext->updateTerrainSystem();
+      ZoneNamedN(z, "RenderContext Update", true);
+      renderContext->update();
     }
 
     {
