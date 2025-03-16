@@ -1,18 +1,19 @@
 #pragma once
 
-#include "gp/AssetManager.hpp"
-#include "gp/action/IActionSystem.hpp"
-#include "gp/components/Transform.hpp"
-#include "systems/AnimationSystem.hpp"
-#include "systems/CameraSystem.hpp"
-#include "systems/RenderDataSystem.hpp"
-#include "systems/TransformSystem.hpp"
-#include "tr/Events.hpp"
-#include "tr/IEventBus.hpp"
 #include "tr/IGameplaySystem.hpp"
-#include "tr/ITerrainSystem.hpp"
+#include "gp/components/Transform.hpp"
+#include "tr/Events.hpp"
 
 namespace tr {
+
+class AssetManager;
+class IActionSystem;
+class AnimationSystem;
+class CameraSystem;
+class TransformSystem;
+class RenderDataSystem;
+class ITerrainSystem;
+class IEventBus;
 
 class DefaultGameplaySystem : public IGameplaySystem {
 public:

@@ -26,23 +26,24 @@ auto DebugMeshManager::update() -> void {
     vertexGroups.push_back(vertices);
   }
 
-  // This needs to happen on another thread.
-  const auto task = [this, vertexGroups]() -> std::vector<MeshHandle> {
-    // This should block until everything is uploaded to the GPU
-    return resourceManager->uploadLineData(vertexGroups);
-  };
+  // // This needs to happen on another thread.
+  // const auto task = [this, vertexGroups]() -> std::vector<MeshHandle> {
+  //   // This should block until everything is uploaded to the GPU
+  //   // return resourceManager->uploadLineData(vertexGroups);
+  //   return {};
+  // };
 
-  const auto onComplete = [this](const std::vector<MeshHandle>& handles) {
-    // This executes on the main thread (the same thread as the renderer is reading from them) so
-    // no lock is needed. This also ensures the GPU won't be told to render anything that hasn't
-    // finished uploading yet
-    currentMeshData.clear();
-    for (const auto& meshHandle : handles) {
-      currentMeshData.emplace_back(meshHandle, Topology::LineList, 0L);
-    }
-  };
+  // const auto onComplete = [this](const std::vector<MeshHandle>& handles) {
+  //   // This executes on the main thread (the same thread as the renderer is reading from them) so
+  //   // no lock is needed. This also ensures the GPU won't be told to render anything that hasn't
+  //   // finished uploading yet
+  //   currentMeshData.clear();
+  //   for (const auto& meshHandle : handles) {
+  //     currentMeshData.emplace_back(meshHandle, Topology::LineList, 0L);
+  //   }
+  // };
 
-  taskQueue->enqueue(task, onComplete);
+  // taskQueue->enqueue(task, onComplete);
 }
 
 auto DebugMeshManager::getRenderableMeshes() const -> std::vector<MeshData> {
