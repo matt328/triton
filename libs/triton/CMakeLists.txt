@@ -12,6 +12,7 @@ set(common_SRC
   modules/triton/src/terrain/DebugSurfaceExtractor.cxx
   modules/triton/src/terrain/LinearOctree.cxx
   modules/triton/src/terrain/BlockUpdater.cxx
+  modules/triton/src/DefaultDebugService.cxx
 
   modules/gameplay/src/ActionSystem.cxx
   modules/gameplay/src/systems/CameraSystem.cxx

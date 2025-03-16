@@ -1,5 +1,13 @@
 # Debug/Editor Gui Design
 
+## Gizmo System
+
+- Injectable Component Requirements
+  - Add/Remove debug shapes
+    - Add shapes with a tag, so we can clear and/or toggle all shapes with by tags
+  - Add a gizmo to a given entity with a transform component
+  - Label vertices, lines and triangles
+
 ## ImGui Current Use
 
 - ImGuiHelper - just initializes and tears down imgui statically, has no actual behavor beyond that.

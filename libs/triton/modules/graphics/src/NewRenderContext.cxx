@@ -12,7 +12,18 @@ NewRenderContext::~NewRenderContext() {
   Log.trace("Destroying NewRenderContext");
 }
 
-void NewRenderContext::updateTerrainSystem() {
+void NewRenderContext::update() {
+  /*
+    DebugMeshService -
+      Check to see if any DebugMeshes are in the UploadComplete state
+      If so, move them into the Renderable state
+
+      If the list of Meshes in the Renderable state has changed since last frame,
+      add their data to the renderData
+
+      From here, the DefaultRenderScheduler should pick up the renderData and update buffers, etc
+      maybe factor this out into separate buffer updaters for each render task?
+  */
 }
 
 /// This gets called directly after setRenderData

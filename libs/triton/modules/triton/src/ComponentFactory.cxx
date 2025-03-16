@@ -2,6 +2,7 @@
 
 #include <di.hpp>
 
+#include "DefaultDebugService.hpp"
 #include "Window.hpp"
 #include "cm/ImGuiAdapter.hpp"
 #include "gp/DefaultGameplaySystem.hpp"
@@ -79,7 +80,8 @@ auto ComponentFactory::getContext(const FrameworkConfig& config) -> std::shared_
                         di::bind<queue::Compute>.to<queue::Compute>(),
                         di::bind<IBufferManager>.to<BufferManager>(),
                         di::bind<tr::TaskQueueConfig>.to(taskQueueConfig),
-                        di::bind<tr::ITerrainSystem>.to<tr::DebugTerrainSystem>());
+                        di::bind<tr::ITerrainSystem>.to<tr::DebugTerrainSystem>(),
+                        di::bind<tr::IDebugService>.to<tr::DefaultDebugService>());
 
   return injector.create<std::shared_ptr<DefaultContext>>();
 }
