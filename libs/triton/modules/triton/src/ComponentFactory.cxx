@@ -32,13 +32,19 @@
 
 #include "pipeline/SpirvShaderModuleFactory.hpp"
 #include "vk/sb/DSShaderBindingFactory.hpp"
+#include "vk/BufferManager.hpp"
+#include "cm/TaskQueue.hpp"
+#include "tr/ITerrainSystem.hpp"
+
+// These classes are just implicitly bound. Maybe this isn't a great idea, but it does work.
+#include "geo/GeometryData.hpp"
 #include "vk/sb/IShaderBinding.hpp"
 #include "vk/sb/DSLayout.hpp"
-#include "vk/BufferManager.hpp"
-#include "geo/GeometryData.hpp"
-#include "cm/TaskQueue.hpp"
 #include "tr/SdfGenerator.hpp"
-#include "tr/ITerrainSystem.hpp"
+#include "systems/CameraSystem.hpp"
+#include "systems/AnimationSystem.hpp"
+#include "systems/RenderDataSystem.hpp"
+#include "systems/TransformSystem.hpp"
 
 namespace di = boost::di;
 
@@ -54,6 +60,12 @@ auto ComponentFactory::getContext(const FrameworkConfig& config) -> std::shared_
                                                       .framesInFlight = 2};
 
   constexpr auto taskQueueConfig = tr::TaskQueueConfig{.maxQueueSize = 100};
+
+  // TODO(matt): Make it so each 'module' configures and produces its own injector, similar to how
+  // this one is exposed to the application.
+  /*
+    Each module needs to expose a single top level interface that
+  */
 
   const auto injector =
       di::make_injector(di::bind<IDebugManager>.to<DefaultDebugManager>(),

@@ -4,6 +4,8 @@
 #include "systems/CameraSystem.hpp"
 #include "systems/RenderDataSystem.hpp"
 #include "systems/TransformSystem.hpp"
+#include "systems/AnimationSystem.hpp"
+#include "tr/ITerrainSystem.hpp"
 #include "tr/IEventBus.hpp"
 #include "commands/CreateCamera.hpp"
 
