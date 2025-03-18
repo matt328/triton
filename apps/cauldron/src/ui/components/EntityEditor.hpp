@@ -1,15 +1,15 @@
 #pragma once
 
-#include "cm/EntitySystemTypes.hpp"
-#include "tr/IEventBus.hpp"
-#include "tr/IGameplaySystem.hpp"
-#include "data/DataFacade.hpp"
-#include "ui/components/DialogManager.hpp"
-#include <entt/entity/fwd.hpp>
+namespace tr {
+class IEventBus;
+class IGameplaySystem;
+class EntityService;
+}
 
 namespace ed {
 
-using ComponentInspectorFn = void (*)(entt::registry, tr::EntityType);
+class DataFacade;
+class DialogManager;
 
 class EntityEditor {
 public:

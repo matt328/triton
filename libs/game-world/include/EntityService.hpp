@@ -4,7 +4,7 @@
 #include "gp/components/TerrainComponent.hpp"
 #include "cm/EntitySystemTypes.hpp"
 #include "cm/RenderData.hpp"
-#include "gp/AssetManager.hpp"
+#include "tr/AssetManager.hpp"
 #include "gp/components/Animation.hpp"
 #include "gp/components/Camera.hpp"
 #include "gp/components/EditorInfo.hpp"

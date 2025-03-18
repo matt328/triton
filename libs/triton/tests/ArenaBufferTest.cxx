@@ -4,7 +4,7 @@
 
 #include "mem/ArenaBuffer.hpp"
 #include "IBufferManager.hpp"
-#include "geo/GeometryData.hpp"
+#include "cm/IGeometryData.hpp"
 #include "mem/BufferRegion.hpp"
 
 using trompeloeil::_;

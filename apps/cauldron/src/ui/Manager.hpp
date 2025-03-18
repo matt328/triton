@@ -1,16 +1,19 @@
 #pragma once
 
-#include "cm/TaskQueue.hpp"
-#include "components/AppLog.hpp"
-#include "data/DataFacade.hpp"
-#include "ui/components/AssetViewer.hpp"
-#include "ui/components/DialogManager.hpp"
-#include "ui/components/EntityEditor.hpp"
-#include "ui/components/Menu.hpp"
+namespace tr {
+class TaskQueue;
+}
 
 namespace ed {
 
+struct AppLog;
 class AssetTool;
+class DataFacade;
+class AssetViewer;
+class DialogManager;
+class EntityEditor;
+class Menu;
+class Properties;
 
 class Manager {
 public:

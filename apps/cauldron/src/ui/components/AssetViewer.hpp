@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Properties.hpp"
-#include "data/DataFacade.hpp"
-#include "ui/components/DialogManager.hpp"
-
 namespace ed {
+
+class DataFacade;
+class DialogManager;
+class Properties;
 
 class AssetViewer {
 public:

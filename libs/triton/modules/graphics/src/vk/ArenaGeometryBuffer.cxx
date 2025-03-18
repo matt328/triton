@@ -1,5 +1,5 @@
 #include "vk/ArenaGeometryBuffer.hpp"
-#include "geo/GeometryData.hpp"
+#include "cm/IGeometryData.hpp"
 #include "mem/ArenaBuffer.hpp"
 
 namespace tr {

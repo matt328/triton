@@ -23,6 +23,7 @@
 
 namespace tr {
 class IGameplaySystem;
+class TaskQueue;
 }
 
 namespace ed {

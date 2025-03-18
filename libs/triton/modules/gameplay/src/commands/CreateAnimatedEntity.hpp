@@ -1,6 +1,6 @@
 #pragma once
 #include "CommandQueue.hpp"
-#include "gp/AssetManager.hpp"
+#include "tr/AssetManager.hpp"
 #include "gp/components/Animation.hpp"
 #include "gp/components/Transform.hpp"
 #include "gp/components/EditorInfo.hpp"

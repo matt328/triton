@@ -1,18 +1,20 @@
 #pragma once
 
-#include "tr/IContext.hpp"
-#include "tr/IGuiSystem.hpp"
-#include "ui/Manager.hpp"
+namespace tr {
+class IGuiSystem;
+class IGameLoop;
+class IGameplaySystem;
+}
 
 namespace ed {
 
 class Properties;
+class Manager;
 
 class Application {
 public:
   Application(std::shared_ptr<Properties> newProperties,
-              std::shared_ptr<tr::IContext> newContext,
-              std::shared_ptr<tr::IGameplaySystem> newGameplaySystem,
+              std::shared_ptr<tr::IGameLoop> newGameLoop,
               std::shared_ptr<tr::IGuiSystem> newGuiSystem,
               std::shared_ptr<Manager> newManager);
   ~Application();
@@ -27,8 +29,7 @@ public:
 
 private:
   std::shared_ptr<Properties> properties;
-  std::shared_ptr<tr::IContext> context;
-  std::shared_ptr<tr::IGameplaySystem> gameplaySystem;
+  std::shared_ptr<tr::IGameLoop> gameLoop;
   std::shared_ptr<tr::IGuiSystem> guiSystem;
   std::shared_ptr<Manager> manager;
 };

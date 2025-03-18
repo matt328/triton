@@ -2,28 +2,8 @@ project("triton")
 
 set(common_SRC
 
-  modules/common/src/ImGuiAdapter.cxx
-
-  modules/triton/src/ComponentFactory.cxx
-  modules/triton/src/DefaultContext.cxx
-  modules/triton/src/DefaultEventBus.cxx
-  modules/triton/src/terrain/SdfGenerator.cxx
-  modules/triton/src/terrain/DebugTerrainSystem.cxx
-  modules/triton/src/terrain/DebugSurfaceExtractor.cxx
-  modules/triton/src/terrain/LinearOctree.cxx
-  modules/triton/src/terrain/BlockUpdater.cxx
-  modules/triton/src/DefaultDebugService.cxx
-
-  modules/gameplay/src/ActionSystem.cxx
-  modules/gameplay/src/systems/CameraSystem.cxx
-  modules/gameplay/src/systems/TransformSystem.cxx
-  modules/gameplay/src/systems/RenderDataSystem.cxx
-  modules/gameplay/src/systems/AnimationSystem.cxx
-  modules/gameplay/src/AnimationFactory.cxx
-  modules/gameplay/src/DefaultGameplaySystem.cxx
-  modules/gameplay/src/AssetManager.cxx
-  modules/gameplay/src/EntityService.cxx
-
+  # modules/gameplay/src/GameplayFactory.cxx
+  # modules/gameplay/src/GameplayContextImpl.cxx
   modules/graphics/src/ImmediateTransferContext.cxx
   modules/graphics/src/Window.cxx
 

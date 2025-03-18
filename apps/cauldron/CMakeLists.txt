@@ -94,11 +94,11 @@ endif()
 
 target_link_libraries(${PROJECT_NAME}
   PRIVATE
+  framework
+  shared
   BoostDI
-  L2DFD
   glfw
   cereal::cereal
-  triton
   platform_folders
   spdlog::spdlog_header_only
   util-lib
