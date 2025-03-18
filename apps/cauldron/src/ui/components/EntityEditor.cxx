@@ -1,5 +1,7 @@
 #include "EntityEditor.hpp"
 
+#include "fx/IEventBus.hpp"
+
 #include "tr/GameplayEvents.hpp"
 #include "ui/components/DialogManager.hpp"
 #include "ui/components/dialog/ModalDialog.hpp"

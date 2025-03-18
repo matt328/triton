@@ -61,9 +61,12 @@ include(CTest)
 
 add_subdirectory(assets)
 add_subdirectory(libs/util-lib)
-add_subdirectory(libs/triton)
+add_subdirectory(libs/framework)
+add_subdirectory(libs/shared)
 add_subdirectory(apps/cauldron)
-add_subdirectory(apps/testarea)
-add_subdirectory(apps/assettool)
+
+# add_subdirectory(apps/testarea)
+# add_subdirectory(apps/assettool)
 add_subdirectory(libs/asset-lib)
-add_subdirectory(libs/triton/tests)
+
+# add_subdirectory(libs/triton/tests)

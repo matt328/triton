@@ -1,8 +1,6 @@
 #pragma once
 
-#include <entt/fwd.hpp>
-
 namespace tr {
-using EntityType = entt::entity;
+using EntityType = uint64_t;
 using TerrainCreatedFn = std::function<void(EntityType)>;
 }

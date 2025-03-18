@@ -1,18 +1,6 @@
 set(test_SRC
   ArenaBufferTest.cxx
 
-  ../modules/common/src/ImGuiAdapter.cxx
-  ../modules/triton/src/ComponentFactory.cxx
-  ../modules/triton/src/DefaultContext.cxx
-  ../modules/triton/src/DefaultEventBus.cxx
-  ../modules/gameplay/src/ActionSystem.cxx
-  ../modules/gameplay/src/systems/CameraSystem.cxx
-  ../modules/gameplay/src/systems/TransformSystem.cxx
-  ../modules/gameplay/src/systems/RenderDataSystem.cxx
-  ../modules/gameplay/src/systems/AnimationSystem.cxx
-  ../modules/gameplay/src/AnimationFactory.cxx
-  ../modules/gameplay/src/DefaultGameplaySystem.cxx
-  ../modules/gameplay/src/AssetManager.cxx
   ../modules/graphics/src/ImmediateTransferContext.cxx
   ../modules/graphics/src/Window.cxx
   ../modules/graphics/src/mem/Allocator.cxx

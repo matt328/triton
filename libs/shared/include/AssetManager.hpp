@@ -2,7 +2,7 @@
 
 #include "cm/Handles.hpp"
 #include "cm/Rando.hpp"
-#include "geo/GeometryHandles.hpp"
+#include "cm/GeometryHandles.hpp"
 #include "as/Model.hpp"
 #include <ozz/animation/runtime/skeleton.h>
 

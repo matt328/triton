@@ -1,5 +1,5 @@
 #pragma once
-#include "gp/AssetManager.hpp"
+#include "tr/AssetManager.hpp"
 #include "gp/EntityService.hpp"
 
 namespace tr {

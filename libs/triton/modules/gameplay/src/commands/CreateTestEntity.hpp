@@ -2,7 +2,7 @@
 
 #include "CommandQueue.hpp"
 
-#include "gp/AssetManager.hpp"
+#include "tr/AssetManager.hpp"
 #include "gp/components/EditorInfo.hpp"
 #include "gp/components/Renderable.hpp"
 #include "gp/components/Transform.hpp"

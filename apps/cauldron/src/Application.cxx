@@ -1,18 +1,18 @@
 #include "Application.hpp"
 #include "Properties.hpp"
-#include "tr/IContext.hpp"
-#include "tr/IGuiSystem.hpp"
+#include "ui/Manager.hpp"
+
+#include "fx/IGuiSystem.hpp"
+#include "fx/IGameLoop.hpp"
 
 namespace ed {
 
 Application::Application(std::shared_ptr<Properties> newProperties,
-                         std::shared_ptr<tr::IContext> newContext,
-                         std::shared_ptr<tr::IGameplaySystem> newGameplaySystem,
+                         std::shared_ptr<tr::IGameLoop> newGameLoop,
                          std::shared_ptr<tr::IGuiSystem> newGuiSystem,
                          std::shared_ptr<Manager> newManager)
     : properties{std::move(newProperties)},
-      context{std::move(newContext)},
-      gameplaySystem{std::move(newGameplaySystem)},
+      gameLoop{std::move(newGameLoop)},
       guiSystem{std::move(newGuiSystem)},
       manager{std::move(newManager)} {
 
@@ -35,7 +35,7 @@ Application::~Application() {
 
 void Application::run() const {
   Log.debug("Application run");
-  context->run();
+  gameLoop->run();
   Log.debug("Application stopped");
 }
 

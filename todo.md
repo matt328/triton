@@ -1,5 +1,26 @@
 # TODO
 
+## Project Structure
+
+apps
+  cauldron
+  assettool
+  testarea
+libs
+  shared
+    - Standalone utilities that can be used by other libraries, and are generic enough to work with any gameworld or graphics implementation.
+  framework
+    - Provides a FrameworkContext which keeps gameworld and graphics loosely coupled, and allows client applications to interface with each.
+    - houses the run loop and orchestrates how gameworld and graphics interact with each other.
+  gameworld-ecs
+    - houses the ecs and is where game logic lives, uses entt, but keeps it abstracted away from other libs
+  gameworld-somethingelse
+    - hypothetical gameworld library that uses something else to manage the gameworld
+  vkgraphics
+    - all vulkan related code goes here
+  dx12graphics
+    - hypothetical graphics library that is primarily a thought experiment to keep graphics abstracted away
+
 - Need to clean up and document project configurations.
   - When building without testing, test executables and their dependencies shouldn't even be included
   - Document how to run unit tests and coverage without all the magic vscode jank.
