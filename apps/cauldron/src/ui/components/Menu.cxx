@@ -1,5 +1,11 @@
 #include "Menu.hpp"
+
 #include "data/DataFacade.hpp"
+#include "Properties.hpp"
+#include "FileDialog.hpp"
+#include "DialogManager.hpp"
+
+#include "fx/IEventBus.hpp"
 
 namespace ed {
 

@@ -1,4 +1,4 @@
-#include "tr/AssetManager.hpp"
+#include "AssetManager.hpp"
 #include "cm/Handles.hpp"
 #include "geo/GeometryHandles.hpp"
 #include "geo/DynamicGeometryData.hpp"

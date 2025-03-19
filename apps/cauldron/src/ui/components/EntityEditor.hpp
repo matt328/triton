@@ -3,7 +3,7 @@
 namespace tr {
 class IEventBus;
 class IGameplaySystem;
-class EntityService;
+class IEntityServiceProvider;
 }
 
 namespace ed {
@@ -17,7 +17,7 @@ public:
                std::shared_ptr<DataFacade> newDataFacade,
                std::shared_ptr<DialogManager> newDialogManager,
                std::shared_ptr<tr::IEventBus> newEventBus,
-               std::shared_ptr<tr::EntityService> newEntityService);
+               std::shared_ptr<tr::IEntityServiceProvider> newEntityServiceProvider);
   ~EntityEditor();
 
   EntityEditor(const EntityEditor&) = delete;
@@ -34,7 +34,7 @@ private:
   std::shared_ptr<DataFacade> dataFacade;
   std::shared_ptr<DialogManager> dialogManager;
   std::shared_ptr<tr::IEventBus> eventBus;
-  std::shared_ptr<tr::EntityService> entityService;
+  std::shared_ptr<tr::IEntityServiceProvider> entityServiceProvider;
 
   std::optional<std::string> selectedEntity{std::nullopt};
 

@@ -1,8 +1,10 @@
 #include "fx/IFrameworkContext.hpp"
 #include "fx/FrameworkFactory.hpp"
 #include "fx/IGameLoop.hpp"
+#include "fx/IGuiSystem.hpp"
 
 #include "Application.hpp"
+#include "Properties.hpp"
 
 #include "config.h"
 
@@ -60,8 +62,10 @@ auto main() -> int {
 
     auto frameworkContext = tr::createFrameworkContext(frameworkConfig);
 
-    const auto injector = di::make_injector(di::bind<tr::IGameLoop>.to(
-        [&frameworkContext] { return frameworkContext->getGameLoop(); }));
+    const auto injector = di::make_injector(
+        di::bind<tr::IGameLoop>.to([&frameworkContext] { return frameworkContext->getGameLoop(); }),
+        di::bind<tr::IGuiSystem>.to(
+            [&frameworkContext] { return frameworkContext->getGuiSystem(); }));
 
     auto application = injector.create<std::shared_ptr<ed::Application>>();
 

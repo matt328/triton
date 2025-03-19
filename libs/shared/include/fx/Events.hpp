@@ -1,10 +1,8 @@
 #pragma once
 
-#include "Inputs.hpp"
 #include "Actions.hpp"
-
+#include "Inputs.hpp"
 #include "GameplayEvents.hpp"
-#include "tr/GameplayEvents.hpp"
 
 namespace tr {
 
@@ -58,10 +56,6 @@ struct SwapchainCreated {
   uint32_t height;
 };
 
-struct FrameEndEvent {
-  vk::Fence fence;
-};
-
 using EventVariant = std::variant<WindowIconified,
                                   WindowClosed,
                                   KeyEvent,
@@ -74,7 +68,6 @@ using EventVariant = std::variant<WindowIconified,
                                   PlayerScored,
                                   EntityCreated,
                                   SwapchainResized,
-                                  SwapchainCreated,
-                                  FrameEndEvent>;
+                                  SwapchainCreated>;
 
 }

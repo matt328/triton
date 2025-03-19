@@ -1,4 +1,8 @@
 #include "AssetViewer.hpp"
+
+#include "data/DataFacade.hpp"
+#include "DialogManager.hpp"
+
 #include "cm/GlmToString.hpp"
 #include "imgui.h"
 #include "ui/assets/IconsLucide.hpp"
