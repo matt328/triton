@@ -1,7 +1,7 @@
 #include "fx/IFrameworkContext.hpp"
 #include "fx/FrameworkFactory.hpp"
 #include "fx/IGameLoop.hpp"
-#include "fx/IGuiSystem.hpp"
+#include "fx/IGuiCallbackRegistrar.hpp"
 
 #include "Application.hpp"
 #include "Properties.hpp"
@@ -43,29 +43,12 @@ auto main() -> int {
         .windowTitle = windowTitle.str(),
     };
 
-    // auto context = tr::ComponentFactory::getContext(frameworkConfig);
-    // auto gameplaySystem = context->getGameplaySystem();
-    // auto guiSystem = context->getGuiSystem();
-    // auto eventSystem = context->getEventSystem();
-    // auto entityService = gameplaySystem->getEntityService();
-    // auto taskQueue = context->getTaskQueue();
-
-    // const auto injector = di::make_injector(di::bind<tr::IContext>.to(context),
-    //                                         di::bind<tr::IGuiSystem>.to(guiSystem),
-    //                                         di::bind<tr::IEventBus>.to(eventSystem),
-    //                                         di::bind<tr::IGameplaySystem>.to<>(gameplaySystem),
-    //                                         di::bind<tr::TaskQueue>.to<>(taskQueue),
-    //                                         di::bind<std::filesystem::path>.to<>(propertiesPath),
-    //                                         di::bind<tr::EntityService>.to(entityService));
-
-    // auto application = injector.create<std::shared_ptr<ed::Application>>();
-
     auto frameworkContext = tr::createFrameworkContext(frameworkConfig);
 
     const auto injector = di::make_injector(
         di::bind<tr::IGameLoop>.to([&frameworkContext] { return frameworkContext->getGameLoop(); }),
-        di::bind<tr::IGuiSystem>.to(
-            [&frameworkContext] { return frameworkContext->getGuiSystem(); }));
+        di::bind<tr::IGuiCallbackRegistrar>.to(
+            [&frameworkContext] { return frameworkContext->getGuiCallbackRegistrar(); }));
 
     auto application = injector.create<std::shared_ptr<ed::Application>>();
 

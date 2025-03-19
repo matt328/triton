@@ -23,6 +23,10 @@ auto createFrameworkContext([[maybe_unused]] const FrameworkConfig& config)
                                             return createVkGraphicsContext(guiCallbackRegistrar);
                                           }));
 
+  auto gameLoop = std::make_shared<FixedGameLoop>();
+
+  auto* frameworkContextImpl = new FrameworkContextImpl(gameLoop, guiCallbackRegistrar);
+
   const auto frameworkContext = injector.create<std::shared_ptr<FrameworkContextImpl>>();
 
   return frameworkContext;

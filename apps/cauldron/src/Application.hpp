@@ -1,7 +1,7 @@
 #pragma once
 
 namespace tr {
-class IGuiSystem;
+class IGuiCallbackRegistrar;
 class IGameLoop;
 class IGameplaySystem;
 }
@@ -15,7 +15,7 @@ class Application {
 public:
   Application(std::shared_ptr<Properties> newProperties,
               std::shared_ptr<tr::IGameLoop> newGameLoop,
-              std::shared_ptr<tr::IGuiSystem> newGuiSystem,
+              std::shared_ptr<tr::IGuiCallbackRegistrar> newGuiCallbackRegistrar,
               std::shared_ptr<Manager> newManager);
   ~Application();
 
@@ -30,7 +30,7 @@ public:
 private:
   std::shared_ptr<Properties> properties;
   std::shared_ptr<tr::IGameLoop> gameLoop;
-  std::shared_ptr<tr::IGuiSystem> guiSystem;
+  std::shared_ptr<tr::IGuiCallbackRegistrar> guiCallbackRegistrar;
   std::shared_ptr<Manager> manager;
 };
 }
