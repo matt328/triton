@@ -6,7 +6,6 @@ namespace tr {
 class FrameworkContextImpl : public IFrameworkContext {
 public:
   FrameworkContextImpl(std::shared_ptr<IGameLoop> newGameLoop,
-                       std::shared_ptr<IGuiSystem> newGuiSystem,
                        std::shared_ptr<IGuiCallbackRegistrar> newGuiCallbackRegistrar);
   ~FrameworkContextImpl() override = default;
 
@@ -16,12 +15,10 @@ public:
   auto operator=(FrameworkContextImpl&&) -> FrameworkContextImpl& = delete;
 
   auto getGameLoop() -> std::shared_ptr<IGameLoop> override;
-  auto getGuiSystem() -> std::shared_ptr<IGuiSystem> override;
   auto getGuiCallbackRegistrar() -> std::shared_ptr<IGuiCallbackRegistrar> override;
 
 private:
   std::shared_ptr<IGameLoop> gameLoop;
-  std::shared_ptr<IGuiSystem> guiSystem;
   std::shared_ptr<IGuiCallbackRegistrar> guiCallbackRegistrar;
 };
 }
