@@ -1,8 +1,10 @@
 #include "EntityEditor.hpp"
 
+#include "fx/IGameplaySystem.hpp"
 #include "fx/IEventBus.hpp"
+#include "fx/IEntityServiceProvider.hpp"
 
-#include "tr/GameplayEvents.hpp"
+#include "data/DataFacade.hpp"
 #include "ui/components/DialogManager.hpp"
 #include "ui/components/dialog/ModalDialog.hpp"
 #include "editors/TransformInspector.hpp"
@@ -16,17 +18,13 @@ EntityEditor::EntityEditor(std::shared_ptr<tr::IGameplaySystem> newGameplaySyste
                            std::shared_ptr<DataFacade> newDataFacade,
                            std::shared_ptr<DialogManager> newDialogManager,
                            std::shared_ptr<tr::IEventBus> newEventBus,
-                           std::shared_ptr<tr::EntityService> newEntityService)
+                           std::shared_ptr<tr::IEntityServiceProvider> newEntityServiceProvider)
     : gameplaySystem{std::move(newGameplaySystem)},
       dataFacade{std::move(newDataFacade)},
       dialogManager{std::move(newDialogManager)},
       eventBus{std::move(newEventBus)},
-      entityService{std::move(newEntityService)} {
+      entityServiceProvider{std::move(newEntityServiceProvider)} {
   Log.trace("Creating EntityEditor");
-
-  eventBus->subscribe<tr::EntityCreated>([](const tr::EntityCreated& event) {
-    Log.trace("EntityEditor entityCreated: {}", static_cast<long>(event.entityId));
-  });
 
   createAnimatedEntityDialog();
   createStaticEntityDialog();
@@ -95,9 +93,10 @@ void EntityEditor::render() {
 
           const auto transformCallback = [this](std::string_view name, Orientation orientation) {
             const auto entityId = dataFacade->getEntityId(name);
-            entityService->setTransform(
+            entityServiceProvider->setTransform(
                 entityId,
-                tr::Transform{.rotation = orientation.rotation, .position = orientation.position});
+                tr::TransformData{.position = orientation.position,
+                                  .rotation = orientation.rotation});
           };
           renderTransformInspector(entityData->name, &entityData->orientation, transformCallback);
         }
@@ -151,7 +150,7 @@ void EntityEditor::render() {
         if (del) {
           const auto entityId = dataFacade->getEntityId(selectedEntity.value());
           dataFacade->deleteEntity(selectedEntity.value());
-          entityService->removeEntity(entityId);
+          entityServiceProvider->removeEntity(entityId);
           selectedEntity = std::nullopt;
         }
       } else {

@@ -1,11 +1,8 @@
-#include <algorithm>
-
 #include "DataFacade.hpp"
 
+#include "fx/IGameplaySystem.hpp"
 #include "cm/TaskQueue.hpp"
 #include "cm/TerrainCreateInfo.hpp"
-
-#include "tr/IGameplaySystem.hpp"
 
 namespace ed {
 
@@ -81,8 +78,8 @@ void DataFacade::createStaticModel(const EntityData& entityData) noexcept {
 
   engineBusy = true;
 
-  const auto transform = tr::Transform{.rotation = entityData.orientation.rotation,
-                                       .position = entityData.orientation.position};
+  const auto transform = tr::TransformData{.position = entityData.orientation.position,
+                                           .rotation = entityData.orientation.rotation};
 
   const auto task = [this, modelFilename, entityName, transform] {
     return gameplaySystem->createStaticModelEntity(modelFilename,
@@ -113,8 +110,8 @@ void DataFacade::createAnimatedModel(const EntityData& entityData) {
                                                         .animationFilename = animationFilename,
                                                         .entityName = entityName};
 
-  const auto transform = tr::Transform{.rotation = entityData.orientation.rotation,
-                                       .position = entityData.orientation.position};
+  const auto transform = tr::TransformData{.position = entityData.orientation.position,
+                                           .rotation = entityData.orientation.rotation};
 
   const auto task = [this, animatedEntityData, transform] {
     return gameplaySystem->createAnimatedModelEntity(animatedEntityData,
@@ -208,13 +205,6 @@ void DataFacade::save(const std::filesystem::path& outputFile) {
   output(dataStore);
   Log.info("Wrote binary output file to {0}", outputFile.string());
   unsaved = false;
-}
-
-void DataFacade::entityTransformUpdated(std::string_view name, const tr::Transform& transform) {
-  auto& entityData = dataStore.scene.at(name.data());
-  entityData.orientation.position = transform.position;
-  entityData.orientation.rotation = transform.rotation;
-  unsaved = true;
 }
 
 void DataFacade::load(const std::filesystem::path& inputFile) {

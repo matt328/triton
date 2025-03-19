@@ -1,6 +1,10 @@
 #include "fx/FrameworkFactory.hpp"
 #include "FixedGameLoop.hpp"
 #include "FrameworkContextImpl.hpp"
+#include "fx/IGraphicsContext.hpp"
+#include "fx/GuiCallbackRegistrar.hpp"
+
+#include "VkGraphicsFactory.hpp"
 
 #include <di.hpp>
 
@@ -10,9 +14,18 @@ namespace tr {
 
 auto createFrameworkContext([[maybe_unused]] const FrameworkConfig& config)
     -> std::shared_ptr<IFrameworkContext> {
-  const auto injector = di::make_injector(di::bind<IGameLoop>.to<FixedGameLoop>());
 
-  return injector.create<std::shared_ptr<FrameworkContextImpl>>();
+  const auto guiCallbackRegistrar = std::make_shared<GuiCallBackRegistrar>();
+
+  const auto injector = di::make_injector(di::bind<IGameLoop>.to<FixedGameLoop>(),
+                                          di::bind<IGuiCallbackRegistrar>.to(guiCallbackRegistrar),
+                                          di::bind<IGraphicsContext>.to([&guiCallbackRegistrar]() {
+                                            return createVkGraphicsContext(guiCallbackRegistrar);
+                                          }));
+
+  const auto frameworkContext = injector.create<std::shared_ptr<FrameworkContextImpl>>();
+
+  return frameworkContext;
 }
 
 }

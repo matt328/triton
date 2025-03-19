@@ -208,10 +208,6 @@ auto DefaultGameplaySystem::entityCreated([[maybe_unused]] entt::registry& reg,
   eventBus->emit(EntityCreated{entity});
 }
 
-auto DefaultGameplaySystem::getEntityService() const -> std::shared_ptr<EntityService> {
-  return entityService;
-}
-
 // This method is just debug. Eventually push this down into the TerrainSystem
 auto DefaultGameplaySystem::triangulateChunk(tr::EntityType terrainId,
                                              tr::EntityType chunkId,

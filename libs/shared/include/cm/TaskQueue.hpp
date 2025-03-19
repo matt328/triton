@@ -28,8 +28,9 @@ public:
   auto operator=(TaskQueue&&) -> TaskQueue& = delete;
 
   template <class F, class... Args, class OnComplete>
-  auto enqueue(F&& f, OnComplete&& onComplete, Args&&... args)
-      -> std::future<std::invoke_result_t<F&&, Args&&...>> {
+  auto enqueue(F&& f,
+               OnComplete&& onComplete,
+               Args&&... args) -> std::future<std::invoke_result_t<F&&, Args&&...>> {
     using ReturnType = std::invoke_result_t<F&&, Args&&...>;
 
     auto task = std::make_shared<std::packaged_task<ReturnType()>>(
@@ -84,7 +85,7 @@ private:
   std::thread thread;
   TracyLockableN(std::mutex, mtx, "TaskQueueLock");
   std::condition_variable_any cv;
-  std::queue<std::function<void()>> internalQueue{};
+  std::queue<std::function<void()>> internalQueue;
 
   TracyLockableN(std::mutex, completeMtx, "CompleteQueueLock");
   std::queue<std::function<void()>> completeQueue;

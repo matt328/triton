@@ -48,6 +48,8 @@ target_precompile_headers(${PROJECT_NAME}
   <shared_mutex>
   <stb_image.h>
   <thread>
+  <tracy/Tracy.hpp>
+  <tracy/TracyC.h>
   <variant>
   <ozz/animation/runtime/sampling_job.h>
   <ozz/base/containers/vector.h>
@@ -72,6 +74,7 @@ target_link_libraries(${PROJECT_NAME}
   PUBLIC
   asset-lib
   glm
+  Tracy::TracyClient
   util-lib
   PRIVATE
   BoostDI

@@ -63,6 +63,7 @@ add_subdirectory(assets)
 add_subdirectory(libs/util-lib)
 add_subdirectory(libs/framework)
 add_subdirectory(libs/shared)
+add_subdirectory(libs/graphics-vk)
 add_subdirectory(apps/cauldron)
 
 # add_subdirectory(apps/testarea)

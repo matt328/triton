@@ -41,6 +41,7 @@ target_link_libraries(${PROJECT_NAME}
   glm
   PRIVATE
   shared
+  graphics-vk
 )
 
 target_include_directories(${PROJECT_NAME}

@@ -1,0 +1,48 @@
+{
+  "C++ Interface": {
+    "prefix": "cppinterface",
+    "body": [
+      "#pragma once",
+      "",
+      "namespace ${1:namespace} {",
+      "",
+      "class ${2:InterfaceName} {",
+      "public:",
+      "  ${2:InterfaceName}() = default;",
+      "  virtual ~${2:InterfaceName}() = default;",
+      "",
+      "  ${2:InterfaceName}(const ${2:InterfaceName}&) = default;",
+      "  ${2:InterfaceName}(${2:InterfaceName}&&) = delete;",
+      "  auto operator=(const ${2:InterfaceName}&) -> ${2:InterfaceName}& = default;",
+      "  auto operator=(${2:InterfaceName}&&) -> ${2:InterfaceName}& = delete;",
+      "};",
+      "",
+      "}",
+      ""
+    ],
+    "description": "Snippet for a C++ interface with default rule of five"
+  },
+  "C++ Class": {
+    "prefix": "cppclass",
+    "body": [
+      "#pragma once",
+      "",
+      "namespace ${1:namespace} {",
+      "",
+      "class ${2:InterfaceName} {",
+      "public:",
+      "  ${2:InterfaceName}() = default;",
+      "  ~${2:InterfaceName}() = default;",
+      "",
+      "  ${2:InterfaceName}(const ${2:InterfaceName}&) = default;",
+      "  ${2:InterfaceName}(${2:InterfaceName}&&) = delete;",
+      "  auto operator=(const ${2:InterfaceName}&) -> ${2:InterfaceName}& = default;",
+      "  auto operator=(${2:InterfaceName}&&) -> ${2:InterfaceName}& = delete;",
+      "};",
+      "",
+      "}",
+      ""
+    ],
+    "description": "Snippet for a C++ class with default rule of five"
+  }
+}

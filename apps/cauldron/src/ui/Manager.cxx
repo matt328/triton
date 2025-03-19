@@ -6,10 +6,13 @@
 #include "assets/IconsLucide.hpp"
 #include "assets/Lucide.hpp"
 
+#include "imgui_impl_vulkan.h"
 #include "ui/components/AppLog.hpp"
 #include "ui/components/AssetViewer.hpp"
 #include "ui/components/ImGuiSink.hpp"
 #include "ui/components/Dock.hpp"
+#include "ui/components/DialogManager.hpp"
+#include "ui/components/Menu.hpp"
 
 namespace ed {
 

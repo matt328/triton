@@ -1,19 +1,22 @@
 #pragma once
 
-#include "Properties.hpp"
-#include "data/DataFacade.hpp"
-#include "tr/IEventBus.hpp"
-#include "ui/components/DialogManager.hpp"
-#include "ui/components/FileDialog.hpp"
+namespace tr {
+class IEventBus;
+}
 
 namespace ed {
 
+class DataFacade;
+class FileDialog;
+class Properties;
+class DialogManager;
+
 class Menu {
 public:
-  explicit Menu(std::shared_ptr<DataFacade> newDataFacade,
-                std::shared_ptr<Properties> newProperties,
-                std::shared_ptr<DialogManager> newDialogManager,
-                std::shared_ptr<tr::IEventBus> newEventBus);
+  Menu(std::shared_ptr<DataFacade> newDataFacade,
+       std::shared_ptr<Properties> newProperties,
+       std::shared_ptr<DialogManager> newDialogManager,
+       std::shared_ptr<tr::IEventBus> newEventBus);
   ~Menu();
 
   Menu(const Menu&) = delete;
