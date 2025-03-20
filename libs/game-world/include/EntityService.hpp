@@ -1,18 +1,18 @@
 #pragma once
 
-#include "gp/components/TerrainChunk.hpp"
-#include "gp/components/TerrainComponent.hpp"
 #include "cm/EntitySystemTypes.hpp"
 #include "cm/RenderData.hpp"
-#include "tr/AssetManager.hpp"
-#include "gp/components/Animation.hpp"
-#include "gp/components/Camera.hpp"
-#include "gp/components/EditorInfo.hpp"
-#include "gp/components/Renderable.hpp"
-#include "gp/components/Resources.hpp"
-#include "gp/components/Transform.hpp"
+#include "components/TerrainChunk.hpp"
+#include "components/Animation.hpp"
+#include "components/Camera.hpp"
+#include "components/EditorInfo.hpp"
+#include "components/Renderable.hpp"
+#include "components/Resources.hpp"
+#include "components/Transform.hpp"
 
 namespace tr {
+
+class AssetManager;
 
 struct TerrainResult {
   tr::EntityType definitionId;

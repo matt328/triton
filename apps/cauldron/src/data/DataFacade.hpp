@@ -1,12 +1,11 @@
 #pragma once
 
 #include "cm/EntitySystemTypes.hpp"
-#include "cm/TaskQueue.hpp"
 #include "DataStore.hpp"
 
 namespace tr {
 class IGameplaySystem;
-class TaskQueue;
+class ITaskQueue;
 }
 
 namespace ed {
@@ -14,7 +13,7 @@ namespace ed {
 class DataFacade {
 public:
   DataFacade(std::shared_ptr<tr::IGameplaySystem> newGameplaySystem,
-             std::shared_ptr<tr::TaskQueue> newTaskQueue);
+             std::shared_ptr<tr::ITaskQueue> newTaskQueue);
   ~DataFacade();
 
   DataFacade(const DataFacade&) = delete;
@@ -98,7 +97,7 @@ public:
 
 private:
   std::shared_ptr<tr::IGameplaySystem> gameplaySystem;
-  std::shared_ptr<tr::TaskQueue> taskQueue;
+  std::shared_ptr<tr::ITaskQueue> taskQueue;
 
   bool unsaved{};
   bool engineBusy{};

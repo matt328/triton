@@ -1,8 +1,8 @@
 #pragma once
 
-#include "tr/IGameplaySystem.hpp"
-#include "gp/components/Transform.hpp"
-#include "tr/Events.hpp"
+#include "fx/IGameplaySystem.hpp"
+#include "components/Transform.hpp"
+#include "fx/Events.hpp"
 
 namespace tr {
 
