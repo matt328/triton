@@ -1,7 +1,7 @@
 #pragma once
 
-#include "tr/Events.hpp"
-#include "tr/IEventBus.hpp"
+#include "fx/Events.hpp"
+#include "fx/IEventBus.hpp"
 
 namespace tr {
 

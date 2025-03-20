@@ -31,6 +31,7 @@ target_precompile_headers(${PROJECT_NAME}
   PUBLIC
   <glm/glm.hpp>
   <string>
+  <queue>
   PRIVATE
   <memory>
 )

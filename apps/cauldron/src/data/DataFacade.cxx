@@ -1,13 +1,13 @@
 #include "DataFacade.hpp"
 
 #include "fx/IGameplaySystem.hpp"
-#include "cm/TaskQueue.hpp"
+#include "fx/ITaskQueue.hpp"
 #include "cm/TerrainCreateInfo.hpp"
 
 namespace ed {
 
 DataFacade::DataFacade(std::shared_ptr<tr::IGameplaySystem> newGameplaySystem,
-                       std::shared_ptr<tr::TaskQueue> newTaskQueue)
+                       std::shared_ptr<tr::ITaskQueue> newTaskQueue)
     : gameplaySystem{std::move(newGameplaySystem)}, taskQueue{std::move(newTaskQueue)} {
   Log.trace("Creating DataFacade");
 }
