@@ -1,11 +1,13 @@
 #include "fx/FrameworkFactory.hpp"
+#include "fx/IGraphicsContext.hpp"
+#include "fx/IGameworldContext.hpp"
 #include "FixedGameLoop.hpp"
 #include "FrameworkContextImpl.hpp"
-#include "fx/IGraphicsContext.hpp"
 #include "DefaultEventBus.hpp"
 #include "fx/GuiCallbackRegistrar.hpp"
 
 #include "VkGraphicsFactory.hpp"
+#include "gw/GameworldFactory.hpp"
 
 #include "TaskQueue.hpp"
 
@@ -30,9 +32,11 @@ auto createFrameworkContext([[maybe_unused]] const FrameworkConfig& config)
                           return createVkGraphicsContext(guiCallbackRegistrar);
                         }));
 
-  auto gameLoop = std::make_shared<FixedGameLoop>();
-
   const auto frameworkContext = injector.create<std::shared_ptr<FrameworkContextImpl>>();
+
+  const auto eventBus = frameworkContext->getEventBus();
+
+  const auto gameworldContext = createGameworldContext(eventBus);
 
   return frameworkContext;
 }
