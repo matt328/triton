@@ -1,12 +1,13 @@
-#include "gp/DefaultGameplaySystem.hpp"
-#include "gp/action/IActionSystem.hpp"
-#include "gp/components/Resources.hpp"
+#include "DefaultGameplaySystem.hpp"
+#include "EntityService.hpp"
+#include "action/IActionSystem.hpp"
+#include "as/Model.hpp"
+#include "fx/IEventBus.hpp"
 #include "systems/CameraSystem.hpp"
 #include "systems/RenderDataSystem.hpp"
 #include "systems/TransformSystem.hpp"
 #include "systems/AnimationSystem.hpp"
-#include "tr/ITerrainSystem.hpp"
-#include "tr/IEventBus.hpp"
+#include "fx/IEventBus.hpp"
 #include "commands/CreateCamera.hpp"
 
 namespace tr {
@@ -17,7 +18,7 @@ constexpr auto DefaultFarClip = 10000.f;
 constexpr auto DefaultPosition = glm::vec3{0.f, 7.f, 5.f};
 
 DefaultGameplaySystem::DefaultGameplaySystem(std::shared_ptr<IEventBus> newEventBus,
-                                             std::shared_ptr<AssetManager> newAssetManager,
+                                             std::shared_ptr<IAssetService> newAssetService,
                                              std::shared_ptr<IActionSystem> newActionSystem,
                                              std::shared_ptr<CameraSystem> newCameraSystem,
                                              std::shared_ptr<TransformSystem> newTransformSystem,
@@ -26,7 +27,7 @@ DefaultGameplaySystem::DefaultGameplaySystem(std::shared_ptr<IEventBus> newEvent
                                              std::shared_ptr<EntityService> newEntityService,
                                              std::shared_ptr<ITerrainSystem> newTerrainSystem)
     : eventBus{std::move(newEventBus)},
-      assetManager{std::move(newAssetManager)},
+      assetService{std::move(newAssetService)},
       actionSystem{std::move(newActionSystem)},
       cameraSystem{std::move(newCameraSystem)},
       transformSystem{std::move(newTransformSystem)},
@@ -137,7 +138,9 @@ auto DefaultGameplaySystem::createStaticModelEntity(std::string filename,
                                                     std::string_view entityName,
                                                     std::optional<Transform> initialTransform)
     -> tr::EntityType {
-  auto modelData = assetManager->loadModel(filename);
+  auto model = assetService->loadModel(filename);
+
+  // TODO(Matt): Create IResourceManagerProvider
 
   auto transform = Transform{.rotation = glm::zero<glm::vec3>(),
                              .position = glm::zero<glm::vec3>(),

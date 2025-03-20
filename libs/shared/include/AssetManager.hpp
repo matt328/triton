@@ -13,20 +13,7 @@ struct Model;
 namespace tr {
 
 class IGeometryData;
-
-class GeometryDataNotFoundException : public std::logic_error {
-public:
-  explicit GeometryDataNotFoundException(const std::string& message) : std::logic_error(message) {
-  }
-};
-
-class IOException final : public tr::BaseException {
-public:
-  using BaseException::BaseException;
-};
-
 struct TritonModelData;
-
 class VkResourceManager;
 
 class AssetManager {
@@ -39,17 +26,10 @@ public:
   auto operator=(const AssetManager&) -> AssetManager& = delete;
   auto operator=(AssetManager&&) -> AssetManager& = delete;
 
-  /// Load a model from disk and return a handle to the mesh data.
-  /// The handle will be used to identify the geometry needed to render the model to the renderer.
-  /// This method will block until the geometry data is available to be rendered, so it should be
-  /// called from a background thread. A lot of vulkan synchronization issues can be avoided by
-  /// calling this method from a background thread, and simply not asking the renderer to render it
-  /// until after the call is completed. Any vulkan operations that have to happen during this
-  /// method will happen 'asynchronously' as far as Vulkan is concerned, meaning they will not block
-  /// any rendering operations.
   auto loadModel(std::string_view filename) -> ModelData;
 
   auto loadSkeleton(std::string_view filename) -> SkeletonHandle;
+
   auto loadAnimation(std::string_view filename) -> AnimationHandle;
 
   [[nodiscard]] auto getAnimation(AnimationHandle handle) const -> const ozz::animation::Animation&;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "tr/Inputs.hpp"
+#include "fx/Inputs.hpp"
 
 namespace tr {
 enum class SourceType : uint32_t {

@@ -42,6 +42,7 @@ target_link_libraries(${PROJECT_NAME}
   glm
   PRIVATE
   shared
+  game-world
   graphics-vk
 )
 

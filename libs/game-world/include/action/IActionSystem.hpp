@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Sources.hpp"
-#include "tr/Actions.hpp"
+#include "action/Sources.hpp"
+#include "fx/Actions.hpp"
 
 namespace tr {
 class IActionSystem {
