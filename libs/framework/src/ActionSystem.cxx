@@ -1,5 +1,5 @@
-#include "gp/action/ActionSystem.hpp"
-#include "tr/IEventBus.hpp"
+#include "ActionSystem.hpp"
+#include "fx/IEventBus.hpp"
 
 namespace tr {
 

@@ -8,13 +8,15 @@ FrameworkContextImpl::FrameworkContextImpl(
     std::shared_ptr<ITaskQueue> newTaskQueue,
     std::shared_ptr<IEventBus> newEventBus,
     std::shared_ptr<IEntityServiceProvider> newEntityServiceProvider,
-    std::shared_ptr<IGameplaySystem> newGameplaySystem)
+    std::shared_ptr<IGameplaySystem> newGameplaySystem,
+    std::shared_ptr<IAssetService> newAssetService)
     : gameLoop{std::move(newGameLoop)},
       guiCallbackRegistrar{std::move(newGuiCallbackRegistrar)},
       taskQueue{std::move(newTaskQueue)},
       eventBus{std::move(newEventBus)},
       entityServiceProvider{std::move(newEntityServiceProvider)},
-      gameplaySystem{std::move(newGameplaySystem)} {
+      gameplaySystem{std::move(newGameplaySystem)},
+      assetService{std::move(newAssetService)} {
 }
 
 auto FrameworkContextImpl::getGameLoop() -> std::shared_ptr<IGameLoop> {
@@ -39,6 +41,10 @@ auto FrameworkContextImpl::getEntityServiceProvider() -> std::shared_ptr<IEntity
 
 auto FrameworkContextImpl::getGameplaySystem() -> std::shared_ptr<IGameplaySystem> {
   return gameplaySystem;
+}
+
+auto FrameworkContextImpl::getAssetService() -> std::shared_ptr<IAssetService> {
+  return assetService;
 }
 
 }

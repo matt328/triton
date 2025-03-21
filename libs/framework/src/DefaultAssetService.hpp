@@ -19,6 +19,7 @@ public:
 
   auto loadModel(std::string_view filename) -> as::Model override;
   auto loadSkeleton(std::string_view filename) -> SkeletonHandle override;
+  auto loadAnimation(std::string_view filename) -> AnimationHandle override;
 
   auto getAnimation(AnimationHandle handle) -> const ozz::animation::Animation& override;
   auto getSkeleton(SkeletonHandle handle) -> const ozz::animation::Skeleton& override;
