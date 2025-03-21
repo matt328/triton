@@ -10,7 +10,8 @@ public:
                        std::shared_ptr<ITaskQueue> newTaskQueue,
                        std::shared_ptr<IEventBus> newEventBus,
                        std::shared_ptr<IEntityServiceProvider> newEntityServiceProvider,
-                       std::shared_ptr<IGameplaySystem> newGameplaySystem);
+                       std::shared_ptr<IGameplaySystem> newGameplaySystem,
+                       std::shared_ptr<IAssetService> newAssetService);
   ~FrameworkContextImpl() override = default;
 
   FrameworkContextImpl(const FrameworkContextImpl&) = default;
@@ -24,6 +25,7 @@ public:
   auto getEventBus() -> std::shared_ptr<IEventBus> override;
   auto getEntityServiceProvider() -> std::shared_ptr<IEntityServiceProvider> override;
   auto getGameplaySystem() -> std::shared_ptr<IGameplaySystem> override;
+  auto getAssetService() -> std::shared_ptr<IAssetService> override;
 
 private:
   std::shared_ptr<IGameLoop> gameLoop;
@@ -32,5 +34,6 @@ private:
   std::shared_ptr<IEventBus> eventBus;
   std::shared_ptr<IEntityServiceProvider> entityServiceProvider;
   std::shared_ptr<IGameplaySystem> gameplaySystem;
+  std::shared_ptr<IAssetService> assetService;
 };
 }

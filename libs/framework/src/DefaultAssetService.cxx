@@ -2,6 +2,7 @@
 
 #include "as/Model.hpp"
 #include "cm/SharedExceptions.hpp"
+#include <ozz/animation/runtime/animation.h>
 
 namespace tr {
 
@@ -70,6 +71,32 @@ auto DefaultAssetService::loadSkeleton(std::string_view filename) -> SkeletonHan
   skeletons.emplace(key, std::move(skeleton));
 
   loadedSkeletons.emplace(filename, key);
+
+  return key;
+}
+
+auto DefaultAssetService::loadAnimation(std::string_view filename) -> AnimationHandle {
+  if (loadedAnimations.contains(filename.data())) {
+    return loadedAnimations.at(filename.data());
+  }
+
+  ozz::io::File file(filename.data(), "rb");
+  if (!file.opened()) {
+    Log.error("Failed to open animation file: {0}", filename);
+  }
+
+  ozz::io::IArchive archive(&file);
+  if (!archive.TestTag<ozz::animation::Animation>()) {
+    Log.error("Failed to load animation from file: {0}", filename);
+  }
+
+  auto animation = ozz::animation::Animation{};
+  archive >> animation;
+
+  const auto key = animationKey.getKey();
+  animations.emplace(key, std::move(animation));
+
+  loadedAnimations.emplace(filename, key);
 
   return key;
 }

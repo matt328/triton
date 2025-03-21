@@ -35,7 +35,6 @@ public:
       -> tr::EntityType = 0;
   virtual auto createTerrain(const TerrainCreateInfo& createInfo) -> TerrainResult2& = 0;
   virtual auto createDefaultCamera() -> void = 0;
-  virtual auto createTestEntity(std::string_view name) -> void = 0;
   virtual auto removeEntity(tr::EntityType entity) -> void = 0;
 
   virtual auto triangulateChunk(tr::EntityType terrainId,

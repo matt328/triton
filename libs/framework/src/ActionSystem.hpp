@@ -1,8 +1,8 @@
 #pragma once
 
-#include "gp/action/IActionSystem.hpp"
-
-#include "tr/Inputs.hpp"
+#include "fx/Sources.hpp"
+#include "fx/IActionSystem.hpp"
+#include "fx/Inputs.hpp"
 
 namespace tr {
 class IEventBus;

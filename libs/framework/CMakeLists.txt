@@ -3,6 +3,10 @@ project("framework")
 set(framework_SRC
   src/FrameworkFactory.cxx
   src/FrameworkContextImpl.cxx
+  src/DefaultAssetService.cxx
+  src/DefaultEventBus.cxx
+  src/FixedGameLoop.cxx
+  src/GuiCallbackRegistrar.cxx
 )
 
 add_library(${PROJECT_NAME} STATIC ${framework_SRC})

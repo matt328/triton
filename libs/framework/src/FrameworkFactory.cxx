@@ -1,4 +1,5 @@
 #include "fx/FrameworkFactory.hpp"
+#include "DefaultAssetService.hpp"
 #include "fx/IGraphicsContext.hpp"
 #include "fx/IGameworldContext.hpp"
 #include "FixedGameLoop.hpp"
@@ -21,10 +22,13 @@ auto createFrameworkContext([[maybe_unused]] const FrameworkConfig& config)
     -> std::shared_ptr<IFrameworkContext> {
 
   const auto guiCallbackRegistrar = std::make_shared<GuiCallBackRegistrar>();
+  const auto eventBus = std::make_shared<DefaultEventBus>();
+  const auto assetService = std::make_shared<DefaultAssetService>();
 
   const auto injector =
-      di::make_injector(di::bind<IGameLoop>.to<FixedGameLoop>(),
-                        di::bind<IEventBus>.to<DefaultEventBus>(),
+      di::make_injector(di::bind<IEventBus>.to<>(eventBus),
+                        di::bind<IAssetService>.to<>(assetService),
+                        di::bind<IGameLoop>.to<FixedGameLoop>(),
                         di::bind<ITaskQueue>.to<TaskQueue>(),
                         di::bind<IEntityServiceProvider>.to<EntityServiceProvider>(),
                         di::bind<IGuiCallbackRegistrar>.to(guiCallbackRegistrar),
@@ -34,9 +38,7 @@ auto createFrameworkContext([[maybe_unused]] const FrameworkConfig& config)
 
   const auto frameworkContext = injector.create<std::shared_ptr<FrameworkContextImpl>>();
 
-  const auto eventBus = frameworkContext->getEventBus();
-
-  const auto gameworldContext = createGameworldContext(eventBus);
+  const auto gameworldContext = createGameworldContext(eventBus, assetService);
 
   return frameworkContext;
 }

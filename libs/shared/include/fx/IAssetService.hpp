@@ -22,6 +22,7 @@ public:
 
   virtual auto loadModel(std::string_view filename) -> as::Model = 0;
   virtual auto loadSkeleton(std::string_view filename) -> SkeletonHandle = 0;
+  virtual auto loadAnimation(std::string_view filename) -> AnimationHandle = 0;
 
   virtual auto getAnimation(AnimationHandle handle) -> const ozz::animation::Animation& = 0;
   virtual auto getSkeleton(SkeletonHandle handle) -> const ozz::animation::Skeleton& = 0;

@@ -5,15 +5,15 @@
 
 namespace tr {
 
-class IEntityServiceProvider {
+class IEntityServiceProxy {
 public:
-  IEntityServiceProvider() = default;
-  virtual ~IEntityServiceProvider() = default;
+  IEntityServiceProxy() = default;
+  virtual ~IEntityServiceProxy() = default;
 
-  IEntityServiceProvider(const IEntityServiceProvider&) = default;
-  IEntityServiceProvider(IEntityServiceProvider&&) = delete;
-  auto operator=(const IEntityServiceProvider&) -> IEntityServiceProvider& = default;
-  auto operator=(IEntityServiceProvider&&) -> IEntityServiceProvider& = delete;
+  IEntityServiceProxy(const IEntityServiceProxy&) = default;
+  IEntityServiceProxy(IEntityServiceProxy&&) = delete;
+  auto operator=(const IEntityServiceProxy&) -> IEntityServiceProxy& = default;
+  auto operator=(IEntityServiceProxy&&) -> IEntityServiceProxy& = delete;
 
   virtual auto removeEntity(tr::EntityType entityType) -> void = 0;
   virtual auto setTransform(tr::EntityType entityType, TransformData transformData) -> void = 0;

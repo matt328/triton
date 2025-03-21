@@ -1,14 +1,15 @@
 #include "DefaultGameplaySystem.hpp"
+
 #include "EntityService.hpp"
-#include "action/IActionSystem.hpp"
+#include "fx/IActionSystem.hpp"
 #include "as/Model.hpp"
 #include "fx/IEventBus.hpp"
+#include "fx/IResourceProxy.hpp"
 #include "systems/CameraSystem.hpp"
 #include "systems/RenderDataSystem.hpp"
 #include "systems/TransformSystem.hpp"
 #include "systems/AnimationSystem.hpp"
-#include "fx/IEventBus.hpp"
-#include "commands/CreateCamera.hpp"
+#include "fx/ITerrainSystemProxy.hpp"
 
 namespace tr {
 
@@ -17,15 +18,17 @@ constexpr auto DefaultNearClip = 0.1f;
 constexpr auto DefaultFarClip = 10000.f;
 constexpr auto DefaultPosition = glm::vec3{0.f, 7.f, 5.f};
 
-DefaultGameplaySystem::DefaultGameplaySystem(std::shared_ptr<IEventBus> newEventBus,
-                                             std::shared_ptr<IAssetService> newAssetService,
-                                             std::shared_ptr<IActionSystem> newActionSystem,
-                                             std::shared_ptr<CameraSystem> newCameraSystem,
-                                             std::shared_ptr<TransformSystem> newTransformSystem,
-                                             std::shared_ptr<AnimationSystem> newAnimationSystem,
-                                             std::shared_ptr<RenderDataSystem> newRenderDataSystem,
-                                             std::shared_ptr<EntityService> newEntityService,
-                                             std::shared_ptr<ITerrainSystem> newTerrainSystem)
+DefaultGameplaySystem::DefaultGameplaySystem(
+    std::shared_ptr<IEventBus> newEventBus,
+    std::shared_ptr<IAssetService> newAssetService,
+    std::shared_ptr<IActionSystem> newActionSystem,
+    std::shared_ptr<CameraSystem> newCameraSystem,
+    std::shared_ptr<TransformSystem> newTransformSystem,
+    std::shared_ptr<AnimationSystem> newAnimationSystem,
+    std::shared_ptr<RenderDataSystem> newRenderDataSystem,
+    std::shared_ptr<EntityService> newEntityService,
+    std::shared_ptr<ITerrainSystemProxy> newTerrainSystemProxy,
+    std::shared_ptr<IResourceProxy> newResourceProxy)
     : eventBus{std::move(newEventBus)},
       assetService{std::move(newAssetService)},
       actionSystem{std::move(newActionSystem)},
@@ -34,7 +37,8 @@ DefaultGameplaySystem::DefaultGameplaySystem(std::shared_ptr<IEventBus> newEvent
       animationSystem{std::move(newAnimationSystem)},
       renderDataSystem{std::move(newRenderDataSystem)},
       entityService{std::move(newEntityService)},
-      terrainSystem{std::move(newTerrainSystem)} {
+      terrainSystemProxy{std::move(newTerrainSystemProxy)},
+      resourceProxy{std::move(newResourceProxy)} {
 
   entityCreatedConnection = entityService->registerEntityCreated(
       [this](entt::registry& reg, entt::entity entity) { entityCreated(reg, entity); });
@@ -136,11 +140,11 @@ void DefaultGameplaySystem::setRenderDataTransferHandler(const RenderDataTransfe
 
 auto DefaultGameplaySystem::createStaticModelEntity(std::string filename,
                                                     std::string_view entityName,
-                                                    std::optional<Transform> initialTransform)
+                                                    std::optional<TransformData> initialTransform)
     -> tr::EntityType {
-  auto model = assetService->loadModel(filename);
+  const auto model = assetService->loadModel(filename);
 
-  // TODO(Matt): Create IResourceManagerProvider
+  auto modelData = resourceProxy->uploadModel(model);
 
   auto transform = Transform{.rotation = glm::zero<glm::vec3>(),
                              .position = glm::zero<glm::vec3>(),
@@ -155,16 +159,18 @@ auto DefaultGameplaySystem::createStaticModelEntity(std::string filename,
 }
 
 auto DefaultGameplaySystem::createAnimatedModelEntity(const AnimatedModelData& modelData,
-                                                      std::optional<Transform> initialTransform)
+                                                      std::optional<TransformData> initialTransform)
     -> tr::EntityType {
 
-  auto loadedModelData = assetManager->loadModel(modelData.modelFilename);
+  const auto model = assetService->loadModel(modelData.modelFilename);
+
+  auto loadedModelData = resourceProxy->uploadModel(model);
 
   assert(loadedModelData.skinData.has_value());
 
   loadedModelData.animationData = std::make_optional(
-      AnimationData{.skeletonHandle = assetManager->loadSkeleton(modelData.skeletonFilename),
-                    .animationHandle = assetManager->loadAnimation(modelData.animationFilename)});
+      AnimationData{.skeletonHandle = assetService->loadSkeleton(modelData.skeletonFilename),
+                    .animationHandle = assetService->loadAnimation(modelData.animationFilename)});
 
   auto transform = Transform{.rotation = glm::zero<glm::vec3>(),
                              .position = glm::zero<glm::vec3>(),
@@ -181,7 +187,7 @@ auto DefaultGameplaySystem::createAnimatedModelEntity(const AnimatedModelData& m
 }
 
 auto DefaultGameplaySystem::createTerrain(const TerrainCreateInfo& createInfo) -> TerrainResult2& {
-  auto& terrainResult = terrainSystem->registerTerrain(createInfo);
+  auto& terrainResult = terrainSystemProxy->registerTerrain(createInfo);
   entityService->createTerrain(terrainResult);
   return terrainResult;
 }
@@ -196,19 +202,13 @@ auto DefaultGameplaySystem::createDefaultCamera() -> void {
   entityService->createCamera(cameraInfo, "Default Camera");
 }
 
-auto DefaultGameplaySystem::createTestEntity([[maybe_unused]] std::string_view name) -> void {
-  Log.trace("Creating test entity: {}", name.data());
-  auto modelData = assetManager->createCube();
-  entityService->createStaticEntity(std::vector{modelData.meshData}, Transform{}, name);
-}
-
 auto DefaultGameplaySystem::removeEntity(tr::EntityType entity) -> void {
   entityService->removeEntity(entity);
 }
 
 auto DefaultGameplaySystem::entityCreated([[maybe_unused]] entt::registry& reg,
                                           entt::entity entity) const -> void {
-  eventBus->emit(EntityCreated{entity});
+  eventBus->emit(EntityCreated{static_cast<tr::EntityType>(entity)});
 }
 
 // This method is just debug. Eventually push this down into the TerrainSystem
@@ -217,7 +217,7 @@ auto DefaultGameplaySystem::triangulateChunk(tr::EntityType terrainId,
                                              glm::ivec3 cellPosition) -> void {
   const auto terrainHandle = entityService->getTerrainHandle(terrainId);
   const auto chunkHandle = entityService->getChunkHandle(chunkId);
-  terrainSystem->triangulateBlock(terrainHandle, chunkHandle, chunkId, cellPosition);
+  terrainSystemProxy->triangulateBlock(terrainHandle, chunkHandle, chunkId, cellPosition);
 }
 
 }
