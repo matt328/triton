@@ -1,27 +1,28 @@
 #pragma once
 
-#include "fx/IGameworldContext.hpp"
+#include "fx/IGameWorldContext.hpp"
 
 namespace tr {
 
 class IGameplaySystem;
 
-class GameworldContextImpl : public IGameworldContext {
+class GameWorldContextImpl : public IGameWorldContext {
 public:
-  explicit GameworldContextImpl(std::shared_ptr<IGameplaySystem> newGameplaySystem);
-  ~GameworldContextImpl() override = default;
+  explicit GameWorldContextImpl(std::shared_ptr<IGameWorldSystem> newGameWorldSystem,
+                                std::shared_ptr<IGameObjectProxy> newGameObjectProxy);
+  ~GameWorldContextImpl() override = default;
 
-  GameworldContextImpl(const GameworldContextImpl&) = default;
-  GameworldContextImpl(GameworldContextImpl&&) = delete;
-  auto operator=(const GameworldContextImpl&) -> GameworldContextImpl& = default;
-  auto operator=(GameworldContextImpl&&) -> GameworldContextImpl& = delete;
+  GameWorldContextImpl(const GameWorldContextImpl&) = default;
+  GameWorldContextImpl(GameWorldContextImpl&&) = delete;
+  auto operator=(const GameWorldContextImpl&) -> GameWorldContextImpl& = default;
+  auto operator=(GameWorldContextImpl&&) -> GameWorldContextImpl& = delete;
 
-  auto getGameplaySystem() -> std::shared_ptr<IGameplaySystem> override;
-  auto getEntityServiceProvider() -> std::shared_ptr<IEntityServiceProvider> override;
+  auto getGameWorldSystem() -> std::shared_ptr<IGameWorldSystem> override;
+  auto getGameObjectProxy() -> std::shared_ptr<IGameObjectProxy> override;
 
 private:
-  std::shared_ptr<IEntityServiceProvider> entityServiceProvider;
-  std::shared_ptr<IGameplaySystem> gameplaySystem;
+  std::shared_ptr<IGameWorldSystem> gameWorldSystem;
+  std::shared_ptr<IGameObjectProxy> gameObjectProxy;
 };
 
 }

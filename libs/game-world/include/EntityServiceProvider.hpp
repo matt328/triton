@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fx/IEntityServiceProvider.hpp"
+#include "fx/IGameObjectProxy.hpp"
 
 #include "cm/EntitySystemTypes.hpp"
 #include "cm/TransformData.hpp"
@@ -9,7 +9,7 @@ namespace tr {
 
 class EntityService;
 
-class EntityServiceProvider : public IEntityServiceProvider {
+class EntityServiceProvider : public IGameObjectProxy {
 public:
   explicit EntityServiceProvider(std::shared_ptr<EntityService> newEntityService);
   ~EntityServiceProvider() override = default;

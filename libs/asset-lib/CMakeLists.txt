@@ -21,10 +21,11 @@ target_compile_definitions(${PROJECT_NAME}
 
 target_precompile_headers(${PROJECT_NAME}
   PRIVATE
-  <filesystem>
   <unordered_map>
   <vector>
   PUBLIC
+  <filesystem>
+  <fstream>
   <glm/gtc/matrix_transform.hpp>
   <glm/gtc/type_ptr.hpp>
   <glm/gtx/matrix_decompose.hpp>

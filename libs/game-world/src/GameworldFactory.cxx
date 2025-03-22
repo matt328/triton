@@ -1,5 +1,5 @@
-#include "gw/GameworldFactory.hpp"
-#include "GameworldContextImpl.hpp"
+#include "GameWorldFactory.hpp"
+#include "GameWorldContextImpl.hpp"
 #include "DefaultGameplaySystem.hpp"
 
 #include <di.hpp>
@@ -8,14 +8,15 @@ namespace di = boost::di;
 
 namespace tr {
 
-auto createGameworldContext(const std::shared_ptr<IEventBus>& eventBus,
+auto createGameWorldContext(const std::shared_ptr<IEventBus>& eventBus,
                             const std::shared_ptr<IAssetService>& assetService)
-    -> std::shared_ptr<IGameworldContext> {
-  const auto injector = di::make_injector(di::bind<IGameplaySystem>.to<DefaultGameplaySystem>(),
+    -> std::shared_ptr<IGameWorldContext> {
+  const auto injector = di::make_injector(di::bind<IGameWorldSystem>.to<DefaultGameplaySystem>(),
                                           di::bind<IAssetService>.to<>(assetService),
-                                          di::bind<IEventBus>.to<>(eventBus));
+                                          di::bind<IEventBus>.to<>(eventBus),
+                                          di::bind<IActionSystem>.to<>(ActionSystem));
 
-  return injector.create<std::shared_ptr<GameworldContextImpl>>();
+  return injector.create<std::shared_ptr<GameWorldContextImpl>>();
 }
 
 }

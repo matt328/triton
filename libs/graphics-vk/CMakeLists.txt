@@ -34,9 +34,8 @@ target_precompile_headers(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
   PUBLIC
   BoostDI
-  glm
-  PRIVATE
   shared
+  PRIVATE
 )
 
 target_include_directories(${PROJECT_NAME}

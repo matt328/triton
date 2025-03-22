@@ -2,8 +2,6 @@
 
 #include "fx/ITaskQueue.hpp"
 
-#include <queue> // This should come from the precompiled headers but it isn't probably because the build is broke rn
-
 namespace tr {
 
 constexpr size_t DefaultMaxQueueSize = 2;
@@ -33,10 +31,9 @@ public:
   auto operator=(TaskQueue&&) -> TaskQueue& = delete;
 
 protected:
-  auto enqueueImpl(std::function<void()> task,
-                   std::function<void()> onComplete) -> std::future<void> override {
+  auto enqueueImpl(std::function<void()> task, std::function<void()> onComplete) -> void override {
     auto packagedTask = std::make_shared<std::packaged_task<void()>>(std::move(task));
-    std::future<void> result = packagedTask->get_future();
+    [[maybe_unused]] std::future<void> result = packagedTask->get_future();
 
     {
       std::unique_lock<std::mutex> lock(mtx);
@@ -54,7 +51,7 @@ protected:
     }
 
     cv.notify_one();
-    return result;
+    // return result;
   }
 
 private:

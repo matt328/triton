@@ -2,12 +2,12 @@
 
 namespace tr {
 
-class IGameworldContext;
+class IGameWorldContext;
 class IEventBus;
 class IAssetService;
 
 auto createGameworldContext(const std::shared_ptr<IEventBus>& eventBus,
                             const std::shared_ptr<IAssetService>& assetService)
-    -> std::shared_ptr<IGameworldContext>;
+    -> std::shared_ptr<IGameWorldContext>;
 
 }

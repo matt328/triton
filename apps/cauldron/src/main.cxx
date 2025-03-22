@@ -1,10 +1,10 @@
 #include "fx/IFrameworkContext.hpp"
 #include "fx/FrameworkFactory.hpp"
 #include "fx/IGameLoop.hpp"
+#include "fx/IGameObjectProxy.hpp"
 #include "fx/IGuiCallbackRegistrar.hpp"
 #include "fx/ITaskQueue.hpp"
 #include "fx/IEventBus.hpp"
-#include "fx/IEntityServiceProvider.hpp"
 #include "fx/IGameplaySystem.hpp"
 
 #include "Application.hpp"
@@ -47,26 +47,22 @@ auto main() -> int {
         .windowTitle = windowTitle.str(),
     };
 
-    auto frameworkContext = tr::createFrameworkContext(frameworkConfig);
+    const auto fc = tr::createFrameworkContext(frameworkConfig);
 
     const auto injector = di::make_injector(
         di::bind<std::filesystem::path>.to<>(propertiesPath),
-        di::bind<tr::IGameLoop>.to([&frameworkContext] { return frameworkContext->getGameLoop(); }),
-        di::bind<tr::IGuiCallbackRegistrar>.to(
-            [&frameworkContext] { return frameworkContext->getGuiCallbackRegistrar(); }),
-        di::bind<tr::ITaskQueue>.to(
-            [&frameworkContext] { return frameworkContext->getTaskQueue(); }),
-        di::bind<tr::IEventBus>.to([&frameworkContext] { return frameworkContext->getEventBus(); }),
-        di::bind<tr::IEntityServiceProvider>.to(
-            [&frameworkContext] { return frameworkContext->getEntityServiceProvider(); }),
-        di::bind<tr::IGameplaySystem>.to(
-            [&frameworkContext] { return frameworkContext->getGameplaySystem(); }));
+        di::bind<tr::IGameLoop>.to([&fc] { return fc->getGameLoop(); }),
+        di::bind<tr::IGuiCallbackRegistrar>.to([&fc] { return fc->getGuiCallbackRegistrar(); }),
+        di::bind<tr::ITaskQueue>.to([&fc] { return fc->getTaskQueue(); }),
+        di::bind<tr::IEventBus>.to([&fc] { return fc->getEventBus(); }),
+        di::bind<tr::IGameObjectProxy>.to([&fc] { return fc->getGameObjectProxy(); }),
+        di::bind<tr::IGameplaySystem>.to([&fc] { return fc->getGameWorldSystem(); }));
 
-    auto application = injector.create<std::shared_ptr<ed::Application>>();
+    auto app = injector.create<std::shared_ptr<ed::Application>>();
 
     Log.info("Initialized");
 
-    application->run();
+    app->run();
 
   } catch (const std::exception& e) {
     Log.critical(e.what());
