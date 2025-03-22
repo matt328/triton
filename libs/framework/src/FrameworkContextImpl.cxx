@@ -7,16 +7,20 @@ FrameworkContextImpl::FrameworkContextImpl(
     std::shared_ptr<IGuiCallbackRegistrar> newGuiCallbackRegistrar,
     std::shared_ptr<ITaskQueue> newTaskQueue,
     std::shared_ptr<IEventBus> newEventBus,
-    std::shared_ptr<IEntityServiceProvider> newEntityServiceProvider,
-    std::shared_ptr<IGameplaySystem> newGameplaySystem,
-    std::shared_ptr<IAssetService> newAssetService)
+    std::shared_ptr<IGameObjectProxy> newGameObjectProxy,
+    std::shared_ptr<IGameWorldSystem> newGameWorldSystem,
+    std::shared_ptr<IAssetService> newAssetService,
+    std::shared_ptr<IGameWorldContext> newGameWorldContext,
+    std::shared_ptr<IGraphicsContext> newGraphicsContext)
     : gameLoop{std::move(newGameLoop)},
       guiCallbackRegistrar{std::move(newGuiCallbackRegistrar)},
       taskQueue{std::move(newTaskQueue)},
       eventBus{std::move(newEventBus)},
-      entityServiceProvider{std::move(newEntityServiceProvider)},
-      gameplaySystem{std::move(newGameplaySystem)},
-      assetService{std::move(newAssetService)} {
+      gameObjectProxy{std::move(newGameObjectProxy)},
+      gameWorldSystem{std::move(newGameWorldSystem)},
+      assetService{std::move(newAssetService)},
+      gameWorldContext{std::move(newGameWorldContext)},
+      graphicsContext{std::move(newGraphicsContext)} {
 }
 
 auto FrameworkContextImpl::getGameLoop() -> std::shared_ptr<IGameLoop> {
@@ -35,12 +39,12 @@ auto FrameworkContextImpl::getEventBus() -> std::shared_ptr<IEventBus> {
   return eventBus;
 }
 
-auto FrameworkContextImpl::getEntityServiceProvider() -> std::shared_ptr<IEntityServiceProvider> {
-  return entityServiceProvider;
+auto FrameworkContextImpl::getGameObjectProxy() -> std::shared_ptr<IGameObjectProxy> {
+  return gameObjectProxy;
 }
 
-auto FrameworkContextImpl::getGameplaySystem() -> std::shared_ptr<IGameplaySystem> {
-  return gameplaySystem;
+auto FrameworkContextImpl::getGameWorldSystem() -> std::shared_ptr<IGameWorldSystem> {
+  return gameWorldSystem;
 }
 
 auto FrameworkContextImpl::getAssetService() -> std::shared_ptr<IAssetService> {

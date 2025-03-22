@@ -8,9 +8,10 @@ class IGraphicsContext;
 class IGuiCallbackRegistrar;
 class ITaskQueue;
 class IEventBus;
-class IEntityServiceProvider;
-class IGameplaySystem;
+class IGameObjectProxy;
+class IGameWorldSystem;
 class IAssetService;
+class IGameWorldContext;
 
 class IFrameworkContext {
 public:
@@ -26,8 +27,8 @@ public:
   virtual auto getGuiCallbackRegistrar() -> std::shared_ptr<IGuiCallbackRegistrar> = 0;
   virtual auto getTaskQueue() -> std::shared_ptr<ITaskQueue> = 0;
   virtual auto getEventBus() -> std::shared_ptr<IEventBus> = 0;
-  virtual auto getEntityServiceProvider() -> std::shared_ptr<IEntityServiceProvider> = 0;
-  virtual auto getGameplaySystem() -> std::shared_ptr<IGameplaySystem> = 0;
+  virtual auto getGameObjectProxy() -> std::shared_ptr<IGameObjectProxy> = 0;
+  virtual auto getGameWorldSystem() -> std::shared_ptr<IGameWorldSystem> = 0;
   virtual auto getAssetService() -> std::shared_ptr<IAssetService> = 0;
 };
 }

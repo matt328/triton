@@ -2,21 +2,20 @@
 
 namespace tr {
 
-class IGameplaySystem;
-class IEntityServiceProvider;
+class IGameWorldSystem;
+class IGameObjectProxy;
 
-class IGameworldContext {
+class IGameWorldContext {
 public:
-  IGameworldContext() = default;
-  virtual ~IGameworldContext() = default;
+  IGameWorldContext() = default;
+  virtual ~IGameWorldContext() = default;
 
-  IGameworldContext(const IGameworldContext&) = default;
-  IGameworldContext(IGameworldContext&&) = delete;
-  auto operator=(const IGameworldContext&) -> IGameworldContext& = default;
-  auto operator=(IGameworldContext&&) -> IGameworldContext& = delete;
+  IGameWorldContext(const IGameWorldContext&) = default;
+  IGameWorldContext(IGameWorldContext&&) = delete;
+  auto operator=(const IGameWorldContext&) -> IGameWorldContext& = default;
+  auto operator=(IGameWorldContext&&) -> IGameWorldContext& = delete;
 
-  virtual auto getGameplaySystem() -> std::shared_ptr<IGameplaySystem> = 0;
-  virtual auto getEntityServiceProvider() -> std::shared_ptr<IEntityServiceProvider> = 0;
+  virtual auto getGameWorldSystem() -> std::shared_ptr<IGameWorldSystem> = 0;
+  virtual auto getGameObjectProxy() -> std::shared_ptr<IGameObjectProxy> = 0;
 };
-
 }

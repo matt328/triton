@@ -34,6 +34,11 @@ target_compile_definitions(${PROJECT_NAME}
 target_precompile_headers(${PROJECT_NAME}
   PUBLIC
   <glm/glm.hpp>
+  <Logger2.hpp>
+  <cereal/archives/portable_binary.hpp>
+  <cereal/archives/json.hpp>
+  <tracy/Tracy.hpp>
+  <tracy/TracyC.h>
   <string>
   <queue>
   PRIVATE
@@ -42,12 +47,16 @@ target_precompile_headers(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
   PUBLIC
+  asset-lib
   BoostDI
+  cereal::cereal
   glm
+  Tracy::TracyClient
   PRIVATE
-  shared
   game-world
   graphics-vk
+  shared
+  util-lib
 )
 
 target_include_directories(${PROJECT_NAME}

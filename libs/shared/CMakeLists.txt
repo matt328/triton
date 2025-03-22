@@ -1,61 +1,16 @@
 project("shared")
 
-set(shared_SRC
-  src/AssetManager.cxx
-)
-
-add_library(${PROJECT_NAME} STATIC ${shared_SRC})
-
-target_compile_options(${PROJECT_NAME}
-  PRIVATE
-  $<$<CXX_COMPILER_ID:Clang>:-g -Wall -Wextra -pedantic -Werror>
-)
-
-IF(WIN32)
-  target_compile_definitions(${PROJECT_NAME}
-    PRIVATE
-    -D_CRT_SECURE_NO_WARNINGS
-  )
-ENDIF(WIN32)
-
-target_compile_definitions(${PROJECT_NAME}
-  PRIVATE
-  GLM_FORCE_RADIANS
-  GLM_FORCE_DEPTH_ZERO_TO_ONE
-  GLM_ENABLE_EXPERIMENTAL
-  NOMINMAX
-)
+add_library(${PROJECT_NAME} INTERFACE)
 
 target_precompile_headers(${PROJECT_NAME}
-  PUBLIC
-  <bitset>
-  <cereal/archives/json.hpp>
-  <cereal/archives/portable_binary.hpp>
-  <cstddef>
-  <filesystem>
-  <fstream>
-  <format>
+  INTERFACE
+  <algorithm>
+  <fmt/format.h>
   <functional>
   <future>
   <glm/glm.hpp>
-  <glm/gtx/string_cast.hpp>
-  <glm/detail/qualifier.hpp>
-  <map>
-  <mutex>
-  <random>
-  <ranges>
-  <set>
-  <shared_mutex>
-  <stb_image.h>
-  <thread>
-  <tracy/Tracy.hpp>
-  <tracy/TracyC.h>
-  <variant>
-  <ozz/animation/runtime/sampling_job.h>
-  <ozz/base/containers/vector.h>
-  PRIVATE
-  <ctime>
-  <cstdint>
+  <memory>
+  <optional>
   <ozz/animation/runtime/animation.h>
   <ozz/animation/runtime/local_to_model_job.h>
   <ozz/animation/runtime/skeleton.h>
@@ -65,24 +20,21 @@ target_precompile_headers(${PROJECT_NAME}
   <ozz/base/span.h>
   <ozz/base/io/archive.h>
   <ozz/base/io/stream.h>
-  <queue>
-  <unordered_map>
-  <vector>
+  <random>
+  <string>
+  <tuple>
+  <typeindex>
+  <variant>
 )
 
 target_link_libraries(${PROJECT_NAME}
-  PUBLIC
-  asset-lib
+  INTERFACE
   glm
-  Tracy::TracyClient
-  util-lib
-  PRIVATE
-  BoostDI
+  ozz_animation
+  fmt
 )
 
 target_include_directories(${PROJECT_NAME}
-  PUBLIC
+  INTERFACE
   include
-  PRIVATE
-  src
 )

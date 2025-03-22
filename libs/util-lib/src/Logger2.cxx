@@ -1,7 +1,4 @@
 #include "Logger2.hpp"
-#include <spdlog/async.h>
-#include <spdlog/async_logger.h>
-#include <spdlog/sinks/basic_file_sink.h>
 
 spdlog::logger Log("basic");
 
@@ -25,8 +22,4 @@ void initLogger([[maybe_unused]] spdlog::level::level_enum debugLevel,
 #else
   Log.set_level(releaseLevel);
 #endif
-}
-
-void LogTest(std::source_location location) {
-  Log.debug("{}:{} log message here", location.file_name(), location.line());
 }

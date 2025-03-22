@@ -2,7 +2,6 @@
 
 #include "as/Model.hpp"
 #include "cm/SharedExceptions.hpp"
-#include <ozz/animation/runtime/animation.h>
 
 namespace tr {
 
