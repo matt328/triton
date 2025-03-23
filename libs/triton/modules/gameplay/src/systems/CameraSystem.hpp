@@ -2,7 +2,7 @@
 
 #include "gp/EntityService.hpp"
 #include "gp/components/Camera.hpp"
-#include "tr/IEventBus.hpp"
+#include "fx/IEventBus.hpp"
 
 namespace tr {
 

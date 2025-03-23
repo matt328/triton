@@ -2,12 +2,12 @@
 
 #include "cm/GpuCameraData.hpp"
 #include "cm/RenderData.hpp"
-#include "gp/components/Renderable.hpp"
-#include "gp/components/Camera.hpp"
-#include "gp/components/Resources.hpp"
-#include "gp/components/Transform.hpp"
-#include "gp/components/Animation.hpp"
-#include "gp/components/TerrainComponent.hpp"
+#include "components/Renderable.hpp"
+#include "components/Camera.hpp"
+#include "components/Resources.hpp"
+#include "components/Transform.hpp"
+#include "components/Animation.hpp"
+#include "components/TerrainComponent.hpp"
 
 namespace tr {
 

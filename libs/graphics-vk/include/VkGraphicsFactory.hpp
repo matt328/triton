@@ -4,8 +4,10 @@ namespace tr {
 
 class IGraphicsContext;
 class IGuiCallbackRegistrar;
+class IEventBus;
 
-auto createVkGraphicsContext(std::shared_ptr<IGuiCallbackRegistrar> newGuiCallbackRegistrar)
+auto createVkGraphicsContext(std::shared_ptr<IGuiCallbackRegistrar> newGuiCallbackRegistrar,
+                             const std::shared_ptr<IEventBus>& newEventBus)
     -> std::shared_ptr<IGraphicsContext>;
 
 }

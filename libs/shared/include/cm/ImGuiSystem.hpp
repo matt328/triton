@@ -1,10 +1,10 @@
 #pragma once
 
-#include "tr/IGuiSystem.hpp"
+#include "IGuiSystem.hpp"
 
 #include "gfx/QueueTypes.hpp"
 #include "vk/core/Device.hpp"
-#include "vk/VkResourceManager.hpp"
+#include "VkResourceManager.hpp"
 
 namespace tr {
 class Swapchain;
@@ -33,7 +33,6 @@ public:
   auto operator=(const ImGuiSystem&) -> ImGuiSystem& = delete;
   auto operator=(ImGuiSystem&&) -> ImGuiSystem& = delete;
 
-  auto setRenderCallback(std::function<void(void)> newRenderFn) -> void override;
   auto render(vk::raii::CommandBuffer& commandBuffer,
               const vk::ImageView& swapchainImageView,
               const vk::Extent2D& swapchainExtent) -> void override;

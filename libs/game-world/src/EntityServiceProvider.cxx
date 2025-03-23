@@ -12,7 +12,11 @@ auto EntityServiceProvider::removeEntity(tr::EntityType entityType) -> void {
 
 auto EntityServiceProvider::setTransform(tr::EntityType entityType,
                                          TransformData transformData) -> void {
-  entityService->setTransform(entityType, transformData);
+  const auto transform = Transform{
+      .rotation = transformData.rotation,
+      .position = transformData.position,
+  };
+  entityService->setTransform(static_cast<entt::entity>(entityType), transform);
 }
 
 }

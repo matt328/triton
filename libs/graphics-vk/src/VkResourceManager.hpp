@@ -1,7 +1,7 @@
 #pragma once
 #include "vk/ArenaGeometryBuffer.hpp"
 #include "vk/core/Device.hpp"
-#include "tr/IDebugManager.hpp"
+#include "gfx/IDebugManager.hpp"
 #include "ImmediateTransferContext.hpp"
 #include "cm/Handles.hpp"
 #include "cm/Rando.hpp"
@@ -11,7 +11,7 @@
 #include "as/Model.hpp"
 
 #include "vk/ResourceManagerHandles.hpp"
-#include "TextureData.hpp"
+#include "vk/TextureData.hpp"
 #include "vk/sb/DSLayoutManager.hpp"
 #include "vk/sb/IShaderBindingFactory.hpp"
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fx/IGameplaySystem.hpp"
+#include "fx/IGameWorldSystem.hpp"
 #include "fx/Events.hpp"
 
 namespace tr {
@@ -16,7 +16,7 @@ class IEventBus;
 class EntityService;
 class IResourceProxy;
 
-class DefaultGameplaySystem : public IGameplaySystem {
+class DefaultGameplaySystem : public IGameWorldSystem {
 public:
   DefaultGameplaySystem(std::shared_ptr<IEventBus> newEventBus,
                         std::shared_ptr<IAssetService> newAssetService,

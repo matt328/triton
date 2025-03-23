@@ -1,9 +1,9 @@
 #include "DefaultContext.hpp"
 
 #include "cm/TaskQueue.hpp"
-#include "tr/IGuiSystem.hpp"
-#include "tr/IWindow.hpp"
-#include "tr/IEventBus.hpp"
+#include "IGuiSystem.hpp"
+#include "gfx/IWindow.hpp"
+#include "fx/IEventBus.hpp"
 
 #include "gfx/IRenderContext.hpp"
 #include "tr/IGameplaySystem.hpp"

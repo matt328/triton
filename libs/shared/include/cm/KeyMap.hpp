@@ -1,6 +1,6 @@
 #pragma once
 
-#include "tr/Inputs.hpp"
+#include "fx/Inputs.hpp"
 
 namespace tr {
 inline const static std::unordered_map<int, tr::Key> keyMap = {

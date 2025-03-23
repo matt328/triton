@@ -2,13 +2,13 @@
 
 namespace tr {
 
-enum class ButtonState : uint32_t {
+enum class ButtonState : uint8_t {
   None = 0,
   Pressed = 1,
   Released = 2
 };
 
-enum class GamepadInput : uint32_t {
+enum class GamepadInput : uint8_t {
   None = 0,
   Button_X,
   Button_Y,
@@ -19,7 +19,7 @@ enum class GamepadInput : uint32_t {
   // TODO(matt) The rest of Gamepad Inputs
 };
 
-enum class MouseInput {
+enum class MouseInput : uint8_t {
   MOVE_X,
   MOVE_Y,
   CLICK_LEFT,
@@ -28,7 +28,7 @@ enum class MouseInput {
   SCROLL_X,
   SCROLL_Y
 };
-enum class Key : uint32_t {
+enum class Key : uint8_t {
   None = 0,
 
   Comma,

@@ -1,14 +1,23 @@
 #include "fx/IFrameworkContext.hpp"
 #include "fx/FrameworkFactory.hpp"
 #include "fx/IGameLoop.hpp"
-#include "fx/IGameObjectProxy.hpp"
+#include "fx/ext/IGameObjectProxy.hpp"
 #include "fx/IGuiCallbackRegistrar.hpp"
 #include "fx/ITaskQueue.hpp"
 #include "fx/IEventBus.hpp"
-#include "fx/IGameplaySystem.hpp"
+#include "fx/IGameWorldSystem.hpp"
 
 #include "Application.hpp"
+
+// Following aren't referenced in this file, but need to be here for BoostDI to work
 #include "Properties.hpp"
+#include "ui/Manager.hpp"
+#include "ui/components/Menu.hpp"
+#include "data/DataFacade.hpp"
+#include "ui/components/DialogManager.hpp"
+#include "ui/components/AssetViewer.hpp"
+#include "ui/components/EntityEditor.hpp"
+#include "ui/components/AssetTool.hpp"
 
 #include "config.h"
 
@@ -56,7 +65,7 @@ auto main() -> int {
         di::bind<tr::ITaskQueue>.to([&fc] { return fc->getTaskQueue(); }),
         di::bind<tr::IEventBus>.to([&fc] { return fc->getEventBus(); }),
         di::bind<tr::IGameObjectProxy>.to([&fc] { return fc->getGameObjectProxy(); }),
-        di::bind<tr::IGameplaySystem>.to([&fc] { return fc->getGameWorldSystem(); }));
+        di::bind<tr::IGameWorldSystem>.to([&fc] { return fc->getGameWorldSystem(); }));
 
     auto app = injector.create<std::shared_ptr<ed::Application>>();
 

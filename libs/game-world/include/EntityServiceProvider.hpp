@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fx/IGameObjectProxy.hpp"
+#include "fx/ext/IGameObjectProxy.hpp"
 
 #include "cm/EntitySystemTypes.hpp"
 #include "cm/TransformData.hpp"

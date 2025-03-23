@@ -7,7 +7,7 @@ namespace tr {
 struct TerrainComponent {
   std::string name;
   TerrainHandle handle;
-  std::vector<tr::EntityType> chunkEntityIds;
+  std::vector<entt::entity> chunkEntityIds;
 };
 
 }

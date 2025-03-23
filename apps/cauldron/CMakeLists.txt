@@ -95,13 +95,11 @@ endif()
 target_link_libraries(${PROJECT_NAME}
   PRIVATE
   framework
-  shared
   BoostDI
   glfw
   cereal::cereal
   platform_folders
   spdlog::spdlog_header_only
-  util-lib
   imgui_custom
   Vulkan::Vulkan
 )

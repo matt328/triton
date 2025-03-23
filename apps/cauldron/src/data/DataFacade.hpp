@@ -4,7 +4,7 @@
 #include "DataStore.hpp"
 
 namespace tr {
-class IGameplaySystem;
+class IGameWorldSystem;
 class ITaskQueue;
 }
 
@@ -12,7 +12,7 @@ namespace ed {
 
 class DataFacade {
 public:
-  DataFacade(std::shared_ptr<tr::IGameplaySystem> newGameplaySystem,
+  DataFacade(std::shared_ptr<tr::IGameWorldSystem> newGameWorldSystem,
              std::shared_ptr<tr::ITaskQueue> newTaskQueue);
   ~DataFacade();
 
@@ -96,7 +96,7 @@ public:
   }
 
 private:
-  std::shared_ptr<tr::IGameplaySystem> gameplaySystem;
+  std::shared_ptr<tr::IGameWorldSystem> gameWorldSystem;
   std::shared_ptr<tr::ITaskQueue> taskQueue;
 
   bool unsaved{};

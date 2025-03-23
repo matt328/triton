@@ -1,13 +1,14 @@
-#include "gp/EntityService.hpp"
-#include "gp/components/TerrainComponent.hpp"
-#include "gp/components/EditorInfo.hpp"
-#include "gp/components/Resources.hpp"
-#include "gp/components/TerrainChunk.hpp"
+#include "EntityService.hpp"
+#include "components/TerrainComponent.hpp"
+#include "components/EditorInfo.hpp"
+#include "components/Resources.hpp"
+#include "components/TerrainChunk.hpp"
+#include "fx/IAssetService.hpp"
 
 namespace tr {
 
-EntityService::EntityService(std::shared_ptr<AssetManager> newAssetManager)
-    : assetManager{std::move(newAssetManager)} {
+EntityService::EntityService(std::shared_ptr<IAssetService> newAssetService)
+    : assetService{std::move(newAssetService)} {
   registry = std::make_unique<entt::registry>();
 }
 
@@ -117,10 +118,10 @@ auto EntityService::updateWindowDimensions(WindowDimensions windowDimensions) ->
 
 auto EntityService::createStaticEntity(std::vector<MeshData> meshData,
                                        Transform transform,
-                                       std::string_view name) -> tr::EntityType {
+                                       std::string_view name) -> EntityId {
   std::unique_lock<SharedLockableBase(std::shared_mutex)> lock(registryMutex);
   LockMark(registryMutex);
-  const auto entity = registry->create();
+  auto entity = registry->create();
   registry->emplace<Renderable>(entity, meshData);
   registry->emplace<Transform>(entity, transform);
   registry->emplace<EditorInfo>(entity, name.data());
@@ -129,9 +130,9 @@ auto EntityService::createStaticEntity(std::vector<MeshData> meshData,
 
 auto EntityService::createDynamicEntity(ModelData modelData,
                                         Transform transform,
-                                        std::string_view name) -> tr::EntityType {
+                                        std::string_view name) -> EntityId {
 
-  const auto& skeleton = assetManager->getSkeleton(modelData.animationData->skeletonHandle);
+  const auto& skeleton = assetService->getSkeleton(modelData.animationData->skeletonHandle);
 
   std::unique_lock<SharedLockableBase(std::shared_mutex)> lock(registryMutex);
   LockMark(registryMutex);
@@ -151,12 +152,12 @@ auto EntityService::createDynamicEntity(ModelData modelData,
   return entity;
 }
 
-auto EntityService::getTerrainHandle(tr::EntityType terrainId) -> TerrainHandle {
+auto EntityService::getTerrainHandle(EntityId terrainId) -> TerrainHandle {
   const auto terrainComponent = registry->get<TerrainComponent>(terrainId);
   return terrainComponent.handle;
 }
 
-auto EntityService::getChunkHandle(tr::EntityType chunkId) -> ChunkHandle {
+auto EntityService::getChunkHandle(EntityId chunkId) -> ChunkHandle {
   const auto chunkComponent = registry->get<ChunkComponent>(chunkId);
   return chunkComponent.handle;
 }
@@ -165,12 +166,12 @@ auto EntityService::createTerrain(TerrainResult2& terrainResult) -> void {
   std::unique_lock<SharedLockableBase(std::shared_mutex)> lock(registryMutex);
   LockMark(registryMutex);
 
-  auto chunkEntityIds = std::vector<tr::EntityType>{};
+  auto chunkEntityIds = std::vector<entt::entity>{};
 
   // Create an entity for each chunk
   for (auto& chunk : terrainResult.chunks) {
     const auto entity = registry->create();
-    chunk.entityId = entity;
+    chunk.entityId = static_cast<uint64_t>(entity);
     chunkEntityIds.push_back(entity);
     const auto chunkName =
         fmt::format("Chunk({}, {}, {})", chunk.location.x, chunk.location.y, chunk.location.z);
@@ -179,7 +180,7 @@ auto EntityService::createTerrain(TerrainResult2& terrainResult) -> void {
   }
 
   const auto entity = registry->create();
-  terrainResult.entityId = entity;
+  terrainResult.entityId = static_cast<uint64_t>(entity);
   registry->emplace<TerrainComponent>(entity,
                                       terrainResult.name,
                                       terrainResult.terrainHandle,
@@ -211,7 +212,7 @@ auto EntityService::createCamera(CameraInfo cameraInfo,
 }
 
 auto EntityService::forEachEditorInfo(
-    const std::function<void(tr::EntityType entity, EditorInfo& editorInfo)>& fn) -> void {
+    const std::function<void(EntityId entity, EditorInfo& editorInfo)>& fn) -> void {
 
   std::shared_lock<SharedLockableBase(std::shared_mutex)> lock(registryMutex);
   LockMark(registryMutex);
@@ -225,10 +226,10 @@ auto EntityService::forEachEditorInfo(
 auto EntityService::removeEntity(EntityType entity) -> void {
   std::unique_lock<SharedLockableBase(std::shared_mutex)> lock(registryMutex);
   LockMark(registryMutex);
-  registry->destroy(entity);
+  registry->destroy(static_cast<entt::entity>(entity));
 }
 
-auto EntityService::setTransform(tr::EntityType entityId, Transform transform) -> void {
+auto EntityService::setTransform(EntityId entityId, Transform transform) -> void {
   std::unique_lock<SharedLockableBase(std::shared_mutex)> lock(registryMutex);
   LockMark(registryMutex);
   registry->patch<Transform>(entityId, [transform](Transform& t) {
@@ -237,8 +238,8 @@ auto EntityService::setTransform(tr::EntityType entityId, Transform transform) -
   });
 }
 
-auto EntityService::addMeshToTerrainChunk([[maybe_unused]] tr::EntityType terrainId,
-                                          tr::EntityType chunkId,
+auto EntityService::addMeshToTerrainChunk([[maybe_unused]] EntityId terrainId,
+                                          EntityId chunkId,
                                           MeshHandle meshHandle) -> void {
   const auto meshDataList = {MeshData{
       .meshHandle = meshHandle,

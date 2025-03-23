@@ -6,7 +6,7 @@
 #include "gp/EntityService.hpp"
 #include "terrain/BlockUpdater.hpp"
 #include "tr/SdfGenerator.hpp"
-#include "vk/VkResourceManager.hpp"
+#include "VkResourceManager.hpp"
 
 namespace tr {
 

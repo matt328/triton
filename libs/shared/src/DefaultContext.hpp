@@ -1,6 +1,6 @@
 #pragma once
 
-#include "tr/IGuiSystem.hpp"
+#include "IGuiSystem.hpp"
 #include "gfx/IRenderContext.hpp"
 #include "tr/IContext.hpp"
 

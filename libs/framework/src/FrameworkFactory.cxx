@@ -5,10 +5,15 @@
 #include "FrameworkContextImpl.hpp"
 #include "DefaultEventBus.hpp"
 #include "fx/GuiCallbackRegistrar.hpp"
-#include "fx/IGameObjectProxy.hpp"
+#include "fx/IGraphicsContext.hpp"
+#include "fx/ITerrainContext.hpp"
+#include "fx/ext/IGameObjectProxy.hpp"
+#include "ActionSystem.hpp"
+#include "fx/IActionSystem.hpp"
 
 #include "VkGraphicsFactory.hpp"
-#include "gw/GameworldFactory.hpp"
+#include "gw/GameWorldFactory.hpp"
+#include "VoxelTerrainFactory.hpp"
 
 #include "TaskQueue.hpp"
 
@@ -39,15 +44,22 @@ auto createFrameworkContext([[maybe_unused]] const FrameworkConfig& config)
   const auto guiCallbackRegistrar = std::make_shared<GuiCallBackRegistrar>();
   const auto eventBus = std::make_shared<DefaultEventBus>();
   const auto assetService = std::make_shared<DefaultAssetService>();
+  const auto actionSystem = std::make_shared<ActionSystem>(eventBus);
 
   // This might seem odd that we pull some things out of the contexts to bind them, then just bind
   // the context anyway, but we need to store off the context so it doesn't go out of scope, and
   // bind components individually to maintain some modularity.
-  const auto gameWorldContext = createGameworldContext(eventBus, assetService);
+
+  const auto graphicsContext = createVkGraphicsContext(guiCallbackRegistrar, eventBus);
+  const auto resourceProxy = graphicsContext->getResourceProxy();
+
+  const auto terrainContext = createTerrainContext();
+  const auto terrainProxy = terrainContext->getTerrainSystemProxy();
+
+  const auto gameWorldContext =
+      createGameworldContext(eventBus, assetService, actionSystem, terrainProxy, resourceProxy);
   const auto gameObjectProxy = gameWorldContext->getGameObjectProxy();
   const auto gameWorldSystem = gameWorldContext->getGameWorldSystem();
-
-  const auto graphicsContext = createVkGraphicsContext(guiCallbackRegistrar);
 
   const auto frameworkInjector =
       di::make_injector(di::bind<IGameLoop>.to<FixedGameLoop>(),
@@ -57,6 +69,7 @@ auto createFrameworkContext([[maybe_unused]] const FrameworkConfig& config)
                         di::bind<IGameObjectProxy>.to<>(gameObjectProxy),
                         di::bind<IGameWorldSystem>.to(gameWorldSystem),
                         di::bind<IAssetService>.to<>(assetService),
+                        di::bind<IActionSystem>.to<>(actionSystem),
                         di::bind<IGameWorldContext>.to<>(gameWorldContext),
                         di::bind<IGraphicsContext>.to<>(graphicsContext));
 
