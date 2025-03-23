@@ -1,6 +1,5 @@
 #pragma once
 
-#include "cm/EntitySystemTypes.hpp"
 #include "cm/RenderData.hpp"
 #include "components/TerrainChunk.hpp"
 #include "components/Animation.hpp"
@@ -12,12 +11,7 @@
 
 namespace tr {
 
-class AssetManager;
-
-struct TerrainResult {
-  tr::EntityType definitionId;
-  std::unordered_map<tr::EntityType, std::string> chunkData;
-};
+class IAssetService;
 
 using CamFn = std::function<void(RenderData& renderData, const Camera&)>;
 
@@ -35,9 +29,11 @@ using TerrainUpdateFn =
 
 using EntityCreatedFn = std::function<void(entt::registry&, entt::entity)>;
 
+using EntityId = entt::entity;
+
 class EntityService {
 public:
-  explicit EntityService(std::shared_ptr<AssetManager> newAssetManager);
+  explicit EntityService(std::shared_ptr<IAssetService> newAssetService);
   ~EntityService();
 
   EntityService(const EntityService&) = delete;
@@ -67,11 +63,11 @@ public:
 
   auto createStaticEntity(std::vector<MeshData> meshData,
                           Transform transform,
-                          std::string_view name) -> tr::EntityType;
+                          std::string_view name) -> EntityId;
 
   auto createDynamicEntity(ModelData modelData,
                            Transform transform,
-                           std::string_view name) -> tr::EntityType;
+                           std::string_view name) -> EntityId;
 
   auto createTerrain(TerrainResult2& terrainResult) -> void;
 
@@ -79,20 +75,18 @@ public:
 
   auto removeEntity(EntityType entity) -> void;
 
-  auto forEachEditorInfo(
-      const std::function<void(tr::EntityType entity, EditorInfo& editorInfo)>& fn) -> void;
+  auto forEachEditorInfo(const std::function<void(EntityId entity, EditorInfo& editorInfo)>& fn)
+      -> void;
 
-  auto setTransform(tr::EntityType entityId, Transform transform) -> void;
+  auto setTransform(EntityId entityId, Transform transform) -> void;
 
-  auto getTerrainHandle(tr::EntityType terrainId) -> TerrainHandle;
-  auto getChunkHandle(tr::EntityType chunkId) -> ChunkHandle;
+  auto getTerrainHandle(EntityId terrainId) -> TerrainHandle;
+  auto getChunkHandle(EntityId chunkId) -> ChunkHandle;
 
-  auto addMeshToTerrainChunk(tr::EntityType terrainId,
-                             tr::EntityType chunkId,
-                             MeshHandle meshHandle) -> void;
+  auto addMeshToTerrainChunk(EntityId terrainId, EntityId chunkId, MeshHandle meshHandle) -> void;
 
 private:
-  std::shared_ptr<AssetManager> assetManager;
+  std::shared_ptr<IAssetService> assetService;
 
   std::unique_ptr<entt::registry> registry;
   mutable TracySharedLockableN(std::shared_mutex, registryMutex, "EntityService");

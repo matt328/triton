@@ -5,7 +5,7 @@
 #include "cm/IGeometryData.hpp"
 #include "mem/Allocator.hpp"
 #include "mem/Image.hpp"
-#include "tr/IDebugManager.hpp"
+#include "gfx/IDebugManager.hpp"
 #include "ResourceExceptions.hpp"
 #include "mem/Buffer.hpp"
 #include "pipeline/ComputePipeline.hpp"

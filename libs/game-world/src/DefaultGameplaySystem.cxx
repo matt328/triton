@@ -9,7 +9,7 @@
 #include "systems/RenderDataSystem.hpp"
 #include "systems/TransformSystem.hpp"
 #include "systems/AnimationSystem.hpp"
-#include "fx/ITerrainSystemProxy.hpp"
+#include "fx/ext/ITerrainSystemProxy.hpp"
 
 namespace tr {
 
@@ -155,7 +155,8 @@ auto DefaultGameplaySystem::createStaticModelEntity(std::string filename,
     transform.rotation = initialTransform->rotation;
   }
 
-  return entityService->createStaticEntity(std::vector{modelData.meshData}, transform, entityName);
+  return static_cast<tr::EntityType>(
+      entityService->createStaticEntity(std::vector{modelData.meshData}, transform, entityName));
 }
 
 auto DefaultGameplaySystem::createAnimatedModelEntity(const AnimatedModelData& modelData,
@@ -181,9 +182,10 @@ auto DefaultGameplaySystem::createAnimatedModelEntity(const AnimatedModelData& m
     transform.rotation = initialTransform->rotation;
   }
 
-  return entityService->createDynamicEntity(loadedModelData,
-                                            transform,
-                                            modelData.entityName.value_or("Unnamed Entity"));
+  return static_cast<tr::EntityType>(
+      entityService->createDynamicEntity(loadedModelData,
+                                         transform,
+                                         modelData.entityName.value_or("Unnamed Entity")));
 }
 
 auto DefaultGameplaySystem::createTerrain(const TerrainCreateInfo& createInfo) -> TerrainResult2& {
@@ -215,8 +217,8 @@ auto DefaultGameplaySystem::entityCreated([[maybe_unused]] entt::registry& reg,
 auto DefaultGameplaySystem::triangulateChunk(tr::EntityType terrainId,
                                              tr::EntityType chunkId,
                                              glm::ivec3 cellPosition) -> void {
-  const auto terrainHandle = entityService->getTerrainHandle(terrainId);
-  const auto chunkHandle = entityService->getChunkHandle(chunkId);
+  const auto terrainHandle = entityService->getTerrainHandle(static_cast<EntityId>(terrainId));
+  const auto chunkHandle = entityService->getChunkHandle(static_cast<EntityId>(chunkId));
   terrainSystemProxy->triangulateBlock(terrainHandle, chunkHandle, chunkId, cellPosition);
 }
 

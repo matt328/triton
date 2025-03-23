@@ -1,8 +1,8 @@
 #include "EntityEditor.hpp"
 
-#include "fx/IGameplaySystem.hpp"
+#include "fx/IGameWorldSystem.hpp"
 #include "fx/IEventBus.hpp"
-#include "fx/IEntityServiceProvider.hpp"
+#include "fx/ext/IGameObjectProxy.hpp"
 
 #include "data/DataFacade.hpp"
 #include "ui/components/DialogManager.hpp"
@@ -14,16 +14,16 @@ namespace ed {
 constexpr auto DialogName = " AnimatedEntity";
 constexpr auto StaticEntityDialogName = " StaticEntity";
 
-EntityEditor::EntityEditor(std::shared_ptr<tr::IGameplaySystem> newGameplaySystem,
+EntityEditor::EntityEditor(std::shared_ptr<tr::IGameWorldSystem> newGameWorldSystem,
                            std::shared_ptr<DataFacade> newDataFacade,
                            std::shared_ptr<DialogManager> newDialogManager,
                            std::shared_ptr<tr::IEventBus> newEventBus,
-                           std::shared_ptr<tr::IEntityServiceProvider> newEntityServiceProvider)
-    : gameplaySystem{std::move(newGameplaySystem)},
+                           std::shared_ptr<tr::IGameObjectProxy> newGameObjectProxy)
+    : gameWorldSystem{std::move(newGameWorldSystem)},
       dataFacade{std::move(newDataFacade)},
       dialogManager{std::move(newDialogManager)},
       eventBus{std::move(newEventBus)},
-      entityServiceProvider{std::move(newEntityServiceProvider)} {
+      gameObjectProxy{std::move(newGameObjectProxy)} {
   Log.trace("Creating EntityEditor");
 
   createAnimatedEntityDialog();
@@ -93,10 +93,9 @@ void EntityEditor::render() {
 
           const auto transformCallback = [this](std::string_view name, Orientation orientation) {
             const auto entityId = dataFacade->getEntityId(name);
-            entityServiceProvider->setTransform(
-                entityId,
-                tr::TransformData{.position = orientation.position,
-                                  .rotation = orientation.rotation});
+            gameObjectProxy->setTransform(entityId,
+                                          tr::TransformData{.position = orientation.position,
+                                                            .rotation = orientation.rotation});
           };
           renderTransformInspector(entityData->name, &entityData->orientation, transformCallback);
         }
@@ -139,18 +138,18 @@ void EntityEditor::render() {
           ImGui::DragInt3("Position##Chunk", glm::value_ptr(cellPosition), 1);
 
           if (ImGui::Button("Triangulate Cell")) {
-            gameplaySystem->triangulateChunk(terrainId, selectedChunk.entityId, cellPosition);
+            gameWorldSystem->triangulateChunk(terrainId, selectedChunk.entityId, cellPosition);
           }
 
           if (ImGui::Button("Triangulate All")) {
-            gameplaySystem->triangulateChunk(terrainId, selectedChunk.entityId, cellPosition);
+            gameWorldSystem->triangulateChunk(terrainId, selectedChunk.entityId, cellPosition);
           }
         }
 
         if (del) {
           const auto entityId = dataFacade->getEntityId(selectedEntity.value());
           dataFacade->deleteEntity(selectedEntity.value());
-          entityServiceProvider->removeEntity(entityId);
+          gameObjectProxy->removeEntity(entityId);
           selectedEntity = std::nullopt;
         }
       } else {

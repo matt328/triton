@@ -2,6 +2,8 @@
 
 namespace tr {
 
+class IResourceProxy;
+
 class IGraphicsContext {
 public:
   IGraphicsContext() = default;
@@ -11,6 +13,8 @@ public:
   IGraphicsContext(IGraphicsContext&&) = delete;
   auto operator=(const IGraphicsContext&) -> IGraphicsContext& = default;
   auto operator=(IGraphicsContext&&) -> IGraphicsContext& = delete;
+
+  virtual auto getResourceProxy() -> std::shared_ptr<IResourceProxy> = 0;
 };
 
 }

@@ -1,6 +1,6 @@
 #pragma once
+
 #include "cm/Handles.hpp"
-#include "ozz/base/maths/soa_transform.h"
 
 namespace tr {
 

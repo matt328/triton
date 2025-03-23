@@ -65,6 +65,7 @@ add_subdirectory(libs/framework)
 add_subdirectory(libs/shared)
 add_subdirectory(libs/graphics-vk)
 add_subdirectory(libs/game-world)
+add_subdirectory(libs/voxel-terrain)
 add_subdirectory(apps/cauldron)
 
 # add_subdirectory(apps/testarea)

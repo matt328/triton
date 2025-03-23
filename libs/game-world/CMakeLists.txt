@@ -1,8 +1,16 @@
 project("game-world")
 
 set(gameworld_SRC
+  src/systems/AnimationSystem.cxx
+  src/systems/CameraSystem.cxx
+  src/systems/RenderDataSystem.cxx
+  src/systems/TransformSystem.cxx
+  src/DefaultGameplaySystem.cxx
   src/EntityService.cxx
   src/EntityServiceProvider.cxx
+  src/GameWorldContextImpl.cxx
+  src/GameWorldFactory.cxx
+  src/GameObjectProxyImpl.cxx
 )
 
 add_library(${PROJECT_NAME} STATIC ${gameworld_SRC})
@@ -31,8 +39,14 @@ target_precompile_headers(${PROJECT_NAME}
   PUBLIC
   <entt/entt.hpp>
   <glm/glm.hpp>
-  <string>
+  <glm/ext/matrix_clip_space.hpp>
+  <glm/ext/matrix_transform.hpp>
+  <tracy/Tracy.hpp>
+  <tracy/TracyC.h>
+  <unordered_map>
   <queue>
+  <string>
+  <vector>
   PRIVATE
   <memory>
 )
@@ -41,8 +55,10 @@ target_link_libraries(${PROJECT_NAME}
   PUBLIC
   BoostDI
   EnTT::EnTT
-  PRIVATE
   shared
+  asset-lib
+  Tracy::TracyClient
+  util-lib
 )
 
 target_include_directories(${PROJECT_NAME}

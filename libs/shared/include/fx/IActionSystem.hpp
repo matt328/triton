@@ -4,6 +4,7 @@
 #include "fx/Actions.hpp"
 
 namespace tr {
+
 class IActionSystem {
 public:
   explicit IActionSystem() = default;
@@ -16,4 +17,5 @@ public:
 
   virtual void mapSource(Source source, tr::StateType sType, tr::ActionType aType) = 0;
 };
+
 }

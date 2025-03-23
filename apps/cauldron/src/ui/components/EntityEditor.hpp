@@ -2,8 +2,8 @@
 
 namespace tr {
 class IEventBus;
-class IGameplaySystem;
-class IEntityServiceProvider;
+class IGameWorldSystem;
+class IGameObjectProxy;
 }
 
 namespace ed {
@@ -13,11 +13,11 @@ class DialogManager;
 
 class EntityEditor {
 public:
-  EntityEditor(std::shared_ptr<tr::IGameplaySystem> newGameplaySystem,
+  EntityEditor(std::shared_ptr<tr::IGameWorldSystem> newGameWorldSystem,
                std::shared_ptr<DataFacade> newDataFacade,
                std::shared_ptr<DialogManager> newDialogManager,
                std::shared_ptr<tr::IEventBus> newEventBus,
-               std::shared_ptr<tr::IEntityServiceProvider> newEntityServiceProvider);
+               std::shared_ptr<tr::IGameObjectProxy> newGameObjectProxy);
   ~EntityEditor();
 
   EntityEditor(const EntityEditor&) = delete;
@@ -30,11 +30,11 @@ public:
   static constexpr auto ComponentName = "Entity Editor";
 
 private:
-  std::shared_ptr<tr::IGameplaySystem> gameplaySystem;
+  std::shared_ptr<tr::IGameWorldSystem> gameWorldSystem;
   std::shared_ptr<DataFacade> dataFacade;
   std::shared_ptr<DialogManager> dialogManager;
   std::shared_ptr<tr::IEventBus> eventBus;
-  std::shared_ptr<tr::IEntityServiceProvider> entityServiceProvider;
+  std::shared_ptr<tr::IGameObjectProxy> gameObjectProxy;
 
   std::optional<std::string> selectedEntity{std::nullopt};
 

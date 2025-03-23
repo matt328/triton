@@ -1,14 +1,14 @@
 #include "DataFacade.hpp"
 
-#include "fx/IGameplaySystem.hpp"
+#include "fx/IGameWorldSystem.hpp"
 #include "fx/ITaskQueue.hpp"
 #include "cm/TerrainCreateInfo.hpp"
 
 namespace ed {
 
-DataFacade::DataFacade(std::shared_ptr<tr::IGameplaySystem> newGameplaySystem,
+DataFacade::DataFacade(std::shared_ptr<tr::IGameWorldSystem> newGameWorldSystem,
                        std::shared_ptr<tr::ITaskQueue> newTaskQueue)
-    : gameplaySystem{std::move(newGameplaySystem)}, taskQueue{std::move(newTaskQueue)} {
+    : gameWorldSystem{std::move(newGameWorldSystem)}, taskQueue{std::move(newTaskQueue)} {
   Log.trace("Creating DataFacade");
 }
 
@@ -34,7 +34,7 @@ void DataFacade::createAABB() {
   // for (int i = 0; i < 50; ++i) {
   //    const auto min = glm::vec3{dis(gen), dis(gen), dis(gen)};
   //    const auto max = min + glm::vec3{5.f, 1.f, 1.f};
-  //    [[maybe_unused]] auto entityId = gameplayFacade.createDebugAABB(min, max);
+  //    [[maybe_unused]] auto entityId = GameWorldFacade.createDebugAABB(min, max);
   // }
 }
 
@@ -82,9 +82,9 @@ void DataFacade::createStaticModel(const EntityData& entityData) noexcept {
                                            .rotation = entityData.orientation.rotation};
 
   const auto task = [this, modelFilename, entityName, transform] {
-    return gameplaySystem->createStaticModelEntity(modelFilename,
-                                                   entityName,
-                                                   std::make_optional(transform));
+    return gameWorldSystem->createStaticModelEntity(modelFilename,
+                                                    entityName,
+                                                    std::make_optional(transform));
   };
 
   taskQueue->enqueue(task, onComplete);
@@ -114,8 +114,8 @@ void DataFacade::createAnimatedModel(const EntityData& entityData) {
                                            .rotation = entityData.orientation.rotation};
 
   const auto task = [this, animatedEntityData, transform] {
-    return gameplaySystem->createAnimatedModelEntity(animatedEntityData,
-                                                     std::make_optional(transform));
+    return gameWorldSystem->createAnimatedModelEntity(animatedEntityData,
+                                                      std::make_optional(transform));
   };
 
   taskQueue->enqueue(task, onComplete);
@@ -159,7 +159,8 @@ void DataFacade::createTerrain(std::string_view terrainName, glm::vec3 terrainSi
                                            .sdfCreateInfo = boxInfo,
                                            .chunkCount = glm::ivec3(3, 3, 3),
                                            .chunkSize = glm::ivec3(16, 16, 16)};
-    return gameplaySystem->createTerrain(tci);
+
+    return gameWorldSystem->createTerrain(tci);
   };
 
   const auto onComplete = [this, terrainName, terrainSize](const tr::TerrainResult2& result) {

@@ -1,5 +1,5 @@
 #include "TransformSystem.hpp"
-#include "gp/components/Transform.hpp"
+#include "components/Transform.hpp"
 
 namespace tr {
 

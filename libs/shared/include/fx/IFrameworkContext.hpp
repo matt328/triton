@@ -12,6 +12,7 @@ class IGameObjectProxy;
 class IGameWorldSystem;
 class IAssetService;
 class IGameWorldContext;
+class IActionSystem;
 
 class IFrameworkContext {
 public:
@@ -30,5 +31,6 @@ public:
   virtual auto getGameObjectProxy() -> std::shared_ptr<IGameObjectProxy> = 0;
   virtual auto getGameWorldSystem() -> std::shared_ptr<IGameWorldSystem> = 0;
   virtual auto getAssetService() -> std::shared_ptr<IAssetService> = 0;
+  virtual auto getActionSystem() -> std::shared_ptr<IActionSystem> = 0;
 };
 }

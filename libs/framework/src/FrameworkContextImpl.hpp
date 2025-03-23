@@ -14,7 +14,8 @@ public:
                        std::shared_ptr<IGameWorldSystem> newGameWorldSystem,
                        std::shared_ptr<IAssetService> newAssetService,
                        std::shared_ptr<IGameWorldContext> newGameWorldContext,
-                       std::shared_ptr<IGraphicsContext> newGraphicsContext);
+                       std::shared_ptr<IGraphicsContext> newGraphicsContext,
+                       std::shared_ptr<IActionSystem> newActionSystem);
   ~FrameworkContextImpl() override = default;
 
   FrameworkContextImpl(const FrameworkContextImpl&) = default;
@@ -29,6 +30,7 @@ public:
   auto getGameObjectProxy() -> std::shared_ptr<IGameObjectProxy> override;
   auto getGameWorldSystem() -> std::shared_ptr<IGameWorldSystem> override;
   auto getAssetService() -> std::shared_ptr<IAssetService> override;
+  auto getActionSystem() -> std::shared_ptr<IActionSystem> override;
 
 private:
   std::shared_ptr<IGameLoop> gameLoop;
@@ -40,5 +42,6 @@ private:
   std::shared_ptr<IAssetService> assetService;
   std::shared_ptr<IGameWorldContext> gameWorldContext;
   std::shared_ptr<IGraphicsContext> graphicsContext;
+  std::shared_ptr<IActionSystem> actionSystem;
 };
 }

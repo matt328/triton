@@ -10,8 +10,8 @@ struct Action;
 
 class CameraSystem {
 public:
-  explicit CameraSystem(const std::shared_ptr<IEventBus>& eventBus,
-                        std::shared_ptr<EntityService> newEntityService);
+  CameraSystem(const std::shared_ptr<IEventBus>& eventBus,
+               std::shared_ptr<EntityService> newEntityService);
   ~CameraSystem();
 
   CameraSystem(const CameraSystem&) = delete;

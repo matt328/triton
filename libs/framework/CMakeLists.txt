@@ -52,11 +52,12 @@ target_link_libraries(${PROJECT_NAME}
   cereal::cereal
   glm
   Tracy::TracyClient
-  PRIVATE
-  game-world
-  graphics-vk
   shared
   util-lib
+  game-world
+  voxel-terrain
+  PRIVATE
+  graphics-vk
 )
 
 target_include_directories(${PROJECT_NAME}

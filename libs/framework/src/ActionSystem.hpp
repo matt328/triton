@@ -1,16 +1,14 @@
 #pragma once
 
-#include "fx/Sources.hpp"
 #include "fx/IActionSystem.hpp"
+#include "fx/Sources.hpp"
 #include "fx/Inputs.hpp"
 
 namespace tr {
+
 class IEventBus;
-}
 
-namespace tr {
-
-class ActionSystem final : public IActionSystem {
+class ActionSystem : public IActionSystem {
 public:
   explicit ActionSystem(std::shared_ptr<IEventBus> newEventBus);
   ~ActionSystem() override;
