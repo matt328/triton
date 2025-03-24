@@ -1,4 +1,4 @@
-#include "cm/ImGuiAdapter.hpp"
+#include "ImGuiAdapter.hpp"
 
 namespace tr {
 

@@ -5,12 +5,13 @@ set(gameworld_SRC
   src/systems/CameraSystem.cxx
   src/systems/RenderDataSystem.cxx
   src/systems/TransformSystem.cxx
+
   src/DefaultGameplaySystem.cxx
   src/EntityService.cxx
   src/EntityServiceProvider.cxx
+  src/GameObjectProxyImpl.cxx
   src/GameWorldContextImpl.cxx
   src/GameWorldFactory.cxx
-  src/GameObjectProxyImpl.cxx
 )
 
 add_library(${PROJECT_NAME} STATIC ${gameworld_SRC})

@@ -1,7 +1,9 @@
 project("voxel-terrain")
 
 set(voxelterrain_SRC
+  src/VoxelTerrainContext.cxx
   src/VoxelTerrainFactory.cxx
+  src/VoxelTerrainSystemProxy.cxx
 )
 
 add_library(${PROJECT_NAME} STATIC ${voxelterrain_SRC})

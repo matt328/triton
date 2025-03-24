@@ -8,8 +8,11 @@ DSLayoutManager::DSLayoutManager(std::shared_ptr<Device> newDevice,
     : device{std::move(newDevice)}, debugManager{std::move(newDebugManager)} {
 }
 
-auto DSLayoutManager::createLayout(vk::DescriptorSetLayoutBinding binding, std::string_view name)
-    -> DSLayoutHandle {
+DSLayoutManager::~DSLayoutManager() {
+}
+
+auto DSLayoutManager::createLayout(vk::DescriptorSetLayoutBinding binding,
+                                   std::string_view name) -> DSLayoutHandle {
   const auto key = keyGen.getKey();
 
   static constexpr vk::DescriptorBindingFlags bindlessFlags =

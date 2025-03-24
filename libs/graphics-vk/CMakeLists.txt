@@ -109,7 +109,6 @@ target_link_libraries(${PROJECT_NAME}
   glslang
   glslang-default-resource-limits
   libnoise
-  SPRIV
 )
 
 target_include_directories(${PROJECT_NAME}

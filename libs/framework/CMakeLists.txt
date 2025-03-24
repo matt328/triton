@@ -1,11 +1,12 @@
 project("framework")
 
 set(framework_SRC
-  src/FrameworkFactory.cxx
-  src/FrameworkContextImpl.cxx
+  src/ActionSystem.cxx
   src/DefaultAssetService.cxx
   src/DefaultEventBus.cxx
   src/FixedGameLoop.cxx
+  src/FrameworkContextImpl.cxx
+  src/FrameworkFactory.cxx
   src/GuiCallbackRegistrar.cxx
 )
 

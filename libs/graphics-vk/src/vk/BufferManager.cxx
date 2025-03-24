@@ -34,7 +34,9 @@ BufferManager::BufferManager(std::shared_ptr<Allocator> newAllocator,
     const auto task = [this, event] {
       ZoneNamedN(var, "Buffer Cleanup Fence Wait", true);
       if (const auto result =
-              device->getVkDevice().waitForFences(event.fence, vk::True, UINT64_MAX);
+              device->getVkDevice().waitForFences(std::any_cast<vk::Fence>(event.fenceHandle),
+                                                  vk::True,
+                                                  UINT64_MAX);
           result != vk::Result::eSuccess) {
         Log.warn("Timeout waiting for fence during Buffer Cleanup");
       }

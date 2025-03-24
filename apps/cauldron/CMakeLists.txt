@@ -3,6 +3,7 @@ project("Cauldron" VERSION "0.0.1" LANGUAGES CXX)
 set(editor_SRC
   src/main.cxx
   src/Application.cxx
+  src/ImGuiAdapter.cxx
 
   src/ui/Manager.cxx
 
@@ -95,6 +96,7 @@ endif()
 target_link_libraries(${PROJECT_NAME}
   PRIVATE
   framework
+  game-world
   BoostDI
   glfw
   cereal::cereal
