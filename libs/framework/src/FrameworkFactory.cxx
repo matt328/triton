@@ -50,7 +50,10 @@ auto createFrameworkContext([[maybe_unused]] const FrameworkConfig& config)
   // the context anyway, but we need to store off the context so it doesn't go out of scope, and
   // bind components individually to maintain some modularity.
 
-  const auto graphicsContext = createVkGraphicsContext(guiCallbackRegistrar, eventBus);
+  const auto taskQueue = std::make_shared<TaskQueue>(1024);
+
+  const auto graphicsContext =
+      createVkGraphicsContext(guiCallbackRegistrar, eventBus, taskQueue, config.guiAdapter);
   const auto resourceProxy = graphicsContext->getResourceProxy();
 
   const auto terrainContext = createTerrainContext();
@@ -64,7 +67,7 @@ auto createFrameworkContext([[maybe_unused]] const FrameworkConfig& config)
   const auto frameworkInjector =
       di::make_injector(di::bind<IGameLoop>.to<FixedGameLoop>(),
                         di::bind<IGuiCallbackRegistrar>.to(guiCallbackRegistrar),
-                        di::bind<ITaskQueue>.to<TaskQueue>(),
+                        di::bind<ITaskQueue>.to<>(taskQueue),
                         di::bind<IEventBus>.to<>(eventBus),
                         di::bind<IGameObjectProxy>.to<>(gameObjectProxy),
                         di::bind<IGameWorldSystem>.to(gameWorldSystem),

@@ -18,7 +18,7 @@
 #include "ui/components/AssetViewer.hpp"
 #include "ui/components/EntityEditor.hpp"
 #include "ui/components/AssetTool.hpp"
-
+#include "ImGuiAdapter.hpp"
 #include "config.h"
 
 namespace di = boost::di;
@@ -51,10 +51,10 @@ auto main() -> int {
   auto propertiesPath = configDir / "editor";
 
   try {
-    const auto frameworkConfig = tr::FrameworkConfig{
-        .initialWindowSize = glm::ivec2(width, height),
-        .windowTitle = windowTitle.str(),
-    };
+    const auto frameworkConfig =
+        tr::FrameworkConfig{.initialWindowSize = glm::ivec2(width, height),
+                            .windowTitle = windowTitle.str(),
+                            .guiAdapter = std::make_shared<tr::ImGuiAdapter>()};
 
     const auto fc = tr::createFrameworkContext(frameworkConfig);
 

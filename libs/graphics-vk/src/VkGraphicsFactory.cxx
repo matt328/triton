@@ -21,7 +21,6 @@
 #include "VkResourceManager.hpp"
 #include "ResourceProxyImpl.hpp"
 #include "VkGraphicsContext.hpp"
-#include "cm/ImGuiAdapter.hpp"
 
 #include <di.hpp>
 
@@ -29,7 +28,9 @@ namespace di = boost::di;
 
 namespace tr {
 auto createVkGraphicsContext(std::shared_ptr<IGuiCallbackRegistrar> newGuiCallbackRegistrar,
-                             const std::shared_ptr<IEventBus>& newEventBus)
+                             const std::shared_ptr<IEventBus>& newEventBus,
+                             std::shared_ptr<ITaskQueue> newTaskQueue,
+                             const std::shared_ptr<IGuiAdapter>& newGuiAdapter)
     -> std::shared_ptr<IGraphicsContext> {
   const auto injector =
       di::make_injector(di::bind<IGuiCallbackRegistrar>.to(newGuiCallbackRegistrar),
@@ -38,7 +39,7 @@ auto createVkGraphicsContext(std::shared_ptr<IGuiCallbackRegistrar> newGuiCallba
                         di::bind<Context>.to<Context>(),
                         di::bind<IDebugManager>.to<DefaultDebugManager>(),
                         di::bind<IWindow>.to<Window>(),
-                        di::bind<IGuiAdapter>.to<ImGuiAdapter>(),
+                        di::bind<IGuiAdapter>.to<>(newGuiAdapter),
                         di::bind<Device>.to<Device>(),
                         di::bind<PhysicalDevice>.to<PhysicalDevice>(),
                         di::bind<Surface>.to<Surface>(),
@@ -54,6 +55,7 @@ auto createVkGraphicsContext(std::shared_ptr<IGuiCallbackRegistrar> newGuiCallba
                         di::bind<IShaderBindingFactory>.to<DSShaderBindingFactory>(),
                         di::bind<Allocator>.to<Allocator>(),
                         di::bind<IBufferManager>.to<BufferManager>(),
+                        di::bind<ITaskQueue>.to<>(newTaskQueue),
                         di::bind<VkResourceManager>.to<VkResourceManager>());
 
   return injector.create<std::shared_ptr<VkGraphicsContext>>();

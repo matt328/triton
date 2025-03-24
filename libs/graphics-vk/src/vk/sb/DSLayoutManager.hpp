@@ -14,15 +14,15 @@ class DSLayoutManager {
 public:
   explicit DSLayoutManager(std::shared_ptr<Device> newDevice,
                            std::shared_ptr<IDebugManager> newDebugManager);
-  ~DSLayoutManager() = default;
+  ~DSLayoutManager();
 
   DSLayoutManager(const DSLayoutManager&) = delete;
   DSLayoutManager(DSLayoutManager&&) = delete;
   auto operator=(const DSLayoutManager&) -> DSLayoutManager& = delete;
   auto operator=(DSLayoutManager&&) -> DSLayoutManager& = delete;
 
-  [[nodiscard]] auto createLayout(vk::DescriptorSetLayoutBinding binding, std::string_view name)
-      -> DSLayoutHandle;
+  [[nodiscard]] auto createLayout(vk::DescriptorSetLayoutBinding binding,
+                                  std::string_view name) -> DSLayoutHandle;
   [[nodiscard]] auto getLayout(DSLayoutHandle handle) -> DSLayout&;
 
 private:

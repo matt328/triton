@@ -3,6 +3,7 @@
 #include "Actions.hpp"
 #include "Inputs.hpp"
 #include "GameplayEvents.hpp"
+#include <any>
 
 namespace tr {
 
@@ -56,6 +57,11 @@ struct SwapchainCreated {
   uint32_t height;
 };
 
+struct FrameEndEvent {
+  // This is nasty, but it works for now
+  std::any fenceHandle;
+};
+
 using EventVariant = std::variant<WindowIconified,
                                   WindowClosed,
                                   KeyEvent,
@@ -68,6 +74,7 @@ using EventVariant = std::variant<WindowIconified,
                                   PlayerScored,
                                   EntityCreated,
                                   SwapchainResized,
-                                  SwapchainCreated>;
+                                  SwapchainCreated,
+                                  FrameEndEvent>;
 
 }

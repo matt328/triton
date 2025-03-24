@@ -12,6 +12,7 @@
 #include "task/Frame.hpp"
 #include "task/IRenderTask.hpp"
 #include "VkResourceManager.hpp"
+#include "fx/Events.hpp"
 
 namespace tr {
 
