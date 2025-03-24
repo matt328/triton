@@ -3,6 +3,8 @@
 #include "cm/IGuiAdapter.hpp"
 #include "cm/KeyMap.hpp"
 
+#include "VkGraphicsCreateInfo.hpp"
+
 #ifdef _WIN32
 #include <GLFW/glfw3native.h>
 #include <windows.h> // For general Windows APIs
@@ -16,8 +18,7 @@ constexpr int MinHeight = 200;
 
 Window::Window(std::shared_ptr<IEventBus> newEventBus,
                std::shared_ptr<tr::IGuiAdapter> newGuiAdapter,
-               const glm::ivec2& dimensions,
-               const std::string& windowTitle)
+               const VkGraphicsCreateInfo& createInfo)
     : eventBus{std::move(newEventBus)}, guiAdapter{std::move(newGuiAdapter)} {
   Log.trace("Constructing Window");
 
@@ -27,11 +28,15 @@ Window::Window(std::shared_ptr<IEventBus> newEventBus,
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
-    window = glfwCreateWindow(dimensions.x, dimensions.y, windowTitle.data(), nullptr, nullptr);
+    window = glfwCreateWindow(createInfo.initialWindowSize.x,
+                              createInfo.initialWindowSize.y,
+                              createInfo.windowTitle.c_str(),
+                              nullptr,
+                              nullptr);
 
 #ifdef _WIN32
 
-    auto hWnd = glfwGetWin32Window(window);
+    auto* hWnd = glfwGetWin32Window(window);
     // Paints the background of the window black
     PAINTSTRUCT ps;
     RECT rc;
@@ -41,7 +46,7 @@ Window::Window(std::shared_ptr<IEventBus> newEventBus,
     ExtTextOut(hdc, 0, 0, ETO_OPAQUE, &rc, nullptr, 0, nullptr);
     EndPaint(hWnd, &ps);
     BOOL value = TRUE;
-    HRESULT result;
+    HRESULT result = 0;
     result = DwmSetWindowAttribute(hWnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &value, sizeof(value));
     if (result != S_OK) {
       Log.warn("Error setting Window Attributes");

@@ -50,8 +50,6 @@ Manager::Manager(std::shared_ptr<Menu> newAppMenu,
     }
   };
   Log.sinks().push_back(std::make_shared<my_sink_mt>(logFn));
-
-  // dataFacade->createTerrain("Terrain", glm::vec3(9.f, 9.f, 9.f));
 }
 
 Manager::~Manager() {

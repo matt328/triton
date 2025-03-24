@@ -3,6 +3,7 @@
 namespace tr {
 
 class IResourceProxy;
+class IRenderContext;
 
 class IGraphicsContext {
 public:
@@ -15,6 +16,7 @@ public:
   auto operator=(IGraphicsContext&&) -> IGraphicsContext& = delete;
 
   virtual auto getResourceProxy() -> std::shared_ptr<IResourceProxy> = 0;
+  virtual auto getRenderContext() -> std::shared_ptr<IRenderContext> = 0;
 };
 
 }

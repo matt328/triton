@@ -27,13 +27,15 @@
 namespace di = boost::di;
 
 namespace tr {
-auto createVkGraphicsContext(std::shared_ptr<IGuiCallbackRegistrar> newGuiCallbackRegistrar,
+auto createVkGraphicsContext(const VkGraphicsCreateInfo& createInfo,
+                             std::shared_ptr<IGuiCallbackRegistrar> newGuiCallbackRegistrar,
                              const std::shared_ptr<IEventBus>& newEventBus,
                              std::shared_ptr<ITaskQueue> newTaskQueue,
                              const std::shared_ptr<IGuiAdapter>& newGuiAdapter)
     -> std::shared_ptr<IGraphicsContext> {
   const auto injector =
-      di::make_injector(di::bind<IGuiCallbackRegistrar>.to(newGuiCallbackRegistrar),
+      di::make_injector(di::bind<VkGraphicsCreateInfo>.to<>(createInfo),
+                        di::bind<IGuiCallbackRegistrar>.to(newGuiCallbackRegistrar),
                         di::bind<IEventBus>.to<>(newEventBus),
                         di::bind<IResourceProxy>.to<ResourceProxyImpl>(),
                         di::bind<Context>.to<Context>(),

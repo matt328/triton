@@ -35,6 +35,8 @@ public:
     return result;
   }
 
+  virtual auto processCompleteTasks() -> void = 0;
+
 protected:
   virtual auto enqueueImpl(std::function<void()> task,
                            std::function<void()> onComplete) -> void = 0;

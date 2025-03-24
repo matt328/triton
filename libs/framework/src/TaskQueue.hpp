@@ -30,6 +30,17 @@ public:
   auto operator=(const TaskQueue&) -> TaskQueue& = delete;
   auto operator=(TaskQueue&&) -> TaskQueue& = delete;
 
+  void processCompleteTasks() override {
+    std::unique_lock<LockableBase(std::mutex)> lock(completeMtx);
+    while (!completeQueue.empty()) {
+      auto task = std::move(completeQueue.front());
+      completeQueue.pop();
+      lock.unlock();
+      task();
+      lock.lock();
+    }
+  }
+
 protected:
   auto enqueueImpl(std::function<void()> task, std::function<void()> onComplete) -> void override {
     auto packagedTask = std::make_shared<std::packaged_task<void()>>(std::move(task));
@@ -60,7 +71,7 @@ private:
   std::condition_variable cv;
   std::queue<std::function<void()>> internalQueue;
 
-  std::mutex completeMtx;
+  TracyLockableN(std::mutex, completeMtx, "CompleteQueueLock");
   std::queue<std::function<void()>> completeQueue;
 
   bool stopFlag{};
@@ -83,7 +94,7 @@ private:
   }
 
   void enqueueOnCallerThread(std::function<void()> task) {
-    std::unique_lock<std::mutex> lock(completeMtx);
+    std::unique_lock<LockableBase(std::mutex)> lock(completeMtx);
     completeQueue.emplace(std::move(task));
   }
 };

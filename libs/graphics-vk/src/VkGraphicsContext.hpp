@@ -6,7 +6,8 @@ namespace tr {
 
 class VkGraphicsContext : public IGraphicsContext {
 public:
-  explicit VkGraphicsContext(std::shared_ptr<IResourceProxy> newResourceProxy);
+  explicit VkGraphicsContext(std::shared_ptr<IResourceProxy> newResourceProxy,
+                             std::shared_ptr<IRenderContext> newRenderContext);
   ~VkGraphicsContext() override = default;
 
   VkGraphicsContext(const VkGraphicsContext&) = default;
@@ -15,9 +16,11 @@ public:
   auto operator=(VkGraphicsContext&&) -> VkGraphicsContext& = delete;
 
   auto getResourceProxy() -> std::shared_ptr<IResourceProxy> override;
+  auto getRenderContext() -> std::shared_ptr<IRenderContext> override;
 
 private:
   std::shared_ptr<IResourceProxy> resourceProxy;
+  std::shared_ptr<IRenderContext> renderContext;
 };
 
 }
