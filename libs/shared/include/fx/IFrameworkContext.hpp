@@ -3,7 +3,6 @@
 namespace tr {
 
 class IGameLoop;
-class IGuiSystem;
 class IGraphicsContext;
 class IGuiCallbackRegistrar;
 class ITaskQueue;

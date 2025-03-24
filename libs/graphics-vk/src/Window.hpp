@@ -6,12 +6,13 @@
 
 namespace tr {
 
+struct VkGraphicsCreateInfo;
+
 class Window : public tr::IWindow {
 public:
   Window(std::shared_ptr<IEventBus> newEventBus,
          std::shared_ptr<IGuiAdapter> newGuiAdapter,
-         const glm::ivec2& dimensions,
-         const std::string& windowTitle);
+         const VkGraphicsCreateInfo& createInfo);
   ~Window() override;
 
   Window(const Window&) = default;
