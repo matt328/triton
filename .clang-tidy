@@ -1,7 +1,7 @@
 ---
 Checks: "*,-llvmlibc-*, -fuchsia-*, -altera-*, -llvm-*, -google-readability-namespace-comments, -misc-no-recursion, -misc-include-cleaner, -hicpp-uppercase-literal-suffix, -readability-uppercase-literal-suffix, -readability-identifier-length, -cppcoreguidelines-pro-type-union-access"
 WarningsAsErrors: "true"
-HeaderFilterRegex: ""
+HeaderFilterRegex: "^(?!.*(build/debug/_deps)).*$"
 FormatStyle: google
 CheckOptions:
   - key: google-readability-braces-around-statements.ShortStatementLines
