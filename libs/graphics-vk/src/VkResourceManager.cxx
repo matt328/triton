@@ -420,7 +420,7 @@ auto VkResourceManager::createDepthImageAndView([[maybe_unused]] std::string_vie
       .usage = vk::ImageUsageFlagBits::eDepthStencilAttachment,
       .sharingMode = vk::SharingMode::eExclusive,
       .initialLayout = vk::ImageLayout::eUndefined};
-
+  assert(imageCreateInfo.extent.height != 0 && imageCreateInfo.extent.width != 0);
   constexpr auto imageAllocateCreateInfo =
       vma::AllocationCreateInfo{.usage = vma::MemoryUsage::eGpuOnly};
 

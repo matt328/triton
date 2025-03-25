@@ -20,7 +20,7 @@ public:
                 std::shared_ptr<ImmediateTransferContext> newImmediateTransferContext,
                 std::shared_ptr<Device> newDevice,
                 std::shared_ptr<ITaskQueue> newTaskQueue,
-                const std::shared_ptr<IEventBus>& eventBus);
+                std::shared_ptr<IEventBus> eventBus);
   ~BufferManager() override = default;
 
   BufferManager(const BufferManager&) = delete;

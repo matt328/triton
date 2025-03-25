@@ -9,9 +9,9 @@ namespace tr {
 const auto VertexShaderFile = SHADERS / "static.vert.spv";
 const auto FragmentShaderFile = SHADERS / "static.frag.spv";
 
-StaticPipeline::StaticPipeline(const std::shared_ptr<Device>& device,
-                               const std::shared_ptr<IShaderModuleFactory>& shaderCompiler,
-                               const std::shared_ptr<VkResourceManager>& resourceManager) {
+StaticPipeline::StaticPipeline(std::shared_ptr<Device> device,
+                               std::shared_ptr<IShaderModuleFactory> shaderCompiler,
+                               std::shared_ptr<VkResourceManager> resourceManager) {
   Log.trace("Constructing StaticPipeline");
 
   // Pipeline Layout

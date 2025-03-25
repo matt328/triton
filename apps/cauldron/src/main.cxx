@@ -51,12 +51,11 @@ auto main() -> int {
   auto propertiesPath = configDir / "editor";
 
   try {
-    const auto frameworkConfig =
-        tr::FrameworkConfig{.initialWindowSize = glm::ivec2(width, height),
-                            .windowTitle = windowTitle.str(),
-                            .guiAdapter = std::make_shared<tr::ImGuiAdapter>()};
+    const auto guiAdapter = std::make_shared<tr::ImGuiAdapter>();
+    const auto frameworkConfig = tr::FrameworkConfig{.initialWindowSize = glm::ivec2(width, height),
+                                                     .windowTitle = windowTitle.str()};
 
-    const auto fc = tr::createFrameworkContext(frameworkConfig);
+    const auto fc = tr::createFrameworkContext(frameworkConfig, guiAdapter);
 
     const auto injector = di::make_injector(
         di::bind<std::filesystem::path>.to<>(propertiesPath),

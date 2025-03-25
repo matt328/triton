@@ -1,37 +1,46 @@
 #include "VkGraphicsFactory.hpp"
 
 #include "DefaultDebugManager.hpp"
+#include "NewRenderContext.hpp"
 #include "VkGraphicsContext.hpp"
 #include "ResourceProxyImpl.hpp"
 
 #include "Window.hpp"
 #include "mem/Allocator.hpp"
 #include "pipeline/SpirvShaderModuleFactory.hpp"
+#include "task/DefaultFrameManager.hpp"
+#include "task/DefaultRenderScheduler.hpp"
+#include "gfx/QueueTypes.hpp"
+
 #include "vk/BufferManager.hpp"
 #include "vk/CommandBufferManager.hpp"
-#include "vk/core/Context.hpp"
-#include "vk/core/Surface.hpp"
-#include "gfx/QueueTypes.hpp"
+
 #include "vk/sb/DSLayoutManager.hpp"
 #include "vk/sb/DSShaderBindingFactory.hpp"
+
+#include "vk/core/Context.hpp"
+#include "vk/core/Surface.hpp"
 #include "vk/core/Device.hpp"
 #include "vk/core/PhysicalDevice.hpp"
-#include "ImmediateTransferContext.hpp"
 #include "vk/core/Instance.hpp"
+
+#include "ImmediateTransferContext.hpp"
 #include "VkResourceManager.hpp"
 #include "ResourceProxyImpl.hpp"
 #include "VkGraphicsContext.hpp"
+#include "Window.hpp"
+#include "cm/ImGuiSystem.hpp"
 
 #include <di.hpp>
 
 namespace di = boost::di;
 
 namespace tr {
-auto createVkGraphicsContext(const VkGraphicsCreateInfo& createInfo,
+auto createVkGraphicsContext(VkGraphicsCreateInfo createInfo,
                              std::shared_ptr<IGuiCallbackRegistrar> newGuiCallbackRegistrar,
-                             const std::shared_ptr<IEventBus>& newEventBus,
+                             std::shared_ptr<IEventBus> newEventBus,
                              std::shared_ptr<ITaskQueue> newTaskQueue,
-                             const std::shared_ptr<IGuiAdapter>& newGuiAdapter)
+                             std::shared_ptr<IGuiAdapter> newGuiAdapter)
     -> std::shared_ptr<IGraphicsContext> {
   const auto injector =
       di::make_injector(di::bind<VkGraphicsCreateInfo>.to<>(createInfo),
@@ -58,7 +67,11 @@ auto createVkGraphicsContext(const VkGraphicsCreateInfo& createInfo,
                         di::bind<Allocator>.to<Allocator>(),
                         di::bind<IBufferManager>.to<BufferManager>(),
                         di::bind<ITaskQueue>.to<>(newTaskQueue),
-                        di::bind<VkResourceManager>.to<VkResourceManager>());
+                        di::bind<VkResourceManager>.to<VkResourceManager>(),
+                        di::bind<IFrameManager>.to<DefaultFrameManager>(),
+                        di::bind<IRenderScheduler>.to<DefaultRenderScheduler>(),
+                        di::bind<IRenderContext>.to<NewRenderContext>(),
+                        di::bind<IGuiSystem>.to<ImGuiSystem>());
 
   return injector.create<std::shared_ptr<VkGraphicsContext>>();
 }

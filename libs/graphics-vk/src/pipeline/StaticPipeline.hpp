@@ -10,9 +10,9 @@ class VkResourceManager;
 
 class StaticPipeline : public IPipeline {
 public:
-  StaticPipeline(const std::shared_ptr<Device>& device,
-                 const std::shared_ptr<IShaderModuleFactory>& shaderCompiler,
-                 const std::shared_ptr<VkResourceManager>& resourceManager);
+  StaticPipeline(std::shared_ptr<Device> device,
+                 std::shared_ptr<IShaderModuleFactory> shaderCompiler,
+                 std::shared_ptr<VkResourceManager> resourceManager);
   ~StaticPipeline() override = default;
 
   StaticPipeline(const StaticPipeline&) = delete;

@@ -11,9 +11,9 @@ class VkResourceManager;
 
 class IndirectPipeline : public IPipeline {
 public:
-  IndirectPipeline(const std::shared_ptr<Device>& device,
-                   const std::shared_ptr<IShaderModuleFactory>& shaderCompiler,
-                   const std::shared_ptr<VkResourceManager>& resourceManager);
+  IndirectPipeline(std::shared_ptr<Device> device,
+                   std::shared_ptr<IShaderModuleFactory> shaderCompiler,
+                   std::shared_ptr<VkResourceManager> resourceManager);
   ~IndirectPipeline() override = default;
 
   IndirectPipeline(const IndirectPipeline&) = delete;
