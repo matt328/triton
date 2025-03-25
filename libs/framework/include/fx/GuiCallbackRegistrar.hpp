@@ -15,6 +15,7 @@ public:
   auto operator=(GuiCallBackRegistrar&&) -> GuiCallBackRegistrar& = delete;
 
   auto setRenderCallback(std::function<void(void)> newRenderFn) -> void override;
+  auto render() -> void override;
 
 private:
   std::function<void(void)> renderFn;

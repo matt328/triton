@@ -1,13 +1,13 @@
 #include "DataFacade.hpp"
 
 #include "fx/IGameWorldSystem.hpp"
-#include "fx/ITaskQueue.hpp"
+#include "TaskQueue.hpp"
 #include "cm/TerrainCreateInfo.hpp"
 
 namespace ed {
 
 DataFacade::DataFacade(std::shared_ptr<tr::IGameWorldSystem> newGameWorldSystem,
-                       std::shared_ptr<tr::ITaskQueue> newTaskQueue)
+                       std::shared_ptr<tr::TaskQueue> newTaskQueue)
     : gameWorldSystem{std::move(newGameWorldSystem)}, taskQueue{std::move(newTaskQueue)} {
   Log.trace("Creating DataFacade");
 }

@@ -1,4 +1,5 @@
 #include "cm/ImGuiSystem.hpp"
+#include "fx/IGuiCallbackRegistrar.hpp"
 #include "imgui.h"
 #include "gfx/IWindow.hpp"
 
@@ -12,8 +13,11 @@ ImGuiSystem::ImGuiSystem(const std::shared_ptr<IWindow>& window,
                          const std::shared_ptr<PhysicalDevice>& physicalDevice,
                          const std::shared_ptr<queue::Graphics>& graphicsQueue,
                          const std::shared_ptr<Swapchain>& swapchain,
-                         std::shared_ptr<VkResourceManager> newResourceManager)
-    : resourceManager{std::move(newResourceManager)}, device{std::move(newDevice)} {
+                         std::shared_ptr<VkResourceManager> newResourceManager,
+                         std::shared_ptr<IGuiCallbackRegistrar> newGuiCallbackRegistrar)
+    : resourceManager{std::move(newResourceManager)},
+      device{std::move(newDevice)},
+      guiCallbackRegistrar{std::move(newGuiCallbackRegistrar)} {
   Log.trace("Creating ImGuiSystem");
 
   descriptorPool = resourceManager->createDefaultDescriptorPool();
@@ -58,7 +62,8 @@ auto ImGuiSystem::render(vk::raii::CommandBuffer& commandBuffer,
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
   }
-  renderFn();
+
+  guiCallbackRegistrar->render();
 
   {
     ZoneNamedN(var, "ImGui::Render", true);

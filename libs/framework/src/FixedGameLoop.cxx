@@ -1,6 +1,7 @@
 #include "FixedGameLoop.hpp"
+#include "fx/IEventBus.hpp"
 #include "fx/IGameWorldSystem.hpp"
-#include "fx/ITaskQueue.hpp"
+#include "TaskQueue.hpp"
 #include "gfx/IRenderContext.hpp"
 #include "gfx/IWindow.hpp"
 
@@ -11,13 +12,24 @@ FixedGameLoop::FixedGameLoop(std::shared_ptr<IEventBus> newEventBus,
                              std::shared_ptr<IWindow> newWindow,
                              std::shared_ptr<IGuiSystem> newGuiSystem,
                              std::shared_ptr<IGameWorldSystem> newGameWorldSystem,
-                             std::shared_ptr<ITaskQueue> newTaskQueue)
+                             std::shared_ptr<TaskQueue> newTaskQueue)
     : eventBus{std::move(newEventBus)},
       renderContext{std::move(newRenderContext)},
       window{std::move(newWindow)},
       guiSystem{std::move(newGuiSystem)},
       gameplaySystem{std::move(newGameWorldSystem)},
       taskQueue{std::move(newTaskQueue)} {
+  Log.trace("Constructing FixedGameLoop");
+  // TODO(matt): Move this functionality somewhere else?
+  eventBus->subscribe<tr::WindowClosed>(
+      [&]([[maybe_unused]] const tr::WindowClosed& event) { running = false; });
+
+  // Wire together game world to render world
+  gameplaySystem->setRenderDataTransferHandler(
+      [&](const RenderData& renderData) { renderContext->setRenderData(renderData); });
+
+  Log.debug("Creating Default Camera");
+  gameplaySystem->createDefaultCamera();
 }
 
 auto FixedGameLoop::run() -> void {

@@ -4,14 +4,14 @@
 #include "cm/IGeometryData.hpp"
 #include "mem/Allocator.hpp"
 #include "mem/Buffer.hpp"
-#include "fx/ITaskQueue.hpp"
+#include "TaskQueue.hpp"
 
 namespace tr {
 
 BufferManager::BufferManager(std::shared_ptr<Allocator> newAllocator,
                              std::shared_ptr<ImmediateTransferContext> newImmediateTransferContext,
                              std::shared_ptr<Device> newDevice,
-                             std::shared_ptr<ITaskQueue> newTaskQueue,
+                             std::shared_ptr<TaskQueue> newTaskQueue,
                              std::shared_ptr<IEventBus> eventBus)
     : allocator{std::move(newAllocator)},
       immediateTransferContext{std::move(newImmediateTransferContext)},

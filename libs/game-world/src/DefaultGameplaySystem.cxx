@@ -115,6 +115,7 @@ void DefaultGameplaySystem::update() {
 
     renderDataSystem->update(renderData);
   }
+  assert(transferHandler && "TransferHandler was not set");
   transferHandler(renderData);
 }
 

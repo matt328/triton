@@ -12,14 +12,14 @@ class Buffer;
 class Allocator;
 class ImmediateTransferContext;
 class IGeometryData;
-class ITaskQueue;
+class TaskQueue;
 
 class BufferManager : public IBufferManager {
 public:
   BufferManager(std::shared_ptr<Allocator> newAllocator,
                 std::shared_ptr<ImmediateTransferContext> newImmediateTransferContext,
                 std::shared_ptr<Device> newDevice,
-                std::shared_ptr<ITaskQueue> newTaskQueue,
+                std::shared_ptr<TaskQueue> newTaskQueue,
                 std::shared_ptr<IEventBus> eventBus);
   ~BufferManager() override = default;
 
@@ -63,7 +63,7 @@ private:
   std::shared_ptr<Allocator> allocator;
   std::shared_ptr<ImmediateTransferContext> immediateTransferContext;
   std::shared_ptr<Device> device;
-  std::shared_ptr<ITaskQueue> taskQueue;
+  std::shared_ptr<TaskQueue> taskQueue;
 
   MapKey bufferMapKeygen;
   std::unordered_map<BufferHandle, std::unique_ptr<Buffer>> bufferMap;

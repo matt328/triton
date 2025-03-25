@@ -7,16 +7,13 @@
 #include "VkResourceManager.hpp"
 
 namespace tr {
+
 class Swapchain;
 class Instance;
 class IGraphicsDevice;
-}
-
-namespace tr {
 class IWindow;
-}
+class IGuiCallbackRegistrar;
 
-namespace tr {
 class ImGuiSystem final : public IGuiSystem {
 public:
   ImGuiSystem(const std::shared_ptr<IWindow>& window,
@@ -25,7 +22,8 @@ public:
               const std::shared_ptr<PhysicalDevice>& physicalDevice,
               const std::shared_ptr<queue::Graphics>& graphicsQueue,
               const std::shared_ptr<Swapchain>& swapchain,
-              std::shared_ptr<VkResourceManager> newResourceManager);
+              std::shared_ptr<VkResourceManager> newResourceManager,
+              std::shared_ptr<IGuiCallbackRegistrar> newGuiCallbackRegistrar);
   ~ImGuiSystem() override;
 
   ImGuiSystem(const ImGuiSystem&) = delete;
@@ -40,6 +38,7 @@ public:
 private:
   std::shared_ptr<VkResourceManager> resourceManager;
   std::shared_ptr<Device> device;
+  std::shared_ptr<IGuiCallbackRegistrar> guiCallbackRegistrar;
 
   std::unique_ptr<vk::raii::DescriptorPool> descriptorPool;
   std::function<void()> renderFn;

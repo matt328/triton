@@ -1,6 +1,6 @@
 #include "Manager.hpp"
 
-#include "fx/ITaskQueue.hpp"
+#include "TaskQueue.hpp"
 
 #include "ImGuiStyle.hpp"
 #include "assets/RobotoRegular.h"
@@ -24,7 +24,7 @@ Manager::Manager(std::shared_ptr<Menu> newAppMenu,
                  std::shared_ptr<AssetViewer> newAssetViewer,
                  std::shared_ptr<DialogManager> newDialogManager,
                  std::shared_ptr<EntityEditor> newEntityEditor,
-                 std::shared_ptr<tr::ITaskQueue> newTaskQueue,
+                 std::shared_ptr<tr::TaskQueue> newTaskQueue,
                  std::shared_ptr<Properties> newProperties,
                  std::shared_ptr<DataFacade> newDataFacade,
                  std::shared_ptr<AssetTool> newAssetTool)
