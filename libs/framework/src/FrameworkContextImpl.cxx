@@ -5,7 +5,7 @@ namespace tr {
 FrameworkContextImpl::FrameworkContextImpl(
     std::shared_ptr<IGameLoop> newGameLoop,
     std::shared_ptr<IGuiCallbackRegistrar> newGuiCallbackRegistrar,
-    std::shared_ptr<ITaskQueue> newTaskQueue,
+    std::shared_ptr<TaskQueue> newTaskQueue,
     std::shared_ptr<IEventBus> newEventBus,
     std::shared_ptr<IGameObjectProxy> newGameObjectProxy,
     std::shared_ptr<IGameWorldSystem> newGameWorldSystem,
@@ -33,7 +33,7 @@ auto FrameworkContextImpl::getGuiCallbackRegistrar() -> std::shared_ptr<IGuiCall
   return guiCallbackRegistrar;
 }
 
-auto FrameworkContextImpl::getTaskQueue() -> std::shared_ptr<ITaskQueue> {
+auto FrameworkContextImpl::getTaskQueue() -> std::shared_ptr<TaskQueue> {
   return taskQueue;
 }
 

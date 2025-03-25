@@ -3,7 +3,7 @@
 #include "fx/IGameLoop.hpp"
 #include "fx/ext/IGameObjectProxy.hpp"
 #include "fx/IGuiCallbackRegistrar.hpp"
-#include "fx/ITaskQueue.hpp"
+#include "TaskQueue.hpp"
 #include "fx/IEventBus.hpp"
 #include "fx/IGameWorldSystem.hpp"
 
@@ -31,7 +31,7 @@ namespace di = boost::di;
 // #else
 auto main() -> int {
   // #endif
-  initLogger(spdlog::level::err, spdlog::level::err);
+  initLogger(spdlog::level::trace, spdlog::level::trace);
 
   Log.info("Console is now ready for logging!");
 
@@ -61,7 +61,7 @@ auto main() -> int {
         di::bind<std::filesystem::path>.to<>(propertiesPath),
         di::bind<tr::IGameLoop>.to([&fc] { return fc->getGameLoop(); }),
         di::bind<tr::IGuiCallbackRegistrar>.to([&fc] { return fc->getGuiCallbackRegistrar(); }),
-        di::bind<tr::ITaskQueue>.to([&fc] { return fc->getTaskQueue(); }),
+        di::bind<tr::TaskQueue>.to([&fc] { return fc->getTaskQueue(); }),
         di::bind<tr::IEventBus>.to([&fc] { return fc->getEventBus(); }),
         di::bind<tr::IGameObjectProxy>.to([&fc] { return fc->getGameObjectProxy(); }),
         di::bind<tr::IGameWorldSystem>.to([&fc] { return fc->getGameWorldSystem(); }));

@@ -17,6 +17,7 @@ target_precompile_headers(${PROJECT_NAME}
   <functional>
   <iomanip>
   <iostream>
+  <queue>
   <string_view>
   <spdlog/spdlog.h>
   <spdlog/async.h>
@@ -24,6 +25,8 @@ target_precompile_headers(${PROJECT_NAME}
   <spdlog/sinks/basic_file_sink.h>
   <spdlog/sinks/stdout_color_sinks.h>
   <string>
+  <tracy/Tracy.hpp>
+  <tracy/TracyC.h>
   <BaseException.hpp>
   <Logger2.hpp>
 )
@@ -31,6 +34,7 @@ target_precompile_headers(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
   PUBLIC
   spdlog::spdlog_header_only
+  Tracy::TracyClient
 )
 
 target_include_directories(${PROJECT_NAME}

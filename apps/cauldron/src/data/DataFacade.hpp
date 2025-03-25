@@ -5,7 +5,7 @@
 
 namespace tr {
 class IGameWorldSystem;
-class ITaskQueue;
+class TaskQueue;
 }
 
 namespace ed {
@@ -13,7 +13,7 @@ namespace ed {
 class DataFacade {
 public:
   DataFacade(std::shared_ptr<tr::IGameWorldSystem> newGameWorldSystem,
-             std::shared_ptr<tr::ITaskQueue> newTaskQueue);
+             std::shared_ptr<tr::TaskQueue> newTaskQueue);
   ~DataFacade();
 
   DataFacade(const DataFacade&) = delete;
@@ -97,7 +97,7 @@ public:
 
 private:
   std::shared_ptr<tr::IGameWorldSystem> gameWorldSystem;
-  std::shared_ptr<tr::ITaskQueue> taskQueue;
+  std::shared_ptr<tr::TaskQueue> taskQueue;
 
   bool unsaved{};
   bool engineBusy{};

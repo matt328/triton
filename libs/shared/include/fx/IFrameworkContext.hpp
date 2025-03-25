@@ -5,7 +5,7 @@ namespace tr {
 class IGameLoop;
 class IGraphicsContext;
 class IGuiCallbackRegistrar;
-class ITaskQueue;
+class TaskQueue;
 class IEventBus;
 class IGameObjectProxy;
 class IGameWorldSystem;
@@ -25,7 +25,7 @@ public:
 
   virtual auto getGameLoop() -> std::shared_ptr<IGameLoop> = 0;
   virtual auto getGuiCallbackRegistrar() -> std::shared_ptr<IGuiCallbackRegistrar> = 0;
-  virtual auto getTaskQueue() -> std::shared_ptr<ITaskQueue> = 0;
+  virtual auto getTaskQueue() -> std::shared_ptr<TaskQueue> = 0;
   virtual auto getEventBus() -> std::shared_ptr<IEventBus> = 0;
   virtual auto getGameObjectProxy() -> std::shared_ptr<IGameObjectProxy> = 0;
   virtual auto getGameWorldSystem() -> std::shared_ptr<IGameWorldSystem> = 0;

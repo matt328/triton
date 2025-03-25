@@ -8,7 +8,7 @@ class FrameworkContextImpl : public IFrameworkContext {
 public:
   FrameworkContextImpl(std::shared_ptr<IGameLoop> newGameLoop,
                        std::shared_ptr<IGuiCallbackRegistrar> newGuiCallbackRegistrar,
-                       std::shared_ptr<ITaskQueue> newTaskQueue,
+                       std::shared_ptr<TaskQueue> newTaskQueue,
                        std::shared_ptr<IEventBus> newEventBus,
                        std::shared_ptr<IGameObjectProxy> newGameObjectProxy,
                        std::shared_ptr<IGameWorldSystem> newGameWorldSystem,
@@ -25,7 +25,7 @@ public:
 
   auto getGameLoop() -> std::shared_ptr<IGameLoop> override;
   auto getGuiCallbackRegistrar() -> std::shared_ptr<IGuiCallbackRegistrar> override;
-  auto getTaskQueue() -> std::shared_ptr<ITaskQueue> override;
+  auto getTaskQueue() -> std::shared_ptr<TaskQueue> override;
   auto getEventBus() -> std::shared_ptr<IEventBus> override;
   auto getGameObjectProxy() -> std::shared_ptr<IGameObjectProxy> override;
   auto getGameWorldSystem() -> std::shared_ptr<IGameWorldSystem> override;
@@ -35,7 +35,7 @@ public:
 private:
   std::shared_ptr<IGameLoop> gameLoop;
   std::shared_ptr<IGuiCallbackRegistrar> guiCallbackRegistrar;
-  std::shared_ptr<ITaskQueue> taskQueue;
+  std::shared_ptr<TaskQueue> taskQueue;
   std::shared_ptr<IEventBus> eventBus;
   std::shared_ptr<IGameObjectProxy> gameObjectProxy;
   std::shared_ptr<IGameWorldSystem> gameWorldSystem;

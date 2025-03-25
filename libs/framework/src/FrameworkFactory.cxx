@@ -30,7 +30,7 @@ auto createFrameworkContext(const FrameworkConfig& config, std::shared_ptr<IGuiA
   const auto eventBus = std::make_shared<DefaultEventBus>();
   const auto assetService = std::make_shared<DefaultAssetService>();
   const auto actionSystem = std::make_shared<ActionSystem>(eventBus);
-  const auto taskQueue = std::make_shared<TaskQueue>(1024);
+  const auto taskQueue = std::make_shared<TaskQueue>(TaskQueueConfig{.maxQueueSize = 1024});
 
   const auto graphicsConfig = VkGraphicsCreateInfo{.initialWindowSize = config.initialWindowSize,
                                                    .windowTitle = config.windowTitle};
@@ -58,7 +58,7 @@ auto createFrameworkContext(const FrameworkConfig& config, std::shared_ptr<IGuiA
       di::make_injector(di::bind<IGameLoop>.to<FixedGameLoop>(),
                         di::bind<IRenderContext>.to<>(renderContext),
                         di::bind<IGuiCallbackRegistrar>.to(guiCallbackRegistrar),
-                        di::bind<ITaskQueue>.to<>(taskQueue),
+                        di::bind<TaskQueue>.to<>(taskQueue),
                         di::bind<IEventBus>.to<>(eventBus),
                         di::bind<IGameObjectProxy>.to<>(gameObjectProxy),
                         di::bind<IGameWorldSystem>.to(gameWorldSystem),

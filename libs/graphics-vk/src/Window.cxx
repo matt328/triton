@@ -16,6 +16,8 @@ namespace tr {
 constexpr int MinWidth = 320;
 constexpr int MinHeight = 200;
 
+// TODO(matt): window size is not being propagated to the swapchain images correctly
+
 Window::Window(std::shared_ptr<IEventBus> newEventBus,
                std::shared_ptr<tr::IGuiAdapter> newGuiAdapter,
                VkGraphicsCreateInfo createInfo)

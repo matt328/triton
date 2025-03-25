@@ -39,11 +39,19 @@ namespace tr {
 auto createVkGraphicsContext(VkGraphicsCreateInfo createInfo,
                              std::shared_ptr<IGuiCallbackRegistrar> newGuiCallbackRegistrar,
                              std::shared_ptr<IEventBus> newEventBus,
-                             std::shared_ptr<ITaskQueue> newTaskQueue,
+                             std::shared_ptr<TaskQueue> newTaskQueue,
                              std::shared_ptr<IGuiAdapter> newGuiAdapter)
     -> std::shared_ptr<IGraphicsContext> {
+  // Need to bind a rendercontextconfig here
+  constexpr auto rendererConfig = RenderContextConfig{.useDescriptorBuffers = false,
+                                                      .maxStaticObjects = 1024,
+                                                      .maxDynamicObjects = 1024,
+                                                      .maxTerrainChunks = 1024,
+                                                      .maxTextures = 16,
+                                                      .framesInFlight = 2};
   const auto injector =
-      di::make_injector(di::bind<VkGraphicsCreateInfo>.to<>(createInfo),
+      di::make_injector(di::bind<RenderContextConfig>.to<>(rendererConfig),
+                        di::bind<VkGraphicsCreateInfo>.to<>(createInfo),
                         di::bind<IGuiCallbackRegistrar>.to(newGuiCallbackRegistrar),
                         di::bind<IEventBus>.to<>(newEventBus),
                         di::bind<IResourceProxy>.to<ResourceProxyImpl>(),
@@ -66,7 +74,7 @@ auto createVkGraphicsContext(VkGraphicsCreateInfo createInfo,
                         di::bind<IShaderBindingFactory>.to<DSShaderBindingFactory>(),
                         di::bind<Allocator>.to<Allocator>(),
                         di::bind<IBufferManager>.to<BufferManager>(),
-                        di::bind<ITaskQueue>.to<>(newTaskQueue),
+                        di::bind<TaskQueue>.to<>(newTaskQueue),
                         di::bind<VkResourceManager>.to<VkResourceManager>(),
                         di::bind<IFrameManager>.to<DefaultFrameManager>(),
                         di::bind<IRenderScheduler>.to<DefaultRenderScheduler>(),
