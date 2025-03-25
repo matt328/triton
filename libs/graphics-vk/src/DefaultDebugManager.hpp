@@ -2,16 +2,13 @@
 
 #include "gfx/IDebugManager.hpp"
 
-#include "vk/core/Context.hpp"
-#include "vk/core/Device.hpp"
-
 namespace tr {
 
 class Context;
 
 const auto ValidationLayers = std::vector{"VK_LAYER_KHRONOS_validation"};
 
-class DefaultDebugManager final : public IDebugManager {
+class DefaultDebugManager : public IDebugManager {
 public:
   explicit DefaultDebugManager(std::shared_ptr<Context> newContext);
   ~DefaultDebugManager() override;

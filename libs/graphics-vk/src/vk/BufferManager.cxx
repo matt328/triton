@@ -12,7 +12,7 @@ BufferManager::BufferManager(std::shared_ptr<Allocator> newAllocator,
                              std::shared_ptr<ImmediateTransferContext> newImmediateTransferContext,
                              std::shared_ptr<Device> newDevice,
                              std::shared_ptr<ITaskQueue> newTaskQueue,
-                             const std::shared_ptr<IEventBus>& eventBus)
+                             std::shared_ptr<IEventBus> eventBus)
     : allocator{std::move(newAllocator)},
       immediateTransferContext{std::move(newImmediateTransferContext)},
       device{std::move(newDevice)},

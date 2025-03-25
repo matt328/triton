@@ -18,7 +18,7 @@ constexpr int MinHeight = 200;
 
 Window::Window(std::shared_ptr<IEventBus> newEventBus,
                std::shared_ptr<tr::IGuiAdapter> newGuiAdapter,
-               const VkGraphicsCreateInfo& createInfo)
+               VkGraphicsCreateInfo createInfo)
     : eventBus{std::move(newEventBus)}, guiAdapter{std::move(newGuiAdapter)} {
   Log.trace("Constructing Window");
 

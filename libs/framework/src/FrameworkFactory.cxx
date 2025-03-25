@@ -16,14 +16,14 @@
 #include "VoxelTerrainFactory.hpp"
 #include "gfx/IRenderContext.hpp"
 #include "TaskQueue.hpp"
-
+#include "gfx/IWindow.hpp"
 #include <di.hpp>
 
 namespace di = boost::di;
 
 namespace tr {
 
-auto createFrameworkContext([[maybe_unused]] const FrameworkConfig& config)
+auto createFrameworkContext(const FrameworkConfig& config, std::shared_ptr<IGuiAdapter> guiAdapter)
     -> std::shared_ptr<IFrameworkContext> {
 
   const auto guiCallbackRegistrar = std::make_shared<GuiCallBackRegistrar>();
@@ -39,9 +39,12 @@ auto createFrameworkContext([[maybe_unused]] const FrameworkConfig& config)
                                                        guiCallbackRegistrar,
                                                        eventBus,
                                                        taskQueue,
-                                                       config.guiAdapter);
+                                                       guiAdapter);
+
   const auto resourceProxy = graphicsContext->getResourceProxy();
   const auto renderContext = graphicsContext->getRenderContext();
+  const auto window = graphicsContext->getWindow();
+  const auto guiSystem = graphicsContext->getGuiSystem();
 
   const auto terrainContext = createTerrainContext();
   const auto terrainProxy = terrainContext->getTerrainSystemProxy();
@@ -62,7 +65,9 @@ auto createFrameworkContext([[maybe_unused]] const FrameworkConfig& config)
                         di::bind<IAssetService>.to<>(assetService),
                         di::bind<IActionSystem>.to<>(actionSystem),
                         di::bind<IGameWorldContext>.to<>(gameWorldContext),
-                        di::bind<IGraphicsContext>.to<>(graphicsContext));
+                        di::bind<IGraphicsContext>.to<>(graphicsContext),
+                        di::bind<IWindow>.to<>(window),
+                        di::bind<IGuiSystem>.to<>(guiSystem));
 
   const auto frameworkContext = frameworkInjector.create<std::shared_ptr<FrameworkContextImpl>>();
 

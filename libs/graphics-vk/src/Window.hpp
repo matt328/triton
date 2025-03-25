@@ -12,7 +12,7 @@ class Window : public tr::IWindow {
 public:
   Window(std::shared_ptr<IEventBus> newEventBus,
          std::shared_ptr<IGuiAdapter> newGuiAdapter,
-         const VkGraphicsCreateInfo& createInfo);
+         VkGraphicsCreateInfo createInfo);
   ~Window() override;
 
   Window(const Window&) = default;

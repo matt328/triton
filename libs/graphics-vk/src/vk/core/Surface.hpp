@@ -14,7 +14,7 @@ public:
   auto operator=(const Surface&) -> Surface& = delete;
   auto operator=(Surface&&) -> Surface& = delete;
 
-  auto getVkSurface() const -> vk::raii::SurfaceKHR&;
+  [[nodiscard]] auto getVkSurface() const -> vk::raii::SurfaceKHR&;
 
 private:
   std::shared_ptr<IWindow> window;

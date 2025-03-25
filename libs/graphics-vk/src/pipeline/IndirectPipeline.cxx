@@ -8,9 +8,9 @@ namespace tr {
 const auto VertexShaderFile = SHADERS / "dynamic.vert.spv";
 const auto FragmentShaderFile = SHADERS / "dynamic.frag.spv";
 
-IndirectPipeline::IndirectPipeline(const std::shared_ptr<Device>& device,
-                                   const std::shared_ptr<IShaderModuleFactory>& shaderCompiler,
-                                   const std::shared_ptr<VkResourceManager>& resourceManager) {
+IndirectPipeline::IndirectPipeline(std::shared_ptr<Device> device,
+                                   std::shared_ptr<IShaderModuleFactory> shaderCompiler,
+                                   std::shared_ptr<VkResourceManager> resourceManager) {
   Log.trace("Constructing IndirectPipeline");
 
   const auto pushConstantRange = vk::PushConstantRange{
@@ -50,7 +50,7 @@ IndirectPipeline::IndirectPipeline(const std::shared_ptr<Device>& device,
                                         .pName = "main"});
 
   // Vertex Input State
-  constexpr auto vertexAttributeDescriptions = std::array<vk::VertexInputAttributeDescription, 4>{
+  const auto vertexAttributeDescriptions = std::array<vk::VertexInputAttributeDescription, 4>{
       // Position
       vk::VertexInputAttributeDescription{.location = 0,
                                           .binding = 0,
