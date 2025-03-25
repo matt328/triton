@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.19 FATAL_ERROR)
 
 if(POLICY CMP0019)
-  cmake_policy(SET CMP0019 NEW)
+   cmake_policy(SET CMP0019 NEW)
 endif()
 
 project(Triton LANGUAGES CXX)
@@ -26,10 +26,10 @@ add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 
 if(APPLE OR UNIX)
-  set(CMAKE_CXX_FLAGS -std=c++23)
-  add_compile_options(-stdlib=libc++)
-  add_link_options(-fuse-ld=lld -stdlib=libc++)
-  set(CMAKE_EXE_LINKER_FLAGS "-stdlib=libc++ -lc++")
+   set(CMAKE_CXX_FLAGS -std=c++23)
+   add_compile_options(-stdlib=libc++)
+   add_link_options(-fuse-ld=lld -stdlib=libc++)
+   set(CMAKE_EXE_LINKER_FLAGS "-L/usr/local/opt/llvm/lib/c++ -L/usr/local/opt/llvm/lib/unwind -lunwind -lc++ -lc++abi")
 endif()
 
 set(CATCH2_VERSION v3.6.0)
