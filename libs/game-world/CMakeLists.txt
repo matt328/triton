@@ -42,6 +42,7 @@ target_precompile_headers(${PROJECT_NAME}
   <glm/glm.hpp>
   <glm/ext/matrix_clip_space.hpp>
   <glm/ext/matrix_transform.hpp>
+  <shared_mutex>
   <tracy/Tracy.hpp>
   <tracy/TracyC.h>
   <unordered_map>
