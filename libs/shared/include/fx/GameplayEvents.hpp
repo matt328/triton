@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gw/GameObjectType.hpp"
+#include "cm/GameObjectType.hpp"
 
 namespace tr {
 struct EntityCreated {

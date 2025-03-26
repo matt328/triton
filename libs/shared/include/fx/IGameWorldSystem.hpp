@@ -3,7 +3,7 @@
 #include "gw/AnimatedModelData.hpp"
 #include "cm/TerrainCreateInfo.hpp"
 #include "cm/TransformData.hpp"
-#include "gw/GameObjectType.hpp"
+#include "cm/GameObjectType.hpp"
 #include "cm/RenderData.hpp"
 #include "cm/TerrainResult.hpp"
 

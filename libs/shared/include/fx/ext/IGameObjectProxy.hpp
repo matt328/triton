@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gw/GameObjectType.hpp"
+#include "cm/GameObjectType.hpp"
 #include "cm/TransformData.hpp"
 #include "fx/GameObjectId.hpp"
 #include "fx/ext/StaticObjectDetails.hpp"
@@ -28,12 +28,12 @@ public:
   virtual auto getDynamicObjectDetails() -> DynamicObjectDetails = 0;
   virtual auto getTerrainObjectDetails() -> TerrainObjectDetails = 0;
 
-  virtual auto setStaticObjectDetails(GameObjectId id,
-                                      const StaticObjectDetails& details) -> void = 0;
-  virtual auto setDynamicObjectDetails(GameObjectId id,
-                                       const DynamicObjectDetails& details) -> void = 0;
-  virtual auto setTerrainObjectDetails(GameObjectId id,
-                                       const TerrainObjectDetails& details) -> void = 0;
+  virtual auto setStaticObjectDetails(GameObjectId id, const StaticObjectDetails& details)
+      -> void = 0;
+  virtual auto setDynamicObjectDetails(GameObjectId id, const DynamicObjectDetails& details)
+      -> void = 0;
+  virtual auto setTerrainObjectDetails(GameObjectId id, const TerrainObjectDetails& details)
+      -> void = 0;
 
   // Debug Methods
   virtual auto triangulateChunk(GameObjectId terrainId,
