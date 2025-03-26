@@ -10,7 +10,7 @@ auto VoxelTerrainSystemProxy::registerTerrain([[maybe_unused]] const TerrainCrea
 
 auto VoxelTerrainSystemProxy::triangulateBlock([[maybe_unused]] TerrainHandle terrainHandle,
                                                [[maybe_unused]] BlockHandle blockHandle,
-                                               [[maybe_unused]] tr::EntityType blockId,
+                                               [[maybe_unused]] GameObjectId blockId,
                                                [[maybe_unused]] glm::ivec3 cellPosition) -> void {
 }
 

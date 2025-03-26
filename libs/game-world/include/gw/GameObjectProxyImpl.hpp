@@ -15,8 +15,8 @@ public:
   auto operator=(const GameObjectProxyImpl&) -> GameObjectProxyImpl& = delete;
   auto operator=(GameObjectProxyImpl&&) -> GameObjectProxyImpl& = delete;
 
-  auto removeEntity(tr::EntityType entityType) -> void override;
-  auto setTransform(tr::EntityType entityType, TransformData transformData) -> void override;
+  auto removeEntity(GameObjectId entityType) -> void override;
+  auto setTransform(GameObjectId entityType, TransformData transformData) -> void override;
 
   auto getEditableGameObjects() -> std::vector<GameObjectId> override;
   auto getStaticObjectDetails() -> StaticObjectDetails override;

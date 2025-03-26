@@ -6,10 +6,10 @@ GameObjectProxyImpl::GameObjectProxyImpl(std::shared_ptr<EntityService> newEntit
     : entityService{std::move(newEntityService)} {
 }
 
-auto GameObjectProxyImpl::removeEntity([[maybe_unused]] tr::EntityType entityType) -> void {
+auto GameObjectProxyImpl::removeEntity([[maybe_unused]] GameObjectId entityType) -> void {
 }
 
-auto GameObjectProxyImpl::setTransform([[maybe_unused]] tr::EntityType entityType,
+auto GameObjectProxyImpl::setTransform([[maybe_unused]] GameObjectId entityType,
                                        [[maybe_unused]] TransformData transformData) -> void {
 }
 

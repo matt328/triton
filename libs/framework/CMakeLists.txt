@@ -48,13 +48,13 @@ target_precompile_headers(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
   PUBLIC
-  asset-lib
+  asset-forge
   BoostDI
   cereal::cereal
   glm
   Tracy::TracyClient
   shared
-  util-lib
+  base-kit
   game-world
   voxel-terrain
   PRIVATE

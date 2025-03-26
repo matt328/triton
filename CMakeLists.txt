@@ -60,16 +60,11 @@ add_code_coverage_all_targets()
 include(CTest)
 
 add_subdirectory(assets)
-add_subdirectory(libs/util-lib)
+add_subdirectory(libs/asset-forge)
+add_subdirectory(libs/base-kit)
 add_subdirectory(libs/framework)
 add_subdirectory(libs/shared)
 add_subdirectory(libs/graphics-vk)
 add_subdirectory(libs/game-world)
 add_subdirectory(libs/voxel-terrain)
 add_subdirectory(apps/cauldron)
-
-# add_subdirectory(apps/testarea)
-# add_subdirectory(apps/assettool)
-add_subdirectory(libs/asset-lib)
-
-# add_subdirectory(libs/triton/tests)

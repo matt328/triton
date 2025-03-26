@@ -1,7 +1,7 @@
 #pragma once
 
 #include "GlmCereal.hpp"
-#include "cm/EntitySystemTypes.hpp"
+#include "gw/GameObjectType.hpp"
 
 namespace ed {
 
@@ -64,7 +64,7 @@ struct EntityData {
 };
 
 struct BlockData {
-  tr::EntityType entityId;
+  tr::GameObjectId entityId;
   glm::ivec3 location;
 };
 
@@ -73,7 +73,7 @@ struct TerrainData {
   glm::vec3 terrainSize;
 
   std::vector<BlockData> chunkData;
-  tr::EntityType entityId;
+  tr::GameObjectId entityId;
 
   template <class T>
   void serialize(T& archive) {
@@ -93,7 +93,7 @@ struct DataStore {
   // Terrain
   std::unordered_map<std::string, TerrainData> terrainMap;
 
-  std::unordered_map<std::string, tr::EntityType> entityNameMap;
+  std::unordered_map<std::string, tr::GameObjectId> entityNameMap;
 
   template <class T>
   void serialize(T& archive) {

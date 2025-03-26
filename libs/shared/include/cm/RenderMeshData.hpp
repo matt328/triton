@@ -1,7 +1,7 @@
 #pragma once
 
 #include "cm/Handles.hpp"
-#include "cm/AssetStructs.hpp"
+#include "gw/AssetStructs.hpp"
 
 namespace tr {
 

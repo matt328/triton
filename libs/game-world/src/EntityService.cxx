@@ -1,4 +1,6 @@
 #include "EntityService.hpp"
+
+#include "EntitySystemTypes.hpp"
 #include "components/TerrainComponent.hpp"
 #include "components/EditorInfo.hpp"
 #include "components/Resources.hpp"

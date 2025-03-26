@@ -103,7 +103,7 @@ target_link_libraries(${PROJECT_NAME}
   platform_folders
   spdlog::spdlog_header_only
   imgui_custom
-  util-lib
+  base-kit
   Vulkan::Vulkan
 )
 

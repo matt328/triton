@@ -43,20 +43,20 @@ public:
   auto createStaticModelEntity(std::string filename,
                                std::string_view entityName,
                                std::optional<TransformData> initialTransform)
-      -> tr::EntityType override;
+      -> GameObjectId override;
 
   auto createAnimatedModelEntity(const AnimatedModelData& modelData,
                                  std::optional<TransformData> initialTransform)
-      -> tr::EntityType override;
+      -> GameObjectId override;
 
   auto createTerrain(const TerrainCreateInfo& createInfo) -> TerrainResult2& override;
 
   auto createDefaultCamera() -> void override;
 
-  auto removeEntity(tr::EntityType entity) -> void override;
+  auto removeEntity(GameObjectId entity) -> void override;
 
-  auto triangulateChunk(tr::EntityType terrainId,
-                        tr::EntityType chunkId,
+  auto triangulateChunk(GameObjectId terrainId,
+                        GameObjectId chunkId,
                         glm::ivec3 cellPosition) -> void override;
 
 private:

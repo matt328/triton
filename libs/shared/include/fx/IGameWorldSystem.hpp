@@ -1,9 +1,9 @@
 #pragma once
 
-#include "cm/AnimatedModelData.hpp"
+#include "gw/AnimatedModelData.hpp"
 #include "cm/TerrainCreateInfo.hpp"
 #include "cm/TransformData.hpp"
-#include "cm/EntitySystemTypes.hpp"
+#include "gw/GameObjectType.hpp"
 #include "cm/RenderData.hpp"
 #include "cm/TerrainResult.hpp"
 
@@ -29,16 +29,16 @@ public:
   virtual auto createStaticModelEntity(std::string filename,
                                        std::string_view entityName,
                                        std::optional<TransformData> initialTransform)
-      -> tr::EntityType = 0;
+      -> tr::GameObjectId = 0;
   virtual auto createAnimatedModelEntity(const AnimatedModelData& modelData,
                                          std::optional<TransformData> initialTransform)
-      -> tr::EntityType = 0;
+      -> tr::GameObjectId = 0;
   virtual auto createTerrain(const TerrainCreateInfo& createInfo) -> TerrainResult2& = 0;
   virtual auto createDefaultCamera() -> void = 0;
-  virtual auto removeEntity(tr::EntityType entity) -> void = 0;
+  virtual auto removeEntity(tr::GameObjectId entity) -> void = 0;
 
-  virtual auto triangulateChunk(tr::EntityType terrainId,
-                                tr::EntityType chunkId,
+  virtual auto triangulateChunk(tr::GameObjectId terrainId,
+                                tr::GameObjectId chunkId,
                                 glm::ivec3 cellPosition) -> void = 0;
 };
 }

@@ -7,19 +7,21 @@ apps
   assettool
   testarea
 libs
+  base-kit
+    - low level utilities and structs needed by any/all other libraries. put something here only as a last resort
   shared
+    - is this even still needed? each component library should abstract its behavior behind a public api, and most of what is currently in shared
+      should probably just be part of that libs public api, with things common to more than one component lib in base-kit
     - Standalone utilities that can be used by other libraries, and are generic enough to work with any gameworld or graphics implementation.
   framework
     - Provides a FrameworkContext which keeps gameworld and graphics loosely coupled, and allows client applications to interface with each.
     - houses the run loop and orchestrates how gameworld and graphics interact with each other.
-  gameworld-ecs
+  game-world
     - houses the ecs and is where game logic lives, uses entt, but keeps it abstracted away from other libs
-  gameworld-somethingelse
-    - hypothetical gameworld library that uses something else to manage the gameworld
-  vkgraphics
-    - all vulkan related code goes here
-  dx12graphics
-    - hypothetical graphics library that is primarily a thought experiment to keep graphics abstracted away
+    - another ecs or no ecs at all could be swapped out, but that should be able to happen without changing the public api of the library
+  graphics
+    - all rendering code goes here
+    - vulkan or dx12 or whatever should be able to be swapped out without changing the public api of the library
 
 - Need to clean up and document project configurations.
   - When building without testing, test executables and their dependencies shouldn't even be included

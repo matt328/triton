@@ -1,9 +1,9 @@
 #pragma once
 
-#include "cm/EntitySystemTypes.hpp"
+#include "gw/GameObjectType.hpp"
 
 namespace tr {
 struct EntityCreated {
-  EntityType entityId;
+  GameObjectId entityId;
 };
 }

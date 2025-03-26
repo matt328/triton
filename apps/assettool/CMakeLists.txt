@@ -39,8 +39,8 @@ target_link_libraries(${PROJECT_NAME}
   BoostDI
   glm
   ozz_animation
-  util-lib
-  asset-lib
+  base-kit
+  asset-forge
 )
 
 if(UNIX)

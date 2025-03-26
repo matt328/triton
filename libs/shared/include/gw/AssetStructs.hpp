@@ -4,6 +4,11 @@
 
 namespace tr {
 
+// TODO(Matt): Tomorrow go through this and the rest of the stuff piled in cm and fx and move it
+// into either gfx, gw, or fx
+
+// Sort out these heirarchical structs and where all they're used.
+
 using AnimationHandle = uint64_t;
 
 enum class Topology : uint8_t {
