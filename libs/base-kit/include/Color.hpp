@@ -1,10 +1,11 @@
-#include <glm/glm.hpp>
+#pragma once
 
 namespace tr {
-struct Color {
-  glm::vec3 rgb;
 
-  constexpr Color(float r, float g, float b) : rgb(r, g, b) {
+struct Color {
+  float r, g, b;
+
+  constexpr Color(float newR, float newG, float newB) : r{newR}, g{newG}, b{newB} {
   }
 
   constexpr auto operator==(const Color& other) const -> bool = default;

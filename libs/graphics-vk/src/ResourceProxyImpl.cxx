@@ -7,13 +7,12 @@
 namespace tr {
 
 /// This ProxyImpl keeps vk-graphics from knowing about as::Model
+/// Is only called from game-world
 ResourceProxyImpl::ResourceProxyImpl(std::shared_ptr<VkResourceManager> newResourceManager)
     : resourceManager{std::move(newResourceManager)} {
 }
 
 auto ResourceProxyImpl::uploadModel(const as::Model& model) -> ModelData {
-  // Convert a Model into IGeometryData
-
   MeshHandle meshHandle = 0L;
 
   if (model.skinned()) {

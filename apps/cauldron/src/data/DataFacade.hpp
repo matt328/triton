@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cm/EntitySystemTypes.hpp"
+#include "gw/GameObjectType.hpp"
 #include "DataStore.hpp"
 
 namespace tr {
@@ -51,9 +51,9 @@ public:
   void save(const std::filesystem::path& outputFile);
   void load(const std::filesystem::path& inputFile);
 
-  auto getEntityNames() -> std::vector<std::tuple<std::string, tr::EntityType>>;
+  auto getEntityNames() -> std::vector<std::tuple<std::string, tr::GameObjectId>>;
 
-  [[nodiscard]] auto getEntityId(std::string_view name) const -> tr::EntityType {
+  [[nodiscard]] auto getEntityId(std::string_view name) const -> tr::GameObjectId {
     return dataStore.entityNameMap.at(name.data());
   }
 

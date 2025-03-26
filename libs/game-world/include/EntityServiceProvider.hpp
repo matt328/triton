@@ -2,7 +2,6 @@
 
 #include "fx/ext/IGameObjectProxy.hpp"
 
-#include "cm/EntitySystemTypes.hpp"
 #include "cm/TransformData.hpp"
 
 namespace tr {
@@ -19,8 +18,8 @@ public:
   auto operator=(const EntityServiceProvider&) -> EntityServiceProvider& = default;
   auto operator=(EntityServiceProvider&&) -> EntityServiceProvider& = delete;
 
-  auto removeEntity(tr::EntityType entityType) -> void override;
-  auto setTransform(tr::EntityType entityType, TransformData transformData) -> void override;
+  auto removeEntity(GameObjectId entityType) -> void override;
+  auto setTransform(GameObjectId entityType, TransformData transformData) -> void override;
 
 private:
   std::shared_ptr<EntityService> entityService;

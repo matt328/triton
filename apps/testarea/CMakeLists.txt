@@ -15,7 +15,7 @@ target_code_coverage(${PROJECT_NAME} AUTO ALL)
 target_link_libraries(${PROJECT_NAME}
   PRIVATE
   BoostDI
-  util-lib
+  base-kit
   tlsf
 )
 

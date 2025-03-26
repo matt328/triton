@@ -58,9 +58,9 @@ target_link_libraries(${PROJECT_NAME}
   BoostDI
   EnTT::EnTT
   shared
-  asset-lib
+  asset-forge
   Tracy::TracyClient
-  util-lib
+  base-kit
 )
 
 target_include_directories(${PROJECT_NAME}

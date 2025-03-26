@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cm/EntitySystemTypes.hpp"
+#include "gw/GameObjectType.hpp"
 
 namespace tr {
 using SdfHandle = uint64_t;
@@ -13,7 +13,7 @@ struct BlockResult {
   ChunkHandle chunkHandle;
   glm::ivec3 location;
   glm::ivec3 size;
-  std::optional<tr::EntityType> entityId = std::nullopt;
+  std::optional<tr::GameObjectId> entityId = std::nullopt;
 };
 
 /// Returned from TerrainManager::createTerrain() without entityIds
@@ -23,6 +23,6 @@ struct TerrainResult2 {
   TerrainHandle terrainHandle;
   SdfHandle sdfHandle;
   std::vector<BlockResult> chunks;
-  std::optional<tr::EntityType> entityId = std::nullopt;
+  std::optional<tr::GameObjectId> entityId = std::nullopt;
 };
 }

@@ -2,6 +2,8 @@
 
 #include "fx/ext/ITerrainSystemProxy.hpp"
 
+#include "gw/GameObjectType.hpp"
+
 namespace tr {
 
 class VoxelTerrainSystemProxy : public ITerrainSystemProxy {
@@ -18,7 +20,7 @@ public:
 
   auto triangulateBlock(TerrainHandle terrainHandle,
                         BlockHandle blockHandle,
-                        tr::EntityType blockId,
+                        tr::GameObjectId blockId,
                         glm::ivec3 cellPosition) -> void override;
 
 private:

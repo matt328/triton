@@ -28,7 +28,7 @@ public:
 
   virtual auto triangulateBlock(TerrainHandle terrainHandle,
                                 BlockHandle blockHandle,
-                                tr::EntityType blockId,
+                                GameObjectId blockId,
                                 glm::ivec3 cellPosition) -> void = 0;
 };
 

@@ -142,7 +142,7 @@ void DefaultGameplaySystem::setRenderDataTransferHandler(const RenderDataTransfe
 auto DefaultGameplaySystem::createStaticModelEntity(std::string filename,
                                                     std::string_view entityName,
                                                     std::optional<TransformData> initialTransform)
-    -> tr::EntityType {
+    -> GameObjectId {
   const auto model = assetService->loadModel(filename);
 
   auto modelData = resourceProxy->uploadModel(model);
@@ -156,13 +156,13 @@ auto DefaultGameplaySystem::createStaticModelEntity(std::string filename,
     transform.rotation = initialTransform->rotation;
   }
 
-  return static_cast<tr::EntityType>(
+  return static_cast<GameObjectId>(
       entityService->createStaticEntity(std::vector{modelData.meshData}, transform, entityName));
 }
 
 auto DefaultGameplaySystem::createAnimatedModelEntity(const AnimatedModelData& modelData,
                                                       std::optional<TransformData> initialTransform)
-    -> tr::EntityType {
+    -> GameObjectId {
 
   const auto model = assetService->loadModel(modelData.modelFilename);
 
@@ -183,7 +183,7 @@ auto DefaultGameplaySystem::createAnimatedModelEntity(const AnimatedModelData& m
     transform.rotation = initialTransform->rotation;
   }
 
-  return static_cast<tr::EntityType>(
+  return static_cast<GameObjectId>(
       entityService->createDynamicEntity(loadedModelData,
                                          transform,
                                          modelData.entityName.value_or("Unnamed Entity")));
@@ -205,18 +205,18 @@ auto DefaultGameplaySystem::createDefaultCamera() -> void {
   entityService->createCamera(cameraInfo, "Default Camera");
 }
 
-auto DefaultGameplaySystem::removeEntity(tr::EntityType entity) -> void {
-  entityService->removeEntity(entity);
+auto DefaultGameplaySystem::removeEntity(GameObjectId entity) -> void {
+  entityService->removeEntity(static_cast<EntityType>(entity));
 }
 
 auto DefaultGameplaySystem::entityCreated([[maybe_unused]] entt::registry& reg,
                                           entt::entity entity) const -> void {
-  eventBus->emit(EntityCreated{static_cast<tr::EntityType>(entity)});
+  eventBus->emit(EntityCreated{static_cast<GameObjectId>(entity)});
 }
 
 // This method is just debug. Eventually push this down into the TerrainSystem
-auto DefaultGameplaySystem::triangulateChunk(tr::EntityType terrainId,
-                                             tr::EntityType chunkId,
+auto DefaultGameplaySystem::triangulateChunk(GameObjectId terrainId,
+                                             GameObjectId chunkId,
                                              glm::ivec3 cellPosition) -> void {
   const auto terrainHandle = entityService->getTerrainHandle(static_cast<EntityId>(terrainId));
   const auto chunkHandle = entityService->getChunkHandle(static_cast<EntityId>(chunkId));

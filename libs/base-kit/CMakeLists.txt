@@ -1,10 +1,10 @@
-project("util-lib")
+project("base-kit")
 
-set(utillib_SRC
+set(basekit_SRC
   src/Logger2.cxx
 )
 
-add_library(${PROJECT_NAME} STATIC ${utillib_SRC})
+add_library(${PROJECT_NAME} STATIC ${basekit_SRC})
 
 target_compile_definitions(${PROJECT_NAME}
   PRIVATE

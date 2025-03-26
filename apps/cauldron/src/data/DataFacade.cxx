@@ -69,7 +69,7 @@ void DataFacade::createStaticModel(const EntityData& entityData) noexcept {
   const auto modelFilename = dataStore.models.at(entityData.modelName).filePath;
   const auto entityName = entityData.name;
 
-  const auto onComplete = [this, entityName, entityData](tr::EntityType entityId) {
+  const auto onComplete = [this, entityName, entityData](tr::GameObjectId entityId) {
     dataStore.scene.insert({entityData.name, entityData});
     dataStore.entityNameMap.insert({entityName, entityId});
     engineBusy = false;
@@ -98,7 +98,7 @@ void DataFacade::createAnimatedModel(const EntityData& entityData) {
   const auto animationFilename = dataStore.animations.at(entityData.animations[0]).filePath;
   const auto entityName = entityData.name;
 
-  const auto onComplete = [this, entityName, entityData](tr::EntityType entityId) {
+  const auto onComplete = [this, entityName, entityData](tr::GameObjectId entityId) {
     dataStore.entityNameMap.insert({entityName, entityId});
     dataStore.scene.insert({entityName, entityData});
     engineBusy = false;
@@ -242,8 +242,8 @@ void DataFacade::load(const std::filesystem::path& inputFile) {
   } catch (const std::exception& ex) { Log.error(ex.what()); }
 }
 
-auto DataFacade::getEntityNames() -> std::vector<std::tuple<std::string, tr::EntityType>> {
-  auto names = std::vector<std::tuple<std::string, tr::EntityType>>{};
+auto DataFacade::getEntityNames() -> std::vector<std::tuple<std::string, tr::GameObjectId>> {
+  auto names = std::vector<std::tuple<std::string, tr::GameObjectId>>{};
   for (const auto& [name, _] : dataStore.scene) {
     names.emplace_back(name, dataStore.entityNameMap.at(name));
   }

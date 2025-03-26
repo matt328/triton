@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cm/EntitySystemTypes.hpp"
+#include "gw/GameObjectType.hpp"
 #include "cm/TransformData.hpp"
 #include "fx/GameObjectId.hpp"
 #include "fx/ext/StaticObjectDetails.hpp"
@@ -20,8 +20,8 @@ public:
   auto operator=(const IGameObjectProxy&) -> IGameObjectProxy& = default;
   auto operator=(IGameObjectProxy&&) -> IGameObjectProxy& = delete;
 
-  virtual auto removeEntity(tr::EntityType entityType) -> void = 0;
-  virtual auto setTransform(tr::EntityType entityType, TransformData transformData) -> void = 0;
+  virtual auto removeEntity(tr::GameObjectId entityType) -> void = 0;
+  virtual auto setTransform(tr::GameObjectId entityType, TransformData transformData) -> void = 0;
 
   virtual auto getEditableGameObjects() -> std::vector<GameObjectId> = 0;
   virtual auto getStaticObjectDetails() -> StaticObjectDetails = 0;

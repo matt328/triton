@@ -95,13 +95,13 @@ target_precompile_headers(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
   PUBLIC
-  asset-lib
+  asset-forge
   shared
   glfw
   glm
   imgui_custom
   Tracy::TracyClient
-  util-lib
+  base-kit
   ${Vulkan_LIBRARIES}
   VulkanMemoryAllocator-Hpp
   PRIVATE

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "EntitySystemTypes.hpp"
+
 #include "cm/RenderData.hpp"
 #include "components/TerrainChunk.hpp"
 #include "components/Animation.hpp"

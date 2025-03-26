@@ -1,6 +1,6 @@
-project("asset-lib")
+project("asset-forge")
 
-set(assetlib_SRC
+set(assetforge_SRC
   src/ModelConverter.cxx
   src/gltf/GltfTransformParser.cxx
   src/gltf/GltfNodeParser.cxx
@@ -12,7 +12,7 @@ set(assetlib_SRC
   src/gltf/GltfLoaderImpl.cxx
 )
 
-add_library(${PROJECT_NAME} STATIC ${assetlib_SRC})
+add_library(${PROJECT_NAME} STATIC ${assetforge_SRC})
 
 target_compile_definitions(${PROJECT_NAME}
   PRIVATE
@@ -46,7 +46,7 @@ target_link_libraries(${PROJECT_NAME}
   tinygltf
   glm
   PRIVATE
-  util-lib
+  base-kit
 )
 
 target_include_directories(${PROJECT_NAME}
