@@ -3,8 +3,8 @@
 
 namespace tr {
 
-StaticGeometryData::StaticGeometryData(std::vector<as::StaticVertex>&& newVertices,
-                                       std::vector<uint32_t>&& newIndices)
+StaticGeometryData::StaticGeometryData(const std::vector<as::StaticVertex>&& newVertices,
+                                       const std::vector<uint32_t>&& newIndices)
     : vertices(std::move(newVertices)), indices(std::move(newIndices)) {
 }
 

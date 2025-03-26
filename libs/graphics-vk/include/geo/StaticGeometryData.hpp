@@ -7,8 +7,8 @@ namespace tr {
 
 class StaticGeometryData : public IGeometryData {
 public:
-  StaticGeometryData(std::vector<as::StaticVertex>&& newVertices,
-                     std::vector<uint32_t>&& newIndices);
+  StaticGeometryData(const std::vector<as::StaticVertex>&& newVertices,
+                     const std::vector<uint32_t>&& newIndices);
   ~StaticGeometryData() override = default;
 
   StaticGeometryData(const StaticGeometryData&) = delete;
