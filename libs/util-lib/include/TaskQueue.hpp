@@ -73,6 +73,7 @@ public:
   void processCompleteTasks() {
     std::unique_lock<LockableBase(std::mutex)> lock(completeMtx);
     while (!completeQueue.empty()) {
+      Log.trace("TaskQueue processing completed task");
       auto task = std::move(completeQueue.front());
       completeQueue.pop();
       lock.unlock();
