@@ -2,7 +2,7 @@
 
 #include "fx/ext/ITerrainSystemProxy.hpp"
 
-#include "gw/GameObjectType.hpp"
+#include "cm/GameObjectType.hpp"
 
 namespace tr {
 

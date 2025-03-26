@@ -1,7 +1,7 @@
 #pragma once
 
 #include "GlmCereal.hpp"
-#include "gw/GameObjectType.hpp"
+#include "cm/GameObjectType.hpp"
 
 namespace ed {
 

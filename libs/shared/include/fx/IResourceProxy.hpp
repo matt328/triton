@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gw/AssetStructs.hpp"
+#include "cm/AssetStructs.hpp"
 
 namespace as {
 struct Model;

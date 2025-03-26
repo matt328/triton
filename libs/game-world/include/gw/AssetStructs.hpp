@@ -1,20 +1,13 @@
 #pragma once
 
 #include "cm/Handles.hpp"
+#include "cm/Topology.hpp"
 
 namespace tr {
 
-// TODO(Matt): Tomorrow go through this and the rest of the stuff piled in cm and fx and move it
-// into either gfx, gw, or fx
-
-// Sort out these heirarchical structs and where all they're used.
+// These structs are used by IResourceProxy
 
 using AnimationHandle = uint64_t;
-
-enum class Topology : uint8_t {
-  Triangles = 0,
-  LineList = 1
-};
 
 /// Combination of MeshHandle, Topology, and a TextureHandle
 struct MeshData {
@@ -34,6 +27,9 @@ struct AnimationData {
 };
 
 /// Mesh and Optional Skin and Animation Data
+/// Basically a Handle to a model with the Animation data since the animation data is updated by
+/// gameworld and not in graphics, so that data has to be passed over the gameworld->graphics sync
+/// point
 struct ModelData {
   MeshData meshData{};
   std::optional<SkinData> skinData;

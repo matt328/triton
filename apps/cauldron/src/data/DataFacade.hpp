@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gw/GameObjectType.hpp"
+#include "cm/GameObjectType.hpp"
 #include "DataStore.hpp"
 
 namespace tr {

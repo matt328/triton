@@ -1,8 +1,9 @@
 #pragma once
 
-#include "gw/GameObjectType.hpp"
+#include "cm/GameObjectType.hpp"
 
 namespace tr {
+
 using SdfHandle = uint64_t;
 using ChunkHandle = uint64_t;
 using BlockHandle = uint64_t;
@@ -25,4 +26,5 @@ struct TerrainResult2 {
   std::vector<BlockResult> chunks;
   std::optional<tr::GameObjectId> entityId = std::nullopt;
 };
+
 }
