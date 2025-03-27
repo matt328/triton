@@ -1,7 +1,7 @@
 #pragma once
 
 #include "IShaderBindingFactory.hpp"
-#include "cm/Rando.hpp"
+#include "Rando.hpp"
 #include "vk/sb/DSLayoutManager.hpp"
 
 namespace tr {

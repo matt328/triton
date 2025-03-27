@@ -18,6 +18,7 @@ target_precompile_headers(${PROJECT_NAME}
   <iomanip>
   <iostream>
   <queue>
+  <random>
   <string_view>
   <spdlog/spdlog.h>
   <spdlog/async.h>

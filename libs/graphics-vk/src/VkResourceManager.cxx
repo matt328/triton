@@ -2,7 +2,7 @@
 
 #include "as/StaticVertex.hpp"
 #include "as/TerrainVertex.hpp"
-#include "cm/IGeometryData.hpp"
+#include "gfx/IGeometryData.hpp"
 #include "mem/Allocator.hpp"
 #include "mem/Image.hpp"
 #include "gfx/IDebugManager.hpp"

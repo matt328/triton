@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cm/Rando.hpp"
+#include "Rando.hpp"
 
 namespace tr {
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ITerrainSystem.hpp"
-#include "cm/Rando.hpp"
+#include "Rando.hpp"
 
 namespace tr {
 

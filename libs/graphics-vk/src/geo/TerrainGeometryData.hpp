@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cm/IGeometryData.hpp"
+#include "gfx/IGeometryData.hpp"
 #include "as/TerrainVertex.hpp"
 
 namespace tr {
