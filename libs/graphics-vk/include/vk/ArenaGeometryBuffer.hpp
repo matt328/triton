@@ -1,7 +1,7 @@
 #pragma once
 
 #include "cm/Handles.hpp"
-#include "cm/Rando.hpp"
+#include "Rando.hpp"
 #include "cm/RenderMeshData.hpp"
 #include "mem/ArenaBuffer.hpp"
 #include "vk/BufferEntry.hpp"

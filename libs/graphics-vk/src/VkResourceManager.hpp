@@ -4,7 +4,7 @@
 #include "gfx/IDebugManager.hpp"
 #include "ImmediateTransferContext.hpp"
 #include "cm/Handles.hpp"
-#include "cm/Rando.hpp"
+#include "Rando.hpp"
 #include "geo/Mesh.hpp"
 #include "mem/Allocator.hpp"
 #include "pipeline/IShaderModuleFactory.hpp"

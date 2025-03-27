@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cm/Handles.hpp"
+#include "cm/AssetStructs.hpp"
 
 namespace tr {
 

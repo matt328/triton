@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cm/Rando.hpp"
+#include "Rando.hpp"
 #include "cm/SdfCreateInfo.hpp"
 #include "cm/TerrainResult.hpp"
 #include "tr/IDensityGenerator.hpp"

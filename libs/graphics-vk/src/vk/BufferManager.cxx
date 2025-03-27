@@ -1,7 +1,7 @@
 #include "BufferManager.hpp"
 #include "ImmediateTransferContext.hpp"
 #include "ResourceExceptions.hpp"
-#include "cm/IGeometryData.hpp"
+#include "gfx/IGeometryData.hpp"
 #include "mem/Allocator.hpp"
 #include "mem/Buffer.hpp"
 #include "TaskQueue.hpp"
