@@ -1,7 +1,7 @@
 #pragma once
 
 #include "IDensityGenerator.hpp"
-#include "cm/GlmToString.hpp"
+#include "api/GlmToString.hpp"
 
 namespace tr {
 class PlaneGenerator : public IDensityGenerator {

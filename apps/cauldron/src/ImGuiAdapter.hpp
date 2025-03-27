@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cm/IGuiAdapter.hpp"
+#include "api/fx/IGuiAdapter.hpp"
 
 namespace tr {
 class ImGuiAdapter : public IGuiAdapter {

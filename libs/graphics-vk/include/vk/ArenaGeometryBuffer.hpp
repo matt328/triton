@@ -1,8 +1,8 @@
 #pragma once
 
-#include "cm/Handles.hpp"
-#include "Rando.hpp"
-#include "cm/RenderMeshData.hpp"
+#include "api/gw/Handles.hpp"
+#include "bk/Rando.hpp"
+#include "api/gw/RenderMeshData.hpp"
 #include "mem/ArenaBuffer.hpp"
 #include "vk/BufferEntry.hpp"
 

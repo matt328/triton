@@ -2,7 +2,7 @@
 #include "gfx/RenderContextConfig.hpp"
 #include "Frame.hpp"
 #include "Maths.hpp"
-#include "fx/Events.hpp"
+#include "api/fx/Events.hpp"
 #include "vk/core/Swapchain.hpp"
 
 namespace tr {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "BaseException.hpp"
+#include "bk/BaseException.hpp"
 
 namespace tr {
 class ResourceUploadException final : public BaseException {

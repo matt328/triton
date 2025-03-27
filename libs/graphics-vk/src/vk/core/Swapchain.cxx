@@ -1,7 +1,7 @@
 #include "Swapchain.hpp"
 #include "Surface.hpp"
-#include "fx/Events.hpp"
-#include "fx/IEventBus.hpp"
+#include "api/fx/Events.hpp"
+#include "api/fx/IEventBus.hpp"
 
 namespace tr {
 Swapchain::Swapchain(std::shared_ptr<PhysicalDevice> newPhysicalDevice,

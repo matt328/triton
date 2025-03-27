@@ -35,7 +35,6 @@ target_compile_definitions(${PROJECT_NAME}
 target_precompile_headers(${PROJECT_NAME}
   PUBLIC
   <glm/glm.hpp>
-  <Logger2.hpp>
   <cereal/archives/portable_binary.hpp>
   <cereal/archives/json.hpp>
   <tracy/Tracy.hpp>
@@ -53,7 +52,7 @@ target_link_libraries(${PROJECT_NAME}
   cereal::cereal
   glm
   Tracy::TracyClient
-  shared
+  shared-api
   base-kit
   game-world
   voxel-terrain

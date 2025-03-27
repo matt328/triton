@@ -3,7 +3,7 @@
 #include "CellCache.hpp"
 #include "ISurfaceExtractor.hpp"
 #include "as/TerrainVertex.hpp"
-#include "cm/TerrainResult.hpp"
+#include "api/TerrainResult.hpp"
 #include "Transvoxel.hpp"
 
 namespace tr {

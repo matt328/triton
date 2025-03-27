@@ -1,7 +1,7 @@
 #pragma once
 
-#include "cm/TerrainCreateInfo.hpp"
-#include "cm/TerrainResult.hpp"
+#include "api/TerrainCreateInfo.hpp"
+#include "api/TerrainResult.hpp"
 
 namespace tr {
 class ITerrainSystem {

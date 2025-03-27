@@ -13,7 +13,6 @@ set(graphicsvk_SRC
   src/mem/Image.cxx
   src/mem/ArenaBuffer.cxx
   src/geo/VertexAttributes.cxx
-  src/geo/HeightField.cxx
   src/geo/DynamicGeometryData.cxx
   src/geo/StaticGeometryData.cxx
   src/geo/TerrainGeometryData.cxx
@@ -96,7 +95,7 @@ target_precompile_headers(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
   PUBLIC
   asset-forge
-  shared
+  shared-api
   glfw
   glm
   imgui_custom

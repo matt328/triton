@@ -1,8 +1,8 @@
 #pragma once
 
 #include "IBufferManager.hpp"
-#include "Rando.hpp"
-#include "fx/IEventBus.hpp"
+#include "bk/Rando.hpp"
+#include "api/fx/IEventBus.hpp"
 #include "vk/ResourceManagerHandles.hpp"
 #include "vk/core/Device.hpp"
 

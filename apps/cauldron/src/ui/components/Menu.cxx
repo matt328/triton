@@ -5,7 +5,7 @@
 #include "FileDialog.hpp"
 #include "DialogManager.hpp"
 
-#include "fx/IEventBus.hpp"
+#include "api/fx/IEventBus.hpp"
 
 namespace ed {
 

@@ -2,7 +2,7 @@
 
 #include "gfx/IFrameManager.hpp"
 #include "gfx/RenderContextConfig.hpp"
-#include "fx/IEventBus.hpp"
+#include "api/fx/IEventBus.hpp"
 
 namespace tr {
 

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "fx/IActionSystem.hpp"
-#include "fx/Sources.hpp"
-#include "fx/Inputs.hpp"
+#include "api/action/IActionSystem.hpp"
+#include "api/action/Sources.hpp"
+#include "api/action/Inputs.hpp"
 
 namespace tr {
 

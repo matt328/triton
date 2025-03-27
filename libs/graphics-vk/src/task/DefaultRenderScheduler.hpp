@@ -1,10 +1,10 @@
 #pragma once
 
 #include "TerrainTask.hpp"
-#include "cm/ImGuiSystem.hpp"
-#include "cm/RenderData.hpp"
+#include "api/gfx/ImGuiSystem.hpp"
+#include "api/gw/RenderData.hpp"
 #include "gfx/RenderContextConfig.hpp"
-#include "fx/Events.hpp"
+#include "api/fx/Events.hpp"
 #include "IGuiSystem.hpp"
 #include "vk/CommandBufferManager.hpp"
 #include "gfx/IFrameManager.hpp"

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Rando.hpp"
-#include "cm/SdfCreateInfo.hpp"
-#include "cm/TerrainResult.hpp"
+#include "bk/Rando.hpp"
+#include "api/SdfCreateInfo.hpp"
+#include "api/TerrainResult.hpp"
 #include "tr/IDensityGenerator.hpp"
 
 namespace tr {

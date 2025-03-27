@@ -1,15 +1,15 @@
 #include "DefaultGameplaySystem.hpp"
 
 #include "EntityService.hpp"
-#include "fx/IActionSystem.hpp"
+#include "api/action/IActionSystem.hpp"
 #include "as/Model.hpp"
-#include "fx/IEventBus.hpp"
-#include "fx/IResourceProxy.hpp"
+#include "api/fx/IEventBus.hpp"
+#include "api/fx/IResourceProxy.hpp"
 #include "systems/CameraSystem.hpp"
 #include "systems/RenderDataSystem.hpp"
 #include "systems/TransformSystem.hpp"
 #include "systems/AnimationSystem.hpp"
-#include "fx/ext/ITerrainSystemProxy.hpp"
+#include "api/ext/ITerrainSystemProxy.hpp"
 
 namespace tr {
 

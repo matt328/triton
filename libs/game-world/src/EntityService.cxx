@@ -5,7 +5,7 @@
 #include "components/EditorInfo.hpp"
 #include "components/Resources.hpp"
 #include "components/TerrainChunk.hpp"
-#include "fx/IAssetService.hpp"
+#include "api/fx/IAssetService.hpp"
 
 namespace tr {
 

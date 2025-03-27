@@ -29,7 +29,7 @@
 #include "ResourceProxyImpl.hpp"
 #include "VkGraphicsContext.hpp"
 #include "Window.hpp"
-#include "cm/ImGuiSystem.hpp"
+#include "api/gfx/ImGuiSystem.hpp"
 
 #include <di.hpp>
 

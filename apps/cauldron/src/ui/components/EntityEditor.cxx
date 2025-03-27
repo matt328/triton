@@ -1,8 +1,8 @@
 #include "EntityEditor.hpp"
 
-#include "fx/IGameWorldSystem.hpp"
-#include "fx/IEventBus.hpp"
-#include "fx/ext/IGameObjectProxy.hpp"
+#include "api/fx/IGameWorldSystem.hpp"
+#include "api/fx/IEventBus.hpp"
+#include "api/ext/IGameObjectProxy.hpp"
 
 #include "data/DataFacade.hpp"
 #include "ui/components/DialogManager.hpp"

@@ -1,7 +1,7 @@
 #include "FixedGameLoop.hpp"
-#include "fx/IEventBus.hpp"
-#include "fx/IGameWorldSystem.hpp"
-#include "TaskQueue.hpp"
+#include "api/fx/IEventBus.hpp"
+#include "api/fx/IGameWorldSystem.hpp"
+#include "bk/TaskQueue.hpp"
 #include "gfx/IRenderContext.hpp"
 #include "gfx/IWindow.hpp"
 

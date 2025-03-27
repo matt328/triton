@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fx/IGameWorldContext.hpp"
+#include "api/fx/IGameWorldContext.hpp"
 
 namespace tr {
 
