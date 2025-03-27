@@ -1,8 +1,8 @@
 #pragma once
 
-#include "cm/IGuiAdapter.hpp"
+#include "api/fx/IGuiAdapter.hpp"
 #include "gfx/IWindow.hpp"
-#include "fx/IEventBus.hpp"
+#include "api/fx/IEventBus.hpp"
 
 namespace tr {
 

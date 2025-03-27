@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cm/RenderData.hpp"
+#include "api/gw/RenderData.hpp"
 #include "task/Frame.hpp"
 
 namespace tr {

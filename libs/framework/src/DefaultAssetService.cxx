@@ -1,7 +1,7 @@
 #include "DefaultAssetService.hpp"
 
 #include "as/Model.hpp"
-#include "cm/SharedExceptions.hpp"
+#include "api/SharedExceptions.hpp"
 
 namespace tr {
 

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "fx/ext/ITerrainSystemProxy.hpp"
+#include "api/ext/ITerrainSystemProxy.hpp"
 
-#include "cm/GameObjectType.hpp"
+#include "api/gw/GameObjectType.hpp"
 
 namespace tr {
 

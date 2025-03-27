@@ -1,7 +1,7 @@
 #include "Window.hpp"
-#include "fx/Events.hpp"
-#include "cm/IGuiAdapter.hpp"
-#include "cm/KeyMap.hpp"
+#include "api/fx/Events.hpp"
+#include "api/fx/IGuiAdapter.hpp"
+#include "api/action/KeyMap.hpp"
 
 #include "VkGraphicsCreateInfo.hpp"
 

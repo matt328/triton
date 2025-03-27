@@ -1,5 +1,5 @@
-#include "cm/ImGuiSystem.hpp"
-#include "fx/IGuiCallbackRegistrar.hpp"
+#include "api/gfx/ImGuiSystem.hpp"
+#include "api/fx/IGuiCallbackRegistrar.hpp"
 #include "imgui.h"
 #include "gfx/IWindow.hpp"
 

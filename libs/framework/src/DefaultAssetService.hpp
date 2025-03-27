@@ -1,7 +1,7 @@
 #pragma once
 
-#include "fx/IAssetService.hpp"
-#include "Rando.hpp"
+#include "api/fx/IAssetService.hpp"
+#include "bk/Rando.hpp"
 
 namespace tr {
 

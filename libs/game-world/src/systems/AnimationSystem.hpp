@@ -1,5 +1,5 @@
 #pragma once
-#include "fx/IAssetService.hpp"
+#include "api/fx/IAssetService.hpp"
 #include "EntityService.hpp"
 
 namespace tr {

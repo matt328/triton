@@ -1,8 +1,8 @@
 #include "DataFacade.hpp"
 
-#include "fx/IGameWorldSystem.hpp"
-#include "TaskQueue.hpp"
-#include "cm/TerrainCreateInfo.hpp"
+#include "api/fx/IGameWorldSystem.hpp"
+#include "bk/TaskQueue.hpp"
+#include "api/vtx/TerrainCreateInfo.hpp"
 
 namespace ed {
 

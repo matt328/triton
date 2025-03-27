@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cm/TerrainResult.hpp"
+#include "api/vtx/TerrainResult.hpp"
 namespace tr {
 
 struct ChunkComponent {

@@ -1,18 +1,17 @@
 #include "DefaultRenderScheduler.hpp"
 
-#include "cm/Handles.hpp"
-#include "fx/Events.hpp"
-#include "fx/IEventBus.hpp"
+#include "api/gw/Handles.hpp"
+#include "api/fx/Events.hpp"
+#include "api/fx/IEventBus.hpp"
 #include "IGuiSystem.hpp"
 #include "vk/BufferManager.hpp"
 #include "vk/CommandBufferManager.hpp"
 #include "Maths.hpp"
 #include "gfx/QueueTypes.hpp"
-#include "cm/GpuObjectData.hpp"
+#include "api/gfx/GpuObjectData.hpp"
 #include "task/Frame.hpp"
 #include "task/IRenderTask.hpp"
 #include "VkResourceManager.hpp"
-#include "fx/Events.hpp"
 
 namespace tr {
 

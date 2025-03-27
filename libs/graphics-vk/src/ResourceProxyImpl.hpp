@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fx/IResourceProxy.hpp"
+#include "api/fx/IResourceProxy.hpp"
 
 namespace tr {
 

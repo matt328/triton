@@ -1,7 +1,7 @@
 #include "RenderDataSystem.hpp"
 
-#include "cm/GpuCameraData.hpp"
-#include "cm/RenderData.hpp"
+#include "api/gfx/GpuCameraData.hpp"
+#include "api/gw/RenderData.hpp"
 #include "components/Renderable.hpp"
 #include "components/Camera.hpp"
 #include "components/Resources.hpp"

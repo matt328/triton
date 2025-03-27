@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fx/ITerrainContext.hpp"
+#include "api/fx/ITerrainContext.hpp"
 
 namespace tr {
 

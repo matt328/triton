@@ -2,7 +2,7 @@
 #include "Properties.hpp"
 #include "ui/Manager.hpp"
 
-#include "fx/IGuiCallbackRegistrar.hpp"
+#include "api/fx/IGuiCallbackRegistrar.hpp"
 #include "fx/IGameLoop.hpp"
 
 namespace ed {

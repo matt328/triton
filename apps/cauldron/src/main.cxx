@@ -1,11 +1,11 @@
-#include "fx/IFrameworkContext.hpp"
+#include "api/fx/IFrameworkContext.hpp"
 #include "fx/FrameworkFactory.hpp"
 #include "fx/IGameLoop.hpp"
-#include "fx/ext/IGameObjectProxy.hpp"
-#include "fx/IGuiCallbackRegistrar.hpp"
-#include "TaskQueue.hpp"
-#include "fx/IEventBus.hpp"
-#include "fx/IGameWorldSystem.hpp"
+#include "api/ext/IGameObjectProxy.hpp"
+#include "api/fx/IGuiCallbackRegistrar.hpp"
+#include "bk/TaskQueue.hpp"
+#include "api/fx/IEventBus.hpp"
+#include "api/fx/IGameWorldSystem.hpp"
 
 #include "Application.hpp"
 

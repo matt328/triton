@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fx/ext/IGameObjectProxy.hpp"
+#include "api/ext/IGameObjectProxy.hpp"
 #include "EntityService.hpp"
 
 namespace tr {

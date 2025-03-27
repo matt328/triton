@@ -2,7 +2,7 @@
 
 #include "EntitySystemTypes.hpp"
 
-#include "cm/RenderData.hpp"
+#include "api/gw/RenderData.hpp"
 #include "components/TerrainChunk.hpp"
 #include "components/Animation.hpp"
 #include "components/Camera.hpp"

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "fx/IGameWorldSystem.hpp"
-#include "fx/Events.hpp"
+#include "api/fx/IGameWorldSystem.hpp"
+#include "api/fx/Events.hpp"
 
 namespace tr {
 

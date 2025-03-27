@@ -1,8 +1,8 @@
 #pragma once
 
-#include "fx/ext/IGameObjectProxy.hpp"
+#include "api/ext/IGameObjectProxy.hpp"
 
-#include "cm/TransformData.hpp"
+#include "api/gw/TransformData.hpp"
 
 namespace tr {
 

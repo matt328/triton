@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cm/TerrainResult.hpp"
+#include "api/TerrainResult.hpp"
 #include "tr/IDensityGenerator.hpp"
 #include "as/TerrainVertex.hpp"
 

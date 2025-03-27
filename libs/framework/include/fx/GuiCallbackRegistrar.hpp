@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fx/IGuiCallbackRegistrar.hpp"
+#include "api/fx/IGuiCallbackRegistrar.hpp"
 
 namespace tr {
 

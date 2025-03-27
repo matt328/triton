@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fx/IGraphicsContext.hpp"
+#include "api/fx/IGraphicsContext.hpp"
 
 namespace tr {
 

@@ -28,8 +28,8 @@ target_precompile_headers(${PROJECT_NAME}
   <string>
   <tracy/Tracy.hpp>
   <tracy/TracyC.h>
-  <BaseException.hpp>
-  <Logger2.hpp>
+  <bk/BaseException.hpp>
+  <bk/Logger2.hpp>
 )
 
 target_link_libraries(${PROJECT_NAME}
