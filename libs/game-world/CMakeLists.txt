@@ -10,8 +10,8 @@ set(gameworld_SRC
   src/EntityService.cxx
   src/EntityServiceProvider.cxx
   src/GameObjectProxyImpl.cxx
-  src/GameWorldContextImpl.cxx
-  src/GameWorldFactory.cxx
+  src/ctx/GameWorldContextImpl.cxx
+  src/ctx/GameWorldFactory.cxx
 )
 
 add_library(${PROJECT_NAME} STATIC ${gameworld_SRC})

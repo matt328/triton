@@ -1,8 +1,8 @@
 project("voxel-terrain")
 
 set(voxelterrain_SRC
-  src/VoxelTerrainContext.cxx
-  src/VoxelTerrainFactory.cxx
+  src/ctx/VoxelTerrainContext.cxx
+  src/ctx/VoxelTerrainFactory.cxx
   src/VoxelTerrainSystemProxy.cxx
 )
 
@@ -37,6 +37,7 @@ target_link_libraries(${PROJECT_NAME}
   PUBLIC
   BoostDI
   shared-api
+  base-kit
   PRIVATE
 )
 

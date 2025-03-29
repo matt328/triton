@@ -20,9 +20,9 @@ FrameworkContextImpl::FrameworkContextImpl(
       gameObjectProxy{std::move(newGameObjectProxy)},
       gameWorldSystem{std::move(newGameWorldSystem)},
       assetService{std::move(newAssetService)},
+      actionSystem{std::move(newActionSystem)},
       gameWorldContext{std::move(newGameWorldContext)},
-      graphicsContext{std::move(newGraphicsContext)},
-      actionSystem{std::move(newActionSystem)} {
+      graphicsContext{std::move(newGraphicsContext)} {
 }
 
 auto FrameworkContextImpl::getGameLoop() -> std::shared_ptr<IGameLoop> {

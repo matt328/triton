@@ -12,6 +12,7 @@ class IGameWorldSystem;
 class IAssetService;
 class IGameWorldContext;
 class IActionSystem;
+class ITerrainContext;
 
 class IFrameworkContext {
 public:

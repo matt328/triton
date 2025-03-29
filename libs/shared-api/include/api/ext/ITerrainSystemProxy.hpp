@@ -3,14 +3,6 @@
 #include "api/vtx/TerrainCreateInfo.hpp"
 #include "api/vtx/TerrainResult.hpp"
 
-/*
-  Consider whether its worth the hassle of having terrain in its own lib.
-  Otherwise, need to figure out how to isolate separate parts of a lib and keep them as self
-  contained modules.
-  It could live inside the same library, but use its own injector. Have to think about the folder
-  structure for that.
-*/
-
 namespace tr {
 
 /// Proxy Object to allow direct manipulation of the terrain system by editors and debug engines.

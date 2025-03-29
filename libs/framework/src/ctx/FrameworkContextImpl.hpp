@@ -40,8 +40,11 @@ private:
   std::shared_ptr<IGameObjectProxy> gameObjectProxy;
   std::shared_ptr<IGameWorldSystem> gameWorldSystem;
   std::shared_ptr<IAssetService> assetService;
+  std::shared_ptr<IActionSystem> actionSystem;
+
+  // These are here just so they don't go out of scope.
   std::shared_ptr<IGameWorldContext> gameWorldContext;
   std::shared_ptr<IGraphicsContext> graphicsContext;
-  std::shared_ptr<IActionSystem> actionSystem;
+  std::shared_ptr<ITerrainContext> terrainContext;
 };
 }

@@ -2,6 +2,12 @@
 
 namespace tr {
 
+VoxelTerrainSystemProxy::VoxelTerrainSystemProxy() {
+}
+
+VoxelTerrainSystemProxy::~VoxelTerrainSystemProxy() {
+}
+
 auto VoxelTerrainSystemProxy::registerTerrain([[maybe_unused]] const TerrainCreateInfo& createInfo)
     -> TerrainResult2& {
   tempResult = TerrainResult2{};

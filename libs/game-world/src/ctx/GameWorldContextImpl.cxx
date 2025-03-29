@@ -16,4 +16,9 @@ auto GameWorldContextImpl::getGameObjectProxy() -> std::shared_ptr<IGameObjectPr
   return gameObjectProxy;
 }
 
+auto GameWorldContextImpl::registerTerrainProxy(std::shared_ptr<ITerrainSystemProxy> terrainProxy)
+    -> void {
+  this->terrainProxy = terrainProxy;
+}
+
 }

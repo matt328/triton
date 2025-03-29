@@ -11,20 +11,20 @@ public:
   VoxelTerrainSystemProxy();
   ~VoxelTerrainSystemProxy() override;
 
-  VoxelTerrainSystemProxy(const VoxelTerrainSystemProxy&) = default;
+  VoxelTerrainSystemProxy(const VoxelTerrainSystemProxy&) = delete;
   VoxelTerrainSystemProxy(VoxelTerrainSystemProxy&&) = delete;
-  auto operator=(const VoxelTerrainSystemProxy&) -> VoxelTerrainSystemProxy& = default;
+  auto operator=(const VoxelTerrainSystemProxy&) -> VoxelTerrainSystemProxy& = delete;
   auto operator=(VoxelTerrainSystemProxy&&) -> VoxelTerrainSystemProxy& = delete;
 
   auto registerTerrain(const TerrainCreateInfo& createInfo) -> TerrainResult2& override;
 
   auto triangulateBlock(TerrainHandle terrainHandle,
                         BlockHandle blockHandle,
-                        tr::GameObjectId blockId,
+                        GameObjectId blockId,
                         glm::ivec3 cellPosition) -> void override;
 
 private:
-  TerrainResult2 tempResult;
+  TerrainResult2 terrainResult{};
 };
 
 }

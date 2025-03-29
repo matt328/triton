@@ -137,11 +137,7 @@ void EntityEditor::render() {
           static glm::ivec3 cellPosition = {0, 0, 0};
           ImGui::DragInt3("Position##Chunk", glm::value_ptr(cellPosition), 1);
 
-          if (ImGui::Button("Triangulate Cell")) {
-            gameWorldSystem->triangulateChunk(terrainId, selectedChunk.entityId, cellPosition);
-          }
-
-          if (ImGui::Button("Triangulate All")) {
+          if (ImGui::Button("Triangulate")) {
             gameWorldSystem->triangulateChunk(terrainId, selectedChunk.entityId, cellPosition);
           }
         }

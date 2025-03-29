@@ -9,7 +9,6 @@
 #include "systems/RenderDataSystem.hpp"
 #include "systems/TransformSystem.hpp"
 #include "systems/AnimationSystem.hpp"
-#include "api/ext/ITerrainSystemProxy.hpp"
 
 namespace tr {
 
@@ -18,17 +17,15 @@ constexpr auto DefaultNearClip = 0.1f;
 constexpr auto DefaultFarClip = 10000.f;
 constexpr auto DefaultPosition = glm::vec3{0.f, 7.f, 5.f};
 
-DefaultGameplaySystem::DefaultGameplaySystem(
-    std::shared_ptr<IEventBus> newEventBus,
-    std::shared_ptr<IAssetService> newAssetService,
-    std::shared_ptr<IActionSystem> newActionSystem,
-    std::shared_ptr<CameraSystem> newCameraSystem,
-    std::shared_ptr<TransformSystem> newTransformSystem,
-    std::shared_ptr<AnimationSystem> newAnimationSystem,
-    std::shared_ptr<RenderDataSystem> newRenderDataSystem,
-    std::shared_ptr<EntityService> newEntityService,
-    std::shared_ptr<ITerrainSystemProxy> newTerrainSystemProxy,
-    std::shared_ptr<IResourceProxy> newResourceProxy)
+DefaultGameplaySystem::DefaultGameplaySystem(std::shared_ptr<IEventBus> newEventBus,
+                                             std::shared_ptr<IAssetService> newAssetService,
+                                             std::shared_ptr<IActionSystem> newActionSystem,
+                                             std::shared_ptr<CameraSystem> newCameraSystem,
+                                             std::shared_ptr<TransformSystem> newTransformSystem,
+                                             std::shared_ptr<AnimationSystem> newAnimationSystem,
+                                             std::shared_ptr<RenderDataSystem> newRenderDataSystem,
+                                             std::shared_ptr<EntityService> newEntityService,
+                                             std::shared_ptr<IResourceProxy> newResourceProxy)
     : eventBus{std::move(newEventBus)},
       assetService{std::move(newAssetService)},
       actionSystem{std::move(newActionSystem)},
@@ -37,7 +34,6 @@ DefaultGameplaySystem::DefaultGameplaySystem(
       animationSystem{std::move(newAnimationSystem)},
       renderDataSystem{std::move(newRenderDataSystem)},
       entityService{std::move(newEntityService)},
-      terrainSystemProxy{std::move(newTerrainSystemProxy)},
       resourceProxy{std::move(newResourceProxy)} {
 
   entityCreatedConnection = entityService->registerEntityCreated(
@@ -189,9 +185,10 @@ auto DefaultGameplaySystem::createAnimatedModelEntity(const AnimatedModelData& m
                                          modelData.entityName.value_or("Unnamed Entity")));
 }
 
-auto DefaultGameplaySystem::createTerrain(const TerrainCreateInfo& createInfo) -> TerrainResult2& {
-  auto& terrainResult = terrainSystemProxy->registerTerrain(createInfo);
-  entityService->createTerrain(terrainResult);
+auto DefaultGameplaySystem::createTerrain([[maybe_unused]] const TerrainCreateInfo& createInfo)
+    -> TerrainResult2& {
+  // auto& terrainResult = terrainSystemProxy->registerTerrain(createInfo);
+  // entityService->createTerrain(terrainResult);
   return terrainResult;
 }
 
@@ -215,12 +212,12 @@ auto DefaultGameplaySystem::entityCreated([[maybe_unused]] entt::registry& reg,
 }
 
 // This method is just debug. Eventually push this down into the TerrainSystem
-auto DefaultGameplaySystem::triangulateChunk(GameObjectId terrainId,
-                                             GameObjectId chunkId,
-                                             glm::ivec3 cellPosition) -> void {
-  const auto terrainHandle = entityService->getTerrainHandle(static_cast<EntityId>(terrainId));
-  const auto chunkHandle = entityService->getChunkHandle(static_cast<EntityId>(chunkId));
-  terrainSystemProxy->triangulateBlock(terrainHandle, chunkHandle, chunkId, cellPosition);
+auto DefaultGameplaySystem::triangulateChunk([[maybe_unused]] GameObjectId terrainId,
+                                             [[maybe_unused]] GameObjectId chunkId,
+                                             [[maybe_unused]] glm::ivec3 cellPosition) -> void {
+  // const auto terrainHandle = entityService->getTerrainHandle(static_cast<EntityId>(terrainId));
+  // const auto chunkHandle = entityService->getChunkHandle(static_cast<EntityId>(chunkId));
+  // terrainSystemProxy->triangulateBlock(terrainHandle, chunkHandle, chunkId, cellPosition);
 }
 
 }

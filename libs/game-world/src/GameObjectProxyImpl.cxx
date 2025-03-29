@@ -6,11 +6,16 @@ GameObjectProxyImpl::GameObjectProxyImpl(std::shared_ptr<EntityService> newEntit
     : entityService{std::move(newEntityService)} {
 }
 
-auto GameObjectProxyImpl::removeEntity([[maybe_unused]] GameObjectId entityType) -> void {
+auto GameObjectProxyImpl::removeEntity(GameObjectId entityType) -> void {
+  entityService->removeEntity(static_cast<EntityType>(entityType));
 }
 
 auto GameObjectProxyImpl::setTransform([[maybe_unused]] GameObjectId entityType,
                                        [[maybe_unused]] TransformData transformData) -> void {
+  const auto entityId = static_cast<EntityType>(entityType);
+  const auto transform =
+      Transform{.rotation = transformData.rotation, .position = transformData.position};
+  entityService->setTransform(entityId, transform);
 }
 
 auto GameObjectProxyImpl::getEditableGameObjects() -> std::vector<GameObjectId> {

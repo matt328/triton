@@ -16,6 +16,11 @@ public:
 
   auto getTerrainSystemProxy() -> std::shared_ptr<ITerrainSystemProxy> override;
 
+  auto registerGameObjectProxy(std::shared_ptr<IGameObjectProxy> newGameObjectProxy)
+      -> void override;
+
+  auto registerResourceProxy(std::shared_ptr<IResourceProxy> newResourceProxy) -> void override;
+
 private:
   std::shared_ptr<ITerrainSystemProxy> terrainSystemProxy;
 };

@@ -1,8 +1,11 @@
 #pragma once
 
+#include "api/ext/IGameObjectProxy.hpp"
+
 namespace tr {
 
 class ITerrainSystemProxy;
+class IResourceProxy;
 
 class ITerrainContext {
 public:
@@ -15,6 +18,11 @@ public:
   auto operator=(ITerrainContext&&) -> ITerrainContext& = delete;
 
   virtual auto getTerrainSystemProxy() -> std::shared_ptr<ITerrainSystemProxy> = 0;
+
+  virtual auto registerGameObjectProxy(std::shared_ptr<IGameObjectProxy> newGameObjectProxy)
+      -> void = 0;
+
+  virtual auto registerResourceProxy(std::shared_ptr<IResourceProxy> newResourceProxy) -> void = 0;
 };
 
 }

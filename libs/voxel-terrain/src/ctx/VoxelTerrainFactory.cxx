@@ -7,6 +7,7 @@
 namespace di = boost::di;
 
 namespace tr {
+
 auto createTerrainContext() -> std::shared_ptr<ITerrainContext> {
 
   const auto injector =
