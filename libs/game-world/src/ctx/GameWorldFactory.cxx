@@ -19,7 +19,6 @@ namespace tr {
 auto createGameworldContext(const std::shared_ptr<IEventBus>& eventBus,
                             const std::shared_ptr<IAssetService>& assetService,
                             const std::shared_ptr<IActionSystem>& actionSystem,
-                            const std::shared_ptr<ITerrainSystemProxy>& terrainSystemProxy,
                             const std::shared_ptr<IResourceProxy>& resourceProxy)
     -> std::shared_ptr<IGameWorldContext> {
 
@@ -27,7 +26,6 @@ auto createGameworldContext(const std::shared_ptr<IEventBus>& eventBus,
                                           di::bind<IAssetService>.to<>(assetService),
                                           di::bind<IEventBus>.to<>(eventBus),
                                           di::bind<IActionSystem>.to<>(actionSystem),
-                                          di::bind<ITerrainSystemProxy>.to<>(terrainSystemProxy),
                                           di::bind<IResourceProxy>.to<>(resourceProxy),
                                           di::bind<IGameObjectProxy>.to<GameObjectProxyImpl>());
 

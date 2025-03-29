@@ -19,10 +19,13 @@ public:
 
   auto getGameWorldSystem() -> std::shared_ptr<IGameWorldSystem> override;
   auto getGameObjectProxy() -> std::shared_ptr<IGameObjectProxy> override;
+  auto registerTerrainProxy(std::shared_ptr<ITerrainSystemProxy> terrainProxy) -> void override;
 
 private:
   std::shared_ptr<IGameWorldSystem> gameWorldSystem;
   std::shared_ptr<IGameObjectProxy> gameObjectProxy;
+
+  std::shared_ptr<ITerrainSystemProxy> terrainProxy;
 };
 
 }

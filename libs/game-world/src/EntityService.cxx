@@ -173,7 +173,7 @@ auto EntityService::createTerrain(TerrainResult2& terrainResult) -> void {
   // Create an entity for each chunk
   for (auto& chunk : terrainResult.chunks) {
     const auto entity = registry->create();
-    chunk.entityId = static_cast<uint64_t>(entity);
+    chunk.entityId = static_cast<GameObjectId>(entity);
     chunkEntityIds.push_back(entity);
     const auto chunkName =
         fmt::format("Chunk({}, {}, {})", chunk.location.x, chunk.location.y, chunk.location.z);
@@ -182,7 +182,7 @@ auto EntityService::createTerrain(TerrainResult2& terrainResult) -> void {
   }
 
   const auto entity = registry->create();
-  terrainResult.entityId = static_cast<uint64_t>(entity);
+  terrainResult.entityId = static_cast<GameObjectId>(entity);
   registry->emplace<TerrainComponent>(entity,
                                       terrainResult.name,
                                       terrainResult.terrainHandle,

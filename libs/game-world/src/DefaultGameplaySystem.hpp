@@ -26,7 +26,6 @@ public:
                         std::shared_ptr<AnimationSystem> newAnimationSystem,
                         std::shared_ptr<RenderDataSystem> newRenderDataSystem,
                         std::shared_ptr<EntityService> entityService,
-                        std::shared_ptr<ITerrainSystemProxy> newTerrainSystemProxy,
                         std::shared_ptr<IResourceProxy> newResourceProxy);
   ~DefaultGameplaySystem() override;
 
@@ -68,7 +67,6 @@ private:
   std::shared_ptr<AnimationSystem> animationSystem;
   std::shared_ptr<RenderDataSystem> renderDataSystem;
   std::shared_ptr<EntityService> entityService;
-  std::shared_ptr<ITerrainSystemProxy> terrainSystemProxy;
   std::shared_ptr<IResourceProxy> resourceProxy;
 
   RenderDataTransferHandler transferHandler;
@@ -82,6 +80,7 @@ private:
 
   auto handleSwapchainResized(const SwapchainResized& event) -> void;
   auto handleSwapchainCreated(const SwapchainCreated& event) -> void;
+  TerrainResult2 terrainResult{};
 };
 
 }
