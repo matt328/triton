@@ -12,6 +12,7 @@
 #include "task/Frame.hpp"
 #include "task/IRenderTask.hpp"
 #include "VkResourceManager.hpp"
+#include "bk/DebugRegistry.hpp"
 
 namespace tr {
 
@@ -392,8 +393,8 @@ auto DefaultRenderScheduler::handleSwapchainResized(const SwapchainResized& even
   }
 }
 
-auto DefaultRenderScheduler::updatePerFrameRenderData(Frame* frame,
-                                                      const RenderData& renderData) -> void {
+auto DefaultRenderScheduler::updatePerFrameRenderData(Frame* frame, const RenderData& renderData)
+    -> void {
   ZoneNamedN(var, "updatePerFrameRenderData", true);
 
   frame->setStaticObjectCount(renderData.staticGpuMeshData.size());
@@ -604,6 +605,9 @@ auto DefaultRenderScheduler::executeTasks(Frame* frame, bool recordTasks) const 
   commandBuffer.setViewportWithCount({viewport});
   commandBuffer.setScissorWithCount({snezzor});
 
+  const auto shapes = DebugRegistry::instance().getShapes();
+  Log.trace("rendering {} debug shapes", shapes.size());
+
   if (recordTasks) {
     ZoneNamedN(var, "IndirectRenderTask", true);
     if (frame->getStaticObjectCount() > 0) {
@@ -727,8 +731,8 @@ auto DefaultRenderScheduler::copyImageToImage(const vk::raii::CommandBuffer& cmd
   cmd.blitImage2(blitInfo);
 }
 
-auto DefaultRenderScheduler::insertBarrier(const vk::raii::CommandBuffer& cmd,
-                                           const Buffer& buffer) -> void {
+auto DefaultRenderScheduler::insertBarrier(const vk::raii::CommandBuffer& cmd, const Buffer& buffer)
+    -> void {
   // Insert a memory barrier for the buffer the computeTask writes to
   vk::BufferMemoryBarrier bufferMemoryBarrier{
       .srcAccessMask = vk::AccessFlagBits::eShaderWrite,
@@ -748,8 +752,8 @@ auto DefaultRenderScheduler::insertBarrier(const vk::raii::CommandBuffer& cmd,
                       nullptr);
 }
 
-auto DefaultRenderScheduler::updateStaticBuffers(Frame* frame,
-                                                 const RenderData& renderData) -> void {
+auto DefaultRenderScheduler::updateStaticBuffers(Frame* frame, const RenderData& renderData)
+    -> void {
   // Update GpuBufferEntriesBuffer
   {
     ZoneNamedN(var, "getStaticGpuData", true);
@@ -776,8 +780,8 @@ auto DefaultRenderScheduler::updateStaticBuffers(Frame* frame,
   }
 }
 
-auto DefaultRenderScheduler::updateDynamicBuffers(Frame* frame,
-                                                  const RenderData& renderData) -> void {
+auto DefaultRenderScheduler::updateDynamicBuffers(Frame* frame, const RenderData& renderData)
+    -> void {
   // Update GpuBufferEntriesBuffer
   {
     ZoneNamedN(var, "getDynamicGpuData", true);
@@ -816,8 +820,8 @@ auto DefaultRenderScheduler::updateDynamicBuffers(Frame* frame,
   }
 }
 
-auto DefaultRenderScheduler::updateTerrainBuffers(Frame* frame,
-                                                  const RenderData& renderData) -> void {
+auto DefaultRenderScheduler::updateTerrainBuffers(Frame* frame, const RenderData& renderData)
+    -> void {
   {
     ZoneNamedN(var, "Update Terrain GPU Data", true);
     const auto& gpuBufferEntryList = resourceManager->getTerrainGpuData(renderData.terrainMeshData);

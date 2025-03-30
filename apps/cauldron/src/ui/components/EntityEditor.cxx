@@ -3,6 +3,7 @@
 #include "api/fx/IGameWorldSystem.hpp"
 #include "api/fx/IEventBus.hpp"
 #include "api/ext/IGameObjectProxy.hpp"
+#include "bk/DebugRegistry.hpp"
 
 #include "data/DataFacade.hpp"
 #include "ui/components/DialogManager.hpp"
@@ -50,6 +51,12 @@ void EntityEditor::render() {
         }
         if (ImGui::MenuItem("Terrain")) {
           dataFacade->createTerrain("terrain", glm::vec3{9.f, 9.f, 9.f});
+        }
+        if (ImGui::MenuItem("Debug Cube")) {
+          tr::DebugRegistry::instance().addDebugCube("tag",
+                                                     glm::vec3(0.f, 0.f, 0.f),
+                                                     4.f,
+                                                     tr::Colors::Green);
         }
         ImGui::EndMenu();
       }

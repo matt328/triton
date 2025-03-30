@@ -10,6 +10,7 @@ set(gameworld_SRC
   src/EntityService.cxx
   src/EntityServiceProvider.cxx
   src/GameObjectProxyImpl.cxx
+
   src/ctx/GameWorldContextImpl.cxx
   src/ctx/GameWorldFactory.cxx
 )

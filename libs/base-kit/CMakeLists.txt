@@ -15,6 +15,7 @@ target_precompile_headers(${PROJECT_NAME}
   <chrono>
   <exception>
   <functional>
+  <glm/glm.hpp>
   <iomanip>
   <iostream>
   <queue>
@@ -34,6 +35,7 @@ target_precompile_headers(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
   PUBLIC
+  glm
   spdlog::spdlog_header_only
   Tracy::TracyClient
 )

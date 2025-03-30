@@ -2,11 +2,11 @@
 #include "api/gw/Handles.hpp"
 
 namespace tr {
-class IDebugService;
+class IDebugRegistry;
 
 class DebugMeshManager {
 public:
-  explicit DebugMeshManager(std::shared_ptr<IDebugService> newDebugService);
+  explicit DebugMeshManager();
   ~DebugMeshManager() = default;
 
   DebugMeshManager(const DebugMeshManager&) = default;
@@ -18,8 +18,6 @@ public:
   [[nodiscard]] auto getRenderableMeshes() const -> std::vector<MeshData>;
 
 private:
-  std::shared_ptr<IDebugService> debugService;
-
   std::vector<MeshData> currentMeshData;
 };
 
