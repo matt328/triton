@@ -13,6 +13,7 @@ class IAssetService;
 class IGameWorldContext;
 class IActionSystem;
 class ITerrainContext;
+class IDebugRegistry;
 
 class IFrameworkContext {
 public:
@@ -32,5 +33,6 @@ public:
   virtual auto getGameWorldSystem() -> std::shared_ptr<IGameWorldSystem> = 0;
   virtual auto getAssetService() -> std::shared_ptr<IAssetService> = 0;
   virtual auto getActionSystem() -> std::shared_ptr<IActionSystem> = 0;
+  virtual auto getDebugRegistry() -> std::shared_ptr<IDebugRegistry> = 0;
 };
 }

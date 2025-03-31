@@ -7,6 +7,10 @@ namespace tr {
 // Maximum size of the GpuObjectData buffer array
 constexpr auto MAX_OBJECTS = 128;
 
+struct DebugGpuObjectData {
+  glm::mat4 model{};
+};
+
 struct StaticGpuObjectData {
   glm::mat4 model{};
   TextureHandle textureId{};

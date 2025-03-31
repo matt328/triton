@@ -1,4 +1,5 @@
 #include "gw/GameWorldFactory.hpp"
+#include "DebugRegistry.hpp"
 #include "GameWorldContextImpl.hpp"
 #include "DefaultGameplaySystem.hpp"
 #include "EntityService.hpp"
@@ -27,7 +28,8 @@ auto createGameworldContext(const std::shared_ptr<IEventBus>& eventBus,
                                           di::bind<IEventBus>.to<>(eventBus),
                                           di::bind<IActionSystem>.to<>(actionSystem),
                                           di::bind<IResourceProxy>.to<>(resourceProxy),
-                                          di::bind<IGameObjectProxy>.to<GameObjectProxyImpl>());
+                                          di::bind<IGameObjectProxy>.to<GameObjectProxyImpl>(),
+                                          di::bind<IDebugRegistry>.to<DebugTools>());
 
   return injector.create<std::shared_ptr<GameWorldContextImpl>>();
 }

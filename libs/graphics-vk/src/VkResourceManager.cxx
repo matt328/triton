@@ -1,5 +1,6 @@
 #include "VkResourceManager.hpp"
 
+#include "as/ColorVertex.hpp"
 #include "as/StaticVertex.hpp"
 #include "as/TerrainVertex.hpp"
 #include "gfx/IGeometryData.hpp"
@@ -67,6 +68,11 @@ VkResourceManager::VkResourceManager(
                                     .bufferName = "TerrainGeometry"};
 
   terrainMeshBuffer = std::make_unique<ArenaGeometryBuffer>(bufferManager, terrainBufferCreateInfo);
+
+  const auto dbmbci = ArenaGeometryBufferCreateInfo{.vertexSize = sizeof(as::ColorVertex),
+                                                    .indexSize = sizeof(uint32_t),
+                                                    .bufferName = "DebugGeometry"};
+  debugMeshBuffer = std::make_unique<ArenaGeometryBuffer>(bufferManager, dbmbci);
 
   textureManager = std::make_unique<TextureManager>(this);
 }
@@ -145,8 +151,8 @@ auto VkResourceManager::uploadImage([[maybe_unused]] const as::ImageData& imageD
 
 /// Synchronously uploads the texturedata to the device, waiting until it is uploaded and available
 /// before creating and returning an image, view, and default sampler.
-auto VkResourceManager::getTextureData(const as::ImageData& imageData,
-                                       std::string_view name) -> TextureData {
+auto VkResourceManager::getTextureData(const as::ImageData& imageData, std::string_view name)
+    -> TextureData {
   auto textureData = TextureData{};
   auto textureSize =
       static_cast<vk::DeviceSize>(imageData.width * imageData.height * imageData.component);
@@ -319,6 +325,10 @@ auto VkResourceManager::getTextureData(const as::ImageData& imageData,
 [[nodiscard]] auto VkResourceManager::getTerrainMeshBuffers() const
     -> std::tuple<Buffer&, Buffer&> {
   return terrainMeshBuffer->getBuffers();
+}
+
+[[nodiscard]] auto VkResourceManager::getDebugMeshBuffers() const -> std::tuple<Buffer&, Buffer&> {
+  return debugMeshBuffer->getBuffers();
 }
 
 auto VkResourceManager::createDefaultDescriptorPool() const

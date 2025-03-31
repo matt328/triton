@@ -15,7 +15,8 @@ public:
                        std::shared_ptr<IAssetService> newAssetService,
                        std::shared_ptr<IGameWorldContext> newGameWorldContext,
                        std::shared_ptr<IGraphicsContext> newGraphicsContext,
-                       std::shared_ptr<IActionSystem> newActionSystem);
+                       std::shared_ptr<IActionSystem> newActionSystem,
+                       std::shared_ptr<IDebugRegistry> newDebugRegistry);
   ~FrameworkContextImpl() override = default;
 
   FrameworkContextImpl(const FrameworkContextImpl&) = default;
@@ -31,6 +32,7 @@ public:
   auto getGameWorldSystem() -> std::shared_ptr<IGameWorldSystem> override;
   auto getAssetService() -> std::shared_ptr<IAssetService> override;
   auto getActionSystem() -> std::shared_ptr<IActionSystem> override;
+  auto getDebugRegistry() -> std::shared_ptr<IDebugRegistry> override;
 
 private:
   std::shared_ptr<IGameLoop> gameLoop;
@@ -41,6 +43,7 @@ private:
   std::shared_ptr<IGameWorldSystem> gameWorldSystem;
   std::shared_ptr<IAssetService> assetService;
   std::shared_ptr<IActionSystem> actionSystem;
+  std::shared_ptr<IDebugRegistry> debugRegistry;
 
   // These are here just so they don't go out of scope.
   std::shared_ptr<IGameWorldContext> gameWorldContext;

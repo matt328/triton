@@ -16,6 +16,8 @@
 
 namespace tr {
 
+class DebugTask;
+
 class DefaultRenderScheduler final : public IRenderScheduler {
 public:
   explicit DefaultRenderScheduler(std::shared_ptr<IFrameManager> newFrameManager,
@@ -56,6 +58,7 @@ private:
   std::shared_ptr<ComputeTask> computeTask;
   std::shared_ptr<StaticTask> staticRenderTask;
   std::shared_ptr<TerrainTask> terrainTask;
+  std::shared_ptr<DebugTask> debugTask;
 
   std::vector<std::shared_ptr<IRenderTask>> staticRenderTasks;
 

@@ -1,23 +1,25 @@
-#include "StaticPipeline.hpp"
-#include "as/StaticVertex.hpp"
-#include "vk/StaticPushConstants.hpp"
+#include "DebugPipeline.hpp"
 #include "VkResourceManager.hpp"
+#include "as/ColorVertex.hpp"
+#include "task/debugshapes/DebugPushConstants.hpp"
+#include "vk/core/Device.hpp"
 
 namespace tr {
 
-const auto VertexShaderFile = SHADERS / "static.vert.spv";
-const auto FragmentShaderFile = SHADERS / "static.frag.spv";
+const auto VertexShaderFile = SHADERS / "debug.vert.spv";
+const auto FragmentShaderFile = SHADERS / "debug.frag.spv";
 
-StaticPipeline::StaticPipeline(std::shared_ptr<Device> device,
-                               std::shared_ptr<IShaderModuleFactory> shaderCompiler,
-                               std::shared_ptr<VkResourceManager> resourceManager) {
+DebugPipeline::DebugPipeline(std::shared_ptr<Device> device,
+                             std::shared_ptr<IShaderModuleFactory> shaderCompiler,
+                             std::shared_ptr<VkResourceManager> resourceManager) {
+
   Log.trace("Constructing StaticPipeline");
 
   // Pipeline Layout
   const auto pushConstantRange = vk::PushConstantRange{
       .stageFlags = vk::ShaderStageFlagBits::eVertex,
       .offset = 0,
-      .size = sizeof(StaticPushConstants),
+      .size = sizeof(DebugPushConstants),
   };
 
   const auto pipelineLayoutCreateInfo =
@@ -56,12 +58,12 @@ StaticPipeline::StaticPipeline(std::shared_ptr<Device> device,
                                           .format = vk::Format::eR32G32B32Sfloat},
       vk::VertexInputAttributeDescription{.location = 1,
                                           .binding = 0,
-                                          .format = vk::Format::eR32G32Sfloat,
-                                          .offset = offsetof(as::StaticVertex, texCoord)}};
+                                          .format = vk::Format::eR32G32B32Sfloat,
+                                          .offset = offsetof(as::ColorVertex, color)}};
 
   constexpr auto bindingDescription =
       vk::VertexInputBindingDescription{.binding = 0,
-                                        .stride = sizeof(as::StaticVertex),
+                                        .stride = sizeof(as::ColorVertex),
                                         .inputRate = vk::VertexInputRate::eVertex};
 
   const auto vertexInputStateCreateInfo = vk::PipelineVertexInputStateCreateInfo{
@@ -72,13 +74,13 @@ StaticPipeline::StaticPipeline(std::shared_ptr<Device> device,
 
   // Input Assembly
   constexpr auto inputAssembly = vk::PipelineInputAssemblyStateCreateInfo{
-      .topology = vk::PrimitiveTopology::eTriangleList,
+      .topology = vk::PrimitiveTopology::eLineList,
       .primitiveRestartEnable = VK_FALSE,
   };
 
   // Rasterizer
   constexpr auto rasterizer = vk::PipelineRasterizationStateCreateInfo{
-      .polygonMode = vk::PolygonMode::eFill,
+      .polygonMode = vk::PolygonMode::eLine,
       .cullMode = vk::CullModeFlagBits::eBack,
       .frontFace = vk::FrontFace::eCounterClockwise,
       .lineWidth = 1.f,
@@ -141,10 +143,11 @@ StaticPipeline::StaticPipeline(std::shared_ptr<Device> device,
                                                   pipelineCreateInfo);
 }
 
-auto StaticPipeline::getPipeline() const -> vk::Pipeline {
+auto DebugPipeline::getPipeline() const -> vk::Pipeline {
   return **pipeline;
 }
-auto StaticPipeline::getPipelineLayout() const -> vk::PipelineLayout {
+
+auto DebugPipeline::getPipelineLayout() const -> vk::PipelineLayout {
   return **pipelineLayout;
 }
 

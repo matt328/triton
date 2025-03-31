@@ -54,9 +54,11 @@ public:
   [[nodiscard]] auto getSwapchainImageIndex() const noexcept -> uint32_t;
   [[nodiscard]] auto getRenderingInfo() const -> vk::RenderingInfo;
   [[nodiscard]] auto getDrawImageExtent() const -> vk::Extent2D;
+
   [[nodiscard]] auto getStaticObjectCount() const -> uint32_t;
   [[nodiscard]] auto getDynamicObjectCount() const -> uint32_t;
   [[nodiscard]] auto getTerrainChunkCount() const -> uint32_t;
+  [[nodiscard]] auto getDebugObjectCount() const -> uint32_t;
 
   [[nodiscard]] auto getBufferHandle(BufferHandleType type) const -> BufferHandle;
 
@@ -69,6 +71,9 @@ public:
 
   auto setBufferHandle(BufferHandleType type, BufferHandle handle) -> void;
 
+  auto registerBuffer(BufferHandle handle) -> size_t;
+  [[nodiscard]] auto getBufferHandle2(size_t key) const -> BufferHandle;
+
   auto setDepthImageHandle(ImageHandle handle) -> void;
   auto setDrawImageHandle(ImageHandle handle) -> void;
 
@@ -78,6 +83,7 @@ public:
   auto setStaticObjectCount(uint32_t newObjectCount) -> void;
   auto setDynamicObjectCount(uint32_t newObjectCount) -> void;
   auto setTerrainChunkCount(uint32_t newObjectCount) -> void;
+  auto setDebugObjectCount(uint32_t newDebugObjectCount) -> void;
 
   auto setupRenderingInfo(const std::shared_ptr<VkResourceManager>& resourceManager) -> void;
 
@@ -94,6 +100,9 @@ private:
 
   std::unordered_map<BufferHandleType, BufferHandle> bufferHandleMap;
 
+  MapKey bufferHandleKeygen;
+  std::unordered_map<size_t, BufferHandle> bufferHandleMap2;
+
   ImageHandle depthImageHandle;
   ImageHandle drawImageHandle;
 
@@ -108,6 +117,7 @@ private:
   uint32_t staticObjectCount;
   uint32_t dynamicObjectCount;
   uint32_t terrainChunkCount;
+  uint32_t debugObjectCount;
 
   static auto transitionImage(const vk::raii::CommandBuffer& cmd,
                               const vk::Image& image,

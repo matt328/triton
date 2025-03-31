@@ -10,7 +10,7 @@ enum class GizmoMode : uint8_t {
 };
 
 struct IShape {
-  explicit IShape(Color newColor) : color{newColor} {
+  explicit IShape(Color newColor, float newDuration) : color{newColor}, duration{newDuration} {
   }
   IShape(const IShape&) = default;
   IShape(IShape&&) = delete;
@@ -20,12 +20,13 @@ struct IShape {
   virtual ~IShape() = default;
   virtual auto getPoints() -> std::vector<glm::vec3> = 0;
   Color color = Colors::White;
+  float duration{};
 };
 
 struct Line : public IShape {
   Line() = delete;
-  Line(glm::vec3 newStart, glm::vec3 newEnd, Color newColor)
-      : IShape{newColor}, start{newStart}, end{newEnd} {
+  Line(glm::vec3 newStart, glm::vec3 newEnd, Color newColor, float newDuration)
+      : IShape{newColor, newDuration}, start{newStart}, end{newEnd} {
   }
   glm::vec3 start;
   glm::vec3 end;
@@ -48,8 +49,8 @@ struct Triangle : public IShape {
 };
 
 struct Cube : public IShape {
-  explicit Cube(std::vector<Line> newLines, Color newColor)
-      : IShape{newColor}, lines{std::move(newLines)} {
+  explicit Cube(std::vector<Line> newLines, Color newColor, float newDuration)
+      : IShape{newColor, newDuration}, lines{std::move(newLines)} {
   }
 
   std::vector<Line> lines;

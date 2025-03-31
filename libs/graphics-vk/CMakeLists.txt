@@ -48,6 +48,9 @@ set(graphicsvk_SRC
   src/pipeline/ComputePipeline.cxx
   src/pipeline/TerrainPipeline.cxx
   src/pipeline/SpirvShaderModuleFactory.cxx
+
+  src/task/debugshapes/DebugTask.cxx
+  src/task/debugshapes/DebugPipeline.cxx
 )
 
 add_library(${PROJECT_NAME} STATIC ${graphicsvk_SRC})

@@ -118,6 +118,10 @@ auto Frame::getTerrainChunkCount() const -> uint32_t {
   return terrainChunkCount;
 }
 
+auto Frame::getDebugObjectCount() const -> uint32_t {
+  return debugObjectCount;
+}
+
 auto Frame::setDepthImageHandle(const ImageHandle handle) -> void {
   depthImageHandle = handle;
 }
@@ -146,6 +150,10 @@ auto Frame::setTerrainChunkCount(uint32_t newObjectCount) -> void {
   terrainChunkCount = newObjectCount;
 }
 
+auto Frame::setDebugObjectCount(uint32_t newDebugObjectCount) -> void {
+  debugObjectCount = newDebugObjectCount;
+}
+
 auto Frame::transitionImage(const vk::raii::CommandBuffer& cmd,
                             const vk::Image& image,
                             const vk::ImageLayout currentLayout,
@@ -167,4 +175,16 @@ auto Frame::transitionImage(const vk::raii::CommandBuffer& cmd,
                       {},
                       barrier);
 }
+
+auto Frame::registerBuffer(BufferHandle handle) -> size_t {
+  const auto key = bufferHandleKeygen.getKey();
+  bufferHandleMap2.emplace(key, handle);
+  return key;
+}
+
+auto Frame::getBufferHandle2(size_t key) const -> BufferHandle {
+  assert(bufferHandleMap2.contains(key) && "Invalid buffer key requested");
+  return bufferHandleMap2.at(key);
+}
+
 }
