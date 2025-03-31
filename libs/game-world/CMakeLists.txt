@@ -6,7 +6,6 @@ set(gameworld_SRC
   src/systems/RenderDataSystem.cxx
   src/systems/TransformSystem.cxx
 
-  src/DebugRegistry.cxx
   src/DefaultGameplaySystem.cxx
   src/EntityService.cxx
   src/EntityServiceProvider.cxx

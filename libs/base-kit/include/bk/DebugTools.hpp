@@ -2,6 +2,17 @@
 
 #include "DebugShapes.hpp"
 
+/*
+  TODO(matt): Implement immediate mode buffer handling. use a persistently cpu mapped buffer and
+  rewrite the entire contents of it every frame.
+
+  ShapeExtractor needs to get the shape list and get a list of vertices to send to the
+  IResourceProxy
+  ShapeExtractor should have access to EntityService so it can query the transform of any entities
+  to which shapes are attached and transform the shape's vertices.
+  ShapeExtractor should also know how to deal with Gizmo shapes to tell ImGuiSystem to render them
+*/
+
 namespace tr {
 
 struct ShapeEntry {
@@ -20,6 +31,18 @@ public:
   auto operator=(DebugTools&&) -> DebugTools& = delete;
   DebugTools(const DebugTools&) = delete;
   auto operator=(const DebugTools&) -> DebugTools& = delete;
+
+  auto update(float deltaTime) -> void {
+    // Decrement every shape's duration, and remove ones that have timed out
+    for (auto it = shapeEntries.begin(); it != shapeEntries.end();) {
+      it->duration -= deltaTime;
+      if (it->duration <= 0.f) {
+        it = shapeEntries.erase(it);
+      } else {
+        ++it;
+      }
+    }
+  }
 
   auto drawCube(glm::vec3 center, float extent, Color color, float duration = 0.f) -> void {
     std::array<glm::vec3, 8> corners = {

@@ -4,10 +4,8 @@
 #include "api/gw/RenderData.hpp"
 #include "components/Renderable.hpp"
 #include "components/Camera.hpp"
-#include "components/Resources.hpp"
 #include "components/Transform.hpp"
 #include "components/Animation.hpp"
-#include "components/TerrainComponent.hpp"
 
 namespace tr {
 
