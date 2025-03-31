@@ -4,6 +4,8 @@
 #include "api/fx/Events.hpp"
 #include "api/fx/IEventBus.hpp"
 #include "IGuiSystem.hpp"
+#include "task/StaticTask.hpp"
+#include "task/debugshapes/DebugTask.hpp"
 #include "vk/BufferManager.hpp"
 #include "vk/CommandBufferManager.hpp"
 #include "Maths.hpp"
@@ -12,7 +14,6 @@
 #include "task/Frame.hpp"
 #include "task/IRenderTask.hpp"
 #include "VkResourceManager.hpp"
-#include "bk/DebugRegistry.hpp"
 
 namespace tr {
 
@@ -69,6 +70,8 @@ DefaultRenderScheduler::DefaultRenderScheduler(
                                         .viewProj = view * projection,
                                         .position = glm::vec4{0.f, 0.f, 0.f, 1.f}};
 
+  debugTask = renderTaskFactory->createDebugTask();
+
   for (const auto& frame : frameManager->getFrames()) {
 
     frame->setDepthImageHandle(depthImageHandle);
@@ -76,6 +79,8 @@ DefaultRenderScheduler::DefaultRenderScheduler(
     createStaticBuffers(frame);
     createDynamicBuffers(frame);
     createTerrainBuffers(frame);
+
+    debugTask->registerBuffers(frame);
 
     // Camera Data Buffer
     {
@@ -604,9 +609,6 @@ auto DefaultRenderScheduler::executeTasks(Frame* frame, bool recordTasks) const 
 
   commandBuffer.setViewportWithCount({viewport});
   commandBuffer.setScissorWithCount({snezzor});
-
-  const auto shapes = DebugRegistry::instance().getShapes();
-  Log.trace("rendering {} debug shapes", shapes.size());
 
   if (recordTasks) {
     ZoneNamedN(var, "IndirectRenderTask", true);

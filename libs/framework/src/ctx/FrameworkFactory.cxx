@@ -2,6 +2,7 @@
 #include "DefaultAssetService.hpp"
 #include "IGuiSystem.hpp"
 #include "api/ext/ITerrainSystemProxy.hpp"
+#include "api/fx/IDebugRegistry.hpp"
 #include "api/fx/IGameWorldContext.hpp"
 #include "FixedGameLoop.hpp"
 #include "FrameworkContextImpl.hpp"
@@ -75,7 +76,9 @@ auto createFrameworkContext(const FrameworkConfig& config, std::shared_ptr<IGuiA
       di::bind<IGraphicsContext>.to<>(graphicsContext),
       di::bind<IWindow>.to<>([&graphicsContext] { return graphicsContext->getWindow(); }),
       di::bind<IGuiSystem>.to<>([&graphicsContext] { return graphicsContext->getGuiSystem(); }),
-      di::bind<ITerrainSystemProxy>.to<>(terrainProxy));
+      di::bind<ITerrainSystemProxy>.to<>(terrainProxy),
+      di::bind<IDebugRegistry>.to<>(
+          [&gameWorldContext] { return gameWorldContext->getDebugRegistry(); }));
 
   const auto frameworkContext = frameworkInjector.create<std::shared_ptr<FrameworkContextImpl>>();
 

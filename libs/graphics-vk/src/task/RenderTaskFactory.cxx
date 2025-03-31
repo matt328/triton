@@ -2,17 +2,22 @@
 #include "TerrainTask.hpp"
 #include "gfx/RenderContextConfig.hpp"
 #include "task/StaticTask.hpp"
+#include "task/IndirectRenderTask.hpp"
+#include "task/ComputeTask.hpp"
+#include "debugshapes/DebugTask.hpp"
 
 namespace tr {
 
 RenderTaskFactory::RenderTaskFactory(std::shared_ptr<VkResourceManager> newResourceManager,
                                      std::shared_ptr<IndirectPipeline> newIndirectPipeline,
                                      std::shared_ptr<StaticPipeline> newStaticPipeline,
+                                     std::shared_ptr<DebugPipeline> newDebugPipeline,
                                      std::shared_ptr<BufferManager> newBufferManager,
                                      RenderContextConfig newConfig)
     : resourceManager{std::move(newResourceManager)},
       indirectPipeline{std::move(newIndirectPipeline)},
       staticPipeline{std::move(newStaticPipeline)},
+      debugPipeline{std::move(newDebugPipeline)},
       bufferManager{std::move(newBufferManager)},
       config{newConfig} {
 }
@@ -34,6 +39,10 @@ auto RenderTaskFactory::createStaticTask() -> std::unique_ptr<StaticTask> {
 
 auto RenderTaskFactory::createTerrainTask() -> std::unique_ptr<TerrainTask> {
   return std::make_unique<TerrainTask>(resourceManager, staticPipeline, bufferManager, config);
+}
+
+auto RenderTaskFactory::createDebugTask() -> std::unique_ptr<DebugTask> {
+  return std::make_unique<DebugTask>(bufferManager, debugPipeline, resourceManager, config);
 }
 
 }

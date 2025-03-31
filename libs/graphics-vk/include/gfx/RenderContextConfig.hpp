@@ -9,5 +9,6 @@ struct RenderContextConfig {
   uint16_t maxTextures{};
   uint8_t framesInFlight{};
   float renderScale{1.f};
+  uint32_t maxDebugObjects{};
 };
 }

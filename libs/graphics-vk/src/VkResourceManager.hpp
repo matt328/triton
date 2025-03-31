@@ -76,9 +76,8 @@ public:
   auto createDrawImageAndView(std::string_view imageName, vk::Extent2D extent) -> ImageHandle;
   auto destroyDrawImageAndView(ImageHandle handle) -> void;
 
-  auto createDepthImageAndView(std::string_view imageName,
-                               vk::Extent2D extent,
-                               vk::Format format) -> ImageHandle;
+  auto createDepthImageAndView(std::string_view imageName, vk::Extent2D extent, vk::Format format)
+      -> ImageHandle;
 
   /// Add a static mesh to the MeshBufferManager for static meshes.
   auto uploadStaticMesh(const IGeometryData& geometryData) -> MeshHandle;
@@ -120,6 +119,7 @@ public:
   [[nodiscard]] auto getStaticMeshBuffers() const -> std::tuple<Buffer&, Buffer&>;
   [[nodiscard]] auto getDynamicMeshBuffers() const -> std::tuple<Buffer&, Buffer&>;
   [[nodiscard]] auto getTerrainMeshBuffers() const -> std::tuple<Buffer&, Buffer&>;
+  [[nodiscard]] auto getDebugMeshBuffers() const -> std::tuple<Buffer&, Buffer&>;
 
   [[nodiscard]] auto getDescriptorSetLayout() -> const vk::DescriptorSetLayout*;
 
@@ -166,6 +166,7 @@ private:
   std::unique_ptr<ArenaGeometryBuffer> staticMeshBuffer;
   std::unique_ptr<ArenaGeometryBuffer> dynamicMeshBuffer;
   std::unique_ptr<ArenaGeometryBuffer> terrainMeshBuffer;
+  std::unique_ptr<ArenaGeometryBuffer> debugMeshBuffer;
 
   std::unique_ptr<TextureManager> textureManager;
 
@@ -180,7 +181,7 @@ private:
                                       uint32_t dstQueueFamily = VK_QUEUE_FAMILY_IGNORED)
       -> TransitionBarrierInfo;
 
-  static inline auto aligned_size(VkDeviceSize value, VkDeviceSize alignment) -> vk::DeviceSize {
+  static auto aligned_size(VkDeviceSize value, VkDeviceSize alignment) -> vk::DeviceSize {
     return (value + alignment - 1) & ~(alignment - 1);
   }
 };

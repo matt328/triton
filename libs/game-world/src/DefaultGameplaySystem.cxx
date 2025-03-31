@@ -9,6 +9,7 @@
 #include "systems/RenderDataSystem.hpp"
 #include "systems/TransformSystem.hpp"
 #include "systems/AnimationSystem.hpp"
+#include "bk/DebugTools.hpp"
 
 namespace tr {
 
@@ -99,6 +100,9 @@ auto DefaultGameplaySystem::handleSwapchainCreated(const SwapchainCreated& event
 }
 
 void DefaultGameplaySystem::update() {
+
+  const auto shapeList = DebugTools::instance().getShapes();
+
   {
     ZoneNamedN(rd, "RenderData", true);
     renderData.objectData.clear();

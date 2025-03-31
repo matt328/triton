@@ -12,6 +12,7 @@
 #include "task/DefaultRenderScheduler.hpp"
 #include "gfx/QueueTypes.hpp"
 
+#include "task/debugshapes/DebugPipeline.hpp"
 #include "vk/BufferManager.hpp"
 #include "vk/CommandBufferManager.hpp"
 
@@ -42,13 +43,14 @@ auto createVkGraphicsContext(VkGraphicsCreateInfo createInfo,
                              std::shared_ptr<TaskQueue> newTaskQueue,
                              std::shared_ptr<IGuiAdapter> newGuiAdapter)
     -> std::shared_ptr<IGraphicsContext> {
-  // Need to bind a rendercontextconfig here
+
   constexpr auto rendererConfig = RenderContextConfig{.useDescriptorBuffers = false,
                                                       .maxStaticObjects = 1024,
                                                       .maxDynamicObjects = 1024,
                                                       .maxTerrainChunks = 1024,
                                                       .maxTextures = 16,
-                                                      .framesInFlight = 2};
+                                                      .framesInFlight = 2,
+                                                      .maxDebugObjects = 32};
   const auto injector =
       di::make_injector(di::bind<RenderContextConfig>.to<>(rendererConfig),
                         di::bind<VkGraphicsCreateInfo>.to<>(createInfo),
