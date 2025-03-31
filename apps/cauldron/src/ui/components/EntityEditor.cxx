@@ -1,9 +1,9 @@
 #include "EntityEditor.hpp"
 
-#include "api/fx/IDebugRegistry.hpp"
 #include "api/fx/IGameWorldSystem.hpp"
 #include "api/fx/IEventBus.hpp"
 #include "api/ext/IGameObjectProxy.hpp"
+#include "bk/DebugTools.hpp"
 
 #include "data/DataFacade.hpp"
 #include "ui/components/DialogManager.hpp"
@@ -19,14 +19,12 @@ EntityEditor::EntityEditor(std::shared_ptr<tr::IGameWorldSystem> newGameWorldSys
                            std::shared_ptr<DataFacade> newDataFacade,
                            std::shared_ptr<DialogManager> newDialogManager,
                            std::shared_ptr<tr::IEventBus> newEventBus,
-                           std::shared_ptr<tr::IGameObjectProxy> newGameObjectProxy,
-                           std::shared_ptr<tr::IDebugRegistry> newDebugRegistry)
+                           std::shared_ptr<tr::IGameObjectProxy> newGameObjectProxy)
     : gameWorldSystem{std::move(newGameWorldSystem)},
       dataFacade{std::move(newDataFacade)},
       dialogManager{std::move(newDialogManager)},
       eventBus{std::move(newEventBus)},
-      gameObjectProxy{std::move(newGameObjectProxy)},
-      debugRegistry{std::move(newDebugRegistry)} {
+      gameObjectProxy{std::move(newGameObjectProxy)} {
   Log.trace("Creating EntityEditor");
 
   createAnimatedEntityDialog();
@@ -55,7 +53,7 @@ void EntityEditor::render() {
           dataFacade->createTerrain("terrain", glm::vec3{9.f, 9.f, 9.f});
         }
         if (ImGui::MenuItem("Debug Cube")) {
-          debugRegistry->addDebugCube("tag", glm::vec3(0.f, 0.f, 0.f), 4.f, tr::Colors::Green);
+          tr::DebugTools::instance().drawCube(glm::vec3(0.f, 0.f, 0.f), 4.f, tr::Colors::Green);
         }
         ImGui::EndMenu();
       }

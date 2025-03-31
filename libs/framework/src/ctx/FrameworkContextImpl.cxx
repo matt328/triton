@@ -12,8 +12,7 @@ FrameworkContextImpl::FrameworkContextImpl(
     std::shared_ptr<IAssetService> newAssetService,
     std::shared_ptr<IGameWorldContext> newGameWorldContext,
     std::shared_ptr<IGraphicsContext> newGraphicsContext,
-    std::shared_ptr<IActionSystem> newActionSystem,
-    std::shared_ptr<IDebugRegistry> newDebugRegistry)
+    std::shared_ptr<IActionSystem> newActionSystem)
     : gameLoop{std::move(newGameLoop)},
       guiCallbackRegistrar{std::move(newGuiCallbackRegistrar)},
       taskQueue{std::move(newTaskQueue)},
@@ -22,7 +21,6 @@ FrameworkContextImpl::FrameworkContextImpl(
       gameWorldSystem{std::move(newGameWorldSystem)},
       assetService{std::move(newAssetService)},
       actionSystem{std::move(newActionSystem)},
-      debugRegistry{std::move(newDebugRegistry)},
       gameWorldContext{std::move(newGameWorldContext)},
       graphicsContext{std::move(newGraphicsContext)} {
 }
@@ -57,10 +55,6 @@ auto FrameworkContextImpl::getAssetService() -> std::shared_ptr<IAssetService> {
 
 auto FrameworkContextImpl::getActionSystem() -> std::shared_ptr<IActionSystem> {
   return actionSystem;
-}
-
-auto FrameworkContextImpl::getDebugRegistry() -> std::shared_ptr<IDebugRegistry> {
-  return debugRegistry;
 }
 
 }

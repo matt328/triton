@@ -2,7 +2,6 @@
 #include "api/gw/Handles.hpp"
 
 namespace tr {
-class IDebugRegistry;
 
 class DebugMeshManager {
 public:

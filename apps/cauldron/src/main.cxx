@@ -1,4 +1,3 @@
-#include "api/fx/IDebugRegistry.hpp"
 #include "api/fx/IFrameworkContext.hpp"
 #include "fx/FrameworkFactory.hpp"
 #include "fx/IGameLoop.hpp"
@@ -65,8 +64,7 @@ auto main() -> int {
         di::bind<tr::TaskQueue>.to([&fc] { return fc->getTaskQueue(); }),
         di::bind<tr::IEventBus>.to([&fc] { return fc->getEventBus(); }),
         di::bind<tr::IGameObjectProxy>.to([&fc] { return fc->getGameObjectProxy(); }),
-        di::bind<tr::IGameWorldSystem>.to([&fc] { return fc->getGameWorldSystem(); }),
-        di::bind<tr::IDebugRegistry>.to([&fc] { return fc->getDebugRegistry(); }));
+        di::bind<tr::IGameWorldSystem>.to([&fc] { return fc->getGameWorldSystem(); }));
 
     auto app = injector.create<std::shared_ptr<ed::Application>>();
 
