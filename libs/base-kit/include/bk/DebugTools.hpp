@@ -11,6 +11,11 @@
   ShapeExtractor should have access to EntityService so it can query the transform of any entities
   to which shapes are attached and transform the shape's vertices.
   ShapeExtractor should also know how to deal with Gizmo shapes to tell ImGuiSystem to render them
+
+  Debug Rendering
+    - single vertex buffer just contains pre-transformed vertices
+    - buffer is cpu visible and coherent, wiped and refilled each frame
+    - doesn't need any of the buffer indirection stuff
 */
 
 namespace tr {
