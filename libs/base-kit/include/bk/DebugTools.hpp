@@ -3,19 +3,23 @@
 #include "DebugShapes.hpp"
 
 /*
-  TODO(matt): Implement immediate mode buffer handling. use a persistently cpu mapped buffer and
-  rewrite the entire contents of it every frame.
-
-  ShapeExtractor needs to get the shape list and get a list of vertices to send to the
-  IResourceProxy
-  ShapeExtractor should have access to EntityService so it can query the transform of any entities
-  to which shapes are attached and transform the shape's vertices.
-  ShapeExtractor should also know how to deal with Gizmo shapes to tell ImGuiSystem to render them
-
-  Debug Rendering
-    - single vertex buffer just contains pre-transformed vertices
-    - buffer is cpu visible and coherent, wiped and refilled each frame
-    - doesn't need any of the buffer indirection stuff
+  TODO(matt): Scrap the immediate mode idea. It's going to be entirely too much effort to subvert
+  the entire system built around async gpu uploads and bindless indirect draw.
+  So, debug widgets are going to be entities.
+  - Create components for each type of widget
+    - Box
+    - Ray
+    - Segment
+    - Triangle
+    - Label
+    - Each widget (entity) can be attached to another entity
+  - Create an API for adding/removing/toggling Debug Widgets by handle or multiples by tags
+    - API will live in the game-world library, and provide a Proxy interface to Cauldron and
+      voxel-terrain for create, update, and delete of widgets
+    - I don't think graphics will need a proxy interface since the widgets can just add their
+      handles to the RenderData that gets passed over the sync point, then the DebugWidgetTask can
+      pick up the data from there.
+    - Labels and ImGuizmo widgets will have to have a separate renderer and pipeline.
 */
 
 namespace tr {
