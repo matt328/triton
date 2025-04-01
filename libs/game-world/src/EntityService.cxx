@@ -15,6 +15,7 @@ EntityService::EntityService(std::shared_ptr<IAssetService> newAssetService)
 }
 
 EntityService::~EntityService() {
+  Log.trace("Destroying EntityService");
 }
 
 auto EntityService::registerEntityCreated(const EntityCreatedFn& fn) -> entt::connection {
@@ -190,9 +191,8 @@ auto EntityService::createTerrain(TerrainResult2& terrainResult) -> void {
   registry->emplace<EditorInfo>(entity, terrainResult.name);
 }
 
-auto EntityService::createCamera(CameraInfo cameraInfo,
-                                 std::string_view name,
-                                 bool setDefault) -> void {
+auto EntityService::createCamera(CameraInfo cameraInfo, std::string_view name, bool setDefault)
+    -> void {
 
   std::unique_lock<SharedLockableBase(std::shared_mutex)> lock(registryMutex);
   LockMark(registryMutex);

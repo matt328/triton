@@ -43,6 +43,20 @@ public:
   auto operator=(const EntityService&) -> EntityService& = delete;
   auto operator=(EntityService&&) -> EntityService& = delete;
 
+  template <typename T>
+  auto sharedAccess(T&& fn) {
+    std::shared_lock<SharedLockableBase(std::shared_mutex)> lock(registryMutex);
+    LockMark(registryMutex);
+    return fn(registry);
+  }
+
+  template <typename T>
+  auto exclusiveAccess(T&& fn) {
+    std::unique_lock<SharedLockableBase(std::shared_mutex)> lock(registryMutex);
+    LockMark(registryMutex);
+    return fn(registry);
+  }
+
   auto updateAnimations(const std::function<void(entt::entity, Animation&)>& fn) -> void;
 
   auto updateCameraActions(const std::function<void(entt::entity, Camera&)>& fn) -> void;
@@ -67,9 +81,8 @@ public:
                           Transform transform,
                           std::string_view name) -> EntityId;
 
-  auto createDynamicEntity(ModelData modelData,
-                           Transform transform,
-                           std::string_view name) -> EntityId;
+  auto createDynamicEntity(ModelData modelData, Transform transform, std::string_view name)
+      -> EntityId;
 
   auto createTerrain(TerrainResult2& terrainResult) -> void;
 
