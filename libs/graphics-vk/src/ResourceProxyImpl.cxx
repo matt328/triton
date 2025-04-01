@@ -39,8 +39,4 @@ auto ResourceProxyImpl::uploadModel(const as::Model& model) -> ModelData {
   return ModelData{.meshData = meshData, .skinData = skinData, .animationData = std::nullopt};
 }
 
-/// This sets the vertices in an immediate mode buffer
-auto ResourceProxyImpl::addLines(const std::vector<as::ColorVertex>& vertices) -> void {
-}
-
 }

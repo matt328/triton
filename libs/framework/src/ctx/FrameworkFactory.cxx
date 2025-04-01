@@ -20,6 +20,7 @@
 #include "gfx/IRenderContext.hpp"
 #include "bk/TaskQueue.hpp"
 #include "gfx/IWindow.hpp"
+#include "gw/IWidgetService.hpp"
 
 #define BOOST_DI_CFG_CTOR_LIMIT_SIZE 11
 #include <di.hpp>
@@ -69,6 +70,8 @@ auto createFrameworkContext(const FrameworkConfig& config, std::shared_ptr<IGuiA
       di::bind<IGameObjectProxy>.to<>(gameObjectProxy),
       di::bind<IGameWorldSystem>.to(
           [&gameWorldContext] { return gameWorldContext->getGameWorldSystem(); }),
+      di::bind<IWidgetService>.to(
+          [&gameWorldContext] { return gameWorldContext->getWidgetService(); }),
       di::bind<IAssetService>.to<>(assetService),
       di::bind<IActionSystem>.to<>(actionSystem),
       di::bind<IGameWorldContext>.to<>(gameWorldContext),
