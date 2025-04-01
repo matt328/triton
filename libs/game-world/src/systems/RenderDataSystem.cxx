@@ -2,6 +2,7 @@
 
 #include "api/gfx/GpuCameraData.hpp"
 #include "api/gw/RenderData.hpp"
+#include "components/BoxWidget.hpp"
 #include "components/Renderable.hpp"
 #include "components/Camera.hpp"
 #include "components/Transform.hpp"
@@ -13,6 +14,12 @@ RenderDataSystem::RenderDataSystem(std::shared_ptr<EntityService> newEntityServi
     : entityService{std::move(newEntityService)} {};
 
 auto RenderDataSystem::update(RenderData& renderData) -> void {
+
+  // Add box shapes to renderdata
+  entityService->sharedAccess([](std::unique_ptr<entt::registry>& registry) {
+    const auto view = registry->view<BoxWidget>();
+    for ([[maybe_unused]] const auto& [entity, box] : view.each()) {}
+  });
 
   const auto camFn = [](RenderData& renderData, const Camera& cam) {
     renderData.cameraData = GpuCameraData{.view = cam.view,

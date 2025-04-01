@@ -1,5 +1,7 @@
 #pragma once
 
+#include "api/gfx/Topology.hpp"
+
 namespace tr {
 
 class IGeometryData {
@@ -18,6 +20,9 @@ public:
   [[nodiscard]] virtual auto getIndexData() const -> const void* = 0;
   [[nodiscard]] virtual auto getIndexCount() const -> uint32_t = 0;
   [[nodiscard]] virtual auto getVertexCount() const -> uint32_t = 0;
+  [[nodiscard]] virtual auto getTopology() const -> Topology {
+    return Topology::Triangles;
+  };
 };
 
 }
