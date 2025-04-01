@@ -2,6 +2,7 @@
 #include "GameWorldContextImpl.hpp"
 #include "DefaultGameplaySystem.hpp"
 #include "EntityService.hpp"
+#include "WidgetService.hpp"
 #include "gw/GameObjectProxyImpl.hpp"
 // These includes have to be here or else DI won't work. Should explicitly register everything.
 // then they have a reason to be here and nothing is magickal.
@@ -27,7 +28,8 @@ auto createGameworldContext(const std::shared_ptr<IEventBus>& eventBus,
                                           di::bind<IEventBus>.to<>(eventBus),
                                           di::bind<IActionSystem>.to<>(actionSystem),
                                           di::bind<IResourceProxy>.to<>(resourceProxy),
-                                          di::bind<IGameObjectProxy>.to<GameObjectProxyImpl>());
+                                          di::bind<IGameObjectProxy>.to<GameObjectProxyImpl>(),
+                                          di::bind<IWidgetService>.to<WidgetService>());
 
   return injector.create<std::shared_ptr<GameWorldContextImpl>>();
 }

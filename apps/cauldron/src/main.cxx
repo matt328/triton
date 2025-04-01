@@ -11,6 +11,7 @@
 
 // Following aren't referenced in this file, but need to be here for BoostDI to work
 #include "Properties.hpp"
+#include "gw/IWidgetService.hpp"
 #include "ui/Manager.hpp"
 #include "ui/components/Menu.hpp"
 #include "data/DataFacade.hpp"
@@ -64,7 +65,8 @@ auto main() -> int {
         di::bind<tr::TaskQueue>.to([&fc] { return fc->getTaskQueue(); }),
         di::bind<tr::IEventBus>.to([&fc] { return fc->getEventBus(); }),
         di::bind<tr::IGameObjectProxy>.to([&fc] { return fc->getGameObjectProxy(); }),
-        di::bind<tr::IGameWorldSystem>.to([&fc] { return fc->getGameWorldSystem(); }));
+        di::bind<tr::IGameWorldSystem>.to([&fc] { return fc->getGameWorldSystem(); }),
+        di::bind<tr::IWidgetService>.to([&fc] { return fc->getWidgetService(); }));
 
     auto app = injector.create<std::shared_ptr<ed::Application>>();
 

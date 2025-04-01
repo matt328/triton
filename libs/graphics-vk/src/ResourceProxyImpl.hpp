@@ -18,8 +18,6 @@ public:
 
   auto uploadModel(const as::Model& model) -> ModelData override;
 
-  auto addLines(const std::vector<as::ColorVertex>& vertices) -> void override;
-
 private:
   std::shared_ptr<VkResourceManager> resourceManager;
 };

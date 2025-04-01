@@ -1,6 +1,7 @@
 #include "WidgetService.hpp"
 #include "EntityService.hpp"
 #include "components/BoxWidget.hpp"
+#include "components/TagComponent.hpp"
 #include "components/Target.hpp"
 
 namespace tr {
@@ -20,14 +21,17 @@ auto WidgetService::createBox(const BoxCreateInfo& createInfo) -> void {
         registry->emplace<Target>(entityId, targetEntityId);
       }
     }
+    Log.trace("Widget Service Creating Box");
+    registry->emplace<Tag>(entityId, createInfo.tag);
     registry->emplace<BoxWidget>(entityId, createInfo.center, createInfo.extent, createInfo.color);
   });
 }
 
-auto WidgetService::toggleByTag(const std::string& tag, bool visible) -> void {
+auto WidgetService::toggleByTag([[maybe_unused]] const std::string& tag,
+                                [[maybe_unused]] bool visible) -> void {
 }
 
-auto WidgetService::removeByTag(const std::string& tag) -> void {
+auto WidgetService::removeByTag([[maybe_unused]] const std::string& tag) -> void {
 }
 
 }

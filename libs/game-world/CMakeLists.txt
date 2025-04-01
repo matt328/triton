@@ -9,6 +9,7 @@ set(gameworld_SRC
   src/DefaultGameplaySystem.cxx
   src/EntityService.cxx
   src/EntityServiceProvider.cxx
+  src/WidgetService.cxx
   src/GameObjectProxyImpl.cxx
 
   src/ctx/GameWorldContextImpl.cxx
