@@ -11,6 +11,13 @@ WidgetService::WidgetService(std::shared_ptr<EntityService> newEntityService)
 }
 
 auto WidgetService::createBox(const BoxCreateInfo& createInfo) -> void {
+
+  // Triangulate vertices for a box
+  // Upload the data to a buffer
+  // Get a GeometryHandle - find a better/consistent name for these
+
+  // place the geometry handle in the BoxWidget
+
   entityService->exclusiveAccess([createInfo](std::unique_ptr<entt::registry>& registry) {
     const auto entityId = registry->create();
     if (createInfo.target) {
