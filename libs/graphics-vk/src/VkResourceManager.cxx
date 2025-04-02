@@ -93,47 +93,6 @@ auto VkResourceManager::uploadTerrainMesh(const IGeometryData& geometryData) -> 
   return terrainMeshBuffer->addMesh(geometryData);
 }
 
-auto VkResourceManager::asyncUpload2(const IGeometryData& geometryData) -> MeshHandle {
-  // Prepare Vertex Buffer
-  const auto vbSize = geometryData.getVertexDataSize();
-  const auto ibSize = geometryData.getIndexDataSize();
-
-  try {
-    const auto vbStagingBuffer = allocator->createStagingBuffer(vbSize, "Buffer-VertexStaging");
-    void* vbData = allocator->mapMemory(*vbStagingBuffer);
-    memcpy(vbData, geometryData.getVertexData(), vbSize);
-    allocator->unmapMemory(*vbStagingBuffer);
-
-    // Prepare Index Buffer
-    const auto ibStagingBuffer = allocator->createStagingBuffer(ibSize, "Buffer-IndexStaging");
-
-    auto* const data = allocator->mapMemory(*ibStagingBuffer);
-    memcpy(data, geometryData.getIndexData(), ibSize);
-    allocator->unmapMemory(*ibStagingBuffer);
-
-    auto vertexBuffer = allocator->createGpuVertexBuffer(vbSize, "Buffer-Vertex");
-    auto indexBuffer = allocator->createGpuIndexBuffer(ibSize, "Buffer-Index");
-    const auto indicesCount = geometryData.getIndexCount();
-
-    // Upload Buffers
-    immediateTransferContext->submit([&](const vk::raii::CommandBuffer& cmd) {
-      const auto vbCopy = vk::BufferCopy{.srcOffset = 0, .dstOffset = 0, .size = vbSize};
-      cmd.copyBuffer(vbStagingBuffer->getBuffer(), vertexBuffer->getBuffer(), vbCopy);
-      const auto copy = vk::BufferCopy{.srcOffset = 0, .dstOffset = 0, .size = ibSize};
-      cmd.copyBuffer(ibStagingBuffer->getBuffer(), indexBuffer->getBuffer(), copy);
-    });
-
-    const auto meshHandle = meshList.size();
-    meshList.emplace_back(std::move(vertexBuffer), std::move(indexBuffer), indicesCount);
-
-    return meshHandle;
-
-  } catch (const AllocationException& ex) {
-    throw ResourceUploadException(
-        fmt::format("Error allocating resources for geometry, {0}", ex.what()));
-  }
-}
-
 /*
   The process should be upload an image to the GPU in a background task which waits till the upload
   is finished, creates a vk::DescriptorImageInfo and stores it in a host side list and returns a

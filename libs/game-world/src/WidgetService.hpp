@@ -5,10 +5,14 @@
 namespace tr {
 
 class EntityService;
+class TaskQueue;
+class IResourceProxy;
 
 class WidgetService : public IWidgetService {
 public:
-  explicit WidgetService(std::shared_ptr<EntityService> newEntityService);
+  explicit WidgetService(std::shared_ptr<EntityService> newEntityService,
+                         std::shared_ptr<TaskQueue> newTaskQueue,
+                         std::shared_ptr<IResourceProxy> newResourceProxy);
   ~WidgetService() override = default;
 
   WidgetService(const WidgetService&) = delete;
@@ -24,6 +28,8 @@ public:
 
 private:
   std::shared_ptr<EntityService> entityService;
+  std::shared_ptr<TaskQueue> taskQueue;
+  std::shared_ptr<IResourceProxy> resourceProxy;
 };
 
 }

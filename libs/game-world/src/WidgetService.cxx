@@ -1,37 +1,49 @@
 #include "WidgetService.hpp"
 #include "EntityService.hpp"
+#include "api/fx/IResourceProxy.hpp"
+#include "bk/TaskQueue.hpp"
 #include "components/BoxWidget.hpp"
 #include "components/TagComponent.hpp"
 #include "components/Target.hpp"
 
 namespace tr {
 
-WidgetService::WidgetService(std::shared_ptr<EntityService> newEntityService)
-    : entityService{std::move(newEntityService)} {
+WidgetService::WidgetService(std::shared_ptr<EntityService> newEntityService,
+                             std::shared_ptr<TaskQueue> newTaskQueue,
+                             std::shared_ptr<IResourceProxy> newResourceProxy)
+    : entityService{std::move(newEntityService)},
+      taskQueue{std::move(newTaskQueue)},
+      resourceProxy{std::move(newResourceProxy)} {
 }
 
 auto WidgetService::createBox(const BoxCreateInfo& createInfo) -> void {
 
-  // Triangulate vertices for a box
-  // Upload the data to a buffer
-  // Get a GeometryHandle - find a better/consistent name for these
+  const auto task = [] {
+    // const auto geometryData = geometryFactory->triangulate(createInfo);
 
-  // place the geometry handle in the BoxWidget
+    // const auto meshHandle = resourceProxy->uploadGeometry(geometryData);
+    return static_cast<MeshHandle>(0);
+  };
 
-  entityService->exclusiveAccess([createInfo](std::unique_ptr<entt::registry>& registry) {
-    const auto entityId = registry->create();
-    if (createInfo.target) {
-      const auto targetEntityId = static_cast<entt::entity>(*createInfo.target);
-      if (createInfo.targetOffset) {
-        registry->emplace<Target>(entityId, targetEntityId, *createInfo.targetOffset);
-      } else {
-        registry->emplace<Target>(entityId, targetEntityId);
-      }
-    }
-    Log.trace("Widget Service Creating Box");
-    registry->emplace<Tag>(entityId, createInfo.tag);
-    registry->emplace<BoxWidget>(entityId, createInfo.center, createInfo.extent, createInfo.color);
-  });
+  const auto onComplete = [this, &createInfo](MeshHandle meshHandle) {
+    entityService->exclusiveAccess(
+        [createInfo, meshHandle](std::unique_ptr<entt::registry>& registry) {
+          const auto entityId = registry->create();
+          if (createInfo.target) {
+            const auto targetEntityId = static_cast<entt::entity>(*createInfo.target);
+            if (createInfo.targetOffset) {
+              registry->emplace<Target>(entityId, targetEntityId, *createInfo.targetOffset);
+            } else {
+              registry->emplace<Target>(entityId, targetEntityId);
+            }
+          }
+          Log.trace("Widget Service Creating Box");
+          registry->emplace<Tag>(entityId, createInfo.tag);
+          registry->emplace<BoxWidget>(entityId, meshHandle);
+        });
+  };
+
+  taskQueue->enqueue(task, onComplete);
 }
 
 auto WidgetService::toggleByTag([[maybe_unused]] const std::string& tag,

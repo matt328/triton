@@ -20,7 +20,8 @@ namespace tr {
 auto createGameworldContext(const std::shared_ptr<IEventBus>& eventBus,
                             const std::shared_ptr<IAssetService>& assetService,
                             const std::shared_ptr<IActionSystem>& actionSystem,
-                            const std::shared_ptr<IResourceProxy>& resourceProxy)
+                            const std::shared_ptr<IResourceProxy>& resourceProxy,
+                            const std::shared_ptr<TaskQueue>& taskQueue)
     -> std::shared_ptr<IGameWorldContext> {
 
   const auto injector = di::make_injector(di::bind<IGameWorldSystem>.to<DefaultGameplaySystem>(),
@@ -29,7 +30,8 @@ auto createGameworldContext(const std::shared_ptr<IEventBus>& eventBus,
                                           di::bind<IActionSystem>.to<>(actionSystem),
                                           di::bind<IResourceProxy>.to<>(resourceProxy),
                                           di::bind<IGameObjectProxy>.to<GameObjectProxyImpl>(),
-                                          di::bind<IWidgetService>.to<WidgetService>());
+                                          di::bind<IWidgetService>.to<WidgetService>(),
+                                          di::bind<TaskQueue>.to<>(taskQueue));
 
   return injector.create<std::shared_ptr<GameWorldContextImpl>>();
 }

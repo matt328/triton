@@ -1,13 +1,11 @@
 #pragma once
 
-#include "bk/Color.hpp"
+#include "api/gw/Handles.hpp"
 
 namespace tr {
 
 struct BoxWidget {
-  glm::vec3 center;
-  float extent;
-  Color color;
+  MeshHandle meshHandle;
 };
 
 }
