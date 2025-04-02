@@ -53,7 +53,8 @@ auto createFrameworkContext(const FrameworkConfig& config, std::shared_ptr<IGuiA
   const auto gameWorldContext = createGameworldContext(eventBus,
                                                        assetService,
                                                        actionSystem,
-                                                       graphicsContext->getResourceProxy());
+                                                       graphicsContext->getResourceProxy(),
+                                                       taskQueue);
   const auto gameObjectProxy = gameWorldContext->getGameObjectProxy();
 
   gameWorldContext->registerTerrainProxy(terrainProxy);
