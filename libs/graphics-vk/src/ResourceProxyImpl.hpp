@@ -18,6 +18,8 @@ public:
 
   auto uploadModel(const as::Model& model) -> ModelData override;
 
+  auto uploadGeometry(const DDGeometryData& data) -> MeshHandle override;
+
 private:
   std::shared_ptr<VkResourceManager> resourceManager;
 };

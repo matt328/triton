@@ -81,6 +81,24 @@ VkResourceManager::~VkResourceManager() {
   Log.trace("Destroying VkResourceManager");
 }
 
+auto VkResourceManager::uploadGeometryData(const DDGeometryData& data) -> MeshHandle {
+  // TODO(matt): The vertex list needs to contain enough data to find/create a buffer
+  /*
+    What will drive the creation/finding of renderers and pipelines? Probably more augmentations to
+    the DDGeometryData struct.
+    GeometryData can have a topology and some other params to create the pipeline
+    How to determine which renderer to use? Maybe there are no different renderers, maybe they'll
+    all do the same thing just with different pipelines and buffers?
+    There may be more than 1 pipeline for objects in a given buffer, possibly MeshHandle needs to be
+    augmented to be able to know which buffer to find the Mesh?
+    Could there be only one GpuBufferEntry/ObjectDataBuffer? Some of those buffers could be
+    condensed into a single global buffer, but the IndirectCommandBuffer and ObjectCountBuffer would
+    need to exist for each pipeline.
+    Also some pipelines may need additional buffers like AnimationData
+  */
+  return static_cast<MeshHandle>(0L);
+}
+
 auto VkResourceManager::uploadStaticMesh(const IGeometryData& geometryData) -> MeshHandle {
   return staticMeshBuffer->addMesh(geometryData);
 }

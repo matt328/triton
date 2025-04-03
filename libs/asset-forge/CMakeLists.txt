@@ -37,6 +37,7 @@ target_precompile_headers(${PROJECT_NAME}
   <cereal/types/string.hpp>
   <ozz/animation/runtime/skeleton.h>
   <ozz/base/io/archive.h>
+  <span>
 )
 
 target_link_libraries(${PROJECT_NAME}

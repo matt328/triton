@@ -2,8 +2,14 @@
 
 namespace tr {
 
+enum class VertexAttributeFormat : uint8_t {
+  Float2 = 0,
+  Float3,
+  Float4
+};
+
 struct VertexAttribute {
-  vk::Format format;
+  VertexAttributeFormat format;
   uint32_t offset;
 
   auto operator==(const VertexAttribute& other) const -> bool {

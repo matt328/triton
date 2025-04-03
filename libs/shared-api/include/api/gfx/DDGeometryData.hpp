@@ -1,6 +1,6 @@
 #pragma once
 
-#include "dd/VertexList.hpp"
+#include "as/VertexList.hpp"
 
 namespace tr {
 
@@ -16,6 +16,14 @@ public:
   DDGeometryData(DDGeometryData&&) = default;
   auto operator=(const DDGeometryData&) -> DDGeometryData& = delete;
   auto operator=(DDGeometryData&&) -> DDGeometryData& = default;
+
+  [[nodiscard]] auto getVertexList() const -> const VertexList& {
+    return vertexList;
+  }
+
+  [[nodiscard]] auto getIndexList() const -> const std::vector<uint32_t>& {
+    return indexList;
+  }
 
 private:
   VertexList vertexList;

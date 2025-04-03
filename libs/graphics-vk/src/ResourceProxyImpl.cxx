@@ -39,4 +39,8 @@ auto ResourceProxyImpl::uploadModel(const as::Model& model) -> ModelData {
   return ModelData{.meshData = meshData, .skinData = skinData, .animationData = std::nullopt};
 }
 
+auto ResourceProxyImpl::uploadGeometry(const DDGeometryData& data) -> MeshHandle {
+  return resourceManager->uploadGeometryData(data);
+}
+
 }
