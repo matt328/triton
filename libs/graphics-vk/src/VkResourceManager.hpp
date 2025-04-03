@@ -1,4 +1,5 @@
 #pragma once
+#include "api/gfx/DDGeometryData.hpp"
 #include "vk/ArenaGeometryBuffer.hpp"
 #include "vk/core/Device.hpp"
 #include "gfx/IDebugManager.hpp"
@@ -78,6 +79,8 @@ public:
 
   auto createDepthImageAndView(std::string_view imageName, vk::Extent2D extent, vk::Format format)
       -> ImageHandle;
+
+  auto uploadGeometryData(const DDGeometryData& data) -> MeshHandle;
 
   /// Add a static mesh to the MeshBufferManager for static meshes.
   auto uploadStaticMesh(const IGeometryData& geometryData) -> MeshHandle;

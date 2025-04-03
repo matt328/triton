@@ -15,6 +15,7 @@
 #include "api/action/IActionSystem.hpp"
 
 #include "VkGraphicsFactory.hpp"
+#include "api/fx/GeometryGenerator.hpp"
 #include "gw/GameWorldFactory.hpp"
 #include "VoxelTerrainFactory.hpp"
 #include "gfx/IRenderContext.hpp"
@@ -37,6 +38,7 @@ auto createFrameworkContext(const FrameworkConfig& config, std::shared_ptr<IGuiA
   const auto assetService = std::make_shared<DefaultAssetService>();
   const auto actionSystem = std::make_shared<ActionSystem>(eventBus);
   const auto taskQueue = std::make_shared<TaskQueue>(TaskQueueConfig{.maxQueueSize = 1024});
+  const auto geometryGenerator = std::make_shared<GeometryGenerator>();
 
   const auto graphicsConfig = VkGraphicsCreateInfo{.initialWindowSize = config.initialWindowSize,
                                                    .windowTitle = config.windowTitle};
@@ -54,7 +56,8 @@ auto createFrameworkContext(const FrameworkConfig& config, std::shared_ptr<IGuiA
                                                        assetService,
                                                        actionSystem,
                                                        graphicsContext->getResourceProxy(),
-                                                       taskQueue);
+                                                       taskQueue,
+                                                       geometryGenerator);
   const auto gameObjectProxy = gameWorldContext->getGameObjectProxy();
 
   gameWorldContext->registerTerrainProxy(terrainProxy);

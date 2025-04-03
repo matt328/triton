@@ -1,4 +1,4 @@
-#include "geo/GeometryGenerator.hpp"
+#include "api/fx/GeometryGenerator.hpp"
 
 namespace tr {
 auto GeometryGenerator::generateBox(const BoxCreateInfo& info) -> DDGeometryData {
@@ -23,8 +23,8 @@ auto GeometryGenerator::generateBox(const BoxCreateInfo& info) -> DDGeometryData
   auto vertexFormat = VertexFormat{
       .stride = sizeof(glm::vec3) + sizeof(glm::vec3),
       .attributes = std::vector{
-          VertexAttribute{.format = vk::Format::eR32G32B32Sfloat, .offset = PositionOffset},
-          VertexAttribute{.format = vk::Format::eR32G32B32Sfloat, .offset = ColorOffset}}};
+          VertexAttribute{.format = VertexAttributeFormat::Float3, .offset = PositionOffset},
+          VertexAttribute{.format = VertexAttributeFormat::Float3, .offset = ColorOffset}}};
 
   auto vertexList = VertexList{};
   vertexList.reserve(corners.size());

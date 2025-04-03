@@ -1,7 +1,7 @@
 #pragma once
 
 #include "api/gw/BoxCreateInfo.hpp"
-#include "geo/DDGeometryData.hpp"
+#include "api/gfx/DDGeometryData.hpp"
 
 namespace tr {
 

@@ -7,12 +7,14 @@ namespace tr {
 class EntityService;
 class TaskQueue;
 class IResourceProxy;
+class GeometryGenerator;
 
 class WidgetService : public IWidgetService {
 public:
   explicit WidgetService(std::shared_ptr<EntityService> newEntityService,
                          std::shared_ptr<TaskQueue> newTaskQueue,
-                         std::shared_ptr<IResourceProxy> newResourceProxy);
+                         std::shared_ptr<IResourceProxy> newResourceProxy,
+                         std::shared_ptr<GeometryGenerator> newGeometryGenerator);
   ~WidgetService() override = default;
 
   WidgetService(const WidgetService&) = delete;
@@ -30,6 +32,7 @@ private:
   std::shared_ptr<EntityService> entityService;
   std::shared_ptr<TaskQueue> taskQueue;
   std::shared_ptr<IResourceProxy> resourceProxy;
+  std::shared_ptr<GeometryGenerator> geometryGenerator;
 };
 
 }

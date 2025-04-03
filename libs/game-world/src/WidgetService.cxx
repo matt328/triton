@@ -5,24 +5,27 @@
 #include "components/BoxWidget.hpp"
 #include "components/TagComponent.hpp"
 #include "components/Target.hpp"
+#include "api/fx/GeometryGenerator.hpp"
 
 namespace tr {
 
 WidgetService::WidgetService(std::shared_ptr<EntityService> newEntityService,
                              std::shared_ptr<TaskQueue> newTaskQueue,
-                             std::shared_ptr<IResourceProxy> newResourceProxy)
+                             std::shared_ptr<IResourceProxy> newResourceProxy,
+                             std::shared_ptr<GeometryGenerator> newGeometryGenerator)
     : entityService{std::move(newEntityService)},
       taskQueue{std::move(newTaskQueue)},
-      resourceProxy{std::move(newResourceProxy)} {
+      resourceProxy{std::move(newResourceProxy)},
+      geometryGenerator{std::move(newGeometryGenerator)} {
 }
 
 auto WidgetService::createBox(const BoxCreateInfo& createInfo) -> void {
-
-  const auto task = [] {
-    // const auto geometryData = geometryFactory->triangulate(createInfo);
-
-    // const auto meshHandle = resourceProxy->uploadGeometry(geometryData);
-    return static_cast<MeshHandle>(0);
+  const auto task = [this, &createInfo] {
+    // TODO(matt): don't pass entire boxcreateinfo here, only pass what's needed, center and extent
+    // create a BoxGeometryCreateInfo struct in GeometryGenerator.hpp
+    const auto geometryData = geometryGenerator->generateBox(createInfo);
+    const auto meshHandle = resourceProxy->uploadGeometry(geometryData);
+    return meshHandle;
   };
 
   const auto onComplete = [this, &createInfo](MeshHandle meshHandle) {

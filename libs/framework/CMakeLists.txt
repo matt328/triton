@@ -8,6 +8,7 @@ set(framework_SRC
   src/ctx/FrameworkContextImpl.cxx
   src/ctx/FrameworkFactory.cxx
   src/GuiCallbackRegistrar.cxx
+  src/GeometryGenerator.cxx
 )
 
 add_library(${PROJECT_NAME} STATIC ${framework_SRC})
