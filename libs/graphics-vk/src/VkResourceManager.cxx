@@ -81,7 +81,8 @@ VkResourceManager::~VkResourceManager() {
   Log.trace("Destroying VkResourceManager");
 }
 
-auto VkResourceManager::uploadGeometryData(const DDGeometryData& data) -> MeshHandle {
+auto VkResourceManager::uploadGeometryData([[maybe_unused]] const DDGeometryData& data)
+    -> MeshHandle {
   // TODO(matt): The vertex list needs to contain enough data to find/create a buffer
   /*
     What will drive the creation/finding of renderers and pipelines? Probably more augmentations to
