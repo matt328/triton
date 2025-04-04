@@ -1,17 +1,9 @@
 #pragma once
 
 #include "gfx/IRenderContext.hpp"
+#include "dd/Renderable.hpp"
 
 namespace tr {
-
-using RenderConfigHandle = uint64_t;
-
-struct Renderable {
-  RenderConfigHandle renderConfigHandle;
-  GeometryHandle geometryHandle;
-  MaterialHandle materialHandle;
-  ObjectID objectId;
-};
 
 class DDRenderer : public IRenderContext {
 public:
@@ -30,6 +22,7 @@ public:
 
 private:
   RenderData renderData;
+  std::vector<Renderable> renderables;
   std::unordered_map<RenderConfigHandle, std::vector<Renderable>> categorizedRenderables;
 };
 
