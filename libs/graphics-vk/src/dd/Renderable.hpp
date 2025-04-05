@@ -1,14 +1,14 @@
 #pragma once
 
-namespace tr {
+#include "dd/RenderConfigHandle.hpp"
 
-using RenderConfigHandle = uint64_t;
+namespace tr {
 
 struct Renderable {
   RenderConfigHandle renderConfigHandle;
   GeometryHandle geometryHandle;
   MaterialHandle materialHandle;
-  ObjectID objectId;
+  ObjectID objectId; // Not actually known until the ObjectDataBuffer is populated for this frame.
 };
 
 }
