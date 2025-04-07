@@ -32,12 +32,12 @@ auto RenderPass::execute(const Frame* frame, [[maybe_unused]] vk::CommandBuffer&
     depthAttachmentInfo->imageView = resourceManager->getImageView(imageHandle);
   }
 
-  const auto renderingInfo = vk::RenderingInfo{
-      .renderArea = {.offset = {.x = 0, .y = 0}, .extent = frame->getDrawImageExtent()},
-      .layerCount = 1,
-      .colorAttachmentCount = 1,
-      .pColorAttachments = &*colorAttachmentInfo,
-      .pDepthAttachment = &*depthAttachmentInfo};
+  const auto renderingInfo =
+      vk::RenderingInfo{.renderArea = {.offset = {.x = 0, .y = 0}, .extent = config.extent},
+                        .layerCount = 1,
+                        .colorAttachmentCount = 1,
+                        .pColorAttachments = &*colorAttachmentInfo,
+                        .pDepthAttachment = &*depthAttachmentInfo};
 
   cmdBuffer.beginRendering(renderingInfo);
 }

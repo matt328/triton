@@ -18,7 +18,7 @@ auto RenderPassFactory::createRenderPass(const RenderPassCreateInfo& createInfo)
   auto depthAttachmentInfo = std::optional<vk::RenderingAttachmentInfo>{};
 
   if (createInfo.colorFormat) {
-    logicalColorHandle = frameManager->registerPerFrameDrawImage(*createInfo.colorExtent);
+    logicalColorHandle = frameManager->registerPerFrameDrawImage(createInfo.extent);
     colorAttachmentInfo =
         std::make_optional<vk::RenderingAttachmentInfo>(vk::RenderingAttachmentInfo{
             .imageLayout = vk::ImageLayout::eColorAttachmentOptimal,
@@ -30,7 +30,7 @@ auto RenderPassFactory::createRenderPass(const RenderPassCreateInfo& createInfo)
   if (createInfo.depthFormat) {
     // todo registerPerFrameImage(extent, format)
     logicalDepthHandle =
-        frameManager->registerPerFrameDepthImage(*createInfo.depthExtent, *createInfo.depthFormat);
+        frameManager->registerPerFrameDepthImage(createInfo.extent, *createInfo.depthFormat);
     depthAttachmentInfo =
         std::make_optional<vk::RenderingAttachmentInfo>(vk::RenderingAttachmentInfo{
             .imageLayout = vk::ImageLayout::eDepthAttachmentOptimal,
@@ -41,7 +41,9 @@ auto RenderPassFactory::createRenderPass(const RenderPassCreateInfo& createInfo)
                                                            .stencil = *createInfo.clearStencil}}});
   }
 
-  return std::make_unique<RenderPass>(RenderPassConfig{.colorHandle = logicalColorHandle,
+  return std::make_unique<RenderPass>(resourceManager,
+                                      RenderPassConfig{.extent = createInfo.extent,
+                                                       .colorHandle = logicalColorHandle,
                                                        .depthHandle = logicalDepthHandle,
                                                        .colorAttachmentInfo = colorAttachmentInfo,
                                                        .depthAttachmentInfo = depthAttachmentInfo});

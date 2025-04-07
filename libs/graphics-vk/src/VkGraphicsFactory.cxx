@@ -36,6 +36,7 @@
 #include "dd/DDRenderer.hpp"
 #include "dd/RenderConfigRegistry.hpp"
 #include "dd/DrawContextFactory.hpp"
+#include "dd/RenderPassFactory.hpp"
 
 #include <di.hpp>
 

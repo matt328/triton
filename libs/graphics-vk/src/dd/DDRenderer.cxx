@@ -1,22 +1,27 @@
 #include "dd/DDRenderer.hpp"
 #include "dd/DrawContextFactory.hpp"
 #include "dd/RenderConfigRegistry.hpp"
-#include "dd/RenderPassBuilder.hpp"
 #include "gfx/IFrameManager.hpp"
 #include "vk/core/Swapchain.hpp"
 #include "task/Frame.hpp"
+#include "dd/RenderPassFactory.hpp"
 
 namespace tr {
 
 DDRenderer::DDRenderer(std::shared_ptr<RenderConfigRegistry> newRenderConfigRegistry,
                        std::shared_ptr<DrawContextFactory> newDrawContextFactory,
-                       std::shared_ptr<IFrameManager> newFrameManager)
+                       std::shared_ptr<IFrameManager> newFrameManager,
+                       std::shared_ptr<RenderPassFactory> newRenderPassFactory)
     : renderConfigRegistry{std::move(newRenderConfigRegistry)},
       drawContextFactory{std::move(newDrawContextFactory)},
-      frameManager{std::move(newFrameManager)} {
+      frameManager{std::move(newFrameManager)},
+      renderPassFactory{std::move(newRenderPassFactory)} {
 
-  renderPasses.emplace(RenderPassType::ForwardOpaque, std::make_unique<RenderPass>());
-  renderPasses.emplace(RenderPassType::UI, std::make_unique<RenderPass>());
+  const auto forwardCreateInfo = RenderPassCreateInfo{};
+  const auto uiCreateInfo = RenderPassCreateInfo{};
+
+  renderPasses.emplace_back(renderPassFactory->createRenderPass(forwardCreateInfo));
+  renderPasses.emplace_back(renderPassFactory->createRenderPass(uiCreateInfo));
 }
 
 auto DDRenderer::update() -> void {
@@ -31,7 +36,7 @@ auto DDRenderer::registerRenderable(const RenderableData& data) -> RenderableRes
 
   auto* const drawContext = drawContextFactory->getOrCreateDrawContext(renderConfigHandle);
 
-  for (const auto& [renderPassType, renderPass] : renderPasses) {
+  for (const auto& renderPass : renderPasses) {
     if (renderPass->accepts(renderConfig)) {
       renderPass->addDrawContext(renderConfigHandle, drawContext);
     }

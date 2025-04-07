@@ -11,6 +11,7 @@ class Frame;
 class VkResourceManager;
 
 struct RenderPassConfig {
+  vk::Extent2D extent;
   std::optional<LogicalImageHandle> colorHandle;
   std::optional<LogicalImageHandle> depthHandle;
   std::optional<vk::RenderingAttachmentInfo> colorAttachmentInfo;

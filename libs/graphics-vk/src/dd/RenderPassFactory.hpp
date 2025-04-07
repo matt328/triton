@@ -14,14 +14,13 @@ enum class RenderPassType : uint8_t {
 
 struct RenderPassCreateInfo {
   RenderPassType type;
+  vk::Extent2D extent;
   std::optional<vk::Format> colorFormat = vk::Format::eR16G16B16A16Sfloat;
-  std::optional<vk::Extent2D> colorExtent;
   std::optional<std::array<float, 4>> clearColor;
   vk::AttachmentLoadOp colorLoadOp = vk::AttachmentLoadOp::eClear;
   vk::AttachmentStoreOp colorStoreOp = vk::AttachmentStoreOp::eStore;
 
   std::optional<vk::Format> depthFormat;
-  std::optional<vk::Extent2D> depthExtent;
   std::optional<float> clearDepth = 1.f;
   std::optional<uint32_t> clearStencil = 0u;
   vk::AttachmentLoadOp depthLoadOp = vk::AttachmentLoadOp::eClear;

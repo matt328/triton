@@ -9,12 +9,14 @@ namespace tr {
 class RenderConfigRegistry;
 class DrawContextFactory;
 class IFrameManager;
+class RenderPassFactory;
 
 class DDRenderer : public IRenderContext {
 public:
   explicit DDRenderer(std::shared_ptr<RenderConfigRegistry> newRenderConfigRegistry,
                       std::shared_ptr<DrawContextFactory> newDrawContextFactory,
-                      std::shared_ptr<IFrameManager> newFrameManager);
+                      std::shared_ptr<IFrameManager> newFrameManager,
+                      std::shared_ptr<RenderPassFactory> newRenderPassFactory);
   ~DDRenderer() override = default;
 
   DDRenderer(const DDRenderer&) = default;
@@ -33,8 +35,9 @@ private:
   std::shared_ptr<RenderConfigRegistry> renderConfigRegistry;
   std::shared_ptr<DrawContextFactory> drawContextFactory;
   std::shared_ptr<IFrameManager> frameManager;
+  std::shared_ptr<RenderPassFactory> renderPassFactory;
 
-  std::unordered_map<RenderPassType, std::unique_ptr<RenderPass>> renderPasses;
+  std::vector<std::unique_ptr<RenderPass>> renderPasses;
 
   RenderData renderData;
   std::vector<Renderable> renderables;
