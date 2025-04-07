@@ -128,7 +128,7 @@ auto Frame::addLogicalImage(LogicalImageHandle logicalHandle, ImageHandle imageH
   imageHandles.emplace(logicalHandle, imageHandle);
 }
 
-auto Frame::getLogicalImage(LogicalImageHandle logicalHandle) -> ImageHandle {
+auto Frame::getLogicalImage(LogicalImageHandle logicalHandle) const -> ImageHandle {
   return imageHandles.at(logicalHandle);
 }
 

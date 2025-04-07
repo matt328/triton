@@ -84,6 +84,19 @@ auto DefaultFrameManager::registerPerFrameDrawImage(vk::Extent2D extent) -> Logi
   return logicalHandle;
 }
 
+auto DefaultFrameManager::registerPerFrameDepthImage(vk::Extent2D extent, vk::Format format)
+    -> LogicalImageHandle {
+  const auto logicalHandle = imageKeygen.getKey();
+  for (auto& frame : frames) {
+    const auto imageHandle =
+        resourceManager->createDepthImageAndView(frame->getIndexedName("Image-Draw-Frame_"),
+                                                 extent,
+                                                 format);
+    frame->addLogicalImage(logicalHandle, imageHandle);
+  }
+  return logicalHandle;
+}
+
 auto DefaultFrameManager::handleSwapchainResized(const SwapchainResized& event) -> void {
 
   const auto drawImageExtent =

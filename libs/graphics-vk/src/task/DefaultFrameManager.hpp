@@ -34,6 +34,8 @@ public:
   // For each frame, create a drawImage and store its handle associated with the same
   // LogicalImageHandle
   auto registerPerFrameDrawImage(vk::Extent2D extent) -> LogicalImageHandle override;
+  auto registerPerFrameDepthImage(vk::Extent2D extent, vk::Format format)
+      -> LogicalImageHandle override;
 
 private:
   RenderContextConfig renderConfig;

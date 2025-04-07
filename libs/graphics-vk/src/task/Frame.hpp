@@ -76,7 +76,7 @@ public:
   [[nodiscard]] auto getBufferHandle2(size_t key) const -> BufferHandle;
 
   auto addLogicalImage(LogicalImageHandle logicalHandle, ImageHandle imageHandle) -> void;
-  auto getLogicalImage(LogicalImageHandle logicalHandle) -> ImageHandle;
+  auto getLogicalImage(LogicalImageHandle logicalHandle) const -> ImageHandle;
 
   auto setDepthImageHandle(ImageHandle handle) -> void;
   auto setDrawImageHandle(ImageHandle handle) -> void;

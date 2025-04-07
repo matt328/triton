@@ -6,27 +6,22 @@
 
 namespace tr {
 
-enum class RenderPassType : uint8_t {
-  ForwardOpaque = 0,
-  PostProcess,
-  UI,
-};
-
-struct RenderPassCreateInfo {
-  RenderPassType type;
-  std::optional<LogicalImageHandle> colorImageHandle;
-  std::optional<glm::vec3> clearColor;
-  std::optional<LogicalImageHandle> depthImageHandle;
-  std::optional<glm::vec3> depthColor;
-  std::optional<std::string> name;
-};
-
 class DrawContextFactory;
 class Frame;
+class VkResourceManager;
+
+struct RenderPassConfig {
+  std::optional<LogicalImageHandle> colorHandle;
+  std::optional<LogicalImageHandle> depthHandle;
+  std::optional<vk::RenderingAttachmentInfo> colorAttachmentInfo;
+  std::optional<vk::RenderingAttachmentInfo> depthAttachmentInfo;
+  std::string name = "Unnamed RenderPass";
+};
 
 class RenderPass {
 public:
-  explicit RenderPass(RenderPassCreateInfo& createInfo);
+  explicit RenderPass(std::shared_ptr<VkResourceManager> newResourceManager,
+                      RenderPassConfig newConfig);
   ~RenderPass() = default;
 
   RenderPass(const RenderPass&) = default;
@@ -41,7 +36,8 @@ public:
   auto execute(const Frame* frame, vk::CommandBuffer& cmdBuffer) -> void;
 
 private:
-  std::optional<std::string> debugName;
+  std::shared_ptr<VkResourceManager> resourceManager;
+  RenderPassConfig config;
   std::unordered_map<RenderConfigHandle, DrawContext*> drawContexts;
 };
 

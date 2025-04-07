@@ -22,6 +22,8 @@ public:
   virtual auto acquireFrame() -> std::variant<Frame*, ImageAcquireResult> = 0;
   [[nodiscard]] virtual auto getFrames() const -> const std::vector<std::unique_ptr<Frame>>& = 0;
   virtual auto registerPerFrameDrawImage(vk::Extent2D extent) -> LogicalImageHandle = 0;
+  virtual auto registerPerFrameDepthImage(vk::Extent2D extent, vk::Format format)
+      -> LogicalImageHandle = 0;
 };
 
 }
