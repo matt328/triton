@@ -8,6 +8,13 @@ set(graphicsvk_SRC
   src/ImmediateTransferContext.cxx
   src/Window.cxx
 
+  src/dd/DDRenderer.cxx
+  src/dd/DrawContext.cxx
+  src/dd/DrawContextFactory.cxx
+  src/dd/RenderConfigRegistry.cxx
+  src/dd/ResourceUploader.cxx
+  src/dd/RenderPass.cxx
+
   src/mem/Allocator.cxx
   src/mem/Buffer.cxx
   src/mem/Image.cxx

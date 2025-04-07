@@ -3,6 +3,9 @@
 
 namespace tr {
 
+struct RenderableData;
+struct RenderableResources;
+
 class IRenderContext {
 public:
   explicit IRenderContext() = default;
@@ -12,6 +15,8 @@ public:
   IRenderContext(IRenderContext&&) = delete;
   auto operator=(const IRenderContext&) -> IRenderContext& = default;
   auto operator=(IRenderContext&&) -> IRenderContext& = delete;
+
+  virtual auto registerRenderable(const RenderableData& data) -> RenderableResources = 0;
 
   virtual void update() = 0;
   virtual void renderNextFrame() = 0;

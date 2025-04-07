@@ -1,4 +1,5 @@
 #include "NewRenderContext.hpp"
+#include "api/gw/RenderableResources.hpp"
 
 namespace tr {
 
@@ -10,6 +11,11 @@ NewRenderContext::NewRenderContext(std::shared_ptr<IFrameManager> newFrameManage
 
 NewRenderContext::~NewRenderContext() {
   Log.trace("Destroying NewRenderContext");
+}
+
+auto NewRenderContext::registerRenderable([[maybe_unused]] const RenderableData& data)
+    -> RenderableResources {
+  return {};
 }
 
 void NewRenderContext::update() {

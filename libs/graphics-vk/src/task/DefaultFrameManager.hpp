@@ -1,5 +1,6 @@
 #pragma once
 
+#include "bk/Rando.hpp"
 #include "gfx/IFrameManager.hpp"
 #include "gfx/RenderContextConfig.hpp"
 #include "api/fx/IEventBus.hpp"
@@ -30,6 +31,10 @@ public:
 
   [[nodiscard]] auto getFrames() const -> const std::vector<std::unique_ptr<Frame>>& override;
 
+  // For each frame, create a drawImage and store its handle associated with the same
+  // LogicalImageHandle
+  auto registerPerFrameDrawImage(vk::Extent2D extent) -> LogicalImageHandle override;
+
 private:
   RenderContextConfig renderConfig;
   std::shared_ptr<CommandBufferManager> commandBufferManager;
@@ -40,6 +45,8 @@ private:
 
   size_t currentFrame;
   std::vector<std::unique_ptr<Frame>> frames;
+
+  MapKey imageKeygen;
 
   auto handleSwapchainResized(const SwapchainResized& event) -> void;
 };

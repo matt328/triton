@@ -122,6 +122,16 @@ auto Frame::getDebugObjectCount() const -> uint32_t {
   return debugObjectCount;
 }
 
+auto Frame::addLogicalImage(LogicalImageHandle logicalHandle, ImageHandle imageHandle) -> void {
+  assert(!imageHandles.contains(logicalHandle) &&
+         "Attempted to register same logical handle twice");
+  imageHandles.emplace(logicalHandle, imageHandle);
+}
+
+auto Frame::getLogicalImage(LogicalImageHandle logicalHandle) -> ImageHandle {
+  return imageHandles.at(logicalHandle);
+}
+
 auto Frame::setDepthImageHandle(const ImageHandle handle) -> void {
   depthImageHandle = handle;
 }

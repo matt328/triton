@@ -20,6 +20,7 @@ public:
   void renderNextFrame() override;
   void waitIdle() override;
   void setRenderData(const RenderData& renderData) override;
+  auto registerRenderable(const RenderableData& data) -> RenderableResources override;
 
 private:
   std::shared_ptr<IFrameManager> frameManager;

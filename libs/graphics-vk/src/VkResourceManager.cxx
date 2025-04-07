@@ -346,7 +346,7 @@ auto VkResourceManager::createDrawImageAndView(std::string_view imageName,
   const auto imageCreateInfo = vk::ImageCreateInfo{
       .imageType = vk::ImageType::e2D,
       .format = drawImageFormat,
-      .extent = vk::Extent3D{extent.width, extent.height, 1},
+      .extent = vk::Extent3D{.width = extent.width, .height = extent.height, .depth = 1},
       .mipLevels = 1,
       .arrayLayers = 1,
       .samples = vk::SampleCountFlagBits::e1,

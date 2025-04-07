@@ -6,6 +6,7 @@
 #include "ResourceProxyImpl.hpp"
 
 #include "Window.hpp"
+#include "dd/RenderConfigRegistry.hpp"
 #include "mem/Allocator.hpp"
 #include "pipeline/SpirvShaderModuleFactory.hpp"
 #include "task/DefaultFrameManager.hpp"
@@ -31,6 +32,10 @@
 #include "VkGraphicsContext.hpp"
 #include "Window.hpp"
 #include "api/gfx/ImGuiSystem.hpp"
+
+#include "dd/DDRenderer.hpp"
+#include "dd/RenderConfigRegistry.hpp"
+#include "dd/DrawContextFactory.hpp"
 
 #include <di.hpp>
 
@@ -80,7 +85,7 @@ auto createVkGraphicsContext(VkGraphicsCreateInfo createInfo,
                         di::bind<VkResourceManager>.to<VkResourceManager>(),
                         di::bind<IFrameManager>.to<DefaultFrameManager>(),
                         di::bind<IRenderScheduler>.to<DefaultRenderScheduler>(),
-                        di::bind<IRenderContext>.to<NewRenderContext>(),
+                        di::bind<IRenderContext>.to<DDRenderer>(),
                         di::bind<IGuiSystem>.to<ImGuiSystem>());
 
   return injector.create<std::shared_ptr<VkGraphicsContext>>();

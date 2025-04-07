@@ -74,6 +74,16 @@ DefaultFrameManager::~DefaultFrameManager() {
   frames.clear();
 }
 
+auto DefaultFrameManager::registerPerFrameDrawImage(vk::Extent2D extent) -> LogicalImageHandle {
+  const auto logicalHandle = imageKeygen.getKey();
+  for (auto& frame : frames) {
+    const auto imageHandle =
+        resourceManager->createDrawImageAndView(frame->getIndexedName("Image-Draw-Frame_"), extent);
+    frame->addLogicalImage(logicalHandle, imageHandle);
+  }
+  return logicalHandle;
+}
+
 auto DefaultFrameManager::handleSwapchainResized(const SwapchainResized& event) -> void {
 
   const auto drawImageExtent =

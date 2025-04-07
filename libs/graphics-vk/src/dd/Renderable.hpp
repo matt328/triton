@@ -4,6 +4,10 @@
 
 namespace tr {
 
+using GeometryHandle = size_t;
+using MaterialHandle = size_t;
+using ObjectID = size_t;
+
 struct Renderable {
   RenderConfigHandle renderConfigHandle;
   GeometryHandle geometryHandle;

@@ -1,0 +1,35 @@
+#pragma once
+
+#include "api/gfx/DDGeometryData.hpp"
+#include "as/Model.hpp"
+#include "dd/RenderConfig.hpp"
+
+namespace tr {
+
+using SkeletonHandle = uint64_t;
+using AnimationHandle = uint64_t;
+
+struct AnimationData2 {
+  SkeletonHandle skeletonHandle{};
+  AnimationHandle animationHandle{};
+};
+
+struct ObjectData {
+  std::vector<std::byte> objectDataBytes;
+};
+
+struct MaterialData {
+  ShadingMode shadingMode;
+  std::optional<as::ImageData> imageData;
+};
+
+/// Asset Service will be updated to produce these. This struct will probably be extended with
+/// abstract attributes that describe how to render it.
+struct RenderableData {
+  DDGeometryData geometryData;
+  ObjectData objectData;
+  MaterialData materialData;
+  std::optional<AnimationData2> animationData;
+};
+
+}
