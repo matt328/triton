@@ -1,29 +1,39 @@
 #pragma once
 
+#include "bk/Rando.hpp"
 #include "dd/buffer-registry/GeometryBufferConfig.hpp"
 #include "dd/buffer-registry/ObjectBufferConfig.hpp"
 #include "vk/ResourceManagerHandles.hpp"
 
 namespace tr {
 
+class ArenaGeometryBuffer;
+class ArenaBuffer;
+class IBufferManager;
+
 class BufferRegistry {
 public:
-  BufferRegistry() = default;
+  explicit BufferRegistry(std::shared_ptr<IBufferManager> newBufferManager);
   ~BufferRegistry() = default;
 
-  BufferRegistry(const BufferRegistry&) = default;
+  BufferRegistry(const BufferRegistry&) = delete;
   BufferRegistry(BufferRegistry&&) = delete;
-  auto operator=(const BufferRegistry&) -> BufferRegistry& = default;
+  auto operator=(const BufferRegistry&) -> BufferRegistry& = delete;
   auto operator=(BufferRegistry&&) -> BufferRegistry& = delete;
 
-  auto getOrCreateGeometryBuffer(GeometryBufferConfig bufferConfig)
-      -> std::tuple<BufferHandle, BufferHandle>;
-  auto getOrCreateObjectBuffer() -> BufferHandle;
+  auto getOrCreateGeometryBuffer(const GeometryBufferConfig& bufferConfig) -> BufferHandle;
+  auto getOrCreateObjectBuffer(const ObjectBufferConfig& bufferConfig) -> BufferHandle;
   auto getOrCreateMaterialBuffer() -> BufferHandle;
 
 private:
-  std::unordered_map<GeometryBufferConfig, std::tuple<BufferHandle, BufferHandle>> geometryBuffers;
-  std::unordered_map<ObjectBufferConfig, BufferHandle> objectBuffers;
+  std::shared_ptr<IBufferManager> bufferManager;
+
+  std::unordered_map<GeometryBufferConfig, BufferHandle> geometryBufferHandles;
+  std::unordered_map<ObjectBufferConfig, BufferHandle> objectBufferHandles;
+
+  MapKey geometryBufferKeygen;
+  std::unordered_map<BufferHandle, std::unique_ptr<ArenaGeometryBuffer>> geometryBuffers;
+  std::unordered_map<BufferHandle, std::unique_ptr<ArenaBuffer>> objectDataBuffers;
 };
 
 }

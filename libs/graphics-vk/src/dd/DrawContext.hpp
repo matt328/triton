@@ -7,10 +7,15 @@
 
 namespace tr {
 
+struct DrawContextCreateInfo {
+  BufferHandle geometryBufferHandle;
+  BufferHandle objectDataBufferHandle;
+  BufferHandle materialBufferHandle;
+};
+
 class DrawContext {
 public:
-  // Create Constructor so that handles are immutable
-  DrawContext() = default;
+  explicit DrawContext(const DrawContextCreateInfo& creatInfo);
   ~DrawContext() = default;
 
   DrawContext(const DrawContext&) = delete;
@@ -22,9 +27,9 @@ public:
   auto writeObjectData(const Renderable& renderable) -> void;
 
 private:
-  std::unique_ptr<BufferHandle> vertexBufferHandle;
-  std::unique_ptr<BufferHandle> indexBufferHandle;
-  std::unique_ptr<BufferHandle> objectDataBufferHandle;
+  BufferHandle geometryBufferHandle;
+  BufferHandle objectDataBufferHandle;
+  BufferHandle materialBufferHandle;
 };
 
 }

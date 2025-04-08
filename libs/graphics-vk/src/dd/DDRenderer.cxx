@@ -52,6 +52,14 @@ auto DDRenderer::update() -> void {
 
 auto DDRenderer::registerRenderable(const RenderableData& data) -> RenderableResources {
   // Eventually move viewport and scissor so they're defined in RenderableData
+
+  auto objectDataType = ObjectDataType::Base;
+  if (data.materialData.imageData) {
+    objectDataType = ObjectDataType::BaseMaterial;
+  } else if (data.animationData) {
+    objectDataType = ObjectDataType::BaseMaterialAnimated;
+  }
+
   const auto renderConfig =
       RenderConfig{.vertexFormat = data.geometryData.getVertexList().format,
                    .topology = data.geometryData.getVertexList().topology,
@@ -59,7 +67,9 @@ auto DDRenderer::registerRenderable(const RenderableData& data) -> RenderableRes
                    .viewport = Viewport{.width = swapchain->getImageExtent().width,
                                         .height = swapchain->getImageExtent().height},
                    .scissor = Scissor{.width = swapchain->getImageExtent().width,
-                                      .height = swapchain->getImageExtent().height}};
+                                      .height = swapchain->getImageExtent().height},
+                   .objectDataType = objectDataType};
+
   const auto renderConfigHandle = renderConfigRegistry->registerOrGet(renderConfig);
 
   auto* const drawContext = drawContextFactory->getOrCreateDrawContext(renderConfigHandle);

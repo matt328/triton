@@ -26,20 +26,11 @@ public:
                             bool mapped) -> BufferHandle = 0;
 
   virtual auto createGpuVertexBuffer(size_t size, std::string_view name) -> BufferHandle = 0;
-
   virtual auto createGpuIndexBuffer(size_t size, std::string_view name) -> BufferHandle = 0;
-
   virtual auto createIndirectBuffer(size_t size) -> BufferHandle = 0;
 
   [[nodiscard]] virtual auto resizeBuffer(BufferHandle handle, size_t newSize) -> BufferHandle = 0;
-
   [[nodiscard]] virtual auto getBuffer(BufferHandle handle) const -> Buffer& = 0;
-
-  virtual auto addToBuffer(const IGeometryData& geometryData,
-                           BufferHandle vertexBufferHandle,
-                           vk::DeviceSize vertexOffset,
-                           BufferHandle indexBufferHandle,
-                           vk::DeviceSize indexOffset) -> void = 0;
 
   virtual auto addToSingleBuffer(const void* data,
                                  size_t size,

@@ -36,17 +36,24 @@ struct Viewport {
   }
 };
 
+enum class ObjectDataType : uint8_t {
+  Base = 0,
+  BaseMaterial,
+  BaseMaterialAnimated
+};
+
 struct RenderConfig {
   VertexFormat vertexFormat;
   Topology topology;
   ShadingMode shadingMode;
   Viewport viewport;
   Scissor scissor;
+  ObjectDataType objectDataType;
 
   auto operator==(const RenderConfig& other) const -> bool {
     return vertexFormat == other.vertexFormat && topology == other.topology &&
            shadingMode == other.shadingMode && viewport == other.viewport &&
-           scissor == other.scissor;
+           scissor == other.scissor && objectDataType == other.objectDataType;
   }
 };
 

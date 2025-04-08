@@ -46,16 +46,8 @@ public:
 
   [[nodiscard]] auto getBuffer(BufferHandle handle) const -> Buffer& override;
 
-  auto addToBuffer(const IGeometryData& geometryData,
-                   BufferHandle vertexBufferHandle,
-                   vk::DeviceSize vertexOffset,
-                   BufferHandle indexBufferHandle,
-                   vk::DeviceSize indexOffset) -> void override;
-
-  auto addToSingleBuffer(const void* data,
-                         size_t size,
-                         BufferHandle handle,
-                         vk::DeviceSize offset) -> void override;
+  auto addToSingleBuffer(const void* data, size_t size, BufferHandle handle, vk::DeviceSize offset)
+      -> void override;
 
   auto removeData(BufferHandle handle, vk::DeviceSize offset, size_t size) -> void override;
 

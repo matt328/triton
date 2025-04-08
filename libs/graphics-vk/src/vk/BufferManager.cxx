@@ -96,8 +96,8 @@ auto BufferManager::createIndirectBuffer(size_t size) -> BufferHandle {
   return key;
 }
 
-[[nodiscard]] auto BufferManager::resizeBuffer(BufferHandle handle,
-                                               size_t newSize) -> BufferHandle {
+[[nodiscard]] auto BufferManager::resizeBuffer(BufferHandle handle, size_t newSize)
+    -> BufferHandle {
   ZoneNamedN(var, "Resize Buffer", true);
   auto& oldBuffer = bufferMap.at(handle);
 
@@ -129,44 +129,7 @@ auto BufferManager::createIndirectBuffer(size_t size) -> BufferHandle {
   return *bufferMap.at(handle);
 }
 
-auto BufferManager::addToBuffer(const IGeometryData& geometryData,
-                                BufferHandle vertexBufferHandle,
-                                vk::DeviceSize vertexOffset,
-                                BufferHandle indexBufferHandle,
-                                vk::DeviceSize indexOffset) -> void {
-  const auto vbSize = geometryData.getVertexDataSize();
-  const auto ibSize = geometryData.getIndexDataSize();
-
-  try {
-    // Prepare Vertex Staging Buffer
-    const auto vbStagingBuffer = allocator->createStagingBuffer(vbSize, "Buffer-VertexStaging");
-    void* vbData = allocator->mapMemory(*vbStagingBuffer);
-    memcpy(vbData, geometryData.getVertexData(), vbSize);
-    allocator->unmapMemory(*vbStagingBuffer);
-
-    // Prepare Index Staging Buffer
-    const auto ibStagingBuffer = allocator->createStagingBuffer(ibSize, "Buffer-IndexStaging");
-    auto* const data = allocator->mapMemory(*ibStagingBuffer);
-    memcpy(data, geometryData.getIndexData(), ibSize);
-    allocator->unmapMemory(*ibStagingBuffer);
-
-    // Destination Buffer
-    auto& vertexBuffer = getBuffer(vertexBufferHandle);
-    auto& indexBuffer = getBuffer(indexBufferHandle);
-
-    immediateTransferContext->submit([&](const vk::raii::CommandBuffer& cmd) {
-      const auto vbCopy = vk::BufferCopy{.srcOffset = 0, .dstOffset = vertexOffset, .size = vbSize};
-      cmd.copyBuffer(vbStagingBuffer->getBuffer(), vertexBuffer.getBuffer(), vbCopy);
-      const auto copy = vk::BufferCopy{.srcOffset = 0, .dstOffset = indexOffset, .size = ibSize};
-      cmd.copyBuffer(ibStagingBuffer->getBuffer(), indexBuffer.getBuffer(), copy);
-    });
-
-  } catch (const AllocationException& ex) {
-    throw ResourceUploadException(
-        fmt::format("Error allocating resources for geometry, {0}", ex.what()));
-  }
-}
-
+/// Uses a staging buffer to copy data into the buffer at the given offset
 auto BufferManager::addToSingleBuffer(const void* data,
                                       size_t size,
                                       BufferHandle handle,

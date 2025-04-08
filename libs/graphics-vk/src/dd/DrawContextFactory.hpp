@@ -8,10 +8,12 @@ using DrawContextHandle = size_t;
 
 class DrawContext;
 class RenderConfigRegistry;
+class BufferRegistry;
 
 class DrawContextFactory {
 public:
-  explicit DrawContextFactory(std::shared_ptr<RenderConfigRegistry> newRenderConfigRegistry);
+  DrawContextFactory(std::shared_ptr<RenderConfigRegistry> newRenderConfigRegistry,
+                     std::shared_ptr<BufferRegistry> newBufferRegistry);
   ~DrawContextFactory() = default;
 
   DrawContextFactory(const DrawContextFactory&) = delete;
@@ -23,6 +25,7 @@ public:
 
 private:
   std::shared_ptr<RenderConfigRegistry> renderConfigRegistry;
+  std::shared_ptr<BufferRegistry> bufferRegistry;
 
   std::unordered_map<RenderConfigHandle, std::unique_ptr<DrawContext>> drawContexts;
 };

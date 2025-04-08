@@ -51,6 +51,17 @@ VkResourceManager::VkResourceManager(
   textureShaderBindingHandle =
       shaderBindingFactory->createShaderBinding(ShaderBindingType::Textures, textureDSLHandle);
 
+  /*
+      Need another buffermanager that sits on top of ArenaGeometryBuffer->ArenaBuffer->BufferHandle
+      and managed ArenaBuffers and gives out opaque handles to them.
+      Maybe we can flatten this at some point, or just lean into it and clean up the layering.
+      The ArenaBuffer is maybe too wide having a reference to the IBufferManager.
+      Maybe should just abstract all of the different types of buffers under IBufferManager.
+      IBufferManager->createBuffer()
+      IBufferManager->createArenaBuffer()
+      IBufferManager->createGeometryArenaBuffer()
+  */
+
   const auto smbci = ArenaGeometryBufferCreateInfo{.vertexSize = sizeof(as::StaticVertex),
                                                    .indexSize = sizeof(uint32_t),
                                                    .bufferName = "StaticGeometry"};
