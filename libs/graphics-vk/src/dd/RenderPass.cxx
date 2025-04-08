@@ -1,5 +1,3 @@
-#include <utility>
-
 #include "RenderPass.hpp"
 #include "task/Frame.hpp"
 
@@ -18,8 +16,7 @@ auto RenderPass::addDrawContext([[maybe_unused]] RenderConfigHandle handle,
                                 [[maybe_unused]] DrawContext* drawContext) -> void {
 }
 
-auto RenderPass::execute(const Frame* frame, [[maybe_unused]] vk::CommandBuffer& cmdBuffer)
-    -> void {
+auto RenderPass::execute(const Frame* frame, vk::raii::CommandBuffer& cmdBuffer) -> void {
   auto colorAttachmentInfo = config.colorAttachmentInfo;
   if (colorAttachmentInfo) {
     const auto imageHandle = frame->getLogicalImage(*config.colorHandle);
@@ -40,6 +37,10 @@ auto RenderPass::execute(const Frame* frame, [[maybe_unused]] vk::CommandBuffer&
                         .pDepthAttachment = &*depthAttachmentInfo};
 
   cmdBuffer.beginRendering(renderingInfo);
+
+  // Render DrawContexts
+
+  cmdBuffer.endRendering();
 }
 
 }

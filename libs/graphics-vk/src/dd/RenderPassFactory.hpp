@@ -20,13 +20,13 @@ struct RenderPassCreateInfo {
   vk::AttachmentLoadOp colorLoadOp = vk::AttachmentLoadOp::eClear;
   vk::AttachmentStoreOp colorStoreOp = vk::AttachmentStoreOp::eStore;
 
-  std::optional<vk::Format> depthFormat;
+  std::optional<vk::Format> depthFormat = std::nullopt;
   std::optional<float> clearDepth = 1.f;
   std::optional<uint32_t> clearStencil = 0u;
   vk::AttachmentLoadOp depthLoadOp = vk::AttachmentLoadOp::eClear;
   vk::AttachmentStoreOp depthStoreOp = vk::AttachmentStoreOp::eStore;
 
-  std::optional<std::string> name;
+  std::optional<std::string> name = std::nullopt;
 };
 
 class RenderPassFactory {

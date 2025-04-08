@@ -3,7 +3,7 @@
 namespace tr {
 
 struct VkGraphicsCreateInfo {
-  glm::ivec2 initialWindowSize;
+  glm::uvec2 initialWindowSize;
   std::string windowTitle;
 };
 

@@ -50,13 +50,15 @@ auto createVkGraphicsContext(VkGraphicsCreateInfo createInfo,
                              std::shared_ptr<IGuiAdapter> newGuiAdapter)
     -> std::shared_ptr<IGraphicsContext> {
 
-  constexpr auto rendererConfig = RenderContextConfig{.useDescriptorBuffers = false,
-                                                      .maxStaticObjects = 1024,
-                                                      .maxDynamicObjects = 1024,
-                                                      .maxTerrainChunks = 1024,
-                                                      .maxTextures = 16,
-                                                      .framesInFlight = 2,
-                                                      .maxDebugObjects = 32};
+  const auto rendererConfig = RenderContextConfig{.useDescriptorBuffers = false,
+                                                  .maxStaticObjects = 1024,
+                                                  .maxDynamicObjects = 1024,
+                                                  .maxTerrainChunks = 1024,
+                                                  .maxTextures = 16,
+                                                  .framesInFlight = 2,
+                                                  .initialWidth = createInfo.initialWindowSize.x,
+                                                  .initialHeight = createInfo.initialWindowSize.y,
+                                                  .maxDebugObjects = 32};
   const auto injector =
       di::make_injector(di::bind<RenderContextConfig>.to<>(rendererConfig),
                         di::bind<VkGraphicsCreateInfo>.to<>(createInfo),

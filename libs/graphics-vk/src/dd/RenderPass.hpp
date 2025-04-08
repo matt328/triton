@@ -34,7 +34,7 @@ public:
 
   auto addDrawContext(RenderConfigHandle handle, DrawContext* drawContext) -> void;
 
-  auto execute(const Frame* frame, vk::CommandBuffer& cmdBuffer) -> void;
+  auto execute(const Frame* frame, vk::raii::CommandBuffer& cmdBuffer) -> void;
 
 private:
   std::shared_ptr<VkResourceManager> resourceManager;

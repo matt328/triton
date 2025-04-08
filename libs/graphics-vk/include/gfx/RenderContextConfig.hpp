@@ -8,6 +8,8 @@ struct RenderContextConfig {
   uint32_t maxTerrainChunks{};
   uint16_t maxTextures{};
   uint8_t framesInFlight{};
+  uint32_t initialWidth{};
+  uint32_t initialHeight{};
   float renderScale{1.f};
   uint32_t maxDebugObjects{};
 };
