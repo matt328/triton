@@ -3,8 +3,7 @@
 namespace tr {
 
 DrawContext::DrawContext(const DrawContextCreateInfo& createInfo)
-    : vertexBufferHandle(createInfo.vertexBufferHandle),
-      indexBufferHandle(createInfo.indexBufferHandle),
+    : geometryBufferHandle(createInfo.geometryBufferHandle),
       objectDataBufferHandle(createInfo.objectDataBufferHandle),
       materialBufferHandle(createInfo.materialBufferHandle) {
 }

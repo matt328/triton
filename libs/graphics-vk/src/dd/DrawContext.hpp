@@ -2,6 +2,7 @@
 
 #include "api/gw/RenderableData.hpp"
 #include "api/gw/RenderableResources.hpp"
+#include "dd/LogicalBufferHandle.hpp"
 #include "dd/Renderable.hpp"
 #include "vk/ResourceManagerHandles.hpp"
 
@@ -9,13 +10,13 @@ namespace tr {
 
 struct DrawContextCreateInfo {
   BufferHandle geometryBufferHandle;
-  BufferHandle objectDataBufferHandle;
+  LogicalBufferHandle objectDataBufferHandle;
   BufferHandle materialBufferHandle;
 };
 
 class DrawContext {
 public:
-  explicit DrawContext(const DrawContextCreateInfo& creatInfo);
+  explicit DrawContext(const DrawContextCreateInfo& createInfo);
   ~DrawContext() = default;
 
   DrawContext(const DrawContext&) = delete;
@@ -27,9 +28,9 @@ public:
   auto writeObjectData(const Renderable& renderable) -> void;
 
 private:
-  BufferHandle geometryBufferHandle;
-  BufferHandle objectDataBufferHandle;
-  BufferHandle materialBufferHandle;
+  [[maybe_unused]] BufferHandle geometryBufferHandle;
+  [[maybe_unused]] BufferHandle objectDataBufferHandle;
+  [[maybe_unused]] BufferHandle materialBufferHandle;
 };
 
 }

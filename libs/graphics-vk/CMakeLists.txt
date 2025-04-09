@@ -15,6 +15,7 @@ set(graphicsvk_SRC
   src/dd/ResourceUploader.cxx
   src/dd/RenderPass.cxx
   src/dd/RenderPassFactory.cxx
+  src/dd/buffer-registry/BufferRegistry.cxx
 
   src/mem/Allocator.cxx
   src/mem/Buffer.cxx

@@ -29,9 +29,11 @@ auto BufferRegistry::getOrCreateBuffer(const ObjectBufferConfig& bufferConfig) -
   if (objectBufferHandles.contains(bufferConfig)) {
     return objectBufferHandles.at(bufferConfig);
   }
+  return static_cast<BufferHandle>(0L);
 }
 
 auto BufferRegistry::getOrCreateMaterialBuffer() -> BufferHandle {
+  return static_cast<BufferHandle>(0L);
 }
 
 }

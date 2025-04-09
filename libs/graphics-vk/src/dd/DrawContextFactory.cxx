@@ -26,10 +26,6 @@ auto DrawContextFactory::getOrCreateDrawContext(RenderConfigHandle renderConfigH
 
     const auto geometryBufferHandle = bufferRegistry->getOrCreateBuffer(geometryBufferConfig);
 
-    /*
-      Each drawcontext gets its own ObjectBuffer, but they are still per-frame buffers created via
-      the FrameManager.
-    */
     const auto objectBufferConfig = ObjectBufferConfig{
         .hasMaterialId = renderConfig.objectDataType == ObjectDataType::BaseMaterial ||
                          renderConfig.objectDataType == ObjectDataType::BaseMaterialAnimated,
@@ -38,23 +34,10 @@ auto DrawContextFactory::getOrCreateDrawContext(RenderConfigHandle renderConfigH
     const auto logicalObjectBufferHandle =
         frameManager->getOrCreatePerFrameBuffer(objectBufferConfig);
 
-    /*
-      FrameManager will have to have a method to getOrCreatePerFrameBuffer(objectBufferConfig);
-      this method will return a LogicalBufferHandle.
-
-      during rendering, DrawContext can just do h = frame->getBufferHandle(logicalHandle)
-      then bufferregistry->getBuffer(h);
-
-      Should this use bufferregistry? I think so? BufferRegistry is the higher level abstraction
-      over the low level BufferManager? Need to think about the 'levels' of buffer-ness here. I
-      think it should be flattened so that there is one 'thing' that owns all the buffers, whether
-      they're arena, arenageometry, or regular.
-    */
-
     const auto materialBufferHandle = bufferRegistry->getOrCreateMaterialBuffer();
 
     const auto dcci = DrawContextCreateInfo{.geometryBufferHandle = geometryBufferHandle,
-                                            .objectDataBufferHandle = objectBufferHandle,
+                                            .objectDataBufferHandle = logicalObjectBufferHandle,
                                             .materialBufferHandle = materialBufferHandle};
 
     drawContexts.emplace(renderConfigHandle, std::make_unique<DrawContext>(dcci));
