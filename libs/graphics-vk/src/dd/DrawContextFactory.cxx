@@ -26,6 +26,10 @@ auto DrawContextFactory::getOrCreateDrawContext(RenderConfigHandle renderConfigH
 
     const auto geometryBufferHandle = bufferRegistry->getOrCreateBuffer(geometryBufferConfig);
 
+    /*
+      Each drawcontext gets its own ObjectBuffer, but they are still per-frame buffers created via
+      the FrameManager.
+    */
     const auto objectBufferConfig = ObjectBufferConfig{
         .hasMaterialId = renderConfig.objectDataType == ObjectDataType::BaseMaterial ||
                          renderConfig.objectDataType == ObjectDataType::BaseMaterialAnimated,
