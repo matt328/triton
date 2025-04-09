@@ -10,6 +10,7 @@ namespace tr {
 class CommandBufferManager;
 class Swapchain;
 class VkResourceManager;
+class BufferRegistry;
 
 class DefaultFrameManager final : public IFrameManager {
 public:
@@ -19,7 +20,8 @@ public:
                                std::shared_ptr<Swapchain> newSwapchain,
                                std::shared_ptr<VkResourceManager> newResourceManager,
                                std::shared_ptr<IEventBus> newEventBus,
-                               std::shared_ptr<IDebugManager> debugManager);
+                               std::shared_ptr<IDebugManager> debugManager,
+                               std::shared_ptr<BufferRegistry> newBufferRegistry);
   ~DefaultFrameManager() override;
 
   DefaultFrameManager(const DefaultFrameManager&) = delete;
@@ -36,6 +38,7 @@ public:
   auto registerPerFrameDrawImage(vk::Extent2D extent) -> LogicalImageHandle override;
   auto registerPerFrameDepthImage(vk::Extent2D extent, vk::Format format)
       -> LogicalImageHandle override;
+  auto getOrCreatePerFrameBuffer(const ObjectBufferConfig& config) -> LogicalBufferHandle override;
 
 private:
   RenderContextConfig renderConfig;
@@ -44,11 +47,13 @@ private:
   std::shared_ptr<Swapchain> swapchain;
   std::shared_ptr<VkResourceManager> resourceManager;
   std::shared_ptr<IEventBus> eventBus;
+  std::shared_ptr<BufferRegistry> bufferRegistry;
 
   size_t currentFrame;
   std::vector<std::unique_ptr<Frame>> frames;
 
   MapKey imageKeygen;
+  MapKey bufferKeygen;
 
   auto handleSwapchainResized(const SwapchainResized& event) -> void;
 };

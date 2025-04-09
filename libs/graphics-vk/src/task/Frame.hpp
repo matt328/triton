@@ -1,4 +1,5 @@
 #pragma once
+#include "dd/LogicalBufferHandle.hpp"
 #include "vk/CommandBufferManager.hpp"
 #include "VkResourceManager.hpp"
 #include "dd/LogicalImageHandle.hpp"
@@ -76,7 +77,10 @@ public:
   [[nodiscard]] auto getBufferHandle2(size_t key) const -> BufferHandle;
 
   auto addLogicalImage(LogicalImageHandle logicalHandle, ImageHandle imageHandle) -> void;
-  auto getLogicalImage(LogicalImageHandle logicalHandle) const -> ImageHandle;
+  [[nodiscard]] auto getLogicalImage(LogicalImageHandle logicalHandle) const -> ImageHandle;
+
+  auto addLogicalBuffer(LogicalBufferHandle logicalHandle, BufferHandle bufferHandle) -> void;
+  [[nodiscard]] auto getLogicalBuffer(LogicalBufferHandle logicalHandle) const -> BufferHandle;
 
   auto setDepthImageHandle(ImageHandle handle) -> void;
   auto setDrawImageHandle(ImageHandle handle) -> void;
@@ -111,6 +115,7 @@ private:
   ImageHandle drawImageHandle;
 
   std::unordered_map<LogicalImageHandle, ImageHandle> imageHandles;
+  std::unordered_map<LogicalBufferHandle, BufferHandle> bufferHandles;
 
   CommandBufferHandle startCmdBuffer;
   CommandBufferHandle mainCmdBuffer;

@@ -2,14 +2,17 @@
 #include "dd/DrawContext.hpp"
 #include "dd/RenderConfigRegistry.hpp"
 #include "dd/buffer-registry/BufferRegistry.hpp"
+#include "gfx/IFrameManager.hpp"
 
 namespace tr {
 
 DrawContextFactory::DrawContextFactory(
     std::shared_ptr<RenderConfigRegistry> newRenderConfigRegistry,
-    std::shared_ptr<BufferRegistry> newBufferRegistry)
+    std::shared_ptr<BufferRegistry> newBufferRegistry,
+    std::shared_ptr<IFrameManager> newFrameManager)
     : renderConfigRegistry{std::move(newRenderConfigRegistry)},
-      bufferRegistry{std::move(newBufferRegistry)} {
+      bufferRegistry{std::move(newBufferRegistry)},
+      frameManager{std::move(newFrameManager)} {
 }
 
 auto DrawContextFactory::getOrCreateDrawContext(RenderConfigHandle renderConfigHandle)
@@ -21,15 +24,15 @@ auto DrawContextFactory::getOrCreateDrawContext(RenderConfigHandle renderConfigH
     const auto geometryBufferConfig =
         GeometryBufferConfig{.vertexFormat = renderConfig.vertexFormat};
 
-    const auto geometryBufferHandle =
-        bufferRegistry->getOrCreateGeometryBuffer(geometryBufferConfig);
+    const auto geometryBufferHandle = bufferRegistry->getOrCreateBuffer(geometryBufferConfig);
 
     const auto objectBufferConfig = ObjectBufferConfig{
         .hasMaterialId = renderConfig.objectDataType == ObjectDataType::BaseMaterial ||
                          renderConfig.objectDataType == ObjectDataType::BaseMaterialAnimated,
         .hasAnimationDataId = renderConfig.objectDataType == ObjectDataType::BaseMaterialAnimated};
 
-    const auto objectBufferHandle = bufferRegistry->getOrCreateObjectBuffer(objectBufferConfig);
+    const auto logicalObjectBufferHandle =
+        frameManager->getOrCreatePerFrameBuffer(objectBufferConfig);
 
     /*
       FrameManager will have to have a method to getOrCreatePerFrameBuffer(objectBufferConfig);

@@ -9,11 +9,13 @@ using DrawContextHandle = size_t;
 class DrawContext;
 class RenderConfigRegistry;
 class BufferRegistry;
+class IFrameManager;
 
 class DrawContextFactory {
 public:
   DrawContextFactory(std::shared_ptr<RenderConfigRegistry> newRenderConfigRegistry,
-                     std::shared_ptr<BufferRegistry> newBufferRegistry);
+                     std::shared_ptr<BufferRegistry> newBufferRegistry,
+                     std::shared_ptr<IFrameManager> newFrameManager);
   ~DrawContextFactory() = default;
 
   DrawContextFactory(const DrawContextFactory&) = delete;
@@ -26,6 +28,7 @@ public:
 private:
   std::shared_ptr<RenderConfigRegistry> renderConfigRegistry;
   std::shared_ptr<BufferRegistry> bufferRegistry;
+  std::shared_ptr<IFrameManager> frameManager;
 
   std::unordered_map<RenderConfigHandle, std::unique_ptr<DrawContext>> drawContexts;
 };

@@ -1,4 +1,5 @@
 #include "DefaultFrameManager.hpp"
+#include "dd/buffer-registry/BufferRegistry.hpp"
 #include "gfx/RenderContextConfig.hpp"
 #include "Frame.hpp"
 #include "Maths.hpp"
@@ -14,13 +15,15 @@ DefaultFrameManager::DefaultFrameManager(
     std::shared_ptr<Swapchain> newSwapchain,
     std::shared_ptr<VkResourceManager> newResourceManager,
     std::shared_ptr<IEventBus> newEventBus,
-    std::shared_ptr<IDebugManager> debugManager)
+    std::shared_ptr<IDebugManager> debugManager,
+    std::shared_ptr<BufferRegistry> newBufferRegistry)
     : renderConfig{newRenderContextConfig},
       commandBufferManager{std::move(newCommandBufferManager)},
       device{std::move(newDevice)},
       swapchain{std::move(newSwapchain)},
       resourceManager{std::move(newResourceManager)},
       eventBus{std::move(newEventBus)},
+      bufferRegistry{std::move(newBufferRegistry)},
       currentFrame{0} {
 
   for (uint8_t i = 0; i < renderConfig.framesInFlight; ++i) {
@@ -93,6 +96,16 @@ auto DefaultFrameManager::registerPerFrameDepthImage(vk::Extent2D extent, vk::Fo
                                                  extent,
                                                  format);
     frame->addLogicalImage(logicalHandle, imageHandle);
+  }
+  return logicalHandle;
+}
+
+auto DefaultFrameManager::getOrCreatePerFrameBuffer(const ObjectBufferConfig& config)
+    -> LogicalBufferHandle {
+  const auto logicalHandle = bufferKeygen.getKey();
+  for (auto& frame : frames) {
+    const auto bufferHandle = bufferRegistry->getOrCreateBuffer(config);
+    frame->addLogicalBuffer(logicalHandle, bufferHandle);
   }
   return logicalHandle;
 }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "dd/LogicalBufferHandle.hpp"
+#include "dd/buffer-registry/ObjectBufferConfig.hpp"
 #include "vk/core/Swapchain.hpp"
 
 namespace tr {
@@ -24,6 +26,9 @@ public:
   virtual auto registerPerFrameDrawImage(vk::Extent2D extent) -> LogicalImageHandle = 0;
   virtual auto registerPerFrameDepthImage(vk::Extent2D extent, vk::Format format)
       -> LogicalImageHandle = 0;
+
+  virtual auto getOrCreatePerFrameBuffer(const ObjectBufferConfig& config)
+      -> LogicalBufferHandle = 0;
 };
 
 }

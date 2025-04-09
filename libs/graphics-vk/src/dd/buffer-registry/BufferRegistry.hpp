@@ -21,8 +21,8 @@ public:
   auto operator=(const BufferRegistry&) -> BufferRegistry& = delete;
   auto operator=(BufferRegistry&&) -> BufferRegistry& = delete;
 
-  auto getOrCreateGeometryBuffer(const GeometryBufferConfig& bufferConfig) -> BufferHandle;
-  auto getOrCreateObjectBuffer(const ObjectBufferConfig& bufferConfig) -> BufferHandle;
+  auto getOrCreateBuffer(const GeometryBufferConfig& bufferConfig) -> BufferHandle;
+  auto getOrCreateBuffer(const ObjectBufferConfig& bufferConfig) -> BufferHandle;
   auto getOrCreateMaterialBuffer() -> BufferHandle;
 
 private:

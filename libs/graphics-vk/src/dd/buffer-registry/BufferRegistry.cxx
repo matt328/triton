@@ -7,8 +7,7 @@ BufferRegistry::BufferRegistry(std::shared_ptr<IBufferManager> newBufferManager)
     : bufferManager{std::move(newBufferManager)} {
 }
 
-auto BufferRegistry::getOrCreateGeometryBuffer(const GeometryBufferConfig& bufferConfig)
-    -> BufferHandle {
+auto BufferRegistry::getOrCreateBuffer(const GeometryBufferConfig& bufferConfig) -> BufferHandle {
   if (geometryBufferHandles.contains(bufferConfig)) {
     return geometryBufferHandles.at(bufferConfig);
   }
@@ -26,8 +25,7 @@ auto BufferRegistry::getOrCreateGeometryBuffer(const GeometryBufferConfig& buffe
   return key;
 }
 
-auto BufferRegistry::getOrCreateObjectBuffer(const ObjectBufferConfig& bufferConfig)
-    -> BufferHandle {
+auto BufferRegistry::getOrCreateBuffer(const ObjectBufferConfig& bufferConfig) -> BufferHandle {
   if (objectBufferHandles.contains(bufferConfig)) {
     return objectBufferHandles.at(bufferConfig);
   }

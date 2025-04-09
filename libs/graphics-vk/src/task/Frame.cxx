@@ -132,6 +132,17 @@ auto Frame::getLogicalImage(LogicalImageHandle logicalHandle) const -> ImageHand
   return imageHandles.at(logicalHandle);
 }
 
+auto Frame::addLogicalBuffer(LogicalBufferHandle logicalHandle, BufferHandle bufferHandle) -> void {
+  assert(!bufferHandles.contains(logicalHandle) &&
+         "Attempted to register same logical handle twice");
+  bufferHandles.emplace(logicalHandle, bufferHandle);
+}
+
+[[nodiscard]] auto Frame::getLogicalBuffer(LogicalBufferHandle logicalHandle) const
+    -> BufferHandle {
+  return bufferHandles.at(logicalHandle);
+}
+
 auto Frame::setDepthImageHandle(const ImageHandle handle) -> void {
   depthImageHandle = handle;
 }
