@@ -9,9 +9,15 @@
 namespace tr {
 
 struct DrawContextCreateInfo {
+  // Shared Buffers
   BufferHandle geometryBufferHandle;
-  LogicalBufferHandle objectDataBufferHandle;
   BufferHandle materialBufferHandle;
+  BufferHandle geometryRegionBufferHandle;
+  // Per Frame Buffers
+  LogicalBufferHandle objectDataBufferHandle;
+  LogicalBufferHandle objectDataIndexBufferHandle;
+  LogicalBufferHandle objectCountBufferHandle;
+  LogicalBufferHandle indirectDrawCommandBufferHandle;
 };
 
 class DrawContext {
@@ -29,8 +35,13 @@ public:
 
 private:
   [[maybe_unused]] BufferHandle geometryBufferHandle;
-  [[maybe_unused]] BufferHandle objectDataBufferHandle;
   [[maybe_unused]] BufferHandle materialBufferHandle;
+  [[maybe_unused]] BufferHandle geometryRegionBufferHandle;
+
+  [[maybe_unused]] LogicalBufferHandle objectDataBufferHandle;
+  [[maybe_unused]] LogicalBufferHandle objectDataIndexBufferHandle;
+  [[maybe_unused]] LogicalBufferHandle objectCountBufferHandle;
+  [[maybe_unused]] LogicalBufferHandle indirectDrawCommandBufferHandle;
 };
 
 }

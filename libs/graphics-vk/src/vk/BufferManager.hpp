@@ -28,6 +28,8 @@ public:
   auto operator=(const BufferManager&) -> BufferManager& = delete;
   auto operator=(BufferManager&&) -> BufferManager& = delete;
 
+  auto createBuffer(const BufferCreateInfo& bufferCreateInfo) -> BufferHandle override;
+
   auto createBuffer(
       size_t size,
       vk::Flags<vk::BufferUsageFlagBits> flags,

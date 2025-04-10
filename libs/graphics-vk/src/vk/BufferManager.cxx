@@ -47,6 +47,15 @@ BufferManager::BufferManager(std::shared_ptr<Allocator> newAllocator,
   });
 }
 
+auto BufferManager::createBuffer(const BufferCreateInfo& bufferCreateInfo) -> BufferHandle {
+  return createBuffer(bufferCreateInfo.size,
+                      bufferCreateInfo.flags,
+                      bufferCreateInfo.name,
+                      bufferCreateInfo.memoryUsage,
+                      bufferCreateInfo.memoryProperties,
+                      bufferCreateInfo.mapped);
+}
+
 auto BufferManager::createBuffer(size_t size,
                                  vk::Flags<vk::BufferUsageFlagBits> flags,
                                  std::string_view name,

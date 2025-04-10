@@ -2,6 +2,7 @@
 
 #include "bk/Rando.hpp"
 #include "dd/buffer-registry/GeometryBufferConfig.hpp"
+#include "dd/buffer-registry/MaterialBufferConfig.hpp"
 #include "dd/buffer-registry/ObjectBufferConfig.hpp"
 #include "vk/ResourceManagerHandles.hpp"
 
@@ -10,6 +11,7 @@ namespace tr {
 class ArenaGeometryBuffer;
 class ArenaBuffer;
 class IBufferManager;
+class Buffer;
 
 class BufferRegistry {
 public:
@@ -23,17 +25,20 @@ public:
 
   auto getOrCreateBuffer(const GeometryBufferConfig& bufferConfig) -> BufferHandle;
   auto getOrCreateBuffer(const ObjectBufferConfig& bufferConfig) -> BufferHandle;
-  auto getOrCreateMaterialBuffer() -> BufferHandle;
+  auto getOrCreateBuffer(const MaterialBufferConfig& bufferConfig) -> BufferHandle;
 
 private:
   std::shared_ptr<IBufferManager> bufferManager;
 
   std::unordered_map<GeometryBufferConfig, BufferHandle> geometryBufferHandles;
   std::unordered_map<ObjectBufferConfig, BufferHandle> objectBufferHandles;
+  std::unordered_map<MaterialBufferConfig, BufferHandle> materialBufferHandles;
 
   MapKey geometryBufferKeygen;
+  MapKey materialBufferKeygen;
   std::unordered_map<BufferHandle, std::unique_ptr<ArenaGeometryBuffer>> geometryBuffers;
   std::unordered_map<BufferHandle, std::unique_ptr<ArenaBuffer>> objectDataBuffers;
+  std::unordered_map<BufferHandle, std::unique_ptr<Buffer>> materialBuffers;
 };
 
 }

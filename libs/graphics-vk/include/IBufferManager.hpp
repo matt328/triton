@@ -7,6 +7,15 @@ namespace tr {
 class Buffer;
 class IGeometryData;
 
+struct BufferCreateInfo {
+  size_t size;
+  vk::Flags<vk::BufferUsageFlagBits> flags;
+  std::string name = "Unnamed Buffer";
+  vma::MemoryUsage memoryUsage = vma::MemoryUsage::eCpuToGpu;
+  vk::MemoryPropertyFlags memoryProperties = vk::MemoryPropertyFlagBits::eHostCoherent;
+  bool mapped = false;
+};
+
 class IBufferManager {
 public:
   IBufferManager() = default;
@@ -17,6 +26,8 @@ public:
   auto operator=(IBufferManager&&) -> IBufferManager& = delete;
 
   virtual ~IBufferManager() = default;
+
+  virtual auto createBuffer(const BufferCreateInfo& bufferCreateInfo) -> BufferHandle = 0;
 
   virtual auto createBuffer(size_t size,
                             vk::Flags<vk::BufferUsageFlagBits> flags,
