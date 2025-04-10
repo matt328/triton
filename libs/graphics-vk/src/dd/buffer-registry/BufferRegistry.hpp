@@ -23,7 +23,10 @@ public:
   auto operator=(const BufferRegistry&) -> BufferRegistry& = delete;
   auto operator=(BufferRegistry&&) -> BufferRegistry& = delete;
 
-  auto getOrCreateBuffer(const GeometryBufferConfig& bufferConfig) -> BufferHandle;
+  auto getOrCreateBuffer(const GeometryBufferConfig& bufferConfig,
+                         uint32_t drawContextId,
+                         uint8_t frameId = 0) -> BufferHandle;
+
   auto getOrCreateBuffer(const ObjectBufferConfig& bufferConfig) -> BufferHandle;
   auto getOrCreateBuffer(const MaterialBufferConfig& bufferConfig) -> BufferHandle;
 
@@ -42,3 +45,10 @@ private:
 };
 
 }
+namespace std {
+template <>
+struct hash<tr::BufferInstanceKey> {
+  auto operator()(const tr::BufferInstanceKey& key) const -> size_t {
+    return std::hash<size_t>{}(key.drawContextId) ^ (std::hash<uint32_t>{}(key.frameId) << 1);
+  }
+};

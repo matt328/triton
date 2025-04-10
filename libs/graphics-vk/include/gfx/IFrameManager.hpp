@@ -27,8 +27,7 @@ public:
   virtual auto registerPerFrameDepthImage(vk::Extent2D extent, vk::Format format)
       -> LogicalImageHandle = 0;
 
-  virtual auto getOrCreatePerFrameBuffer(const ObjectBufferConfig& config)
-      -> LogicalBufferHandle = 0;
+  virtual auto createPerFrameBuffer(const ObjectBufferConfig& config) -> LogicalBufferHandle = 0;
 };
 
 }
