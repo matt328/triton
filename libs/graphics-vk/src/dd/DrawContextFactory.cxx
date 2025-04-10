@@ -21,20 +21,26 @@ auto DrawContextFactory::getOrCreateDrawContext(RenderConfigHandle renderConfigH
   if (!drawContexts.contains(renderConfigHandle)) {
     const auto renderConfig = renderConfigRegistry->get(renderConfigHandle);
 
+    const auto drawContextId = drawContextKeygen.getKey();
+
     const auto geometryBufferHandle = bufferRegistry->getOrCreateBuffer(
         GeometryBufferConfig{.vertexFormat = renderConfig.vertexFormat});
 
     // Don't want to reuse object buffer, each drawContext should always get its own.
     // Still need the config here to tell it how to create the buffer
-    const auto logicalObjectBufferHandle = frameManager->createPerFrameBuffer(ObjectBufferConfig{
-        .hasMaterialId = renderConfig.objectDataType == ObjectDataType::BaseMaterial ||
-                         renderConfig.objectDataType == ObjectDataType::BaseMaterialAnimated,
-        .hasAnimationDataId = renderConfig.objectDataType == ObjectDataType::BaseMaterialAnimated});
+    const auto logicalObjectBufferHandle = frameManager->createPerFrameBuffer(
+        ObjectBufferConfig{.hasMaterialId =
+                               renderConfig.objectDataType == ObjectDataType::BaseMaterial ||
+                               renderConfig.objectDataType == ObjectDataType::BaseMaterialAnimated,
+                           .hasAnimationDataId =
+                               renderConfig.objectDataType == ObjectDataType::BaseMaterialAnimated},
+        drawContextId);
 
     const auto materialBufferHandle =
         bufferRegistry->getOrCreateBuffer(MaterialBufferConfig{.id = 1});
 
     const auto dcci = DrawContextCreateInfo{
+        .id = drawContextId,
         .geometryBufferHandle = geometryBufferHandle,
         .materialBufferHandle = materialBufferHandle,
         .objectDataBufferHandle = logicalObjectBufferHandle,

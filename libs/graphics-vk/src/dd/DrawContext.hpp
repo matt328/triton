@@ -9,6 +9,7 @@
 namespace tr {
 
 struct DrawContextCreateInfo {
+  size_t id;
   // Shared Buffers
   BufferHandle geometryBufferHandle;
   BufferHandle materialBufferHandle;
@@ -34,6 +35,7 @@ public:
   auto writeObjectData(const Renderable& renderable) -> void;
 
 private:
+  size_t id;
   [[maybe_unused]] BufferHandle geometryBufferHandle;
   [[maybe_unused]] BufferHandle materialBufferHandle;
   [[maybe_unused]] BufferHandle geometryRegionBufferHandle;

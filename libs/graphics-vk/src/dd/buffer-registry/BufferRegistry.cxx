@@ -8,9 +8,13 @@ BufferRegistry::BufferRegistry(std::shared_ptr<IBufferManager> newBufferManager)
     : bufferManager{std::move(newBufferManager)} {
 }
 
-auto BufferRegistry::getOrCreateBuffer(const GeometryBufferConfig& bufferConfig) -> BufferHandle {
-  if (geometryBufferHandles.contains(bufferConfig)) {
-    return geometryBufferHandles.at(bufferConfig);
+auto BufferRegistry::getOrCreateBuffer(const GeometryBufferConfig& bufferConfig,
+                                       uint32_t drawContextId,
+                                       uint8_t frameId) -> BufferHandle {
+  const auto key = BufferKey<GeometryBufferConfig>{bufferConfig, {drawContextId, frameId}};
+
+  if (geometryBufferHandles.contains(key)) {
+    return geometryBufferHandles.at(key);
   }
 
   const auto createInfo = ArenaGeometryBufferCreateInfo{
@@ -18,12 +22,12 @@ auto BufferRegistry::getOrCreateBuffer(const GeometryBufferConfig& bufferConfig)
       .indexSize = 102400,
       .bufferName = "Unnamed buffer"};
 
-  const auto key = geometryBufferKeygen.getKey();
-  geometryBuffers.emplace(key, std::make_unique<ArenaGeometryBuffer>(bufferManager, createInfo));
+  const auto handle = geometryBufferKeygen.getKey();
+  geometryBuffers.emplace(handle, std::make_unique<ArenaGeometryBuffer>(bufferManager, createInfo));
 
-  geometryBufferHandles.emplace(bufferConfig, key);
+  geometryBufferHandles.emplace(key, handle);
 
-  return key;
+  return handle;
 }
 
 auto BufferRegistry::getOrCreateBuffer(const ObjectBufferConfig& bufferConfig) -> BufferHandle {

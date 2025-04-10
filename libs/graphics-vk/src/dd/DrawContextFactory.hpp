@@ -1,5 +1,6 @@
 #pragma once
 
+#include "bk/Rando.hpp"
 #include "dd/RenderConfigHandle.hpp"
 
 namespace tr {
@@ -29,6 +30,8 @@ private:
   std::shared_ptr<RenderConfigRegistry> renderConfigRegistry;
   std::shared_ptr<BufferRegistry> bufferRegistry;
   std::shared_ptr<IFrameManager> frameManager;
+
+  MapKey drawContextKeygen;
 
   std::unordered_map<RenderConfigHandle, std::unique_ptr<DrawContext>> drawContexts;
 };
