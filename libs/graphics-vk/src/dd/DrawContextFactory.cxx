@@ -50,7 +50,9 @@ auto DrawContextFactory::getOrCreateDrawContext(RenderConfigHandle renderConfigH
         frameManager->createPerFrameBuffer(StorageBufferConfig{.id = 3, .size = sizeof(uint32_t)},
                                            drawContextId);
 
-    const auto dcci =
+    const auto logicalIndirectoDrawCommandBufferHandle = frameManager->createPerFrameBuffer()
+
+                                                             const auto dcci =
         DrawContextCreateInfo{.id = drawContextId,
                               .geometryBufferHandle = geometryBufferHandle,
                               .materialBufferHandle = materialBufferHandle,

@@ -7,7 +7,7 @@ namespace tr {
 
 using RegionContainer = std::set<BufferRegion, BufferRegionComparator>;
 
-enum class BufferType : uint8_t {
+enum class ArenaBufferType : uint8_t {
   Vertex = 0,
   Index
 };
@@ -15,7 +15,7 @@ enum class BufferType : uint8_t {
 struct ArenaBufferCreateInfo {
   size_t newItemStride;
   size_t initialBufferSize;
-  BufferType bufferType;
+  ArenaBufferType bufferType;
   std::string_view bufferName;
 };
 

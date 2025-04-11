@@ -4,10 +4,17 @@
 
 namespace tr {
 
+/*
+  Need to decide what differentiates this from a BufferCreateInfo.
+  I guess BufferCreateInfo is vulkan specific, and BufferConfig abstracts that away
+  Need to add like Flags and MemoryUsage and MemoryProperties abstracted flags here.
+*/
+
 enum class BufferType : uint8_t {
   Geometry = 0U,
   Arena,
-  Fixed
+  Fixed,
+  Indirect
 };
 
 struct BufferConfig {

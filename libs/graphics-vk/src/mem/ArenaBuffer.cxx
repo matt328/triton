@@ -7,11 +7,11 @@ ArenaBuffer::ArenaBuffer(std::shared_ptr<IBufferManager> newBufferManager,
     : bufferManager{std::move(newBufferManager)},
       capacity(createInfo.initialBufferSize),
       itemStride{createInfo.newItemStride} {
-  if (createInfo.bufferType == BufferType::Vertex) {
+  if (createInfo.bufferType == ArenaBufferType::Vertex) {
     bufferHandle = bufferManager->createGpuVertexBuffer(
         capacity,
         fmt::format("Buffer-{}-Vertex", createInfo.bufferName.data()));
-  } else if (createInfo.bufferType == BufferType::Index) {
+  } else if (createInfo.bufferType == ArenaBufferType::Index) {
     bufferHandle = bufferManager->createGpuIndexBuffer(
         capacity,
         fmt::format("Buffer-{}-Vertex", createInfo.bufferName.data()));
