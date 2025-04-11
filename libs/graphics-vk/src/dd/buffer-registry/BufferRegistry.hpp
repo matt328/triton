@@ -2,6 +2,7 @@
 
 #include "bk/Rando.hpp"
 #include "dd/buffer-registry/GeometryBufferConfig.hpp"
+#include "dd/buffer-registry/GeometryRregionBufferConfig.hpp"
 #include "dd/buffer-registry/MaterialBufferConfig.hpp"
 #include "dd/buffer-registry/ObjectBufferConfig.hpp"
 #include "vk/ResourceManagerHandles.hpp"
@@ -42,6 +43,10 @@ public:
   auto operator=(const BufferRegistry&) -> BufferRegistry& = delete;
   auto operator=(BufferRegistry&&) -> BufferRegistry& = delete;
 
+  auto getOrCreateBuffer(const GeometryRegionBufferConfig& bufferConfig,
+                         uint32_t drawContextId = 0,
+                         uint8_t frameId = 0) -> BufferHandle;
+
   auto getOrCreateBuffer(const GeometryBufferConfig& bufferConfig,
                          uint32_t drawContextId = 0,
                          uint8_t frameId = 0) -> BufferHandle;
@@ -55,14 +60,19 @@ private:
   std::shared_ptr<IBufferManager> bufferManager;
 
   std::unordered_map<BufferKey<GeometryBufferConfig>, BufferHandle> geometryBufferHandles;
-  std::unordered_map<ObjectBufferConfig, BufferHandle> objectBufferHandles;
+  std::unordered_map<BufferKey<ObjectBufferConfig>, BufferHandle> objectBufferHandles;
   std::unordered_map<MaterialBufferConfig, BufferHandle> materialBufferHandles;
+  std::unordered_map<BufferKey<GeometryRegionBufferConfig>, BufferHandle>
+      geometryRegionBufferHandles;
 
   MapKey geometryBufferKeygen;
-  MapKey materialBufferKeygen;
+  MapKey regularBufferKeygen;
+  MapKey objectBufferKeygen;
+  // TODO(matt): Rethink Buffer, ArenaBuffer, and ArenaGeometryBuffer
   std::unordered_map<BufferHandle, std::unique_ptr<ArenaGeometryBuffer>> geometryBuffers;
   std::unordered_map<BufferHandle, std::unique_ptr<ArenaBuffer>> objectDataBuffers;
-  std::unordered_map<BufferHandle, std::unique_ptr<Buffer>> materialBuffers;
+  // These are a regular 'buffer' and not a wrapper so there's just another handle
+  std::unordered_map<BufferHandle, BufferHandle> regularBuffers;
 };
 
 }
