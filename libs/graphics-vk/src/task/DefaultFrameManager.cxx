@@ -110,6 +110,16 @@ auto DefaultFrameManager::createPerFrameBuffer(const ObjectBufferConfig& config,
   return logicalHandle;
 }
 
+auto DefaultFrameManager::createPerFrameBuffer(const StorageBufferConfig& config,
+                                               size_t drawContextId) -> LogicalBufferHandle {
+  const auto logicalHandle = bufferKeygen.getKey();
+  for (auto& frame : frames) {
+    const auto bufferHandle = bufferRegistry->getOrCreateBuffer(config, drawContextId);
+    frame->addLogicalBuffer(logicalHandle, bufferHandle);
+  }
+  return logicalHandle;
+}
+
 auto DefaultFrameManager::handleSwapchainResized(const SwapchainResized& event) -> void {
 
   const auto drawImageExtent =

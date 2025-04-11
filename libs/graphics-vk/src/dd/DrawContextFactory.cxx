@@ -4,6 +4,7 @@
 #include "dd/RenderConfigRegistry.hpp"
 #include "dd/buffer-registry/BufferRegistry.hpp"
 #include "dd/buffer-registry/GeometryRregionBufferConfig.hpp"
+#include "dd/gpu-data/GpuMaterialData.hpp"
 #include "gfx/IFrameManager.hpp"
 
 namespace tr {
@@ -30,32 +31,33 @@ auto DrawContextFactory::getOrCreateDrawContext(RenderConfigHandle renderConfigH
         GeometryBufferConfig{.vertexFormat = renderConfig.vertexFormat});
 
     // Shared across DrawContexts and Frames
-    const auto materialBufferHandle =
-        bufferRegistry->getOrCreateBuffer(MaterialBufferConfig{.id = 1});
+    const auto materialBufferHandle = bufferRegistry->getOrCreateBuffer(
+        StorageBufferConfig{.id = 1, .size = sizeof(GpuMaterialData) * 10});
 
     // Unique Per DrawContext, shared across Frames
     const auto geometryRegionBufferHandle =
         bufferRegistry->getOrCreateBuffer(GeometryRegionBufferConfig{.id = 1}, drawContextId);
 
     // One per DrawContext and one per frame
-    // TODO(matt): finish other cases' strides
-    const auto stride = sizeof(StaticGpuObjectData) * 1024;
-    const auto logicalObjectBufferHandle = frameManager->createPerFrameBuffer(
-        ObjectBufferConfig{.stride = stride,
-                           .hasMaterialId =
-                               renderConfig.objectDataType == ObjectDataType::BaseMaterial ||
-                               renderConfig.objectDataType == ObjectDataType::BaseMaterialAnimated,
-                           .hasAnimationDataId =
-                               renderConfig.objectDataType == ObjectDataType::BaseMaterialAnimated},
+    const auto logicalObjectBufferHandle =
+        frameManager->createPerFrameBuffer(getObjectBufferConfig(renderConfig), drawContextId);
+
+    const auto logicalObjectIndexBufferHandle = frameManager->createPerFrameBuffer(
+        StorageBufferConfig{.id = 2, .size = sizeof(uint32_t) * 1024},
         drawContextId);
 
-    const auto dcci = DrawContextCreateInfo{
-        .id = drawContextId,
-        .geometryBufferHandle = geometryBufferHandle,
-        .materialBufferHandle = materialBufferHandle,
-        .geometryRegionBufferHandle = geometryRegionBufferHandle,
-        .objectDataBufferHandle = logicalObjectBufferHandle,
-    };
+    const auto logicalObjectCountBufferHandle =
+        frameManager->createPerFrameBuffer(StorageBufferConfig{.id = 3, .size = sizeof(uint32_t)},
+                                           drawContextId);
+
+    const auto dcci =
+        DrawContextCreateInfo{.id = drawContextId,
+                              .geometryBufferHandle = geometryBufferHandle,
+                              .materialBufferHandle = materialBufferHandle,
+                              .geometryRegionBufferHandle = geometryRegionBufferHandle,
+                              .objectDataBufferHandle = logicalObjectBufferHandle,
+                              .objectDataIndexBufferHandle = logicalObjectIndexBufferHandle,
+                              .objectCountBufferHandle = logicalObjectCountBufferHandle};
 
     drawContexts.emplace(renderConfigHandle, std::make_unique<DrawContext>(dcci));
   }
@@ -63,4 +65,14 @@ auto DrawContextFactory::getOrCreateDrawContext(RenderConfigHandle renderConfigH
   return drawContexts.at(renderConfigHandle).get();
 }
 
+auto DrawContextFactory::getObjectBufferConfig(const RenderConfig& renderConfig)
+    -> ObjectBufferConfig {
+  // TODO(matt): finish other cases' strides
+  const auto stride = sizeof(StaticGpuObjectData) * 1024;
+  return {.stride = stride,
+          .hasMaterialId = renderConfig.objectDataType == ObjectDataType::BaseMaterial ||
+                           renderConfig.objectDataType == ObjectDataType::BaseMaterialAnimated,
+          .hasAnimationDataId =
+              renderConfig.objectDataType == ObjectDataType::BaseMaterialAnimated};
+}
 }

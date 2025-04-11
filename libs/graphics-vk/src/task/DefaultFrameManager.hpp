@@ -40,6 +40,8 @@ public:
       -> LogicalImageHandle override;
   auto createPerFrameBuffer(const ObjectBufferConfig& config, size_t drawContextId)
       -> LogicalBufferHandle override;
+  auto createPerFrameBuffer(const StorageBufferConfig& config, size_t drawContextId)
+      -> LogicalBufferHandle override;
 
 private:
   RenderContextConfig renderConfig;

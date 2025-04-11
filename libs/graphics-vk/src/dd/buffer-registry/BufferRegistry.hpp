@@ -1,10 +1,12 @@
 #pragma once
 
 #include "bk/Rando.hpp"
+#include "dd/buffer-registry/BufferConfig.hpp"
+#include "dd/buffer-registry/BufferKey.hpp"
 #include "dd/buffer-registry/GeometryBufferConfig.hpp"
 #include "dd/buffer-registry/GeometryRregionBufferConfig.hpp"
-#include "dd/buffer-registry/MaterialBufferConfig.hpp"
 #include "dd/buffer-registry/ObjectBufferConfig.hpp"
+#include "dd/buffer-registry/StorageBufferConfig.hpp"
 #include "vk/ResourceManagerHandles.hpp"
 
 namespace tr {
@@ -13,25 +15,6 @@ class ArenaGeometryBuffer;
 class ArenaBuffer;
 class IBufferManager;
 class Buffer;
-
-struct BufferInstanceKey {
-  size_t drawContextId;
-  uint32_t frameId;
-
-  auto operator==(const BufferInstanceKey& other) const -> bool {
-    return drawContextId == other.drawContextId && frameId == other.frameId;
-  }
-};
-
-template <typename T>
-struct BufferKey {
-  T config;
-  BufferInstanceKey instance;
-
-  auto operator==(const BufferKey& other) const -> bool {
-    return config == other.config && instance == other.instance;
-  }
-};
 
 class BufferRegistry {
 public:
@@ -42,6 +25,9 @@ public:
   BufferRegistry(BufferRegistry&&) = delete;
   auto operator=(const BufferRegistry&) -> BufferRegistry& = delete;
   auto operator=(BufferRegistry&&) -> BufferRegistry& = delete;
+
+  auto getOrCreateBuffer(const BufferConfig& bufferConfig, size_t drawContextId, uint8_t frameId)
+      -> BufferHandle;
 
   auto getOrCreateBuffer(const GeometryRegionBufferConfig& bufferConfig,
                          uint32_t drawContextId = 0,
@@ -54,42 +40,26 @@ public:
   auto getOrCreateBuffer(const ObjectBufferConfig& bufferConfig,
                          size_t drawContextId = 0,
                          uint8_t frameId = 0) -> BufferHandle;
-  auto getOrCreateBuffer(const MaterialBufferConfig& bufferConfig) -> BufferHandle;
+
+  auto getOrCreateBuffer(const StorageBufferConfig& bufferConfig,
+                         size_t drawContextId = 0,
+                         uint8_t frameId = 0) -> BufferHandle;
 
 private:
   std::shared_ptr<IBufferManager> bufferManager;
 
-  std::unordered_map<BufferKey<GeometryBufferConfig>, BufferHandle> geometryBufferHandles;
-  std::unordered_map<BufferKey<ObjectBufferConfig>, BufferHandle> objectBufferHandles;
-  std::unordered_map<MaterialBufferConfig, BufferHandle> materialBufferHandles;
-  std::unordered_map<BufferKey<GeometryRegionBufferConfig>, BufferHandle>
-      geometryRegionBufferHandles;
+  std::unordered_map<BufferKey, BufferHandle> geometryBufferHandles;
+  std::unordered_map<BufferKey, BufferHandle> objectBufferHandles;
+  std::unordered_map<BufferKey, BufferHandle> storageBufferHandles;
 
   MapKey geometryBufferKeygen;
   MapKey regularBufferKeygen;
   MapKey objectBufferKeygen;
-  // TODO(matt): Rethink Buffer, ArenaBuffer, and ArenaGeometryBuffer
+
   std::unordered_map<BufferHandle, std::unique_ptr<ArenaGeometryBuffer>> geometryBuffers;
   std::unordered_map<BufferHandle, std::unique_ptr<ArenaBuffer>> objectDataBuffers;
   // These are a regular 'buffer' and not a wrapper so there's just another handle
   std::unordered_map<BufferHandle, BufferHandle> regularBuffers;
 };
 
-}
-
-namespace std {
-template <>
-struct hash<tr::BufferInstanceKey> {
-  auto operator()(const tr::BufferInstanceKey& key) const -> size_t {
-    return std::hash<size_t>{}(key.drawContextId) ^ (std::hash<uint32_t>{}(key.frameId) << 1U);
-  }
-};
-
-template <typename T>
-struct hash<tr::BufferKey<T>> {
-  auto operator()(const tr::BufferKey<T>& key) const -> size_t {
-    return std::hash<tr::GeometryBufferConfig>{}(key.config) ^
-           std::hash<tr::BufferInstanceKey>{}(key.instance);
-  }
-};
 }
