@@ -11,7 +11,7 @@ ArenaGeometryBuffer::ArenaGeometryBuffer(IBufferManager* newBufferManager,
   const auto vbAci = ArenaBufferCreateInfo{
       .newItemStride = createInfo.vertexSize,
       .initialBufferSize = 8192000,
-      .bufferType = BufferType::Vertex,
+      .bufferType = ArenaBufferType::Vertex,
       .bufferName = createInfo.bufferName,
   };
   vertexBuffer = std::make_unique<ArenaBuffer>(bufferManager, vbAci);
@@ -19,7 +19,7 @@ ArenaGeometryBuffer::ArenaGeometryBuffer(IBufferManager* newBufferManager,
   const auto ibAci = ArenaBufferCreateInfo{
       .newItemStride = createInfo.indexSize,
       .initialBufferSize = 819200,
-      .bufferType = BufferType::Index,
+      .bufferType = ArenaBufferType::Index,
       .bufferName = createInfo.bufferName,
   };
   indexBuffer = std::make_unique<ArenaBuffer>(bufferManager, ibAci);

@@ -8,15 +8,18 @@ namespace tr {
 
 class BufferWrapper {
 public:
-  template <typename T>
-  explicit BufferWrapper(T&& b) : buffer(b) {
-  }
   ~BufferWrapper() = default;
 
   BufferWrapper(const BufferWrapper&) = delete;
   BufferWrapper(BufferWrapper&&) = delete;
   auto operator=(const BufferWrapper&) -> BufferWrapper& = delete;
   auto operator=(BufferWrapper&&) -> BufferWrapper& = delete;
+
+  template <typename T, typename... Args>
+  static auto create(Args&&... args) {
+    return std::unique_ptr<BufferWrapper>(
+        new BufferWrapper(std::in_place_type<T>, std::forward<Args>(args)...));
+  }
 
   template <typename T>
   auto get() -> T* {
@@ -29,6 +32,10 @@ public:
   }
 
 private:
+  template <typename T, typename... Args>
+  explicit BufferWrapper(std::in_place_type_t<T>, Args&&... args)
+      : buffer(std::in_place_type<T>, std::forward<Args>(args)...) {
+  }
   std::variant<Buffer, ArenaBuffer, ArenaGeometryBuffer> buffer;
 };
 

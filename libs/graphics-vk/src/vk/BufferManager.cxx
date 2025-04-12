@@ -171,14 +171,14 @@ auto BufferManager::removeData([[maybe_unused]] BufferHandle handle,
 
 auto BufferManager::createArenaBuffer(const ArenaBufferCreateInfo& createInfo) -> BufferHandle {
   const auto key = bufferMapKeygen.getKey();
-  newBufferMap.emplace(key, std::make_unique<BufferWrapper>(ArenaBuffer{this, createInfo}));
+  newBufferMap.emplace(key, BufferWrapper::create<ArenaBuffer>(this, createInfo));
   return key;
 }
 
 auto BufferManager::createArenaGeometryBuffer(const ArenaGeometryBufferCreateInfo& createInfo)
     -> BufferHandle {
   const auto key = bufferMapKeygen.getKey();
-  newBufferMap.emplace(key, std::make_unique<BufferWrapper>(ArenaGeometryBuffer{this, createInfo}));
+  newBufferMap.emplace(key, BufferWrapper::create<ArenaGeometryBuffer>(this, createInfo));
   return key;
 }
 

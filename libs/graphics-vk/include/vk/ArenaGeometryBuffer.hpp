@@ -17,7 +17,7 @@ public:
   ~ArenaGeometryBuffer();
 
   ArenaGeometryBuffer(const ArenaGeometryBuffer&) = delete;
-  ArenaGeometryBuffer(ArenaGeometryBuffer&&) = default;
+  ArenaGeometryBuffer(ArenaGeometryBuffer&&) = delete;
   auto operator=(const ArenaGeometryBuffer&) -> ArenaGeometryBuffer& = delete;
   auto operator=(ArenaGeometryBuffer&&) -> ArenaGeometryBuffer& = delete;
 
