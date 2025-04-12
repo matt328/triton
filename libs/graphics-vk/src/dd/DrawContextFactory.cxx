@@ -27,12 +27,14 @@ auto DrawContextFactory::getOrCreateDrawContext(RenderConfigHandle renderConfigH
     const auto drawContextId = drawContextKeygen.getKey();
 
     // Might be shared across multiple DrawContexts, Shared across Frames
-    const auto geometryBufferHandle = bufferRegistry->getOrCreateBuffer(
-        GeometryBufferConfig{.vertexFormat = renderConfig.vertexFormat});
+    const auto geometryBufferHandle =
+        bufferRegistry->getOrCreateBuffer(BufferConfig{.vertexFormat = renderConfig.vertexFormat});
 
     // Shared across DrawContexts and Frames
-    const auto materialBufferHandle = bufferRegistry->getOrCreateBuffer(
-        StorageBufferConfig{.id = 1, .size = sizeof(GpuMaterialData) * 10});
+    const auto materialBufferHandle =
+        bufferRegistry->getOrCreateBuffer(BufferConfig{.id = 1,
+                                                       .size = sizeof(GpuMaterialData) * 10,
+                                                       .bufferType = BufferType::Fixed});
 
     // Unique Per DrawContext, shared across Frames
     const auto geometryRegionBufferHandle =

@@ -2,9 +2,8 @@
 
 namespace tr {
 
-ArenaBuffer::ArenaBuffer(std::shared_ptr<IBufferManager> newBufferManager,
-                         ArenaBufferCreateInfo createInfo)
-    : bufferManager{std::move(newBufferManager)},
+ArenaBuffer::ArenaBuffer(IBufferManager* newBufferManager, ArenaBufferCreateInfo createInfo)
+    : bufferManager{newBufferManager},
       capacity(createInfo.initialBufferSize),
       itemStride{createInfo.newItemStride} {
   if (createInfo.bufferType == ArenaBufferType::Vertex) {

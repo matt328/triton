@@ -4,9 +4,9 @@
 
 namespace tr {
 
-ArenaGeometryBuffer::ArenaGeometryBuffer(std::shared_ptr<IBufferManager> newBufferManager,
+ArenaGeometryBuffer::ArenaGeometryBuffer(IBufferManager* newBufferManager,
                                          const ArenaGeometryBufferCreateInfo& createInfo)
-    : bufferManager{std::move(newBufferManager)} {
+    : bufferManager{newBufferManager} {
 
   const auto vbAci = ArenaBufferCreateInfo{
       .newItemStride = createInfo.vertexSize,

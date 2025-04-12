@@ -3,8 +3,10 @@
 #include "ResourceExceptions.hpp"
 #include "gfx/IGeometryData.hpp"
 #include "mem/Allocator.hpp"
+#include "mem/ArenaBuffer.hpp"
 #include "mem/Buffer.hpp"
 #include "bk/TaskQueue.hpp"
+#include "mem/BufferWrapper.hpp"
 
 namespace tr {
 
@@ -165,6 +167,19 @@ auto BufferManager::addToSingleBuffer(const void* data,
 auto BufferManager::removeData([[maybe_unused]] BufferHandle handle,
                                [[maybe_unused]] vk::DeviceSize offset,
                                [[maybe_unused]] size_t size) -> void {
+}
+
+auto BufferManager::createArenaBuffer(const ArenaBufferCreateInfo& createInfo) -> BufferHandle {
+  const auto key = bufferMapKeygen.getKey();
+  newBufferMap.emplace(key, std::make_unique<BufferWrapper>(ArenaBuffer{this, createInfo}));
+  return key;
+}
+
+auto BufferManager::createArenaGeometryBuffer(const ArenaGeometryBufferCreateInfo& createInfo)
+    -> BufferHandle {
+  const auto key = bufferMapKeygen.getKey();
+  newBufferMap.emplace(key, std::make_unique<BufferWrapper>(ArenaGeometryBuffer{this, createInfo}));
+  return key;
 }
 
 }

@@ -13,6 +13,7 @@ class Allocator;
 class ImmediateTransferContext;
 class IGeometryData;
 class TaskQueue;
+class BufferWrapper;
 
 class BufferManager : public IBufferManager {
 public:
@@ -53,6 +54,11 @@ public:
 
   auto removeData(BufferHandle handle, vk::DeviceSize offset, size_t size) -> void override;
 
+  auto createArenaBuffer(const ArenaBufferCreateInfo& createInfo) -> BufferHandle override;
+
+  auto createArenaGeometryBuffer(const ArenaGeometryBufferCreateInfo& createInfo)
+      -> BufferHandle override;
+
 private:
   std::shared_ptr<Allocator> allocator;
   std::shared_ptr<ImmediateTransferContext> immediateTransferContext;
@@ -61,6 +67,7 @@ private:
 
   MapKey bufferMapKeygen;
   std::unordered_map<BufferHandle, std::unique_ptr<Buffer>> bufferMap;
+  std::unordered_map<BufferHandle, std::unique_ptr<BufferWrapper>> newBufferMap;
   std::vector<BufferHandle> unusedBuffers;
   bool clearInProgress = false;
 };

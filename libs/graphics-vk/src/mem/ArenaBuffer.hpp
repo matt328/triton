@@ -7,25 +7,13 @@ namespace tr {
 
 using RegionContainer = std::set<BufferRegion, BufferRegionComparator>;
 
-enum class ArenaBufferType : uint8_t {
-  Vertex = 0,
-  Index
-};
-
-struct ArenaBufferCreateInfo {
-  size_t newItemStride;
-  size_t initialBufferSize;
-  ArenaBufferType bufferType;
-  std::string_view bufferName;
-};
-
 class ArenaBuffer {
 public:
-  ArenaBuffer(std::shared_ptr<IBufferManager> newBufferManager, ArenaBufferCreateInfo createInfo);
+  ArenaBuffer(IBufferManager* newBufferManager, ArenaBufferCreateInfo createInfo);
   ~ArenaBuffer();
 
   ArenaBuffer(const ArenaBuffer&) = delete;
-  ArenaBuffer(ArenaBuffer&&) = delete;
+  ArenaBuffer(ArenaBuffer&&) = default;
   auto operator=(const ArenaBuffer&) -> ArenaBuffer& = delete;
   auto operator=(ArenaBuffer&&) -> ArenaBuffer& = delete;
 
@@ -35,7 +23,7 @@ public:
   [[nodiscard]] auto getBuffer() const -> Buffer&;
 
 private:
-  std::shared_ptr<IBufferManager> bufferManager;
+  IBufferManager* bufferManager;
 
   RegionContainer freeList;
 

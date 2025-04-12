@@ -16,6 +16,24 @@ struct BufferCreateInfo {
   bool mapped = false;
 };
 
+enum class ArenaBufferType : uint8_t {
+  Vertex = 0,
+  Index
+};
+
+struct ArenaBufferCreateInfo {
+  size_t newItemStride;
+  size_t initialBufferSize;
+  ArenaBufferType bufferType;
+  std::string_view bufferName;
+};
+
+struct ArenaGeometryBufferCreateInfo {
+  size_t vertexSize;
+  size_t indexSize;
+  std::string_view bufferName;
+};
+
 class IBufferManager {
 public:
   IBufferManager() = default;
@@ -48,6 +66,11 @@ public:
                                  BufferHandle handle,
                                  vk::DeviceSize offset) -> void = 0;
   virtual auto removeData(BufferHandle handle, vk::DeviceSize offset, size_t size) -> void = 0;
+
+  virtual auto createArenaBuffer(const ArenaBufferCreateInfo& createInfo) -> BufferHandle = 0;
+
+  virtual auto createArenaGeometryBuffer(const ArenaGeometryBufferCreateInfo& createInfo)
+      -> BufferHandle = 0;
 };
 
 }

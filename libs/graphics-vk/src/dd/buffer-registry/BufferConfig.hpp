@@ -18,12 +18,12 @@ enum class BufferType : uint8_t {
 };
 
 struct BufferConfig {
-  size_t id;
+  size_t id = 0L;
   size_t size;
   BufferType bufferType;
 
-  std::optional<VertexFormat> vertexFormat;
-  std::optional<size_t> stride;
+  std::optional<VertexFormat> vertexFormat{};
+  std::optional<size_t> stride{};
 
   auto operator==(const BufferConfig& other) const -> bool {
     return id == other.id && size == other.size && bufferType == other.bufferType &&

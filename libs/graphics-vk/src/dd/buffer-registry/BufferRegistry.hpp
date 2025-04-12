@@ -3,10 +3,6 @@
 #include "bk/Rando.hpp"
 #include "dd/buffer-registry/BufferConfig.hpp"
 #include "dd/buffer-registry/BufferKey.hpp"
-#include "dd/buffer-registry/GeometryBufferConfig.hpp"
-#include "dd/buffer-registry/GeometryRregionBufferConfig.hpp"
-#include "dd/buffer-registry/ObjectBufferConfig.hpp"
-#include "dd/buffer-registry/StorageBufferConfig.hpp"
 #include "vk/ResourceManagerHandles.hpp"
 
 namespace tr {
@@ -26,22 +22,7 @@ public:
   auto operator=(const BufferRegistry&) -> BufferRegistry& = delete;
   auto operator=(BufferRegistry&&) -> BufferRegistry& = delete;
 
-  auto getOrCreateBuffer(const BufferConfig& bufferConfig, size_t drawContextId, uint8_t frameId)
-      -> BufferHandle;
-
-  auto getOrCreateBuffer(const GeometryRegionBufferConfig& bufferConfig,
-                         uint32_t drawContextId = 0,
-                         uint8_t frameId = 0) -> BufferHandle;
-
-  auto getOrCreateBuffer(const GeometryBufferConfig& bufferConfig,
-                         uint32_t drawContextId = 0,
-                         uint8_t frameId = 0) -> BufferHandle;
-
-  auto getOrCreateBuffer(const ObjectBufferConfig& bufferConfig,
-                         size_t drawContextId = 0,
-                         uint8_t frameId = 0) -> BufferHandle;
-
-  auto getOrCreateBuffer(const StorageBufferConfig& bufferConfig,
+  auto getOrCreateBuffer(const BufferConfig& bufferConfig,
                          size_t drawContextId = 0,
                          uint8_t frameId = 0) -> BufferHandle;
 

@@ -17,7 +17,7 @@ public:
   Buffer(const Buffer&) = delete;
   auto operator=(const Buffer&) -> Buffer& = delete;
 
-  Buffer(Buffer&&) = delete;
+  Buffer(Buffer&&) = default;
   auto operator=(Buffer&&) -> Buffer& = delete;
 
   /// Permanently maps the buffer, until either unmapBuffer() is called, or the object is
