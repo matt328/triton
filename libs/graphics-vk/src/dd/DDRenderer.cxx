@@ -36,7 +36,7 @@ DDRenderer::DDRenderer(RenderContextConfig newConfig,
   const auto forwardCreateInfo = RenderPassCreateInfo{
       .type = RenderPassType::ForwardOpaque,
       .extent = vk::Extent2D{.width = newConfig.initialWidth, .height = newConfig.initialHeight},
-      .clearColor = {{1.f, 1.f, 1.f, 1.f}},
+      .clearColor = {{0.39f, 0.58f, 0.93f, 1.f}},
       .depthFormat = swapchain->getDepthFormat()};
 
   const auto uiCreateInfo = RenderPassCreateInfo{
