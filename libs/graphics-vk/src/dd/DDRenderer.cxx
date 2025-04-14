@@ -31,6 +31,8 @@ DDRenderer::DDRenderer(RenderContextConfig newConfig,
       graphicsQueue{std::move(newGraphicsQueue)},
       eventBus{std::move(newEventBus)} {
 
+  Log.trace("Constructing Data Driven Renderer");
+
   const auto forwardCreateInfo = RenderPassCreateInfo{
       .type = RenderPassType::ForwardOpaque,
       .extent = vk::Extent2D{.width = newConfig.initialWidth, .height = newConfig.initialHeight},

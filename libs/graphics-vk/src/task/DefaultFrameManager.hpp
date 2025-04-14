@@ -38,9 +38,7 @@ public:
   auto registerPerFrameDrawImage(vk::Extent2D extent) -> LogicalImageHandle override;
   auto registerPerFrameDepthImage(vk::Extent2D extent, vk::Format format)
       -> LogicalImageHandle override;
-  auto createPerFrameBuffer(const ObjectBufferConfig& config, size_t drawContextId)
-      -> LogicalBufferHandle override;
-  auto createPerFrameBuffer(const StorageBufferConfig& config, size_t drawContextId)
+  auto createPerFrameBuffer(const BufferUsageProfile& profile, size_t drawContextId)
       -> LogicalBufferHandle override;
 
 private:

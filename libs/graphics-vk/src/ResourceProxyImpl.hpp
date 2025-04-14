@@ -5,10 +5,12 @@
 namespace tr {
 
 class VkResourceManager;
+class IRenderContext;
 
 class ResourceProxyImpl : public IResourceProxy {
 public:
-  explicit ResourceProxyImpl(std::shared_ptr<VkResourceManager> newResourceManager);
+  explicit ResourceProxyImpl(std::shared_ptr<VkResourceManager> newResourceManager,
+                             std::shared_ptr<IRenderContext> newRenderContext);
   ~ResourceProxyImpl() override = default;
 
   ResourceProxyImpl(const ResourceProxyImpl&) = default;
@@ -18,10 +20,11 @@ public:
 
   auto uploadModel(const as::Model& model) -> ModelData override;
 
-  auto uploadGeometry(const DDGeometryData& data) -> MeshHandle override;
+  auto uploadGeometry(DDGeometryData&& data) -> MeshHandle override;
 
 private:
   std::shared_ptr<VkResourceManager> resourceManager;
+  std::shared_ptr<IRenderContext> renderContext;
 };
 
 }

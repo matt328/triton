@@ -1,9 +1,7 @@
 #pragma once
 
 #include "bk/Rando.hpp"
-#include "dd/RenderConfig.hpp"
 #include "dd/RenderConfigHandle.hpp"
-#include "dd/buffer-registry/ObjectBufferConfig.hpp"
 
 namespace tr {
 
@@ -34,10 +32,7 @@ private:
   std::shared_ptr<IFrameManager> frameManager;
 
   MapKey drawContextKeygen;
-
   std::unordered_map<RenderConfigHandle, std::unique_ptr<DrawContext>> drawContexts;
-
-  static auto getObjectBufferConfig(const RenderConfig& renderConfig) -> ObjectBufferConfig;
 };
 
 }

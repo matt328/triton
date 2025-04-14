@@ -100,21 +100,14 @@ auto DefaultFrameManager::registerPerFrameDepthImage(vk::Extent2D extent, vk::Fo
   return logicalHandle;
 }
 
-auto DefaultFrameManager::createPerFrameBuffer(const ObjectBufferConfig& config,
+auto DefaultFrameManager::createPerFrameBuffer(const BufferUsageProfile& profile,
                                                size_t drawContextId) -> LogicalBufferHandle {
   const auto logicalHandle = bufferKeygen.getKey();
   for (auto& frame : frames) {
-    const auto bufferHandle = bufferRegistry->getOrCreateBuffer(config, drawContextId);
-    frame->addLogicalBuffer(logicalHandle, bufferHandle);
-  }
-  return logicalHandle;
-}
-
-auto DefaultFrameManager::createPerFrameBuffer(const StorageBufferConfig& config,
-                                               size_t drawContextId) -> LogicalBufferHandle {
-  const auto logicalHandle = bufferKeygen.getKey();
-  for (auto& frame : frames) {
-    const auto bufferHandle = bufferRegistry->getOrCreateBuffer(config, drawContextId);
+    const auto instance =
+        BufferInstanceKey{.drawContextId = drawContextId, .frameId = frame->getIndex()};
+    const auto bufferHandle =
+        bufferRegistry->getOrCreate(BufferKey{.profile = profile, .instance = instance});
     frame->addLogicalBuffer(logicalHandle, bufferHandle);
   }
   return logicalHandle;

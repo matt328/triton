@@ -23,8 +23,8 @@ auto WidgetService::createBox(const BoxCreateInfo& createInfo) -> void {
   const auto task = [this, &createInfo] {
     // TODO(matt): don't pass entire boxcreateinfo here, only pass what's needed, center and extent
     // create a BoxGeometryCreateInfo struct in GeometryGenerator.hpp
-    const auto geometryData = geometryGenerator->generateBox(createInfo);
-    const auto meshHandle = resourceProxy->uploadGeometry(geometryData);
+    auto geometryData = geometryGenerator->generateBox(createInfo);
+    const auto meshHandle = resourceProxy->uploadGeometry(std::move(geometryData));
     return meshHandle;
   };
 

@@ -1,11 +1,10 @@
 #include "dd/DrawContextFactory.hpp"
-#include "api/gfx/GpuObjectData.hpp"
 #include "dd/DrawContext.hpp"
 #include "dd/RenderConfigRegistry.hpp"
 #include "dd/buffer-registry/BufferRegistry.hpp"
-#include "dd/buffer-registry/GeometryRregionBufferConfig.hpp"
 #include "dd/gpu-data/GpuMaterialData.hpp"
 #include "gfx/IFrameManager.hpp"
+#include "vk/BufferEntry.hpp"
 
 namespace tr {
 
@@ -26,57 +25,115 @@ auto DrawContextFactory::getOrCreateDrawContext(RenderConfigHandle renderConfigH
 
     const auto drawContextId = drawContextKeygen.getKey();
 
-    // Might be shared across multiple DrawContexts, Shared across Frames
+    // Geometry Buffer
+    const auto instance = BufferInstanceKey{
+        .drawContextId = 0,
+        .frameId = 0,
+    };
+    const auto profile =
+        BufferUsageProfile{.kind = BufferKind::Geometry,
+                           .usages = {BufferUsage::GeometryIndex, BufferUsage::GeometryVertex},
+                           .debugName = "geometrybuffer",
+                           .stride = renderConfig.vertexFormat.stride,
+                           .maxElements = 10240,
+                           .extra = GeometryExtraProfile{
+                               .vertexFormat = renderConfig.vertexFormat,
+                               .indexSize = sizeof(uint32_t),
+                           }};
     const auto geometryBufferHandle =
-        bufferRegistry->getOrCreateBuffer(BufferConfig{.vertexFormat = renderConfig.vertexFormat});
+        bufferRegistry->getOrCreate(BufferKey{.profile = profile, .instance = instance});
 
-    // Shared across DrawContexts and Frames
-    const auto materialBufferHandle =
-        bufferRegistry->getOrCreateBuffer(BufferConfig{.id = 1,
-                                                       .size = sizeof(GpuMaterialData) * 10,
-                                                       .bufferType = BufferType::Fixed});
+    // Material Buffer
+    const auto materialBufferInstance = BufferInstanceKey{
+        .drawContextId = 0,
+        .frameId = 0,
+    };
+    const auto materialProfile = BufferUsageProfile{
+        .kind = BufferKind::Material,
+        .usages = {BufferUsage::CpuWritable,
+                   BufferUsage::ShaderDeviceAddress,
+                   BufferUsage::Storage},
+        .debugName = "Materials",
+        .stride = sizeof(GpuMaterialData),
+        .maxElements = 128,
+    };
+    const auto materialBufferHandle = bufferRegistry->getOrCreate(
+        BufferKey{.profile = materialProfile, .instance = materialBufferInstance});
 
-    // Unique Per DrawContext, shared across Frames
-    const auto geometryRegionBufferHandle =
-        bufferRegistry->getOrCreateBuffer(GeometryRegionBufferConfig{.id = 1}, drawContextId);
+    // GeometryRegion Buffer
+    const auto regionInstance = BufferInstanceKey{.drawContextId = drawContextId, .frameId = 0};
+    const auto regionProfile =
+        BufferUsageProfile{.kind = BufferKind::GpuBufferRegion,
+                           .usages = {BufferUsage::CpuWritable,
+                                      BufferUsage::ShaderDeviceAddress,
+                                      BufferUsage::Storage},
+                           .debugName = std::format("{}-GeometryRegion", drawContextId),
+                           .stride = sizeof(GpuBufferEntry),
+                           .maxElements = 128};
+    const auto geometryRegionBufferHandle = bufferRegistry->getOrCreate(
+        BufferKey{.profile = regionProfile, .instance = regionInstance});
 
-    // One per DrawContext and one per frame
+    // Object Buffer
+    const auto objectBufferProfile = BufferUsageProfile{
+        .kind = BufferKind::GpuBufferRegion,
+        .usages = {BufferUsage::CpuWritable,
+                   BufferUsage::ShaderDeviceAddress,
+                   BufferUsage::Storage},
+        .debugName = std::format("{}-ObjectBuffer", drawContextId),
+        .stride = sizeof(GpuBufferEntry), // TODO(matt): map ObjectDataType to a size
+        .maxElements = 128};
     const auto logicalObjectBufferHandle =
-        frameManager->createPerFrameBuffer(getObjectBufferConfig(renderConfig), drawContextId);
+        frameManager->createPerFrameBuffer(objectBufferProfile, drawContextId);
 
-    const auto logicalObjectIndexBufferHandle = frameManager->createPerFrameBuffer(
-        StorageBufferConfig{.id = 2, .size = sizeof(uint32_t) * 1024},
-        drawContextId);
-
+    // Object Count Buffer
+    const auto objectCountBufferProfile =
+        BufferUsageProfile{.kind = BufferKind::GpuBufferRegion,
+                           .usages = {BufferUsage::CpuWritable,
+                                      BufferUsage::ShaderDeviceAddress,
+                                      BufferUsage::Storage},
+                           .debugName = std::format("{}-ObjectCount", drawContextId),
+                           .stride = sizeof(uint32_t),
+                           .maxElements = 1};
     const auto logicalObjectCountBufferHandle =
-        frameManager->createPerFrameBuffer(StorageBufferConfig{.id = 3, .size = sizeof(uint32_t)},
-                                           drawContextId);
+        frameManager->createPerFrameBuffer(objectCountBufferProfile, drawContextId);
 
-    const auto logicalIndirectoDrawCommandBufferHandle = frameManager->createPerFrameBuffer()
+    // Object Index Buffer
+    const auto objectIndexBufferProfile =
+        BufferUsageProfile{.kind = BufferKind::GpuBufferRegion,
+                           .usages = {BufferUsage::CpuWritable,
+                                      BufferUsage::ShaderDeviceAddress,
+                                      BufferUsage::Storage},
+                           .debugName = std::format("{}-ObjectIndex", drawContextId),
+                           .stride = sizeof(uint32_t),
+                           .maxElements = 128};
+    const auto logicalObjectIndexBufferHandle =
+        frameManager->createPerFrameBuffer(objectCountBufferProfile, drawContextId);
 
-                                                             const auto dcci =
+    // IndirectDrawCommand Buffer
+    const auto indirectDrawBufferProfile =
+        BufferUsageProfile{.kind = BufferKind::IndirectCommand,
+                           .usages = {BufferUsage::CpuWritable,
+                                      BufferUsage::ShaderDeviceAddress,
+                                      BufferUsage::Indirect},
+                           .debugName = std::format("{}-Indirect", drawContextId),
+                           .stride = sizeof(vk::DrawIndirectCommand),
+                           .maxElements = 128};
+    const auto logicalIndirectBufferHandle =
+        frameManager->createPerFrameBuffer(indirectDrawBufferProfile, drawContextId);
+
+    const auto dcci =
         DrawContextCreateInfo{.id = drawContextId,
                               .geometryBufferHandle = geometryBufferHandle,
                               .materialBufferHandle = materialBufferHandle,
                               .geometryRegionBufferHandle = geometryRegionBufferHandle,
                               .objectDataBufferHandle = logicalObjectBufferHandle,
                               .objectDataIndexBufferHandle = logicalObjectIndexBufferHandle,
-                              .objectCountBufferHandle = logicalObjectCountBufferHandle};
+                              .objectCountBufferHandle = logicalObjectCountBufferHandle,
+                              .indirectDrawCommandBufferHandle = logicalIndirectBufferHandle};
 
     drawContexts.emplace(renderConfigHandle, std::make_unique<DrawContext>(dcci));
   }
 
   return drawContexts.at(renderConfigHandle).get();
-}
-
-auto DrawContextFactory::getObjectBufferConfig(const RenderConfig& renderConfig)
-    -> ObjectBufferConfig {
-  // TODO(matt): finish other cases' strides
-  const auto stride = sizeof(StaticGpuObjectData) * 1024;
-  return {.stride = stride,
-          .hasMaterialId = renderConfig.objectDataType == ObjectDataType::BaseMaterial ||
-                           renderConfig.objectDataType == ObjectDataType::BaseMaterialAnimated,
-          .hasAnimationDataId =
-              renderConfig.objectDataType == ObjectDataType::BaseMaterialAnimated};
 }
 }

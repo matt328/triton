@@ -1,15 +1,19 @@
 #include "ResourceProxyImpl.hpp"
 
 #include "VkResourceManager.hpp"
+#include "api/gw/RenderableData.hpp"
+#include "api/gw/RenderableResources.hpp"
 #include "geo/DynamicGeometryData.hpp"
 #include "geo/StaticGeometryData.hpp"
+#include "gfx/IRenderContext.hpp"
 
 namespace tr {
 
 /// This ProxyImpl keeps vk-graphics from knowing about as::Model
 /// Is only called from game-world
-ResourceProxyImpl::ResourceProxyImpl(std::shared_ptr<VkResourceManager> newResourceManager)
-    : resourceManager{std::move(newResourceManager)} {
+ResourceProxyImpl::ResourceProxyImpl(std::shared_ptr<VkResourceManager> newResourceManager,
+                                     std::shared_ptr<IRenderContext> newRenderContext)
+    : resourceManager{std::move(newResourceManager)}, renderContext{std::move(newRenderContext)} {
 }
 
 auto ResourceProxyImpl::uploadModel(const as::Model& model) -> ModelData {
@@ -39,7 +43,14 @@ auto ResourceProxyImpl::uploadModel(const as::Model& model) -> ModelData {
   return ModelData{.meshData = meshData, .skinData = skinData, .animationData = std::nullopt};
 }
 
-auto ResourceProxyImpl::uploadGeometry(const DDGeometryData& data) -> MeshHandle {
+auto ResourceProxyImpl::uploadGeometry(DDGeometryData&& data) -> MeshHandle {
+  const auto renderableData = RenderableData{
+      .geometryData = std::move(data),
+      .objectData = ObjectData{.objectDataBytes = {}},
+      .materialData = MaterialData{.shadingMode = ShadingMode::Wireframe},
+  };
+  [[maybe_unused]] const auto handles = renderContext->registerRenderable(renderableData);
+  // Log.debug("handles: {}", handles);
   return resourceManager->uploadGeometryData(data);
 }
 

@@ -8,7 +8,8 @@ namespace tr {
 
 class BufferWrapper {
 public:
-  ~BufferWrapper() = default;
+  ~BufferWrapper() {
+  }
 
   BufferWrapper(const BufferWrapper&) = delete;
   BufferWrapper(BufferWrapper&&) = delete;

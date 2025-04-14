@@ -38,6 +38,7 @@
 #include "dd/DrawContextFactory.hpp"
 #include "dd/RenderPassFactory.hpp"
 #include "dd/buffer-registry/BufferRegistry.hpp"
+#include "mem/BufferWrapper.hpp"
 
 #include <di.hpp>
 

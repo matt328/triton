@@ -21,7 +21,7 @@ public:
 
   virtual auto uploadModel(const as::Model& model) -> ModelData = 0;
 
-  virtual auto uploadGeometry(const DDGeometryData& data) -> MeshHandle = 0;
+  virtual auto uploadGeometry(DDGeometryData&& data) -> MeshHandle = 0;
 };
 
 }

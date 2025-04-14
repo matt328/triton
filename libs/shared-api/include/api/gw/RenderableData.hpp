@@ -20,7 +20,7 @@ struct ObjectData {
 
 struct MaterialData {
   ShadingMode shadingMode;
-  std::optional<as::ImageData> imageData;
+  std::optional<as::ImageData> imageData = std::nullopt;
 };
 
 /// Asset Service will be updated to produce these. This struct will probably be extended with
@@ -29,7 +29,7 @@ struct RenderableData {
   DDGeometryData geometryData;
   ObjectData objectData;
   MaterialData materialData;
-  std::optional<AnimationData2> animationData;
+  std::optional<AnimationData2> animationData = std::nullopt;
 };
 
 }

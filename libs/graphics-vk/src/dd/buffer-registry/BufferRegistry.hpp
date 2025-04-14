@@ -1,7 +1,8 @@
 #pragma once
 
+#include "IBufferManager.hpp"
 #include "bk/Rando.hpp"
-#include "dd/buffer-registry/BufferConfig.hpp"
+#include "dd/buffer-registry/BufferKey.hpp"
 #include "vk/ResourceManagerHandles.hpp"
 
 namespace tr {
@@ -10,35 +11,6 @@ class ArenaGeometryBuffer;
 class ArenaBuffer;
 class IBufferManager;
 class Buffer;
-
-struct BufferUsageProfile {
-  enum class Purpose : uint8_t {
-    Vertex,
-    Index,
-    ObjectData,
-    MaterialData,
-    IndirectArgs
-  };
-
-  Purpose purpose;
-
-  std::optional<VertexFormat> vertexFormat;
-  std::optional<size_t> stride;
-
-  bool perFrame = false;
-  bool perDrawContext = false;
-  bool mappable = false;
-};
-
-struct BufferInstanceKey {
-  size_t drawContextId;
-  uint8_t frameId;
-};
-
-struct BufferKey {
-  BufferUsageProfile profile;
-  BufferInstanceKey instance;
-};
 
 class BufferRegistry {
 public:
@@ -57,6 +29,10 @@ private:
 
   MapKey bufferKeygen;
   std::unordered_map<BufferKey, BufferHandle> bufferHandles;
+
+  static auto fromProfile(const BufferUsageProfile& profile) -> BufferCreateInfo;
+  static auto fromProfileGeometry(const BufferUsageProfile& profile)
+      -> ArenaGeometryBufferCreateInfo;
 };
 
 }
