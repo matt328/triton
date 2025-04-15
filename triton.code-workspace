@@ -1,11 +1,10 @@
 {
-	"folders": [
-		{
-			"path": "."
-		},
-		{
-			"path": "../game-assets"
-		}
-	],
-  "settings": {}
+  "folders": [
+    {
+      "path": "."
+    },
+    {
+      "path": "../game-assets"
+    }
+  ]
 }

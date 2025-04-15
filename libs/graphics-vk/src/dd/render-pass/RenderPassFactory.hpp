@@ -29,8 +29,8 @@ private:
 
   std::unordered_map<std::string, Handle<ManagedImage>> logicalImageRegistry;
 
-  auto resolveOrCreateImage(const AttachmentInfo& info) -> Handle<ManagedImage>;
-  auto makeAttachmentInfo(const AttachmentInfo& info, Handle<ManagedImage> imageHandle)
+  auto resolveOrCreateImage(const AttachmentRequest& info) -> Handle<ManagedImage>;
+  auto makeAttachmentInfo(const AttachmentRequest& info, Handle<ManagedImage> imageHandle)
       -> vk::RenderingAttachmentInfo;
 };
 

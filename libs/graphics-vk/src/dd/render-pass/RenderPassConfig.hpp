@@ -5,12 +5,20 @@
 
 namespace tr {
 
+struct AttachmentConfig {
+  Handle<ManagedImage> imageHandle;
+  vk::ClearValue clearValue;
+  vk::AttachmentLoadOp loadOp;
+  vk::AttachmentStoreOp storeOp;
+  vk::ImageLayout layout;
+  vk::ImageAspectFlags aspectMask;
+};
+
 struct RenderPassConfig {
-  std::optional<vk::RenderingAttachmentInfo> colorAttachmentInfo;
-  std::optional<vk::RenderingAttachmentInfo> depthAttachmentInfo;
-  std::optional<Handle<ManagedImage>> colorHandle;
-  std::optional<Handle<ManagedImage>> depthHandle;
+  std::vector<AttachmentConfig> colorAttachmentConfigs;
+  std::optional<AttachmentConfig> depthAttachmentConfig;
   vk::Extent2D extent;
+  std::optional<std::string> debugName;
 };
 
 }

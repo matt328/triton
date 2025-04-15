@@ -20,28 +20,50 @@ auto RenderPass::addDrawContext([[maybe_unused]] RenderConfigHandle handle,
 }
 
 auto RenderPass::execute(const Frame* frame, vk::raii::CommandBuffer& cmdBuffer) -> void {
-  auto colorAttachmentInfo = config.colorAttachmentInfo;
-  if (colorAttachmentInfo) {
-    const auto imageHandle = frame->getLogicalImage(*config.colorHandle);
-    colorAttachmentInfo->imageView = resourceManager->getImageView(imageHandle);
+  std::vector<vk::RenderingAttachmentInfo> colorAttachments;
+  std::optional<vk::RenderingAttachmentInfo> depthAttachment;
+
+  // Process color attachments
+  for (const auto& info : config.colorAttachments) {
+    const auto imageHandle = frame->getLogicalImage(info.imageHandle);
+    auto imageView = imageManager->getImageView(imageHandle);
+
+    vk::RenderingAttachmentInfo attachment{.imageView = *imageView,
+                                           .imageLayout = info.imageLayout,
+                                           .loadOp = info.loadOp,
+                                           .storeOp = info.storeOp,
+                                           .clearValue = info.clearValue};
+
+    colorAttachments.push_back(attachment);
   }
 
-  auto depthAttachmentInfo = config.depthAttachmentInfo;
-  if (depthAttachmentInfo) {
-    const auto imageHandle = frame->getLogicalImage(*config.depthHandle);
-    depthAttachmentInfo->imageView = resourceManager->getImageView(imageHandle);
+  // Process depth/stencil attachment (only one allowed in dynamic rendering)
+  if (config.depthAttachment) {
+    const auto& info = *config.depthAttachment;
+    const auto imageHandle = frame->getLogicalImage(info.imageHandle);
+    auto imageView = imageManager->getImageView(imageHandle);
+
+    depthAttachment = vk::RenderingAttachmentInfo{.imageView = *imageView,
+                                                  .imageLayout = info.imageLayout,
+                                                  .loadOp = info.loadOp,
+                                                  .storeOp = info.storeOp,
+                                                  .clearValue = info.clearValue};
   }
 
-  const auto renderingInfo =
-      vk::RenderingInfo{.renderArea = {.offset = {.x = 0, .y = 0}, .extent = config.extent},
-                        .layerCount = 1,
-                        .colorAttachmentCount = 1,
-                        .pColorAttachments = &*colorAttachmentInfo,
-                        .pDepthAttachment = &*depthAttachmentInfo};
+  // Build rendering info
+  vk::RenderingInfo renderingInfo{
+      .renderArea = {{0, 0}, config.extent},
+      .layerCount = 1,
+      .colorAttachmentCount = static_cast<uint32_t>(colorAttachments.size()),
+      .pColorAttachments = colorAttachments.data(),
+      .pDepthAttachment = depthAttachment ? &*depthAttachment : nullptr};
 
   cmdBuffer.beginRendering(renderingInfo);
 
-  // Render DrawContexts
+  // --- Render all draw contexts here ---
+  for (auto& drawContext : drawContexts) {
+    drawContext.render(cmdBuffer); // Or whatever your draw context does
+  }
 
   cmdBuffer.endRendering();
 }

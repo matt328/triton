@@ -15,24 +15,16 @@ auto RenderPassFactory::createRenderPass(const RenderPassCreateInfo& info)
     -> std::unique_ptr<RenderPass> {
   RenderPassConfig config{};
 
-  if (info.colorAttachment) {
-    config.colorHandle = resolveOrCreateImage(*info.colorAttachment);
-    config.colorAttachmentInfo = makeAttachmentInfo(*info.colorAttachment, *config.colorHandle);
-    config.extent = info.colorAttachment->extent;
-  }
-
-  if (info.depthAttachment) {
-    config.depthHandle = resolveOrCreateImage(*info.depthAttachment);
-    config.depthAttachmentInfo = makeAttachmentInfo(*info.depthAttachment, *config.depthHandle);
-    if (config.extent.width == 0u) {
-      config.extent = info.depthAttachment->extent;
-    }
+  for (const auto& attachment : info.colorAttachments) {
+    const auto handle = resolveOrCreateImage(attachment);
+    config.colorAttachmentConfigs.emplace_back(makeAttachmentInfo(attachment, handle));
   }
 
   return std::make_unique<RenderPass>(config, imageManager);
 }
 
-auto RenderPassFactory::resolveOrCreateImage(const AttachmentInfo& info) -> Handle<ManagedImage> {
+auto RenderPassFactory::resolveOrCreateImage(const AttachmentRequest& info)
+    -> Handle<ManagedImage> {
   if (logicalImageRegistry.contains(info.logicalName)) {
     return logicalImageRegistry.at(info.logicalName);
   }
@@ -48,7 +40,7 @@ auto RenderPassFactory::resolveOrCreateImage(const AttachmentInfo& info) -> Hand
   return handle;
 }
 
-auto RenderPassFactory::makeAttachmentInfo(const AttachmentInfo& info,
+auto RenderPassFactory::makeAttachmentInfo(const AttachmentRequest& info,
                                            Handle<ManagedImage> imageHandle)
     -> vk::RenderingAttachmentInfo {
   return vk::RenderingAttachmentInfo{.imageView =
