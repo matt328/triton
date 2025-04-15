@@ -3,9 +3,8 @@
 
 namespace tr {
 
-RenderPass::RenderPass(std::shared_ptr<VkResourceManager> newResourceManager,
-                       RenderPassConfig newConfig)
-    : resourceManager{std::move(newResourceManager)}, config{std::move(newConfig)} {
+RenderPass::RenderPass(RenderPassConfig newConfig, std::shared_ptr<ImageManager> newImageManager)
+    : imageManager{std::move(newImageManager)}, config{newConfig} {
 }
 
 [[nodiscard]] auto RenderPass::accepts([[maybe_unused]] const RenderConfig& config) const -> bool {
@@ -14,7 +13,7 @@ RenderPass::RenderPass(std::shared_ptr<VkResourceManager> newResourceManager,
 
 /*
   Note: the list of DrawContexts needs to be unique, this will potentially be called multiple times
-  with the same DrawContext. I think we can uniquely identify a DrawContext by its RenderConfig
+  with the same DrawContext. I think we can uniquely identify a DrawContext by its Id
 */
 auto RenderPass::addDrawContext([[maybe_unused]] RenderConfigHandle handle,
                                 [[maybe_unused]] DrawContext* drawContext) -> void {

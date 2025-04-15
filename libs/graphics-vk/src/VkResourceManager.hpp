@@ -33,24 +33,6 @@ struct Vertex {
   glm::vec3 position;
 };
 
-struct ImageResource {
-  vk::Image image;
-  vma::Allocation allocation;
-};
-
-struct ImageDeleter {
-  vma::Allocator allocator;
-
-  void operator()(ImageResource* image) const {
-    if (image != nullptr) {
-      allocator.destroyImage(image->image, image->allocation);
-      delete image;
-    }
-  }
-};
-
-using AllocatedImagePtr = std::unique_ptr<ImageResource, ImageDeleter>;
-
 class TextureManager;
 
 class VkResourceManager {
@@ -73,12 +55,6 @@ public:
 
   [[nodiscard]] auto createDefaultDescriptorPool() const
       -> std::unique_ptr<vk::raii::DescriptorPool>;
-
-  auto createDrawImageAndView(std::string_view imageName, vk::Extent2D extent) -> ImageHandle;
-  auto destroyDrawImageAndView(ImageHandle handle) -> void;
-
-  auto createDepthImageAndView(std::string_view imageName, vk::Extent2D extent, vk::Format format)
-      -> ImageHandle;
 
   auto uploadGeometryData(const DDGeometryData& data) -> MeshHandle;
 
@@ -106,15 +82,7 @@ public:
                              const vk::DescriptorImageInfo& descriptorImageInfo,
                              size_t slot) -> void;
 
-  auto destroyImage(ImageHandle handle) -> void;
-
   auto createComputePipeline(std::string_view name) -> PipelineHandle;
-
-  [[nodiscard]] auto getImage(ImageHandle handle) const -> const vk::Image&;
-
-  [[nodiscard]] auto getImageView(ImageHandle handle) const -> const vk::ImageView&;
-
-  [[nodiscard]] auto getImageExtent(ImageHandle handle) const -> const vk::Extent2D;
 
   [[nodiscard]] auto getMesh(MeshHandle handle) -> const ImmutableMesh&;
 
@@ -140,12 +108,6 @@ public:
   auto updateShaderBindings() -> void;
 
 private:
-  struct ImageInfo {
-    AllocatedImagePtr image;
-    vk::raii::ImageView imageView;
-    vk::Extent2D extent;
-  };
-
   std::shared_ptr<Device> device;
   std::shared_ptr<ImmediateTransferContext> immediateTransferContext;
   std::shared_ptr<IShaderModuleFactory> shaderCompiler;
@@ -157,10 +119,8 @@ private:
   std::shared_ptr<queue::Graphics> graphicsQueue;
   std::shared_ptr<queue::Transfer> transferQueue;
 
-  std::unordered_map<ImageHandle, ImageInfo> imageInfoMap;
   std::unordered_map<PipelineHandle, std::unique_ptr<IPipeline>> pipelineMap;
 
-  MapKey imageMapKeygen;
   MapKey pipelineMapKeygen;
 
   std::vector<ImmutableMesh> meshList;

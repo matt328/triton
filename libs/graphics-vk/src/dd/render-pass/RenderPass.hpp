@@ -1,28 +1,18 @@
 #pragma once
 
 #include "dd/DrawContext.hpp"
-#include "dd/LogicalImageHandle.hpp"
 #include "dd/RenderConfigHandle.hpp"
+#include "dd/render-pass/RenderPassConfig.hpp"
 
 namespace tr {
 
 class DrawContextFactory;
 class Frame;
-class VkResourceManager;
-
-struct RenderPassConfig {
-  vk::Extent2D extent;
-  std::optional<LogicalImageHandle> colorHandle;
-  std::optional<LogicalImageHandle> depthHandle;
-  std::optional<vk::RenderingAttachmentInfo> colorAttachmentInfo;
-  std::optional<vk::RenderingAttachmentInfo> depthAttachmentInfo;
-  std::string name = "Unnamed RenderPass";
-};
+class ImageManager;
 
 class RenderPass {
 public:
-  explicit RenderPass(std::shared_ptr<VkResourceManager> newResourceManager,
-                      RenderPassConfig newConfig);
+  explicit RenderPass(RenderPassConfig newConfig, std::shared_ptr<ImageManager> newImageManager);
   ~RenderPass() = default;
 
   RenderPass(const RenderPass&) = default;
@@ -37,7 +27,7 @@ public:
   auto execute(const Frame* frame, vk::raii::CommandBuffer& cmdBuffer) -> void;
 
 private:
-  std::shared_ptr<VkResourceManager> resourceManager;
+  std::shared_ptr<ImageManager> imageManager;
   RenderPassConfig config;
   std::unordered_map<RenderConfigHandle, DrawContext*> drawContexts;
 };
