@@ -36,7 +36,6 @@ target_precompile_headers(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
   PRIVATE
-  BoostDI
   glm
   ozz_animation
   base-kit

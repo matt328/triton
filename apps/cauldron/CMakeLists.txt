@@ -96,7 +96,6 @@ endif()
 target_link_libraries(${PROJECT_NAME}
   PRIVATE
   framework
-  BoostDI
   glfw
   cereal::cereal
   platform_folders

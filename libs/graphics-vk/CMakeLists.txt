@@ -17,6 +17,8 @@ set(graphicsvk_SRC
   src/dd/RenderPassFactory.cxx
   src/dd/buffer-registry/BufferRegistry.cxx
 
+  src/img/ImageManager.cxx
+
   src/mem/Allocator.cxx
   src/mem/Buffer.cxx
   src/mem/Image.cxx
@@ -63,11 +65,6 @@ set(graphicsvk_SRC
 )
 
 add_library(${PROJECT_NAME} STATIC ${graphicsvk_SRC})
-
-target_compile_options(${PROJECT_NAME}
-  PRIVATE
-  $<$<CXX_COMPILER_ID:Clang>:-g -Wall -Wextra -pedantic -Werror>
-)
 
 IF(WIN32)
   target_compile_definitions(${PROJECT_NAME}
@@ -116,7 +113,6 @@ target_link_libraries(${PROJECT_NAME}
   ${Vulkan_LIBRARIES}
   VulkanMemoryAllocator-Hpp
   PRIVATE
-  BoostDI
   glslang
   glslang-default-resource-limits
   libnoise

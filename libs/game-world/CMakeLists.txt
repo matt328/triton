@@ -18,11 +18,6 @@ set(gameworld_SRC
 
 add_library(${PROJECT_NAME} STATIC ${gameworld_SRC})
 
-target_compile_options(${PROJECT_NAME}
-  PRIVATE
-  $<$<CXX_COMPILER_ID:Clang>:-g -Wall -Wextra -pedantic -Werror>
-)
-
 IF(WIN32)
   target_compile_definitions(${PROJECT_NAME}
     PRIVATE
@@ -57,7 +52,6 @@ target_precompile_headers(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
   PUBLIC
-  BoostDI
   EnTT::EnTT
   shared-api
   asset-forge

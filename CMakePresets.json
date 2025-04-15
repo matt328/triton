@@ -11,8 +11,8 @@
         "CMAKE_BUILD_TYPE": "Debug",
         "CMAKE_C_COMPILER": "clang",
         "CMAKE_CXX_COMPILER": "clang++",
-        "CMAKE_CXX_FLAGS": "-Wall -g -Wextra -Weffc++ -Wno-unused-parameter -std=c++23 -O0",
-        "CMAKE_C_FLAGS": "-Wall -g -Wextra -Weffc++ -O0"
+        "CMAKE_CXX_FLAGS": "-Wall -g -Wextra -Weffc++ -Wno-unused-parameter -Wdeprecated-declarations -std=c++23 -O0",
+        "CMAKE_C_FLAGS": "-Wall -g -Wextra -Weffc++ -Wdeprecated-declarations -O0"
       }
     },
     {

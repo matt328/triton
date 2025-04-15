@@ -11,6 +11,9 @@ struct MapKey {
         geometryDistribution(1, 10000) {
   }
 
+  // TODO(matt): someday uncomment this and fix all the warnings. I'd really like to, but it's just
+  // too much right now.
+  //[[deprecated("Use type HandleGenerator/Handle instead")]]
   [[nodiscard]] auto getKey() {
     return geometryDistribution(geometryGen);
   }
