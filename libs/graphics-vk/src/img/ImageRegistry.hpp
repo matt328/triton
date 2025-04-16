@@ -20,6 +20,8 @@ public:
 
   auto getOrCreate(const ImageKey& key) -> Handle<ManagedImage>;
 
+  auto swapchainResized(vk::Extent2D swapchainSize, float renderScale) -> void;
+
 private:
   std::shared_ptr<ImageManager> imageManager;
 

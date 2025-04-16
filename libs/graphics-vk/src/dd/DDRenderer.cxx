@@ -9,7 +9,7 @@
 #include "img/ImageRequest.hpp"
 #include "vk/core/Swapchain.hpp"
 #include "task/Frame.hpp"
-#include "dd/RenderPassFactory.hpp"
+#include "dd/render-pass/RenderPassFactory.hpp"
 
 namespace tr {
 
@@ -174,6 +174,8 @@ auto DDRenderer::setRenderData(const RenderData& newRenderData) -> void {
   renderData = newRenderData;
 }
 
+// TODO(matt): Replace this blit function with a renderpass? that combines all the images into a
+// final image
 auto DDRenderer::combineImages(const Frame* frame) -> void {
   ZoneNamedN(var, "End", true);
   auto& endCmd = commandBufferManager->getCommandBuffer(frame->getEndCommandBufferHandle());

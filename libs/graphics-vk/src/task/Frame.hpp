@@ -1,5 +1,7 @@
 #pragma once
+#include "bk/Handle.hpp"
 #include "dd/LogicalBufferHandle.hpp"
+#include "img/ManagedImage.hpp"
 #include "vk/CommandBufferManager.hpp"
 #include "VkResourceManager.hpp"
 #include "dd/LogicalImageHandle.hpp"
@@ -76,8 +78,10 @@ public:
   auto registerBuffer(BufferHandle handle) -> size_t;
   [[nodiscard]] auto getBufferHandle2(size_t key) const -> BufferHandle;
 
-  auto addLogicalImage(LogicalImageHandle logicalHandle, ImageHandle imageHandle) -> void;
-  [[nodiscard]] auto getLogicalImage(LogicalImageHandle logicalHandle) const -> ImageHandle;
+  auto addLogicalImage(Handle<ManagedImage> logicalHandle, Handle<ManagedImage> imageHandle)
+      -> void;
+  [[nodiscard]] auto getLogicalImage(Handle<ManagedImage> logicalHandle) const
+      -> Handle<ManagedImage>;
 
   auto addLogicalBuffer(LogicalBufferHandle logicalHandle, BufferHandle bufferHandle) -> void;
   [[nodiscard]] auto getLogicalBuffer(LogicalBufferHandle logicalHandle) const -> BufferHandle;
@@ -111,19 +115,12 @@ private:
   MapKey bufferHandleKeygen;
   std::unordered_map<size_t, BufferHandle> bufferHandleMap2;
 
-  ImageHandle depthImageHandle;
-  ImageHandle drawImageHandle;
-
-  std::unordered_map<LogicalImageHandle, ImageHandle> imageHandles;
+  std::unordered_map<Handle<ManagedImage>, Handle<ManagedImage>> imageHandles;
   std::unordered_map<LogicalBufferHandle, BufferHandle> bufferHandles;
 
   CommandBufferHandle startCmdBuffer;
   CommandBufferHandle mainCmdBuffer;
   CommandBufferHandle endCmdBuffer;
-
-  vk::RenderingAttachmentInfo colorAttachmentInfo;
-  vk::RenderingAttachmentInfo depthAttachmentInfo;
-  vk::RenderingInfo renderingInfo;
 
   uint32_t staticObjectCount;
   uint32_t dynamicObjectCount;

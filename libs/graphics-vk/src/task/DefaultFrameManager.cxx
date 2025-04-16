@@ -4,6 +4,7 @@
 #include "Frame.hpp"
 #include "Maths.hpp"
 #include "api/fx/Events.hpp"
+#include "img/ImageRegistry.hpp"
 #include "vk/core/Swapchain.hpp"
 
 namespace tr {
@@ -16,7 +17,8 @@ DefaultFrameManager::DefaultFrameManager(
     std::shared_ptr<VkResourceManager> newResourceManager,
     std::shared_ptr<IEventBus> newEventBus,
     std::shared_ptr<IDebugManager> debugManager,
-    std::shared_ptr<BufferRegistry> newBufferRegistry)
+    std::shared_ptr<BufferRegistry> newBufferRegistry,
+    std::shared_ptr<ImageRegistry> newImageRegistry)
     : renderConfig{newRenderContextConfig},
       commandBufferManager{std::move(newCommandBufferManager)},
       device{std::move(newDevice)},
@@ -24,6 +26,7 @@ DefaultFrameManager::DefaultFrameManager(
       resourceManager{std::move(newResourceManager)},
       eventBus{std::move(newEventBus)},
       bufferRegistry{std::move(newBufferRegistry)},
+      imageRegistry{std::move(newImageRegistry)},
       currentFrame{0} {
 
   for (uint8_t i = 0; i < renderConfig.framesInFlight; ++i) {
@@ -56,17 +59,6 @@ DefaultFrameManager::DefaultFrameManager(
                                              mainCmdBufferHandle));
   }
 
-  const auto drawImageExtent = vk::Extent2D{
-      .width = maths::scaleNumber(swapchain->getImageExtent().width, renderConfig.renderScale),
-      .height = maths::scaleNumber(swapchain->getImageExtent().height, renderConfig.renderScale)};
-
-  for (auto& frame : frames) {
-    auto drawImageHandle =
-        resourceManager->createDrawImageAndView(frame->getIndexedName("Image-Draw-Frame_"),
-                                                drawImageExtent);
-    frame->setDrawImageHandle(drawImageHandle);
-  }
-
   eventBus->subscribe<SwapchainResized>(
       [&](SwapchainResized event) { handleSwapchainResized(event); });
 }
@@ -77,26 +69,18 @@ DefaultFrameManager::~DefaultFrameManager() {
   frames.clear();
 }
 
-auto DefaultFrameManager::registerPerFrameDrawImage(vk::Extent2D extent) -> LogicalImageHandle {
-  const auto logicalHandle = imageKeygen.getKey();
-  for (auto& frame : frames) {
-    const auto imageHandle =
-        resourceManager->createDrawImageAndView(frame->getIndexedName("Image-Draw-Frame_"), extent);
-    frame->addLogicalImage(logicalHandle, imageHandle);
-  }
-  return logicalHandle;
-}
+auto DefaultFrameManager::registerImageRequest(const ImageRequest& request)
+    -> Handle<ManagedImage> {
+  const auto logicalHandle = imageHandleGenerator.requestHandle();
 
-auto DefaultFrameManager::registerPerFrameDepthImage(vk::Extent2D extent, vk::Format format)
-    -> LogicalImageHandle {
-  const auto logicalHandle = imageKeygen.getKey();
   for (auto& frame : frames) {
-    const auto imageHandle =
-        resourceManager->createDepthImageAndView(frame->getIndexedName("Image-Draw-Frame_"),
-                                                 extent,
-                                                 format);
+    const auto imageHandle = imageRegistry->getOrCreate(ImageKey{
+        .request = request,
+        .instance = ImageInstanceKey{.frameId = frame->getIndex()},
+    });
     frame->addLogicalImage(logicalHandle, imageHandle);
   }
+
   return logicalHandle;
 }
 
@@ -114,19 +98,8 @@ auto DefaultFrameManager::createPerFrameBuffer(const BufferUsageProfile& profile
 }
 
 auto DefaultFrameManager::handleSwapchainResized(const SwapchainResized& event) -> void {
-
-  const auto drawImageExtent =
-      vk::Extent2D{.width = maths::scaleNumber(event.width, renderConfig.renderScale),
-                   .height = maths::scaleNumber(event.height, renderConfig.renderScale)};
-
-  for (auto& frame : frames) {
-    resourceManager->destroyDrawImageAndView(frame->getDrawImageHandle());
-    auto drawImageHandle =
-        resourceManager->createDrawImageAndView(frame->getIndexedName("Image-Draw-Frame_"),
-                                                drawImageExtent);
-    frame->setDrawImageHandle(drawImageHandle);
-    frame->setupRenderingInfo(resourceManager);
-  }
+  imageRegistry->swapchainResized(vk::Extent2D{.width = event.width, .height = event.height},
+                                  renderConfig.renderScale);
 }
 
 auto DefaultFrameManager::acquireFrame() -> std::variant<Frame*, ImageAcquireResult> {

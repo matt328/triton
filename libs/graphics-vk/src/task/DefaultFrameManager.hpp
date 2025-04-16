@@ -1,5 +1,6 @@
 #pragma once
 
+#include "bk/HandleGenerator.hpp"
 #include "bk/Rando.hpp"
 #include "gfx/IFrameManager.hpp"
 #include "gfx/RenderContextConfig.hpp"
@@ -11,6 +12,7 @@ class CommandBufferManager;
 class Swapchain;
 class VkResourceManager;
 class BufferRegistry;
+class ImageRegistry;
 
 class DefaultFrameManager final : public IFrameManager {
 public:
@@ -21,7 +23,8 @@ public:
                                std::shared_ptr<VkResourceManager> newResourceManager,
                                std::shared_ptr<IEventBus> newEventBus,
                                std::shared_ptr<IDebugManager> debugManager,
-                               std::shared_ptr<BufferRegistry> newBufferRegistry);
+                               std::shared_ptr<BufferRegistry> newBufferRegistry,
+                               std::shared_ptr<ImageRegistry> newImageRegistry);
   ~DefaultFrameManager() override;
 
   DefaultFrameManager(const DefaultFrameManager&) = delete;
@@ -41,6 +44,8 @@ public:
   auto createPerFrameBuffer(const BufferUsageProfile& profile, size_t drawContextId)
       -> LogicalBufferHandle override;
 
+  auto registerImageRequest(const ImageRequest& request) -> Handle<ManagedImage> override;
+
 private:
   RenderContextConfig renderConfig;
   std::shared_ptr<CommandBufferManager> commandBufferManager;
@@ -49,12 +54,15 @@ private:
   std::shared_ptr<VkResourceManager> resourceManager;
   std::shared_ptr<IEventBus> eventBus;
   std::shared_ptr<BufferRegistry> bufferRegistry;
+  std::shared_ptr<ImageRegistry> imageRegistry;
 
   size_t currentFrame;
   std::vector<std::unique_ptr<Frame>> frames;
 
   MapKey imageKeygen;
   MapKey bufferKeygen;
+
+  HandleGenerator<ManagedImage> imageHandleGenerator;
 
   auto handleSwapchainResized(const SwapchainResized& event) -> void;
 };

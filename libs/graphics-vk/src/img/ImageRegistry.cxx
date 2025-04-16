@@ -15,4 +15,8 @@ auto ImageRegistry::getOrCreate(const ImageKey& key) -> Handle<ManagedImage> {
   }
 }
 
+auto ImageRegistry::swapchainResized([[maybe_unused]] vk::Extent2D swapchainSize,
+                                     [[maybe_unused]] float renderScale) -> void {
+}
+
 }

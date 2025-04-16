@@ -1,7 +1,10 @@
 #pragma once
 
+#include "bk/Handle.hpp"
 #include "dd/LogicalBufferHandle.hpp"
 #include "dd/buffer-registry/BufferRegistry.hpp"
+#include "img/ImageRequest.hpp"
+#include "img/ManagedImage.hpp"
 #include "vk/core/Swapchain.hpp"
 
 namespace tr {
@@ -28,6 +31,9 @@ public:
       -> LogicalImageHandle = 0;
   virtual auto createPerFrameBuffer(const BufferUsageProfile& profile, size_t drawContextId)
       -> LogicalBufferHandle = 0;
+
+  /// Creates an image for each frame, and returns a logical handle
+  virtual auto registerImageRequest(const ImageRequest& request) -> Handle<ManagedImage> = 0;
 };
 
 }

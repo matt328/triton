@@ -14,6 +14,7 @@ class RenderPassFactory;
 class Swapchain;
 class CommandBufferManager;
 class IEventBus;
+class VkResourceManager;
 
 namespace queue {
 class Graphics;

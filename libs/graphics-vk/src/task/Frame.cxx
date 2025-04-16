@@ -1,5 +1,7 @@
 #include "Frame.hpp"
 #include "VkResourceManager.hpp"
+#include "bk/Handle.hpp"
+#include "img/ManagedImage.hpp"
 #include <vulkan/vulkan_core.h>
 
 namespace tr {
@@ -20,34 +22,6 @@ Frame::Frame(const uint8_t newIndex,
       startCmdBuffer(newStartCmdBuffer),
       mainCmdBuffer(newMainCmdBuffer),
       endCmdBuffer(newEndCmdBuffer) {
-}
-
-auto Frame::setupRenderingInfo(const std::shared_ptr<VkResourceManager>& resourceManager) -> void {
-  colorAttachmentInfo = vk::RenderingAttachmentInfo{
-      .imageView = resourceManager->getImageView(getDrawImageHandle()),
-      .imageLayout = vk::ImageLayout::eColorAttachmentOptimal,
-      .loadOp = vk::AttachmentLoadOp::eClear,
-      .storeOp = vk::AttachmentStoreOp::eStore,
-      .clearValue = vk::ClearValue{.color = vk::ClearColorValue{std::array<float, 4>(
-                                       {{0.39f, 0.58f, 0.93f, 1.f}})}},
-  };
-
-  depthAttachmentInfo = vk::RenderingAttachmentInfo{
-      .imageView = resourceManager->getImageView(getDepthImageHandle()),
-      .imageLayout = vk::ImageLayout::eDepthStencilAttachmentOptimal,
-      .loadOp = vk::AttachmentLoadOp::eClear,
-      .storeOp = vk::AttachmentStoreOp::eStore,
-      .clearValue =
-          vk::ClearValue{.depthStencil = vk::ClearDepthStencilValue{.depth = 1.f, .stencil = 0}},
-  };
-
-  renderingInfo = vk::RenderingInfo{
-      .renderArea = vk::Rect2D{.offset = {.x = 0, .y = 0},
-                               .extent = resourceManager->getImageExtent(getDrawImageHandle())},
-      .layerCount = 1,
-      .colorAttachmentCount = 1,
-      .pColorAttachments = &colorAttachmentInfo,
-      .pDepthAttachment = &depthAttachmentInfo};
 }
 
 auto Frame::getIndexedName(std::string_view input) const -> std::string {
@@ -122,13 +96,14 @@ auto Frame::getDebugObjectCount() const -> uint32_t {
   return debugObjectCount;
 }
 
-auto Frame::addLogicalImage(LogicalImageHandle logicalHandle, ImageHandle imageHandle) -> void {
+auto Frame::addLogicalImage(Handle<ManagedImage> logicalHandle, Handle<ManagedImage> imageHandle)
+    -> void {
   assert(!imageHandles.contains(logicalHandle) &&
          "Attempted to register same logical handle twice");
   imageHandles.emplace(logicalHandle, imageHandle);
 }
 
-auto Frame::getLogicalImage(LogicalImageHandle logicalHandle) const -> ImageHandle {
+auto Frame::getLogicalImage(Handle<ManagedImage> logicalHandle) const -> Handle<ManagedImage> {
   return imageHandles.at(logicalHandle);
 }
 
@@ -141,14 +116,6 @@ auto Frame::addLogicalBuffer(LogicalBufferHandle logicalHandle, BufferHandle buf
 [[nodiscard]] auto Frame::getLogicalBuffer(LogicalBufferHandle logicalHandle) const
     -> BufferHandle {
   return bufferHandles.at(logicalHandle);
-}
-
-auto Frame::setDepthImageHandle(const ImageHandle handle) -> void {
-  depthImageHandle = handle;
-}
-
-auto Frame::setDrawImageHandle(const ImageHandle handle) -> void {
-  drawImageHandle = handle;
 }
 
 auto Frame::setSwapchainImageIndex(const uint32_t index) -> void {
