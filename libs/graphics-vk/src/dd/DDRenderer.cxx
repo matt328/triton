@@ -69,11 +69,13 @@ DDRenderer::DDRenderer(RenderContextConfig newConfig,
 
   auto forwardPassCreateInfo =
       RenderPassCreateInfo{.colorAttachments = {AttachmentConfig{.logicalImage = sceneColorHandle}},
-                           .depthAttachment = AttachmentConfig{.logicalImage = sceneDepthHandle}};
+                           .depthAttachment = AttachmentConfig{.logicalImage = sceneDepthHandle},
+                           .renderExtent = extent};
   renderPasses.emplace_back(renderPassFactory->createRenderPass(forwardPassCreateInfo));
 
   auto uiPassCreateInfo =
-      RenderPassCreateInfo{.colorAttachments = {AttachmentConfig{.logicalImage = uiColorHandle}}};
+      RenderPassCreateInfo{.colorAttachments = {AttachmentConfig{.logicalImage = uiColorHandle}},
+                           .renderExtent = extent};
   renderPasses.emplace_back(renderPassFactory->createRenderPass(uiPassCreateInfo));
 }
 
@@ -126,6 +128,19 @@ auto DDRenderer::renderNextFrame() -> void {
   }
   if (std::holds_alternative<Frame*>(result)) {
     const auto* frame = std::get<Frame*>(result);
+
+    /*
+      Create a commandBufferRegistry that uses a composite key of thread id, renderpassid, and
+      frame number and stores a logicalHandle in the frame.
+      At the beginning of rendering a pass, allocate a new command buffer from the pool
+
+      Command Buffer Pools need to be keyed to a queue they're going to be submitted to.
+
+      This leads back to how the Compute is going to work. a DrawContext can't just dipatch compute
+      jobs, that's a different RenderPass. Given that, the GPU Data model needs some rework to
+      factor out the pieces of data that will be involved in Compute passes into its own buffer, and
+      able to be referenced in the shaders via data in other buffers
+    */
 
     preRender(frame);
 

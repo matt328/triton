@@ -21,6 +21,8 @@ auto RenderPassFactory::createRenderPass(RenderPassCreateInfo& info)
     config.depthAttachmentConfig = info.depthAttachment;
   }
 
+  config.extent = info.renderExtent;
+
   return std::make_unique<RenderPass>(config, imageManager);
 }
 

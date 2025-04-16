@@ -7,6 +7,7 @@ struct RenderPassCreateInfo {
   std::vector<AttachmentConfig> colorAttachments;
   std::optional<AttachmentConfig> depthAttachment = std::nullopt;
   std::optional<std::string> debugName = std::nullopt;
+  vk::Extent2D renderExtent;
 };
 
 }
