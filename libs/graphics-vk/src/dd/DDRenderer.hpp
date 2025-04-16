@@ -1,6 +1,6 @@
 #pragma once
 
-#include "dd/RenderPass.hpp"
+#include "dd/render-pass/RenderPass.hpp"
 #include "gfx/IRenderContext.hpp"
 #include "gfx/RenderContextConfig.hpp"
 #include "dd/Renderable.hpp"

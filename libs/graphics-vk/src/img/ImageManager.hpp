@@ -3,6 +3,7 @@
 #include "bk/Handle.hpp"
 #include "bk/HandleGenerator.hpp"
 #include "bk/Rando.hpp"
+#include "img/ImageRequest.hpp"
 #include "img/ManagedImage.hpp"
 namespace tr {
 
@@ -38,7 +39,7 @@ public:
   auto operator=(const ImageManager&) -> ImageManager& = delete;
   auto operator=(ImageManager&&) -> ImageManager& = delete;
 
-  auto createImage(const ImageUsageProfile& profile) -> Handle<ManagedImage>;
+  auto createImage(const ImageRequest& request) -> Handle<ManagedImage>;
   auto getImage(Handle<ManagedImage> imageHandle) -> ManagedImage&;
 
 private:

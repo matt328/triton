@@ -1,13 +1,12 @@
 #pragma once
 
+#include "bk/Handle.hpp"
+#include "img/ManagedImage.hpp"
+
 namespace tr {
 
 struct AttachmentRequest {
-  std::string logicalName;
-  vk::Format format;
-  vk::Extent2D extent;
-  vk::ImageUsageFlags usage;
-  vk::ImageAspectFlags aspect;
+  Handle<ManagedImage> logicalImage;
   vk::AttachmentLoadOp loadOp = vk::AttachmentLoadOp::eClear;
   vk::AttachmentStoreOp storeOp = vk::AttachmentStoreOp::eStore;
 };

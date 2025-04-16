@@ -14,17 +14,17 @@ ImageManager::ImageManager(std::shared_ptr<Allocator> newAllocator,
       device{std::move(newDevice)} {
 }
 
-auto ImageManager::createImage(const ImageUsageProfile& profile) -> Handle<ManagedImage> {
+auto ImageManager::createImage(const ImageRequest& request) -> Handle<ManagedImage> {
   const auto imageCreateInfo = vk::ImageCreateInfo{
       .imageType = vk::ImageType::e2D,
-      .format = profile.format,
+      .format = request.format,
       .extent =
-          vk::Extent3D{.width = profile.extent.width, .height = profile.extent.height, .depth = 1},
-      .mipLevels = profile.mipLevels,
-      .arrayLayers = profile.layers,
+          vk::Extent3D{.width = request.extent.width, .height = request.extent.height, .depth = 1},
+      .mipLevels = request.mipLevels,
+      .arrayLayers = request.layers,
       .samples = vk::SampleCountFlagBits::e1,
       .tiling = vk::ImageTiling::eOptimal,
-      .usage = profile.usage,
+      .usage = request.usageFlags,
       .sharingMode = vk::SharingMode::eExclusive,
       .initialLayout = vk::ImageLayout::eUndefined};
   constexpr auto imageAllocateCreateInfo =
@@ -34,14 +34,14 @@ auto ImageManager::createImage(const ImageUsageProfile& profile) -> Handle<Manag
   auto [image, allocation] =
       allocator->getAllocator()->createImage(imageCreateInfo, imageAllocateCreateInfo);
 
-  if (profile.debugName) {
-    debugManager->setObjectName(image, *profile.debugName);
+  if (request.debugName) {
+    debugManager->setObjectName(image, *request.debugName);
   }
 
   const auto imageViewInfo =
       vk::ImageViewCreateInfo{.image = image,
                               .viewType = vk::ImageViewType::e2D,
-                              .format = profile.format,
+                              .format = request.format,
                               .subresourceRange = {
                                   .aspectMask = vk::ImageAspectFlagBits::eColor,
                                   .levelCount = 1,
@@ -54,7 +54,7 @@ auto ImageManager::createImage(const ImageUsageProfile& profile) -> Handle<Manag
       std::make_unique<ManagedImage>(std::make_unique<AllocatedImage>(
                                          AllocatedImage{.image = image, .allocation = allocation}),
                                      device->getVkDevice().createImageView(imageViewInfo),
-                                     profile.extent));
+                                     request.extent));
   return key;
 }
 

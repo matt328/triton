@@ -1,10 +1,12 @@
+#include <utility>
+
 #include "RenderPass.hpp"
 #include "task/Frame.hpp"
 
 namespace tr {
 
 RenderPass::RenderPass(RenderPassConfig newConfig, std::shared_ptr<ImageManager> newImageManager)
-    : imageManager{std::move(newImageManager)}, config{newConfig} {
+    : imageManager{std::move(newImageManager)}, config{std::move(newConfig)} {
 }
 
 [[nodiscard]] auto RenderPass::accepts([[maybe_unused]] const RenderConfig& config) const -> bool {
@@ -24,8 +26,8 @@ auto RenderPass::execute(const Frame* frame, vk::raii::CommandBuffer& cmdBuffer)
   std::optional<vk::RenderingAttachmentInfo> depthAttachment;
 
   // Process color attachments
-  for (const auto& info : config.colorAttachments) {
-    const auto imageHandle = frame->getLogicalImage(info.imageHandle);
+  for (const auto& attachmentConfig : config.colorAttachmentConfigs) {
+    const auto imageHandle = frame->getLogicalImage(attachmentConfig.imageHandle);
     auto imageView = imageManager->getImageView(imageHandle);
 
     vk::RenderingAttachmentInfo attachment{.imageView = *imageView,
@@ -52,7 +54,7 @@ auto RenderPass::execute(const Frame* frame, vk::raii::CommandBuffer& cmdBuffer)
 
   // Build rendering info
   vk::RenderingInfo renderingInfo{
-      .renderArea = {{0, 0}, config.extent},
+      .renderArea = {.offset = {.x = 0, .y = 0}, .extent = config.extent},
       .layerCount = 1,
       .colorAttachmentCount = static_cast<uint32_t>(colorAttachments.size()),
       .pColorAttachments = colorAttachments.data(),

@@ -1,7 +1,5 @@
 #include "dd/buffer-registry/BufferRegistry.hpp"
 #include "IBufferManager.hpp"
-#include "api/gfx/GpuObjectData.hpp"
-#include "vk/BufferEntry.hpp"
 
 namespace tr {
 
@@ -9,7 +7,7 @@ BufferRegistry::BufferRegistry(std::shared_ptr<IBufferManager> newBufferManager)
     : bufferManager{std::move(newBufferManager)} {
 }
 
-auto BufferRegistry::getOrCreate([[maybe_unused]] const BufferKey& key) -> BufferHandle {
+auto BufferRegistry::getOrCreate(const BufferKey& key) -> BufferHandle {
   if (bufferHandles.contains(key)) {
     return bufferHandles.at(key);
   }

@@ -13,8 +13,8 @@ set(graphicsvk_SRC
   src/dd/DrawContextFactory.cxx
   src/dd/RenderConfigRegistry.cxx
   src/dd/ResourceUploader.cxx
-  src/dd/RenderPass.cxx
-  src/dd/RenderPassFactory.cxx
+  src/dd/render-pass/RenderPass.cxx
+  src/dd/render-pass/RenderPassFactory.cxx
   src/dd/buffer-registry/BufferRegistry.cxx
 
   src/img/ImageManager.cxx
