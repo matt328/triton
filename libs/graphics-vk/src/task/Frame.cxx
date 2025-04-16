@@ -52,20 +52,8 @@ auto Frame::getSwapchainImageIndex() const noexcept -> uint32_t {
   return swapchainImageIndex;
 }
 
-auto Frame::getDrawImageHandle() const -> ImageHandle {
-  return drawImageHandle;
-}
-
-auto Frame::getRenderingInfo() const -> vk::RenderingInfo {
-  return renderingInfo;
-}
-
 auto Frame::getBufferHandle(BufferHandleType type) const -> BufferHandle {
   return bufferHandleMap.at(type);
-}
-
-auto Frame::getDepthImageHandle() const -> ImageHandle {
-  return depthImageHandle;
 }
 
 auto Frame::getStartCommandBufferHandle() const -> CommandBufferHandle {

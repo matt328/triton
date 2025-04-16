@@ -36,11 +36,6 @@ public:
 
   [[nodiscard]] auto getFrames() const -> const std::vector<std::unique_ptr<Frame>>& override;
 
-  // For each frame, create a drawImage and store its handle associated with the same
-  // LogicalImageHandle
-  auto registerPerFrameDrawImage(vk::Extent2D extent) -> LogicalImageHandle override;
-  auto registerPerFrameDepthImage(vk::Extent2D extent, vk::Format format)
-      -> LogicalImageHandle override;
   auto createPerFrameBuffer(const BufferUsageProfile& profile, size_t drawContextId)
       -> LogicalBufferHandle override;
 

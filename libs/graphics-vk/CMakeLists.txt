@@ -18,6 +18,7 @@ set(graphicsvk_SRC
   src/dd/buffer-registry/BufferRegistry.cxx
 
   src/img/ImageManager.cxx
+  src/img/ImageRegistry.cxx
 
   src/mem/Allocator.cxx
   src/mem/Buffer.cxx
@@ -46,7 +47,6 @@ set(graphicsvk_SRC
   src/vk/sb/DSShaderBindingFactory.cxx
   src/vk/sb/DSLayoutManager.cxx
   src/vk/sb/DSLayout.cxx
-  src/task/DefaultRenderScheduler.cxx
   src/task/Frame.cxx
   src/task/DefaultFrameManager.cxx
   src/task/IndirectRenderTask.cxx

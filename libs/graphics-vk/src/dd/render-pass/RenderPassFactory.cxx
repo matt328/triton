@@ -11,16 +11,17 @@ RenderPassFactory::RenderPassFactory(std::shared_ptr<IFrameManager> newFrameMana
     : frameManager{std::move(newFrameManager)}, imageManager{std::move(newImageManager)} {
 }
 
-auto RenderPassFactory::createRenderPass(const RenderPassCreateInfo& info)
+auto RenderPassFactory::createRenderPass(RenderPassCreateInfo& info)
     -> std::unique_ptr<RenderPass> {
   RenderPassConfig config{};
 
-  return std::make_unique<RenderPass>(config, imageManager);
-}
+  std::ranges::copy(config.colorAttachmentConfigs, std::back_inserter(info.colorAttachments));
 
-auto RenderPassFactory::makeAttachmentInfo(const AttachmentRequest& info,
-                                           Handle<ManagedImage> imageHandle)
-    -> vk::RenderingAttachmentInfo {
+  if (info.depthAttachment) {
+    config.depthAttachmentConfig = info.depthAttachment;
+  }
+
+  return std::make_unique<RenderPass>(config, imageManager);
 }
 
 }

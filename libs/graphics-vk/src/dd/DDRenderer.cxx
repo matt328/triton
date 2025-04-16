@@ -1,5 +1,4 @@
 #include "dd/DDRenderer.hpp"
-#include "RenderImageUtils.hpp"
 #include "api/fx/IEventBus.hpp"
 #include "dd/DrawContextFactory.hpp"
 #include "dd/RenderConfigRegistry.hpp"
@@ -9,7 +8,6 @@
 #include "img/ImageRequest.hpp"
 #include "vk/core/Swapchain.hpp"
 #include "task/Frame.hpp"
-#include "dd/render-pass/RenderPassFactory.hpp"
 
 namespace tr {
 
@@ -69,13 +67,13 @@ DDRenderer::DDRenderer(RenderContextConfig newConfig,
   auto sceneDepthHandle = frameManager->registerImageRequest(sceneDepth);
   auto uiColorHandle = frameManager->registerImageRequest(uiColor);
 
-  const auto forwardPassCreateInfo = RenderPassCreateInfo{
-      .colorAttachments = {AttachmentRequest{.logicalImage = sceneColorHandle}},
-      .depthAttachment = AttachmentRequest{.logicalImage = sceneDepthHandle}};
+  auto forwardPassCreateInfo =
+      RenderPassCreateInfo{.colorAttachments = {AttachmentConfig{.logicalImage = sceneColorHandle}},
+                           .depthAttachment = AttachmentConfig{.logicalImage = sceneDepthHandle}};
   renderPasses.emplace_back(renderPassFactory->createRenderPass(forwardPassCreateInfo));
 
-  const auto uiPassCreateInfo =
-      RenderPassCreateInfo{.colorAttachments = {AttachmentRequest{.logicalImage = uiColorHandle}}};
+  auto uiPassCreateInfo =
+      RenderPassCreateInfo{.colorAttachments = {AttachmentConfig{.logicalImage = uiColorHandle}}};
   renderPasses.emplace_back(renderPassFactory->createRenderPass(uiPassCreateInfo));
 }
 
@@ -150,21 +148,22 @@ auto DDRenderer::renderNextFrame() -> void {
 }
 
 auto DDRenderer::preRender(const Frame* frame) -> void {
-  ZoneNamedN(var, "Record Command Buffers", true);
-  {
-    ZoneNamedN(var, "Start", true);
-    const auto& startCmd =
-        commandBufferManager->getCommandBuffer(frame->getStartCommandBufferHandle());
-    startCmd.begin(
-        vk::CommandBufferBeginInfo{.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse});
+  // TODO(matt): RenderPasses will be responsible for ensuring images are transitioned into the
+  // expected layout ZoneNamedN(var, "Record Command Buffers", true);
+  // {
+  //   ZoneNamedN(var, "Start", true);
+  //   const auto& startCmd =
+  //       commandBufferManager->getCommandBuffer(frame->getStartCommandBufferHandle());
+  //   startCmd.begin(
+  //       vk::CommandBufferBeginInfo{.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse});
 
-    utils::transitionImage(startCmd,
-                           resourceManager->getImage(frame->getDrawImageHandle()),
-                           vk::ImageLayout::eUndefined,
-                           vk::ImageLayout::eColorAttachmentOptimal);
+  //   utils::transitionImage(startCmd,
+  //                          resourceManager->getImage(frame->getDrawImageHandle()),
+  //                          vk::ImageLayout::eUndefined,
+  //                          vk::ImageLayout::eColorAttachmentOptimal);
 
-    startCmd.end();
-  }
+  //   startCmd.end();
+  // }
 }
 
 auto DDRenderer::waitIdle() -> void {
@@ -176,38 +175,38 @@ auto DDRenderer::setRenderData(const RenderData& newRenderData) -> void {
 
 // TODO(matt): Replace this blit function with a renderpass? that combines all the images into a
 // final image
-auto DDRenderer::combineImages(const Frame* frame) -> void {
-  ZoneNamedN(var, "End", true);
-  auto& endCmd = commandBufferManager->getCommandBuffer(frame->getEndCommandBufferHandle());
-  endCmd.begin(
-      vk::CommandBufferBeginInfo{.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse});
+auto DDRenderer::combineImages([[maybe_unused]] const Frame* frame) -> void {
+  // ZoneNamedN(var, "End", true);
+  // auto& endCmd = commandBufferManager->getCommandBuffer(frame->getEndCommandBufferHandle());
+  // endCmd.begin(
+  //     vk::CommandBufferBeginInfo{.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse});
 
-  utils::transitionImage(endCmd,
-                         resourceManager->getImage(frame->getDrawImageHandle()),
-                         vk::ImageLayout::eColorAttachmentOptimal,
-                         vk::ImageLayout::eTransferSrcOptimal);
+  // utils::transitionImage(endCmd,
+  //                        resourceManager->getImage(frame->getDrawImageHandle()),
+  //                        vk::ImageLayout::eColorAttachmentOptimal,
+  //                        vk::ImageLayout::eTransferSrcOptimal);
 
-  utils::transitionImage(endCmd,
-                         swapchain->getSwapchainImage(frame->getSwapchainImageIndex()),
-                         vk::ImageLayout::eUndefined,
-                         vk::ImageLayout::eTransferDstOptimal);
+  // utils::transitionImage(endCmd,
+  //                        swapchain->getSwapchainImage(frame->getSwapchainImageIndex()),
+  //                        vk::ImageLayout::eUndefined,
+  //                        vk::ImageLayout::eTransferDstOptimal);
 
-  utils::copyImageToImage(endCmd,
-                          resourceManager->getImage(frame->getDrawImageHandle()),
-                          swapchain->getSwapchainImage(frame->getSwapchainImageIndex()),
-                          resourceManager->getImageExtent(frame->getDrawImageHandle()),
-                          swapchain->getImageExtent());
+  // utils::copyImageToImage(endCmd,
+  //                         resourceManager->getImage(frame->getDrawImageHandle()),
+  //                         swapchain->getSwapchainImage(frame->getSwapchainImageIndex()),
+  //                         resourceManager->getImageExtent(frame->getDrawImageHandle()),
+  //                         swapchain->getImageExtent());
 
-  // guiSystem->render(endCmd,
-  //                   swapchain->getSwapchainImageView(frame->getSwapchainImageIndex()),
-  //                   swapchain->getImageExtent());
+  // // guiSystem->render(endCmd,
+  // //                   swapchain->getSwapchainImageView(frame->getSwapchainImageIndex()),
+  // //                   swapchain->getImageExtent());
 
-  utils::transitionImage(endCmd,
-                         swapchain->getSwapchainImage(frame->getSwapchainImageIndex()),
-                         vk::ImageLayout::eTransferDstOptimal,
-                         vk::ImageLayout::ePresentSrcKHR);
+  // utils::transitionImage(endCmd,
+  //                        swapchain->getSwapchainImage(frame->getSwapchainImageIndex()),
+  //                        vk::ImageLayout::eTransferDstOptimal,
+  //                        vk::ImageLayout::ePresentSrcKHR);
 
-  endCmd.end();
+  // endCmd.end();
 }
 
 auto DDRenderer::endFrame(const Frame* frame) -> void {

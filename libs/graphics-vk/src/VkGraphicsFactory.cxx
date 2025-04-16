@@ -39,6 +39,8 @@
 #include "dd/render-pass/RenderPassFactory.hpp"
 #include "dd/buffer-registry/BufferRegistry.hpp"
 #include "mem/BufferWrapper.hpp"
+#include "img/ImageRegistry.hpp"
+#include "img/ImageManager.hpp"
 
 #include <di.hpp>
 

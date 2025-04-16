@@ -40,8 +40,7 @@ auto DefaultDebugManager::getDebugMessengerCreateInfo() -> vk::DebugUtilsMesseng
       .messageSeverity = vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo |
                          vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
                          vk::DebugUtilsMessageSeverityFlagBitsEXT::eError,
-      .messageType = vk::DebugUtilsMessageTypeFlagBitsEXT::eDeviceAddressBinding |
-                     vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation |
+      .messageType = vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation |
                      vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance,
       .pfnUserCallback = debugCallbackFn};
 }

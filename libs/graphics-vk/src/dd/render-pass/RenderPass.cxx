@@ -1,6 +1,7 @@
 #include <utility>
 
 #include "RenderPass.hpp"
+#include "img/ImageManager.hpp"
 #include "task/Frame.hpp"
 
 namespace tr {
@@ -23,33 +24,35 @@ auto RenderPass::addDrawContext([[maybe_unused]] RenderConfigHandle handle,
 
 auto RenderPass::execute(const Frame* frame, vk::raii::CommandBuffer& cmdBuffer) -> void {
   std::vector<vk::RenderingAttachmentInfo> colorAttachments;
-  std::optional<vk::RenderingAttachmentInfo> depthAttachment;
 
   // Process color attachments
   for (const auto& attachmentConfig : config.colorAttachmentConfigs) {
-    const auto imageHandle = frame->getLogicalImage(attachmentConfig.imageHandle);
-    auto imageView = imageManager->getImageView(imageHandle);
+    const auto imageHandle = frame->getLogicalImage(attachmentConfig.logicalImage);
+    const auto& imageView = imageManager->getImage(imageHandle).getImageView();
+    const auto layout = vk::ImageLayout::eColorAttachmentOptimal;
 
-    vk::RenderingAttachmentInfo attachment{.imageView = *imageView,
-                                           .imageLayout = info.imageLayout,
-                                           .loadOp = info.loadOp,
-                                           .storeOp = info.storeOp,
-                                           .clearValue = info.clearValue};
-
-    colorAttachments.push_back(attachment);
+    colorAttachments.emplace_back(vk::RenderingAttachmentInfo{
+        .imageView = imageView,
+        .imageLayout = layout,
+        .loadOp = attachmentConfig.loadOp,
+        .storeOp = attachmentConfig.storeOp,
+        .clearValue = attachmentConfig.clearValue.value_or(vk::ClearValue{})});
   }
 
   // Process depth/stencil attachment (only one allowed in dynamic rendering)
-  if (config.depthAttachment) {
-    const auto& info = *config.depthAttachment;
-    const auto imageHandle = frame->getLogicalImage(info.imageHandle);
-    auto imageView = imageManager->getImageView(imageHandle);
+  std::optional<vk::RenderingAttachmentInfo> depthAttachment;
+  if (config.depthAttachmentConfig) {
+    const auto& depthConfig = *config.depthAttachmentConfig;
+    const auto imageHandle = frame->getLogicalImage(depthConfig.logicalImage);
+    const auto& imageView = imageManager->getImage(imageHandle).getImageView();
+    const auto layout = vk::ImageLayout::eDepthAttachmentOptimal;
 
-    depthAttachment = vk::RenderingAttachmentInfo{.imageView = *imageView,
-                                                  .imageLayout = info.imageLayout,
-                                                  .loadOp = info.loadOp,
-                                                  .storeOp = info.storeOp,
-                                                  .clearValue = info.clearValue};
+    depthAttachment = vk::RenderingAttachmentInfo{
+        .imageView = imageView,
+        .imageLayout = layout,
+        .loadOp = depthConfig.loadOp,
+        .storeOp = depthConfig.storeOp,
+        .clearValue = depthConfig.clearValue.value_or(vk::ClearValue{})};
   }
 
   // Build rendering info
@@ -62,9 +65,8 @@ auto RenderPass::execute(const Frame* frame, vk::raii::CommandBuffer& cmdBuffer)
 
   cmdBuffer.beginRendering(renderingInfo);
 
-  // --- Render all draw contexts here ---
   for (auto& drawContext : drawContexts) {
-    drawContext.render(cmdBuffer); // Or whatever your draw context does
+    drawContext.second->record(cmdBuffer);
   }
 
   cmdBuffer.endRendering();

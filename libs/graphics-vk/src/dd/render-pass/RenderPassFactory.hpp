@@ -1,8 +1,6 @@
 #pragma once
 
-#include "bk/Handle.hpp"
 #include "dd/render-pass/RenderPassCreateInfo.hpp"
-#include "img/ManagedImage.hpp"
 
 namespace tr {
 
@@ -21,17 +19,11 @@ public:
   auto operator=(const RenderPassFactory&) -> RenderPassFactory& = default;
   auto operator=(RenderPassFactory&&) -> RenderPassFactory& = delete;
 
-  auto createRenderPass(const RenderPassCreateInfo& createInfo) -> std::unique_ptr<RenderPass>;
+  auto createRenderPass(RenderPassCreateInfo& createInfo) -> std::unique_ptr<RenderPass>;
 
 private:
   std::shared_ptr<IFrameManager> frameManager;
   std::shared_ptr<ImageManager> imageManager;
-
-  std::unordered_map<std::string, Handle<ManagedImage>> logicalImageRegistry;
-
-  auto resolveOrCreateImage(const AttachmentRequest& info) -> Handle<ManagedImage>;
-  auto makeAttachmentInfo(const AttachmentRequest& info, Handle<ManagedImage> imageHandle)
-      -> vk::RenderingAttachmentInfo;
 };
 
 }

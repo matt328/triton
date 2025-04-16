@@ -1,4 +1,5 @@
 #include "ImageRegistry.hpp"
+#include "img/ImageManager.hpp"
 
 namespace tr {
 
@@ -13,6 +14,9 @@ auto ImageRegistry::getOrCreate(const ImageKey& key) -> Handle<ManagedImage> {
   if (imageHandles.contains(key)) {
     return imageHandles.at(key);
   }
+  const auto handle = imageManager->createImage(key.request);
+  imageHandles.emplace(key, handle);
+  return handle;
 }
 
 auto ImageRegistry::swapchainResized([[maybe_unused]] vk::Extent2D swapchainSize,

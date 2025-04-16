@@ -16,4 +16,7 @@ auto DrawContext::registerRenderable([[maybe_unused]] const RenderableData& rend
 auto DrawContext::writeObjectData([[maybe_unused]] const Renderable& renderable) -> void {
 }
 
+auto DrawContext::record(vk::raii::CommandBuffer& cmdBuffer) -> void {
+}
+
 }

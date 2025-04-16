@@ -33,6 +33,7 @@ public:
 
   auto registerRenderable(const RenderableData& renderableData) -> RenderableResources;
   auto writeObjectData(const Renderable& renderable) -> void;
+  auto record(vk::raii::CommandBuffer& cmdBuffer) -> void;
 
 private:
   [[maybe_unused]] size_t id;

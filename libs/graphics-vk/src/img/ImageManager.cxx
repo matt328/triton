@@ -38,15 +38,14 @@ auto ImageManager::createImage(const ImageRequest& request) -> Handle<ManagedIma
     debugManager->setObjectName(image, *request.debugName);
   }
 
-  const auto imageViewInfo =
-      vk::ImageViewCreateInfo{.image = image,
-                              .viewType = vk::ImageViewType::e2D,
-                              .format = request.format,
-                              .subresourceRange = {
-                                  .aspectMask = vk::ImageAspectFlagBits::eColor,
-                                  .levelCount = 1,
-                                  .layerCount = 1,
-                              }};
+  const auto imageViewInfo = vk::ImageViewCreateInfo{.image = image,
+                                                     .viewType = vk::ImageViewType::e2D,
+                                                     .format = request.format,
+                                                     .subresourceRange = {
+                                                         .aspectMask = request.aspectFlags,
+                                                         .levelCount = 1,
+                                                         .layerCount = 1,
+                                                     }};
   const auto key = generator.requestHandle();
 
   imageMap.emplace(
