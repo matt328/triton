@@ -11,6 +11,11 @@ RenderPass::RenderPass(RenderPassConfig newConfig, std::shared_ptr<ImageManager>
 }
 
 [[nodiscard]] auto RenderPass::accepts([[maybe_unused]] const RenderConfig& config) const -> bool {
+  /*
+    RenderPass needs to specify a DrawPushConstants description that can be used to tell if the
+    renderpass' pipeline is capable of drawing what this RenderConfig describes
+  */
+
   return true;
 }
 

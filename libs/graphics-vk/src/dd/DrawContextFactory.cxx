@@ -61,27 +61,27 @@ auto DrawContextFactory::getOrCreateDrawContext(RenderConfigHandle renderConfigH
         BufferKey{.profile = materialProfile, .instance = materialBufferInstance});
 
     // GeometryRegion Buffer
-    const auto regionInstance = BufferInstanceKey{.drawContextId = drawContextId, .frameId = 0};
+    const auto regionInstance = BufferInstanceKey{.drawContextId = 0, .frameId = 0};
     const auto regionProfile =
         BufferUsageProfile{.kind = BufferKind::GpuBufferRegion,
                            .usages = {BufferUsage::CpuWritable,
                                       BufferUsage::ShaderDeviceAddress,
                                       BufferUsage::Storage},
                            .debugName = std::format("{}-GeometryRegion", drawContextId),
-                           .stride = sizeof(GpuBufferEntry),
+                           .stride = sizeof(GpuGeometryRegionData),
                            .maxElements = 128};
     const auto geometryRegionBufferHandle = bufferRegistry->getOrCreate(
         BufferKey{.profile = regionProfile, .instance = regionInstance});
 
     // Object Buffer
-    const auto objectBufferProfile = BufferUsageProfile{
-        .kind = BufferKind::GpuBufferRegion,
-        .usages = {BufferUsage::CpuWritable,
-                   BufferUsage::ShaderDeviceAddress,
-                   BufferUsage::Storage},
-        .debugName = std::format("{}-ObjectBuffer", drawContextId),
-        .stride = sizeof(GpuBufferEntry), // TODO(matt): map ObjectDataType to a size
-        .maxElements = 128};
+    const auto objectBufferProfile =
+        BufferUsageProfile{.kind = BufferKind::GpuBufferRegion,
+                           .usages = {BufferUsage::CpuWritable,
+                                      BufferUsage::ShaderDeviceAddress,
+                                      BufferUsage::Storage},
+                           .debugName = std::format("{}-ObjectBuffer", drawContextId),
+                           .stride = sizeof(GpuObjectData),
+                           .maxElements = 128};
     const auto logicalObjectBufferHandle =
         frameManager->createPerFrameBuffer(objectBufferProfile, drawContextId);
 
@@ -92,7 +92,7 @@ auto DrawContextFactory::getOrCreateDrawContext(RenderConfigHandle renderConfigH
                                       BufferUsage::ShaderDeviceAddress,
                                       BufferUsage::Storage},
                            .debugName = std::format("{}-ObjectCount", drawContextId),
-                           .stride = sizeof(uint32_t),
+                           .stride = sizeof(GpuObjectCountData),
                            .maxElements = 1};
     const auto logicalObjectCountBufferHandle =
         frameManager->createPerFrameBuffer(objectCountBufferProfile, drawContextId);
@@ -104,10 +104,10 @@ auto DrawContextFactory::getOrCreateDrawContext(RenderConfigHandle renderConfigH
                                       BufferUsage::ShaderDeviceAddress,
                                       BufferUsage::Storage},
                            .debugName = std::format("{}-ObjectIndex", drawContextId),
-                           .stride = sizeof(uint32_t),
+                           .stride = sizeof(GpuObjectCountData),
                            .maxElements = 128};
     const auto logicalObjectIndexBufferHandle =
-        frameManager->createPerFrameBuffer(objectCountBufferProfile, drawContextId);
+        frameManager->createPerFrameBuffer(objectIndexBufferProfile, drawContextId);
 
     // IndirectDrawCommand Buffer
     const auto indirectDrawBufferProfile =
@@ -116,7 +116,7 @@ auto DrawContextFactory::getOrCreateDrawContext(RenderConfigHandle renderConfigH
                                       BufferUsage::ShaderDeviceAddress,
                                       BufferUsage::Indirect},
                            .debugName = std::format("{}-Indirect", drawContextId),
-                           .stride = sizeof(vk::DrawIndirectCommand),
+                           .stride = sizeof(GpuIndirectCommand),
                            .maxElements = 128};
     const auto logicalIndirectBufferHandle =
         frameManager->createPerFrameBuffer(indirectDrawBufferProfile, drawContextId);
