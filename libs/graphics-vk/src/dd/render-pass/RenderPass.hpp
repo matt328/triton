@@ -12,12 +12,12 @@ class ImageManager;
 
 class RenderPass {
 public:
-  explicit RenderPass(RenderPassConfig newConfig, std::shared_ptr<ImageManager> newImageManager);
+  explicit RenderPass(RenderPassConfig&& newConfig, std::shared_ptr<ImageManager> newImageManager);
   ~RenderPass() = default;
 
-  RenderPass(const RenderPass&) = default;
+  RenderPass(const RenderPass&) = delete;
   RenderPass(RenderPass&&) = delete;
-  auto operator=(const RenderPass&) -> RenderPass& = default;
+  auto operator=(const RenderPass&) -> RenderPass& = delete;
   auto operator=(RenderPass&&) -> RenderPass& = delete;
 
   [[nodiscard]] auto accepts(const RenderConfig& config) const -> bool;

@@ -6,7 +6,7 @@
 
 namespace tr {
 
-RenderPass::RenderPass(RenderPassConfig newConfig, std::shared_ptr<ImageManager> newImageManager)
+RenderPass::RenderPass(RenderPassConfig&& newConfig, std::shared_ptr<ImageManager> newImageManager)
     : imageManager{std::move(newImageManager)}, config{std::move(newConfig)} {
 }
 

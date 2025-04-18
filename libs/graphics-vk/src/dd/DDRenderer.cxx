@@ -17,66 +17,25 @@ DDRenderer::DDRenderer(RenderContextConfig newConfig,
                        std::shared_ptr<IFrameManager> newFrameManager,
                        std::shared_ptr<RenderPassFactory> newRenderPassFactory,
                        std::shared_ptr<CommandBufferManager> newCommandBufferManager,
-                       std::shared_ptr<VkResourceManager> newResourceManager,
                        std::shared_ptr<Swapchain> newSwapchain,
                        std::shared_ptr<queue::Graphics> newGraphicsQueue,
-                       std::shared_ptr<IEventBus> newEventBus)
+                       std::shared_ptr<IEventBus> newEventBus,
+                       std::shared_ptr<IShaderModuleFactory> newShaderModuleFactory)
     : rendererConfig{newConfig},
       renderConfigRegistry{std::move(newRenderConfigRegistry)},
       drawContextFactory{std::move(newDrawContextFactory)},
       frameManager{std::move(newFrameManager)},
       renderPassFactory{std::move(newRenderPassFactory)},
       commandBufferManager{std::move(newCommandBufferManager)},
-      resourceManager{std::move(newResourceManager)},
       swapchain{std::move(newSwapchain)},
       graphicsQueue{std::move(newGraphicsQueue)},
-      eventBus{std::move(newEventBus)} {
+      eventBus{std::move(newEventBus)},
+      shaderModuleFactory{std::move(newShaderModuleFactory)} {
 
   Log.trace("Constructing Data Driven Renderer");
 
-  const auto extent =
-      vk::Extent2D{.width = rendererConfig.initialWidth, .height = rendererConfig.initialHeight};
-
-  const auto sceneColor = ImageRequest{
-      .logicalName = "scene.color",
-      .format = vk::Format::eR16G16B16A16Sfloat,
-      .extent = extent,
-      .usageFlags = vk::ImageUsageFlagBits::eTransferSrc | vk::ImageUsageFlagBits::eTransferDst |
-                    vk::ImageUsageFlagBits::eStorage | vk::ImageUsageFlagBits::eColorAttachment,
-      .aspectFlags = vk::ImageAspectFlagBits::eColor,
-      .debugName = "SceneColor"};
-
-  const auto sceneDepth =
-      ImageRequest{.logicalName = "scene.depth",
-                   .format = swapchain->getDepthFormat(),
-                   .extent = extent,
-                   .usageFlags = vk::ImageUsageFlagBits::eDepthStencilAttachment,
-                   .aspectFlags = vk::ImageAspectFlagBits::eDepth,
-                   .debugName = "SceneDepth"};
-
-  const auto uiColor = ImageRequest{
-      .logicalName = "ui.color",
-      .format = vk::Format::eR16G16B16A16Sfloat,
-      .extent = extent,
-      .usageFlags = vk::ImageUsageFlagBits::eTransferSrc | vk::ImageUsageFlagBits::eTransferDst |
-                    vk::ImageUsageFlagBits::eStorage | vk::ImageUsageFlagBits::eColorAttachment,
-      .aspectFlags = vk::ImageAspectFlagBits::eColor,
-      .debugName = "UIColor"};
-
-  auto sceneColorHandle = frameManager->registerImageRequest(sceneColor);
-  auto sceneDepthHandle = frameManager->registerImageRequest(sceneDepth);
-  auto uiColorHandle = frameManager->registerImageRequest(uiColor);
-
-  auto forwardPassCreateInfo =
-      RenderPassCreateInfo{.colorAttachments = {AttachmentConfig{.logicalImage = sceneColorHandle}},
-                           .depthAttachment = AttachmentConfig{.logicalImage = sceneDepthHandle},
-                           .renderExtent = extent};
-  renderPasses.emplace_back(renderPassFactory->createRenderPass(forwardPassCreateInfo));
-
-  auto uiPassCreateInfo =
-      RenderPassCreateInfo{.colorAttachments = {AttachmentConfig{.logicalImage = uiColorHandle}},
-                           .renderExtent = extent};
-  renderPasses.emplace_back(renderPassFactory->createRenderPass(uiPassCreateInfo));
+  createForwardRenderPass();
+  createUIRenderPass();
 }
 
 auto DDRenderer::update() -> void {
@@ -272,5 +231,60 @@ auto DDRenderer::endFrame(const Frame* frame) -> void {
       Log.trace("Swapchain Needs Resized");
     }
   } catch (const std::exception& ex) { Log.trace("Swapchain needs recreated: {0}", ex.what()); }
+}
+
+auto DDRenderer::createForwardRenderPass() -> void {
+  const auto extent =
+      vk::Extent2D{.width = rendererConfig.initialWidth, .height = rendererConfig.initialHeight};
+
+  // Framebuffer Config
+  const auto sceneColor = ImageRequest{
+      .logicalName = "scene.color",
+      .format = vk::Format::eR16G16B16A16Sfloat,
+      .extent = extent,
+      .usageFlags = vk::ImageUsageFlagBits::eTransferSrc | vk::ImageUsageFlagBits::eTransferDst |
+                    vk::ImageUsageFlagBits::eStorage | vk::ImageUsageFlagBits::eColorAttachment,
+      .aspectFlags = vk::ImageAspectFlagBits::eColor,
+      .debugName = "SceneColor"};
+
+  const auto sceneDepth =
+      ImageRequest{.logicalName = "scene.depth",
+                   .format = swapchain->getDepthFormat(),
+                   .extent = extent,
+                   .usageFlags = vk::ImageUsageFlagBits::eDepthStencilAttachment,
+                   .aspectFlags = vk::ImageAspectFlagBits::eDepth,
+                   .debugName = "SceneDepth"};
+
+  auto sceneColorHandle = frameManager->registerImageRequest(sceneColor);
+  auto sceneDepthHandle = frameManager->registerImageRequest(sceneDepth);
+
+  // Pipeline Config
+
+  auto forwardPassCreateInfo =
+      RenderPassCreateInfo{.colorAttachments = {AttachmentConfig{.logicalImage = sceneColorHandle}},
+                           .depthAttachment = AttachmentConfig{.logicalImage = sceneDepthHandle},
+                           .renderExtent = extent};
+  renderPasses.emplace_back(renderPassFactory->createRenderPass(forwardPassCreateInfo));
+}
+
+auto DDRenderer::createUIRenderPass() -> void {
+  const auto extent =
+      vk::Extent2D{.width = rendererConfig.initialWidth, .height = rendererConfig.initialHeight};
+
+  const auto uiColor = ImageRequest{
+      .logicalName = "ui.color",
+      .format = vk::Format::eR16G16B16A16Sfloat,
+      .extent = extent,
+      .usageFlags = vk::ImageUsageFlagBits::eTransferSrc | vk::ImageUsageFlagBits::eTransferDst |
+                    vk::ImageUsageFlagBits::eStorage | vk::ImageUsageFlagBits::eColorAttachment,
+      .aspectFlags = vk::ImageAspectFlagBits::eColor,
+      .debugName = "UIColor"};
+
+  auto uiColorHandle = frameManager->registerImageRequest(uiColor);
+
+  auto uiPassCreateInfo =
+      RenderPassCreateInfo{.colorAttachments = {AttachmentConfig{.logicalImage = uiColorHandle}},
+                           .renderExtent = extent};
+  renderPasses.emplace_back(renderPassFactory->createRenderPass(uiPassCreateInfo));
 }
 }

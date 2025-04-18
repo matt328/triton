@@ -14,7 +14,7 @@ class RenderPassFactory;
 class Swapchain;
 class CommandBufferManager;
 class IEventBus;
-class VkResourceManager;
+class IShaderModuleFactory;
 
 namespace queue {
 class Graphics;
@@ -28,10 +28,10 @@ public:
              std::shared_ptr<IFrameManager> newFrameManager,
              std::shared_ptr<RenderPassFactory> newRenderPassFactory,
              std::shared_ptr<CommandBufferManager> newCommandBufferManager,
-             std::shared_ptr<VkResourceManager> newResourceManager,
              std::shared_ptr<Swapchain> swapchain,
              std::shared_ptr<queue::Graphics> newGraphicsQueue,
-             std::shared_ptr<IEventBus> newEventBus);
+             std::shared_ptr<IEventBus> newEventBus,
+             std::shared_ptr<IShaderModuleFactory> newShaderModuleFactory);
   ~DDRenderer() override = default;
 
   DDRenderer(const DDRenderer&) = default;
@@ -53,10 +53,10 @@ private:
   std::shared_ptr<IFrameManager> frameManager;
   std::shared_ptr<RenderPassFactory> renderPassFactory;
   std::shared_ptr<CommandBufferManager> commandBufferManager;
-  std::shared_ptr<VkResourceManager> resourceManager;
   std::shared_ptr<Swapchain> swapchain;
   std::shared_ptr<queue::Graphics> graphicsQueue;
   std::shared_ptr<IEventBus> eventBus;
+  std::shared_ptr<IShaderModuleFactory> shaderModuleFactory;
 
   std::vector<std::unique_ptr<RenderPass>> renderPasses;
 
@@ -68,6 +68,9 @@ private:
   auto preRender(const Frame* frame) -> void;
   auto combineImages(const Frame* frame) -> void;
   auto endFrame(const Frame* frame) -> void;
+
+  auto createForwardRenderPass() -> void;
+  auto createUIRenderPass() -> void;
 };
 
 }
