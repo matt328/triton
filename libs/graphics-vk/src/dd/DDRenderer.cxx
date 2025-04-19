@@ -259,7 +259,6 @@ auto DDRenderer::createForwardRenderPass() -> void {
   auto sceneDepthHandle = frameManager->registerImageRequest(sceneDepth);
 
   // Pipeline Config
-
   auto forwardPassCreateInfo =
       RenderPassCreateInfo{.colorAttachments = {AttachmentConfig{.logicalImage = sceneColorHandle}},
                            .depthAttachment = AttachmentConfig{.logicalImage = sceneDepthHandle},

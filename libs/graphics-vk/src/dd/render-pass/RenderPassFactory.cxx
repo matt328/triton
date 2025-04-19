@@ -22,6 +22,11 @@ auto RenderPassFactory::createRenderPass(RenderPassCreateInfo& info)
     -> std::unique_ptr<RenderPass> {
   RenderPassConfig config{};
 
+  /*
+     TODO(matt): Split out a separate ComputeRenderPass and GraphicsRenderPass class, *CreateInfo
+     and *Config structs
+     Start with CreateInfo, then Config, then adjust the factory logic, separate override methods
+  */
   if (info.passType == RenderPassType::Compute) {
     auto pushConstantRanges = info.computePipelineInfo->layout.pushConstantRanges |
                               std::views::transform([](const auto& rangeConfig) {

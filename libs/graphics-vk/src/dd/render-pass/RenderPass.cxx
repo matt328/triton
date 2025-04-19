@@ -31,7 +31,7 @@ auto RenderPass::bind([[maybe_unused]] const Frame* frame,
                       [[maybe_unused]] vk::raii::CommandBuffer& cmdBuffer) -> void {
 }
 
-auto RenderPass::draw(const Frame* frame, vk::raii::CommandBuffer& cmdBuffer) -> void {
+auto RenderPass::execute(const Frame* frame, vk::raii::CommandBuffer& cmdBuffer) -> void {
   std::vector<vk::RenderingAttachmentInfo> colorAttachments;
 
   // Process color attachments
