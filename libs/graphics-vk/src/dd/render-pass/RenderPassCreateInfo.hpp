@@ -22,13 +22,30 @@ struct PipelineLayoutInfo {
   std::vector<PushConstantRangeInfo> pushConstantRanges;
 };
 
+struct AttachmentInfo {
+  std::vector<vk::Format> colorAttachmentFormats;
+  std::optional<vk::Format> depthAttachmentFormat;
+};
+
 struct GraphicsPipelineInfo {
-  std::vector<ShaderStageInfo> shaders;
+  PipelineLayoutInfo layout;
+
+  AttachmentInfo attachmentInfo;
+
+  std::vector<ShaderStageInfo> shaderStageInfo;
+
+  std::vector<vk::VertexInputAttributeDescription> vertexAttributes;
+  std::vector<vk::VertexInputBindingDescription> vertexBindings;
+
   vk::PrimitiveTopology topology = vk::PrimitiveTopology::eTriangleList;
+  vk::PolygonMode polygonMode = vk::PolygonMode::eFill;
+  vk::CullModeFlags cullMode = vk::CullModeFlagBits::eBack;
+
+  vk::Extent2D extent;
+
   bool enableDepthTest = true;
   bool enableDepthWrite = true;
   bool enableBlending = false;
-  PipelineLayoutInfo layout;
 };
 
 struct ComputePipelineInfo {
@@ -40,20 +57,8 @@ struct RenderPassCreateInfo {
   RenderPassType passType;
 
   std::optional<ComputePipelineInfo> computePipelineInfo;
+  std::optional<GraphicsPipelineInfo> graphicsPipelineInfo;
 
-  std::vector<ShaderStageInfo> shaderStages;
-
-  std::vector<vk::VertexInputAttributeDescription> vertexAttributes;
-  std::vector<vk::VertexInputBindingDescription> vertexBindings;
-
-  std::vector<AttachmentConfig> colorAttachments;
-  std::optional<AttachmentConfig> depthAttachment = std::nullopt;
-
-  vk::PrimitiveTopology topology = vk::PrimitiveTopology::eTriangleList;
-  vk::PolygonMode polygonMode = vk::PolygonMode::eFill;
-  vk::CullModeFlags cullMode = vk::CullModeFlagBits::eBack;
-
-  vk::Extent2D extent; // optional, maybe dynamic later
   std::optional<std::string> debugName;
 };
 

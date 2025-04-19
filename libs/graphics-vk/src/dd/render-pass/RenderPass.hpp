@@ -24,7 +24,11 @@ public:
 
   auto addDrawContext(RenderConfigHandle handle, DrawContext* drawContext) -> void;
 
-  auto execute(const Frame* frame, vk::raii::CommandBuffer& cmdBuffer) -> void;
+  /// RenderPass will bind its pipeline and push constants
+  /// After this, the Renderer will have an opportunity to bind any global DescriptorSets
+  auto bind(const Frame* frame, vk::raii::CommandBuffer& cmdBuffer) -> void;
+
+  auto draw(const Frame* frame, vk::raii::CommandBuffer& cmdBuffer) -> void;
 
 private:
   std::shared_ptr<ImageManager> imageManager;

@@ -21,7 +21,7 @@ struct GraphicsPipelineConfig {
 struct RenderPassConfig {
   RenderPassType passType;
 
-  std::optional<GraphicsPipelineConfig> graphicsInfo;
+  std::optional<GraphicsPipelineConfig> graphicsConfig;
   std::optional<ComputePipelineConfig> computeConfig;
 
   std::optional<std::string> debugName;
