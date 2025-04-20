@@ -1,8 +1,11 @@
 #include "dd/DDRenderer.hpp"
 #include "api/fx/IEventBus.hpp"
+#include "api/gw/RenderableData.hpp"
+#include "api/gw/RenderableResources.hpp"
+#include "dd/DrawContext.hpp"
 #include "dd/DrawContextFactory.hpp"
+#include "dd/IFrameGraph.hpp"
 #include "dd/RenderConfigRegistry.hpp"
-#include "dd/render-pass/RenderPassCreateInfo.hpp"
 #include "dd/render-pass/RenderPassFactory.hpp"
 #include "gfx/IFrameManager.hpp"
 #include "img/ImageRequest.hpp"
@@ -20,7 +23,8 @@ DDRenderer::DDRenderer(RenderContextConfig newConfig,
                        std::shared_ptr<Swapchain> newSwapchain,
                        std::shared_ptr<queue::Graphics> newGraphicsQueue,
                        std::shared_ptr<IEventBus> newEventBus,
-                       std::shared_ptr<IShaderModuleFactory> newShaderModuleFactory)
+                       std::shared_ptr<IShaderModuleFactory> newShaderModuleFactory,
+                       std::shared_ptr<IFrameGraph> newFrameGraph)
     : rendererConfig{newConfig},
       renderConfigRegistry{std::move(newRenderConfigRegistry)},
       drawContextFactory{std::move(newDrawContextFactory)},
@@ -30,21 +34,29 @@ DDRenderer::DDRenderer(RenderContextConfig newConfig,
       swapchain{std::move(newSwapchain)},
       graphicsQueue{std::move(newGraphicsQueue)},
       eventBus{std::move(newEventBus)},
-      shaderModuleFactory{std::move(newShaderModuleFactory)} {
+      shaderModuleFactory{std::move(newShaderModuleFactory)},
+      frameGraph{std::move(newFrameGraph)} {
 
   Log.trace("Constructing Data Driven Renderer");
 
-  createForwardRenderPass();
-  createUIRenderPass();
+  const auto cullingPassInfo = renderPassFactory->createCullingPass();
+  const auto geometryPassInfo = renderPassFactory->createGeometryPass();
+  const auto lightingPassInfo = renderPassFactory->createLightingPass();
+  const auto compositePassInfo = renderPassFactory->createCompositePass();
+
+  frameGraph->addPass(cullingPassInfo.handle,
+                      PassInfo{.writeBuffers = {cullingPassInfo.objectData}});
+  frameGraph->addPass(geometryPassInfo.handle, PassInfo{});
+  frameGraph->addPass(lightingPassInfo.handle, PassInfo{});
+  frameGraph->addPass(compositePassInfo.handle, PassInfo{});
 }
 
 auto DDRenderer::update() -> void {
-  // Not really used. Can probably get rid of it
+  frameGraph->bake();
 }
 
 auto DDRenderer::registerRenderable(const RenderableData& data) -> RenderableResources {
   // Eventually move viewport and scissor so they're defined in RenderableData
-
   auto objectDataType = ObjectDataType::Base;
   if (data.materialData.imageData) {
     objectDataType = ObjectDataType::BaseMaterial;
@@ -66,11 +78,7 @@ auto DDRenderer::registerRenderable(const RenderableData& data) -> RenderableRes
 
   auto* const drawContext = drawContextFactory->getOrCreateDrawContext(renderConfigHandle);
 
-  for (const auto& renderPass : renderPasses) {
-    if (renderPass->accepts(renderConfig)) {
-      renderPass->addDrawContext(renderConfigHandle, drawContext);
-    }
-  }
+  renderPassFactory->registerDrawContext(renderConfig, drawContext);
 
   return drawContext->registerRenderable(data);
 }
@@ -103,41 +111,10 @@ auto DDRenderer::renderNextFrame() -> void {
 
     preRender(frame);
 
-    auto& commandBuffer =
-        commandBufferManager->getCommandBuffer(frame->getMainCommandBufferHandle());
-
-    commandBuffer.begin(
-        vk::CommandBufferBeginInfo{.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse});
-
-    for (auto& pass : renderPasses) {
-      pass->execute(frame, commandBuffer);
-    }
-
-    commandBuffer.end();
-
-    combineImages(frame);
+    frameGraph->execute(frame);
 
     endFrame(frame);
   }
-}
-
-auto DDRenderer::preRender(const Frame* frame) -> void {
-  // TODO(matt): RenderPasses will be responsible for ensuring images are transitioned into the
-  // expected layout ZoneNamedN(var, "Record Command Buffers", true);
-  // {
-  //   ZoneNamedN(var, "Start", true);
-  //   const auto& startCmd =
-  //       commandBufferManager->getCommandBuffer(frame->getStartCommandBufferHandle());
-  //   startCmd.begin(
-  //       vk::CommandBufferBeginInfo{.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse});
-
-  //   utils::transitionImage(startCmd,
-  //                          resourceManager->getImage(frame->getDrawImageHandle()),
-  //                          vk::ImageLayout::eUndefined,
-  //                          vk::ImageLayout::eColorAttachmentOptimal);
-
-  //   startCmd.end();
-  // }
 }
 
 auto DDRenderer::waitIdle() -> void {
@@ -259,11 +236,11 @@ auto DDRenderer::createForwardRenderPass() -> void {
   auto sceneDepthHandle = frameManager->registerImageRequest(sceneDepth);
 
   // Pipeline Config
-  auto forwardPassCreateInfo =
-      RenderPassCreateInfo{.colorAttachments = {AttachmentConfig{.logicalImage = sceneColorHandle}},
-                           .depthAttachment = AttachmentConfig{.logicalImage = sceneDepthHandle},
-                           .renderExtent = extent};
-  renderPasses.emplace_back(renderPassFactory->createRenderPass(forwardPassCreateInfo));
+  auto forwardPassCreateInfo = GraphicsPassCreateInfo{
+      .colorAttachments = {AttachmentConfig{.logicalImage = sceneColorHandle}},
+      .depthAttachment = AttachmentConfig{.logicalImage = sceneDepthHandle},
+      .renderExtent = extent};
+  // renderPasses.emplace_back(renderPassFactory->createRenderPass(forwardPassCreateInfo));
 }
 
 auto DDRenderer::createUIRenderPass() -> void {

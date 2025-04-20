@@ -1,6 +1,5 @@
 #pragma once
 
-#include "dd/render-pass/RenderPass.hpp"
 #include "gfx/IRenderContext.hpp"
 #include "gfx/RenderContextConfig.hpp"
 #include "dd/Renderable.hpp"
@@ -15,6 +14,9 @@ class Swapchain;
 class CommandBufferManager;
 class IEventBus;
 class IShaderModuleFactory;
+class Frame;
+class ComputePass;
+class IFrameGraph;
 
 namespace queue {
 class Graphics;
@@ -31,7 +33,8 @@ public:
              std::shared_ptr<Swapchain> swapchain,
              std::shared_ptr<queue::Graphics> newGraphicsQueue,
              std::shared_ptr<IEventBus> newEventBus,
-             std::shared_ptr<IShaderModuleFactory> newShaderModuleFactory);
+             std::shared_ptr<IShaderModuleFactory> newShaderModuleFactory,
+             std::shared_ptr<IFrameGraph> newFrameGraph);
   ~DDRenderer() override = default;
 
   DDRenderer(const DDRenderer&) = default;
@@ -57,8 +60,7 @@ private:
   std::shared_ptr<queue::Graphics> graphicsQueue;
   std::shared_ptr<IEventBus> eventBus;
   std::shared_ptr<IShaderModuleFactory> shaderModuleFactory;
-
-  std::vector<std::unique_ptr<RenderPass>> renderPasses;
+  std::shared_ptr<IFrameGraph> frameGraph;
 
   RenderData renderData;
   std::vector<Renderable> renderables;
