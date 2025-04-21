@@ -1,51 +1,14 @@
 #pragma once
 
+#include "vertex/VertexAttribute.hpp"
+#include "vertex/VertexFormat.hpp"
 #include "api/gfx/Topology.hpp"
+
 namespace tr {
-
-enum class VertexAttributeFormat : uint8_t {
-  Float2 = 0,
-  Float3,
-  Float4
-};
-
-struct VertexAttribute {
-  VertexAttributeFormat format;
-  uint32_t offset;
-
-  auto operator==(const VertexAttribute& other) const -> bool {
-    return format == other.format && offset == other.offset;
-  }
-
-  auto operator<(const VertexAttribute& other) const -> bool {
-    return std::tie(format, offset) < std::tie(other.format, other.offset);
-  }
-
-  template <class Archive>
-  void serialize(Archive& archive, VertexAttribute& attr) {
-    archive(reinterpret_cast<uint32_t&>(attr.format), attr.offset);
-  }
-};
-
-struct VertexFormat {
-  uint32_t stride;
-  std::vector<VertexAttribute> attributes;
-
-  auto operator==(const VertexFormat& other) const -> bool {
-    return stride == other.stride && attributes == other.attributes;
-  }
-
-  auto operator<(const VertexFormat& other) const -> bool {
-    return std::tie(stride, attributes) < std::tie(other.stride, other.attributes);
-  }
-  template <class Archive>
-  void serialize(Archive& archive, VertexFormat& format) {
-    archive(format.stride, "attributes", format.attributes);
-  }
-};
 
 // When adding to this struct, make sure to account for serialize
 struct VertexList {
+  std::unordered_map<VertexAttribute, std::vector<std::byte>> dataMap;
   std::vector<std::byte> data;
   VertexFormat format;
   size_t vertexCount{};
@@ -57,11 +20,15 @@ struct VertexList {
   }
 
   template <typename T>
-  void setAttribute(size_t vertexIndex, uint32_t attributeOffset, const T& value) {
-    std::span<std::byte> bufferSpan = data;
-    size_t index = (vertexIndex * format.stride) + attributeOffset;
+  void setAttribute(size_t vertexIndex, VertexAttribute attribute, const T& value) {
+    std::span<std::byte> bufferSpan = dataMap.at(attribute);
+    size_t index = vertexIndex * attribute.stride;
     assert(index + sizeof(T) > bufferSpan.size());
     std::memcpy(&bufferSpan[index], &value, sizeof(T));
+  }
+
+  auto getData(const VertexAttribute& attribute) const -> std::vector<std::byte> {
+    return dataMap.at(attribute);
   }
 
   template <class Archive>
@@ -86,26 +53,4 @@ struct VertexList {
   }
 };
 
-}
-
-namespace std {
-template <>
-struct hash<tr::VertexAttribute> {
-  auto operator()(const tr::VertexAttribute& attr) const noexcept -> size_t {
-    size_t h1 = hash<int>()(static_cast<int>(attr.format));
-    size_t h2 = hash<uint32_t>()(attr.offset);
-    return h1 ^ (h2 << 1U); // Combine hashes
-  }
-};
-
-template <>
-struct hash<tr::VertexFormat> {
-  auto operator()(const tr::VertexFormat& format) const noexcept -> size_t {
-    size_t h = hash<uint32_t>()(format.stride);
-    for (const auto& attr : format.attributes) {
-      h ^= hash<tr::VertexAttribute>()(attr) + 0x9e3779b9 + (h << 6U) + (h >> 2U); // Hash mix
-    }
-    return h;
-  }
-};
 }

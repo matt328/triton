@@ -17,22 +17,23 @@ auto GeometryGenerator::generateBox(const BoxCreateInfo& info) -> DDGeometryData
   };
 
   // Vertex Format
-  constexpr size_t PositionOffset = 0;
-  constexpr size_t ColorOffset = sizeof(glm::vec3);
+  constexpr auto positionAttribute = VertexAttribute{.format = VertexAttributeFormat::Float3,
+                                                     .stride = sizeof(glm::vec3),
+                                                     .semantic = VertexAttributeSemantic::Position};
+  constexpr auto colorAttribute = VertexAttribute{.format = VertexAttributeFormat::Float3,
+                                                  .stride = sizeof(glm::vec3),
+                                                  .semantic = VertexAttributeSemantic::Color};
 
-  auto vertexFormat = VertexFormat{
-      .stride = sizeof(glm::vec3) + sizeof(glm::vec3),
-      .attributes = std::vector{
-          VertexAttribute{.format = VertexAttributeFormat::Float3, .offset = PositionOffset},
-          VertexAttribute{.format = VertexAttributeFormat::Float3, .offset = ColorOffset}}};
+  auto vertexFormat = VertexFormat{.stride = sizeof(glm::vec3) + sizeof(glm::vec3),
+                                   .attributes = std::vector{positionAttribute, colorAttribute}};
 
   auto vertexList = VertexList{};
   vertexList.reserve(corners.size());
   for (size_t i = 0; i < corners.size(); ++i) {
     // Position
-    vertexList.setAttribute(i, PositionOffset, corners.at(i));
+    vertexList.setAttribute(i, positionAttribute, corners.at(i));
     // Color
-    vertexList.setAttribute(i, ColorOffset, glm::vec3(info.color.r, info.color.g, info.color.b));
+    vertexList.setAttribute(i, colorAttribute, glm::vec3(info.color.r, info.color.g, info.color.b));
   }
 
   std::vector<uint32_t> indices = {

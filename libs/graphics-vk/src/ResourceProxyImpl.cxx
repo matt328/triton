@@ -44,6 +44,16 @@ auto ResourceProxyImpl::uploadModel(const as::Model& model) -> ModelData {
 }
 
 auto ResourceProxyImpl::uploadGeometry(DDGeometryData&& data) -> MeshHandle {
+
+  /*
+  This method needs to figure out which buffers to upload data to.
+  It should look at the vertex list, and determine what data needs to go into what buffers
+  */
+
+  for (const auto& attribute : data.getVertexList().format.attributes) {
+    const auto x = data.getVertexList().getData(attribute);
+  }
+
   const auto renderableData = RenderableData{
       .geometryData = std::move(data),
       .objectData = ObjectData{.objectDataBytes = {}},

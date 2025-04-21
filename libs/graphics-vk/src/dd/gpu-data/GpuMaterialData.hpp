@@ -2,12 +2,32 @@
 
 namespace tr {
 
+/*
+  Use vertex pulling, and only use a single drawcontext per RenderPass.
+*/
+
 // Global Buffers
 struct GpuObjectData {
   glm::mat4 modelMatrix;
   uint32_t geometryRegionId;
   uint32_t materialId;
   uint32_t animationId;
+};
+
+struct GpuVertexPositionData {
+  glm::vec3 position;
+};
+
+struct GpuVertexColorData {
+  glm::vec4 color;
+};
+
+struct GpuVertexTexCoordData {
+  glm::vec2 texCoords;
+};
+
+struct GpuVertexNormalData {
+  glm::vec4 normal;
 };
 
 struct GpuAnimationData {

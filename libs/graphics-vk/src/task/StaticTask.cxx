@@ -58,12 +58,14 @@ auto StaticTask::record(vk::raii::CommandBuffer& commandBuffer, const Frame* fra
   auto& countBuffer =
       bufferManager->getBuffer(frame->getBufferHandle(BufferHandleType::StaticCountBuffer));
 
-  commandBuffer.drawIndexedIndirectCount(indirectBuffer.getBuffer(),
-                                         0,
-                                         countBuffer.getBuffer(),
-                                         0,
-                                         config.maxStaticObjects,
-                                         sizeof(vk::DrawIndexedIndirectCommand));
+  vk::DrawI
+
+      commandBuffer.drawIndexedIndirectCount(indirectBuffer.getBuffer(),
+                                             0,
+                                             countBuffer.getBuffer(),
+                                             0,
+                                             config.maxStaticObjects,
+                                             sizeof(vk::DrawIndexedIndirectCommand));
 }
 
 }
