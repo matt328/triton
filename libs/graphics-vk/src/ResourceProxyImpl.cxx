@@ -43,19 +43,26 @@ auto ResourceProxyImpl::uploadModel(const as::Model& model) -> ModelData {
   return ModelData{.meshData = meshData, .skinData = skinData, .animationData = std::nullopt};
 }
 
-auto ResourceProxyImpl::uploadGeometry(DDGeometryData&& data) -> MeshHandle {
+auto ResourceProxyImpl::uploadGeometry(DDGeometryData&& geometryData) -> MeshHandle {
 
   /*
   This method needs to figure out which buffers to upload data to.
   It should look at the vertex list, and determine what data needs to go into what buffers
+
+  Actually there should be a GeometryBuffer that abstracts this away
+
   */
 
-  for (const auto& attribute : data.getVertexList().format.attributes) {
-    const auto x = data.getVertexList().getData(attribute);
+  return geometryBuffer->addGeometryData(geometryData);
+
+  for (const auto& attribute : geometryData.getVertexList().format.attributes) {
+    const auto data = geometryData.getVertexList().getData(attribute);
+    resourceManager->enqueueGeometryUpload(attribute, data);
   }
+  const auto result = resourceManager->processQueuedUploads();
 
   const auto renderableData = RenderableData{
-      .geometryData = std::move(data),
+      .geometryData = std::move(geometryData),
       .objectData = ObjectData{.objectDataBytes = {}},
       .materialData = MaterialData{.shadingMode = ShadingMode::Wireframe},
   };
