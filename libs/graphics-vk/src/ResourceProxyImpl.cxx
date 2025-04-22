@@ -43,15 +43,20 @@ auto ResourceProxyImpl::uploadModel(const as::Model& model) -> ModelData {
   return ModelData{.meshData = meshData, .skinData = skinData, .animationData = std::nullopt};
 }
 
+/*
+  - The renderer will have to register each DDGeometryData and associate it with one or more
+  RenderPassIds in a routing table.
+  - The renderer can also expose an API to manipulate the routing table behind the abstration of
+  rendering a given geometry in different 'modes'
+  - When actually rendering, consult the routing table to group the Handle<GeometryEntry> by
+  RenderPassId so that the RenderPasses can 'pull' the geometry to be rendered.
+  - These groups of handles should be per frame.
+  - Think more about what Renderer::update() has to do, which buffers need updated each frame, and
+  with what contents
+  - Continue GeometryBuffer impl
+*/
+
 auto ResourceProxyImpl::uploadGeometry(DDGeometryData&& geometryData) -> MeshHandle {
-
-  /*
-  This method needs to figure out which buffers to upload data to.
-  It should look at the vertex list, and determine what data needs to go into what buffers
-
-  Actually there should be a GeometryBuffer that abstracts this away
-
-  */
 
   return geometryBuffer->addGeometryData(geometryData);
 

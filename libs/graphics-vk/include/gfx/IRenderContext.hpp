@@ -5,6 +5,7 @@ namespace tr {
 
 struct RenderableData;
 struct RenderableResources;
+class GeometryBuffer;
 
 class IRenderContext {
 public:
@@ -23,5 +24,6 @@ public:
   virtual void waitIdle() = 0;
 
   virtual void setRenderData(const RenderData& renderData) = 0;
+  virtual auto getGeometryBuffer() -> GeometryBuffer& = 0;
 };
 }

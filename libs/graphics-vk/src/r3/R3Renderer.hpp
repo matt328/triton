@@ -21,5 +21,9 @@ public:
   void waitIdle() override;
 
   void setRenderData(const RenderData& renderData) override;
+
+  auto getGeometryBuffer() -> GeometryBuffer& override;
+
+private:
 };
 }

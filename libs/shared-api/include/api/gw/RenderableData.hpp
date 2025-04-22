@@ -15,11 +15,12 @@ struct AnimationData2 {
 };
 
 struct ObjectData {
-  std::vector<std::byte> objectDataBytes;
+  std::vector<glm::mat4> modelMatrix;
 };
 
 struct MaterialData {
-  ShadingMode shadingMode;
+  ShadingMode shadingMode = ShadingMode::Wireframe;
+  std::optional<glm::vec4> albedo = std::nullopt;
   std::optional<as::ImageData> imageData = std::nullopt;
 };
 
@@ -27,8 +28,8 @@ struct MaterialData {
 /// abstract attributes that describe how to render it.
 struct RenderableData {
   DDGeometryData geometryData;
-  ObjectData objectData;
   MaterialData materialData;
+  ObjectData objectData;
   std::optional<AnimationData2> animationData = std::nullopt;
 };
 

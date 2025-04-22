@@ -6,8 +6,7 @@
 namespace tr {
 
 enum class ShadingMode : uint8_t {
-  Textured = 0,
-  Colored,
+  PBR = 0,
   Wireframe
 };
 
