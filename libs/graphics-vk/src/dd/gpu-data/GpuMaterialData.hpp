@@ -2,10 +2,6 @@
 
 namespace tr {
 
-/*
-  Use vertex pulling, and only use a single drawcontext per RenderPass.
-*/
-
 // Global Buffers
 struct GpuObjectData {
   glm::mat4 modelMatrix;
@@ -48,7 +44,10 @@ struct GpuGeometryRegionData {
   uint32_t vertexOffset;
   uint32_t instanceCount;
   uint32_t firstInstance;
-  uint32_t padding;
+  uint32_t positionOffset;
+  uint32_t texCoordOffset;
+  uint32_t colorOffset;
+  uint32_t normalOffset;
 };
 
 struct GpuIndirectCommand : public vk::DrawIndexedIndirectCommand {};
