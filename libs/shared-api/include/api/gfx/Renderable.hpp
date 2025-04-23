@@ -10,8 +10,15 @@
   - Renderer sorts them into groups based on RenderStyle and the routing table
   - Updates any global buffers
     - ObjectData
-    - GeometryCommandData
+      - sets modelMatrix, geometryEntryId, optional materialId, and animationIds
+      - geometryEntryId is an index into the GeometryEntryData array that will have been uploaded
+        asynchronously
+      - geometryEntryId will be contained in the value returned from asynchronously uploading a
+        Renderable, and stored in the gameobject in the gameworld, so that it can be passed back to
+        the renderer.
+
   - Compute Shader dispatches and updates global buffers
+    - Updates
   - Iterates through RenderPasses, calls update() which will update any RenderPass specific buffers
   - Each RenderPass needs to be supplied with its offset into the Indirect Buffer and the Count
   Buffer,

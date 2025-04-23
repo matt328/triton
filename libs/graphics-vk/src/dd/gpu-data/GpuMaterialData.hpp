@@ -39,6 +39,11 @@ struct GpuMaterialData {
 using GpuObjectIndexData = uint32_t;
 using GpuObjectCountData = uint32_t;
 
+/*
+  Is this actually needed?
+  What information needs to be set in the IndirectCommand buffer, and what variables do those become
+  in the shader programs?
+*/
 /// Information about where the vertices and indices are in the global geometry buffer that gets
 /// turned into a DrawIndirectCommand by the compute shader.
 struct GpuGeometryCommandData {
