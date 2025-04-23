@@ -1,5 +1,8 @@
 #pragma once
 
+#include "api/gfx/RenderStyle.hpp"
+#include "as/vertex/VertexFormat.hpp"
+
 namespace tr {
 
 /*
@@ -8,7 +11,7 @@ namespace tr {
   3. Compile-time shader variant for each AttributeCombination.
     - Need to link a GeometryData to a variant.
       - There will be a RenderPass per variant, so the VertexFormat will determine compatibility,
-  but compatibility doens't imply it should be rendered with all compatible renderpasses. Will still
+  but compatibility doesn't imply it should be rendered with all compatible renderpasses. Will still
   need an explicit piece of data from the gameworld saying which RenderPass this geometry should be
   rendered with. This should be dynamic per frame data passed from the game-world.
   This will use the renderer's routing table to sort each renderable by renderpass, renderables
@@ -20,11 +23,13 @@ namespace tr {
 
 */
 
-enum class RenderableType : uint8_t {
-  Wireframe = 0,
-  Static,
-  Dynamic,
-  Terrain,
+using MaterialType = size_t;
+
+// Describes what RenderPass can support
+struct RenderableDescription {
+  VertexFormat vertexFormat;
+  MaterialType materialType;
+  RenderStyle renderStyle;
 };
 
 }

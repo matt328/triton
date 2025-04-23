@@ -1,5 +1,6 @@
 #pragma once
 
+#include "api/gfx/GeometryEntry.hpp"
 namespace tr {
 
 // Global Buffers
@@ -38,16 +39,14 @@ struct GpuMaterialData {
 using GpuObjectIndexData = uint32_t;
 using GpuObjectCountData = uint32_t;
 
-struct GpuGeometryRegionData {
+/// Information about where the vertices and indices are in the global geometry buffer that gets
+/// turned into a DrawIndirectCommand by the compute shader.
+struct GpuGeometryCommandData {
   uint32_t indexCount;
   uint32_t firstIndex;
   uint32_t vertexOffset;
   uint32_t instanceCount;
   uint32_t firstInstance;
-  uint32_t positionOffset;
-  uint32_t texCoordOffset;
-  uint32_t colorOffset;
-  uint32_t normalOffset;
 };
 
 struct GpuIndirectCommand : public vk::DrawIndexedIndirectCommand {};
