@@ -40,9 +40,24 @@ using GpuObjectIndexData = uint32_t;
 using GpuObjectCountData = uint32_t;
 
 /*
-  Is this actually needed?
-  What information needs to be set in the IndirectCommand buffer, and what variables do those become
-  in the shader programs?
+  GpuGeometryCommandData:
+    - instanceCount - number of instances to render
+      - in shaders, use this as the stop condition when looping while gl_InstanceIndex <
+        instanceCount
+    - firstInstance - starting point for gl_InstanceIndex
+    - firstIndex - startingPoint for gl_VertexIndex, used to pull vertex attributes
+    - indexCount - number of indices used for the draw call, not used directly in shader code
+    - vertexOffset - used specifically in shader code for offsetting into a shared vertex buffer
+        index = indexBuffer[firstIndex + gl_VertexIndex];
+        position = vertexBuffer[index + vertexOffset];
+
+  - This struct gets put into a buffer. The compute culling will write its contents once per frame,
+    and it will be used both internally by drawIndexedIndirectCount() and also referenced manually
+    in shader code for vertex pulling.
+  - I don't think we need a GpuGeometryCommandData, I think on the CPU side this is the
+  GeometryEntry struct that gets passed into the Compute shader to produce the
+  DrawIndexedIndirectCommand Buffer
+
 */
 /// Information about where the vertices and indices are in the global geometry buffer that gets
 /// turned into a DrawIndirectCommand by the compute shader.

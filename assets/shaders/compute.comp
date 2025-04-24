@@ -69,11 +69,11 @@ void main() {
   GpuBufferEntry data = gpuBufferEntryData.instanceData[index];
 
   // Populate indirect draw command
-  drawCommands.commands[index].instanceCount = data.instanceCount;
-  drawCommands.commands[index].indexCount = data.indexCount;
-  drawCommands.commands[index].firstIndex = data.firstIndex;
-  drawCommands.commands[index].vertexOffset = data.vertexOffset;
   drawCommands.commands[index].firstInstance = data.firstInstance;
+  drawCommands.commands[index].instanceCount = data.instanceCount;
+  drawCommands.commands[index].firstIndex = data.firstIndex;
+  drawCommands.commands[index].indexCount = data.indexCount;
+  drawCommands.commands[index].vertexOffset = data.vertexOffset;
 
   uint currentCount = atomicAdd(countBuffer.count, 1);
 
