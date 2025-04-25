@@ -40,7 +40,15 @@
     - Erm Actually
       I don't need to keep a separate buffer. The dIIC method takes a stride parameter so I can tack
       cargo data onto the DIIC buffer's items after the standard vk::DrawIndexedIndirectCommand
-  struct. I should place the objectId here, maybe other things as well.
+      struct. I should place the objectId here, maybe other things as well.
+    - Erm actuall erm actually
+    - I don't even need cargo data in the DIIC since this is what the firstInstance field is
+  actually for. Always set firstInstance to the position in ObjectData. When instance count is 1,
+  that's fine vulkan will just loop over it once, but if instanceCount is > 1, it will pull object
+  data from firstInstance + gl_InstanceIndex.
+  - The compute shader's culling algo might need to be more sophisticated than a brute force
+  bounding sphere intersection check with every ObjectData since with instancing there may be
+  hundreds of thousands of ObjectDatas
 
   - The global DIIC buffer will have to be renderPassCount * ObjectCount in size, and a metadata
   buffer uploaded to the GPU at the beginning of each frame will describe at which offset in the
@@ -54,6 +62,9 @@
   GeometryIndirect buffer that defines the offsets and counts for a single 'geometry'.
   - The ObjectData will contain an index into this GeometryIndirect buffer to be used for vertex
   pulling
+  - Don't worry about massive numbers of objects for this 'pipeline' as things like foliage and
+  particle systems will have to have their own dedicated 'pipeline' and gpu data model
+
   Putting it all together, the renderpass' vertex shaders will iterate over each renderpass' DIIC
   buffer. The buffer will have an object id that will be used to get the GeometryId from the
   ObjectData buffer. The GeometryIndirect entry will be used to find the global locations of the

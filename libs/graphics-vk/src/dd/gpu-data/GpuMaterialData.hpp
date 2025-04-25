@@ -39,26 +39,6 @@ struct GpuMaterialData {
 using GpuObjectIndexData = uint32_t;
 using GpuObjectCountData = uint32_t;
 
-/*
-  GpuGeometryCommandData:
-    - instanceCount - number of instances to render
-      - in shaders, use this as the stop condition when looping while gl_InstanceIndex <
-        instanceCount
-    - firstInstance - starting point for gl_InstanceIndex
-    - firstIndex - startingPoint for gl_VertexIndex, used to pull vertex attributes
-    - indexCount - number of indices used for the draw call, not used directly in shader code
-    - vertexOffset - used specifically in shader code for offsetting into a shared vertex buffer
-        index = indexBuffer[firstIndex + gl_VertexIndex];
-        position = vertexBuffer[index + vertexOffset];
-
-  - This struct gets put into a buffer. The compute culling will write its contents once per frame,
-    and it will be used both internally by drawIndexedIndirectCount() and also referenced manually
-    in shader code for vertex pulling.
-  - I don't think we need a GpuGeometryCommandData, I think on the CPU side this is the
-  GeometryEntry struct that gets passed into the Compute shader to produce the
-  DrawIndexedIndirectCommand Buffer
-
-*/
 /// Information about where the vertices and indices are in the global geometry buffer that gets
 /// turned into a DrawIndirectCommand by the compute shader.
 struct GpuGeometryCommandData {
@@ -69,6 +49,20 @@ struct GpuGeometryCommandData {
   uint32_t firstInstance;
 };
 
-struct GpuIndirectCommand : public vk::DrawIndexedIndirectCommand {};
+/*
+  GpuIndirectCommand fields:
+  indexCount * instanceCount == how many times to run the vertex shader
+  instanceCount is tracked in the loop by gl_InstanceIndex
+  indexCount is tracked in the loop by gl_VertexIndex
+  firstInstance sets the base value of gl_InstanceIndex
+  firstIndex and vertexOffset are ignored by vulkan when no vertex/index buffer is bound
+
+  gl_VertexIndex ranges from 0 to indexCount - 1
+  gl_InstanceIndex ranges from firstInstance to firstInstance + instanceCount - 1
+*/
+
+struct GpuIndirectCommand : public vk::DrawIndexedIndirectCommand {
+  uint32_t objectId = INVALID_OFFSET;
+};
 
 }

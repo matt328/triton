@@ -33,6 +33,8 @@ private:
   std::unique_ptr<ArenaBuffer> normalBuffer;
   std::unique_ptr<ArenaBuffer> indexBuffer;
 
+  std::unique_ptr<ArenaBuffer> geometryEntryBuffer;
+
   HandleGenerator<GeometryEntry> generator;
   std::unordered_map<Handle<GeometryEntry>, GeometryEntry> entries;
 };
