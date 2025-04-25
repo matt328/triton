@@ -6,7 +6,7 @@
 
 /*
   Render data flow
-  - GameWorld produces a list of Renderables, passes to Renerer via setRenderData
+  - GameWorld produces a list of Renderables, passes to Renderer via setRenderData
   - Renderer sorts them into groups based on RenderStyle and the routing table
   - Updates any global buffers
     - ObjectData
@@ -41,7 +41,7 @@
       I don't need to keep a separate buffer. The dIIC method takes a stride parameter so I can tack
       cargo data onto the DIIC buffer's items after the standard vk::DrawIndexedIndirectCommand
       struct. I should place the objectId here, maybe other things as well.
-    - Erm actuall erm actually
+  - Erm actually erm actually
     - I don't even need cargo data in the DIIC since this is what the firstInstance field is
   actually for. Always set firstInstance to the position in ObjectData. When instance count is 1,
   that's fine vulkan will just loop over it once, but if instanceCount is > 1, it will pull object

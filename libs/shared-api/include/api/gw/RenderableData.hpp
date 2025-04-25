@@ -1,6 +1,7 @@
 #pragma once
 
 #include "api/gfx/DDGeometryData.hpp"
+#include "api/gfx/RenderStyle.hpp"
 #include "as/Model.hpp"
 #include "dd/RenderConfig.hpp"
 
@@ -15,7 +16,8 @@ struct AnimationData2 {
 };
 
 struct ObjectData {
-  std::vector<glm::mat4> modelMatrix;
+  glm::mat4 modelMatrix = glm::identity<glm::mat4>();
+  RenderStyle renderStyle = RenderStyle::Lit;
 };
 
 struct MaterialData {
@@ -29,7 +31,7 @@ struct MaterialData {
 struct RenderableData {
   DDGeometryData geometryData;
   MaterialData materialData;
-  ObjectData objectData;
+  ObjectData initialObjectData{};
   std::optional<AnimationData2> animationData = std::nullopt;
 };
 

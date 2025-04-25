@@ -25,5 +25,5 @@ private:
   Handle<ComputePass> computePass{};
   std::vector<Handle<GraphicsPass>> graphicsPasses;
 };
-
+vec3
 }

@@ -39,16 +39,6 @@ struct GpuMaterialData {
 using GpuObjectIndexData = uint32_t;
 using GpuObjectCountData = uint32_t;
 
-/// Information about where the vertices and indices are in the global geometry buffer that gets
-/// turned into a DrawIndirectCommand by the compute shader.
-struct GpuGeometryCommandData {
-  uint32_t indexCount;
-  uint32_t firstIndex;
-  uint32_t vertexOffset;
-  uint32_t instanceCount;
-  uint32_t firstInstance;
-};
-
 /*
   GpuIndirectCommand fields:
   indexCount * instanceCount == how many times to run the vertex shader
