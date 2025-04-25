@@ -77,5 +77,6 @@ void main() {
 
   uint currentCount = atomicAdd(countBuffer.count, 1);
 
+  // This buffer sits parallel to the
   dataIndexBuffer.index[index] = currentCount;
 }
