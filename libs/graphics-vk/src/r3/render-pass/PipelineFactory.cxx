@@ -10,7 +10,7 @@ PipelineFactory::PipelineFactory(std::shared_ptr<Device> newDevice,
 }
 
 auto PipelineFactory::createPipeline(const PipelineCreateInfo& createInfo)
-    -> std::tuple<std::unique_ptr<vk::raii::PipelineLayout>, std::unique_ptr<vk::raii::Pipeline>> {
+    -> std::tuple<vk::raii::PipelineLayout, vk::raii::Pipeline> {
   if (createInfo.pipelineType == PipelineType::Graphics) {
     return createGraphicsPipeline(createInfo);
   }
@@ -18,7 +18,7 @@ auto PipelineFactory::createPipeline(const PipelineCreateInfo& createInfo)
 }
 
 auto PipelineFactory::createGraphicsPipeline(const PipelineCreateInfo& createInfo)
-    -> std::tuple<std::unique_ptr<vk::raii::PipelineLayout>, std::unique_ptr<vk::raii::Pipeline>> {
+    -> std::tuple<vk::raii::PipelineLayout, vk::raii::Pipeline> {
   const auto& layoutInfo = createInfo.pipelineLayoutInfo;
 
   // Push Constants
@@ -137,7 +137,7 @@ auto PipelineFactory::createGraphicsPipeline(const PipelineCreateInfo& createInf
 }
 
 auto PipelineFactory::createComputePipeline(const PipelineCreateInfo& createInfo)
-    -> std::tuple<std::unique_ptr<vk::raii::PipelineLayout>, std::unique_ptr<vk::raii::Pipeline>> {
+    -> std::tuple<vk::raii::PipelineLayout, vk::raii::Pipeline> {
   return {nullptr, nullptr};
 }
 }
