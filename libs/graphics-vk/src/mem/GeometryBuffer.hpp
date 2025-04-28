@@ -12,7 +12,7 @@ class ArenaBuffer;
 class GeometryBuffer {
 public:
   GeometryBuffer() = default;
-  ~GeometryBuffer() = default;
+  ~GeometryBuffer();
 
   GeometryBuffer(const GeometryBuffer&) = delete;
   GeometryBuffer(GeometryBuffer&&) = delete;

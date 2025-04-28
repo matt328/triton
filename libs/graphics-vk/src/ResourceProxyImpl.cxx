@@ -43,37 +43,14 @@ auto ResourceProxyImpl::uploadModel(const as::Model& model) -> ModelData {
   return ModelData{.meshData = meshData, .skinData = skinData, .animationData = std::nullopt};
 }
 
-/*
-  - The renderer will have to register each DDGeometryData and associate it with one or more
-  RenderPassIds in a routing table.
-  - The renderer can also expose an API to manipulate the routing table behind the abstration of
-  rendering a given geometry in different 'modes'
-  - When actually rendering, consult the routing table to group the Handle<GeometryEntry> by
-  RenderPassId so that the RenderPasses can 'pull' the geometry to be rendered.
-  - These groups of handles should be per frame.
-  - Think more about what Renderer::update() has to do, which buffers need updated each frame, and
-  with what contents
-  - Continue GeometryBuffer impl
-*/
+auto ResourceProxyImpl::uploadGeometry([[maybe_unused]] DDGeometryData&& geometryData)
+    -> MeshHandle {
+  return static_cast<MeshHandle>(0L);
+}
 
-auto ResourceProxyImpl::uploadGeometry(DDGeometryData&& geometryData) -> MeshHandle {
-
-  return geometryBuffer->addGeometryData(geometryData);
-
-  for (const auto& attribute : geometryData.getVertexList().format.attributes) {
-    const auto data = geometryData.getVertexList().getData(attribute);
-    resourceManager->enqueueGeometryUpload(attribute, data);
-  }
-  const auto result = resourceManager->processQueuedUploads();
-
-  const auto renderableData = RenderableData{
-      .geometryData = std::move(geometryData),
-      .objectData = ObjectData{.objectDataBytes = {}},
-      .materialData = MaterialData{.shadingMode = ShadingMode::Wireframe},
-  };
-  [[maybe_unused]] const auto handles = renderContext->registerRenderable(renderableData);
-  // Log.debug("handles: {}", handles);
-  return resourceManager->uploadGeometryData(data);
+auto ResourceProxyImpl::registerRenderable([[maybe_unused]] RenderableData&& data)
+    -> RenderableResources {
+  return RenderableResources{};
 }
 
 }

@@ -78,7 +78,7 @@ namespace tr {
 
 /// Defines an object passed from the Game World into the Renderer
 struct Renderable {
-  RenderStyle renderStyle;
+  RenderPassType renderPassType;
   Handle<GeometryEntry> geometryHandle;
 };
 }

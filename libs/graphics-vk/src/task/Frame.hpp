@@ -1,10 +1,10 @@
 #pragma once
 #include "bk/Handle.hpp"
-#include "dd/LogicalBufferHandle.hpp"
+#include "LogicalBufferHandle.hpp"
 #include "img/ManagedImage.hpp"
 #include "vk/CommandBufferManager.hpp"
 #include "VkResourceManager.hpp"
-#include "dd/LogicalImageHandle.hpp"
+#include "LogicalImageHandle.hpp"
 
 namespace tr {
 

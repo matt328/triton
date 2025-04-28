@@ -1,5 +1,4 @@
 #include "DefaultFrameManager.hpp"
-#include "dd/buffer-registry/BufferRegistry.hpp"
 #include "gfx/RenderContextConfig.hpp"
 #include "Frame.hpp"
 #include "Maths.hpp"
@@ -17,7 +16,6 @@ DefaultFrameManager::DefaultFrameManager(
     std::shared_ptr<VkResourceManager> newResourceManager,
     std::shared_ptr<IEventBus> newEventBus,
     std::shared_ptr<IDebugManager> debugManager,
-    std::shared_ptr<BufferRegistry> newBufferRegistry,
     std::shared_ptr<ImageRegistry> newImageRegistry)
     : renderConfig{newRenderContextConfig},
       commandBufferManager{std::move(newCommandBufferManager)},
@@ -25,7 +23,6 @@ DefaultFrameManager::DefaultFrameManager(
       swapchain{std::move(newSwapchain)},
       resourceManager{std::move(newResourceManager)},
       eventBus{std::move(newEventBus)},
-      bufferRegistry{std::move(newBufferRegistry)},
       imageRegistry{std::move(newImageRegistry)},
       currentFrame{0} {
 
@@ -84,16 +81,15 @@ auto DefaultFrameManager::registerImageRequest(const ImageRequest& request)
   return logicalHandle;
 }
 
-auto DefaultFrameManager::createPerFrameBuffer(const BufferUsageProfile& profile,
-                                               size_t drawContextId) -> LogicalBufferHandle {
+auto DefaultFrameManager::createPerFrameBuffer() -> LogicalBufferHandle {
   const auto logicalHandle = bufferKeygen.getKey();
-  for (auto& frame : frames) {
-    const auto instance =
-        BufferInstanceKey{.drawContextId = drawContextId, .frameId = frame->getIndex()};
-    const auto bufferHandle =
-        bufferRegistry->getOrCreate(BufferKey{.profile = profile, .instance = instance});
-    frame->addLogicalBuffer(logicalHandle, bufferHandle);
-  }
+  // for (auto& frame : frames) {
+  //   const auto instance =
+  //       BufferInstanceKey{.drawContextId = drawContextId, .frameId = frame->getIndex()};
+  //   const auto bufferHandle =
+  //       bufferRegistry->getOrCreate(BufferKey{.profile = profile, .instance = instance});
+  //   frame->addLogicalBuffer(logicalHandle, bufferHandle);
+  // }
   return logicalHandle;
 }
 

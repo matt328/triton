@@ -1,14 +1,14 @@
 #include "VkGraphicsFactory.hpp"
 
 #include "DefaultDebugManager.hpp"
-#include "NewRenderContext.hpp"
 #include "VkGraphicsContext.hpp"
 #include "ResourceProxyImpl.hpp"
 
 #include "Window.hpp"
-#include "dd/RenderConfigRegistry.hpp"
 #include "mem/Allocator.hpp"
 #include "pipeline/SpirvShaderModuleFactory.hpp"
+#include "r3/graph/DebugFrameGraph.hpp"
+#include "r3/R3Renderer.hpp"
 #include "task/DefaultFrameManager.hpp"
 #include "task/DefaultRenderScheduler.hpp"
 #include "gfx/QueueTypes.hpp"
@@ -33,11 +33,7 @@
 #include "Window.hpp"
 #include "api/gfx/ImGuiSystem.hpp"
 
-#include "dd/DDRenderer.hpp"
-#include "dd/RenderConfigRegistry.hpp"
-#include "dd/DrawContextFactory.hpp"
-#include "dd/render-pass/RenderPassFactory.hpp"
-#include "dd/buffer-registry/BufferRegistry.hpp"
+#include "mem/GeometryBuffer.hpp"
 #include "mem/BufferWrapper.hpp"
 #include "img/ImageRegistry.hpp"
 #include "img/ImageManager.hpp"
@@ -92,8 +88,9 @@ auto createVkGraphicsContext(VkGraphicsCreateInfo createInfo,
                         di::bind<VkResourceManager>.to<VkResourceManager>(),
                         di::bind<IFrameManager>.to<DefaultFrameManager>(),
                         di::bind<IRenderScheduler>.to<DefaultRenderScheduler>(),
-                        di::bind<IRenderContext>.to<DDRenderer>(),
-                        di::bind<IGuiSystem>.to<ImGuiSystem>());
+                        di::bind<IRenderContext>.to<R3Renderer>(),
+                        di::bind<IGuiSystem>.to<ImGuiSystem>(),
+                        di::bind<IFrameGraph>.to<DebugFrameGraph>());
 
   return injector.create<std::shared_ptr<VkGraphicsContext>>();
 }

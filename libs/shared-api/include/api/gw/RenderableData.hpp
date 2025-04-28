@@ -3,7 +3,6 @@
 #include "api/gfx/DDGeometryData.hpp"
 #include "api/gfx/RenderStyle.hpp"
 #include "as/Model.hpp"
-#include "dd/RenderConfig.hpp"
 
 namespace tr {
 
@@ -17,11 +16,10 @@ struct AnimationData2 {
 
 struct ObjectData {
   glm::mat4 modelMatrix = glm::identity<glm::mat4>();
-  RenderStyle renderStyle = RenderStyle::Lit;
+  RenderPassType renderPassType;
 };
 
 struct MaterialData {
-  ShadingMode shadingMode = ShadingMode::Wireframe;
   std::optional<glm::vec4> albedo = std::nullopt;
   std::optional<as::ImageData> imageData = std::nullopt;
 };

@@ -1,13 +1,15 @@
 #pragma once
 
 #include "bk/Handle.hpp"
-#include "dd/render-pass/ComputePass.hpp"
 #include "vk/ResourceManagerHandles.hpp"
+#include "gfx/PassGraphInfo.hpp"
 
 namespace tr {
 
 class ManagedImage;
 class GraphicsPass;
+class ComputePass;
+class Frame;
 
 struct PassInfo {
   std::vector<Handle<ManagedImage>> readImages{};
@@ -29,7 +31,8 @@ public:
   auto operator=(const IFrameGraph&) -> IFrameGraph& = default;
   auto operator=(IFrameGraph&&) -> IFrameGraph& = delete;
 
-  virtual auto addPass(Handle<GraphicsPass> passHandle, PassInfo passInfo) -> void = 0;
+  virtual auto addPass(const std::unique_ptr<GraphicsPass>&& pass, PassGraphInfo passInfo)
+      -> void = 0;
   virtual auto addPass(Handle<ComputePass> passHandle, PassInfo passInfo) -> void = 0;
 
   virtual auto bake() -> void = 0;

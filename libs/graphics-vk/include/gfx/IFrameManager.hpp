@@ -1,8 +1,7 @@
 #pragma once
 
 #include "bk/Handle.hpp"
-#include "dd/LogicalBufferHandle.hpp"
-#include "dd/buffer-registry/BufferRegistry.hpp"
+#include "LogicalBufferHandle.hpp"
 #include "img/ImageRequest.hpp"
 #include "img/ManagedImage.hpp"
 #include "vk/core/Swapchain.hpp"
@@ -27,8 +26,7 @@ public:
   virtual auto acquireFrame() -> std::variant<Frame*, ImageAcquireResult> = 0;
   [[nodiscard]] virtual auto getFrames() const -> const std::vector<std::unique_ptr<Frame>>& = 0;
 
-  virtual auto createPerFrameBuffer(const BufferUsageProfile& profile, size_t drawContextId)
-      -> LogicalBufferHandle = 0;
+  virtual auto createPerFrameBuffer() -> LogicalBufferHandle = 0;
 
   /// Creates an image for each frame, and returns a logical handle
   virtual auto registerImageRequest(const ImageRequest& request) -> Handle<ManagedImage> = 0;

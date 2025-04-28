@@ -11,7 +11,6 @@ namespace tr {
 class CommandBufferManager;
 class Swapchain;
 class VkResourceManager;
-class BufferRegistry;
 class ImageRegistry;
 
 class DefaultFrameManager final : public IFrameManager {
@@ -23,7 +22,6 @@ public:
                                std::shared_ptr<VkResourceManager> newResourceManager,
                                std::shared_ptr<IEventBus> newEventBus,
                                std::shared_ptr<IDebugManager> debugManager,
-                               std::shared_ptr<BufferRegistry> newBufferRegistry,
                                std::shared_ptr<ImageRegistry> newImageRegistry);
   ~DefaultFrameManager() override;
 
@@ -36,8 +34,7 @@ public:
 
   [[nodiscard]] auto getFrames() const -> const std::vector<std::unique_ptr<Frame>>& override;
 
-  auto createPerFrameBuffer(const BufferUsageProfile& profile, size_t drawContextId)
-      -> LogicalBufferHandle override;
+  auto createPerFrameBuffer() -> LogicalBufferHandle override;
 
   auto registerImageRequest(const ImageRequest& request) -> Handle<ManagedImage> override;
 
@@ -48,7 +45,6 @@ private:
   std::shared_ptr<Swapchain> swapchain;
   std::shared_ptr<VkResourceManager> resourceManager;
   std::shared_ptr<IEventBus> eventBus;
-  std::shared_ptr<BufferRegistry> bufferRegistry;
   std::shared_ptr<ImageRegistry> imageRegistry;
 
   size_t currentFrame;

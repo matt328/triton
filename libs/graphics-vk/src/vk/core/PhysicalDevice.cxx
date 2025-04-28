@@ -93,17 +93,11 @@ auto PhysicalDevice::createDevice() -> std::unique_ptr<vk::raii::Device> {
       .dynamicRendering = VK_TRUE,
   };
 
-  auto features2 =
-      physicalDevice->getFeatures2<vk::PhysicalDeviceFeatures2,
-                                   vk::PhysicalDevice16BitStorageFeatures,
-                                   vk::PhysicalDeviceDescriptorIndexingFeaturesEXT,
-                                   vk::PhysicalDeviceAddressBindingReportFeaturesEXT>();
+  auto features2 = physicalDevice->getFeatures2<vk::PhysicalDeviceFeatures2,
+                                                vk::PhysicalDevice16BitStorageFeatures,
+                                                vk::PhysicalDeviceDescriptorIndexingFeaturesEXT>();
 
   auto indexingFeatures = features2.get<vk::PhysicalDeviceDescriptorIndexingFeatures>();
-
-  auto deviceAddressBindingReportFeatures =
-      features2.get<vk::PhysicalDeviceAddressBindingReportFeaturesEXT>();
-  deviceAddressBindingReportFeatures.setReportAddressBinding(vk::True);
 
   auto drawParamsFeatures =
       vk::PhysicalDeviceShaderDrawParametersFeatures{.shaderDrawParameters = VK_TRUE};
@@ -147,7 +141,6 @@ auto PhysicalDevice::createDevice() -> std::unique_ptr<vk::raii::Device> {
                              drawParamsFeatures,
                              dynamicRenderingFeatures,
                              extendedDynamicStateFeatures,
-                             deviceAddressBindingReportFeatures,
                              /*dbFeatures*/};
 
   return std::make_unique<vk::raii::Device>(physicalDevice->createDevice(c.get(), nullptr));
@@ -280,8 +273,15 @@ auto checkDeviceExtensionSupport(const vk::raii::PhysicalDevice& possibleDevice,
     requiredExtensions.erase(extension.extensionName);
   }
 
+  if (!requiredExtensions.empty()) {
+    for (const auto& ext : requiredExtensions) {
+      Log.warn("Required extension not present: {}", ext);
+    }
+  }
+
   return requiredExtensions.empty();
 }
+
 auto querySwapchainSupport(const vk::raii::PhysicalDevice& possibleDevice,
                            const vk::raii::SurfaceKHR& surface) -> SwapchainSupportDetails {
   SwapchainSupportDetails details;

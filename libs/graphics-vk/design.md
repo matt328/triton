@@ -153,4 +153,41 @@ RenderStyle::Wireframe
 
 At the beginning of each frame, the requested Renderables will be sorted and assigned into groups according to which Passes will render them. This will be accomplished by adding their ObjectData into the ObjectData buffer in each Pass' slice of the buffer. Metadata about this buffer's slices will be tracked during this process and uploaded into a GPU buffer, as well as distributed to the Passes so they can pass the correct offsets to the drawIndexedIndirectCount calls.
 
-TODO: Class Diagram
+## Buffer Manager
+
+Global Buffers, created and owned by the Renderer
+
+- GeometryEntry
+  - Not per frame, rarely updated, only asynchronously by Transfer Queue
+  - Read Only from GraphicsQueue
+  - Indexed into by ObjectData, can be written into arena style, the positions will be written to the ObjectData
+  - VertexAttribute Buffers dependent/tied to GeometryEntryBuffer
+    - Position
+    - Color
+    - TexCoord
+    - Normal
+    - Tangent
+    - Joints
+    - Weights
+- Materials
+  - Not Per Frame
+  - Read Only from GraphicsQueue
+  - Indexed by ObjectData, will be written into arena style.
+- ObjectData
+  - Per Frame
+  - Updated potentially every frame
+  - ReadOnly by the Graphics Queue
+  - Not partitioned or sliced, all items compacted into it every frame in sequence
+- DrawCommandMeta
+  - Per Frame
+  - Tied to DIIC and DrawCount
+  - Communicates how DIIC and DrawCount are sliced/partitioned according to how this frame's renderables are divided among RenderPasses
+  - Uploaded at beginning of frame, then ReadOnly by Graphics Queue
+- DrawIndexedIndirectCommand
+  - Per Frame
+  - Written to by Compute Shader, not streamed back to CPU at all
+  - Partitioned/Sliced by RenderPass
+- DrawCount
+  - Per Frame
+  - Written by compute shader, not streamed back to CPU at all
+  - Parititioned/Sliced by RenderPass

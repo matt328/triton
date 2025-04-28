@@ -1,17 +1,33 @@
 #pragma once
 
+#include "api/gfx/RenderStyle.hpp"
 #include "gfx/IRenderContext.hpp"
+#include "r3/render-pass/GraphicsPass.hpp"
 
 namespace tr {
 
+class IFrameManager;
+class IEventBus;
+class Swapchain;
+class IFrameGraph;
+class RenderPassFactory;
+
+namespace queue {
+class Graphics;
+}
+
 class R3Renderer : public tr::IRenderContext {
 public:
-  R3Renderer() = default;
+  R3Renderer(std::shared_ptr<IFrameManager> newFrameManager,
+             std::shared_ptr<queue::Graphics> newGraphicsQueue,
+             std::shared_ptr<IEventBus> newEventBus,
+             std::shared_ptr<Swapchain> newSwapchain,
+             std::shared_ptr<IFrameGraph> newFrameGraph);
   ~R3Renderer() override = default;
 
-  R3Renderer(const R3Renderer&) = default;
+  R3Renderer(const R3Renderer&) = delete;
   R3Renderer(R3Renderer&&) = delete;
-  auto operator=(const R3Renderer&) -> R3Renderer& = default;
+  auto operator=(const R3Renderer&) -> R3Renderer& = delete;
   auto operator=(R3Renderer&&) -> R3Renderer& = delete;
 
   auto registerRenderable(const RenderableData& data) -> RenderableResources override;
@@ -25,5 +41,19 @@ public:
   auto getGeometryBuffer() -> GeometryBuffer& override;
 
 private:
+  std::shared_ptr<IFrameManager> frameManager;
+  std::shared_ptr<queue::Graphics> graphicsQueue;
+  std::shared_ptr<IEventBus> eventBus;
+  std::shared_ptr<Swapchain> swapchain;
+  std::shared_ptr<IFrameGraph> frameGraph;
+
+  std::shared_ptr<RenderPassFactory> renderPassFactory;
+
+  std::unordered_map<RenderPassType, GraphicsPass> renderPasses;
+  std::unique_ptr<GeometryBuffer> geometryBuffer;
+
+  std::vector<vk::CommandBuffer> buffers;
+
+  auto endFrame(const Frame* frame) -> void;
 };
 }

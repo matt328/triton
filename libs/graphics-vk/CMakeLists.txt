@@ -1,19 +1,16 @@
 project("graphics-vk")
 
 set(graphicsvk_SRC
+  src/r3/R3Renderer.cxx
+  src/r3/graph/DebugFrameGraph.cxx
+  src/r3/render-pass/RenderPassFactory.cxx
+
   src/VkGraphicsFactory.cxx
   src/ResourceProxyImpl.cxx
   src/VkGraphicsContext.cxx
   src/VkResourceManager.cxx
   src/ImmediateTransferContext.cxx
   src/Window.cxx
-
-  src/dd/DDRenderer.cxx
-  src/dd/DrawContext.cxx
-  src/dd/DrawContextFactory.cxx
-  src/dd/RenderConfigRegistry.cxx
-  src/dd/ResourceUploader.cxx
-  src/dd/buffer-registry/BufferRegistry.cxx
 
   src/img/ImageManager.cxx
   src/img/ImageRegistry.cxx
@@ -22,6 +19,8 @@ set(graphicsvk_SRC
   src/mem/Buffer.cxx
   src/mem/Image.cxx
   src/mem/ArenaBuffer.cxx
+  src/mem/GeometryBuffer.cxx
+
   src/geo/VertexAttributes.cxx
   src/geo/DynamicGeometryData.cxx
   src/geo/StaticGeometryData.cxx
@@ -29,7 +28,6 @@ set(graphicsvk_SRC
   src/DefaultDebugManager.cxx
   src/ImGuiSystem.cxx
   src/NoopDebugManager.cxx
-  src/NewRenderContext.cxx
   src/vk/BufferManager.cxx
   src/vk/CommandBufferManager.cxx
   src/vk/ArenaGeometryBuffer.cxx
