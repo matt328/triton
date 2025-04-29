@@ -2,6 +2,7 @@
 
 #include "api/gfx/RenderStyle.hpp"
 #include "gfx/IRenderContext.hpp"
+#include "gfx/RenderContextConfig.hpp"
 #include "r3/render-pass/GraphicsPass.hpp"
 
 namespace tr {
@@ -16,13 +17,17 @@ namespace queue {
 class Graphics;
 }
 
+const std::filesystem::path SHADER_ROOT = std::filesystem::current_path() / "assets" / "shaders";
+
 class R3Renderer : public tr::IRenderContext {
 public:
-  R3Renderer(std::shared_ptr<IFrameManager> newFrameManager,
+  R3Renderer(RenderContextConfig newRendererConfig,
+             std::shared_ptr<IFrameManager> newFrameManager,
              std::shared_ptr<queue::Graphics> newGraphicsQueue,
              std::shared_ptr<IEventBus> newEventBus,
              std::shared_ptr<Swapchain> newSwapchain,
-             std::shared_ptr<IFrameGraph> newFrameGraph);
+             std::shared_ptr<IFrameGraph> newFrameGraph,
+             std::shared_ptr<RenderPassFactory> newRenderPassFactory);
   ~R3Renderer() override = default;
 
   R3Renderer(const R3Renderer&) = delete;
@@ -41,6 +46,7 @@ public:
   auto getGeometryBuffer() -> GeometryBuffer& override;
 
 private:
+  RenderContextConfig rendererConfig;
   std::shared_ptr<IFrameManager> frameManager;
   std::shared_ptr<queue::Graphics> graphicsQueue;
   std::shared_ptr<IEventBus> eventBus;

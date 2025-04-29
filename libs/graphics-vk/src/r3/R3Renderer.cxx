@@ -13,23 +13,50 @@
 
 namespace tr {
 
-R3Renderer::R3Renderer(std::shared_ptr<IFrameManager> newFrameManager,
+R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
+                       std::shared_ptr<IFrameManager> newFrameManager,
                        std::shared_ptr<queue::Graphics> newGraphicsQueue,
                        std::shared_ptr<IEventBus> newEventBus,
                        std::shared_ptr<Swapchain> newSwapchain,
-                       std::shared_ptr<IFrameGraph> newFrameGraph)
-    : frameManager{std::move(newFrameManager)},
+                       std::shared_ptr<IFrameGraph> newFrameGraph,
+                       std::shared_ptr<RenderPassFactory> newRenderPassFactory)
+    : rendererConfig{newRenderConfig},
+      frameManager{std::move(newFrameManager)},
       graphicsQueue{std::move(newGraphicsQueue)},
       eventBus{std::move(newEventBus)},
       swapchain{std::move(newSwapchain)},
-      frameGraph{std::move(newFrameGraph)} {
+      frameGraph{std::move(newFrameGraph)},
+      renderPassFactory{std::move(newRenderPassFactory)} {
 
-  renderPassFactory = std::make_shared<RenderPassFactory>();
+  auto colorAttachmentInfo = AttachmentCreateInfo{
+      .format = vk::Format::eR16G16B16A16Sfloat,
+      .clearValue = vk::ClearValue{
+          .color = vk::ClearColorValue{std::array<float, 4>{0.392f, 0.584f, 0.929f, 1.0f}}}};
 
-  const auto forwardPassCreateInfo = GraphicsPassCreateInfo{};
+  const auto vertexStage = ShaderStageInfo{
+      .stage = vk::ShaderStageFlagBits::eVertex,
+      .shaderFile = SHADER_ROOT / "static.vert.spv",
+      .entryPoint = "main",
+  };
+
+  const auto fragmentStage = ShaderStageInfo{
+      .stage = vk::ShaderStageFlagBits::eFragment,
+      .shaderFile = SHADER_ROOT / "static.frag.spv",
+      .entryPoint = "main",
+  };
+
+  const auto forwardPassCreateInfo =
+      GraphicsPassCreateInfo{.id = "forward",
+                             .pipelineLayoutInfo = PipelineLayoutInfo{},
+                             .colorAttachmentInfos = {colorAttachmentInfo},
+                             .shaderStageInfo = {vertexStage, fragmentStage},
+                             .extent = vk::Extent2D{.width = rendererConfig.initialWidth,
+                                                    .height = rendererConfig.initialHeight}};
+
+  auto forwardPass = renderPassFactory->createGraphicsPass(forwardPassCreateInfo);
+
   const auto forwardPassGraphInfo = PassGraphInfo{};
 
-  const auto forwardPass = renderPassFactory->createGraphicsPass(forwardPassCreateInfo);
   frameGraph->addPass(std::move(forwardPass), forwardPassGraphInfo);
 }
 
@@ -126,5 +153,4 @@ void R3Renderer::setRenderData([[maybe_unused]] const RenderData& renderData) {
 auto R3Renderer::getGeometryBuffer() -> GeometryBuffer& {
   return *geometryBuffer;
 }
-
 }

@@ -4,6 +4,8 @@ set(graphicsvk_SRC
   src/r3/R3Renderer.cxx
   src/r3/graph/DebugFrameGraph.cxx
   src/r3/render-pass/RenderPassFactory.cxx
+  src/r3/render-pass/PipelineFactory.cxx
+  src/r3/render-pass/GraphicsPass.cxx
 
   src/VkGraphicsFactory.cxx
   src/ResourceProxyImpl.cxx

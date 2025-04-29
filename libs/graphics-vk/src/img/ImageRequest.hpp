@@ -12,7 +12,7 @@ struct ImageRequest {
   vk::ImageAspectFlags aspectFlags;
   uint32_t mipLevels = 1;
   uint32_t layers = 1;
-  std::optional<std::string> debugName;
+  std::optional<std::string> debugName = std::nullopt;
 
   auto operator==(const ImageRequest& other) const -> bool {
     return logicalName == other.logicalName && format == other.format && extent == other.extent &&

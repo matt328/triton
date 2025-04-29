@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gfx/IFrameGraph.hpp"
+#include "r3/render-pass/GraphicsPass.hpp"
 
 namespace tr {
 
@@ -14,7 +15,7 @@ public:
   auto operator=(const DebugFrameGraph&) -> DebugFrameGraph& = default;
   auto operator=(DebugFrameGraph&&) -> DebugFrameGraph& = delete;
 
-  auto addPass(const std::unique_ptr<GraphicsPass>&& pass, PassGraphInfo passInfo) -> void override;
+  auto addPass(std::unique_ptr<GraphicsPass>&& pass, PassGraphInfo passInfo) -> void override;
   auto addPass(Handle<ComputePass> passHandle, PassInfo passInfo) -> void override;
 
   auto bake() -> void override;
@@ -23,7 +24,7 @@ public:
 
 private:
   Handle<ComputePass> computePass{};
-  std::vector<Handle<GraphicsPass>> graphicsPasses;
+  std::vector<std::unique_ptr<GraphicsPass>> graphicsPasses;
 };
 
 }

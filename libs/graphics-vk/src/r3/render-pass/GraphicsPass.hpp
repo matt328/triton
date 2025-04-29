@@ -13,9 +13,9 @@ public:
   GraphicsPass(GraphicsPassConfig&& config, std::shared_ptr<ImageManager> newImageManager);
   ~GraphicsPass() = default;
 
-  GraphicsPass(const GraphicsPass&) = default;
+  GraphicsPass(const GraphicsPass&) = delete;
   GraphicsPass(GraphicsPass&&) = delete;
-  auto operator=(const GraphicsPass&) -> GraphicsPass& = default;
+  auto operator=(const GraphicsPass&) -> GraphicsPass& = delete;
   auto operator=(GraphicsPass&&) -> GraphicsPass& = delete;
 
   auto bind(const Frame* frame, vk::raii::CommandBuffer& cmdBuffer, PushConstantsBindFn& bindFn)
@@ -25,6 +25,7 @@ public:
 
 private:
   std::shared_ptr<ImageManager> imageManager;
+  GraphicsPassConfig passConfig;
 };
 
 }

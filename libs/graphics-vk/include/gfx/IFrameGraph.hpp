@@ -31,8 +31,7 @@ public:
   auto operator=(const IFrameGraph&) -> IFrameGraph& = default;
   auto operator=(IFrameGraph&&) -> IFrameGraph& = delete;
 
-  virtual auto addPass(const std::unique_ptr<GraphicsPass>&& pass, PassGraphInfo passInfo)
-      -> void = 0;
+  virtual auto addPass(std::unique_ptr<GraphicsPass>&& pass, PassGraphInfo passInfo) -> void = 0;
   virtual auto addPass(Handle<ComputePass> passHandle, PassInfo passInfo) -> void = 0;
 
   virtual auto bake() -> void = 0;

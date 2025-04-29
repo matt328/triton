@@ -3,11 +3,17 @@
 #include "r3/render-pass/PipelineCreateInfo.hpp"
 
 namespace tr {
+
+struct AttachmentCreateInfo {
+  vk::Format format;
+  std::optional<vk::ClearValue> clearValue = std::nullopt;
+};
+
 struct GraphicsPassCreateInfo {
   std::string id;
   PipelineLayoutInfo pipelineLayoutInfo;
-  std::vector<vk::Format> colorAttachmentFormats;
-  std::optional<vk::Format> depthAttachmentFormat = std::nullopt;
+  std::vector<AttachmentCreateInfo> colorAttachmentInfos;
+  std::optional<AttachmentCreateInfo> depthAttachmentFormat = std::nullopt;
   std::vector<ShaderStageInfo> shaderStageInfo;
 
   vk::PrimitiveTopology topology = vk::PrimitiveTopology::eTriangleList;

@@ -9,6 +9,8 @@
 #include "pipeline/SpirvShaderModuleFactory.hpp"
 #include "r3/graph/DebugFrameGraph.hpp"
 #include "r3/R3Renderer.hpp"
+#include "r3/render-pass/PipelineFactory.hpp"
+#include "r3/render-pass/RenderPassFactory.hpp"
 #include "task/DefaultFrameManager.hpp"
 #include "task/DefaultRenderScheduler.hpp"
 #include "gfx/QueueTypes.hpp"
@@ -90,7 +92,10 @@ auto createVkGraphicsContext(VkGraphicsCreateInfo createInfo,
                         di::bind<IRenderScheduler>.to<DefaultRenderScheduler>(),
                         di::bind<IRenderContext>.to<R3Renderer>(),
                         di::bind<IGuiSystem>.to<ImGuiSystem>(),
-                        di::bind<IFrameGraph>.to<DebugFrameGraph>());
+                        di::bind<IFrameGraph>.to<DebugFrameGraph>(),
+                        di::bind<PipelineFactory>.to<PipelineFactory>(),
+                        di::bind<ImageManager>.to<ImageManager>(),
+                        di::bind<RenderPassFactory>.to<RenderPassFactory>());
 
   return injector.create<std::shared_ptr<VkGraphicsContext>>();
 }

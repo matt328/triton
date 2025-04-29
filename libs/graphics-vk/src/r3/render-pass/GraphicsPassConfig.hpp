@@ -11,7 +11,7 @@ struct GraphicsPassConfig {
   std::optional<std::string> debugName = std::nullopt;
 
   std::vector<AttachmentConfig> colorAttachmentConfigs;
-  std::optional<AttachmentConfig> depthAttachmentConfig;
+  std::optional<AttachmentConfig> depthAttachmentConfig = std::nullopt;
   vk::Extent2D extent;
 };
 
