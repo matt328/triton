@@ -1,7 +1,7 @@
 #include "ImmediateTransferContext.hpp"
 
 #include "gfx/QueueTypes.hpp"
-#include "vk/CommandBufferManager.hpp"
+#include "vk/command-buffer/CommandBufferManager.hpp"
 
 namespace tr {
 

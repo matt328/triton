@@ -10,18 +10,12 @@ Frame::Frame(const uint8_t newIndex,
              vk::raii::Fence&& newRenderFence,
              vk::raii::Semaphore&& newImageAvailableSemaphore,
              vk::raii::Semaphore&& newRenderFinishedSemaphore,
-             vk::raii::Semaphore&& newComputeFinishedSemaphore,
-             CommandBufferHandle newStartCmdBuffer,
-             CommandBufferHandle newEndCmdBuffer,
-             CommandBufferHandle newMainCmdBuffer)
+             vk::raii::Semaphore&& newComputeFinishedSemaphore)
     : index{newIndex},
       inFlightFence{std::move(newRenderFence)},
       imageAvailableSemaphore{std::move(newImageAvailableSemaphore)},
       renderFinishedSemaphore{std::move(newRenderFinishedSemaphore)},
-      computeFinishedSemaphore{std::move(newComputeFinishedSemaphore)},
-      startCmdBuffer(newStartCmdBuffer),
-      mainCmdBuffer(newMainCmdBuffer),
-      endCmdBuffer(newEndCmdBuffer) {
+      computeFinishedSemaphore{std::move(newComputeFinishedSemaphore)} {
 }
 
 auto Frame::getIndexedName(std::string_view input) const -> std::string {
@@ -54,18 +48,6 @@ auto Frame::getSwapchainImageIndex() const noexcept -> uint32_t {
 
 auto Frame::getBufferHandle(BufferHandleType type) const -> BufferHandle {
   return bufferHandleMap.at(type);
-}
-
-auto Frame::getStartCommandBufferHandle() const -> CommandBufferHandle {
-  return startCmdBuffer;
-}
-
-auto Frame::getMainCommandBufferHandle() const -> CommandBufferHandle {
-  return mainCmdBuffer;
-}
-
-auto Frame::getEndCommandBufferHandle() const -> CommandBufferHandle {
-  return endCmdBuffer;
 }
 
 auto Frame::getStaticObjectCount() const -> uint32_t {

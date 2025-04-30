@@ -21,6 +21,10 @@ struct PassInfo {
   bool hasSideEffects = false;
 };
 
+struct FrameGraphResult {
+  std::vector<const vk::CommandBuffer*> commandBuffers;
+};
+
 class IFrameGraph {
 public:
   IFrameGraph() = default;
@@ -36,7 +40,7 @@ public:
 
   virtual auto bake() -> void = 0;
 
-  virtual auto execute(const Frame* frame) -> void = 0;
+  virtual auto execute(const Frame* frame) -> FrameGraphResult = 0;
 };
 
 }

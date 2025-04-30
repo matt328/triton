@@ -2,6 +2,10 @@
 
 namespace tr {
 
+DebugFrameGraph::DebugFrameGraph(std::shared_ptr<CommandBufferManager> newCommandBufferManager)
+    : commandBufferManager{std::move(newCommandBufferManager)} {
+}
+
 auto DebugFrameGraph::addPass(std::unique_ptr<GraphicsPass>&& pass, PassGraphInfo passInfo)
     -> void {
   graphicsPasses.emplace_back(std::move(pass));
@@ -28,17 +32,21 @@ auto DebugFrameGraph::bake() -> void {
   - might only initially have 1 command buffer per pool, but that's ok for now, there will be more
   later.
 */
-auto DebugFrameGraph::execute(const Frame* frame) -> void {
+auto DebugFrameGraph::execute(const Frame* frame) -> FrameGraphResult {
   Log.trace("DebugFrameGraph::execute");
 
-  std::vector<vk::raii::CommandBuffer*> commandBuffers{};
+  auto frameGraphResult = FrameGraphResult{};
 
   for (const auto& pass : graphicsPasses) {
-    auto& commandBuffer = commandBufferManager->getCommandBuffer(pass->getId());
+    const auto request = CommandBufferRequest{.threadId = std::this_thread::get_id(),
+                                              .frameId = frame->getIndex(),
+                                              .passId = pass->getId(),
+                                              .queueType = QueueType::Graphics};
+    auto& commandBuffer = commandBufferManager->requestCommandBuffer(request);
     pass->execute(frame, commandBuffer);
-    commandBuffers.push_back(&commandBuffer);
+    frameGraphResult.commandBuffers.push_back(&(*commandBuffer));
   }
-  return commandBuffers;
+  return frameGraphResult;
 }
 
 }

@@ -42,18 +42,11 @@ DefaultFrameManager::DefaultFrameManager(
     debugManager->setObjectName(*computeFinishedSemaphore,
                                 "Semaphore-ComputeFinished-Frame_" + std::to_string(i));
 
-    const auto startCmdBufferHandle = commandBufferManager->createGraphicsCommandBuffer();
-    const auto endCmdBufferHandle = commandBufferManager->createGraphicsCommandBuffer();
-    const auto mainCmdBufferHandle = commandBufferManager->createGraphicsCommandBuffer();
-
     frames.push_back(std::make_unique<Frame>(static_cast<uint8_t>(frames.size()),
                                              std::move(fence),
                                              std::move(acquireImageSemaphore),
                                              std::move(renderFinishedSemaphore),
-                                             std::move(computeFinishedSemaphore),
-                                             startCmdBufferHandle,
-                                             endCmdBufferHandle,
-                                             mainCmdBufferHandle));
+                                             std::move(computeFinishedSemaphore)));
   }
 
   eventBus->subscribe<SwapchainResized>(

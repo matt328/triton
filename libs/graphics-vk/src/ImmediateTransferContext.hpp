@@ -3,7 +3,6 @@
 #include "gfx/QueueTypes.hpp"
 #include "vk/core/Device.hpp"
 #include "vk/core/PhysicalDevice.hpp"
-#include "vk/CommandBufferManager.hpp"
 
 namespace vk::raii {
 class Device;
@@ -14,6 +13,8 @@ class Queue;
 }
 
 namespace tr {
+
+class CommandBufferManager;
 
 class ImmediateTransferContext {
 public:

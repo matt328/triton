@@ -1,6 +1,8 @@
 #pragma once
 
 #include "bk/Rando.hpp"
+#include "vk/command-buffer/CommandBufferRequest.hpp"
+#include "vk/command-buffer/PoolKey.hpp"
 
 namespace tr {
 
@@ -8,26 +10,6 @@ class Device;
 class IDebugManager;
 
 using CommandBufferHandle = size_t;
-
-enum class QueueType : uint8_t {
-  Compute = 0,
-  Graphics,
-  Transfer
-};
-
-struct PoolKey {
-  std::thread::id threadId;
-  uint8_t frameId;
-  QueueType queueType;
-};
-
-struct CommandBufferRequest {
-  std::thread::id threadId;
-  uint8_t frameId;
-  size_t passId;
-  QueueType queueType = QueueType::Graphics;
-  // TODO: hash
-};
 
 struct CommandBufferUse {
   std::thread::id threadId;

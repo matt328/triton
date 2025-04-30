@@ -2,7 +2,7 @@
 #include "bk/Handle.hpp"
 #include "LogicalBufferHandle.hpp"
 #include "img/ManagedImage.hpp"
-#include "vk/CommandBufferManager.hpp"
+#include "vk/command-buffer/CommandBufferManager.hpp"
 #include "VkResourceManager.hpp"
 #include "LogicalImageHandle.hpp"
 
@@ -44,10 +44,7 @@ public:
                  vk::raii::Fence&& newRenderFence,
                  vk::raii::Semaphore&& newImageAvailableSemaphore,
                  vk::raii::Semaphore&& newRenderFinishedSemaphore,
-                 vk::raii::Semaphore&& newComputeFinishedSemaphore,
-                 CommandBufferHandle newStartCmdBuffer,
-                 CommandBufferHandle newEndCmdBuffer,
-                 CommandBufferHandle newMainCmdBuffer);
+                 vk::raii::Semaphore&& newComputeFinishedSemaphore);
 
   [[nodiscard]] auto getIndexedName(std::string_view input) const -> std::string;
   [[nodiscard]] auto getIndex() const -> uint8_t;
@@ -68,10 +65,6 @@ public:
 
   [[nodiscard]] auto getDepthImageHandle() const -> ImageHandle;
   [[nodiscard]] auto getDrawImageHandle() const -> ImageHandle;
-
-  [[nodiscard]] auto getStartCommandBufferHandle() const -> CommandBufferHandle;
-  [[nodiscard]] auto getMainCommandBufferHandle() const -> CommandBufferHandle;
-  [[nodiscard]] auto getEndCommandBufferHandle() const -> CommandBufferHandle;
 
   auto setBufferHandle(BufferHandleType type, BufferHandle handle) -> void;
 
@@ -117,10 +110,6 @@ private:
 
   std::unordered_map<Handle<ManagedImage>, Handle<ManagedImage>> imageHandles;
   std::unordered_map<LogicalBufferHandle, BufferHandle> bufferHandles;
-
-  CommandBufferHandle startCmdBuffer;
-  CommandBufferHandle mainCmdBuffer;
-  CommandBufferHandle endCmdBuffer;
 
   uint32_t staticObjectCount;
   uint32_t dynamicObjectCount;

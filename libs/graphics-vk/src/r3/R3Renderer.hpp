@@ -12,6 +12,7 @@ class IEventBus;
 class Swapchain;
 class IFrameGraph;
 class RenderPassFactory;
+struct FrameGraphResult;
 
 namespace queue {
 class Graphics;
@@ -21,7 +22,7 @@ const std::filesystem::path SHADER_ROOT = std::filesystem::current_path() / "ass
 
 class R3Renderer : public tr::IRenderContext {
 public:
-  R3Renderer(RenderContextConfig newRendererConfig,
+  R3Renderer(RenderContextConfig newRenderConfig,
              std::shared_ptr<IFrameManager> newFrameManager,
              std::shared_ptr<queue::Graphics> newGraphicsQueue,
              std::shared_ptr<IEventBus> newEventBus,
@@ -60,6 +61,6 @@ private:
 
   std::vector<vk::CommandBuffer> buffers;
 
-  auto endFrame(const Frame* frame) -> void;
+  auto endFrame(const Frame* frame, const FrameGraphResult& result) -> void;
 };
 }

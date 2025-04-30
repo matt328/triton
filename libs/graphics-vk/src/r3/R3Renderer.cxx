@@ -84,13 +84,13 @@ void R3Renderer::renderNextFrame() {
   if (std::holds_alternative<Frame*>(result)) {
     const auto* frame = std::get<Frame*>(result);
 
-    const auto results = frameGraph->execute(frame);
+    const auto& results = frameGraph->execute(frame);
 
     endFrame(frame, results);
   }
 }
 
-auto R3Renderer::endFrame(const Frame* frame) -> void {
+auto R3Renderer::endFrame(const Frame* frame, const FrameGraphResult& results) -> void {
   buffers.clear();
 
   constexpr auto waitStages =

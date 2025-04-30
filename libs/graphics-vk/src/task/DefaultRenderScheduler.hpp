@@ -6,7 +6,7 @@
 #include "gfx/RenderContextConfig.hpp"
 #include "api/fx/Events.hpp"
 #include "IGuiSystem.hpp"
-#include "vk/CommandBufferManager.hpp"
+#include "vk/command-buffer/CommandBufferManager.hpp"
 #include "gfx/IFrameManager.hpp"
 #include "gfx/IRenderScheduler.hpp"
 #include "IRenderTask.hpp"

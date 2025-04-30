@@ -17,7 +17,7 @@
 
 #include "task/debugshapes/DebugPipeline.hpp"
 #include "vk/BufferManager.hpp"
-#include "vk/CommandBufferManager.hpp"
+#include "vk/command-buffer/CommandBufferManager.hpp"
 
 #include "vk/sb/DSLayoutManager.hpp"
 #include "vk/sb/DSShaderBindingFactory.hpp"

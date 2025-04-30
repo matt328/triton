@@ -31,7 +31,7 @@ set(graphicsvk_SRC
   src/ImGuiSystem.cxx
   src/NoopDebugManager.cxx
   src/vk/BufferManager.cxx
-  src/vk/CommandBufferManager.cxx
+  src/vk/command-buffer/CommandBufferManager.cxx
   src/vk/ArenaGeometryBuffer.cxx
   src/vk/TextureManager.cxx
   src/vk/core/Context.cxx

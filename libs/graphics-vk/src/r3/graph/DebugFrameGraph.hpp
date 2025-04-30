@@ -6,21 +6,9 @@
 
 namespace tr {
 
-struct PassContext {
-  size_t passGroupId; // Eventually one PassGroup per thread
-
-  auto executeRenderPass(std::vector<GraphicsPass>& passes, const Frame* frame)
-      -> vk::raii::CommandBuffer& {
-    auto& commandBuffer = mgr->getCommandBuffer(passGroupId, frame->getIndex());
-    for (const auto& pass : passes) {
-      pass.execute(frame, commandBuffer);
-    }
-  }
-};
-
 class DebugFrameGraph : public IFrameGraph {
 public:
-  DebugFrameGraph() = default;
+  explicit DebugFrameGraph(std::shared_ptr<CommandBufferManager> newCommandBufferManager);
   ~DebugFrameGraph() override = default;
 
   DebugFrameGraph(const DebugFrameGraph&) = default;
@@ -33,9 +21,11 @@ public:
 
   auto bake() -> void override;
 
-  auto execute(const Frame* frame) -> void override;
+  auto execute(const Frame* frame) -> FrameGraphResult override;
 
 private:
+  std::shared_ptr<CommandBufferManager> commandBufferManager;
+
   Handle<ComputePass> computePass{};
   std::vector<std::unique_ptr<GraphicsPass>> graphicsPasses;
 };

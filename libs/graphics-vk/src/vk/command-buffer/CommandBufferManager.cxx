@@ -9,15 +9,6 @@ CommandBufferManager::CommandBufferManager(std::shared_ptr<Device> newDevice,
     : device{std::move(newDevice)}, debugManager{std::move(newDebugManager)} {
   debugManager->setDevice(device);
 
-  const auto commandPoolCreateInfo = vk::CommandPoolCreateInfo{
-      .flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
-      .queueFamilyIndex = device->getGraphicsQueueFamily(),
-  };
-
-  graphicsCommandPool = std::make_unique<vk::raii::CommandPool>(
-      device->getVkDevice().createCommandPool(commandPoolCreateInfo));
-  debugManager->setObjectName(**graphicsCommandPool, "CommandPool-Graphics");
-
   const auto transferCommandPoolCreateInfo = vk::CommandPoolCreateInfo{
       .flags = vk::CommandPoolCreateFlagBits::eTransient,
       .queueFamilyIndex = device->getTransferQueueFamily(),
