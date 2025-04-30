@@ -9,6 +9,31 @@ class IDebugManager;
 
 using CommandBufferHandle = size_t;
 
+enum class QueueType : uint8_t {
+  Compute = 0,
+  Graphics,
+  Transfer
+};
+
+struct CommandBufferRequest {
+  std::thread::id threadId;
+  uint8_t frameId;
+  size_t passId;
+  QueueType queueType = QueueType::Graphics;
+  // TODO: hash
+};
+
+struct QueueConfig {
+  QueueType queueType;
+  size_t threadCount;
+  size_t frameCount;
+  std::vector<size_t> passIds;
+};
+
+struct CommandBufferInfo {
+  std::vector<QueueConfig> queueConfigs;
+};
+
 class CommandBufferManager {
 public:
   CommandBufferManager(std::shared_ptr<Device> newDevice,
@@ -19,6 +44,9 @@ public:
   CommandBufferManager(CommandBufferManager&&) = delete;
   auto operator=(const CommandBufferManager&) -> CommandBufferManager& = delete;
   auto operator=(CommandBufferManager&&) -> CommandBufferManager& = delete;
+
+  auto allocateCommandBuffers(const CommandBufferInfo& info) -> void;
+  auto requestCommandBuffer(const CommandBufferRequest& request) -> vk::raii::CommandBuffer&;
 
   auto createGraphicsCommandBuffer() -> CommandBufferHandle;
   auto createTransferCommandBuffer() -> CommandBufferHandle;
@@ -32,6 +60,8 @@ public:
 private:
   std::shared_ptr<Device> device;
   std::shared_ptr<IDebugManager> debugManager;
+
+  std::unordered_map<CommandBufferRequest, vk::raii::CommandBuffer> bufferMap;
 
   MapKey commandBufferMapKeygen;
 

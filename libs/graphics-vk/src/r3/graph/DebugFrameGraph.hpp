@@ -2,8 +2,21 @@
 
 #include "gfx/IFrameGraph.hpp"
 #include "r3/render-pass/GraphicsPass.hpp"
+#include "task/Frame.hpp"
 
 namespace tr {
+
+struct PassContext {
+  size_t passGroupId; // Eventually one PassGroup per thread
+
+  auto executeRenderPass(std::vector<GraphicsPass>& passes, const Frame* frame)
+      -> vk::raii::CommandBuffer& {
+    auto& commandBuffer = mgr->getCommandBuffer(passGroupId, frame->getIndex());
+    for (const auto& pass : passes) {
+      pass.execute(frame, commandBuffer);
+    }
+  }
+};
 
 class DebugFrameGraph : public IFrameGraph {
 public:

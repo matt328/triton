@@ -84,16 +84,9 @@ void R3Renderer::renderNextFrame() {
   if (std::holds_alternative<Frame*>(result)) {
     const auto* frame = std::get<Frame*>(result);
 
-    frameGraph->execute(frame);
-    /*
-      TODO(matt): Create the beginnings of a framegraph and call it here.
-      Frame graph should initially support 2 render passes, one forward (that just clears the
-      screen) and one composition, which copies the resulting image to the swapchain image, using an
-      actual renderpass pipeline. basically hardcoded to render a fullscreen quad and use a fragment
-      shader to sample the image, and draw it onto the quad.
-    */
+    const auto results = frameGraph->execute(frame);
 
-    endFrame(frame);
+    endFrame(frame, results);
   }
 }
 

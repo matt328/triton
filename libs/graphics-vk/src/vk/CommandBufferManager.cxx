@@ -28,6 +28,18 @@ CommandBufferManager::CommandBufferManager(std::shared_ptr<Device> newDevice,
   debugManager->setObjectName(**transferCommandPool, "CommandPool-Transfer");
 }
 
+auto CommandBufferManager::allocateCommandBuffers(const CommandBufferInfo& info) -> void {
+  for (const auto& queueConfig : info.queueConfigs) {
+    // Create a pool for each thread and frame
+    // allocate command buffers for each passId, map to passIds
+  }
+}
+
+auto CommandBufferManager::requestCommandBuffer(const CommandBufferRequest& request)
+    -> vk::raii::CommandBuffer& {
+  return bufferMap.at(request);
+}
+
 auto CommandBufferManager::createGraphicsCommandBuffer() -> CommandBufferHandle {
   const auto key = commandBufferMapKeygen.getKey();
 
@@ -35,7 +47,6 @@ auto CommandBufferManager::createGraphicsCommandBuffer() -> CommandBufferHandle 
                                                        .level = vk::CommandBufferLevel::ePrimary,
                                                        .commandBufferCount = 1};
   auto commandBuffers = device->getVkDevice().allocateCommandBuffers(allocInfo);
-
   commandBufferMap.emplace(key, std::move(commandBuffers.front()));
 
   return key;

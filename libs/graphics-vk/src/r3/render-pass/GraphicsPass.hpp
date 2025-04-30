@@ -23,6 +23,10 @@ public:
 
   auto execute(const Frame* frame, vk::raii::CommandBuffer& cmdBuffer) -> void;
 
+  auto getId() {
+    return passConfig.id;
+  }
+
 private:
   std::shared_ptr<ImageManager> imageManager;
   GraphicsPassConfig passConfig;
