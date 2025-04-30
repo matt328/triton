@@ -29,45 +29,54 @@ CommandBufferManager::CommandBufferManager(std::shared_ptr<Device> newDevice,
 }
 
 auto CommandBufferManager::allocateCommandBuffers(const CommandBufferInfo& info) -> void {
+  std::set<PoolKey> createdPools;
+
   for (const auto& queueConfig : info.queueConfigs) {
-    // Create a pool for each thread and frame
-    // allocate command buffers for each passId, map to passIds
+    const auto queueFamilyIndex = [&]() {
+      switch (queueConfig.queueType) {
+        case QueueType::Graphics:
+          return device->getGraphicsQueueFamily();
+        case QueueType::Compute:
+          return device->getComputeQueueFamily();
+        case QueueType::Transfer:
+          return device->getTransferQueueFamily();
+      }
+      throw std::runtime_error("Unknown QueueType");
+    }();
+
+    for (const auto& use : queueConfig.uses) {
+      const auto poolKey = PoolKey{.threadId = use.threadId,
+                                   .frameId = use.frameId,
+                                   .queueType = QueueType::Graphics};
+
+      if (createdPools.insert(poolKey).second) {
+        const auto poolCreateInfo = vk::CommandPoolCreateInfo{
+            .flags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
+            .queueFamilyIndex = queueFamilyIndex,
+        };
+        poolMap.emplace(poolKey, device->getVkDevice().createCommandPool(poolCreateInfo));
+      }
+      const auto allocInfo = vk::CommandBufferAllocateInfo{
+          .commandPool = *poolMap.at(poolKey),
+          .level = vk::CommandBufferLevel::ePrimary,
+          .commandBufferCount = 1,
+      };
+
+      const CommandBufferRequest req{
+          .threadId = use.threadId,
+          .frameId = use.frameId,
+          .passId = use.passId,
+          .queueType = queueConfig.queueType,
+      };
+      bufferMap.emplace(req,
+                        std::move(device->getVkDevice().allocateCommandBuffers(allocInfo).front()));
+    }
   }
 }
 
 auto CommandBufferManager::requestCommandBuffer(const CommandBufferRequest& request)
     -> vk::raii::CommandBuffer& {
   return bufferMap.at(request);
-}
-
-auto CommandBufferManager::createGraphicsCommandBuffer() -> CommandBufferHandle {
-  const auto key = commandBufferMapKeygen.getKey();
-
-  const auto allocInfo = vk::CommandBufferAllocateInfo{.commandPool = *graphicsCommandPool,
-                                                       .level = vk::CommandBufferLevel::ePrimary,
-                                                       .commandBufferCount = 1};
-  auto commandBuffers = device->getVkDevice().allocateCommandBuffers(allocInfo);
-  commandBufferMap.emplace(key, std::move(commandBuffers.front()));
-
-  return key;
-}
-
-auto CommandBufferManager::createTransferCommandBuffer() -> CommandBufferHandle {
-  const auto key = commandBufferMapKeygen.getKey();
-
-  const auto allocInfo = vk::CommandBufferAllocateInfo{.commandPool = *transferCommandPool,
-                                                       .level = vk::CommandBufferLevel::ePrimary,
-                                                       .commandBufferCount = 1};
-  auto commandBuffers = device->getVkDevice().allocateCommandBuffers(allocInfo);
-
-  commandBufferMap.emplace(key, std::move(commandBuffers.front()));
-
-  return key;
-}
-
-[[nodiscard]] auto CommandBufferManager::getCommandBuffer(CommandBufferHandle handle)
-    -> vk::raii::CommandBuffer& {
-  return commandBufferMap.at(handle);
 }
 
 auto CommandBufferManager::getTransferCommandBuffer() -> vk::raii::CommandBuffer {
@@ -77,5 +86,4 @@ auto CommandBufferManager::getTransferCommandBuffer() -> vk::raii::CommandBuffer
   auto commandBuffers = device->getVkDevice().allocateCommandBuffers(allocInfo);
   return std::move(commandBuffers.front());
 }
-
 }

@@ -15,6 +15,12 @@ enum class QueueType : uint8_t {
   Transfer
 };
 
+struct PoolKey {
+  std::thread::id threadId;
+  uint8_t frameId;
+  QueueType queueType;
+};
+
 struct CommandBufferRequest {
   std::thread::id threadId;
   uint8_t frameId;
@@ -23,11 +29,15 @@ struct CommandBufferRequest {
   // TODO: hash
 };
 
+struct CommandBufferUse {
+  std::thread::id threadId;
+  uint8_t frameId;
+  size_t passId;
+};
+
 struct QueueConfig {
   QueueType queueType;
-  size_t threadCount;
-  size_t frameCount;
-  std::vector<size_t> passIds;
+  std::vector<CommandBufferUse> uses;
 };
 
 struct CommandBufferInfo {
@@ -48,11 +58,6 @@ public:
   auto allocateCommandBuffers(const CommandBufferInfo& info) -> void;
   auto requestCommandBuffer(const CommandBufferRequest& request) -> vk::raii::CommandBuffer&;
 
-  auto createGraphicsCommandBuffer() -> CommandBufferHandle;
-  auto createTransferCommandBuffer() -> CommandBufferHandle;
-
-  auto getCommandBuffer(CommandBufferHandle handle) -> vk::raii::CommandBuffer&;
-
   /// Transfer CommandBuffers are more effective if used once and freed, so callers should let this
   /// go out of scope after it's been submitted, and request a fresh one each time.
   auto getTransferCommandBuffer() -> vk::raii::CommandBuffer;
@@ -61,15 +66,10 @@ private:
   std::shared_ptr<Device> device;
   std::shared_ptr<IDebugManager> debugManager;
 
+  std::unordered_map<PoolKey, vk::raii::CommandPool> poolMap;
   std::unordered_map<CommandBufferRequest, vk::raii::CommandBuffer> bufferMap;
 
-  MapKey commandBufferMapKeygen;
-
-  std::unique_ptr<vk::raii::CommandPool> graphicsCommandPool;
   std::unique_ptr<vk::raii::CommandPool> transferCommandPool;
-
-  std::unordered_map<CommandBufferHandle, vk::raii::CommandBuffer> commandBufferMap;
-  std::unordered_map<CommandBufferHandle, std::string> commandBufferNameMap;
 };
 
 }
