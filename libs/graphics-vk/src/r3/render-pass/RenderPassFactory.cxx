@@ -35,7 +35,7 @@ auto RenderPassFactory::createGraphicsPass(const GraphicsPassCreateInfo& createI
   auto [layout, pipeline] = pipelineFactory->createPipeline(pipelineCreateInfo);
 
   auto colorAttachmentList = std::vector<AttachmentConfig>{};
-  colorAttachmentList.resize(createInfo.colorAttachmentInfos.size());
+  colorAttachmentList.reserve(createInfo.colorAttachmentInfos.size());
   for (const auto& info : createInfo.colorAttachmentInfos) {
     const auto request = ImageRequest{
         .logicalName = std::format("{}", createInfo.id),

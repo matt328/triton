@@ -30,6 +30,10 @@ public:
 private:
   std::shared_ptr<ImageManager> imageManager;
   GraphicsPassConfig passConfig;
+
+  vk::RenderingInfo renderingInfo;
+  std::vector<vk::RenderingAttachmentInfo> colorAttachmentInfo;
+  std::optional<vk::RenderingAttachmentInfo> depthAttachmentInfo;
 };
 
 }
