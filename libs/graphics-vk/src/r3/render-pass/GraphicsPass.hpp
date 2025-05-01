@@ -18,10 +18,9 @@ public:
   auto operator=(const GraphicsPass&) -> GraphicsPass& = delete;
   auto operator=(GraphicsPass&&) -> GraphicsPass& = delete;
 
-  auto bind(const Frame* frame, vk::raii::CommandBuffer& cmdBuffer, PushConstantsBindFn& bindFn)
-      -> void;
-
-  auto execute(const Frame* frame, vk::raii::CommandBuffer& cmdBuffer) -> void;
+  auto execute(const Frame* frame,
+               vk::raii::CommandBuffer& cmdBuffer,
+               const PushConstantsBindFn& bindFn) -> void;
 
   auto getId() {
     return passConfig.id;

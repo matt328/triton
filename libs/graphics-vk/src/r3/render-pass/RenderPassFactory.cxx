@@ -1,5 +1,7 @@
 #include "RenderPassFactory.hpp"
 #include "gfx/IFrameManager.hpp"
+#include "r3/render-pass/ComputePass.hpp"
+#include "r3/render-pass/ComputePassConfig.hpp"
 #include "r3/render-pass/GraphicsPass.hpp"
 #include "r3/render-pass/GraphicsPassConfig.hpp"
 #include "r3/render-pass/PipelineFactory.hpp"
@@ -60,6 +62,25 @@ auto RenderPassFactory::createGraphicsPass(const GraphicsPassCreateInfo& createI
   };
 
   return std::make_unique<GraphicsPass>(std::move(config), imageManager);
+}
+
+auto RenderPassFactory::createComputePass(const ComputePassCreateInfo& createInfo)
+    -> std::unique_ptr<ComputePass> {
+  const auto pipelineCreateInfo =
+      PipelineCreateInfo{.id = createInfo.id,
+                         .pipelineType = PipelineType::Compute,
+                         .pipelineLayoutInfo = createInfo.pipelineLayoutInfo,
+                         .shaderStageInfo = {createInfo.shaderStageInfo}};
+  auto [layout, pipeline] = pipelineFactory->createPipeline(pipelineCreateInfo);
+
+  auto config = ComputePassConfig{
+      .id = createInfo.id,
+      .pipeline = std::move(pipeline),
+      .pipelineLayout = std::move(layout),
+      .debugName = createInfo.id,
+  };
+
+  return std::make_unique<ComputePass>(std::move(config), imageManager);
 }
 
 }

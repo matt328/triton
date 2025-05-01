@@ -1,10 +1,12 @@
 #pragma once
 
 #include "r3/render-pass/GraphicsPassCreateInfo.hpp"
+#include "r3/render-pass/ComputePassCreateInfo.hpp"
 
 namespace tr {
 
 class GraphicsPass;
+class ComputePass;
 class PipelineFactory;
 class ImageManager;
 class IFrameManager;
@@ -23,6 +25,8 @@ public:
 
   auto createGraphicsPass(const GraphicsPassCreateInfo& createInfo)
       -> std::unique_ptr<GraphicsPass>;
+
+  auto createComputePass(const ComputePassCreateInfo& createInfo) -> std::unique_ptr<ComputePass>;
 
 private:
   std::shared_ptr<PipelineFactory> pipelineFactory;

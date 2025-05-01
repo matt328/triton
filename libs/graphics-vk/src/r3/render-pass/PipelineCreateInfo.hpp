@@ -27,9 +27,9 @@ struct PipelineCreateInfo {
   std::string id;
   PipelineType pipelineType;
   PipelineLayoutInfo pipelineLayoutInfo;
-  std::vector<vk::Format> colorAttachmentFormats;
+  std::vector<vk::Format> colorAttachmentFormats{};
   std::optional<vk::Format> depthAttachmentFormat = std::nullopt;
-  std::vector<ShaderStageInfo> shaderStageInfo;
+  std::vector<ShaderStageInfo> shaderStageInfo{};
 
   vk::PrimitiveTopology topology = vk::PrimitiveTopology::eTriangleList;
   vk::PolygonMode polygonMode = vk::PolygonMode::eFill;

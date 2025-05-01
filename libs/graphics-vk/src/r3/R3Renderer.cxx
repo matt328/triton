@@ -38,7 +38,7 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
     - Start with culling pass. Make sure it creates the correct DIIC, count, and uses the DIIC
     metadata buffer
   */
-
+  createComputeCullingPass();
   createForwardRenderPass();
   createCompositionRenderPass();
 }
@@ -127,6 +127,9 @@ void R3Renderer::setRenderData([[maybe_unused]] const RenderData& renderData) {
 
 auto R3Renderer::getGeometryBuffer() -> GeometryBuffer& {
   return *geometryBuffer;
+}
+
+auto R3Renderer::createComputeCullingPass() -> void {
 }
 
 auto R3Renderer::createForwardRenderPass() -> void {

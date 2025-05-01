@@ -63,6 +63,7 @@ private:
 
   std::vector<vk::CommandBuffer> buffers;
 
+  auto createComputeCullingPass() -> void;
   auto createForwardRenderPass() -> void;
   auto createCompositionRenderPass() -> void;
   auto endFrame(const Frame* frame, const FrameGraphResult& result) -> void;

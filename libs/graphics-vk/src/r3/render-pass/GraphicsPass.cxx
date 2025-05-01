@@ -30,12 +30,9 @@ GraphicsPass::GraphicsPass(GraphicsPassConfig&& config,
   }
 }
 
-auto GraphicsPass::bind(const Frame* frame,
-                        vk::raii::CommandBuffer& cmdBuffer,
-                        PushConstantsBindFn& bindFn) -> void {
-}
-
-auto GraphicsPass::execute(const Frame* frame, vk::raii::CommandBuffer& cmdBuffer) -> void {
+auto GraphicsPass::execute(const Frame* frame,
+                           vk::raii::CommandBuffer& cmdBuffer,
+                           const PushConstantsBindFn& bindFn) -> void {
   Log.trace("Executing GraphicsPass: id={}, frame={}", getId(), frame->getIndex());
   // Configure vk::RenderingInfo
   for (size_t i = 0; i < passConfig.colorAttachmentConfigs.size(); ++i) {
@@ -43,6 +40,7 @@ auto GraphicsPass::execute(const Frame* frame, vk::raii::CommandBuffer& cmdBuffe
     const auto& image = imageManager->getImage(handle);
     colorAttachmentInfo[i].setImageView(image.getImageView());
   }
+
   if (depthAttachmentInfo) {
     const auto& depthHandle =
         frame->getLogicalImage(passConfig.depthAttachmentConfig->logicalImage);
@@ -50,13 +48,26 @@ auto GraphicsPass::execute(const Frame* frame, vk::raii::CommandBuffer& cmdBuffe
     depthAttachmentInfo->setImageView(depthImage.getImageView());
     renderingInfo.setPDepthAttachment(&(*depthAttachmentInfo));
   }
+
   renderingInfo.setColorAttachmentCount(colorAttachmentInfo.size());
   renderingInfo.setColorAttachments(colorAttachmentInfo);
+
   cmdBuffer.begin(
       vk::CommandBufferBeginInfo{.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse});
   cmdBuffer.beginRendering(renderingInfo);
-
   cmdBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, passConfig.pipeline);
+
+  bindFn(frame, cmdBuffer);
+
+  // const auto indirectBuffer = frame->getLogicalBuffer(drawContext.indirectBufferHandle);
+
+  // cmdBuffer
+  //     .drawIndexedIndirectCount(vk::Buffer buffer,
+  //                               vk::DeviceSize offset,
+  //                               vk::Buffer countBuffer,
+  //                               vk::DeviceSize countBufferOffset,
+  //                               uint32_t maxDrawCount,
+  //                               uint32_t stride)
 
   cmdBuffer.endRendering();
   cmdBuffer.end();
