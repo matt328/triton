@@ -36,6 +36,7 @@ auto GraphicsPass::bind(const Frame* frame,
 }
 
 auto GraphicsPass::execute(const Frame* frame, vk::raii::CommandBuffer& cmdBuffer) -> void {
+  Log.trace("Executing GraphicsPass: id={}, frame={}", getId(), frame->getIndex());
   // Configure vk::RenderingInfo
   for (size_t i = 0; i < passConfig.colorAttachmentConfigs.size(); ++i) {
     const auto& handle = frame->getLogicalImage(passConfig.colorAttachmentConfigs[i].logicalImage);
@@ -54,6 +55,8 @@ auto GraphicsPass::execute(const Frame* frame, vk::raii::CommandBuffer& cmdBuffe
   cmdBuffer.begin(
       vk::CommandBufferBeginInfo{.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse});
   cmdBuffer.beginRendering(renderingInfo);
+
+  cmdBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, passConfig.pipeline);
 
   cmdBuffer.endRendering();
   cmdBuffer.end();

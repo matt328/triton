@@ -30,49 +30,17 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
       renderPassFactory{std::move(newRenderPassFactory)},
       commandBufferManager{std::move(newCommandBufferManager)} {
 
-  auto colorAttachmentInfo = AttachmentCreateInfo{
-      .format = vk::Format::eR16G16B16A16Sfloat,
-      .clearValue = vk::ClearValue{
-          .color = vk::ClearColorValue{std::array<float, 4>{0.392f, 0.584f, 0.929f, 1.0f}}}};
+  /*
+    TODO(matt): createComputeCullingPass()
+    - register a fullscreen quad geometry specifically for use by the composition pass to write onto
+    the swapchain image.
+    - This will exercise all the geometry buffer and basically the entire pipeline.
+    - Start with culling pass. Make sure it creates the correct DIIC, count, and uses the DIIC
+    metadata buffer
+  */
 
-  const auto vertexStage = ShaderStageInfo{
-      .stage = vk::ShaderStageFlagBits::eVertex,
-      .shaderFile = SHADER_ROOT / "static.vert.spv",
-      .entryPoint = "main",
-  };
-
-  const auto fragmentStage = ShaderStageInfo{
-      .stage = vk::ShaderStageFlagBits::eFragment,
-      .shaderFile = SHADER_ROOT / "static.frag.spv",
-      .entryPoint = "main",
-  };
-
-  const auto forwardPassCreateInfo =
-      GraphicsPassCreateInfo{.id = "forward",
-                             .pipelineLayoutInfo = PipelineLayoutInfo{},
-                             .colorAttachmentInfos = {colorAttachmentInfo},
-                             .shaderStageInfo = {vertexStage, fragmentStage},
-                             .extent = vk::Extent2D{.width = rendererConfig.initialWidth,
-                                                    .height = rendererConfig.initialHeight}};
-
-  auto forwardPass = renderPassFactory->createGraphicsPass(forwardPassCreateInfo);
-
-  std::vector<CommandBufferUse> uses{};
-
-  for (const auto& frame : frameManager->getFrames()) {
-    uses.emplace_back(CommandBufferUse{.threadId = std::this_thread::get_id(),
-                                       .frameId = frame->getIndex(),
-                                       .passId = forwardPass->getId()});
-  }
-
-  const auto commandBufferInfo = CommandBufferInfo{
-      .queueConfigs = {QueueConfig{.queueType = QueueType::Graphics, .uses = uses}}};
-
-  commandBufferManager->allocateCommandBuffers(commandBufferInfo);
-
-  const auto forwardPassGraphInfo = PassGraphInfo{};
-
-  frameGraph->addPass(std::move(forwardPass), forwardPassGraphInfo);
+  createForwardRenderPass();
+  createCompositionRenderPass();
 }
 
 auto R3Renderer::registerRenderable([[maybe_unused]] const RenderableData& data)
@@ -160,4 +128,97 @@ void R3Renderer::setRenderData([[maybe_unused]] const RenderData& renderData) {
 auto R3Renderer::getGeometryBuffer() -> GeometryBuffer& {
   return *geometryBuffer;
 }
+
+auto R3Renderer::createForwardRenderPass() -> void {
+  auto colorAttachmentInfo = AttachmentCreateInfo{
+      .format = vk::Format::eR16G16B16A16Sfloat,
+      .clearValue = vk::ClearValue{
+          .color = vk::ClearColorValue{std::array<float, 4>{0.392f, 0.584f, 0.929f, 1.0f}}}};
+
+  const auto vertexStage = ShaderStageInfo{
+      .stage = vk::ShaderStageFlagBits::eVertex,
+      .shaderFile = SHADER_ROOT / "static.vert.spv",
+      .entryPoint = "main",
+  };
+
+  const auto fragmentStage = ShaderStageInfo{
+      .stage = vk::ShaderStageFlagBits::eFragment,
+      .shaderFile = SHADER_ROOT / "static.frag.spv",
+      .entryPoint = "main",
+  };
+
+  const auto forwardPassCreateInfo =
+      GraphicsPassCreateInfo{.id = "forward",
+                             .pipelineLayoutInfo = PipelineLayoutInfo{},
+                             .colorAttachmentInfos = {colorAttachmentInfo},
+                             .shaderStageInfo = {vertexStage, fragmentStage},
+                             .extent = vk::Extent2D{.width = rendererConfig.initialWidth,
+                                                    .height = rendererConfig.initialHeight}};
+
+  auto forwardPass = renderPassFactory->createGraphicsPass(forwardPassCreateInfo);
+
+  std::vector<CommandBufferUse> uses{};
+
+  for (const auto& frame : frameManager->getFrames()) {
+    uses.emplace_back(CommandBufferUse{.threadId = std::this_thread::get_id(),
+                                       .frameId = frame->getIndex(),
+                                       .passId = forwardPass->getId()});
+  }
+
+  const auto commandBufferInfo = CommandBufferInfo{
+      .queueConfigs = {QueueConfig{.queueType = QueueType::Graphics, .uses = uses}}};
+
+  commandBufferManager->allocateCommandBuffers(commandBufferInfo);
+
+  const auto forwardPassGraphInfo = PassGraphInfo{};
+
+  frameGraph->addPass(std::move(forwardPass), forwardPassGraphInfo);
+}
+
+auto R3Renderer::createCompositionRenderPass() -> void {
+  auto colorAttachmentInfo = AttachmentCreateInfo{
+      .format = vk::Format::eR16G16B16A16Sfloat,
+      .clearValue = vk::ClearValue{
+          .color = vk::ClearColorValue{std::array<float, 4>{0.392f, 0.584f, 0.929f, 1.0f}}}};
+
+  const auto vertexStage = ShaderStageInfo{
+      .stage = vk::ShaderStageFlagBits::eVertex,
+      .shaderFile = SHADER_ROOT / "composition.vert.spv",
+      .entryPoint = "main",
+  };
+
+  const auto fragmentStage = ShaderStageInfo{
+      .stage = vk::ShaderStageFlagBits::eFragment,
+      .shaderFile = SHADER_ROOT / "composition.frag.spv",
+      .entryPoint = "main",
+  };
+
+  const auto compositionPassCreateInfo =
+      GraphicsPassCreateInfo{.id = "composition",
+                             .pipelineLayoutInfo = PipelineLayoutInfo{},
+                             .colorAttachmentInfos = {colorAttachmentInfo},
+                             .shaderStageInfo = {vertexStage, fragmentStage},
+                             .extent = vk::Extent2D{.width = rendererConfig.initialWidth,
+                                                    .height = rendererConfig.initialHeight}};
+
+  auto compositionPass = renderPassFactory->createGraphicsPass(compositionPassCreateInfo);
+
+  std::vector<CommandBufferUse> uses{};
+
+  for (const auto& frame : frameManager->getFrames()) {
+    uses.emplace_back(CommandBufferUse{.threadId = std::this_thread::get_id(),
+                                       .frameId = frame->getIndex(),
+                                       .passId = compositionPass->getId()});
+  }
+
+  const auto commandBufferInfo = CommandBufferInfo{
+      .queueConfigs = {QueueConfig{.queueType = QueueType::Graphics, .uses = uses}}};
+
+  commandBufferManager->allocateCommandBuffers(commandBufferInfo);
+
+  const auto compositionPassGraphInfo = PassGraphInfo{};
+
+  frameGraph->addPass(std::move(compositionPass), compositionPassGraphInfo);
+}
+
 }

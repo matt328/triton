@@ -1,6 +1,5 @@
 #pragma once
 
-#include "bk/Rando.hpp"
 #include "vk/command-buffer/CommandBufferRequest.hpp"
 #include "vk/command-buffer/PoolKey.hpp"
 
@@ -14,7 +13,7 @@ using CommandBufferHandle = size_t;
 struct CommandBufferUse {
   std::thread::id threadId;
   uint8_t frameId;
-  size_t passId;
+  std::string passId;
 };
 
 struct QueueConfig {

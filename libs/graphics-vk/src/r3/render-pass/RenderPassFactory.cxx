@@ -52,7 +52,7 @@ auto RenderPassFactory::createGraphicsPass(const GraphicsPassCreateInfo& createI
   }
 
   auto config = GraphicsPassConfig{
-      .id = 4,
+      .id = createInfo.id,
       .pipeline = std::move(pipeline),
       .pipelineLayout = std::move(layout),
       .colorAttachmentConfigs = colorAttachmentList,

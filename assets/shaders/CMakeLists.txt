@@ -1,4 +1,6 @@
 set(Shaders
+  composition.vert
+  composition.frag
   compute.comp
   debug.vert
   debug.frag
