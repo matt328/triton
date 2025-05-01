@@ -49,13 +49,14 @@ auto PipelineFactory::createGraphicsPipeline(const PipelineCreateInfo& createInf
   }
 
   // Shader Stages
+  auto shaderModules = std::vector<vk::raii::ShaderModule>{};
   auto shaderStages = std::vector<vk::PipelineShaderStageCreateInfo>{};
   for (const auto& stageInfo : createInfo.shaderStageInfo) {
-    auto shaderModule =
-        shaderModuleFactory->createShaderModule(stageInfo.stage, stageInfo.shaderFile);
+    shaderModules.emplace_back(
+        shaderModuleFactory->createShaderModule(stageInfo.stage, stageInfo.shaderFile));
     shaderStages.emplace_back(
         vk::PipelineShaderStageCreateInfo{.stage = stageInfo.stage,
-                                          .module = *shaderModule,
+                                          .module = *shaderModules.back(),
                                           .pName = stageInfo.entryPoint.c_str()});
   }
 

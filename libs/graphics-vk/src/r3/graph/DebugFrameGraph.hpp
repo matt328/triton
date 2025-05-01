@@ -9,7 +9,7 @@ namespace tr {
 class DebugFrameGraph : public IFrameGraph {
 public:
   explicit DebugFrameGraph(std::shared_ptr<CommandBufferManager> newCommandBufferManager);
-  ~DebugFrameGraph() override = default;
+  ~DebugFrameGraph() override;
 
   DebugFrameGraph(const DebugFrameGraph&) = default;
   DebugFrameGraph(DebugFrameGraph&&) = delete;

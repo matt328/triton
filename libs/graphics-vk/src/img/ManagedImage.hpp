@@ -2,20 +2,29 @@
 
 namespace tr {
 
-struct AllocatedImage {
+class AllocatedImage {
+public:
+  AllocatedImage(vk::Image newImage, vma::Allocation newAllocation, vma::Allocator newAllocator)
+      : image{newImage}, allocation{newAllocation}, allocator{newAllocator} {
+  }
+
+  ~AllocatedImage() {
+    allocator.destroyImage(image, allocation);
+  }
+
+  AllocatedImage(const AllocatedImage&) = default;
+  AllocatedImage(AllocatedImage&&) = delete;
+  auto operator=(const AllocatedImage&) -> AllocatedImage& = default;
+  auto operator=(AllocatedImage&&) -> AllocatedImage& = delete;
+
+  auto getImage() -> vk::Image& {
+    return image;
+  }
+
+private:
   vk::Image image;
   vma::Allocation allocation;
-};
-
-struct ImageDeleter {
   vma::Allocator allocator;
-
-  void operator()(AllocatedImage* image) const {
-    if (image != nullptr) {
-      allocator.destroyImage(image->image, image->allocation);
-      delete image;
-    }
-  }
 };
 
 class ManagedImage {
@@ -42,7 +51,7 @@ public:
   }
 
   [[nodiscard]] auto getImage() const -> const vk::Image& {
-    return image->image;
+    return image->getImage();
   }
 
 private:

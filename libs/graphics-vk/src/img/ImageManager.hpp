@@ -32,7 +32,7 @@ public:
   ImageManager(std::shared_ptr<Allocator> newAllocator,
                std::shared_ptr<IDebugManager> newDebugManager,
                std::shared_ptr<Device> newDevice);
-  ~ImageManager() = default;
+  ~ImageManager();
 
   ImageManager(const ImageManager&) = delete;
   ImageManager(ImageManager&&) = delete;

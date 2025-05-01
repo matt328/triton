@@ -30,7 +30,7 @@ class CommandBufferManager {
 public:
   CommandBufferManager(std::shared_ptr<Device> newDevice,
                        std::shared_ptr<IDebugManager> newDebugManager);
-  ~CommandBufferManager() = default;
+  ~CommandBufferManager();
 
   CommandBufferManager(const CommandBufferManager&) = delete;
   CommandBufferManager(CommandBufferManager&&) = delete;

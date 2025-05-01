@@ -19,14 +19,16 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
                        std::shared_ptr<IEventBus> newEventBus,
                        std::shared_ptr<Swapchain> newSwapchain,
                        std::shared_ptr<IFrameGraph> newFrameGraph,
-                       std::shared_ptr<RenderPassFactory> newRenderPassFactory)
+                       std::shared_ptr<RenderPassFactory> newRenderPassFactory,
+                       std::shared_ptr<CommandBufferManager> newCommandBufferManager)
     : rendererConfig{newRenderConfig},
       frameManager{std::move(newFrameManager)},
       graphicsQueue{std::move(newGraphicsQueue)},
       eventBus{std::move(newEventBus)},
       swapchain{std::move(newSwapchain)},
       frameGraph{std::move(newFrameGraph)},
-      renderPassFactory{std::move(newRenderPassFactory)} {
+      renderPassFactory{std::move(newRenderPassFactory)},
+      commandBufferManager{std::move(newCommandBufferManager)} {
 
   auto colorAttachmentInfo = AttachmentCreateInfo{
       .format = vk::Format::eR16G16B16A16Sfloat,
@@ -55,6 +57,19 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
 
   auto forwardPass = renderPassFactory->createGraphicsPass(forwardPassCreateInfo);
 
+  std::vector<CommandBufferUse> uses{};
+
+  for (const auto& frame : frameManager->getFrames()) {
+    uses.emplace_back(CommandBufferUse{.threadId = std::this_thread::get_id(),
+                                       .frameId = frame->getIndex(),
+                                       .passId = forwardPass->getId()});
+  }
+
+  const auto commandBufferInfo = CommandBufferInfo{
+      .queueConfigs = {QueueConfig{.queueType = QueueType::Graphics, .uses = uses}}};
+
+  commandBufferManager->allocateCommandBuffers(commandBufferInfo);
+
   const auto forwardPassGraphInfo = PassGraphInfo{};
 
   frameGraph->addPass(std::move(forwardPass), forwardPassGraphInfo);
@@ -68,7 +83,6 @@ auto R3Renderer::registerRenderable([[maybe_unused]] const RenderableData& data)
 }
 
 void R3Renderer::update() {
-  Log.trace("R3Renderer::update");
 }
 
 void R3Renderer::renderNextFrame() {

@@ -8,6 +8,8 @@ ImageRegistry::ImageRegistry(std::shared_ptr<ImageManager> newImageManager)
 }
 
 ImageRegistry::~ImageRegistry() {
+  Log.trace("Destroying ImageRegistry");
+  imageHandles.clear();
 }
 
 auto ImageRegistry::getOrCreate(const ImageKey& key) -> Handle<ManagedImage> {

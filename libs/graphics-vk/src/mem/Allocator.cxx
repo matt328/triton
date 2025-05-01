@@ -76,8 +76,8 @@ auto Allocator::createDescriptorBuffer(const size_t size, const std::string_view
   return createBuffer(&bci, &aci, name);
 }
 
-auto Allocator::createStagingBuffer(const size_t size,
-                                    const std::string_view& name) const -> std::unique_ptr<Buffer> {
+auto Allocator::createStagingBuffer(const size_t size, const std::string_view& name) const
+    -> std::unique_ptr<Buffer> {
 
   const auto bufferCreateInfo = vk::BufferCreateInfo{.size = size,
                                                      .usage = vk::BufferUsageFlagBits::eTransferSrc,

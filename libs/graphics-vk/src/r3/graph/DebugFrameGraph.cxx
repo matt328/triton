@@ -6,6 +6,10 @@ DebugFrameGraph::DebugFrameGraph(std::shared_ptr<CommandBufferManager> newComman
     : commandBufferManager{std::move(newCommandBufferManager)} {
 }
 
+DebugFrameGraph::~DebugFrameGraph() {
+  graphicsPasses.clear();
+}
+
 auto DebugFrameGraph::addPass(std::unique_ptr<GraphicsPass>&& pass, PassGraphInfo passInfo)
     -> void {
   graphicsPasses.emplace_back(std::move(pass));
@@ -33,8 +37,6 @@ auto DebugFrameGraph::bake() -> void {
   later.
 */
 auto DebugFrameGraph::execute(const Frame* frame) -> FrameGraphResult {
-  Log.trace("DebugFrameGraph::execute");
-
   auto frameGraphResult = FrameGraphResult{};
 
   for (const auto& pass : graphicsPasses) {

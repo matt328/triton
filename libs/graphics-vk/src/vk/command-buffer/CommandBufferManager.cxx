@@ -19,6 +19,11 @@ CommandBufferManager::CommandBufferManager(std::shared_ptr<Device> newDevice,
   debugManager->setObjectName(**transferCommandPool, "CommandPool-Transfer");
 }
 
+CommandBufferManager::~CommandBufferManager() {
+  bufferMap.clear();
+  poolMap.clear();
+}
+
 auto CommandBufferManager::allocateCommandBuffers(const CommandBufferInfo& info) -> void {
   std::set<PoolKey> createdPools;
 
@@ -67,6 +72,7 @@ auto CommandBufferManager::allocateCommandBuffers(const CommandBufferInfo& info)
 
 auto CommandBufferManager::requestCommandBuffer(const CommandBufferRequest& request)
     -> vk::raii::CommandBuffer& {
+  assert(bufferMap.contains(request) && "BufferMap does not contain requested command buffer");
   return bufferMap.at(request);
 }
 

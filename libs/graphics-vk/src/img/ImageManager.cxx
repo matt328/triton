@@ -14,6 +14,11 @@ ImageManager::ImageManager(std::shared_ptr<Allocator> newAllocator,
       device{std::move(newDevice)} {
 }
 
+ImageManager::~ImageManager() {
+  Log.trace("Destroying ImageManager");
+  imageMap.clear();
+}
+
 auto ImageManager::createImage(const ImageRequest& request) -> Handle<ManagedImage> {
   const auto imageCreateInfo = vk::ImageCreateInfo{
       .imageType = vk::ImageType::e2D,
@@ -50,10 +55,10 @@ auto ImageManager::createImage(const ImageRequest& request) -> Handle<ManagedIma
 
   imageMap.emplace(
       key,
-      std::make_unique<ManagedImage>(std::make_unique<AllocatedImage>(
-                                         AllocatedImage{.image = image, .allocation = allocation}),
-                                     device->getVkDevice().createImageView(imageViewInfo),
-                                     request.extent));
+      std::make_unique<ManagedImage>(
+          std::make_unique<AllocatedImage>(image, allocation, *allocator->getAllocator()),
+          device->getVkDevice().createImageView(imageViewInfo),
+          request.extent));
   return key;
 }
 

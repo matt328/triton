@@ -13,6 +13,7 @@ class Swapchain;
 class IFrameGraph;
 class RenderPassFactory;
 struct FrameGraphResult;
+class CommandBufferManager;
 
 namespace queue {
 class Graphics;
@@ -28,7 +29,8 @@ public:
              std::shared_ptr<IEventBus> newEventBus,
              std::shared_ptr<Swapchain> newSwapchain,
              std::shared_ptr<IFrameGraph> newFrameGraph,
-             std::shared_ptr<RenderPassFactory> newRenderPassFactory);
+             std::shared_ptr<RenderPassFactory> newRenderPassFactory,
+             std::shared_ptr<CommandBufferManager> newCommandBufferManager);
   ~R3Renderer() override = default;
 
   R3Renderer(const R3Renderer&) = delete;
@@ -53,8 +55,8 @@ private:
   std::shared_ptr<IEventBus> eventBus;
   std::shared_ptr<Swapchain> swapchain;
   std::shared_ptr<IFrameGraph> frameGraph;
-
   std::shared_ptr<RenderPassFactory> renderPassFactory;
+  std::shared_ptr<CommandBufferManager> commandBufferManager;
 
   std::unordered_map<RenderPassType, GraphicsPass> renderPasses;
   std::unique_ptr<GeometryBuffer> geometryBuffer;
