@@ -4,6 +4,7 @@
 #include "Maths.hpp"
 #include "api/fx/Events.hpp"
 #include "img/ImageRegistry.hpp"
+#include "mem/buffer-registry/BufferRegistry.hpp"
 #include "vk/core/Swapchain.hpp"
 
 namespace tr {
@@ -16,7 +17,8 @@ DefaultFrameManager::DefaultFrameManager(
     std::shared_ptr<VkResourceManager> newResourceManager,
     std::shared_ptr<IEventBus> newEventBus,
     std::shared_ptr<IDebugManager> debugManager,
-    std::shared_ptr<ImageRegistry> newImageRegistry)
+    std::shared_ptr<ImageRegistry> newImageRegistry,
+    std::shared_ptr<BufferRegistry> newBufferRegistry)
     : renderConfig{newRenderContextConfig},
       commandBufferManager{std::move(newCommandBufferManager)},
       device{std::move(newDevice)},
@@ -24,6 +26,7 @@ DefaultFrameManager::DefaultFrameManager(
       resourceManager{std::move(newResourceManager)},
       eventBus{std::move(newEventBus)},
       imageRegistry{std::move(newImageRegistry)},
+      bufferRegistry{std::move(newBufferRegistry)},
       currentFrame{0} {
 
   for (uint8_t i = 0; i < renderConfig.framesInFlight; ++i) {
@@ -69,6 +72,17 @@ auto DefaultFrameManager::registerImageRequest(const ImageRequest& request)
         .instance = ImageInstanceKey{.frameId = frame->getIndex()},
     });
     frame->addLogicalImage(logicalHandle, imageHandle);
+  }
+
+  return logicalHandle;
+}
+
+auto DefaultFrameManager::registerBufferRequest(const BufferKey& bufferKey)
+    -> Handle<BufferWrapper> {
+  const auto logicalHandle = bufferHandleGenerator.requestHandle();
+
+  for (auto& frame : frames) {
+    const auto bufferHandle = bufferRegistry->getOrCreate(bufferKey);
   }
 
   return logicalHandle;

@@ -3,10 +3,6 @@
 #include "bk/Handle.hpp"
 #include "mem/BufferWrapper.hpp"
 
-/*
-  TODO(matt) Create DrawContextFactory, map drawcontexthandles into renderpasses
-*/
-
 namespace tr {
 
 struct PushConstantBlob {
@@ -15,12 +11,16 @@ struct PushConstantBlob {
   uint32_t offset = 0;
 };
 
+struct IndirectMetadata {
+  uint32_t indirectOffset;
+  uint32_t countOffset;
+};
+
 struct DrawContextConfig {
   std::vector<Handle<BufferWrapper>> logicalBuffers;
   Handle<BufferWrapper> indirectBuffer;
   Handle<BufferWrapper> countBuffer;
-  uint32_t indirectOffset;
-  uint32_t countOffset;
+  IndirectMetadata indirectMetadata;
 };
 
 class Frame;
@@ -35,6 +35,8 @@ public:
   DrawContext(DrawContext&&) = delete;
   auto operator=(const DrawContext&) -> DrawContext& = default;
   auto operator=(DrawContext&&) -> DrawContext& = delete;
+
+  auto updateIndirectMetadata(const IndirectMetadata& data) -> void;
 
   auto bind(const Frame* frame,
             vk::raii::CommandBuffer& commandBuffer,

@@ -42,11 +42,15 @@ auto DrawContext::record(const Frame* frame, vk::raii::CommandBuffer& commandBuf
                           .get<ArenaBuffer>();
 
   commandBuffer.drawIndexedIndirectCount(indirectBuffer->getBuffer().getBuffer(),
-                                         config.indirectOffset,
+                                         config.indirectMetadata.indirectOffset,
                                          countBuffer->getBuffer().getBuffer(),
-                                         config.countOffset,
+                                         config.indirectMetadata.countOffset,
                                          1024,
                                          sizeof(vk::DrawIndexedIndirectCommand));
+}
+
+auto DrawContext::updateIndirectMetadata(const IndirectMetadata& data) -> void {
+  config.indirectMetadata = data;
 }
 
 }

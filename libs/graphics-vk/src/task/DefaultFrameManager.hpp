@@ -12,6 +12,7 @@ class CommandBufferManager;
 class Swapchain;
 class VkResourceManager;
 class ImageRegistry;
+class BufferRegistry;
 
 class DefaultFrameManager final : public IFrameManager {
 public:
@@ -22,7 +23,8 @@ public:
                                std::shared_ptr<VkResourceManager> newResourceManager,
                                std::shared_ptr<IEventBus> newEventBus,
                                std::shared_ptr<IDebugManager> debugManager,
-                               std::shared_ptr<ImageRegistry> newImageRegistry);
+                               std::shared_ptr<ImageRegistry> newImageRegistry,
+                               std::shared_ptr<BufferRegistry> newBufferRegistry);
   ~DefaultFrameManager() override;
 
   DefaultFrameManager(const DefaultFrameManager&) = delete;
@@ -36,6 +38,8 @@ public:
 
   auto createPerFrameBuffer() -> LogicalBufferHandle override;
 
+  auto registerBufferRequest(const BufferKey& bufferKey) -> Handle<BufferWrapper> override;
+
   auto registerImageRequest(const ImageRequest& request) -> Handle<ManagedImage> override;
 
 private:
@@ -46,6 +50,7 @@ private:
   std::shared_ptr<VkResourceManager> resourceManager;
   std::shared_ptr<IEventBus> eventBus;
   std::shared_ptr<ImageRegistry> imageRegistry;
+  std::shared_ptr<BufferRegistry> bufferRegistry;
 
   size_t currentFrame;
   std::vector<std::unique_ptr<Frame>> frames;
@@ -54,6 +59,7 @@ private:
   MapKey bufferKeygen;
 
   HandleGenerator<ManagedImage> imageHandleGenerator;
+  HandleGenerator<BufferWrapper> bufferHandleGenerator;
 
   auto handleSwapchainResized(const SwapchainResized& event) -> void;
 };
