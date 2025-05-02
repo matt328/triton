@@ -20,10 +20,10 @@ auto ComputeTask::record(vk::raii::CommandBuffer& commandBuffer,
 
   commandBuffer.bindPipeline(vk::PipelineBindPoint::eCompute, computePipeline.getPipeline());
 
-  commandBuffer.pushConstants<ComputePushConstants>(computePipeline.getPipelineLayout(),
-                                                    vk::ShaderStageFlagBits::eCompute,
-                                                    0,
-                                                    pushConstants);
+  // commandBuffer.pushConstants(computePipeline.getPipelineLayout(),
+  //                             vk::ShaderStageFlagBits::eCompute,
+  //                             0,
+  //                             {pushConstants});
 
   commandBuffer.dispatch(1024, 1, 1);
 }

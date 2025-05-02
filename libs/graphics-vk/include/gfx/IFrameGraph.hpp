@@ -36,7 +36,7 @@ public:
   auto operator=(IFrameGraph&&) -> IFrameGraph& = delete;
 
   virtual auto addPass(std::unique_ptr<GraphicsPass>&& pass, PassGraphInfo passInfo) -> void = 0;
-  virtual auto addPass(Handle<ComputePass> passHandle, PassInfo passInfo) -> void = 0;
+  virtual auto addPass(std::unique_ptr<ComputePass>&& pass, PassGraphInfo passInfo) -> void = 0;
 
   virtual auto bake() -> void = 0;
 

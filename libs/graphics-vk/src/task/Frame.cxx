@@ -46,10 +46,6 @@ auto Frame::getSwapchainImageIndex() const noexcept -> uint32_t {
   return swapchainImageIndex;
 }
 
-auto Frame::getBufferHandle(BufferHandleType type) const -> BufferHandle {
-  return bufferHandleMap.at(type);
-}
-
 auto Frame::getStaticObjectCount() const -> uint32_t {
   return staticObjectCount;
 }
@@ -77,23 +73,20 @@ auto Frame::getLogicalImage(Handle<ManagedImage> logicalHandle) const -> Handle<
   return imageHandles.at(logicalHandle);
 }
 
-auto Frame::addLogicalBuffer(LogicalBufferHandle logicalHandle, BufferHandle bufferHandle) -> void {
+auto Frame::addLogicalBuffer(Handle<BufferWrapper> logicalHandle,
+                             Handle<BufferWrapper> bufferHandle) -> void {
   assert(!bufferHandles.contains(logicalHandle) &&
          "Attempted to register same logical handle twice");
   bufferHandles.emplace(logicalHandle, bufferHandle);
 }
 
-[[nodiscard]] auto Frame::getLogicalBuffer(LogicalBufferHandle logicalHandle) const
-    -> BufferHandle {
+[[nodiscard]] auto Frame::getLogicalBuffer(Handle<BufferWrapper> logicalHandle) const
+    -> Handle<BufferWrapper> {
   return bufferHandles.at(logicalHandle);
 }
 
 auto Frame::setSwapchainImageIndex(const uint32_t index) -> void {
   swapchainImageIndex = index;
-}
-
-auto Frame::setBufferHandle(BufferHandleType type, BufferHandle handle) -> void {
-  bufferHandleMap.insert({type, handle});
 }
 
 auto Frame::setStaticObjectCount(uint32_t newObjectCount) -> void {
@@ -132,17 +125,6 @@ auto Frame::transitionImage(const vk::raii::CommandBuffer& cmd,
                       {},
                       {},
                       barrier);
-}
-
-auto Frame::registerBuffer(BufferHandle handle) -> size_t {
-  const auto key = bufferHandleKeygen.getKey();
-  bufferHandleMap2.emplace(key, handle);
-  return key;
-}
-
-auto Frame::getBufferHandle2(size_t key) const -> BufferHandle {
-  assert(bufferHandleMap2.contains(key) && "Invalid buffer key requested");
-  return bufferHandleMap2.at(key);
 }
 
 }

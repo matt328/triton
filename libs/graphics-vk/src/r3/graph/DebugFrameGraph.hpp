@@ -17,7 +17,7 @@ public:
   auto operator=(DebugFrameGraph&&) -> DebugFrameGraph& = delete;
 
   auto addPass(std::unique_ptr<GraphicsPass>&& pass, PassGraphInfo passInfo) -> void override;
-  auto addPass(Handle<ComputePass> passHandle, PassInfo passInfo) -> void override;
+  auto addPass(std::unique_ptr<ComputePass>&& pass, PassGraphInfo passInfo) -> void override;
 
   auto bake() -> void override;
 
@@ -26,7 +26,7 @@ public:
 private:
   std::shared_ptr<CommandBufferManager> commandBufferManager;
 
-  Handle<ComputePass> computePass{};
+  std::vector<std::unique_ptr<ComputePass>> computePasses;
   std::vector<std::unique_ptr<GraphicsPass>> graphicsPasses;
 };
 

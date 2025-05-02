@@ -57,18 +57,6 @@ auto GraphicsPass::execute(const Frame* frame,
   cmdBuffer.beginRendering(renderingInfo);
   cmdBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, passConfig.pipeline);
 
-  bindFn(frame, cmdBuffer);
-
-  // const auto indirectBuffer = frame->getLogicalBuffer(drawContext.indirectBufferHandle);
-
-  // cmdBuffer
-  //     .drawIndexedIndirectCount(vk::Buffer buffer,
-  //                               vk::DeviceSize offset,
-  //                               vk::Buffer countBuffer,
-  //                               vk::DeviceSize countBufferOffset,
-  //                               uint32_t maxDrawCount,
-  //                               uint32_t stride)
-
   cmdBuffer.endRendering();
   cmdBuffer.end();
 }

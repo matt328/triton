@@ -13,8 +13,8 @@ struct PushConstantInfo {
 };
 
 struct PipelineLayoutInfo {
-  std::vector<PushConstantInfo> pushConstantInfoList;
-  std::span<vk::DescriptorSetLayout> descriptorSetLayouts;
+  std::vector<PushConstantInfo> pushConstantInfoList{};
+  std::span<vk::DescriptorSetLayout> descriptorSetLayouts{};
 };
 
 struct ShaderStageInfo {

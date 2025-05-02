@@ -2,6 +2,7 @@
 #include "bk/Handle.hpp"
 #include "LogicalBufferHandle.hpp"
 #include "img/ManagedImage.hpp"
+#include "mem/BufferWrapper.hpp"
 #include "vk/command-buffer/CommandBufferManager.hpp"
 #include "VkResourceManager.hpp"
 #include "LogicalImageHandle.hpp"
@@ -76,8 +77,10 @@ public:
   [[nodiscard]] auto getLogicalImage(Handle<ManagedImage> logicalHandle) const
       -> Handle<ManagedImage>;
 
-  auto addLogicalBuffer(LogicalBufferHandle logicalHandle, BufferHandle bufferHandle) -> void;
-  [[nodiscard]] auto getLogicalBuffer(LogicalBufferHandle logicalHandle) const -> BufferHandle;
+  auto addLogicalBuffer(Handle<BufferWrapper> logicalHandle, Handle<BufferWrapper> bufferHandle)
+      -> void;
+  [[nodiscard]] auto getLogicalBuffer(Handle<BufferWrapper> logicalHandle) const
+      -> Handle<BufferWrapper>;
 
   auto setDepthImageHandle(ImageHandle handle) -> void;
   auto setDrawImageHandle(ImageHandle handle) -> void;
@@ -103,13 +106,8 @@ private:
   uint32_t swapchainImageIndex{};
   vk::Extent2D drawImageExtent{};
 
-  std::unordered_map<BufferHandleType, BufferHandle> bufferHandleMap;
-
-  MapKey bufferHandleKeygen;
-  std::unordered_map<size_t, BufferHandle> bufferHandleMap2;
-
+  std::unordered_map<Handle<BufferWrapper>, Handle<BufferWrapper>> bufferHandles;
   std::unordered_map<Handle<ManagedImage>, Handle<ManagedImage>> imageHandles;
-  std::unordered_map<LogicalBufferHandle, BufferHandle> bufferHandles;
 
   uint32_t staticObjectCount;
   uint32_t dynamicObjectCount;

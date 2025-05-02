@@ -4,12 +4,13 @@
 #include "gfx/IFrameGraph.hpp"
 #include "gfx/IFrameManager.hpp"
 #include "gfx/QueueTypes.hpp"
-#include "mem/ArenaBuffer.hpp"
 #include "mem/GeometryBuffer.hpp"
+#include "r3/render-pass/ComputePass.hpp"
 #include "r3/render-pass/RenderPassFactory.hpp"
 #include "task/Frame.hpp"
 #include "render-pass/GraphicsPassCreateInfo.hpp"
 #include "gfx/PassGraphInfo.hpp"
+#include "vk/ComputePushConstants.hpp"
 
 namespace tr {
 
@@ -130,6 +131,37 @@ auto R3Renderer::getGeometryBuffer() -> GeometryBuffer& {
 }
 
 auto R3Renderer::createComputeCullingPass() -> void {
+
+  const auto pipelineLayoutInfo =
+      PipelineLayoutInfo{.pushConstantInfoList = {PushConstantInfo{
+                             .stageFlags = vk::ShaderStageFlagBits::eCompute,
+                             .offset = 0,
+                             .size = sizeof(ComputePushConstants),
+                         }}};
+
+  const auto cullingPassInfo = ComputePassCreateInfo{
+      .id = "culling",
+      .pipelineLayoutInfo = pipelineLayoutInfo,
+      .shaderStageInfo = ShaderStageInfo{.stage = vk::ShaderStageFlagBits::eCompute,
+                                         .shaderFile = SHADER_ROOT / "compute.comp.spv",
+                                         .entryPoint = "main"}};
+  auto cullingPass = renderPassFactory->createComputePass(cullingPassInfo);
+
+  auto uses = std::vector<CommandBufferUse>{};
+
+  for (const auto& frame : frameManager->getFrames()) {
+    uses.emplace_back(CommandBufferUse{.threadId = std::this_thread::get_id(),
+                                       .frameId = frame->getIndex(),
+                                       .passId = cullingPass->getId()});
+  }
+
+  const auto commandBufferInfo = CommandBufferInfo{
+      .queueConfigs = {QueueConfig{.queueType = QueueType::Compute, .uses = uses}}};
+  commandBufferManager->allocateCommandBuffers(commandBufferInfo);
+
+  const auto cullingPassGraphInfo = PassGraphInfo{};
+
+  frameGraph->addPass(std::move(cullingPass), cullingPassGraphInfo);
 }
 
 auto R3Renderer::createForwardRenderPass() -> void {

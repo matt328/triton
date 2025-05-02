@@ -22,6 +22,10 @@ public:
                 vk::raii::CommandBuffer& cmdBuffer,
                 const PushConstantsBindFn& bindFn) -> void;
 
+  [[nodiscard]] auto getId() const {
+    return config.id;
+  }
+
 private:
   std::shared_ptr<ImageManager> imageManager;
   ComputePassConfig config;

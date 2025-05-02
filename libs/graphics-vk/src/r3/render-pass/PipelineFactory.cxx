@@ -139,6 +139,41 @@ auto PipelineFactory::createGraphicsPipeline(const PipelineCreateInfo& createInf
 
 auto PipelineFactory::createComputePipeline(const PipelineCreateInfo& createInfo)
     -> std::tuple<vk::raii::PipelineLayout, vk::raii::Pipeline> {
-  return {nullptr, nullptr};
+  // Push Constants
+  std::vector<vk::PushConstantRange> pushConstantRanges{};
+  pushConstantRanges.reserve(createInfo.pipelineLayoutInfo.pushConstantInfoList.size());
+  for (const auto& pcrInfo : createInfo.pipelineLayoutInfo.pushConstantInfoList) {
+    pushConstantRanges.emplace_back(vk::PushConstantRange{
+        .stageFlags = pcrInfo.stageFlags,
+        .offset = pcrInfo.offset,
+        .size = pcrInfo.size,
+    });
+  }
+
+  const auto pipelineLayoutCreateInfo = vk::PipelineLayoutCreateInfo{
+      .pushConstantRangeCount = static_cast<uint32_t>(pushConstantRanges.size()),
+      .pPushConstantRanges = pushConstantRanges.data()};
+
+  auto pipelineLayout = vk::raii::PipelineLayout{device->getVkDevice(), pipelineLayoutCreateInfo};
+
+  // Shader Stages
+  auto shaderModules = std::vector<vk::raii::ShaderModule>{};
+  auto shaderStages = std::vector<vk::PipelineShaderStageCreateInfo>{};
+  for (const auto& stageInfo : createInfo.shaderStageInfo) {
+    shaderModules.emplace_back(
+        shaderModuleFactory->createShaderModule(stageInfo.stage, stageInfo.shaderFile));
+    shaderStages.emplace_back(
+        vk::PipelineShaderStageCreateInfo{.stage = stageInfo.stage,
+                                          .module = *shaderModules.back(),
+                                          .pName = stageInfo.entryPoint.c_str()});
+  }
+
+  const auto pipelineCreateInfo =
+      vk::ComputePipelineCreateInfo{.stage = shaderStages.front(), .layout = *pipelineLayout};
+
+  auto pipeline = vk::raii::Pipeline{device->getVkDevice(), VK_NULL_HANDLE, pipelineCreateInfo};
+
+  return {std::move(pipelineLayout), std::move(pipeline)};
 }
+
 }

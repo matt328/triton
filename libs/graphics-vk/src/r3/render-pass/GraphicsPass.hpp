@@ -22,7 +22,7 @@ public:
                vk::raii::CommandBuffer& cmdBuffer,
                const PushConstantsBindFn& bindFn) -> void;
 
-  auto getId() {
+  [[nodiscard]] auto getId() const {
     return passConfig.id;
   }
 
