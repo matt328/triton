@@ -86,10 +86,10 @@ public:
 
   [[nodiscard]] auto getMesh(MeshHandle handle) -> const ImmutableMesh&;
 
-  [[nodiscard]] auto getStaticMeshBuffers() const -> std::tuple<Buffer&, Buffer&>;
-  [[nodiscard]] auto getDynamicMeshBuffers() const -> std::tuple<Buffer&, Buffer&>;
-  [[nodiscard]] auto getTerrainMeshBuffers() const -> std::tuple<Buffer&, Buffer&>;
-  [[nodiscard]] auto getDebugMeshBuffers() const -> std::tuple<Buffer&, Buffer&>;
+  [[nodiscard]] auto getStaticMeshBuffers() const -> std::tuple<ManagedBuffer&, ManagedBuffer&>;
+  [[nodiscard]] auto getDynamicMeshBuffers() const -> std::tuple<ManagedBuffer&, ManagedBuffer&>;
+  [[nodiscard]] auto getTerrainMeshBuffers() const -> std::tuple<ManagedBuffer&, ManagedBuffer&>;
+  [[nodiscard]] auto getDebugMeshBuffers() const -> std::tuple<ManagedBuffer&, ManagedBuffer&>;
 
   [[nodiscard]] auto getDescriptorSetLayout() -> const vk::DescriptorSetLayout*;
 

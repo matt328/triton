@@ -38,6 +38,29 @@ Allocator::~Allocator() {
   allocator->destroy();
 }
 
+auto Allocator::createBuffer2(vk::BufferCreateInfo* bci,
+                              vma::AllocationCreateInfo* aci,
+                              const std::string_view& name) const
+    -> std::tuple<std::unique_ptr<ManagedBuffer>, BufferMeta> {
+
+  vma::AllocationInfo info{};
+  try {
+    auto [buffer, allocation] = allocator->createBuffer(*bci, *aci, info);
+    allocator->setAllocationName(allocation, name.data());
+    debugManager->setObjectName(buffer, name.data());
+
+    return {std::make_unique<ManagedBuffer>(buffer, allocator, allocation),
+            BufferMeta{
+                .bufferCreateInfo = bci,
+                .allocationInfo = info,
+                .allocationCreateInfo = aci,
+            }};
+  } catch (const std::exception& ex) {
+    throw AllocationException(
+        fmt::format("Error creating and/or naming Buffer: {0}, {1}", name, ex.what()));
+  }
+}
+
 auto Allocator::createBuffer(const vk::BufferCreateInfo* bci,
                              const vma::AllocationCreateInfo* aci,
                              const std::string_view& name) const -> std::unique_ptr<Buffer> {

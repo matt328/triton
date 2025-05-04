@@ -38,7 +38,7 @@ public:
 
   auto createPerFrameBuffer() -> LogicalBufferHandle override;
 
-  auto registerBufferRequest(const BufferKey& bufferKey) -> Handle<BufferWrapper> override;
+  auto registerBufferRequest(BufferKey& bufferKey) -> Handle<BufferWrapper> override;
 
   auto registerImageRequest(const ImageRequest& request) -> Handle<ManagedImage> override;
 

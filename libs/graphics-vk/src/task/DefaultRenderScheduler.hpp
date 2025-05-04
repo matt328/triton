@@ -92,7 +92,8 @@ private:
                                vk::Extent2D srcSize,
                                vk::Extent2D dstSize) -> void;
 
-  static auto insertBarrier(const vk::raii::CommandBuffer& cmd, const Buffer& buffer) -> void;
+  static auto insertBarrier(const vk::raii::CommandBuffer& cmd, const ManagedBuffer& buffer)
+      -> void;
 };
 
 }

@@ -80,7 +80,7 @@ auto ArenaGeometryBuffer::getGpuBufferEntries(const std::vector<RenderMeshData>&
   return gpuBufferEntryCache;
 }
 
-auto ArenaGeometryBuffer::getBuffers() const -> std::tuple<Buffer&, Buffer&> {
+auto ArenaGeometryBuffer::getBuffers() const -> std::tuple<ManagedBuffer&, ManagedBuffer&> {
   return {vertexBuffer->getBuffer(), indexBuffer->getBuffer()};
 }
 

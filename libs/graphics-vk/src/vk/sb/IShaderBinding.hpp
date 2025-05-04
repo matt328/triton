@@ -2,7 +2,7 @@
 
 namespace tr {
 
-class Buffer;
+class ManagedBuffer;
 
 class IShaderBinding {
 public:
@@ -16,7 +16,7 @@ public:
 
   virtual ~IShaderBinding() = default;
 
-  virtual void bindBuffer(uint32_t binding, const Buffer& buffer, size_t size) = 0;
+  virtual void bindBuffer(uint32_t binding, const ManagedBuffer& buffer, size_t size) = 0;
 
   virtual void bindImageSamplers(uint32_t binding,
                                  const std::vector<vk::DescriptorImageInfo>& imageInfo) = 0;

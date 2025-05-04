@@ -14,6 +14,10 @@ struct HandleGenerator {
     return Handle<T>{.id = distribution(gen)};
   }
 
+  [[nodiscard]] auto requestLogicalHandle() -> LogicalHandle<T> {
+    return LogicalHandle<T>{.id = distribution(gen)};
+  }
+
 private:
   std::random_device randomDevice;
   std::mt19937 gen;

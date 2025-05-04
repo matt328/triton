@@ -7,7 +7,7 @@ BufferRegistry::BufferRegistry(std::shared_ptr<IBufferManager> newBufferManager)
     : bufferManager{std::move(newBufferManager)} {
 }
 
-auto BufferRegistry::getOrCreate(const BufferKey& key) -> BufferHandle {
+auto BufferRegistry::getOrCreate(const BufferKey& key) -> Handle<BufferWrapper> {
   if (bufferHandles.contains(key)) {
     return bufferHandles.at(key);
   }

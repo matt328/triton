@@ -1,10 +1,15 @@
 #pragma once
 
+#include "buffers/ManagedBuffer.hpp"
 #include "gfx/IDebugManager.hpp"
 #include "vk/core/PhysicalDevice.hpp"
 #include <vk_mem_alloc_handles.hpp>
 
 namespace tr {
+
+/*
+  TODO: I think the Allocator is the BufferFactory
+*/
 
 class AllocationException : public std::runtime_error {
 public:
@@ -28,6 +33,13 @@ public:
 
   Allocator(Allocator&&) = delete;
   auto operator=(Allocator&&) -> Allocator& = delete;
+
+  /// Creates a Buffer
+  /// @throws AllocationException if there is an error allocating or naming the buffer.
+  auto createBuffer2(vk::BufferCreateInfo* bci,
+                     vma::AllocationCreateInfo* aci,
+                     const std::string_view& name = "unnamed buffer") const
+      -> std::tuple<std::unique_ptr<ManagedBuffer>, BufferMeta>;
 
   /// Creates a Buffer
   /// @throws AllocationException if there is an error allocating or naming the buffer.

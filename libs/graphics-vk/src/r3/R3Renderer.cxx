@@ -11,6 +11,7 @@
 #include "render-pass/GraphicsPassCreateInfo.hpp"
 #include "gfx/PassGraphInfo.hpp"
 #include "vk/ComputePushConstants.hpp"
+#include "mem/buffer-registry/BufferRequest.hpp"
 
 namespace tr {
 
@@ -39,9 +40,29 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
     - Start with culling pass. Make sure it creates the correct DIIC, count, and uses the DIIC
     metadata buffer
   */
+  createGlobalBuffers();
   createComputeCullingPass();
   createForwardRenderPass();
   createCompositionRenderPass();
+}
+
+/*
+  TODO(matt): Simplify and streamline buffer creation.
+  For now, everything goes through the framemanager in case it needs to be a per frame buffer.
+  Reconsider moving it around so everything goes through the BufferRegistry, and that has the
+  frameManager injected into it so that it can transparently register per frame buffers and return
+  logical handles. That way the buffer registry can also track if the handle belongs to a per-frame
+  buffer. After creating a per-frame buffer, a LogicalHandle will be returned. LogicalHandles must
+  only be passed to frames to get the Handle, which will then be passed to the bufferRegistry. If a
+  non-per frame buffer is registered and then requested, this will be purely with the
+  bufferRegistry.
+*/
+
+auto R3Renderer::createGlobalBuffers() -> void {
+  globalBuffers.drawCommands = frameManager->registerBufferRequest(BufferRequest{});
+  globalBuffers.drawCounts = frameManager->registerBufferRequest(BufferRequest{});
+  globalBuffers.drawMetadata = frameManager->registerBufferRequest(BufferRequest{});
+  globalBuffers.geometry = frameManager->registerBufferRequest(BufferRequest{});
 }
 
 auto R3Renderer::registerRenderable([[maybe_unused]] const RenderableData& data)

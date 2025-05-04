@@ -1,11 +1,13 @@
 #pragma once
 
+#include "bk/Handle.hpp"
 #include "vk/ResourceManagerHandles.hpp"
 
 namespace tr {
 
-class Buffer;
+class ManagedBuffer;
 class IGeometryData;
+class BufferWrapper;
 
 struct BufferCreateInfo {
   size_t size;
@@ -45,7 +47,7 @@ public:
 
   virtual ~IBufferManager() = default;
 
-  virtual auto createBuffer(const BufferCreateInfo& bufferCreateInfo) -> BufferHandle = 0;
+  virtual auto createBuffer(const BufferCreateInfo& bufferCreateInfo) -> Handle<BufferWrapper> = 0;
 
   virtual auto createBuffer(size_t size,
                             vk::Flags<vk::BufferUsageFlagBits> flags,
@@ -59,7 +61,7 @@ public:
   virtual auto createIndirectBuffer(size_t size) -> BufferHandle = 0;
 
   [[nodiscard]] virtual auto resizeBuffer(BufferHandle handle, size_t newSize) -> BufferHandle = 0;
-  [[nodiscard]] virtual auto getBuffer(BufferHandle handle) const -> Buffer& = 0;
+  [[nodiscard]] virtual auto getBuffer(BufferHandle handle) const -> ManagedBuffer& = 0;
 
   virtual auto addToSingleBuffer(const void* data,
                                  size_t size,
@@ -67,10 +69,12 @@ public:
                                  vk::DeviceSize offset) -> void = 0;
   virtual auto removeData(BufferHandle handle, vk::DeviceSize offset, size_t size) -> void = 0;
 
+  virtual auto createStaticBuffer(const BufferCreateInfo& createInfo) -> Handle<BufferWrapper> = 0;
+
   virtual auto createArenaBuffer(const ArenaBufferCreateInfo& createInfo) -> BufferHandle = 0;
 
   virtual auto createArenaGeometryBuffer(const ArenaGeometryBufferCreateInfo& createInfo)
-      -> BufferHandle = 0;
+      -> Handle<BufferWrapper> = 0;
 };
 
 }

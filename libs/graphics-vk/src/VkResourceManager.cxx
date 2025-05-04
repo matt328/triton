@@ -267,21 +267,23 @@ auto VkResourceManager::getTextureData(const as::ImageData& imageData, std::stri
   return meshList[handle];
 }
 
-[[nodiscard]] auto VkResourceManager::getStaticMeshBuffers() const -> std::tuple<Buffer&, Buffer&> {
+[[nodiscard]] auto VkResourceManager::getStaticMeshBuffers() const
+    -> std::tuple<ManagedBuffer&, ManagedBuffer&> {
   return staticMeshBuffer->getBuffers();
 }
 
 [[nodiscard]] auto VkResourceManager::getDynamicMeshBuffers() const
-    -> std::tuple<Buffer&, Buffer&> {
+    -> std::tuple<ManagedBuffer&, ManagedBuffer&> {
   return dynamicMeshBuffer->getBuffers();
 }
 
 [[nodiscard]] auto VkResourceManager::getTerrainMeshBuffers() const
-    -> std::tuple<Buffer&, Buffer&> {
+    -> std::tuple<ManagedBuffer&, ManagedBuffer&> {
   return terrainMeshBuffer->getBuffers();
 }
 
-[[nodiscard]] auto VkResourceManager::getDebugMeshBuffers() const -> std::tuple<Buffer&, Buffer&> {
+[[nodiscard]] auto VkResourceManager::getDebugMeshBuffers() const
+    -> std::tuple<ManagedBuffer&, ManagedBuffer&> {
   return debugMeshBuffer->getBuffers();
 }
 

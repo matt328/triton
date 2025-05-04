@@ -37,7 +37,7 @@ private:
   explicit BufferWrapper(std::in_place_type_t<T>, Args&&... args)
       : buffer(std::in_place_type<T>, std::forward<Args>(args)...) {
   }
-  std::variant<Buffer, ArenaBuffer, ArenaGeometryBuffer> buffer;
+  std::variant<ManagedBuffer, ArenaBuffer, ArenaGeometryBuffer> buffer;
 };
 
 }

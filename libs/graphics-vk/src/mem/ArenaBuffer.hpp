@@ -20,7 +20,7 @@ public:
   auto insertData(const void* data, size_t size) -> BufferRegion;
   auto removeData(const BufferRegion& bufferIndex) -> void;
 
-  [[nodiscard]] auto getBuffer() const -> Buffer&;
+  [[nodiscard]] auto getBuffer() const -> ManagedBuffer&;
 
 private:
   IBufferManager* bufferManager;

@@ -43,7 +43,9 @@ DSShaderBinding::~DSShaderBinding() {
   Log.trace("Destroying ShaderBinding: {0}", name);
 }
 
-void DSShaderBinding::bindBuffer(const uint32_t binding, const Buffer& buffer, const size_t size) {
+void DSShaderBinding::bindBuffer(const uint32_t binding,
+                                 const ManagedBuffer& buffer,
+                                 const size_t size) {
   const auto bufferInfo =
       vk::DescriptorBufferInfo{.buffer = buffer.getBuffer(), .offset = 0, .range = size};
   const auto writes = std::array{vk::WriteDescriptorSet{.dstSet = **vkDescriptorSet,

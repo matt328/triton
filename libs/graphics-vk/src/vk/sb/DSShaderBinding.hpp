@@ -23,7 +23,7 @@ public:
   auto operator=(const DSShaderBinding&) -> DSShaderBinding& = delete;
   auto operator=(DSShaderBinding&&) -> DSShaderBinding& = delete;
 
-  void bindBuffer(uint32_t binding, const Buffer& buffer, size_t size) override;
+  void bindBuffer(uint32_t binding, const ManagedBuffer& buffer, size_t size) override;
 
   void bindImageSamplers(uint32_t binding,
                          const std::vector<vk::DescriptorImageInfo>& imageInfo) override;

@@ -9,6 +9,8 @@
 
 namespace tr {
 
+// Invert this dependency, remove bufferRegistry from here.
+
 DefaultFrameManager::DefaultFrameManager(
     const RenderContextConfig& newRenderContextConfig,
     std::shared_ptr<CommandBufferManager> newCommandBufferManager,
@@ -77,12 +79,13 @@ auto DefaultFrameManager::registerImageRequest(const ImageRequest& request)
   return logicalHandle;
 }
 
-auto DefaultFrameManager::registerBufferRequest(const BufferKey& bufferKey)
-    -> Handle<BufferWrapper> {
+auto DefaultFrameManager::registerBufferRequest(BufferKey& bufferKey) -> Handle<BufferWrapper> {
   const auto logicalHandle = bufferHandleGenerator.requestHandle();
 
   for (auto& frame : frames) {
+    bufferKey.instance.frameId = frame->getIndex();
     const auto bufferHandle = bufferRegistry->getOrCreate(bufferKey);
+    frame->addLogicalBuffer(logicalHandle, bufferHandle);
   }
 
   return logicalHandle;

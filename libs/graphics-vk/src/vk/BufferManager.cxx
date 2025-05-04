@@ -136,7 +136,7 @@ auto BufferManager::createIndirectBuffer(size_t size) -> BufferHandle {
   return newHandle;
 }
 
-[[nodiscard]] auto BufferManager::getBuffer(BufferHandle handle) const -> Buffer& {
+[[nodiscard]] auto BufferManager::getBuffer(BufferHandle handle) const -> ManagedBuffer& {
   return *bufferMap.at(handle);
 }
 
@@ -167,6 +167,13 @@ auto BufferManager::addToSingleBuffer(const void* data,
 auto BufferManager::removeData([[maybe_unused]] BufferHandle handle,
                                [[maybe_unused]] vk::DeviceSize offset,
                                [[maybe_unused]] size_t size) -> void {
+}
+
+auto BufferManager::createStaticBuffer(const BufferCreateInfo& createInfo)
+    -> Handle<BufferWrapper> {
+  const auto handle = bufferHandleGenerator.requestHandle();
+  newestBufferMap.emplace(handle, BufferWrapper::create<ManagedBuffer>(createInfo));
+  return handle;
 }
 
 auto BufferManager::createArenaBuffer(const ArenaBufferCreateInfo& createInfo) -> BufferHandle {

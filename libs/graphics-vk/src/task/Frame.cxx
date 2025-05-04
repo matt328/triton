@@ -73,15 +73,15 @@ auto Frame::getLogicalImage(Handle<ManagedImage> logicalHandle) const -> Handle<
   return imageHandles.at(logicalHandle);
 }
 
-auto Frame::addLogicalBuffer(Handle<BufferWrapper> logicalHandle,
-                             Handle<BufferWrapper> bufferHandle) -> void {
+auto Frame::addLogicalBuffer(LogicalHandle<ManagedBuffer> logicalHandle,
+                             Handle<ManagedBuffer> bufferHandle) -> void {
   assert(!bufferHandles.contains(logicalHandle) &&
          "Attempted to register same logical handle twice");
   bufferHandles.emplace(logicalHandle, bufferHandle);
 }
 
-[[nodiscard]] auto Frame::getLogicalBuffer(Handle<BufferWrapper> logicalHandle) const
-    -> Handle<BufferWrapper> {
+[[nodiscard]] auto Frame::getLogicalBuffer(LogicalHandle<ManagedBuffer> logicalHandle) const
+    -> Handle<ManagedBuffer> {
   return bufferHandles.at(logicalHandle);
 }
 

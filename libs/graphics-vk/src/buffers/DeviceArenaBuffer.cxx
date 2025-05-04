@@ -1,28 +1,18 @@
-#include "ArenaBuffer.hpp"
+#include "DeviceArenaBuffer.hpp"
 
 namespace tr {
 
-ArenaBuffer::ArenaBuffer(IBufferManager* newBufferManager, ArenaBufferCreateInfo createInfo)
-    : bufferManager{newBufferManager},
-      capacity(createInfo.initialBufferSize),
-      itemStride{createInfo.newItemStride} {
-  if (createInfo.bufferType == ArenaBufferType::Vertex) {
-    bufferHandle = bufferManager->createGpuVertexBuffer(
-        capacity,
-        fmt::format("Buffer-{}-Vertex", createInfo.bufferName.data()));
-  } else if (createInfo.bufferType == ArenaBufferType::Index) {
-    bufferHandle = bufferManager->createGpuIndexBuffer(
-        capacity,
-        fmt::format("Buffer-{}-Vertex", createInfo.bufferName.data()));
-  }
+DeviceArenaBuffer::DeviceArenaBuffer(std::shared_ptr<Device> newDevice,
+                                     vk::Buffer newVkBuffer,
+                                     std::shared_ptr<vma::Allocator> newAllocator,
+                                     vma::Allocation newAllocation,
+                                     const DeviceArenaBufferCreateInfo& createInfo)
+    : IBuffer(std::move(newDevice), newVkBuffer, std::move(newAllocator), newAllocation),
+      capacity(createInfo.initialCapacity),
+      itemStride(createInfo.itemStride) {
 }
 
-ArenaBuffer::~ArenaBuffer() {
-  Log.trace("Destroying Arena Buffer");
-}
-
-auto ArenaBuffer::insertData(const void* data, size_t size) -> BufferRegion {
-
+auto DeviceArenaBuffer::setData(const void* data, size_t size) -> BufferRegion {
   auto insertPosition = maxOffset;
   auto itemCount = (size / itemStride);
 
@@ -53,7 +43,34 @@ auto ArenaBuffer::insertData(const void* data, size_t size) -> BufferRegion {
       newCapacity *= 2;
     }
     Log.trace("Size: {}, current capacity: {}, new capacity: {}", size, capacity, newCapacity);
-    bufferHandle = bufferManager->resizeBuffer(bufferHandle, newCapacity);
+
+    ZoneNamedN(var, "Resize Buffer", true);
+
+    auto* bci = bufferMeta.bufferCreateInfo;
+    const auto oldSize = bci->size;
+    bci->size = newCapacity;
+
+    auto* aci = bufferMeta.allocationCreateInfo;
+
+    auto [newBuffer, newAllocation] = allocator->createBuffer(*bci, *aci);
+
+    allocation = newAllocation;
+
+    immediateTransferContext->submit([&](const vk::raii::CommandBuffer& cmd) {
+      ZoneNamedN(var, "Copy Buffer", true);
+      const auto vbCopy = vk::BufferCopy{.srcOffset = 0, .dstOffset = 0, .size = oldSize};
+      cmd.copyBuffer(vkBuffer, newBuffer, vbCopy);
+    });
+
+    {
+      ZoneNamedN(var, "Erasing Buffer", true);
+      unusedBuffers.push_back(handle);
+    }
+    TracyMessageL("Old Buffer Erased");
+    const auto newHandle = bufferMapKeygen.getKey();
+    bufferMap.emplace(newHandle, std::move(newBuffer));
+    return newHandle;
+
     capacity = newCapacity;
   }
 
@@ -66,18 +83,7 @@ auto ArenaBuffer::insertData(const void* data, size_t size) -> BufferRegion {
   return BufferRegion{.offset = insertPosition, .size = size};
 }
 
-auto ArenaBuffer::removeData(const BufferRegion& bufferIndex) -> void {
-  bufferManager->removeData(bufferHandle, bufferIndex.offset, bufferIndex.size);
-  auto [it, s] = freeList.insert(bufferIndex);
-  mergeWithNeighbors(it);
-}
-
-auto ArenaBuffer::getBuffer() const -> ManagedBuffer& {
-  return bufferManager->getBuffer(bufferHandle);
-}
-
-auto ArenaBuffer::mergeWithNeighbors(const RegionContainer::iterator& it) -> void {
-
+auto DeviceArenaBuffer::mergeRegionWithNeighbors(const RegionContainer::iterator& it) -> void {
   if (it == freeList.end()) {
     return;
   }

@@ -77,10 +77,11 @@ public:
   [[nodiscard]] auto getLogicalImage(Handle<ManagedImage> logicalHandle) const
       -> Handle<ManagedImage>;
 
-  auto addLogicalBuffer(Handle<BufferWrapper> logicalHandle, Handle<BufferWrapper> bufferHandle)
-      -> void;
-  [[nodiscard]] auto getLogicalBuffer(Handle<BufferWrapper> logicalHandle) const
-      -> Handle<BufferWrapper>;
+  auto addLogicalBuffer(LogicalHandle<ManagedBuffer> logicalHandle,
+                        Handle<ManagedBuffer> bufferHandle) -> void;
+
+  [[nodiscard]] auto getLogicalBuffer(LogicalHandle<ManagedBuffer> logicalHandle) const
+      -> Handle<ManagedBuffer>;
 
   auto setDepthImageHandle(ImageHandle handle) -> void;
   auto setDrawImageHandle(ImageHandle handle) -> void;
@@ -106,7 +107,7 @@ private:
   uint32_t swapchainImageIndex{};
   vk::Extent2D drawImageExtent{};
 
-  std::unordered_map<Handle<BufferWrapper>, Handle<BufferWrapper>> bufferHandles;
+  std::unordered_map<LogicalHandle<ManagedBuffer>, Handle<ManagedBuffer>> bufferHandles;
   std::unordered_map<Handle<ManagedImage>, Handle<ManagedImage>> imageHandles;
 
   uint32_t staticObjectCount;

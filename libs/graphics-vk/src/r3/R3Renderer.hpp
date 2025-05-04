@@ -3,6 +3,7 @@
 #include "api/gfx/RenderStyle.hpp"
 #include "gfx/IRenderContext.hpp"
 #include "gfx/RenderContextConfig.hpp"
+#include "mem/BufferWrapper.hpp"
 #include "r3/render-pass/GraphicsPass.hpp"
 
 namespace tr {
@@ -20,6 +21,13 @@ class Graphics;
 }
 
 const std::filesystem::path SHADER_ROOT = std::filesystem::current_path() / "assets" / "shaders";
+
+struct GlobalBuffers {
+  Handle<BufferWrapper> drawCommands;
+  Handle<BufferWrapper> drawCounts;
+  Handle<BufferWrapper> drawMetadata;
+  Handle<BufferWrapper> geometry;
+};
 
 class R3Renderer : public tr::IRenderContext {
 public:
@@ -63,6 +71,9 @@ private:
 
   std::vector<vk::CommandBuffer> buffers;
 
+  GlobalBuffers globalBuffers{};
+
+  auto createGlobalBuffers() -> void;
   auto createComputeCullingPass() -> void;
   auto createForwardRenderPass() -> void;
   auto createCompositionRenderPass() -> void;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IBufferManager.hpp"
+#include "bk/HandleGenerator.hpp"
 #include "bk/Rando.hpp"
 #include "api/fx/IEventBus.hpp"
 #include "vk/ResourceManagerHandles.hpp"
@@ -8,7 +9,7 @@
 
 namespace tr {
 
-class Buffer;
+class ManagedBuffer;
 class Allocator;
 class ImmediateTransferContext;
 class IGeometryData;
@@ -47,12 +48,14 @@ public:
 
   [[nodiscard]] auto resizeBuffer(BufferHandle handle, size_t newSize) -> BufferHandle override;
 
-  [[nodiscard]] auto getBuffer(BufferHandle handle) const -> Buffer& override;
+  [[nodiscard]] auto getBuffer(BufferHandle handle) const -> ManagedBuffer& override;
 
   auto addToSingleBuffer(const void* data, size_t size, BufferHandle handle, vk::DeviceSize offset)
       -> void override;
 
   auto removeData(BufferHandle handle, vk::DeviceSize offset, size_t size) -> void override;
+
+  auto createStaticBuffer(const BufferCreateInfo& createInfo) -> Handle<BufferWrapper> override;
 
   auto createArenaBuffer(const ArenaBufferCreateInfo& createInfo) -> BufferHandle override;
 
@@ -65,8 +68,11 @@ private:
   std::shared_ptr<Device> device;
   std::shared_ptr<TaskQueue> taskQueue;
 
+  HandleGenerator<BufferWrapper> bufferHandleGenerator;
+  std::unordered_map<Handle<BufferWrapper>, std::unique_ptr<BufferWrapper>> newestBufferMap;
+
   MapKey bufferMapKeygen;
-  std::unordered_map<BufferHandle, std::unique_ptr<Buffer>> bufferMap;
+  std::unordered_map<BufferHandle, std::unique_ptr<ManagedBuffer>> bufferMap;
   std::unordered_map<BufferHandle, std::unique_ptr<BufferWrapper>> newBufferMap;
   std::vector<BufferHandle> unusedBuffers;
   bool clearInProgress = false;

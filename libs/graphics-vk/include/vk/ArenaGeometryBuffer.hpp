@@ -27,7 +27,7 @@ public:
   [[nodiscard]] auto getGpuBufferEntries(const std::vector<RenderMeshData>& meshDataList)
       -> std::vector<GpuBufferEntry>&;
 
-  [[nodiscard]] auto getBuffers() const -> std::tuple<Buffer&, Buffer&>;
+  [[nodiscard]] auto getBuffers() const -> std::tuple<ManagedBuffer&, ManagedBuffer&>;
 
 private:
   IBufferManager* bufferManager;
