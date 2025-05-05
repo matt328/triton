@@ -45,47 +45,66 @@ auto PhysicalDevice::getDescriptorBufferProperties() const
 auto PhysicalDevice::createDevice() -> std::unique_ptr<vk::raii::Device> {
   deviceQueueFamilyIndices = findQueueFamilies(*physicalDevice, surface->getVkSurface());
   std::vector<vk::DeviceQueueCreateInfo> queueCreateInfos;
+  std::unordered_set<uint32_t> usedQueueFamilies;
 
   // Graphics Queue(s)
   if (deviceQueueFamilyIndices.graphicsFamily.has_value() &&
       deviceQueueFamilyIndices.graphicsFamilyCount.has_value()) {
+    const uint32_t index = deviceQueueFamilyIndices.graphicsFamily.value();
+    usedQueueFamilies.insert(index);
+
     const auto graphicsFamilyCreateInfo = vk::DeviceQueueCreateInfo{
-        .queueFamilyIndex = deviceQueueFamilyIndices.graphicsFamily.value(),
+        .queueFamilyIndex = index,
         .queueCount = deviceQueueFamilyIndices.graphicsFamilyCount.value(),
         .pQueuePriorities = deviceQueueFamilyIndices.graphicsFamilyPriorities.data()};
     queueCreateInfos.push_back(graphicsFamilyCreateInfo);
   }
 
-  // If present queue family is different from graphics
-  if (deviceQueueFamilyIndices.graphicsFamily.value() !=
-      deviceQueueFamilyIndices.presentFamily.value()) {
-    Log.trace("Device supports separate present queue");
-    // Present Queue(s)
-    if (deviceQueueFamilyIndices.presentFamily.has_value() &&
-        deviceQueueFamilyIndices.presentFamilyCount.has_value()) {
+  // Present Queue(s) — only if different from graphics
+  if (deviceQueueFamilyIndices.presentFamily.has_value() &&
+      deviceQueueFamilyIndices.presentFamilyCount.has_value()) {
+    const uint32_t index = deviceQueueFamilyIndices.presentFamily.value();
+    if (!usedQueueFamilies.contains(index)) {
+      Log.trace("Device supports separate present queue");
+
+      usedQueueFamilies.insert(index);
       const auto presentFamilyCreateInfo = vk::DeviceQueueCreateInfo{
-          .queueFamilyIndex = deviceQueueFamilyIndices.presentFamily.value(),
+          .queueFamilyIndex = index,
           .queueCount = deviceQueueFamilyIndices.presentFamilyCount.value(),
           .pQueuePriorities = deviceQueueFamilyIndices.presentFamilyPriorities.data()};
       queueCreateInfos.push_back(presentFamilyCreateInfo);
     }
   }
 
-  // If Transfer queue family is different from graphics
-  if (deviceQueueFamilyIndices.graphicsFamily.value() !=
-      deviceQueueFamilyIndices.transferFamily.value()) {
-    Log.trace("Creating Device with transfer queue family: {}",
-              deviceQueueFamilyIndices.transferFamily.value());
-    // Transfer Queue(s)
-    if (deviceQueueFamilyIndices.transferFamily.has_value() &&
-        deviceQueueFamilyIndices.transferFamilyCount.has_value()) {
+  // Transfer Queue(s) — only if different from already used
+  if (deviceQueueFamilyIndices.transferFamily.has_value() &&
+      deviceQueueFamilyIndices.transferFamilyCount.has_value()) {
+    const uint32_t index = deviceQueueFamilyIndices.transferFamily.value();
+    if (!usedQueueFamilies.contains(index)) {
+      Log.trace("Creating Device with transfer queue family: {}", index);
 
+      usedQueueFamilies.insert(index);
       const auto transferFamilyCreateInfo = vk::DeviceQueueCreateInfo{
-          .queueFamilyIndex = deviceQueueFamilyIndices.transferFamily.value(),
+          .queueFamilyIndex = index,
           .queueCount = deviceQueueFamilyIndices.transferFamilyCount.value(),
           .pQueuePriorities = deviceQueueFamilyIndices.transferFamilyPriorities.data()};
-
       queueCreateInfos.push_back(transferFamilyCreateInfo);
+    }
+  }
+
+  // Compute Queue(s) — only if different from already used
+  if (deviceQueueFamilyIndices.computeFamily.has_value() &&
+      deviceQueueFamilyIndices.computeFamilyCount.has_value()) {
+    const uint32_t index = deviceQueueFamilyIndices.computeFamily.value();
+    if (!usedQueueFamilies.contains(index)) {
+      Log.trace("Creating Device with compute queue family: {}", index);
+
+      usedQueueFamilies.insert(index);
+      const auto computeFamilyCreateInfo = vk::DeviceQueueCreateInfo{
+          .queueFamilyIndex = index,
+          .queueCount = deviceQueueFamilyIndices.computeFamilyCount.value(),
+          .pQueuePriorities = deviceQueueFamilyIndices.computeFamilyPriorities.data()};
+      queueCreateInfos.push_back(computeFamilyCreateInfo);
     }
   }
 

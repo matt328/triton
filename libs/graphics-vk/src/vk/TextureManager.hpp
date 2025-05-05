@@ -6,7 +6,7 @@
 
 namespace tr {
 
-constexpr auto MaxTextureCount = 1024;
+constexpr auto MaxTextureCount = 250;
 
 class TextureManager {
 public:
@@ -18,8 +18,8 @@ public:
   auto operator=(const TextureManager&) -> TextureManager& = delete;
   auto operator=(TextureManager&&) -> TextureManager& = delete;
 
-  [[nodiscard]] auto addTexture(const as::ImageData& imageData,
-                                std::string_view name) -> TextureHandle;
+  [[nodiscard]] auto addTexture(const as::ImageData& imageData, std::string_view name)
+      -> TextureHandle;
 
   [[nodiscard]] auto isDirty() const -> bool;
 
