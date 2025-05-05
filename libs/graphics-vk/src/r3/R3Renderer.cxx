@@ -1,17 +1,18 @@
 #include "R3Renderer.hpp"
 #include "api/fx/IEventBus.hpp"
+#include "api/gfx/GeometryEntry.hpp"
 #include "api/gw/RenderableResources.hpp"
+#include "buffers/BufferCreateInfo.hpp"
+#include "buffers/BufferSystem.hpp"
 #include "gfx/IFrameGraph.hpp"
 #include "gfx/IFrameManager.hpp"
 #include "gfx/QueueTypes.hpp"
-#include "mem/GeometryBuffer.hpp"
 #include "r3/render-pass/ComputePass.hpp"
 #include "r3/render-pass/RenderPassFactory.hpp"
 #include "task/Frame.hpp"
 #include "render-pass/GraphicsPassCreateInfo.hpp"
 #include "gfx/PassGraphInfo.hpp"
 #include "vk/ComputePushConstants.hpp"
-#include "mem/buffer-registry/BufferRequest.hpp"
 
 namespace tr {
 
@@ -22,7 +23,8 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
                        std::shared_ptr<Swapchain> newSwapchain,
                        std::shared_ptr<IFrameGraph> newFrameGraph,
                        std::shared_ptr<RenderPassFactory> newRenderPassFactory,
-                       std::shared_ptr<CommandBufferManager> newCommandBufferManager)
+                       std::shared_ptr<CommandBufferManager> newCommandBufferManager,
+                       std::shared_ptr<BufferSystem> newBufferSystem)
     : rendererConfig{newRenderConfig},
       frameManager{std::move(newFrameManager)},
       graphicsQueue{std::move(newGraphicsQueue)},
@@ -30,7 +32,8 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
       swapchain{std::move(newSwapchain)},
       frameGraph{std::move(newFrameGraph)},
       renderPassFactory{std::move(newRenderPassFactory)},
-      commandBufferManager{std::move(newCommandBufferManager)} {
+      commandBufferManager{std::move(newCommandBufferManager)},
+      bufferSystem{std::move(newBufferSystem)} {
 
   /*
     TODO(matt): createComputeCullingPass()
@@ -46,23 +49,31 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
   createCompositionRenderPass();
 }
 
-/*
-  TODO(matt): Simplify and streamline buffer creation.
-  For now, everything goes through the framemanager in case it needs to be a per frame buffer.
-  Reconsider moving it around so everything goes through the BufferRegistry, and that has the
-  frameManager injected into it so that it can transparently register per frame buffers and return
-  logical handles. That way the buffer registry can also track if the handle belongs to a per-frame
-  buffer. After creating a per-frame buffer, a LogicalHandle will be returned. LogicalHandles must
-  only be passed to frames to get the Handle, which will then be passed to the bufferRegistry. If a
-  non-per frame buffer is registered and then requested, this will be purely with the
-  bufferRegistry.
-*/
-
 auto R3Renderer::createGlobalBuffers() -> void {
-  globalBuffers.drawCommands = frameManager->registerBufferRequest(BufferRequest{});
-  globalBuffers.drawCounts = frameManager->registerBufferRequest(BufferRequest{});
-  globalBuffers.drawMetadata = frameManager->registerBufferRequest(BufferRequest{});
-  globalBuffers.geometry = frameManager->registerBufferRequest(BufferRequest{});
+  globalBuffers.drawCommands = bufferSystem->registerPerFrameBuffer(
+      BufferCreateInfo{.bufferType = BufferType::IndirectCommand, .initialSize = 10240});
+
+  globalBuffers.drawCounts = bufferSystem->registerPerFrameBuffer(
+      BufferCreateInfo{.bufferType = BufferType::Device, .initialSize = 64});
+
+  // Specifies how the DIIC and DrawCounts buffers are sliced, providing maximum space as if all
+  // renderables would be rendered this frame. Determines offset values for DIIC and DrawCounts
+  // buffers during drawIndexedIndirect command redording.
+  globalBuffers.drawMetadata = bufferSystem->registerPerFrameBuffer(BufferCreateInfo{
+      .bufferType = BufferType::HostTransient,
+  });
+
+  globalBuffers.objectData = bufferSystem->registerPerFrameBuffer(
+      BufferCreateInfo{.bufferType = BufferType::HostTransient});
+
+  globalBuffers.geometryEntry = bufferSystem->registerBuffer(
+      BufferCreateInfo{.bufferType = BufferType::DeviceArena, .itemStride = sizeof(GeometryEntry)});
+
+  globalBuffers.geometryPositions = bufferSystem->registerBuffer(
+      BufferCreateInfo{.bufferType = BufferType::DeviceArena, .itemStride = sizeof(glm::vec3)});
+
+  globalBuffers.geometryColors = bufferSystem->registerBuffer(
+      BufferCreateInfo{.bufferType = BufferType::DeviceArena, .itemStride = sizeof(glm::vec4)});
 }
 
 auto R3Renderer::registerRenderable([[maybe_unused]] const RenderableData& data)

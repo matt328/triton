@@ -12,11 +12,9 @@
 #include "r3/render-pass/PipelineFactory.hpp"
 #include "r3/render-pass/RenderPassFactory.hpp"
 #include "task/DefaultFrameManager.hpp"
-#include "task/DefaultRenderScheduler.hpp"
 #include "gfx/QueueTypes.hpp"
 
 #include "task/debugshapes/DebugPipeline.hpp"
-#include "vk/BufferManager.hpp"
 #include "vk/command-buffer/CommandBufferManager.hpp"
 
 #include "vk/sb/DSLayoutManager.hpp"
@@ -35,8 +33,6 @@
 #include "Window.hpp"
 #include "api/gfx/ImGuiSystem.hpp"
 
-#include "mem/GeometryBuffer.hpp"
-#include "mem/BufferWrapper.hpp"
 #include "img/ImageRegistry.hpp"
 #include "img/ImageManager.hpp"
 
@@ -85,11 +81,9 @@ auto createVkGraphicsContext(VkGraphicsCreateInfo createInfo,
                         di::bind<DSLayoutManager>.to<DSLayoutManager>(),
                         di::bind<IShaderBindingFactory>.to<DSShaderBindingFactory>(),
                         di::bind<Allocator>.to<Allocator>(),
-                        di::bind<IBufferManager>.to<BufferManager>(),
                         di::bind<TaskQueue>.to<>(newTaskQueue),
                         di::bind<VkResourceManager>.to<VkResourceManager>(),
                         di::bind<IFrameManager>.to<DefaultFrameManager>(),
-                        di::bind<IRenderScheduler>.to<DefaultRenderScheduler>(),
                         di::bind<IRenderContext>.to<R3Renderer>(),
                         di::bind<IGuiSystem>.to<ImGuiSystem>(),
                         di::bind<IFrameGraph>.to<DebugFrameGraph>(),

@@ -20,8 +20,6 @@ set(graphicsvk_SRC
   src/mem/Allocator.cxx
   src/mem/Buffer.cxx
   src/mem/Image.cxx
-  src/mem/ArenaBuffer.cxx
-  src/mem/GeometryBuffer.cxx
 
   src/geo/VertexAttributes.cxx
   src/geo/DynamicGeometryData.cxx
@@ -30,9 +28,7 @@ set(graphicsvk_SRC
   src/DefaultDebugManager.cxx
   src/ImGuiSystem.cxx
   src/NoopDebugManager.cxx
-  src/vk/BufferManager.cxx
   src/vk/command-buffer/CommandBufferManager.cxx
-  src/vk/ArenaGeometryBuffer.cxx
   src/vk/TextureManager.cxx
   src/vk/core/Context.cxx
   src/vk/core/Instance.cxx
@@ -47,18 +43,12 @@ set(graphicsvk_SRC
   src/vk/sb/DSLayout.cxx
   src/task/Frame.cxx
   src/task/DefaultFrameManager.cxx
-  src/task/IndirectRenderTask.cxx
-  src/task/RenderTaskFactory.cxx
-  src/task/ComputeTask.cxx
-  src/task/StaticTask.cxx
-  src/task/TerrainTask.cxx
   src/pipeline/IndirectPipeline.cxx
   src/pipeline/StaticPipeline.cxx
   src/pipeline/ComputePipeline.cxx
   src/pipeline/TerrainPipeline.cxx
   src/pipeline/SpirvShaderModuleFactory.cxx
 
-  src/task/debugshapes/DebugTask.cxx
   src/task/debugshapes/DebugPipeline.cxx
 )
 

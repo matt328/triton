@@ -55,6 +55,4 @@ protected:
   Buffer Classes
     DeviceArena
     HostTransient
-
-
 */

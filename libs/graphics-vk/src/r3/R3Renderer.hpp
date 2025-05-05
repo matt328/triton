@@ -1,9 +1,9 @@
 #pragma once
 
 #include "api/gfx/RenderStyle.hpp"
+#include "buffers/ManagedBuffer.hpp"
 #include "gfx/IRenderContext.hpp"
 #include "gfx/RenderContextConfig.hpp"
-#include "mem/BufferWrapper.hpp"
 #include "r3/render-pass/GraphicsPass.hpp"
 
 namespace tr {
@@ -15,6 +15,7 @@ class IFrameGraph;
 class RenderPassFactory;
 struct FrameGraphResult;
 class CommandBufferManager;
+class BufferSystem;
 
 namespace queue {
 class Graphics;
@@ -23,10 +24,13 @@ class Graphics;
 const std::filesystem::path SHADER_ROOT = std::filesystem::current_path() / "assets" / "shaders";
 
 struct GlobalBuffers {
-  Handle<BufferWrapper> drawCommands;
-  Handle<BufferWrapper> drawCounts;
-  Handle<BufferWrapper> drawMetadata;
-  Handle<BufferWrapper> geometry;
+  LogicalHandle<ManagedBuffer> drawCommands;
+  LogicalHandle<ManagedBuffer> drawCounts;
+  LogicalHandle<ManagedBuffer> drawMetadata;
+  LogicalHandle<ManagedBuffer> objectData;
+  Handle<ManagedBuffer> geometryEntry;
+  Handle<ManagedBuffer> geometryPositions;
+  Handle<ManagedBuffer> geometryColors;
 };
 
 class R3Renderer : public tr::IRenderContext {
@@ -38,7 +42,8 @@ public:
              std::shared_ptr<Swapchain> newSwapchain,
              std::shared_ptr<IFrameGraph> newFrameGraph,
              std::shared_ptr<RenderPassFactory> newRenderPassFactory,
-             std::shared_ptr<CommandBufferManager> newCommandBufferManager);
+             std::shared_ptr<CommandBufferManager> newCommandBufferManager,
+             std::shared_ptr<BufferSystem> newBufferSystem);
   ~R3Renderer() override = default;
 
   R3Renderer(const R3Renderer&) = delete;
@@ -54,8 +59,6 @@ public:
 
   void setRenderData(const RenderData& renderData) override;
 
-  auto getGeometryBuffer() -> GeometryBuffer& override;
-
 private:
   RenderContextConfig rendererConfig;
   std::shared_ptr<IFrameManager> frameManager;
@@ -65,9 +68,9 @@ private:
   std::shared_ptr<IFrameGraph> frameGraph;
   std::shared_ptr<RenderPassFactory> renderPassFactory;
   std::shared_ptr<CommandBufferManager> commandBufferManager;
+  std::shared_ptr<BufferSystem> bufferSystem;
 
   std::unordered_map<RenderPassType, GraphicsPass> renderPasses;
-  std::unique_ptr<GeometryBuffer> geometryBuffer;
 
   std::vector<vk::CommandBuffer> buffers;
 

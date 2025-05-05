@@ -39,7 +39,7 @@ public:
   auto createBuffer2(vk::BufferCreateInfo* bci,
                      vma::AllocationCreateInfo* aci,
                      const std::string_view& name = "unnamed buffer") const
-      -> std::tuple<std::unique_ptr<ManagedBuffer>, BufferMeta>;
+      -> std::unique_ptr<ManagedBuffer>;
 
   /// Creates a Buffer
   /// @throws AllocationException if there is an error allocating or naming the buffer.

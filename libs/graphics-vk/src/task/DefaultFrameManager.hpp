@@ -23,8 +23,7 @@ public:
                                std::shared_ptr<VkResourceManager> newResourceManager,
                                std::shared_ptr<IEventBus> newEventBus,
                                std::shared_ptr<IDebugManager> debugManager,
-                               std::shared_ptr<ImageRegistry> newImageRegistry,
-                               std::shared_ptr<BufferRegistry> newBufferRegistry);
+                               std::shared_ptr<ImageRegistry> newImageRegistry);
   ~DefaultFrameManager() override;
 
   DefaultFrameManager(const DefaultFrameManager&) = delete;
@@ -37,8 +36,6 @@ public:
   [[nodiscard]] auto getFrames() const -> const std::vector<std::unique_ptr<Frame>>& override;
 
   auto createPerFrameBuffer() -> LogicalBufferHandle override;
-
-  auto registerBufferRequest(BufferKey& bufferKey) -> Handle<BufferWrapper> override;
 
   auto registerImageRequest(const ImageRequest& request) -> Handle<ManagedImage> override;
 
@@ -56,10 +53,7 @@ private:
   std::vector<std::unique_ptr<Frame>> frames;
 
   MapKey imageKeygen;
-  MapKey bufferKeygen;
-
   HandleGenerator<ManagedImage> imageHandleGenerator;
-  HandleGenerator<BufferWrapper> bufferHandleGenerator;
 
   auto handleSwapchainResized(const SwapchainResized& event) -> void;
 };

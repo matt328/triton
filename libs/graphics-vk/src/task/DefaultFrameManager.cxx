@@ -4,7 +4,6 @@
 #include "Maths.hpp"
 #include "api/fx/Events.hpp"
 #include "img/ImageRegistry.hpp"
-#include "mem/buffer-registry/BufferRegistry.hpp"
 #include "vk/core/Swapchain.hpp"
 
 namespace tr {
@@ -19,8 +18,7 @@ DefaultFrameManager::DefaultFrameManager(
     std::shared_ptr<VkResourceManager> newResourceManager,
     std::shared_ptr<IEventBus> newEventBus,
     std::shared_ptr<IDebugManager> debugManager,
-    std::shared_ptr<ImageRegistry> newImageRegistry,
-    std::shared_ptr<BufferRegistry> newBufferRegistry)
+    std::shared_ptr<ImageRegistry> newImageRegistry)
     : renderConfig{newRenderContextConfig},
       commandBufferManager{std::move(newCommandBufferManager)},
       device{std::move(newDevice)},
@@ -28,7 +26,6 @@ DefaultFrameManager::DefaultFrameManager(
       resourceManager{std::move(newResourceManager)},
       eventBus{std::move(newEventBus)},
       imageRegistry{std::move(newImageRegistry)},
-      bufferRegistry{std::move(newBufferRegistry)},
       currentFrame{0} {
 
   for (uint8_t i = 0; i < renderConfig.framesInFlight; ++i) {
@@ -76,30 +73,6 @@ auto DefaultFrameManager::registerImageRequest(const ImageRequest& request)
     frame->addLogicalImage(logicalHandle, imageHandle);
   }
 
-  return logicalHandle;
-}
-
-auto DefaultFrameManager::registerBufferRequest(BufferKey& bufferKey) -> Handle<BufferWrapper> {
-  const auto logicalHandle = bufferHandleGenerator.requestHandle();
-
-  for (auto& frame : frames) {
-    bufferKey.instance.frameId = frame->getIndex();
-    const auto bufferHandle = bufferRegistry->getOrCreate(bufferKey);
-    frame->addLogicalBuffer(logicalHandle, bufferHandle);
-  }
-
-  return logicalHandle;
-}
-
-auto DefaultFrameManager::createPerFrameBuffer() -> LogicalBufferHandle {
-  const auto logicalHandle = bufferKeygen.getKey();
-  // for (auto& frame : frames) {
-  //   const auto instance =
-  //       BufferInstanceKey{.drawContextId = drawContextId, .frameId = frame->getIndex()};
-  //   const auto bufferHandle =
-  //       bufferRegistry->getOrCreate(BufferKey{.profile = profile, .instance = instance});
-  //   frame->addLogicalBuffer(logicalHandle, bufferHandle);
-  // }
   return logicalHandle;
 }
 

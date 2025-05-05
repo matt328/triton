@@ -1,12 +1,10 @@
 #pragma once
 #include "api/gfx/DDGeometryData.hpp"
-#include "vk/ArenaGeometryBuffer.hpp"
 #include "vk/core/Device.hpp"
 #include "gfx/IDebugManager.hpp"
 #include "ImmediateTransferContext.hpp"
 #include "api/gw/Handles.hpp"
 #include "bk/Rando.hpp"
-#include "geo/Mesh.hpp"
 #include "mem/Allocator.hpp"
 #include "pipeline/IShaderModuleFactory.hpp"
 #include "as/Model.hpp"
@@ -44,7 +42,6 @@ public:
                              std::shared_ptr<DSLayoutManager> newLayoutManager,
                              std::shared_ptr<IShaderBindingFactory> newShaderBindingFactory,
                              std::shared_ptr<Allocator> newAllocator,
-                             std::shared_ptr<IBufferManager> newBufferManager,
                              std::shared_ptr<queue::Graphics> newGraphicsQueue,
                              std::shared_ptr<queue::Transfer> newTransferQueue);
   ~VkResourceManager();
@@ -58,23 +55,7 @@ public:
 
   auto uploadGeometryData(const DDGeometryData& data) -> MeshHandle;
 
-  /// Add a static mesh to the MeshBufferManager for static meshes.
-  auto uploadStaticMesh(const IGeometryData& geometryData) -> MeshHandle;
-
-  /// Add a Dynamic mesh to the MeshBufferManager for dynamic meshes.
-  auto uploadDynamicMesh(const IGeometryData& geometryData) -> MeshHandle;
-
-  /// Add a Terrain Mesh to the MeshBufferManager for terrain chunk meshes.
-  auto uploadTerrainMesh(const IGeometryData& geometryData) -> MeshHandle;
-
   auto uploadImage(const as::ImageData& imageData, std::string_view name) -> TextureHandle;
-
-  /// Utility method to only be called by MeshBufferManagers.
-  auto addToMesh(const IGeometryData& geometryData,
-                 BufferHandle vertexBufferHandle,
-                 vk::DeviceSize vertexOffset,
-                 BufferHandle indexBufferHandle,
-                 vk::DeviceSize indexOffset) -> void;
 
   auto getTextureData(const as::ImageData& imageData, std::string_view name) -> TextureData;
 
@@ -83,8 +64,6 @@ public:
                              size_t slot) -> void;
 
   auto createComputePipeline(std::string_view name) -> PipelineHandle;
-
-  [[nodiscard]] auto getMesh(MeshHandle handle) -> const ImmutableMesh&;
 
   [[nodiscard]] auto getStaticMeshBuffers() const -> std::tuple<ManagedBuffer&, ManagedBuffer&>;
   [[nodiscard]] auto getDynamicMeshBuffers() const -> std::tuple<ManagedBuffer&, ManagedBuffer&>;
@@ -98,13 +77,6 @@ public:
   [[nodiscard]] auto getTextureDSL() const -> const vk::DescriptorSetLayout*;
   [[nodiscard]] auto getTextureShaderBinding() const -> IShaderBinding&;
 
-  [[nodiscard]] auto getStaticGpuData(const std::vector<RenderMeshData>& gpuBufferData)
-      -> std::vector<GpuBufferEntry>&;
-  [[nodiscard]] auto getDynamicGpuData(const std::vector<RenderMeshData>& gpuBufferData)
-      -> std::vector<GpuBufferEntry>&;
-  [[nodiscard]] auto getTerrainGpuData(const std::vector<RenderMeshData>& gpuBufferData)
-      -> std::vector<GpuBufferEntry>&;
-
   auto updateShaderBindings() -> void;
 
 private:
@@ -115,20 +87,12 @@ private:
   std::shared_ptr<DSLayoutManager> layoutManager;
   std::shared_ptr<IShaderBindingFactory> shaderBindingFactory;
   std::shared_ptr<Allocator> allocator;
-  std::shared_ptr<IBufferManager> bufferManager;
   std::shared_ptr<queue::Graphics> graphicsQueue;
   std::shared_ptr<queue::Transfer> transferQueue;
 
   std::unordered_map<PipelineHandle, std::unique_ptr<IPipeline>> pipelineMap;
 
   MapKey pipelineMapKeygen;
-
-  std::vector<ImmutableMesh> meshList;
-
-  std::unique_ptr<ArenaGeometryBuffer> staticMeshBuffer;
-  std::unique_ptr<ArenaGeometryBuffer> dynamicMeshBuffer;
-  std::unique_ptr<ArenaGeometryBuffer> terrainMeshBuffer;
-  std::unique_ptr<ArenaGeometryBuffer> debugMeshBuffer;
 
   std::unique_ptr<TextureManager> textureManager;
 

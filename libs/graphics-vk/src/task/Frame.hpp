@@ -2,7 +2,6 @@
 #include "bk/Handle.hpp"
 #include "LogicalBufferHandle.hpp"
 #include "img/ManagedImage.hpp"
-#include "mem/BufferWrapper.hpp"
 #include "vk/command-buffer/CommandBufferManager.hpp"
 #include "VkResourceManager.hpp"
 #include "LogicalImageHandle.hpp"

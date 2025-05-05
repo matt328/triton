@@ -1,8 +1,11 @@
 #pragma once
 
+#include "bk/Handle.hpp"
 #include "mem/BufferRegion.hpp"
 
 namespace tr {
+
+class IBufferStrategy;
 
 using RegionContainer = std::set<BufferRegion, BufferRegionComparator>;
 
@@ -18,11 +21,13 @@ struct BufferMeta {
   vma::AllocationInfo allocationInfo;
   vma::AllocationCreateInfo* allocationCreateInfo;
   std::optional<ArenaInfo> arenaInfo = std::nullopt;
+  Handle<IBufferStrategy> strategyHandle;
 };
 
 class ManagedBuffer {
 public:
   ManagedBuffer(vk::Buffer newVkBuffer,
+                BufferMeta newBufferMeta,
                 std::shared_ptr<vma::Allocator> newAllocator,
                 vma::Allocation newAllocation);
   ~ManagedBuffer();
@@ -36,8 +41,11 @@ public:
 
   auto isMappable() -> bool;
 
+  [[nodiscard]] auto getMeta() const -> const BufferMeta&;
+
 private:
   vk::Buffer vkBuffer;
+  BufferMeta bufferMeta;
   std::shared_ptr<vma::Allocator> allocator;
   vma::Allocation allocation;
 };

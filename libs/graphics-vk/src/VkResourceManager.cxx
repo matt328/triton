@@ -10,7 +10,6 @@
 #include "ResourceExceptions.hpp"
 #include "mem/Buffer.hpp"
 #include "pipeline/ComputePipeline.hpp"
-#include "vk/ArenaGeometryBuffer.hpp"
 #include "vk/sb/DSLayout.hpp"
 #include "vk/sb/IShaderBinding.hpp"
 #include "vk/sb/IShaderBindingFactory.hpp"
@@ -26,7 +25,6 @@ VkResourceManager::VkResourceManager(
     std::shared_ptr<DSLayoutManager> newLayoutManager,
     std::shared_ptr<IShaderBindingFactory> newShaderBindingFactory,
     std::shared_ptr<Allocator> newAllocator,
-    std::shared_ptr<IBufferManager> newBufferManager,
     std::shared_ptr<queue::Graphics> newGraphicsQueue,
     std::shared_ptr<queue::Transfer> newTransferQueue)
     : device{std::move(newDevice)},
@@ -36,7 +34,6 @@ VkResourceManager::VkResourceManager(
       layoutManager{std::move(newLayoutManager)},
       shaderBindingFactory{std::move(newShaderBindingFactory)},
       allocator{std::move(newAllocator)},
-      bufferManager{std::move(newBufferManager)},
       graphicsQueue{std::move(newGraphicsQueue)},
       transferQueue{std::move(newTransferQueue)} {
 
@@ -59,45 +56,9 @@ VkResourceManager::~VkResourceManager() {
 
 auto VkResourceManager::uploadGeometryData([[maybe_unused]] const DDGeometryData& data)
     -> MeshHandle {
-  // TODO(matt): The vertex list needs to contain enough data to find/create a buffer
-  /*
-    What will drive the creation/finding of renderers and pipelines? Probably more augmentations to
-    the DDGeometryData struct.
-    GeometryData can have a topology and some other params to create the pipeline
-    How to determine which renderer to use? Maybe there are no different renderers, maybe they'll
-    all do the same thing just with different pipelines and buffers?
-    There may be more than 1 pipeline for objects in a given buffer, possibly MeshHandle needs to be
-    augmented to be able to know which buffer to find the Mesh?
-    Could there be only one GpuBufferEntry/ObjectDataBuffer? Some of those buffers could be
-    condensed into a single global buffer, but the IndirectCommandBuffer and ObjectCountBuffer would
-    need to exist for each pipeline.
-    Also some pipelines may need additional buffers like AnimationData
-  */
   return static_cast<MeshHandle>(0L);
 }
 
-auto VkResourceManager::uploadStaticMesh(const IGeometryData& geometryData) -> MeshHandle {
-  return staticMeshBuffer->addMesh(geometryData);
-}
-
-auto VkResourceManager::uploadDynamicMesh(const IGeometryData& geometryData) -> MeshHandle {
-  return dynamicMeshBuffer->addMesh(geometryData);
-}
-
-auto VkResourceManager::uploadTerrainMesh(const IGeometryData& geometryData) -> MeshHandle {
-  return terrainMeshBuffer->addMesh(geometryData);
-}
-
-/*
-  The process should be upload an image to the GPU in a background task which waits till the upload
-  is finished, creates a vk::DescriptorImageInfo and stores it in a host side list and returns a
-  TextureHandle, which is an index into this list. Also set a 'dirty' flag in the TextureManager.
-  At the beginning of each frame, check the dirty flag, and if it's dirty, perform the
-  WriteDescriptorSet.
-
-  Should have a TextureManager that's just a part of the ResourceManager. ResourceManager will just
-  delegate to it.
-*/
 auto VkResourceManager::uploadImage([[maybe_unused]] const as::ImageData& imageData,
                                     std::string_view name) -> TextureHandle {
   return textureManager->addTexture(imageData, name);
@@ -263,30 +224,6 @@ auto VkResourceManager::getTextureData(const as::ImageData& imageData, std::stri
   return textureData;
 }
 
-[[nodiscard]] auto VkResourceManager::getMesh(MeshHandle handle) -> const ImmutableMesh& {
-  return meshList[handle];
-}
-
-[[nodiscard]] auto VkResourceManager::getStaticMeshBuffers() const
-    -> std::tuple<ManagedBuffer&, ManagedBuffer&> {
-  return staticMeshBuffer->getBuffers();
-}
-
-[[nodiscard]] auto VkResourceManager::getDynamicMeshBuffers() const
-    -> std::tuple<ManagedBuffer&, ManagedBuffer&> {
-  return dynamicMeshBuffer->getBuffers();
-}
-
-[[nodiscard]] auto VkResourceManager::getTerrainMeshBuffers() const
-    -> std::tuple<ManagedBuffer&, ManagedBuffer&> {
-  return terrainMeshBuffer->getBuffers();
-}
-
-[[nodiscard]] auto VkResourceManager::getDebugMeshBuffers() const
-    -> std::tuple<ManagedBuffer&, ManagedBuffer&> {
-  return debugMeshBuffer->getBuffers();
-}
-
 auto VkResourceManager::createDefaultDescriptorPool() const
     -> std::unique_ptr<vk::raii::DescriptorPool> {
   static constexpr auto poolSizes = std::array{
@@ -341,27 +278,6 @@ auto VkResourceManager::updateShaderBindings() -> void {
     auto& sb = shaderBindingFactory->getShaderBinding(textureShaderBindingHandle);
     sb.bindImageSamplers(0, textureManager->getDescriptorImageInfoList());
   }
-}
-
-/// Gets a list of the GpuBufferEntry that the game world thinks are involved in this frame.
-/// These are passed to the compute shader to get turned into DrawCommands and placed in the
-/// DrawIndexedIndirect buffer
-[[nodiscard]] auto VkResourceManager::getStaticGpuData(
-    const std::vector<RenderMeshData>& gpuBufferData) -> std::vector<GpuBufferEntry>& {
-  ZoneNamedN(var, "getGpuBufferEntries", true);
-  return staticMeshBuffer->getGpuBufferEntries(gpuBufferData);
-}
-
-[[nodiscard]] auto VkResourceManager::getTerrainGpuData(
-    const std::vector<RenderMeshData>& gpuBufferData) -> std::vector<GpuBufferEntry>& {
-  ZoneNamedN(var, "getGpuBufferEntries", true);
-  return terrainMeshBuffer->getGpuBufferEntries(gpuBufferData);
-}
-
-[[nodiscard]] auto VkResourceManager::getDynamicGpuData(
-    const std::vector<RenderMeshData>& gpuBufferData) -> std::vector<GpuBufferEntry>& {
-  ZoneNamedN(var, "getDynamicGpuBufferEntries", true);
-  return dynamicMeshBuffer->getGpuBufferEntries(gpuBufferData);
 }
 
 auto VkResourceManager::createTransitionBarrier(const vk::Image& image,
