@@ -30,9 +30,7 @@ GraphicsPass::GraphicsPass(GraphicsPassConfig&& config,
   }
 }
 
-auto GraphicsPass::execute(const Frame* frame,
-                           vk::raii::CommandBuffer& cmdBuffer,
-                           const PushConstantsBindFn& bindFn) -> void {
+auto GraphicsPass::execute(const Frame* frame, vk::raii::CommandBuffer& cmdBuffer) -> void {
   Log.trace("Executing GraphicsPass: id={}, frame={}", getId(), frame->getIndex());
   // Configure vk::RenderingInfo
   for (size_t i = 0; i < passConfig.colorAttachmentConfigs.size(); ++i) {

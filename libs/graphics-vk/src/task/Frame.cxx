@@ -62,14 +62,15 @@ auto Frame::getDebugObjectCount() const -> uint32_t {
   return debugObjectCount;
 }
 
-auto Frame::addLogicalImage(Handle<ManagedImage> logicalHandle, Handle<ManagedImage> imageHandle)
-    -> void {
+auto Frame::addLogicalImage(LogicalHandle<ManagedImage> logicalHandle,
+                            Handle<ManagedImage> imageHandle) -> void {
   assert(!imageHandles.contains(logicalHandle) &&
          "Attempted to register same logical handle twice");
   imageHandles.emplace(logicalHandle, imageHandle);
 }
 
-auto Frame::getLogicalImage(Handle<ManagedImage> logicalHandle) const -> Handle<ManagedImage> {
+auto Frame::getLogicalImage(LogicalHandle<ManagedImage> logicalHandle) const
+    -> Handle<ManagedImage> {
   return imageHandles.at(logicalHandle);
 }
 

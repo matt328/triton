@@ -21,6 +21,10 @@ auto ManagedBuffer::isMappable() -> bool {
   return (memProps & vk::MemoryPropertyFlagBits::eHostCoherent) != vk::MemoryPropertyFlagBits{};
 }
 
+[[nodiscard]] auto ManagedBuffer::getVkBuffer() const -> const vk::Buffer& {
+  return vkBuffer;
+}
+
 [[nodiscard]] auto ManagedBuffer::getMeta() const -> const BufferMeta& {
   return bufferMeta;
 }

@@ -5,6 +5,7 @@
 #include "ResourceProxyImpl.hpp"
 
 #include "Window.hpp"
+#include "buffers/BufferSystem.hpp"
 #include "mem/Allocator.hpp"
 #include "pipeline/SpirvShaderModuleFactory.hpp"
 #include "r3/graph/DebugFrameGraph.hpp"

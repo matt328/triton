@@ -27,7 +27,7 @@ struct hash<tr::Handle<T>> {
 
 template <typename T>
 struct hash<tr::LogicalHandle<T>> {
-  auto operator()(const tr::Handle<T>& h) const -> size_t {
+  auto operator()(const tr::LogicalHandle<T>& h) const -> size_t {
     return h.id;
   }
 };

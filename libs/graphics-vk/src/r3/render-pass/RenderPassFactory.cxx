@@ -1,10 +1,12 @@
 #include "RenderPassFactory.hpp"
 #include "gfx/IFrameManager.hpp"
+#include "img/ImageManager.hpp"
 #include "r3/render-pass/ComputePass.hpp"
 #include "r3/render-pass/ComputePassConfig.hpp"
 #include "r3/render-pass/GraphicsPass.hpp"
 #include "r3/render-pass/GraphicsPassConfig.hpp"
 #include "r3/render-pass/PipelineFactory.hpp"
+#include "task/Frame.hpp"
 #include <ranges>
 
 namespace tr {
@@ -46,9 +48,13 @@ auto RenderPassFactory::createGraphicsPass(const GraphicsPassCreateInfo& createI
         .usageFlags = vk::ImageUsageFlagBits::eColorAttachment,
         .aspectFlags = vk::ImageAspectFlagBits::eColor,
     };
-    const auto logicalImageHandle = frameManager->registerImageRequest(request);
+    const auto logicalHandle = imageHandleGenerator.requestLogicalHandle();
+    for (const auto& frame : frameManager->getFrames()) {
+      const auto handle = imageManager->createImage(request);
+      frame->addLogicalImage(logicalHandle, handle);
+    }
     colorAttachmentList.push_back({
-        .logicalImage = logicalImageHandle,
+        .logicalImage = logicalHandle,
         .clearValue = info.clearValue,
     });
   }

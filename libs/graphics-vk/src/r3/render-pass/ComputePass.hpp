@@ -18,9 +18,7 @@ public:
   auto operator=(const ComputePass&) -> ComputePass& = delete;
   auto operator=(ComputePass&&) -> ComputePass& = delete;
 
-  auto dispatch(const Frame* frame,
-                vk::raii::CommandBuffer& cmdBuffer,
-                const PushConstantsBindFn& bindFn) -> void;
+  auto dispatch(const Frame* frame, vk::raii::CommandBuffer& cmdBuffer) -> void;
 
   [[nodiscard]] auto getId() const {
     return config.id;

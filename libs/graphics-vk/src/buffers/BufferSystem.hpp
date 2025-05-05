@@ -54,7 +54,7 @@ private:
   std::shared_ptr<Allocator> allocator;
 
   HandleGenerator<ManagedBuffer> bufferHandleGenerator;
-  std::unordered_map<Handle<ManagedBuffer>, ManagedBuffer> bufferMap;
+  std::unordered_map<Handle<ManagedBuffer>, std::unique_ptr<ManagedBuffer>> bufferMap;
 
   HandleGenerator<IBufferStrategy> strategyHandleGenerator;
   std::unordered_map<Handle<IBufferStrategy>, std::unique_ptr<IBufferStrategy>> strategyMap;

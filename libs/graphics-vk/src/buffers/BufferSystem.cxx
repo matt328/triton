@@ -27,8 +27,7 @@ auto BufferSystem::registerBuffer(BufferCreateInfo createInfo) -> Handle<Managed
   const auto handle = bufferHandleGenerator.requestHandle();
 
   auto [bci, aci] = fromCreateInfo(createInfo);
-  const auto buffer = allocator->createBuffer2(&bci, &aci);
-  bufferMap.emplace(handle, buffer);
+  bufferMap.emplace(handle, allocator->createBuffer2(&bci, &aci));
 
   return handle;
 }
@@ -47,21 +46,21 @@ auto BufferSystem::registerPerFrameBuffer(BufferCreateInfo createInfo)
 
 auto BufferSystem::rewrite(Handle<ManagedBuffer> handle, const void* data, size_t size) -> void {
   auto& buffer = bufferMap.at(handle);
-  auto& strategy = strategyMap.at(buffer.getMeta().strategyHandle);
-  strategy->rewrite(buffer, data, size);
+  auto& strategy = strategyMap.at(buffer->getMeta().strategyHandle);
+  strategy->rewrite(*buffer, data, size);
 }
 
 auto BufferSystem::insert(Handle<ManagedBuffer> handle, const void* data, size_t size)
     -> BufferRegion {
   auto& buffer = bufferMap.at(handle);
-  auto& strategy = strategyMap.at(buffer.getMeta().strategyHandle);
-  return strategy->insert(buffer, data, size);
+  auto& strategy = strategyMap.at(buffer->getMeta().strategyHandle);
+  return strategy->insert(*buffer, data, size);
 }
 
 auto BufferSystem::removeData(Handle<ManagedBuffer> handle, const BufferRegion& region) -> void {
   auto& buffer = bufferMap.at(handle);
-  auto& strategy = strategyMap.at(buffer.getMeta().strategyHandle);
-  strategy->remove(buffer, region);
+  auto& strategy = strategyMap.at(buffer->getMeta().strategyHandle);
+  strategy->remove(*buffer, region);
 }
 
 auto BufferSystem::fromCreateInfo(const BufferCreateInfo& createInfo)

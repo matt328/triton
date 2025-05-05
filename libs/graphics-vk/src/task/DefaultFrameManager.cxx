@@ -61,21 +61,6 @@ DefaultFrameManager::~DefaultFrameManager() {
   frames.clear();
 }
 
-auto DefaultFrameManager::registerImageRequest(const ImageRequest& request)
-    -> Handle<ManagedImage> {
-  const auto logicalHandle = imageHandleGenerator.requestHandle();
-
-  for (auto& frame : frames) {
-    const auto imageHandle = imageRegistry->getOrCreate(ImageKey{
-        .request = request,
-        .instance = ImageInstanceKey{.frameId = frame->getIndex()},
-    });
-    frame->addLogicalImage(logicalHandle, imageHandle);
-  }
-
-  return logicalHandle;
-}
-
 auto DefaultFrameManager::handleSwapchainResized(const SwapchainResized& event) -> void {
   imageRegistry->swapchainResized(vk::Extent2D{.width = event.width, .height = event.height},
                                   renderConfig.renderScale);

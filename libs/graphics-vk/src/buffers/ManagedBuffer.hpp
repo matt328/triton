@@ -37,7 +37,7 @@ public:
   auto operator=(const ManagedBuffer&) -> ManagedBuffer& = delete;
   auto operator=(ManagedBuffer&&) -> ManagedBuffer& = delete;
 
-  [[nodiscard]] auto getVkBuffer() const -> vk::Buffer&;
+  [[nodiscard]] auto getVkBuffer() const -> const vk::Buffer&;
 
   auto isMappable() -> bool;
 

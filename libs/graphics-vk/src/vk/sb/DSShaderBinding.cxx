@@ -1,4 +1,5 @@
 #include "DSShaderBinding.hpp"
+#include "buffers/ManagedBuffer.hpp"
 #include "vk/core/Device.hpp"
 #include "vk/sb/DSLayout.hpp"
 #include "mem/Buffer.hpp"
@@ -47,7 +48,7 @@ void DSShaderBinding::bindBuffer(const uint32_t binding,
                                  const ManagedBuffer& buffer,
                                  const size_t size) {
   const auto bufferInfo =
-      vk::DescriptorBufferInfo{.buffer = buffer.getBuffer(), .offset = 0, .range = size};
+      vk::DescriptorBufferInfo{.buffer = buffer.getVkBuffer(), .offset = 0, .range = size};
   const auto writes = std::array{vk::WriteDescriptorSet{.dstSet = **vkDescriptorSet,
                                                         .dstBinding = binding,
                                                         .dstArrayElement = 0,

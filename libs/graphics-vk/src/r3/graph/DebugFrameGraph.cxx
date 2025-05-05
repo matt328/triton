@@ -32,7 +32,7 @@ auto DebugFrameGraph::execute(const Frame* frame) -> FrameGraphResult {
                                               .passId = pass->getId(),
                                               .queueType = QueueType::Compute};
     auto& commandBuffer = commandBufferManager->requestCommandBuffer(request);
-    pass->dispatch(frame, commandBuffer, passBindFunction);
+    pass->dispatch(frame, commandBuffer);
     frameGraphResult.commandBuffers.push_back(&(*commandBuffer));
   }
 
@@ -42,7 +42,7 @@ auto DebugFrameGraph::execute(const Frame* frame) -> FrameGraphResult {
                                               .passId = pass->getId(),
                                               .queueType = QueueType::Graphics};
     auto& commandBuffer = commandBufferManager->requestCommandBuffer(request);
-    pass->execute(frame, commandBuffer, passBindFunction);
+    pass->execute(frame, commandBuffer);
     frameGraphResult.commandBuffers.push_back(&(*commandBuffer));
   }
   return frameGraphResult;

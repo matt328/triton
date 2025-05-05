@@ -23,12 +23,12 @@ auto ResourceProxyImpl::uploadModel(const as::Model& model) -> ModelData {
     auto verts = model.dynamicVertices.value();
     auto indices = model.indices;
     auto geometryData = DynamicGeometryData{std::move(verts), std::move(indices)};
-    meshHandle = resourceManager->uploadDynamicMesh(geometryData);
+    // meshHandle = resourceManager->uploadDynamicMesh(geometryData);
   } else {
     auto verts = model.staticVertices.value();
     auto indices = model.indices;
     auto geometryData = StaticGeometryData{std::move(verts), std::move(indices)};
-    meshHandle = resourceManager->uploadStaticMesh(geometryData);
+    // meshHandle = resourceManager->uploadStaticMesh(geometryData);
   }
 
   auto textureHandle = resourceManager->uploadImage(model.imageData, "unnamed_texture");

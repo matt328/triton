@@ -24,6 +24,5 @@ public:
   virtual void waitIdle() = 0;
 
   virtual void setRenderData(const RenderData& renderData) = 0;
-  virtual auto getGeometryBuffer() -> GeometryBuffer& = 0;
 };
 }

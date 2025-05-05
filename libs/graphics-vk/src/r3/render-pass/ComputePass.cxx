@@ -7,13 +7,9 @@ ComputePass::ComputePass(ComputePassConfig&& newConfig,
     : imageManager{std::move(newImageManager)}, config{std::move(newConfig)} {
 }
 
-auto ComputePass::dispatch(const Frame* frame,
-                           vk::raii::CommandBuffer& cmdBuffer,
-                           const PushConstantsBindFn& bindFn) -> void {
+auto ComputePass::dispatch(const Frame* frame, vk::raii::CommandBuffer& cmdBuffer) -> void {
 
   cmdBuffer.bindPipeline(vk::PipelineBindPoint::eCompute, config.pipeline);
-
-  bindFn(frame, cmdBuffer);
 
   cmdBuffer.dispatch(1024, 1, 1);
 }

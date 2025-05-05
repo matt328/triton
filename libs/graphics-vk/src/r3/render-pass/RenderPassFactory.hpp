@@ -1,5 +1,6 @@
 #pragma once
 
+#include "bk/HandleGenerator.hpp"
 #include "r3/render-pass/GraphicsPassCreateInfo.hpp"
 #include "r3/render-pass/ComputePassCreateInfo.hpp"
 
@@ -10,6 +11,7 @@ class ComputePass;
 class PipelineFactory;
 class ImageManager;
 class IFrameManager;
+class ManagedImage;
 
 class RenderPassFactory {
 public:
@@ -18,9 +20,9 @@ public:
                     std::shared_ptr<IFrameManager> newFrameManager);
   ~RenderPassFactory() = default;
 
-  RenderPassFactory(const RenderPassFactory&) = default;
+  RenderPassFactory(const RenderPassFactory&) = delete;
   RenderPassFactory(RenderPassFactory&&) = delete;
-  auto operator=(const RenderPassFactory&) -> RenderPassFactory& = default;
+  auto operator=(const RenderPassFactory&) -> RenderPassFactory& = delete;
   auto operator=(RenderPassFactory&&) -> RenderPassFactory& = delete;
 
   auto createGraphicsPass(const GraphicsPassCreateInfo& createInfo)
@@ -32,6 +34,8 @@ private:
   std::shared_ptr<PipelineFactory> pipelineFactory;
   std::shared_ptr<ImageManager> imageManager;
   std::shared_ptr<IFrameManager> frameManager;
+
+  HandleGenerator<ManagedImage> imageHandleGenerator;
 };
 
 }

@@ -71,9 +71,9 @@ public:
   auto registerBuffer(BufferHandle handle) -> size_t;
   [[nodiscard]] auto getBufferHandle2(size_t key) const -> BufferHandle;
 
-  auto addLogicalImage(Handle<ManagedImage> logicalHandle, Handle<ManagedImage> imageHandle)
+  auto addLogicalImage(LogicalHandle<ManagedImage> logicalHandle, Handle<ManagedImage> imageHandle)
       -> void;
-  [[nodiscard]] auto getLogicalImage(Handle<ManagedImage> logicalHandle) const
+  [[nodiscard]] auto getLogicalImage(LogicalHandle<ManagedImage> logicalHandle) const
       -> Handle<ManagedImage>;
 
   auto addLogicalBuffer(LogicalHandle<ManagedBuffer> logicalHandle,
@@ -107,7 +107,7 @@ private:
   vk::Extent2D drawImageExtent{};
 
   std::unordered_map<LogicalHandle<ManagedBuffer>, Handle<ManagedBuffer>> bufferHandles;
-  std::unordered_map<Handle<ManagedImage>, Handle<ManagedImage>> imageHandles;
+  std::unordered_map<LogicalHandle<ManagedImage>, Handle<ManagedImage>> imageHandles;
 
   uint32_t staticObjectCount;
   uint32_t dynamicObjectCount;

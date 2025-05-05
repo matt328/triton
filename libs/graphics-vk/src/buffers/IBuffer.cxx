@@ -5,10 +5,12 @@ namespace tr {
 
 IBuffer::IBuffer(std::shared_ptr<Device> newDevice,
                  vk::Buffer newVkBuffer,
+                 BufferMeta newBufferMeta,
                  std::shared_ptr<vma::Allocator> newAllocator,
                  vma::Allocation newAllocation)
     : device{std::move(newDevice)},
       vkBuffer{newVkBuffer},
+      bufferMeta{newBufferMeta},
       allocator{std::move(newAllocator)},
       allocation{newAllocation} {
 }

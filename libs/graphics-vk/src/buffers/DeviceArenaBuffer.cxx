@@ -4,10 +4,15 @@ namespace tr {
 
 DeviceArenaBuffer::DeviceArenaBuffer(std::shared_ptr<Device> newDevice,
                                      vk::Buffer newVkBuffer,
+                                     BufferMeta newBufferMeta,
                                      std::shared_ptr<vma::Allocator> newAllocator,
                                      vma::Allocation newAllocation,
                                      const DeviceArenaBufferCreateInfo& createInfo)
-    : IBuffer(std::move(newDevice), newVkBuffer, std::move(newAllocator), newAllocation),
+    : IBuffer(std::move(newDevice),
+              newVkBuffer,
+              newBufferMeta,
+              std::move(newAllocator),
+              newAllocation),
       capacity(createInfo.initialCapacity),
       itemStride(createInfo.itemStride) {
 }

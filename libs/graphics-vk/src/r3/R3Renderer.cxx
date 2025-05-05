@@ -158,10 +158,6 @@ void R3Renderer::waitIdle() {
 void R3Renderer::setRenderData([[maybe_unused]] const RenderData& renderData) {
 }
 
-auto R3Renderer::getGeometryBuffer() -> GeometryBuffer& {
-  return *geometryBuffer;
-}
-
 auto R3Renderer::createComputeCullingPass() -> void {
 
   const auto pipelineLayoutInfo =

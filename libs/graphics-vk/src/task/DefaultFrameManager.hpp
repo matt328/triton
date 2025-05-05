@@ -35,10 +35,6 @@ public:
 
   [[nodiscard]] auto getFrames() const -> const std::vector<std::unique_ptr<Frame>>& override;
 
-  auto createPerFrameBuffer() -> LogicalBufferHandle override;
-
-  auto registerImageRequest(const ImageRequest& request) -> Handle<ManagedImage> override;
-
 private:
   RenderContextConfig renderConfig;
   std::shared_ptr<CommandBufferManager> commandBufferManager;
