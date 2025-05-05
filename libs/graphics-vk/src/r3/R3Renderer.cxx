@@ -46,7 +46,7 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
   createGlobalBuffers();
   createComputeCullingPass();
   createForwardRenderPass();
-  createCompositionRenderPass();
+  // createCompositionRenderPass();
 }
 
 auto R3Renderer::createGlobalBuffers() -> void {
@@ -210,13 +210,16 @@ auto R3Renderer::createForwardRenderPass() -> void {
       .entryPoint = "main",
   };
 
-  const auto forwardPassCreateInfo =
-      GraphicsPassCreateInfo{.id = "forward",
-                             .pipelineLayoutInfo = PipelineLayoutInfo{},
-                             .colorAttachmentInfos = {colorAttachmentInfo},
-                             .shaderStageInfo = {vertexStage, fragmentStage},
-                             .extent = vk::Extent2D{.width = rendererConfig.initialWidth,
-                                                    .height = rendererConfig.initialHeight}};
+  const auto forwardPassCreateInfo = GraphicsPassCreateInfo{
+      .id = "forward",
+      .pipelineLayoutInfo = PipelineLayoutInfo{.pushConstantInfoList = {PushConstantInfo{
+                                                   .stageFlags = vk::ShaderStageFlagBits::eVertex,
+                                                   .offset = 0,
+                                                   .size = 36}}}, // TODO(matt): Fix this
+      .colorAttachmentInfos = {colorAttachmentInfo},
+      .shaderStageInfo = {vertexStage, fragmentStage},
+      .extent = vk::Extent2D{.width = rendererConfig.initialWidth,
+                             .height = rendererConfig.initialHeight}};
 
   auto forwardPass = renderPassFactory->createGraphicsPass(forwardPassCreateInfo);
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "bk/Handle.hpp"
-#include "mem/BufferWrapper.hpp"
+#include "buffers/ManagedBuffer.hpp"
 
 namespace tr {
 
@@ -17,18 +17,18 @@ struct IndirectMetadata {
 };
 
 struct DrawContextConfig {
-  std::vector<Handle<BufferWrapper>> logicalBuffers;
-  Handle<BufferWrapper> indirectBuffer;
-  Handle<BufferWrapper> countBuffer;
+  std::vector<LogicalHandle<ManagedBuffer>> logicalBuffers;
+  LogicalHandle<ManagedBuffer> indirectBuffer;
+  LogicalHandle<ManagedBuffer> countBuffer;
   IndirectMetadata indirectMetadata;
 };
 
 class Frame;
-class BufferRegistry;
+class BufferSystem;
 
 class DrawContext {
 public:
-  DrawContext(DrawContextConfig config, std::shared_ptr<BufferRegistry> newBufferRegistry);
+  DrawContext(DrawContextConfig config, std::shared_ptr<BufferSystem> newBufferSystem);
   ~DrawContext() = default;
 
   DrawContext(const DrawContext&) = default;
@@ -44,7 +44,7 @@ public:
   auto record(const Frame* frame, vk::raii::CommandBuffer& commandBuffer) -> void;
 
 private:
-  std::shared_ptr<BufferRegistry> bufferRegistry;
+  std::shared_ptr<BufferSystem> bufferSystem;
   DrawContextConfig config;
 };
 

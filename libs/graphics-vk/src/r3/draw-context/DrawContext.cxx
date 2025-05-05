@@ -1,14 +1,13 @@
 #include <utility>
 
 #include "DrawContext.hpp"
-#include "mem/buffer-registry/BufferRegistry.hpp"
+#include "buffers/BufferSystem.hpp"
 #include "task/Frame.hpp"
 
 namespace tr {
 
-DrawContext::DrawContext(DrawContextConfig config,
-                         std::shared_ptr<BufferRegistry> newBufferRegistry)
-    : bufferRegistry{std::move(newBufferRegistry)}, config{std::move(config)} {
+DrawContext::DrawContext(DrawContextConfig config, std::shared_ptr<BufferSystem> newBufferSystem)
+    : bufferSystem{std::move(newBufferSystem)}, config{std::move(config)} {
 }
 
 auto DrawContext::bind(const Frame* frame,
@@ -21,7 +20,7 @@ auto DrawContext::bind(const Frame* frame,
   };
   pcBlob.data.reserve(config.logicalBuffers.size() * 8);
   for (const auto& handle : config.logicalBuffers) {
-    auto address = bufferRegistry->getBufferAddress(frame->getLogicalBuffer(handle));
+    auto address = bufferSystem->getBufferAddress(frame->getLogicalBuffer(handle));
     pcBlob.data.insert(pcBlob.data.end(), address, address + sizeof(address));
   }
 
@@ -36,14 +35,12 @@ auto DrawContext::bind(const Frame* frame,
 
 auto DrawContext::record(const Frame* frame, vk::raii::CommandBuffer& commandBuffer) -> void {
   auto indirectBufferHandle = frame->getLogicalBuffer(config.indirectBuffer);
-  auto* indirectBuffer = bufferRegistry->getBufferWrapper(indirectBufferHandle).get<ArenaBuffer>();
+  const auto indirectBuffer = bufferSystem->getVkBuffer(indirectBufferHandle);
+  const auto countBuffer = bufferSystem->getVkBuffer(frame->getLogicalBuffer(config.countBuffer));
 
-  auto* countBuffer = bufferRegistry->getBufferWrapper(frame->getLogicalBuffer(config.countBuffer))
-                          .get<ArenaBuffer>();
-
-  commandBuffer.drawIndexedIndirectCount(indirectBuffer->getBuffer().getBuffer(),
+  commandBuffer.drawIndexedIndirectCount(indirectBuffer,
                                          config.indirectMetadata.indirectOffset,
-                                         countBuffer->getBuffer().getBuffer(),
+                                         countBuffer,
                                          config.indirectMetadata.countOffset,
                                          1024,
                                          sizeof(vk::DrawIndexedIndirectCommand));

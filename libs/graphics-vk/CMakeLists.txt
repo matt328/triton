@@ -7,6 +7,7 @@ set(graphicsvk_SRC
   src/r3/render-pass/PipelineFactory.cxx
   src/r3/render-pass/GraphicsPass.cxx
   src/r3/render-pass/ComputePass.cxx
+  src/r3/draw-context/DrawContext.cxx
 
   src/buffers/ManagedBuffer.cxx
   src/buffers/HostVisibleStrategy.cxx

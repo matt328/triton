@@ -23,6 +23,15 @@ BufferSystem::BufferSystem(std::shared_ptr<IFrameManager> newFrameManager,
   strategyMap.emplace(arenaHandle, std::make_unique<ArenaStrategy>());
 }
 
+auto BufferSystem::getBufferAddress(Handle<ManagedBuffer> handle) -> uint64_t {
+  return device->getVkDevice().getBufferAddress(
+      vk::BufferDeviceAddressInfo{.buffer = bufferMap.at(handle)->getVkBuffer()});
+}
+
+auto BufferSystem::getVkBuffer(Handle<ManagedBuffer> handle) -> const vk::Buffer& {
+  return bufferMap.at(handle)->getVkBuffer();
+}
+
 auto BufferSystem::registerBuffer(BufferCreateInfo createInfo) -> Handle<ManagedBuffer> {
   const auto handle = bufferHandleGenerator.requestHandle();
 

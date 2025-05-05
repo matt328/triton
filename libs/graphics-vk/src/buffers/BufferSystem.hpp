@@ -48,6 +48,8 @@ public:
   /// Gets the buffer's address as a uint64_t to be set into a PushConstant.
   auto getBufferAddress(Handle<ManagedBuffer> handle) -> uint64_t;
 
+  auto getVkBuffer(Handle<ManagedBuffer> handle) -> const vk::Buffer&;
+
 private:
   std::shared_ptr<IFrameManager> frameManager;
   std::shared_ptr<Device> device;

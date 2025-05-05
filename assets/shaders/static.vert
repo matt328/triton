@@ -3,9 +3,6 @@
 #extension GL_EXT_shader_explicit_arithmetic_types_int64 : enable
 #extension GL_EXT_shader_explicit_arithmetic_types : require
 
-layout(location = 0) in vec3 inPosition;
-layout(location = 1) in vec2 inTexCoord;
-
 layout(location = 0) out vec2 fragTexCoord;
 layout(location = 1) out uint textureId;
 
@@ -48,9 +45,9 @@ void main() {
   uint objectIndex = objectDataIndexBuffer.index[gl_DrawID];
 
   mat4 model = objectDataBuffer.objectData[objectIndex].modelMatrix;
-  vec4 worldPos = camData.proj * camData.view * model * vec4(inPosition, 1.0);
+  vec4 worldPos = camData.proj * camData.view * model * vec4(0.0, 0.0, 0.0, 1.0);
 
   gl_Position = worldPos;
-  fragTexCoord = inTexCoord;
+  fragTexCoord = vec2(0.0, 0.0);
   textureId = objectDataBuffer.objectData[objectIndex].textureId;
 }
