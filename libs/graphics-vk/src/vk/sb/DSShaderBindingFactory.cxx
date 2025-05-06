@@ -60,6 +60,7 @@ auto DSShaderBindingFactory::createShaderBinding(ShaderBindingType type,
 }
 
 auto DSShaderBindingFactory::getShaderBinding(ShaderBindingHandle handle) -> IShaderBinding& {
+  assert(shaderBindingMap.contains(handle));
   return *shaderBindingMap.at(handle);
 }
 

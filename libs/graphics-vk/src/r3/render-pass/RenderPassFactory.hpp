@@ -12,12 +12,14 @@ class PipelineFactory;
 class ImageManager;
 class IFrameManager;
 class ManagedImage;
+class ContextFactory;
 
 class RenderPassFactory {
 public:
   RenderPassFactory(std::shared_ptr<PipelineFactory> newPipelineFactory,
                     std::shared_ptr<ImageManager> newImageManager,
-                    std::shared_ptr<IFrameManager> newFrameManager);
+                    std::shared_ptr<IFrameManager> newFrameManager,
+                    std::shared_ptr<ContextFactory> newDrawContextFactory);
   ~RenderPassFactory() = default;
 
   RenderPassFactory(const RenderPassFactory&) = delete;
@@ -34,6 +36,7 @@ private:
   std::shared_ptr<PipelineFactory> pipelineFactory;
   std::shared_ptr<ImageManager> imageManager;
   std::shared_ptr<IFrameManager> frameManager;
+  std::shared_ptr<ContextFactory> drawContextFactory;
 
   HandleGenerator<ManagedImage> imageHandleGenerator;
 };

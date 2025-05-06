@@ -24,11 +24,13 @@ BufferSystem::BufferSystem(std::shared_ptr<IFrameManager> newFrameManager,
 }
 
 auto BufferSystem::getBufferAddress(Handle<ManagedBuffer> handle) -> uint64_t {
+  assert(bufferMap.contains(handle));
   return device->getVkDevice().getBufferAddress(
       vk::BufferDeviceAddressInfo{.buffer = bufferMap.at(handle)->getVkBuffer()});
 }
 
 auto BufferSystem::getVkBuffer(Handle<ManagedBuffer> handle) -> const vk::Buffer& {
+  assert(bufferMap.contains(handle));
   return bufferMap.at(handle)->getVkBuffer();
 }
 
@@ -54,20 +56,26 @@ auto BufferSystem::registerPerFrameBuffer(BufferCreateInfo createInfo)
 }
 
 auto BufferSystem::rewrite(Handle<ManagedBuffer> handle, const void* data, size_t size) -> void {
+  assert(bufferMap.contains(handle));
   auto& buffer = bufferMap.at(handle);
+  assert(strategyMap.contains(buffer->getMeta().strategyHandle));
   auto& strategy = strategyMap.at(buffer->getMeta().strategyHandle);
   strategy->rewrite(*buffer, data, size);
 }
 
 auto BufferSystem::insert(Handle<ManagedBuffer> handle, const void* data, size_t size)
     -> BufferRegion {
+  assert(bufferMap.contains(handle));
   auto& buffer = bufferMap.at(handle);
+  assert(strategyMap.contains(buffer->getMeta().strategyHandle));
   auto& strategy = strategyMap.at(buffer->getMeta().strategyHandle);
   return strategy->insert(*buffer, data, size);
 }
 
 auto BufferSystem::removeData(Handle<ManagedBuffer> handle, const BufferRegion& region) -> void {
+  assert(bufferMap.contains(handle));
   auto& buffer = bufferMap.at(handle);
+  assert(strategyMap.contains(buffer->getMeta().strategyHandle));
   auto& strategy = strategyMap.at(buffer->getMeta().strategyHandle);
   strategy->remove(*buffer, region);
 }

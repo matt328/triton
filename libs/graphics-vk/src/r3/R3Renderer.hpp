@@ -43,7 +43,8 @@ public:
              std::shared_ptr<IFrameGraph> newFrameGraph,
              std::shared_ptr<RenderPassFactory> newRenderPassFactory,
              std::shared_ptr<CommandBufferManager> newCommandBufferManager,
-             std::shared_ptr<BufferSystem> newBufferSystem);
+             std::shared_ptr<BufferSystem> newBufferSystem,
+             std::shared_ptr<ContextFactory> newDrawContextFactory);
   ~R3Renderer() override = default;
 
   R3Renderer(const R3Renderer&) = delete;
@@ -69,6 +70,7 @@ private:
   std::shared_ptr<RenderPassFactory> renderPassFactory;
   std::shared_ptr<CommandBufferManager> commandBufferManager;
   std::shared_ptr<BufferSystem> bufferSystem;
+  std::shared_ptr<ContextFactory> drawContextFactory;
 
   std::unordered_map<RenderPassType, GraphicsPass> renderPasses;
 

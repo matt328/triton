@@ -13,10 +13,12 @@ namespace tr {
 
 RenderPassFactory::RenderPassFactory(std::shared_ptr<PipelineFactory> newPipelineFactory,
                                      std::shared_ptr<ImageManager> newImageManager,
-                                     std::shared_ptr<IFrameManager> newFrameManager)
+                                     std::shared_ptr<IFrameManager> newFrameManager,
+                                     std::shared_ptr<ContextFactory> newDrawContextFactory)
     : pipelineFactory{std::move(newPipelineFactory)},
       imageManager{std::move(newImageManager)},
-      frameManager{std::move(newFrameManager)} {
+      frameManager{std::move(newFrameManager)},
+      drawContextFactory{std::move(newDrawContextFactory)} {
 }
 
 auto RenderPassFactory::createGraphicsPass(const GraphicsPassCreateInfo& createInfo)
@@ -67,7 +69,7 @@ auto RenderPassFactory::createGraphicsPass(const GraphicsPassCreateInfo& createI
       .extent = createInfo.extent,
   };
 
-  return std::make_unique<GraphicsPass>(std::move(config), imageManager);
+  return std::make_unique<GraphicsPass>(std::move(config), imageManager, drawContextFactory);
 }
 
 auto RenderPassFactory::createComputePass(const ComputePassCreateInfo& createInfo)
@@ -86,7 +88,7 @@ auto RenderPassFactory::createComputePass(const ComputePassCreateInfo& createInf
       .debugName = createInfo.id,
   };
 
-  return std::make_unique<ComputePass>(std::move(config), imageManager);
+  return std::make_unique<ComputePass>(std::move(config), imageManager, drawContextFactory);
 }
 
 }

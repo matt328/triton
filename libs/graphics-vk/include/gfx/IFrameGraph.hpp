@@ -38,6 +38,9 @@ public:
   virtual auto addPass(std::unique_ptr<GraphicsPass>&& pass, PassGraphInfo passInfo) -> void = 0;
   virtual auto addPass(std::unique_ptr<ComputePass>&& pass, PassGraphInfo passInfo) -> void = 0;
 
+  [[nodiscard]] virtual auto getGraphicsPass(std::string id) -> std::unique_ptr<GraphicsPass>& = 0;
+  [[nodiscard]] virtual auto getComputePass(std::string id) -> std::unique_ptr<ComputePass>& = 0;
+
   virtual auto bake() -> void = 0;
 
   virtual auto execute(const Frame* frame) -> FrameGraphResult = 0;

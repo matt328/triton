@@ -2,6 +2,8 @@
 
 namespace tr {
 
-struct PassGraphInfo {};
+struct PassGraphInfo {
+  std::string id;
+};
 
 }

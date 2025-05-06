@@ -8,6 +8,7 @@
 #include "buffers/BufferSystem.hpp"
 #include "mem/Allocator.hpp"
 #include "pipeline/SpirvShaderModuleFactory.hpp"
+#include "r3/draw-context/ContextFactory.hpp"
 #include "r3/graph/DebugFrameGraph.hpp"
 #include "r3/R3Renderer.hpp"
 #include "r3/render-pass/PipelineFactory.hpp"
@@ -36,6 +37,8 @@
 
 #include "img/ImageRegistry.hpp"
 #include "img/ImageManager.hpp"
+
+#include "r3/draw-context/DispatchContext.hpp"
 
 #include <di.hpp>
 

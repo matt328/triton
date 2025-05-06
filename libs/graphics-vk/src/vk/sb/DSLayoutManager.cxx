@@ -11,8 +11,8 @@ DSLayoutManager::DSLayoutManager(std::shared_ptr<Device> newDevice,
 DSLayoutManager::~DSLayoutManager() {
 }
 
-auto DSLayoutManager::createLayout(vk::DescriptorSetLayoutBinding binding,
-                                   std::string_view name) -> DSLayoutHandle {
+auto DSLayoutManager::createLayout(vk::DescriptorSetLayoutBinding binding, std::string_view name)
+    -> DSLayoutHandle {
   const auto key = keyGen.getKey();
 
   static constexpr vk::DescriptorBindingFlags bindlessFlags =
@@ -39,6 +39,7 @@ auto DSLayoutManager::createLayout(vk::DescriptorSetLayoutBinding binding,
 }
 
 auto DSLayoutManager::getLayout(DSLayoutHandle handle) -> DSLayout& {
+  assert(layoutMap.contains(handle));
   return *layoutMap.at(handle);
 }
 

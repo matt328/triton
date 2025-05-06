@@ -133,7 +133,7 @@ auto DrawContextFactory::getOrCreateDrawContext(RenderConfigHandle renderConfigH
 
     drawContexts.emplace(renderConfigHandle, std::make_unique<DrawContext>(dcci));
   }
-
+  assert(drawContexts.contains(renderConfigHandle));
   return drawContexts.at(renderConfigHandle).get();
 }
 }

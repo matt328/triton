@@ -5,12 +5,6 @@
 
 namespace tr {
 
-struct PushConstantBlob {
-  std::vector<uint8_t> data;
-  vk::ShaderStageFlags stageFlags;
-  uint32_t offset = 0;
-};
-
 struct IndirectMetadata {
   uint32_t indirectOffset;
   uint32_t countOffset;

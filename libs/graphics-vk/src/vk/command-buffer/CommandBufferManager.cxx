@@ -52,6 +52,7 @@ auto CommandBufferManager::allocateCommandBuffers(const CommandBufferInfo& info)
         };
         poolMap.emplace(poolKey, device->getVkDevice().createCommandPool(poolCreateInfo));
       }
+      assert(poolMap.contains(poolKey));
       const auto allocInfo = vk::CommandBufferAllocateInfo{
           .commandPool = *poolMap.at(poolKey),
           .level = vk::CommandBufferLevel::ePrimary,

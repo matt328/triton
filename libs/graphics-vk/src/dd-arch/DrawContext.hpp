@@ -21,15 +21,15 @@ struct DrawContextCreateInfo {
   LogicalBufferHandle indirectDrawCommandBufferHandle;
 };
 
-class DrawContext {
+class DispatchContext {
 public:
-  explicit DrawContext(const DrawContextCreateInfo& createInfo);
-  ~DrawContext() = default;
+  explicit DispatchContext(const DrawContextCreateInfo& createInfo);
+  ~DispatchContext() = default;
 
-  DrawContext(const DrawContext&) = delete;
-  DrawContext(DrawContext&&) = delete;
-  auto operator=(const DrawContext&) -> DrawContext& = delete;
-  auto operator=(DrawContext&&) -> DrawContext& = delete;
+  DispatchContext(const DispatchContext&) = delete;
+  DispatchContext(DispatchContext&&) = delete;
+  auto operator=(const DispatchContext&) -> DispatchContext& = delete;
+  auto operator=(DispatchContext&&) -> DispatchContext& = delete;
 
   auto registerRenderable(const RenderableData& renderableData) -> RenderableResources;
   auto writeObjectData(const Renderable& renderable) -> void;

@@ -19,6 +19,10 @@ public:
   auto addPass(std::unique_ptr<GraphicsPass>&& pass, PassGraphInfo passInfo) -> void override;
   auto addPass(std::unique_ptr<ComputePass>&& pass, PassGraphInfo passInfo) -> void override;
 
+  [[nodiscard]] auto getGraphicsPass(std::string id) -> std::unique_ptr<GraphicsPass>& override;
+
+  [[nodiscard]] auto getComputePass(std::string id) -> std::unique_ptr<ComputePass>& override;
+
   auto bake() -> void override;
 
   auto execute(const Frame* frame) -> FrameGraphResult override;
@@ -26,8 +30,8 @@ public:
 private:
   std::shared_ptr<CommandBufferManager> commandBufferManager;
 
-  std::vector<std::unique_ptr<ComputePass>> computePasses;
-  std::vector<std::unique_ptr<GraphicsPass>> graphicsPasses;
+  std::unordered_map<std::string, std::unique_ptr<ComputePass>> computePasses;
+  std::unordered_map<std::string, std::unique_ptr<GraphicsPass>> graphicsPasses;
 };
 
 }

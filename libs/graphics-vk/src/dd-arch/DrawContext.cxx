@@ -2,21 +2,21 @@
 
 namespace tr {
 
-DrawContext::DrawContext(const DrawContextCreateInfo& createInfo)
+DispatchContext::DispatchContext(const DrawContextCreateInfo& createInfo)
     : id(createInfo.id),
       geometryBufferHandle(createInfo.geometryBufferHandle),
       materialBufferHandle(createInfo.materialBufferHandle) {
 }
 
-auto DrawContext::registerRenderable([[maybe_unused]] const RenderableData& renderableData)
+auto DispatchContext::registerRenderable([[maybe_unused]] const RenderableData& renderableData)
     -> RenderableResources {
   return {};
 }
 
-auto DrawContext::writeObjectData([[maybe_unused]] const Renderable& renderable) -> void {
+auto DispatchContext::writeObjectData([[maybe_unused]] const Renderable& renderable) -> void {
 }
 
-auto DrawContext::record(vk::raii::CommandBuffer& cmdBuffer) -> void {
+auto DispatchContext::record(vk::raii::CommandBuffer& cmdBuffer) -> void {
 }
 
 }

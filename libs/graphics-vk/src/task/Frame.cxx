@@ -71,6 +71,7 @@ auto Frame::addLogicalImage(LogicalHandle<ManagedImage> logicalHandle,
 
 auto Frame::getLogicalImage(LogicalHandle<ManagedImage> logicalHandle) const
     -> Handle<ManagedImage> {
+  assert(imageHandles.contains(logicalHandle));
   return imageHandles.at(logicalHandle);
 }
 
@@ -83,6 +84,7 @@ auto Frame::addLogicalBuffer(LogicalHandle<ManagedBuffer> logicalHandle,
 
 [[nodiscard]] auto Frame::getLogicalBuffer(LogicalHandle<ManagedBuffer> logicalHandle) const
     -> Handle<ManagedBuffer> {
+  assert(bufferHandles.contains(logicalHandle));
   return bufferHandles.at(logicalHandle);
 }
 

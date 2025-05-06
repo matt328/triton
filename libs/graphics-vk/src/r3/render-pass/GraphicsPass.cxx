@@ -1,11 +1,15 @@
 #include "GraphicsPass.hpp"
 #include "img/ImageManager.hpp"
 #include "task/Frame.hpp"
+#include "r3/draw-context/ContextFactory.hpp"
 
 namespace tr {
 GraphicsPass::GraphicsPass(GraphicsPassConfig&& config,
-                           std::shared_ptr<ImageManager> newImageManager)
-    : imageManager{std::move(newImageManager)}, passConfig{std::move(config)} {
+                           std::shared_ptr<ImageManager> newImageManager,
+                           std::shared_ptr<ContextFactory> newDrawContextFactory)
+    : imageManager{std::move(newImageManager)},
+      drawContextFactory{std::move(newDrawContextFactory)},
+      passConfig{std::move(config)} {
 
   renderingInfo = vk::RenderingInfo{
       .renderArea = vk::Rect2D{.offset = {.x = 0, .y = 0}, .extent = passConfig.extent},
@@ -55,8 +59,18 @@ auto GraphicsPass::execute(const Frame* frame, vk::raii::CommandBuffer& cmdBuffe
   cmdBuffer.beginRendering(renderingInfo);
   cmdBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, passConfig.pipeline);
 
+  for (const auto& handle : drawableContexts) {
+    const auto& drawContext = drawContextFactory->getDrawContext(handle);
+    drawContext->bind(frame, cmdBuffer, passConfig.pipelineLayout);
+    drawContext->record(frame, cmdBuffer);
+  }
+
   cmdBuffer.endRendering();
   cmdBuffer.end();
+}
+
+auto GraphicsPass::registerDrawContext(Handle<DrawContext> handle) -> void {
+  drawableContexts.push_back(handle);
 }
 
 }

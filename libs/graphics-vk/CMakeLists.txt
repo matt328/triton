@@ -8,6 +8,8 @@ set(graphicsvk_SRC
   src/r3/render-pass/GraphicsPass.cxx
   src/r3/render-pass/ComputePass.cxx
   src/r3/draw-context/DrawContext.cxx
+  src/r3/draw-context/DispatchContext.cxx
+  src/r3/draw-context/ContextFactory.cxx
 
   src/buffers/ManagedBuffer.cxx
   src/buffers/HostVisibleStrategy.cxx
@@ -85,6 +87,7 @@ target_precompile_headers(${PROJECT_NAME}
   <GLFW/glfw3.h>
   <imgui_impl_glfw.h>
   <imgui_impl_vulkan.h>
+  <ranges>
   <set>
   <tracy/Tracy.hpp>
   <tracy/TracyC.h>

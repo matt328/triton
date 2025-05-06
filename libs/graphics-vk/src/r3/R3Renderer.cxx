@@ -7,6 +7,8 @@
 #include "gfx/IFrameGraph.hpp"
 #include "gfx/IFrameManager.hpp"
 #include "gfx/QueueTypes.hpp"
+#include "r3/draw-context/ContextFactory.hpp"
+#include "r3/draw-context/DispatchContext.hpp"
 #include "r3/render-pass/ComputePass.hpp"
 #include "r3/render-pass/RenderPassFactory.hpp"
 #include "task/Frame.hpp"
@@ -16,6 +18,18 @@
 
 namespace tr {
 
+constexpr std::string CullingPassId = "pass.culling";
+constexpr std::string ForwardId = "pass.forward";
+
+constexpr std::string CubeDrawContext = "context.cube";
+constexpr std::string CullingDispatchContext = "context.culling";
+
+const std::unordered_map<std::string, std::vector<std::string>> GraphicsMap = {
+    {CubeDrawContext, {ForwardId}}};
+
+const std::unordered_map<std::string, std::vector<std::string>> ComputeMap = {
+    {CullingDispatchContext, {CullingPassId}}};
+
 R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
                        std::shared_ptr<IFrameManager> newFrameManager,
                        std::shared_ptr<queue::Graphics> newGraphicsQueue,
@@ -24,7 +38,8 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
                        std::shared_ptr<IFrameGraph> newFrameGraph,
                        std::shared_ptr<RenderPassFactory> newRenderPassFactory,
                        std::shared_ptr<CommandBufferManager> newCommandBufferManager,
-                       std::shared_ptr<BufferSystem> newBufferSystem)
+                       std::shared_ptr<BufferSystem> newBufferSystem,
+                       std::shared_ptr<ContextFactory> newDrawContextFactory)
     : rendererConfig{newRenderConfig},
       frameManager{std::move(newFrameManager)},
       graphicsQueue{std::move(newGraphicsQueue)},
@@ -33,8 +48,17 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
       frameGraph{std::move(newFrameGraph)},
       renderPassFactory{std::move(newRenderPassFactory)},
       commandBufferManager{std::move(newCommandBufferManager)},
-      bufferSystem{std::move(newBufferSystem)} {
+      bufferSystem{std::move(newBufferSystem)},
+      drawContextFactory{std::move(newDrawContextFactory)} {
 
+  drawContextFactory->createDrawContext(
+      CubeDrawContext,
+      DrawContextConfig{.logicalBuffers = {},
+                        .indirectBuffer = globalBuffers.drawCommands,
+                        .countBuffer = globalBuffers.drawCounts,
+                        .indirectMetadata = IndirectMetadata{}});
+  drawContextFactory->createDispatchContext(CullingDispatchContext,
+                                            DispatchContextConfig{.logicalBuffers = {}});
   /*
     TODO(matt): createComputeCullingPass()
     - register a fullscreen quad geometry specifically for use by the composition pass to write onto
@@ -42,11 +66,28 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
     - This will exercise all the geometry buffer and basically the entire pipeline.
     - Start with culling pass. Make sure it creates the correct DIIC, count, and uses the DIIC
     metadata buffer
+
+    Culling Shader:
+    - todo tomorrow
   */
   createGlobalBuffers();
   createComputeCullingPass();
   createForwardRenderPass();
   // createCompositionRenderPass();
+
+  for (const auto& [contextId, passIds] : GraphicsMap) {
+    for (const auto& passId : passIds) {
+      frameGraph->getGraphicsPass(passId)->registerDrawContext(
+          drawContextFactory->getDrawContextHandle(contextId));
+    }
+  }
+
+  for (const auto& [contextId, passIds] : ComputeMap) {
+    for (const auto& passId : passIds) {
+      frameGraph->getComputePass(passId)->registerDispatchContext(
+          drawContextFactory->getDispatchContextHandle(contextId));
+    }
+  }
 }
 
 auto R3Renderer::createGlobalBuffers() -> void {
@@ -187,9 +228,7 @@ auto R3Renderer::createComputeCullingPass() -> void {
       .queueConfigs = {QueueConfig{.queueType = QueueType::Compute, .uses = uses}}};
   commandBufferManager->allocateCommandBuffers(commandBufferInfo);
 
-  const auto cullingPassGraphInfo = PassGraphInfo{};
-
-  frameGraph->addPass(std::move(cullingPass), cullingPassGraphInfo);
+  frameGraph->addPass(std::move(cullingPass), PassGraphInfo{.id = CullingPassId});
 }
 
 auto R3Renderer::createForwardRenderPass() -> void {
@@ -236,9 +275,7 @@ auto R3Renderer::createForwardRenderPass() -> void {
 
   commandBufferManager->allocateCommandBuffers(commandBufferInfo);
 
-  const auto forwardPassGraphInfo = PassGraphInfo{};
-
-  frameGraph->addPass(std::move(forwardPass), forwardPassGraphInfo);
+  frameGraph->addPass(std::move(forwardPass), PassGraphInfo{.id = ForwardId});
 }
 
 auto R3Renderer::createCompositionRenderPass() -> void {
@@ -282,9 +319,7 @@ auto R3Renderer::createCompositionRenderPass() -> void {
 
   commandBufferManager->allocateCommandBuffers(commandBufferInfo);
 
-  const auto compositionPassGraphInfo = PassGraphInfo{};
-
-  frameGraph->addPass(std::move(compositionPass), compositionPassGraphInfo);
+  frameGraph->addPass(std::move(compositionPass), PassGraphInfo{.id = CullingPassId});
 }
 
 }
