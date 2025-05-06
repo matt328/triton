@@ -1,0 +1,78 @@
+#version 460
+#extension GL_EXT_nonuniform_qualifier : require
+#extension GL_EXT_buffer_reference : require
+#extension GL_EXT_scalar_block_layout : require
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : enable
+
+#define INVALID_OFFSET 0xFFFFFFFFu
+
+#define ObjectDataSize 76
+#define GeometryRegionSize 24
+#define IndirectCommandSize 20
+
+layout(buffer_reference, scalar) buffer GpuObjectDataBuffer {
+  mat4 modelMatrix;
+  uint geometryRegionId;
+  uint materialId;
+  uint animationId;
+};
+
+layout(buffer_reference, scalar) buffer GpuGeometryRegionDataBuffer {
+  uint indexCount;
+  uint indexOffset;
+  uint positionOffset;
+  uint colorOffset;
+  uint texCoordOffset;
+  uint normalOffset;
+};
+
+layout(buffer_reference, scalar) buffer GpuIndexDataBuffer {
+  uint index;
+};
+
+layout(buffer_reference, scalar) buffer GpuVertexPositionDataBuffer {
+  vec3 position;
+};
+
+layout(buffer_reference, scalar) buffer GpuIndirectCommandBuffer {
+  uint indexCount;
+  uint instanceCount;
+  uint firstIndex;
+  int vertexOffset;
+  uint firstInstance;
+};
+
+layout(push_constant) uniform PushConstants {
+  uint objectCount;
+  uint64_t objectDataAddress;
+  uint64_t geometryRegionAddress;
+  uint64_t indexDataAddress;
+  uint64_t vertexPositionAddress;
+  uint64_t vertexNormalAddress;
+  uint64_t vertexTexCoordAddress;
+  uint64_t vertexColorAddress;
+  uint64_t outputIndirectCommandAddress;
+}
+pushConstants;
+
+layout(local_size_x = 64) in;
+
+void main() {
+  uint idx = gl_GlobalInvocationID.x;
+  if (idx >= pushConstants.objectCount)
+    return;
+
+  GpuObjectDataBuffer objectData =
+      GpuObjectDataBuffer(pushConstants.objectDataAddress + idx * ObjectDataSize);
+  GpuGeometryRegionDataBuffer geomData = GpuGeometryRegionDataBuffer(
+      pushConstants.geometryRegionAddress + objectData.geometryRegionId * GeometryRegionSize);
+
+  GpuIndirectCommandBuffer outCmd = GpuIndirectCommandBuffer(
+      pushConstants.outputIndirectCommandAddress + idx * IndirectCommandSize);
+
+  outCmd.indexCount = geomData.indexCount;
+  outCmd.instanceCount = 1;
+  outCmd.firstIndex = geomData.indexOffset;
+  outCmd.vertexOffset = 0;
+  outCmd.firstInstance = idx;
+}

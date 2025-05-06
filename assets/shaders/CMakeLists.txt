@@ -2,6 +2,7 @@ set(Shaders
   composition.vert
   composition.frag
   compute.comp
+  compute2.comp
   debug.vert
   debug.frag
   dynamic.vert

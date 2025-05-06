@@ -1,14 +1,31 @@
 #pragma once
 
-#include "api/gfx/GeometryEntry.hpp"
 namespace tr {
 
-// Global Buffers
+constexpr uint32_t INVALID_OFFSET = std::numeric_limits<uint32_t>::max(); // 0xFFFFFFFF
+
+// ObjectData Buffer
 struct GpuObjectData {
   glm::mat4 modelMatrix;
   uint32_t geometryRegionId;
   uint32_t materialId;
   uint32_t animationId;
+};
+
+/// Describes a single Mesh in the GpuVertexData struct by indexing into the GpuIndexData buffer
+struct GpuGeometryRegionData {
+  uint32_t indexCount = 0;
+  uint32_t indexOffset = INVALID_OFFSET;
+
+  uint32_t positionOffset = 0;
+  uint32_t colorOffset = INVALID_OFFSET;
+  uint32_t texCoordOffset = INVALID_OFFSET;
+  uint32_t normalOffset = INVALID_OFFSET;
+};
+
+// Typical Index Data each index 'indexes' into the GpuVertexData buffer
+struct GpuIndexData {
+  uint32_t index;
 };
 
 struct GpuVertexPositionData {
@@ -24,7 +41,7 @@ struct GpuVertexTexCoordData {
 };
 
 struct GpuVertexNormalData {
-  glm::vec4 normal;
+  glm::vec3 normal;
 };
 
 struct GpuAnimationData {
@@ -36,8 +53,9 @@ struct GpuMaterialData {
   uint32_t albedoTextureId;
 };
 
-using GpuObjectIndexData = uint32_t;
 using GpuObjectCountData = uint32_t;
+
+struct GpuIndirectCommand : public vk::DrawIndexedIndirectCommand {};
 
 /*
   GpuIndirectCommand fields:
@@ -50,9 +68,5 @@ using GpuObjectCountData = uint32_t;
   gl_VertexIndex ranges from 0 to indexCount - 1
   gl_InstanceIndex ranges from firstInstance to firstInstance + instanceCount - 1
 */
-
-struct GpuIndirectCommand : public vk::DrawIndexedIndirectCommand {
-  uint32_t objectId = INVALID_OFFSET;
-};
 
 }

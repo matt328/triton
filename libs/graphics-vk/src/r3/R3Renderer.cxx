@@ -212,7 +212,7 @@ auto R3Renderer::createComputeCullingPass() -> void {
       .id = "culling",
       .pipelineLayoutInfo = pipelineLayoutInfo,
       .shaderStageInfo = ShaderStageInfo{.stage = vk::ShaderStageFlagBits::eCompute,
-                                         .shaderFile = SHADER_ROOT / "compute.comp.spv",
+                                         .shaderFile = SHADER_ROOT / "compute2.comp.spv",
                                          .entryPoint = "main"}};
   auto cullingPass = renderPassFactory->createComputePass(cullingPassInfo);
 
