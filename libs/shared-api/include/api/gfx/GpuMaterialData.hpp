@@ -4,12 +4,29 @@ namespace tr {
 
 constexpr uint32_t INVALID_OFFSET = std::numeric_limits<uint32_t>::max(); // 0xFFFFFFFF
 
-// ObjectData Buffer
+/// ObjectData Buffer
 struct GpuObjectData {
-  glm::mat4 modelMatrix;
+  uint32_t transformIndex;
+  uint32_t rotationIndex;
+  uint32_t scaleIndex;
   uint32_t geometryRegionId;
   uint32_t materialId;
   uint32_t animationId;
+  uint32_t _padding;
+};
+
+struct GpuTransformData {
+  glm::vec3 position;
+  float _pad0 = 0.f;
+};
+
+struct GpuRotationData {
+  glm::quat rotation;
+};
+
+struct GpuScaleData {
+  glm::vec3 scale;
+  float _pad0 = 0.f;
 };
 
 /// Describes a single Mesh in the GpuVertexData struct by indexing into the GpuIndexData buffer

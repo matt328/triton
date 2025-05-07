@@ -125,25 +125,31 @@ auto R3Renderer::registerRenderable([[maybe_unused]] const RenderableData& data)
 }
 
 void R3Renderer::update() {
+  /*
+    TODO(matt): Sketch out how the client can write state into a ring buffer on a fixed interval,
+    and how the renderer can pick up 2 states and an interpolation value from this ring buffer on
+    it's own interval.
+
+  */
 }
 
 void R3Renderer::renderNextFrame() {
   const auto result = frameManager->acquireFrame();
 
   if (std::holds_alternative<ImageAcquireResult>(result)) {
-    if (const auto acquireResult = std::get<ImageAcquireResult>(result);
-        acquireResult == ImageAcquireResult::Error) {
+    const auto acquireResult = std::get<ImageAcquireResult>(result);
+    if (acquireResult == ImageAcquireResult::Error) {
       Log.warn("Failed to acquire swapchain image");
       return;
     }
+    Log.warn("Some other Result returned from acquireFrame");
+    return;
   }
-  if (std::holds_alternative<Frame*>(result)) {
-    const auto* frame = std::get<Frame*>(result);
 
-    const auto& results = frameGraph->execute(frame);
-
-    endFrame(frame, results);
-  }
+  auto* frame = std::get<Frame*>(result);
+  // Process sync point here
+  const auto& results = frameGraph->execute(frame);
+  endFrame(frame, results);
 }
 
 auto R3Renderer::endFrame(const Frame* frame, const FrameGraphResult& results) -> void {
