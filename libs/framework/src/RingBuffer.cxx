@@ -14,7 +14,7 @@ RingBuffer::RingBuffer(const RingBufferConfig& config) : size(config.capacity), 
 auto RingBuffer::getInterpolatedStates(SimState& stateA,
                                        SimState& stateB,
                                        float& alpha,
-                                       Timestamp currentTimeSec) -> bool {
+                                       Timestamp currentTimeStamp) -> bool {
   const size_t write = writeIndex.load(std::memory_order_acquire);
 
   int64_t i = static_cast<int64_t>(write) - 1;
@@ -27,7 +27,7 @@ auto RingBuffer::getInterpolatedStates(SimState& stateA,
     auto index = static_cast<size_t>((i + count) % count);
     SimState& s = buffer[index];
 
-    if (s.timeStamp <= currentTimeSec) {
+    if (s.timeStamp <= currentTimeStamp) {
       older = &s;
       size_t nextIndex = (index + 1) % count;
       newer = &buffer[nextIndex];
@@ -39,13 +39,17 @@ auto RingBuffer::getInterpolatedStates(SimState& stateA,
     return false;
   }
 
+  if (newer->timeStamp < currentTimeStamp) {
+    return false;
+  }
+
   stateA = *older;
   stateB = *newer;
 
   const auto tA = stateA.timeStamp;
   const auto tB = stateB.timeStamp;
 
-  alpha = (tB == tA) ? 0.0f : static_cast<float>((currentTimeSec - tA) / (tB - tA));
+  alpha = (tB == tA) ? 0.0f : static_cast<float>((currentTimeStamp - tA) / (tB - tA));
 
   alpha = std::clamp(alpha, 0.0f, 1.0f);
   return true;
