@@ -29,12 +29,14 @@ public:
   auto getInterpolatedStates(SimState& stateA,
                              SimState& stateB,
                              float& alpha,
-                             double currentTimeSec) -> bool override;
+                             Timestamp currentTimeSec) -> bool override;
+
+  auto getWriteSlot() -> SimState* override;
+  auto commitWrite() -> void override;
 
 private:
   size_t size;
   std::vector<SimState> buffer;
-  std::atomic<size_t> readIndex;
   std::atomic<size_t> writeIndex;
 };
 }

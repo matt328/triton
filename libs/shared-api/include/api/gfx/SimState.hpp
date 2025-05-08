@@ -4,8 +4,10 @@
 
 namespace tr {
 
+using Timestamp = std::chrono::time_point<std::chrono::steady_clock>;
+
 struct SimState {
-  std::chrono::time_point<std::chrono::steady_clock> timeStamp{};
+  Timestamp timeStamp{};
   uint64_t tag{};
   std::vector<GpuObjectData> objectMetadata;
   std::vector<glm::vec3> positions;

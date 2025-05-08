@@ -89,11 +89,11 @@ auto ThreadedGameLoop::runRenderer(std::atomic<bool>& running,
 
     window->pollEvents();
 
-    const float alpha = float(accumulator.count()) / dt.count();
+    float alpha = float(accumulator.count()) / dt.count();
 
     SimState prev{1024};
     SimState next{1024};
-    if (stateBuffer->findTwoNearestStates(currentTime, prev, next)) {
+    if (stateBuffer->getInterpolatedStates(prev, next, alpha, currentTime)) {
       renderContext->setStates(prev, next, alpha);
     }
 

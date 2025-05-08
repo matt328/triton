@@ -18,7 +18,10 @@ public:
   virtual auto getInterpolatedStates(SimState& stateA,
                                      SimState& stateB,
                                      float& alpha,
-                                     double currentTime) -> bool = 0;
+                                     Timestamp currentTime) -> bool = 0;
+
+  virtual auto getWriteSlot() -> SimState* = 0;
+  virtual auto commitWrite() -> void = 0;
 };
 
 }
