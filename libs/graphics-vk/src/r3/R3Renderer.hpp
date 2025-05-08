@@ -1,5 +1,6 @@
 #pragma once
 
+#include "api/fx/IStateBuffer.hpp"
 #include "api/gfx/RenderStyle.hpp"
 #include "buffers/ManagedBuffer.hpp"
 #include "gfx/IRenderContext.hpp"
@@ -44,7 +45,8 @@ public:
              std::shared_ptr<RenderPassFactory> newRenderPassFactory,
              std::shared_ptr<CommandBufferManager> newCommandBufferManager,
              std::shared_ptr<BufferSystem> newBufferSystem,
-             std::shared_ptr<ContextFactory> newDrawContextFactory);
+             std::shared_ptr<ContextFactory> newDrawContextFactory,
+             std::shared_ptr<IStateBuffer> newStateBuffer);
   ~R3Renderer() override = default;
 
   R3Renderer(const R3Renderer&) = delete;
@@ -71,6 +73,7 @@ private:
   std::shared_ptr<CommandBufferManager> commandBufferManager;
   std::shared_ptr<BufferSystem> bufferSystem;
   std::shared_ptr<ContextFactory> drawContextFactory;
+  std::shared_ptr<IStateBuffer> stateBuffer;
 
   std::unordered_map<RenderPassType, GraphicsPass> renderPasses;
 

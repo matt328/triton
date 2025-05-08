@@ -1,4 +1,5 @@
 #pragma once
+#include "api/fx/IStateBuffer.hpp"
 #include "bk/Handle.hpp"
 #include "LogicalBufferHandle.hpp"
 #include "img/ManagedImage.hpp"
@@ -94,6 +95,10 @@ public:
   auto setDebugObjectCount(uint32_t newDebugObjectCount) -> void;
 
   auto setupRenderingInfo(const std::shared_ptr<VkResourceManager>& resourceManager) -> void;
+
+  SimState currentState;
+  SimState previousState;
+  float alpha;
 
 private:
   uint8_t index;

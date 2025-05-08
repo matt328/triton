@@ -14,6 +14,7 @@ class IGameWorldContext;
 class IActionSystem;
 class ITerrainContext;
 class IWidgetService;
+class IStateBuffer;
 
 class IFrameworkContext {
 public:

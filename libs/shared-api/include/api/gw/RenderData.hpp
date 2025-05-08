@@ -1,7 +1,7 @@
 #pragma once
 
+#include "api/gfx/GpuMaterialData.hpp"
 #include "api/gfx/GpuTerrainDefinition.hpp"
-#include "api/gfx/GpuAnimationData.hpp"
 #include "api/gfx/GpuObjectData.hpp"
 #include "api/gfx/GpuCameraData.hpp"
 #include "api/gw/RenderMeshData.hpp"

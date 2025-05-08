@@ -1,6 +1,7 @@
 #include "fx/FrameworkFactory.hpp"
 #include "DefaultAssetService.hpp"
 #include "IGuiSystem.hpp"
+#include "RingBuffer.hpp"
 #include "api/ext/ITerrainSystemProxy.hpp"
 #include "api/fx/IGameWorldContext.hpp"
 #include "FixedGameLoop.hpp"
@@ -40,6 +41,9 @@ auto createFrameworkContext(const FrameworkConfig& config, std::shared_ptr<IGuiA
   const auto taskQueue = std::make_shared<TaskQueue>(TaskQueueConfig{.maxQueueSize = 1024});
   const auto geometryGenerator = std::make_shared<GeometryGenerator>();
 
+  const auto stateBuffer =
+      std::make_shared<RingBuffer>(RingBufferConfig{.capacity = 3, .maxObjectCount = 1024});
+
   const auto graphicsConfig = VkGraphicsCreateInfo{.initialWindowSize = config.initialWindowSize,
                                                    .windowTitle = config.windowTitle};
 
@@ -47,7 +51,8 @@ auto createFrameworkContext(const FrameworkConfig& config, std::shared_ptr<IGuiA
                                                        guiCallbackRegistrar,
                                                        eventBus,
                                                        taskQueue,
-                                                       guiAdapter);
+                                                       guiAdapter,
+                                                       stateBuffer);
 
   const auto terrainContext = createTerrainContext();
   const auto terrainProxy = terrainContext->getTerrainSystemProxy();

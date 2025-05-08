@@ -5,6 +5,7 @@
 #include "ResourceProxyImpl.hpp"
 
 #include "Window.hpp"
+#include "api/fx/IStateBuffer.hpp"
 #include "buffers/BufferSystem.hpp"
 #include "mem/Allocator.hpp"
 #include "pipeline/SpirvShaderModuleFactory.hpp"
@@ -49,7 +50,8 @@ auto createVkGraphicsContext(VkGraphicsCreateInfo createInfo,
                              std::shared_ptr<IGuiCallbackRegistrar> newGuiCallbackRegistrar,
                              std::shared_ptr<IEventBus> newEventBus,
                              std::shared_ptr<TaskQueue> newTaskQueue,
-                             std::shared_ptr<IGuiAdapter> newGuiAdapter)
+                             std::shared_ptr<IGuiAdapter> newGuiAdapter,
+                             std::shared_ptr<IStateBuffer> newStateBuffer)
     -> std::shared_ptr<IGraphicsContext> {
 
   const auto rendererConfig = RenderContextConfig{.useDescriptorBuffers = false,
@@ -93,7 +95,8 @@ auto createVkGraphicsContext(VkGraphicsCreateInfo createInfo,
                         di::bind<IFrameGraph>.to<DebugFrameGraph>(),
                         di::bind<PipelineFactory>.to<PipelineFactory>(),
                         di::bind<ImageManager>.to<ImageManager>(),
-                        di::bind<RenderPassFactory>.to<RenderPassFactory>());
+                        di::bind<RenderPassFactory>.to<RenderPassFactory>(),
+                        di::bind<IStateBuffer>.to<>(newStateBuffer));
 
   return injector.create<std::shared_ptr<VkGraphicsContext>>();
 }

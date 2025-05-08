@@ -1,6 +1,5 @@
 #include "R3Renderer.hpp"
 #include "api/fx/IEventBus.hpp"
-#include "api/gfx/GeometryEntry.hpp"
 #include "api/gw/RenderableResources.hpp"
 #include "buffers/BufferCreateInfo.hpp"
 #include "buffers/BufferSystem.hpp"
@@ -39,7 +38,8 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
                        std::shared_ptr<RenderPassFactory> newRenderPassFactory,
                        std::shared_ptr<CommandBufferManager> newCommandBufferManager,
                        std::shared_ptr<BufferSystem> newBufferSystem,
-                       std::shared_ptr<ContextFactory> newDrawContextFactory)
+                       std::shared_ptr<ContextFactory> newDrawContextFactory,
+                       std::shared_ptr<IStateBuffer> newStateBuffer)
     : rendererConfig{newRenderConfig},
       frameManager{std::move(newFrameManager)},
       graphicsQueue{std::move(newGraphicsQueue)},
@@ -49,7 +49,8 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
       renderPassFactory{std::move(newRenderPassFactory)},
       commandBufferManager{std::move(newCommandBufferManager)},
       bufferSystem{std::move(newBufferSystem)},
-      drawContextFactory{std::move(newDrawContextFactory)} {
+      drawContextFactory{std::move(newDrawContextFactory)},
+      stateBuffer{std::move(newStateBuffer)} {
 
   drawContextFactory->createDrawContext(
       CubeDrawContext,
@@ -107,8 +108,9 @@ auto R3Renderer::createGlobalBuffers() -> void {
   globalBuffers.objectData = bufferSystem->registerPerFrameBuffer(
       BufferCreateInfo{.bufferType = BufferType::HostTransient});
 
-  globalBuffers.geometryEntry = bufferSystem->registerBuffer(
-      BufferCreateInfo{.bufferType = BufferType::DeviceArena, .itemStride = sizeof(GeometryEntry)});
+  globalBuffers.geometryEntry =
+      bufferSystem->registerBuffer(BufferCreateInfo{.bufferType = BufferType::DeviceArena,
+                                                    .itemStride = sizeof(GpuGeometryRegionData)});
 
   globalBuffers.geometryPositions = bufferSystem->registerBuffer(
       BufferCreateInfo{.bufferType = BufferType::DeviceArena, .itemStride = sizeof(glm::vec3)});
@@ -148,6 +150,10 @@ void R3Renderer::renderNextFrame() {
 
   auto* frame = std::get<Frame*>(result);
   // Process sync point here
+  stateBuffer->getInterpolatedStates(frame->currentState,
+                                     frame->previousState,
+                                     frame->alpha,
+                                     currentTime);
   const auto& results = frameGraph->execute(frame);
   endFrame(frame, results);
 }

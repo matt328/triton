@@ -33,6 +33,9 @@ FixedGameLoop::FixedGameLoop(std::shared_ptr<IEventBus> newEventBus,
 }
 
 auto FixedGameLoop::run() -> void {
+
+  // TODO(matt): change this to kick off two threads, one for gameworld and one for renderer.
+
   using Clock = std::chrono::steady_clock;
   using namespace std::literals;
   auto constexpr MaxFrameTime = 250ms;

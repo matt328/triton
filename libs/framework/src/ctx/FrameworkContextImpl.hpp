@@ -49,5 +49,6 @@ private:
   std::shared_ptr<IGameWorldContext> gameWorldContext;
   std::shared_ptr<IGraphicsContext> graphicsContext;
   std::shared_ptr<ITerrainContext> terrainContext;
+  std::shared_ptr<IStateBuffer> stateBuffer;
 };
 }

@@ -9,6 +9,7 @@ set(framework_SRC
   src/ctx/FrameworkFactory.cxx
   src/GuiCallbackRegistrar.cxx
   src/GeometryGenerator.cxx
+  src/RingBuffer.cxx
 )
 
 add_library(${PROJECT_NAME} STATIC ${framework_SRC})
