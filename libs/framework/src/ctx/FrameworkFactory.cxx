@@ -2,9 +2,9 @@
 #include "DefaultAssetService.hpp"
 #include "IGuiSystem.hpp"
 #include "RingBuffer.hpp"
+#include "ThreadedGameLoop.hpp"
 #include "api/ext/ITerrainSystemProxy.hpp"
 #include "api/fx/IGameWorldContext.hpp"
-#include "FixedGameLoop.hpp"
 #include "FrameworkContextImpl.hpp"
 #include "DefaultEventBus.hpp"
 #include "api/fx/IGameWorldSystem.hpp"
@@ -23,6 +23,7 @@
 #include "bk/TaskQueue.hpp"
 #include "gfx/IWindow.hpp"
 #include "gw/IWidgetService.hpp"
+#include "RingBuffer.hpp"
 
 #define BOOST_DI_CFG_CTOR_LIMIT_SIZE 11
 #include <di.hpp>
@@ -42,7 +43,7 @@ auto createFrameworkContext(const FrameworkConfig& config, std::shared_ptr<IGuiA
   const auto geometryGenerator = std::make_shared<GeometryGenerator>();
 
   const auto stateBuffer =
-      std::make_shared<RingBuffer>(RingBufferConfig{.capacity = 3, .maxObjectCount = 1024});
+      std::make_shared<RingBuffer>(RingBufferConfig{.capacity = 6, .maxObjectCount = 1024});
 
   const auto graphicsConfig = VkGraphicsCreateInfo{.initialWindowSize = config.initialWindowSize,
                                                    .windowTitle = config.windowTitle};
@@ -70,7 +71,7 @@ auto createFrameworkContext(const FrameworkConfig& config, std::shared_ptr<IGuiA
   terrainContext->registerResourceProxy(graphicsContext->getResourceProxy());
 
   const auto frameworkInjector = di::make_injector(
-      di::bind<IGameLoop>.to<FixedGameLoop>(),
+      di::bind<IGameLoop>.to<ThreadedGameLoop>(),
       di::bind<IRenderContext>.to<>(
           [&graphicsContext] { return graphicsContext->getRenderContext(); }),
       di::bind<IGuiCallbackRegistrar>.to(guiCallbackRegistrar),
@@ -87,7 +88,8 @@ auto createFrameworkContext(const FrameworkConfig& config, std::shared_ptr<IGuiA
       di::bind<IGraphicsContext>.to<>(graphicsContext),
       di::bind<IWindow>.to<>([&graphicsContext] { return graphicsContext->getWindow(); }),
       di::bind<IGuiSystem>.to<>([&graphicsContext] { return graphicsContext->getGuiSystem(); }),
-      di::bind<ITerrainSystemProxy>.to<>(terrainProxy));
+      di::bind<ITerrainSystemProxy>.to<>(terrainProxy),
+      di::bind<IStateBuffer>.to<>(stateBuffer));
 
   const auto frameworkContext = frameworkInjector.create<std::shared_ptr<FrameworkContextImpl>>();
 

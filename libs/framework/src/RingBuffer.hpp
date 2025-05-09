@@ -16,15 +16,9 @@ public:
   RingBuffer(RingBuffer&&) = delete;
   auto operator=(RingBuffer&&) -> RingBuffer& = delete;
 
-  ~RingBuffer() override {
-    buffer.clear();
-  }
+  ~RingBuffer() override;
 
   explicit RingBuffer(const RingBufferConfig& config);
-
-  /// Insert data at the write index
-  /// @return false if the buffer is full and data was not inserted
-  auto write(const SimState& state) -> bool override;
 
   auto getInterpolatedStates(SimState& stateA,
                              SimState& stateB,

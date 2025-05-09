@@ -11,6 +11,10 @@ RingBuffer::RingBuffer(const RingBufferConfig& config) : size(config.capacity), 
   }
 }
 
+RingBuffer::~RingBuffer() {
+  buffer.clear();
+}
+
 auto RingBuffer::getInterpolatedStates(SimState& stateA,
                                        SimState& stateB,
                                        float& alpha,

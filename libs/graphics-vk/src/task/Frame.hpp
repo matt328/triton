@@ -96,10 +96,6 @@ public:
 
   auto setupRenderingInfo(const std::shared_ptr<VkResourceManager>& resourceManager) -> void;
 
-  SimState currentState;
-  SimState previousState;
-  float alpha;
-
 private:
   uint8_t index;
 

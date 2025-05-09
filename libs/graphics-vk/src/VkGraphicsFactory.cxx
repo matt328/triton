@@ -41,6 +41,7 @@
 
 #include "r3/draw-context/DispatchContext.hpp"
 
+#define BOOST_DI_CFG_CTOR_LIMIT_SIZE 11
 #include <di.hpp>
 
 namespace di = boost::di;

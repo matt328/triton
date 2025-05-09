@@ -135,6 +135,9 @@ void R3Renderer::update() {
   */
 }
 
+void R3Renderer::setStates(SimState previous, SimState next, float alpha) {
+}
+
 void R3Renderer::renderNextFrame() {
   const auto result = frameManager->acquireFrame();
 
@@ -150,10 +153,11 @@ void R3Renderer::renderNextFrame() {
 
   auto* frame = std::get<Frame*>(result);
   // Process sync point here
-  stateBuffer->getInterpolatedStates(frame->currentState,
-                                     frame->previousState,
-                                     frame->alpha,
-                                     currentTime);
+  SimState current{1};
+  SimState prev{1};
+  float alpha{0};
+  Timestamp currentTime = std::chrono::steady_clock::now();
+  stateBuffer->getInterpolatedStates(current, prev, alpha, currentTime);
   const auto& results = frameGraph->execute(frame);
   endFrame(frame, results);
 }

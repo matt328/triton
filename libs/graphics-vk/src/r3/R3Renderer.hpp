@@ -59,6 +59,7 @@ public:
   void update() override;
   void renderNextFrame() override;
   void waitIdle() override;
+  void setStates(SimState previous, SimState next, float alpha) override;
 
   void setRenderData(const RenderData& renderData) override;
 

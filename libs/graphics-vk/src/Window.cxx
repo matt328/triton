@@ -150,7 +150,7 @@ void Window::keyCallback(GLFWwindow* window,
     buttonState = tr::ButtonState::Released;
   }
 
-  thisWindow->eventBus->emit(tr::KeyEvent{mappedKey, buttonState});
+  thisWindow->eventBus->emit(tr::KeyEvent{.key = mappedKey, .buttonState = buttonState});
 }
 
 void Window::cursorPosCallback(GLFWwindow* window, const double xpos, const double ypos) {

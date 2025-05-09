@@ -25,7 +25,7 @@ ThreadedGameLoop::ThreadedGameLoop(std::shared_ptr<IEventBus> newEventBus,
   Log.trace("Constructing FixedGameLoop");
   // TODO(matt): Move this functionality somewhere else?
   eventBus->subscribe<tr::WindowClosed>(
-      [&]([[maybe_unused]] const tr::WindowClosed& event) { quitFlag.requestQuit(); });
+      [&]([[maybe_unused]] const tr::WindowClosed& event) { mainThreadRunning = false; });
 
   // Wire together game world to render world
   gameplaySystem->setRenderDataTransferHandler(
@@ -39,7 +39,10 @@ auto ThreadedGameLoop::run() -> void {
   gameplayThread = std::thread([&] { runGameplay(gameState.running, stateBuffer); });
   renderThread = std::thread([&] { runRenderer(rendererState.running, stateBuffer); });
 
-  quitFlag.waitForQuit();
+  while (mainThreadRunning) {
+    std::this_thread::sleep_for(std::chrono::microseconds(500));
+  }
+
   gameState.running.store(false, std::memory_order_relaxed);
   rendererState.running.store(false, std::memory_order_relaxed);
 
@@ -59,12 +62,10 @@ auto ThreadedGameLoop::runGameplay(std::atomic<bool>& running,
     if (now - t >= dt) {
       t += dt;
 
-      SimState state{1024};
-      // TODO: pass state ref into here
-      gameplaySystem->fixedUpdate();
-      state.tag = frameCounter++;
-      state.timeStamp = t;
-      stateBuffer->write(state);
+      auto* state = stateBuffer->getWriteSlot();
+      gameplaySystem->fixedUpdate(/*state*/);
+      stateBuffer->commitWrite();
+
     } else {
       std::this_thread::sleep_for(std::chrono::microseconds(500));
     }

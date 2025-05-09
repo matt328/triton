@@ -10,6 +10,7 @@ set(framework_SRC
   src/GuiCallbackRegistrar.cxx
   src/GeometryGenerator.cxx
   src/RingBuffer.cxx
+  src/ThreadedGameLoop.cxx
 )
 
 add_library(${PROJECT_NAME} STATIC ${framework_SRC})

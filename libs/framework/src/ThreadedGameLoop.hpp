@@ -52,6 +52,8 @@ private:
   std::thread gameplayThread;
   std::thread renderThread;
 
+  bool mainThreadRunning = true;
+
   QuitFlag quitFlag{};
 
   auto runGameplay(std::atomic<bool>& running, const std::shared_ptr<IStateBuffer>& stateBuffer)
