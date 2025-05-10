@@ -156,7 +156,7 @@ void Window::keyCallback(GLFWwindow* window,
 void Window::cursorPosCallback(GLFWwindow* window, const double xpos, const double ypos) {
   if (auto* const thisWindow = static_cast<Window*>(glfwGetWindowUserPointer(window));
       thisWindow->isMouseCaptured) {
-    thisWindow->eventBus->emit(tr::MouseMoved{xpos, ypos});
+    thisWindow->eventBus->emit(tr::MouseMoved{.x = xpos, .y = ypos});
   }
 }
 
