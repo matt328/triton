@@ -1,6 +1,6 @@
 #pragma once
 #include "Context.hpp"
-#include "gfx/IWindow.hpp"
+#include "api/fx/IWindow.hpp"
 #include "gfx/IDebugManager.hpp"
 
 namespace tr {

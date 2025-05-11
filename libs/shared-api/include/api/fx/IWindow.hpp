@@ -1,6 +1,9 @@
 #pragma once
 
+#include <vulkan/vulkan.hpp>
+
 namespace tr {
+
 class IWindow {
 public:
   IWindow() = default;
@@ -11,8 +14,11 @@ public:
   auto operator=(const IWindow&) -> IWindow& = default;
   auto operator=(IWindow&&) -> IWindow& = delete;
 
-  virtual auto getNativeWindow() -> void* = 0;
   virtual void pollEvents() = 0;
   virtual void setVulkanVersion(std::string_view version) = 0;
+  virtual auto createVulkanSurface(const vk::Instance& instance, VkSurfaceKHR* outSurface) const
+      -> void = 0;
+  [[nodiscard]] virtual auto getFramebufferSize() const -> glm::ivec2 = 0;
 };
+
 }

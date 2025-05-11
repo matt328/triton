@@ -4,12 +4,10 @@ namespace tr {
 
 VkGraphicsContext::VkGraphicsContext(std::shared_ptr<IResourceProxy> newResourceProxy,
                                      std::shared_ptr<IRenderContext> newRenderContext,
-                                     std::shared_ptr<IWindow> newWindow,
-                                     std::shared_ptr<IGuiSystem> newGuiSystem)
+                                     std::shared_ptr<IWindow> newWindow)
     : resourceProxy{std::move(newResourceProxy)},
       renderContext{std::move(newRenderContext)},
-      window{std::move(newWindow)},
-      guiSystem{std::move(newGuiSystem)} {
+      window{std::move(newWindow)} {
 }
 
 auto VkGraphicsContext::getResourceProxy() -> std::shared_ptr<IResourceProxy> {
@@ -22,10 +20,6 @@ auto VkGraphicsContext::getRenderContext() -> std::shared_ptr<IRenderContext> {
 
 auto VkGraphicsContext::getWindow() -> std::shared_ptr<IWindow> {
   return window;
-}
-
-auto VkGraphicsContext::getGuiSystem() -> std::shared_ptr<IGuiSystem> {
-  return guiSystem;
 }
 
 }

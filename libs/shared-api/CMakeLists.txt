@@ -42,4 +42,5 @@ target_link_libraries(${PROJECT_NAME}
 target_include_directories(${PROJECT_NAME}
   INTERFACE
   include
+  ${Vulkan_INCLUDE_DIRS}
 )

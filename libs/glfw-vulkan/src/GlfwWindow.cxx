@@ -1,26 +1,17 @@
-#include "Window.hpp"
-#include "api/fx/Events.hpp"
-#include "api/fx/IGuiAdapter.hpp"
+#include "GlfwWindow.hpp"
+
 #include "api/action/KeyMap.hpp"
-
-#include "VkGraphicsCreateInfo.hpp"
-
-#ifdef _WIN32
-#include <GLFW/glfw3native.h>
-#include <windows.h> // For general Windows APIs
-#include <dwmapi.h>  // For DWMWINDOWATTRIBUTE
-#endif
+#include "api/fx/IEventBus.hpp"
+#include "api/fx/IGuiAdapter.hpp"
 
 namespace tr {
 
 constexpr int MinWidth = 320;
 constexpr int MinHeight = 200;
 
-// TODO(matt): window size is not being propagated to the swapchain images correctly
-
-Window::Window(std::shared_ptr<IEventBus> newEventBus,
-               std::shared_ptr<tr::IGuiAdapter> newGuiAdapter,
-               VkGraphicsCreateInfo createInfo)
+GlfwWindow::GlfwWindow(const WindowCreateInfo& createInfo,
+                       std::shared_ptr<IEventBus> newEventBus,
+                       std::shared_ptr<IGuiAdapter> newGuiAdapter)
     : eventBus{std::move(newEventBus)}, guiAdapter{std::move(newGuiAdapter)} {
   Log.trace("Constructing Window");
 
@@ -30,9 +21,9 @@ Window::Window(std::shared_ptr<IEventBus> newEventBus,
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
-    window = glfwCreateWindow(createInfo.initialWindowSize.x,
-                              createInfo.initialWindowSize.y,
-                              createInfo.windowTitle.c_str(),
+    window = glfwCreateWindow(createInfo.width,
+                              createInfo.height,
+                              createInfo.title.c_str(),
                               nullptr,
                               nullptr);
 
@@ -91,46 +82,77 @@ Window::Window(std::shared_ptr<IEventBus> newEventBus,
   }
 }
 
-auto Window::getNativeWindow() -> void* {
-  return this->window;
+GlfwWindow::~GlfwWindow() {
+  Log.debug("Destroying window");
+  if (window != nullptr) {
+    glfwDestroyWindow(window);
+    window = nullptr;
+  }
 }
 
-void Window::pollEvents() {
+auto GlfwWindow::createVulkanSurface(const vk::Instance& instance, VkSurfaceKHR* outSurface) const
+    -> void {
+  glfwCreateWindowSurface(&(*instance), window, nullptr, outSurface);
+}
+
+auto GlfwWindow::pollEvents() -> void {
   glfwPollEvents();
 }
 
-void Window::setVulkanVersion(std::string_view version) {
+auto GlfwWindow::setVulkanVersion(std::string_view vulkanVersion) -> void {
   const auto* const currentTitle = glfwGetWindowTitle(window);
-  auto newWindowTitle = std::string{currentTitle};
-  newWindowTitle += " ";
-  newWindowTitle += "Vulkan ";
-  newWindowTitle += version.data();
-
+  auto newWindowTitle = fmt::format("{} Vulkan {}", currentTitle, vulkanVersion.data());
   glfwSetWindowTitle(window, newWindowTitle.c_str());
 }
 
-void Window::errorCallback(int code, const char* description) {
+auto GlfwWindow::getFramebufferSize() const -> glm::ivec2 {
+  auto size = glm::ivec2(320, 400);
+  glfwGetWindowSize(window, &size.x, &size.y);
+  return size;
+}
+
+void GlfwWindow::toggleFullscreen() {
+  if (isFullscreen) {
+    glfwSetWindowMonitor(window, nullptr, prevXPos, prevYPos, prevWidth, prevHeight, 0);
+    isFullscreen = !isFullscreen;
+  } else {
+    auto* const currentMonitor = glfwGetPrimaryMonitor();
+    const auto* const mode = glfwGetVideoMode(currentMonitor);
+    glfwGetWindowPos(window, &prevXPos, &prevYPos);
+    glfwGetWindowSize(window, &prevWidth, &prevHeight);
+    glfwSetWindowMonitor(window,
+                         currentMonitor,
+                         0,
+                         0,
+                         mode->width,
+                         mode->height,
+                         mode->refreshRate);
+    isFullscreen = !isFullscreen;
+  }
+}
+
+void GlfwWindow::errorCallback(int code, const char* description) {
   Log.critical("GLFW Error Code: {}, description: {}", code, description);
   throw std::runtime_error("GLFW Error. See log output for details");
 }
 
-void Window::windowIconifiedCallback(GLFWwindow* window, const int iconified) {
-  auto* const thisWindow = static_cast<Window*>(glfwGetWindowUserPointer(window));
+void GlfwWindow::windowIconifiedCallback(GLFWwindow* window, const int iconified) {
+  auto* const thisWindow = static_cast<GlfwWindow*>(glfwGetWindowUserPointer(window));
   thisWindow->eventBus->emit(tr::WindowIconified{iconified});
 }
 
-void Window::windowCloseCallback(GLFWwindow* window) {
-  auto* const thisWindow = static_cast<Window*>(glfwGetWindowUserPointer(window));
+void GlfwWindow::windowCloseCallback(GLFWwindow* window) {
+  auto* const thisWindow = static_cast<GlfwWindow*>(glfwGetWindowUserPointer(window));
   thisWindow->eventBus->emit(tr::WindowClosed{});
 }
 
-void Window::keyCallback(GLFWwindow* window,
-                         const int key,
-                         [[maybe_unused]] int scancode,
-                         [[maybe_unused]] const int action,
-                         const int mods) {
+void GlfwWindow::keyCallback(GLFWwindow* window,
+                             const int key,
+                             [[maybe_unused]] int scancode,
+                             [[maybe_unused]] const int action,
+                             const int mods) {
 
-  auto* const thisWindow = static_cast<Window*>(glfwGetWindowUserPointer(window));
+  auto* const thisWindow = static_cast<GlfwWindow*>(glfwGetWindowUserPointer(window));
 
   if (thisWindow->guiAdapter->needsKeyboard()) {
     return;
@@ -153,18 +175,18 @@ void Window::keyCallback(GLFWwindow* window,
   thisWindow->eventBus->emit(tr::KeyEvent{.key = mappedKey, .buttonState = buttonState});
 }
 
-void Window::cursorPosCallback(GLFWwindow* window, const double xpos, const double ypos) {
-  if (auto* const thisWindow = static_cast<Window*>(glfwGetWindowUserPointer(window));
+void GlfwWindow::cursorPosCallback(GLFWwindow* window, const double xpos, const double ypos) {
+  if (auto* const thisWindow = static_cast<GlfwWindow*>(glfwGetWindowUserPointer(window));
       thisWindow->isMouseCaptured) {
     thisWindow->eventBus->emit(tr::MouseMoved{.x = xpos, .y = ypos});
   }
 }
 
-void Window::mouseButtonCallback(GLFWwindow* window,
-                                 const int button,
-                                 const int action,
-                                 const int mods) {
-  auto* const thisWindow = static_cast<Window*>(glfwGetWindowUserPointer(window));
+void GlfwWindow::mouseButtonCallback(GLFWwindow* window,
+                                     const int button,
+                                     const int action,
+                                     const int mods) {
+  auto* const thisWindow = static_cast<GlfwWindow*>(glfwGetWindowUserPointer(window));
   if (thisWindow->guiAdapter->needsMouse() && !thisWindow->isMouseCaptured) {
     return;
   }
@@ -179,34 +201,7 @@ void Window::mouseButtonCallback(GLFWwindow* window,
     thisWindow->isMouseCaptured = !thisWindow->isMouseCaptured;
     thisWindow->eventBus->emit(tr::MouseCaptured{thisWindow->isMouseCaptured});
   }
-  thisWindow->eventBus->emit(tr::MouseButton{button, action, mods});
+  thisWindow->eventBus->emit(tr::MouseButton{.button = button, .action = action, .mods = mods});
 }
 
-void Window::toggleFullscreen() {
-  if (isFullscreen) {
-    glfwSetWindowMonitor(window, nullptr, prevXPos, prevYPos, prevWidth, prevHeight, 0);
-    isFullscreen = !isFullscreen;
-  } else {
-    auto* const currentMonitor = glfwGetPrimaryMonitor();
-    const auto* const mode = glfwGetVideoMode(currentMonitor);
-    glfwGetWindowPos(window, &prevXPos, &prevYPos);
-    glfwGetWindowSize(window, &prevWidth, &prevHeight);
-    glfwSetWindowMonitor(window,
-                         currentMonitor,
-                         0,
-                         0,
-                         mode->width,
-                         mode->height,
-                         mode->refreshRate);
-    isFullscreen = !isFullscreen;
-  }
-}
-
-Window::~Window() {
-  Log.debug("Destroying window");
-  if (window != nullptr) {
-    glfwDestroyWindow(window);
-    window = nullptr;
-  }
-}
 }

@@ -21,9 +21,10 @@
 #include "VoxelTerrainFactory.hpp"
 #include "gfx/IRenderContext.hpp"
 #include "bk/TaskQueue.hpp"
-#include "gfx/IWindow.hpp"
+#include "api/fx/IWindow.hpp"
 #include "gw/IWidgetService.hpp"
 #include "RingBuffer.hpp"
+#include "GlfwWindow.hpp"
 
 #define BOOST_DI_CFG_CTOR_LIMIT_SIZE 11
 #include <di.hpp>
@@ -41,9 +42,15 @@ auto createFrameworkContext(const FrameworkConfig& config, std::shared_ptr<IGuiA
   const auto actionSystem = std::make_shared<ActionSystem>(eventBus);
   const auto taskQueue = std::make_shared<TaskQueue>(TaskQueueConfig{.maxQueueSize = 1024});
   const auto geometryGenerator = std::make_shared<GeometryGenerator>();
-
   const auto stateBuffer =
       std::make_shared<RingBuffer>(RingBufferConfig{.capacity = 6, .maxObjectCount = 1024});
+
+  const auto window =
+      std::make_shared<GlfwWindow>(WindowCreateInfo{.height = config.initialWindowSize.y,
+                                                    .width = config.initialWindowSize.x,
+                                                    .title = "Temporary Title"},
+                                   eventBus,
+                                   guiAdapter);
 
   const auto graphicsConfig = VkGraphicsCreateInfo{.initialWindowSize = config.initialWindowSize,
                                                    .windowTitle = config.windowTitle};
@@ -53,7 +60,8 @@ auto createFrameworkContext(const FrameworkConfig& config, std::shared_ptr<IGuiA
                                                        eventBus,
                                                        taskQueue,
                                                        guiAdapter,
-                                                       stateBuffer);
+                                                       stateBuffer,
+                                                       window);
 
   const auto terrainContext = createTerrainContext();
   const auto terrainProxy = terrainContext->getTerrainSystemProxy();
@@ -72,24 +80,31 @@ auto createFrameworkContext(const FrameworkConfig& config, std::shared_ptr<IGuiA
 
   const auto frameworkInjector = di::make_injector(
       di::bind<IGameLoop>.to<ThreadedGameLoop>(),
-      di::bind<IRenderContext>.to<>(
-          [&graphicsContext] { return graphicsContext->getRenderContext(); }),
-      di::bind<IGuiCallbackRegistrar>.to(guiCallbackRegistrar),
       di::bind<TaskQueue>.to<>(taskQueue),
       di::bind<IEventBus>.to<>(eventBus),
-      di::bind<IGameObjectProxy>.to<>(gameObjectProxy),
+      di::bind<IGuiCallbackRegistrar>.to(guiCallbackRegistrar),
+      di::bind<IAssetService>.to<>(assetService),
+      di::bind<IActionSystem>.to<>(actionSystem),
+      di::bind<IStateBuffer>.to<>(stateBuffer),
+      di::bind<ITerrainSystemProxy>.to<>(terrainProxy),
+      di::bind<IWindow>.to<>(window),
+
+      // This seems redundant with the next two sections of factory functions, but it's just how the
+      // framework context 'owns' the graphics and gameworld contexts
+      di::bind<IGraphicsContext>.to<>(graphicsContext),
+      di::bind<IGameWorldContext>.to<>(gameWorldContext),
+
+      // Bind GameWorld components into the FrameworkContext
+      di::bind<IGameObjectProxy>.to<>(
+          [&gameWorldContext] { return gameWorldContext->getGameObjectProxy(); }),
       di::bind<IGameWorldSystem>.to(
           [&gameWorldContext] { return gameWorldContext->getGameWorldSystem(); }),
       di::bind<IWidgetService>.to(
           [&gameWorldContext] { return gameWorldContext->getWidgetService(); }),
-      di::bind<IAssetService>.to<>(assetService),
-      di::bind<IActionSystem>.to<>(actionSystem),
-      di::bind<IGameWorldContext>.to<>(gameWorldContext),
-      di::bind<IGraphicsContext>.to<>(graphicsContext),
-      di::bind<IWindow>.to<>([&graphicsContext] { return graphicsContext->getWindow(); }),
-      di::bind<IGuiSystem>.to<>([&graphicsContext] { return graphicsContext->getGuiSystem(); }),
-      di::bind<ITerrainSystemProxy>.to<>(terrainProxy),
-      di::bind<IStateBuffer>.to<>(stateBuffer));
+
+      // Bind Graphics components into the Framework context
+      di::bind<IRenderContext>.to<>(
+          [&graphicsContext] { return graphicsContext->getRenderContext(); }));
 
   const auto frameworkContext = frameworkInjector.create<std::shared_ptr<FrameworkContextImpl>>();
 

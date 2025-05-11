@@ -4,20 +4,18 @@
 #include "api/fx/IStateBuffer.hpp"
 #include "api/gfx/SimState.hpp"
 #include "gfx/IRenderContext.hpp"
-#include "gfx/IWindow.hpp"
+#include "api/fx/IWindow.hpp"
 
 namespace tr {
 ThreadedGameLoop::ThreadedGameLoop(std::shared_ptr<IEventBus> newEventBus,
                                    std::shared_ptr<IRenderContext> newRenderContext,
                                    std::shared_ptr<IWindow> newWindow,
-                                   std::shared_ptr<IGuiSystem> newGuiSystem,
                                    std::shared_ptr<IGameWorldSystem> newGameWorldSystem,
                                    std::shared_ptr<TaskQueue> newTaskQueue,
                                    std::shared_ptr<IStateBuffer> newStateBuffer)
     : eventBus{std::move(newEventBus)},
       renderContext{std::move(newRenderContext)},
       window{std::move(newWindow)},
-      guiSystem{std::move(newGuiSystem)},
       gameplaySystem{std::move(newGameWorldSystem)},
       taskQueue{std::move(newTaskQueue)},
       stateBuffer{std::move(newStateBuffer)} {

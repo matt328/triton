@@ -45,10 +45,7 @@ Instance::~Instance() {
 
 auto Instance::createSurface(IWindow& window) const -> std::unique_ptr<vk::raii::SurfaceKHR> {
   VkSurfaceKHR tempSurface = nullptr;
-
-  auto* glfwWindow = static_cast<GLFWwindow*>(window.getNativeWindow());
-  glfwCreateWindowSurface(**instance, glfwWindow, nullptr, &tempSurface);
-
+  window.createVulkanSurface(**instance, &tempSurface);
   Log.trace("Created Surface");
   return std::make_unique<vk::raii::SurfaceKHR>(*instance, tempSurface);
 }

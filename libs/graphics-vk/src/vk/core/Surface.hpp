@@ -1,6 +1,6 @@
 #pragma once
 #include "Instance.hpp"
-#include "gfx/IWindow.hpp"
+#include "api/fx/IWindow.hpp"
 
 namespace tr {
 

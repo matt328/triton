@@ -55,6 +55,7 @@ target_link_libraries(${PROJECT_NAME}
   voxel-terrain
   PRIVATE
   graphics-vk
+  glfw-vulkan
 )
 
 target_include_directories(${PROJECT_NAME}

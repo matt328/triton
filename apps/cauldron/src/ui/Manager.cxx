@@ -38,10 +38,10 @@ Manager::Manager(std::shared_ptr<Menu> newAppMenu,
       assetTool{std::move(newAssetTool)} {
 
   Log.trace("Constructing Manager");
-  ImGuiEx::setupImGuiStyle();
-  ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+  // ImGuiEx::setupImGuiStyle();
+  //  ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
-  setupFonts();
+  // setupFonts();
 
   appLog = std::make_shared<AppLog>();
   const auto logFn = [weakLog = std::weak_ptr<AppLog>(appLog)](const std::string& message) {

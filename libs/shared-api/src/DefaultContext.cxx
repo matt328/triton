@@ -1,7 +1,6 @@
 #include "DefaultContext.hpp"
 
 #include "api/TaskQueue.hpp"
-#include "IGuiSystem.hpp"
 #include "gfx/IWindow.hpp"
 #include "api/IEventBus.hpp"
 
@@ -15,13 +14,11 @@ static constexpr auto SleepMillis = 100;
 DefaultContext::DefaultContext(std::shared_ptr<IEventBus> newEventBus,
                                std::shared_ptr<IRenderContext> newRenderContext,
                                std::shared_ptr<tr::IWindow> newWindow,
-                               std::shared_ptr<IGuiSystem> newGuiSystem,
                                std::shared_ptr<IGameplaySystem> newGameplaySystem,
                                std::shared_ptr<TaskQueue> newTaskQueue)
     : eventBus{std::move(newEventBus)},
       renderContext{std::move(newRenderContext)},
       window{std::move(newWindow)},
-      guiSystem{std::move(newGuiSystem)},
       gameplaySystem{std::move(newGameplaySystem)},
       taskQueue{std::move(newTaskQueue)} {
 
@@ -106,10 +103,6 @@ void DefaultContext::run() {
 
 auto DefaultContext::getGameplaySystem() -> std::shared_ptr<IGameplaySystem> {
   return gameplaySystem;
-}
-
-auto DefaultContext::getGuiSystem() -> std::shared_ptr<IGuiSystem> {
-  return guiSystem;
 }
 
 auto DefaultContext::getEventSystem() -> std::shared_ptr<IEventBus> {

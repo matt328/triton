@@ -21,7 +21,6 @@ set(graphicsvk_SRC
   src/VkGraphicsContext.cxx
   src/VkResourceManager.cxx
   src/ImmediateTransferContext.cxx
-  src/Window.cxx
 
   src/img/ImageManager.cxx
   src/img/ImageRegistry.cxx
@@ -35,7 +34,6 @@ set(graphicsvk_SRC
   src/geo/StaticGeometryData.cxx
   src/geo/TerrainGeometryData.cxx
   src/DefaultDebugManager.cxx
-  src/ImGuiSystem.cxx
   src/NoopDebugManager.cxx
   src/vk/command-buffer/CommandBufferManager.cxx
   src/vk/TextureManager.cxx

@@ -1,7 +1,7 @@
 #include "api/gfx/ImGuiSystem.hpp"
 #include "api/fx/IGuiCallbackRegistrar.hpp"
 #include "imgui.h"
-#include "gfx/IWindow.hpp"
+#include "api/fx/IWindow.hpp"
 
 #include "vk/core/Instance.hpp"
 #include "vk/core/Swapchain.hpp"

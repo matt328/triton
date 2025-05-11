@@ -4,7 +4,6 @@
 #include "VkGraphicsContext.hpp"
 #include "ResourceProxyImpl.hpp"
 
-#include "Window.hpp"
 #include "api/fx/IStateBuffer.hpp"
 #include "buffers/BufferSystem.hpp"
 #include "mem/Allocator.hpp"
@@ -33,8 +32,6 @@
 #include "VkResourceManager.hpp"
 #include "ResourceProxyImpl.hpp"
 #include "VkGraphicsContext.hpp"
-#include "Window.hpp"
-#include "api/gfx/ImGuiSystem.hpp"
 
 #include "img/ImageRegistry.hpp"
 #include "img/ImageManager.hpp"
@@ -46,13 +43,17 @@
 
 namespace di = boost::di;
 
+// Left off with the framework needing to import and create the glfwwindow and then pass the IWindow
+// in here
+
 namespace tr {
 auto createVkGraphicsContext(VkGraphicsCreateInfo createInfo,
                              std::shared_ptr<IGuiCallbackRegistrar> newGuiCallbackRegistrar,
                              std::shared_ptr<IEventBus> newEventBus,
                              std::shared_ptr<TaskQueue> newTaskQueue,
                              std::shared_ptr<IGuiAdapter> newGuiAdapter,
-                             std::shared_ptr<IStateBuffer> newStateBuffer)
+                             std::shared_ptr<IStateBuffer> newStateBuffer,
+                             std::shared_ptr<IWindow> newWindow)
     -> std::shared_ptr<IGraphicsContext> {
 
   const auto rendererConfig = RenderContextConfig{.useDescriptorBuffers = false,
@@ -72,7 +73,6 @@ auto createVkGraphicsContext(VkGraphicsCreateInfo createInfo,
                         di::bind<IResourceProxy>.to<ResourceProxyImpl>(),
                         di::bind<Context>.to<Context>(),
                         di::bind<IDebugManager>.to<DefaultDebugManager>(),
-                        di::bind<IWindow>.to<Window>(),
                         di::bind<IGuiAdapter>.to<>(newGuiAdapter),
                         di::bind<Device>.to<Device>(),
                         di::bind<PhysicalDevice>.to<PhysicalDevice>(),
@@ -92,12 +92,12 @@ auto createVkGraphicsContext(VkGraphicsCreateInfo createInfo,
                         di::bind<VkResourceManager>.to<VkResourceManager>(),
                         di::bind<IFrameManager>.to<DefaultFrameManager>(),
                         di::bind<IRenderContext>.to<R3Renderer>(),
-                        di::bind<IGuiSystem>.to<ImGuiSystem>(),
                         di::bind<IFrameGraph>.to<DebugFrameGraph>(),
                         di::bind<PipelineFactory>.to<PipelineFactory>(),
                         di::bind<ImageManager>.to<ImageManager>(),
                         di::bind<RenderPassFactory>.to<RenderPassFactory>(),
-                        di::bind<IStateBuffer>.to<>(newStateBuffer));
+                        di::bind<IStateBuffer>.to<>(newStateBuffer),
+                        di::bind<IWindow>.to<>(newWindow));
 
   return injector.create<std::shared_ptr<VkGraphicsContext>>();
 }
