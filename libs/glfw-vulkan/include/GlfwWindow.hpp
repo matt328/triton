@@ -6,7 +6,7 @@
 
 namespace tr {
 
-class IEventBus;
+class IEventQueue;
 class IGuiAdapter;
 
 struct WindowCreateInfo {
@@ -18,7 +18,7 @@ struct WindowCreateInfo {
 class GlfwWindow : public IWindow {
 public:
   explicit GlfwWindow(const WindowCreateInfo& createInfo,
-                      std::shared_ptr<IEventBus> newEventBus,
+                      std::shared_ptr<IEventQueue> newEventBus,
                       std::shared_ptr<IGuiAdapter> newGuiAdapter);
   ~GlfwWindow() override;
 
@@ -34,7 +34,7 @@ public:
   [[nodiscard]] auto getFramebufferSize() const -> glm::ivec2 override;
 
 private:
-  std::shared_ptr<IEventBus> eventBus;
+  std::shared_ptr<IEventQueue> eventBus;
   std::shared_ptr<IGuiAdapter> guiAdapter;
 
   GLFWwindow* window;

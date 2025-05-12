@@ -4,8 +4,8 @@
 
 namespace tr {
 
-class IGameWorldContext;
-class IGraphicsContext;
+class GameWorldContext;
+class GraphicsContext;
 class IEventQueue;
 class IActionSystem;
 class IStateBuffer;
@@ -41,14 +41,14 @@ private:
   std::shared_ptr<IActionSystem> actionSystem;
   std::shared_ptr<IStateBuffer> stateBuffer;
 
-  std::shared_ptr<IGameWorldContext> gameWorldContext;
-  std::shared_ptr<IGraphicsContext> graphicsContext;
+  std::shared_ptr<GameWorldContext> gameWorldContext;
+  std::shared_ptr<GraphicsContext> graphicsContext;
 
   std::thread gameThread;
   std::thread graphicsThread;
 
-  auto configureGameWorldContext() -> std::shared_ptr<IGameWorldContext>;
-  auto configureGraphicsContext() -> std::shared_ptr<IGraphicsContext>;
+  auto configureGameWorldContext() -> std::shared_ptr<GameWorldContext>;
+  auto configureGraphicsContext() -> std::shared_ptr<GraphicsContext>;
 };
 
 }

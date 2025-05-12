@@ -6,6 +6,8 @@
 #include "ThreadedGameLoop.hpp"
 #include "bk/TaskQueue.hpp"
 #include "fx/IGameLoop.hpp"
+#include "gw/GameWorldContext.hpp"
+#include "gfx/GraphicsContext.hpp"
 
 #define BOOST_DI_CFG_CTOR_LIMIT_SIZE 11
 #include <di.hpp>
@@ -52,26 +54,14 @@ ThreadedFrameworkContext::ThreadedFrameworkContext(const FrameworkConfig& config
 
 auto ThreadedFrameworkContext::startGameworld() -> void {
   gameThread = std::thread([this] {
-    gameWorldContext =
-        createGameworldContext(const std::shared_ptr<IEventBus>& eventBus,
-                               const std::shared_ptr<IAssetService>& assetService,
-                               const std::shared_ptr<IActionSystem>& actionSystem,
-                               const std::shared_ptr<IResourceProxy>& resourceProxy,
-                               const std::shared_ptr<TaskQueue>& taskQueue,
-                               const std::shared_ptr<GeometryGenerator>& geometryGenerator);
+    gameWorldContext = GameWorldContext::create(eventQueue);
     gameWorldContext->run();
   });
 }
 
 auto ThreadedFrameworkContext::startRenderer() -> void {
   graphicsThread = std::thread([this] {
-    graphicsContext =
-        createVkGraphicsContext(VkGraphicsCreateInfo createInfo,
-                                std::shared_ptr<IGuiCallbackRegistrar> newGuiCallbackRegistrar,
-                                std::shared_ptr<IEventBus> newEventBus,
-                                std::shared_ptr<TaskQueue> newTaskQueue,
-                                std::shared_ptr<IStateBuffer> newStateBuffer,
-                                std::shared_ptr<IWindow> newWindow);
+    graphicsContext = GraphicsContext::create(eventQueue);
     graphicsContext->run();
   });
 }

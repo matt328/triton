@@ -1,7 +1,7 @@
 #include "GlfwWindow.hpp"
 
 #include "api/action/KeyMap.hpp"
-#include "api/fx/IEventBus.hpp"
+#include "api/fx/IEventQueue.hpp"
 #include "api/fx/IGuiAdapter.hpp"
 
 namespace tr {
@@ -10,7 +10,7 @@ constexpr int MinWidth = 320;
 constexpr int MinHeight = 200;
 
 GlfwWindow::GlfwWindow(const WindowCreateInfo& createInfo,
-                       std::shared_ptr<IEventBus> newEventBus,
+                       std::shared_ptr<IEventQueue> newEventBus,
                        std::shared_ptr<IGuiAdapter> newGuiAdapter)
     : eventBus{std::move(newEventBus)}, guiAdapter{std::move(newGuiAdapter)} {
   Log.trace("Constructing Window");

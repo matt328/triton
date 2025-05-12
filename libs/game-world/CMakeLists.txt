@@ -12,8 +12,7 @@ set(gameworld_SRC
   src/WidgetService.cxx
   src/GameObjectProxyImpl.cxx
 
-  src/ctx/GameWorldContextImpl.cxx
-  src/ctx/GameWorldFactory.cxx
+  src/ctx/GameWorldContext.cxx
 )
 
 add_library(${PROJECT_NAME} STATIC ${gameworld_SRC})

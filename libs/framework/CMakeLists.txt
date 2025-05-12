@@ -5,8 +5,7 @@ set(framework_SRC
   src/DefaultAssetService.cxx
   src/DefaultEventBus.cxx
   src/FixedGameLoop.cxx
-  src/ctx/FrameworkContextImpl.cxx
-  src/ctx/FrameworkFactory.cxx
+  src/ctx/ThreadedFrameworkContext.cxx
   src/GuiCallbackRegistrar.cxx
   src/GeometryGenerator.cxx
   src/RingBuffer.cxx

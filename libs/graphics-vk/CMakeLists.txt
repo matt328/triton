@@ -16,7 +16,7 @@ set(graphicsvk_SRC
   src/buffers/ArenaStrategy.cxx
   src/buffers/BufferSystem.cxx
 
-  src/VkGraphicsFactory.cxx
+  src/GraphicsContext.cxx
   src/ResourceProxyImpl.cxx
   src/VkGraphicsContext.cxx
   src/VkResourceManager.cxx
