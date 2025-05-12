@@ -13,10 +13,7 @@ class Manager;
 
 class Application {
 public:
-  Application(std::shared_ptr<Properties> newProperties,
-              std::shared_ptr<tr::IGameLoop> newGameLoop,
-              std::shared_ptr<tr::IGuiCallbackRegistrar> newGuiCallbackRegistrar,
-              std::shared_ptr<Manager> newManager);
+  Application(std::shared_ptr<Properties> newProperties, std::shared_ptr<Manager> newManager);
   ~Application();
 
   Application(const Application&) = default;
@@ -29,8 +26,6 @@ public:
 
 private:
   std::shared_ptr<Properties> properties;
-  std::shared_ptr<tr::IGameLoop> gameLoop;
-  std::shared_ptr<tr::IGuiCallbackRegistrar> guiCallbackRegistrar;
   std::shared_ptr<Manager> manager;
 };
 }

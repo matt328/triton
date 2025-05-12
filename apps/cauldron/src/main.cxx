@@ -69,7 +69,7 @@ auto main() -> int {
 
     Log.info("Initialized");
 
-    app->run();
+    frameworkContext->runMainLoop();
 
   } catch (const std::exception& e) {
     Log.critical(e.what());
