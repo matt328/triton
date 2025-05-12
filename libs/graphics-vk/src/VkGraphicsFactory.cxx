@@ -51,7 +51,6 @@ auto createVkGraphicsContext(VkGraphicsCreateInfo createInfo,
                              std::shared_ptr<IGuiCallbackRegistrar> newGuiCallbackRegistrar,
                              std::shared_ptr<IEventBus> newEventBus,
                              std::shared_ptr<TaskQueue> newTaskQueue,
-                             std::shared_ptr<IGuiAdapter> newGuiAdapter,
                              std::shared_ptr<IStateBuffer> newStateBuffer,
                              std::shared_ptr<IWindow> newWindow)
     -> std::shared_ptr<IGraphicsContext> {
@@ -67,13 +66,15 @@ auto createVkGraphicsContext(VkGraphicsCreateInfo createInfo,
                                                   .maxDebugObjects = 32};
   const auto injector =
       di::make_injector(di::bind<RenderContextConfig>.to<>(rendererConfig),
+                        di::bind<IStateBuffer>.to<>(newStateBuffer),
+                        di::bind<IWindow>.to<>(newWindow),
                         di::bind<VkGraphicsCreateInfo>.to<>(createInfo),
                         di::bind<IGuiCallbackRegistrar>.to(newGuiCallbackRegistrar),
                         di::bind<IEventBus>.to<>(newEventBus),
+                        di::bind<TaskQueue>.to<>(newTaskQueue),
                         di::bind<IResourceProxy>.to<ResourceProxyImpl>(),
                         di::bind<Context>.to<Context>(),
                         di::bind<IDebugManager>.to<DefaultDebugManager>(),
-                        di::bind<IGuiAdapter>.to<>(newGuiAdapter),
                         di::bind<Device>.to<Device>(),
                         di::bind<PhysicalDevice>.to<PhysicalDevice>(),
                         di::bind<Surface>.to<Surface>(),
@@ -88,16 +89,13 @@ auto createVkGraphicsContext(VkGraphicsCreateInfo createInfo,
                         di::bind<DSLayoutManager>.to<DSLayoutManager>(),
                         di::bind<IShaderBindingFactory>.to<DSShaderBindingFactory>(),
                         di::bind<Allocator>.to<Allocator>(),
-                        di::bind<TaskQueue>.to<>(newTaskQueue),
                         di::bind<VkResourceManager>.to<VkResourceManager>(),
                         di::bind<IFrameManager>.to<DefaultFrameManager>(),
                         di::bind<IRenderContext>.to<R3Renderer>(),
                         di::bind<IFrameGraph>.to<DebugFrameGraph>(),
                         di::bind<PipelineFactory>.to<PipelineFactory>(),
                         di::bind<ImageManager>.to<ImageManager>(),
-                        di::bind<RenderPassFactory>.to<RenderPassFactory>(),
-                        di::bind<IStateBuffer>.to<>(newStateBuffer),
-                        di::bind<IWindow>.to<>(newWindow));
+                        di::bind<RenderPassFactory>.to<RenderPassFactory>());
 
   return injector.create<std::shared_ptr<VkGraphicsContext>>();
 }

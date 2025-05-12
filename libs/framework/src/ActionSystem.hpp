@@ -6,11 +6,11 @@
 
 namespace tr {
 
-class IEventBus;
+class IEventQueue;
 
 class ActionSystem : public IActionSystem {
 public:
-  explicit ActionSystem(std::shared_ptr<IEventBus> newEventBus);
+  explicit ActionSystem(std::shared_ptr<IEventQueue> newEventQueue);
   ~ActionSystem() override;
 
   ActionSystem(const ActionSystem&) = default;
@@ -21,7 +21,7 @@ public:
   void mapSource(Source source, StateType sType, ActionType aType) override;
 
 private:
-  std::shared_ptr<IEventBus> eventBus;
+  std::shared_ptr<IEventQueue> eventQueue;
 
   double prevX{}, prevY{};
   bool firstMouse = true;

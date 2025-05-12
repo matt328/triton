@@ -1,0 +1,54 @@
+#pragma once
+
+#include "fx/FrameworkConfig.hpp"
+
+namespace tr {
+
+class IGameWorldContext;
+class IGraphicsContext;
+class IEventQueue;
+class IActionSystem;
+class IStateBuffer;
+
+class ThreadedFrameworkContext {
+public:
+  static auto create(const FrameworkConfig& config, std::shared_ptr<IGuiAdapter> guiAdapter)
+      -> std::shared_ptr<ThreadedFrameworkContext>;
+
+  ThreadedFrameworkContext(const FrameworkConfig& config,
+                           std::shared_ptr<IEventQueue> newEventQueue,
+                           std::shared_ptr<IActionSystem> newActionSystem,
+                           std::shared_ptr<IStateBuffer> newStateBuffer);
+
+  ~ThreadedFrameworkContext() = default;
+
+  ThreadedFrameworkContext(const ThreadedFrameworkContext&) = delete;
+  ThreadedFrameworkContext(ThreadedFrameworkContext&&) = delete;
+  auto operator=(const ThreadedFrameworkContext&) -> ThreadedFrameworkContext& = delete;
+  auto operator=(ThreadedFrameworkContext&&) -> ThreadedFrameworkContext& = delete;
+
+  auto startGameworld() -> void;
+  auto startRenderer() -> void;
+
+  auto runMainLoop() -> void;
+  auto stop() -> void;
+
+  auto getEventQueue() -> std::shared_ptr<IEventQueue>;
+
+private:
+  std::shared_ptr<IGuiAdapter> guiAdapter;
+  std::shared_ptr<IEventQueue> eventQueue;
+  std::shared_ptr<IActionSystem> actionSystem;
+  std::shared_ptr<IStateBuffer> stateBuffer;
+
+  std::shared_ptr<IGameWorldContext> gameWorldContext;
+  std::shared_ptr<IGraphicsContext> graphicsContext;
+
+  std::thread gameThread;
+  std::thread graphicsThread;
+
+  auto configureGameWorldContext() -> std::shared_ptr<IGameWorldContext>;
+  auto configureGraphicsContext() -> std::shared_ptr<IGraphicsContext>;
+};
+
+}

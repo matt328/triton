@@ -36,4 +36,5 @@ public:
     emit(typeid(T), EventVariant(event));
   }
 };
+
 }

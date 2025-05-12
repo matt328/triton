@@ -59,7 +59,6 @@ auto createFrameworkContext(const FrameworkConfig& config, std::shared_ptr<IGuiA
                                                        guiCallbackRegistrar,
                                                        eventBus,
                                                        taskQueue,
-                                                       guiAdapter,
                                                        stateBuffer,
                                                        window);
 

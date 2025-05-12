@@ -21,6 +21,8 @@
 #include "ui/components/AssetTool.hpp"
 #include "ImGuiAdapter.hpp"
 #include "config.h"
+#include "fx/ThreadedFrameworkContext.hpp"
+#include "api/fx/IEventQueue.hpp"
 
 namespace di = boost::di;
 
@@ -56,17 +58,12 @@ auto main() -> int {
     const auto frameworkConfig = tr::FrameworkConfig{.initialWindowSize = glm::ivec2(width, height),
                                                      .windowTitle = windowTitle.str()};
 
-    const auto fc = tr::createFrameworkContext(frameworkConfig, guiAdapter);
+    const auto frameworkContext = tr::ThreadedFrameworkContext::create(frameworkConfig, guiAdapter);
 
-    const auto injector = di::make_injector(
-        di::bind<std::filesystem::path>.to<>(propertiesPath),
-        di::bind<tr::IGameLoop>.to([&fc] { return fc->getGameLoop(); }),
-        di::bind<tr::IGuiCallbackRegistrar>.to([&fc] { return fc->getGuiCallbackRegistrar(); }),
-        di::bind<tr::TaskQueue>.to([&fc] { return fc->getTaskQueue(); }),
-        di::bind<tr::IEventBus>.to([&fc] { return fc->getEventBus(); }),
-        di::bind<tr::IGameObjectProxy>.to([&fc] { return fc->getGameObjectProxy(); }),
-        di::bind<tr::IGameWorldSystem>.to([&fc] { return fc->getGameWorldSystem(); }),
-        di::bind<tr::IWidgetService>.to([&fc] { return fc->getWidgetService(); }));
+    const auto injector = di::make_injector(di::bind<std::filesystem::path>.to<>(propertiesPath),
+                                            di::bind<tr::IEventQueue>.to<>([&frameworkContext] {
+                                              return frameworkContext->getEventQueue();
+                                            }));
 
     auto app = injector.create<std::shared_ptr<ed::Application>>();
 

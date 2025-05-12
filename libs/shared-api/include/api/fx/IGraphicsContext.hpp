@@ -19,6 +19,8 @@ public:
   virtual auto getResourceProxy() -> std::shared_ptr<IResourceProxy> = 0;
   virtual auto getRenderContext() -> std::shared_ptr<IRenderContext> = 0;
   virtual auto getWindow() -> std::shared_ptr<IWindow> = 0;
+
+  virtual auto run() -> void = 0;
 };
 
 }

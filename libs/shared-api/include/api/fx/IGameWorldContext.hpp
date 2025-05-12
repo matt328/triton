@@ -22,5 +22,7 @@ public:
   virtual auto getWidgetService() -> std::shared_ptr<IWidgetService> = 0;
 
   virtual auto registerTerrainProxy(std::shared_ptr<ITerrainSystemProxy> terrainProxy) -> void = 0;
+
+  virtual auto run() -> void = 0;
 };
 }
