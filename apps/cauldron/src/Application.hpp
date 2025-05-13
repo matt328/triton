@@ -3,7 +3,6 @@
 namespace tr {
 class IGuiCallbackRegistrar;
 class IGameLoop;
-class IGameWorldSystem;
 }
 
 namespace ed {

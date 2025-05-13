@@ -1,6 +1,7 @@
 #pragma once
 
 #include <optional>
+#include <utility>
 namespace cereal {
 
 template <class Archive>
@@ -29,7 +30,7 @@ struct PropertiesData {
 
 class Properties {
 public:
-  explicit Properties(const std::filesystem::path& filePath) : path(filePath) {
+  explicit Properties(std::filesystem::path filePath) : path(std::move(filePath)) {
     if (!exists(path.parent_path())) {
       create_directories(path.parent_path());
     }

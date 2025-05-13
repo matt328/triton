@@ -1,12 +1,3 @@
-#include "api/fx/IFrameworkContext.hpp"
-#include "fx/FrameworkFactory.hpp"
-#include "fx/IGameLoop.hpp"
-#include "api/ext/IGameObjectProxy.hpp"
-#include "api/fx/IGuiCallbackRegistrar.hpp"
-#include "bk/TaskQueue.hpp"
-#include "api/fx/IEventBus.hpp"
-#include "api/fx/IGameWorldSystem.hpp"
-
 #include "Application.hpp"
 
 // Following aren't referenced in this file, but need to be here for BoostDI to work
@@ -53,6 +44,8 @@ auto main() -> int {
   const auto configDir = std::filesystem::path(sago::getConfigHome()) / "editor";
   auto propertiesPath = configDir / "editor";
 
+  const auto properties = std::make_shared<ed::Properties>(propertiesPath);
+
   try {
     const auto guiAdapter = std::make_shared<tr::ImGuiAdapter>();
     const auto frameworkConfig = tr::FrameworkConfig{.initialWindowSize = glm::ivec2(width, height),
@@ -60,7 +53,7 @@ auto main() -> int {
 
     const auto frameworkContext = tr::ThreadedFrameworkContext::create(frameworkConfig, guiAdapter);
 
-    const auto injector = di::make_injector(di::bind<std::filesystem::path>.to<>(propertiesPath),
+    const auto injector = di::make_injector(di::bind<ed::Properties>.to<>(properties),
                                             di::bind<tr::IEventQueue>.to<>([&frameworkContext] {
                                               return frameworkContext->getEventQueue();
                                             }));
