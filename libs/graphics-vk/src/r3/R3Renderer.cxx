@@ -1,5 +1,4 @@
 #include "R3Renderer.hpp"
-#include "api/fx/IEventBus.hpp"
 #include "api/gw/RenderableResources.hpp"
 #include "buffers/BufferCreateInfo.hpp"
 #include "buffers/BufferSystem.hpp"

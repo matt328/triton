@@ -119,6 +119,7 @@ auto GraphicsContext::run() -> void {
 }
 
 auto GraphicsContext::stop() -> void {
+  running = false;
 }
 
 }

@@ -10,9 +10,11 @@ ManagedBuffer::ManagedBuffer(vk::Buffer newVkBuffer,
       bufferMeta{std::move(newBufferMeta)},
       allocator{std::move(newAllocator)},
       allocation{newAllocation} {
+  Log.trace("Creating Managed Buffer");
 }
 
 ManagedBuffer::~ManagedBuffer() {
+  Log.trace("Destroying ManagedBuffer");
   allocator->destroyBuffer(vkBuffer, allocation);
 }
 

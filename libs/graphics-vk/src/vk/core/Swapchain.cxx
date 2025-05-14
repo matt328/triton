@@ -1,17 +1,17 @@
 #include "Swapchain.hpp"
 #include "Surface.hpp"
 #include "api/fx/Events.hpp"
-#include "api/fx/IEventBus.hpp"
+#include "api/fx/IEventQueue.hpp"
 
 namespace tr {
 Swapchain::Swapchain(std::shared_ptr<PhysicalDevice> newPhysicalDevice,
                      std::shared_ptr<Device> newDevice,
                      std::shared_ptr<Surface> newSurface,
-                     std::shared_ptr<IEventBus> newEventBus)
+                     std::shared_ptr<IEventQueue> newEventQueue)
     : physicalDevice{std::move(newPhysicalDevice)},
       device{std::move(newDevice)},
       surface{std::move(newSurface)},
-      eventBus{std::move(newEventBus)} {
+      eventQueue{std::move(newEventQueue)} {
   createSwapchain();
 }
 
@@ -148,11 +148,11 @@ auto Swapchain::createSwapchain() -> void {
   }
 
   if (oldSwapchain != nullptr) {
-    eventBus->emit(
+    eventQueue->emit(
         SwapchainResized{.width = swapchainExtent.width, .height = swapchainExtent.height});
     oldSwapchain = nullptr;
   } else {
-    eventBus->emit(
+    eventQueue->emit(
         SwapchainCreated{.width = swapchainExtent.width, .height = swapchainExtent.height});
   }
 }

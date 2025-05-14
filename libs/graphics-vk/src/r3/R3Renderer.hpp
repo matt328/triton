@@ -10,7 +10,6 @@
 namespace tr {
 
 class IFrameManager;
-class IEventBus;
 class Swapchain;
 class IFrameGraph;
 class RenderPassFactory;

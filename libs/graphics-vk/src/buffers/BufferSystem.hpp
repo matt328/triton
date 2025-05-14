@@ -19,7 +19,7 @@ public:
   BufferSystem(std::shared_ptr<IFrameManager> newFrameManager,
                std::shared_ptr<Device> newDevice,
                std::shared_ptr<Allocator> newAllocator);
-  ~BufferSystem() = default;
+  ~BufferSystem();
 
   BufferSystem(const BufferSystem&) = delete;
   BufferSystem(BufferSystem&&) = delete;

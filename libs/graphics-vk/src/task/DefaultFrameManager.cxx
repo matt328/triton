@@ -1,4 +1,5 @@
 #include "DefaultFrameManager.hpp"
+#include "api/fx/IEventQueue.hpp"
 #include "gfx/RenderContextConfig.hpp"
 #include "Frame.hpp"
 #include "Maths.hpp"
@@ -16,7 +17,7 @@ DefaultFrameManager::DefaultFrameManager(
     std::shared_ptr<Device> newDevice,
     std::shared_ptr<Swapchain> newSwapchain,
     std::shared_ptr<VkResourceManager> newResourceManager,
-    std::shared_ptr<IEventBus> newEventBus,
+    std::shared_ptr<IEventQueue> newEventQueue,
     std::shared_ptr<IDebugManager> debugManager,
     std::shared_ptr<ImageRegistry> newImageRegistry)
     : renderConfig{newRenderContextConfig},
@@ -24,7 +25,7 @@ DefaultFrameManager::DefaultFrameManager(
       device{std::move(newDevice)},
       swapchain{std::move(newSwapchain)},
       resourceManager{std::move(newResourceManager)},
-      eventBus{std::move(newEventBus)},
+      eventQueue{std::move(newEventQueue)},
       imageRegistry{std::move(newImageRegistry)},
       currentFrame{0} {
 
@@ -51,7 +52,7 @@ DefaultFrameManager::DefaultFrameManager(
                                              std::move(computeFinishedSemaphore)));
   }
 
-  eventBus->subscribe<SwapchainResized>(
+  eventQueue->subscribe<SwapchainResized>(
       [&](SwapchainResized event) { handleSwapchainResized(event); });
 }
 

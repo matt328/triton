@@ -23,6 +23,12 @@ BufferSystem::BufferSystem(std::shared_ptr<IFrameManager> newFrameManager,
   strategyMap.emplace(arenaHandle, std::make_unique<ArenaStrategy>());
 }
 
+BufferSystem::~BufferSystem() {
+  Log.trace("Destroying BufferSystem");
+  strategyMap.clear();
+  bufferMap.clear();
+}
+
 auto BufferSystem::getBufferAddress(Handle<ManagedBuffer> handle) -> uint64_t {
   assert(bufferMap.contains(handle));
   return device->getVkDevice().getBufferAddress(

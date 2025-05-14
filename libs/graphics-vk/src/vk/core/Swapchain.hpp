@@ -10,14 +10,14 @@ enum class ImageAcquireResult : uint8_t {
   Error
 };
 
-class IEventBus;
+class IEventQueue;
 
 class Swapchain {
 public:
   Swapchain(std::shared_ptr<PhysicalDevice> newPhysicalDevice,
             std::shared_ptr<Device> newDevice,
             std::shared_ptr<Surface> newSurface,
-            std::shared_ptr<IEventBus> newEventBus);
+            std::shared_ptr<IEventQueue> newEventQueue);
   ~Swapchain();
 
   Swapchain(const Swapchain&) = delete;
@@ -41,7 +41,7 @@ private:
   std::shared_ptr<PhysicalDevice> physicalDevice;
   std::shared_ptr<Device> device;
   std::shared_ptr<Surface> surface;
-  std::shared_ptr<IEventBus> eventBus;
+  std::shared_ptr<IEventQueue> eventQueue;
 
   std::unique_ptr<vk::raii::SwapchainKHR> oldSwapchain = nullptr;
   std::unique_ptr<vk::raii::SwapchainKHR> swapchain = nullptr;
