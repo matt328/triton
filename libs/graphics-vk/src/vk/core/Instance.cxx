@@ -16,7 +16,7 @@ Instance::Instance(std::shared_ptr<Context> newContext,
                                         .applicationVersion = VK_MAKE_API_VERSION(0, 0, 0, 1),
                                         .pEngineName = "Triton Engine",
                                         .engineVersion = VK_MAKE_API_VERSION(0, 0, 0, 1),
-                                        .apiVersion = VK_API_VERSION_1_3};
+                                        .apiVersion = VK_API_VERSION_1_4};
 
   auto instanceCreateInfo = vk::InstanceCreateInfo{
       .pApplicationInfo = &appInfo,

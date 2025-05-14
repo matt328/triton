@@ -134,7 +134,7 @@ auto PipelineFactory::createGraphicsPipeline(const PipelineCreateInfo& createInf
                                      .basePipelineIndex = -1};
   auto pipeline = vk::raii::Pipeline{device->getVkDevice(), VK_NULL_HANDLE, pipelineCreateInfo};
 
-  return {nullptr, nullptr};
+  return std::make_tuple(std::move(pipelineLayout), std::move(pipeline));
 }
 
 auto PipelineFactory::createComputePipeline(const PipelineCreateInfo& createInfo)

@@ -49,14 +49,6 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
       drawContextFactory{std::move(newDrawContextFactory)},
       stateBuffer{std::move(newStateBuffer)} {
 
-  drawContextFactory->createDrawContext(
-      CubeDrawContext,
-      DrawContextConfig{.logicalBuffers = {},
-                        .indirectBuffer = globalBuffers.drawCommands,
-                        .countBuffer = globalBuffers.drawCounts,
-                        .indirectMetadata = IndirectMetadata{}});
-  drawContextFactory->createDispatchContext(CullingDispatchContext,
-                                            DispatchContextConfig{.logicalBuffers = {}});
   /*
     TODO(matt): createComputeCullingPass()
     - register a fullscreen quad geometry specifically for use by the composition pass to write onto
@@ -72,6 +64,15 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
   createComputeCullingPass();
   createForwardRenderPass();
   // createCompositionRenderPass();
+
+  drawContextFactory->createDrawContext(
+      CubeDrawContext,
+      DrawContextConfig{.logicalBuffers = {},
+                        .indirectBuffer = globalBuffers.drawCommands,
+                        .countBuffer = globalBuffers.drawCounts,
+                        .indirectMetadata = IndirectMetadata{}});
+  drawContextFactory->createDispatchContext(CullingDispatchContext,
+                                            DispatchContextConfig{.logicalBuffers = {}});
 
   for (const auto& [contextId, passIds] : GraphicsMap) {
     for (const auto& passId : passIds) {
@@ -90,30 +91,38 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
 
 auto R3Renderer::createGlobalBuffers() -> void {
   globalBuffers.drawCommands = bufferSystem->registerPerFrameBuffer(
-      BufferCreateInfo{.bufferType = BufferType::IndirectCommand, .initialSize = 10240});
+      BufferCreateInfo{.bufferType = BufferType::IndirectCommand,
+                       .initialSize = 10240,
+                       .debugName = "DrawCommands"});
 
-  globalBuffers.drawCounts = bufferSystem->registerPerFrameBuffer(
-      BufferCreateInfo{.bufferType = BufferType::Device, .initialSize = 64});
+  globalBuffers.drawCounts =
+      bufferSystem->registerPerFrameBuffer(BufferCreateInfo{.bufferType = BufferType::Device,
+                                                            .initialSize = 64,
+                                                            .debugName = "DrawCounts"});
 
   // Specifies how the DIIC and DrawCounts buffers are sliced, providing maximum space as if all
   // renderables would be rendered this frame. Determines offset values for DIIC and DrawCounts
   // buffers during drawIndexedIndirect command redording.
-  globalBuffers.drawMetadata = bufferSystem->registerPerFrameBuffer(BufferCreateInfo{
-      .bufferType = BufferType::HostTransient,
-  });
+  globalBuffers.drawMetadata = bufferSystem->registerPerFrameBuffer(
+      BufferCreateInfo{.bufferType = BufferType::HostTransient, .debugName = "DrawMetadata"});
 
   globalBuffers.objectData = bufferSystem->registerPerFrameBuffer(
-      BufferCreateInfo{.bufferType = BufferType::HostTransient});
+      BufferCreateInfo{.bufferType = BufferType::HostTransient, .debugName = "ObjectData"});
 
   globalBuffers.geometryEntry =
       bufferSystem->registerBuffer(BufferCreateInfo{.bufferType = BufferType::DeviceArena,
-                                                    .itemStride = sizeof(GpuGeometryRegionData)});
+                                                    .itemStride = sizeof(GpuGeometryRegionData),
+                                                    .debugName = "GeometryEntry"});
 
-  globalBuffers.geometryPositions = bufferSystem->registerBuffer(
-      BufferCreateInfo{.bufferType = BufferType::DeviceArena, .itemStride = sizeof(glm::vec3)});
+  globalBuffers.geometryPositions =
+      bufferSystem->registerBuffer(BufferCreateInfo{.bufferType = BufferType::DeviceArena,
+                                                    .itemStride = sizeof(glm::vec3),
+                                                    .debugName = "GeometryPosition"});
 
-  globalBuffers.geometryColors = bufferSystem->registerBuffer(
-      BufferCreateInfo{.bufferType = BufferType::DeviceArena, .itemStride = sizeof(glm::vec4)});
+  globalBuffers.geometryColors =
+      bufferSystem->registerBuffer(BufferCreateInfo{.bufferType = BufferType::DeviceArena,
+                                                    .itemStride = sizeof(glm::vec4),
+                                                    .debugName = "GeometryColors"});
 }
 
 auto R3Renderer::registerRenderable([[maybe_unused]] const RenderableData& data)

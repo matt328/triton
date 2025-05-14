@@ -49,7 +49,7 @@ auto BufferSystem::registerBuffer(BufferCreateInfo createInfo) -> Handle<Managed
   const auto handle = bufferHandleGenerator.requestHandle();
 
   auto [bci, aci] = fromCreateInfo(createInfo);
-  bufferMap.emplace(handle, allocator->createBuffer2(&bci, &aci));
+  bufferMap.emplace(handle, allocator->createBuffer2(&bci, &aci, createInfo.debugName));
 
   return handle;
 }
@@ -59,6 +59,7 @@ auto BufferSystem::registerPerFrameBuffer(BufferCreateInfo createInfo)
   const auto logicalHandle = bufferHandleGenerator.requestLogicalHandle();
 
   for (const auto& frame : frameManager->getFrames()) {
+    createInfo.debugName = fmt::format("{}-Frame-{}", createInfo.debugName, frame->getIndex());
     const auto handle = registerBuffer(createInfo);
     frame->addLogicalBuffer(logicalHandle, handle);
   }
