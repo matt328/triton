@@ -1,12 +1,9 @@
 #include "EntityEditor.hpp"
 
-#include "api/fx/IGameWorldSystem.hpp"
-#include "api/fx/IEventBus.hpp"
-#include "api/ext/IGameObjectProxy.hpp"
+#include "api/fx/IEventQueue.hpp"
 #include "bk/DebugTools.hpp"
 
 #include "data/DataFacade.hpp"
-#include "gw/IWidgetService.hpp"
 #include "ui/components/DialogManager.hpp"
 #include "ui/components/dialog/ModalDialog.hpp"
 #include "editors/TransformInspector.hpp"
@@ -16,18 +13,12 @@ namespace ed {
 constexpr auto DialogName = " AnimatedEntity";
 constexpr auto StaticEntityDialogName = " StaticEntity";
 
-EntityEditor::EntityEditor(std::shared_ptr<tr::IGameWorldSystem> newGameWorldSystem,
+EntityEditor::EntityEditor(std::shared_ptr<tr::IEventQueue> newEventQueue,
                            std::shared_ptr<DataFacade> newDataFacade,
-                           std::shared_ptr<DialogManager> newDialogManager,
-                           std::shared_ptr<tr::IEventBus> newEventBus,
-                           std::shared_ptr<tr::IGameObjectProxy> newGameObjectProxy,
-                           std::shared_ptr<tr::IWidgetService> newWidgetService)
-    : gameWorldSystem{std::move(newGameWorldSystem)},
+                           std::shared_ptr<DialogManager> newDialogManager)
+    : eventQueue{std::move(newEventQueue)},
       dataFacade{std::move(newDataFacade)},
-      dialogManager{std::move(newDialogManager)},
-      eventBus{std::move(newEventBus)},
-      gameObjectProxy{std::move(newGameObjectProxy)},
-      widgetService{std::move(newWidgetService)} {
+      dialogManager{std::move(newDialogManager)} {
   Log.trace("Creating EntityEditor");
 
   createAnimatedEntityDialog();
@@ -56,10 +47,10 @@ void EntityEditor::render() {
           dataFacade->createTerrain("terrain", glm::vec3{9.f, 9.f, 9.f});
         }
         if (ImGui::MenuItem("Debug Cube")) {
-          widgetService->createBox(tr::BoxCreateInfo{.tag = "Test Stuff",
-                                                     .center = glm::vec3(0.f, 0.f, 0.f),
-                                                     .extent = 1.f,
-                                                     .color = tr::Colors::Green});
+          eventQueue->emit(tr::BoxWidget{.tag = "Test Stuff",
+                                         .center = glm::vec3(0.f, 0.f, 0.f),
+                                         .extent = 1.f,
+                                         .color = tr::Colors::Green});
         }
         ImGui::EndMenu();
       }
@@ -103,9 +94,10 @@ void EntityEditor::render() {
 
           const auto transformCallback = [this](std::string_view name, Orientation orientation) {
             const auto entityId = dataFacade->getEntityId(name);
-            gameObjectProxy->setTransform(entityId,
-                                          tr::TransformData{.position = orientation.position,
-                                                            .rotation = orientation.rotation});
+            eventQueue->emit(tr::TransformObject{
+                .objectId = entityId,
+                .transformData = tr::TransformData{.position = orientation.position,
+                                                   .rotation = orientation.rotation}});
           };
           renderTransformInspector(entityData->name, &entityData->orientation, transformCallback);
         }
@@ -148,14 +140,16 @@ void EntityEditor::render() {
           ImGui::DragInt3("Position##Chunk", glm::value_ptr(cellPosition), 1);
 
           if (ImGui::Button("Triangulate")) {
-            gameWorldSystem->triangulateChunk(terrainId, selectedChunk.entityId, cellPosition);
+            eventQueue->emit(tr::ChunkTriangulateRequest{.terrainId = terrainId,
+                                                         .chunkId = selectedChunk.entityId,
+                                                         .cellPosition = cellPosition});
           }
         }
 
         if (del) {
           const auto entityId = dataFacade->getEntityId(selectedEntity.value());
           dataFacade->deleteEntity(selectedEntity.value());
-          gameObjectProxy->removeEntity(entityId);
+          eventQueue->emit(tr::DeleteObject{.objectId = entityId});
           selectedEntity = std::nullopt;
         }
       } else {

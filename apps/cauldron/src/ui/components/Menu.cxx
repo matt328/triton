@@ -1,5 +1,6 @@
 #include "Menu.hpp"
 
+#include "api/fx/IEventQueue.hpp"
 #include "data/DataFacade.hpp"
 #include "Properties.hpp"
 #include "FileDialog.hpp"
@@ -16,11 +17,11 @@ const auto ProjectFilters =
 Menu::Menu(std::shared_ptr<DataFacade> newDataFacade,
            std::shared_ptr<Properties> newProperties,
            std::shared_ptr<DialogManager> newDialogManager,
-           std::shared_ptr<tr::IEventBus> newEventBus)
+           std::shared_ptr<tr::IEventQueue> newEventQueue)
     : dataFacade{std::move(newDataFacade)},
       properties{std::move(newProperties)},
       dialogManager{std::move(newDialogManager)},
-      eventBus{std::move(newEventBus)} {
+      eventQueue{std::move(newEventQueue)} {
 
   projectOpenDialog = std::make_unique<FileDialog>(properties, ProjectFilters, "project");
   projectOpenDialog->setOnOk([&](std::vector<std::filesystem::path> selectedFile) {
@@ -103,7 +104,7 @@ void Menu::render() {
       ImGui::Separator();
 
       if (ImGui::MenuItem("Exit", "Alt+F4")) {
-        eventBus->emit(tr::WindowClosed{});
+        eventQueue->emit(tr::WindowClosed{});
       }
       ImGui::EndMenu();
     }

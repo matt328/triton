@@ -2,18 +2,18 @@
 
 #include "api/gw/GameObjectType.hpp"
 #include "DataStore.hpp"
+#include "bk/Rando.hpp"
 
 namespace tr {
 class IGameWorldSystem;
-class TaskQueue;
+class IEventQueue;
 }
 
 namespace ed {
 
 class DataFacade {
 public:
-  DataFacade(std::shared_ptr<tr::IGameWorldSystem> newGameWorldSystem,
-             std::shared_ptr<tr::TaskQueue> newTaskQueue);
+  explicit DataFacade(std::shared_ptr<tr::IEventQueue> newEventQueue);
   ~DataFacade();
 
   DataFacade(const DataFacade&) = delete;
@@ -96,12 +96,15 @@ public:
   }
 
 private:
-  std::shared_ptr<tr::IGameWorldSystem> gameWorldSystem;
-  std::shared_ptr<tr::TaskQueue> taskQueue;
+  std::shared_ptr<tr::IEventQueue> eventQueue;
 
   bool unsaved{};
   bool engineBusy{};
   DataStore dataStore;
+
+  tr::MapKey requestIdGenerator;
+
+  std::unordered_map<uint64_t, EntityData> inFlightMap;
 };
 
-} // namespace ed::data
+}

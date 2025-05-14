@@ -1,8 +1,11 @@
 #pragma once
 
+#include "api/fx/IApplication.hpp"
+
 namespace tr {
 class IGuiCallbackRegistrar;
 class IGameLoop;
+class IEventQueue;
 }
 
 namespace ed {
@@ -10,21 +13,26 @@ namespace ed {
 class Properties;
 class Manager;
 
-class Application {
+class Application : public tr::IApplication {
 public:
-  Application(std::shared_ptr<Properties> newProperties, std::shared_ptr<Manager> newManager);
-  ~Application();
+  Application(std::shared_ptr<Properties> newProperties,
+              std::shared_ptr<Manager> newManager,
+              std::shared_ptr<tr::IEventQueue> newEventQueue);
 
-  Application(const Application&) = default;
-  Application(Application&&) = default;
+  ~Application() override;
+
+  Application(const Application&) = delete;
+  Application(Application&&) = delete;
   auto operator=(const Application&) -> Application& = delete;
   auto operator=(Application&&) -> Application& = delete;
 
-  /// Runs the Application.
-  void run() const;
+  auto onStart() -> void override;
+  auto onUpdate() -> void override;
+  auto onShutdown() -> void override;
 
 private:
   std::shared_ptr<Properties> properties;
   std::shared_ptr<Manager> manager;
+  std::shared_ptr<tr::IEventQueue> eventQueue;
 };
 }

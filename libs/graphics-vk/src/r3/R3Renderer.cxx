@@ -32,7 +32,6 @@ const std::unordered_map<std::string, std::vector<std::string>> ComputeMap = {
 R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
                        std::shared_ptr<IFrameManager> newFrameManager,
                        std::shared_ptr<queue::Graphics> newGraphicsQueue,
-                       std::shared_ptr<IEventBus> newEventBus,
                        std::shared_ptr<Swapchain> newSwapchain,
                        std::shared_ptr<IFrameGraph> newFrameGraph,
                        std::shared_ptr<RenderPassFactory> newRenderPassFactory,
@@ -43,7 +42,6 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
     : rendererConfig{newRenderConfig},
       frameManager{std::move(newFrameManager)},
       graphicsQueue{std::move(newGraphicsQueue)},
-      eventBus{std::move(newEventBus)},
       swapchain{std::move(newSwapchain)},
       frameGraph{std::move(newFrameGraph)},
       renderPassFactory{std::move(newRenderPassFactory)},
@@ -184,7 +182,6 @@ auto R3Renderer::endFrame(const Frame* frame, const FrameGraphResult& results) -
   try {
     const auto fence = *frame->getInFlightFence();
     graphicsQueue->getQueue().submit(submitInfo, fence);
-    eventBus->emit(FrameEndEvent{fence});
   } catch (const std::exception& ex) {
     Log.error("Failed to submit command buffer submission {}", ex.what());
   }

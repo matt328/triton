@@ -39,7 +39,6 @@ public:
   R3Renderer(RenderContextConfig newRenderConfig,
              std::shared_ptr<IFrameManager> newFrameManager,
              std::shared_ptr<queue::Graphics> newGraphicsQueue,
-             std::shared_ptr<IEventBus> newEventBus,
              std::shared_ptr<Swapchain> newSwapchain,
              std::shared_ptr<IFrameGraph> newFrameGraph,
              std::shared_ptr<RenderPassFactory> newRenderPassFactory,
@@ -67,7 +66,6 @@ private:
   RenderContextConfig rendererConfig;
   std::shared_ptr<IFrameManager> frameManager;
   std::shared_ptr<queue::Graphics> graphicsQueue;
-  std::shared_ptr<IEventBus> eventBus;
   std::shared_ptr<Swapchain> swapchain;
   std::shared_ptr<IFrameGraph> frameGraph;
   std::shared_ptr<RenderPassFactory> renderPassFactory;

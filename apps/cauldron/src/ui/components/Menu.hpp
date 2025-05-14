@@ -1,7 +1,7 @@
 #pragma once
 
 namespace tr {
-class IEventBus;
+class IEventQueue;
 }
 
 namespace ed {
@@ -16,7 +16,7 @@ public:
   Menu(std::shared_ptr<DataFacade> newDataFacade,
        std::shared_ptr<Properties> newProperties,
        std::shared_ptr<DialogManager> newDialogManager,
-       std::shared_ptr<tr::IEventBus> newEventBus);
+       std::shared_ptr<tr::IEventQueue> newEventQueue);
   ~Menu();
 
   Menu(const Menu&) = delete;
@@ -38,7 +38,7 @@ private:
   std::shared_ptr<DataFacade> dataFacade;
   std::shared_ptr<Properties> properties;
   std::shared_ptr<DialogManager> dialogManager;
-  std::shared_ptr<tr::IEventBus> eventBus;
+  std::shared_ptr<tr::IEventQueue> eventQueue;
 
   std::optional<std::filesystem::path> openFilePath;
 

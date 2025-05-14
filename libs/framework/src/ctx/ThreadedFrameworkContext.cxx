@@ -4,6 +4,7 @@
 #include "GlfwWindow.hpp"
 #include "RingBuffer.hpp"
 #include "ThreadedGameLoop.hpp"
+#include "api/fx/IApplication.hpp"
 #include "bk/TaskQueue.hpp"
 #include "fx/IGameLoop.hpp"
 #include "gw/GameWorldContext.hpp"
@@ -43,39 +44,68 @@ auto ThreadedFrameworkContext::create(const FrameworkConfig& config,
   return frameworkInjector.create<std::shared_ptr<ThreadedFrameworkContext>>();
 }
 
+ThreadedFrameworkContext::~ThreadedFrameworkContext() {
+  Log.trace("Destroying ThreadedFrameworkContext");
+}
+
 ThreadedFrameworkContext::ThreadedFrameworkContext(const FrameworkConfig& config,
                                                    std::shared_ptr<IEventQueue> newEventQueue,
                                                    std::shared_ptr<IActionSystem> newActionSystem,
-                                                   std::shared_ptr<IStateBuffer> newStateBuffer)
+                                                   std::shared_ptr<IStateBuffer> newStateBuffer,
+                                                   std::shared_ptr<IWindow> newWindow)
     : eventQueue{std::move(newEventQueue)},
       actionSystem{std::move(newActionSystem)},
-      stateBuffer{std::move(newStateBuffer)} {
+      stateBuffer{std::move(newStateBuffer)},
+      window{std::move(newWindow)} {
 }
 
 auto ThreadedFrameworkContext::startGameworld() -> void {
   gameThread = std::thread([this] {
-    gameWorldContext = GameWorldContext::create(eventQueue);
-    gameWorldContext->run();
+    try {
+      gameWorldContext = GameWorldContext::create(eventQueue);
+      gameWorldContext->run();
+    } catch (const std::exception& e) {
+      Log.error("Exception in game thread: {}", e.what());
+    } catch (...) { Log.error("Unknown exception in game thread"); }
   });
 }
 
 auto ThreadedFrameworkContext::startRenderer() -> void {
   graphicsThread = std::thread([this] {
-    graphicsContext = GraphicsContext::create(eventQueue);
-    graphicsContext->run();
+    try {
+      graphicsContext = GraphicsContext::create(eventQueue, stateBuffer, window);
+      graphicsContext->run();
+    } catch (const std::exception& e) {
+      Log.error("Exception in render thread: {}", e.what());
+    } catch (...) { Log.error("Unknown exception in render thread"); }
   });
 }
 
-auto ThreadedFrameworkContext::runMainLoop() -> void {
+auto ThreadedFrameworkContext::runApplication(const std::shared_ptr<IApplication>& application)
+    -> void {
+  application->onStart();
+  while (!window->shouldClose()) {
+    window->pollEvents();
+    application->onUpdate();
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+  }
+  application->onShutdown();
 }
 
 auto ThreadedFrameworkContext::stop() -> void {
+  Log.trace("ThreadedFrameworkContext::stop()");
+  gameWorldContext->stop();
   if (gameThread.joinable()) {
     gameThread.join();
   }
+  graphicsContext->stop();
   if (graphicsThread.joinable()) {
     graphicsThread.join();
   }
+}
+
+auto ThreadedFrameworkContext::getEventQueue() -> std::shared_ptr<IEventQueue> {
+  return eventQueue;
 }
 
 }

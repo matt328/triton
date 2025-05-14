@@ -19,6 +19,8 @@ public:
 
   virtual void emit(std::type_index type, const EventVariant& event) = 0;
 
+  /// Dispatch any handlers that might have been subscribed on the current thread.
+  /// Must be called periodically from any thread on which events have been subscribed to.
   virtual void dispatchPending() = 0;
 
   template <typename T>

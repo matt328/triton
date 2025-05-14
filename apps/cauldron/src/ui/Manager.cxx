@@ -1,7 +1,5 @@
 #include "Manager.hpp"
 
-#include "bk/TaskQueue.hpp"
-
 #include "ImGuiStyle.hpp"
 #include "assets/RobotoRegular.h"
 #include "assets/JetBrainsMono.hpp"
@@ -24,7 +22,6 @@ Manager::Manager(std::shared_ptr<Menu> newAppMenu,
                  std::shared_ptr<AssetViewer> newAssetViewer,
                  std::shared_ptr<DialogManager> newDialogManager,
                  std::shared_ptr<EntityEditor> newEntityEditor,
-                 std::shared_ptr<tr::TaskQueue> newTaskQueue,
                  std::shared_ptr<Properties> newProperties,
                  std::shared_ptr<DataFacade> newDataFacade,
                  std::shared_ptr<AssetTool> newAssetTool)
@@ -32,7 +29,6 @@ Manager::Manager(std::shared_ptr<Menu> newAppMenu,
       assetViewer{std::move(newAssetViewer)},
       dialogManager{std::move(newDialogManager)},
       entityEditor{std::move(newEntityEditor)},
-      taskQueue{std::move(newTaskQueue)},
       properties{std::move(newProperties)},
       dataFacade{std::move(newDataFacade)},
       assetTool{std::move(newAssetTool)} {

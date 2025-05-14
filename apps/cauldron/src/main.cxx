@@ -2,7 +2,6 @@
 
 // Following aren't referenced in this file, but need to be here for BoostDI to work
 #include "Properties.hpp"
-#include "gw/IWidgetService.hpp"
 #include "ui/Manager.hpp"
 #include "ui/components/Menu.hpp"
 #include "data/DataFacade.hpp"
@@ -51,7 +50,7 @@ auto main() -> int {
     const auto frameworkConfig = tr::FrameworkConfig{.initialWindowSize = glm::ivec2(width, height),
                                                      .windowTitle = windowTitle.str()};
 
-    const auto frameworkContext = tr::ThreadedFrameworkContext::create(frameworkConfig, guiAdapter);
+    auto frameworkContext = tr::ThreadedFrameworkContext::create(frameworkConfig, guiAdapter);
 
     const auto injector = di::make_injector(di::bind<ed::Properties>.to<>(properties),
                                             di::bind<tr::IEventQueue>.to<>([&frameworkContext] {
@@ -62,7 +61,12 @@ auto main() -> int {
 
     Log.info("Initialized");
 
-    frameworkContext->runMainLoop();
+    frameworkContext->startGameworld();
+    frameworkContext->startRenderer();
+
+    frameworkContext->runApplication(app);
+
+    frameworkContext->stop();
 
   } catch (const std::exception& e) {
     Log.critical(e.what());

@@ -1,10 +1,8 @@
 #pragma once
 
 namespace tr {
-class IEventBus;
+class IEventQueue;
 class IGameWorldSystem;
-class IGameObjectProxy;
-class IWidgetService;
 }
 
 namespace ed {
@@ -14,12 +12,9 @@ class DialogManager;
 
 class EntityEditor {
 public:
-  EntityEditor(std::shared_ptr<tr::IGameWorldSystem> newGameWorldSystem,
+  EntityEditor(std::shared_ptr<tr::IEventQueue> newEventQueue,
                std::shared_ptr<DataFacade> newDataFacade,
-               std::shared_ptr<DialogManager> newDialogManager,
-               std::shared_ptr<tr::IEventBus> newEventBus,
-               std::shared_ptr<tr::IGameObjectProxy> newGameObjectProxy,
-               std::shared_ptr<tr::IWidgetService> newWidgetService);
+               std::shared_ptr<DialogManager> newDialogManager);
   ~EntityEditor();
 
   EntityEditor(const EntityEditor&) = delete;
@@ -32,12 +27,9 @@ public:
   static constexpr auto ComponentName = "Entity Editor";
 
 private:
-  std::shared_ptr<tr::IGameWorldSystem> gameWorldSystem;
+  std::shared_ptr<tr::IEventQueue> eventQueue;
   std::shared_ptr<DataFacade> dataFacade;
   std::shared_ptr<DialogManager> dialogManager;
-  std::shared_ptr<tr::IEventBus> eventBus;
-  std::shared_ptr<tr::IGameObjectProxy> gameObjectProxy;
-  std::shared_ptr<tr::IWidgetService> widgetService;
 
   std::optional<std::string> selectedEntity{std::nullopt};
 

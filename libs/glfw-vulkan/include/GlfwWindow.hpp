@@ -33,6 +33,8 @@ public:
       -> void override;
   [[nodiscard]] auto getFramebufferSize() const -> glm::ivec2 override;
 
+  [[nodiscard]] auto shouldClose() const -> bool override;
+
 private:
   std::shared_ptr<IEventQueue> eventBus;
   std::shared_ptr<IGuiAdapter> guiAdapter;

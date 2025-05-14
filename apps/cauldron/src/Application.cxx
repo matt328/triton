@@ -1,12 +1,16 @@
 #include "Application.hpp"
 #include "Properties.hpp"
+#include "api/fx/IEventQueue.hpp"
 #include "ui/Manager.hpp"
 
 namespace ed {
 
 Application::Application(std::shared_ptr<Properties> newProperties,
-                         std::shared_ptr<Manager> newManager)
-    : properties{std::move(newProperties)}, manager{std::move(newManager)} {
+                         std::shared_ptr<Manager> newManager,
+                         std::shared_ptr<tr::IEventQueue> newEventQueue)
+    : properties{std::move(newProperties)},
+      manager{std::move(newManager)},
+      eventQueue{std::move(newEventQueue)} {
 
   Log.debug("Created Application");
 
@@ -25,10 +29,16 @@ Application::~Application() {
   Log.debug("Destroying Application");
 }
 
-void Application::run() const {
-  Log.debug("Application run");
+auto Application::onStart() -> void {
+  Log.trace("Application::onStart()");
+}
 
-  Log.debug("Application stopped");
+auto Application::onUpdate() -> void {
+  eventQueue->dispatchPending();
+}
+
+auto Application::onShutdown() -> void {
+  Log.trace("Application::onShutdown()");
 }
 
 }

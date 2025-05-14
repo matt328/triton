@@ -3,8 +3,80 @@
 #include "api/action/Actions.hpp"
 #include "api/action/Inputs.hpp"
 #include "api/gw/GameplayEvents.hpp"
+#include "api/gw/TransformData.hpp"
+#include "api/vtx/SdfCreateInfo.hpp"
+#include "api/vtx/TerrainResult.hpp"
+#include "bk/Color.hpp"
 
 namespace tr {
+
+struct BoxWidget {
+  std::string tag;
+  glm::vec3 center;
+  float extent;
+  Color color{Colors::White};
+  std::optional<GameObjectId> target{std::nullopt};
+  std::optional<glm::vec3> targetOffset{std::nullopt};
+};
+
+struct DeleteObject {
+  GameObjectId objectId;
+};
+
+struct TransformObject {
+  GameObjectId objectId;
+  TransformData transformData;
+};
+
+struct ChunkTriangulateRequest {
+  GameObjectId terrainId;
+  GameObjectId chunkId;
+  glm::ivec3 cellPosition;
+};
+
+struct TerrainCreateRequest {
+  uint64_t requestId;
+  std::string name;
+  SdfCreateInfo sdfCreateInfo;
+  glm::ivec3 chunkCount; // Dimensions of the terrain, in chunks
+  glm::ivec3 chunkSize;  // Number of points in the chunk, number of cells is chunkSize.[x|y|z] - 2
+};
+
+struct TerrainCreated {
+  uint64_t requestId;
+  std::string name;
+  TerrainHandle terrainHandle;
+  SdfHandle sdfHandle;
+  std::vector<BlockResult> chunks;
+  glm::vec3 terrainSize;
+  std::optional<tr::GameObjectId> entityId = std::nullopt;
+};
+
+struct DynamicModelRequest {
+  uint64_t requestId;
+  std::string modelFilename;
+  std::string skeletonFilename;
+  std::string animationFilename;
+  std::string entityName;
+};
+
+struct DynamicModelLoaded {
+  uint64_t requestId;
+  tr::GameObjectId objectId;
+};
+
+struct StaticModelRequest {
+  uint64_t requestId;
+  std::string modelFilename;
+  std::string entityName;
+  std::optional<tr::TransformData> initialTransform = std::nullopt;
+};
+
+struct StaticModelLoaded {
+  uint64_t requestId;
+  std::string entityName;
+  tr::GameObjectId objectId;
+};
 
 struct WindowIconified {
   int iconified;
@@ -61,7 +133,17 @@ struct FrameEndEvent {
   std::any fenceHandle;
 };
 
-using EventVariant = std::variant<WindowIconified,
+using EventVariant = std::variant<BoxWidget,
+                                  DeleteObject,
+                                  TransformObject,
+                                  ChunkTriangulateRequest,
+                                  TerrainCreateRequest,
+                                  TerrainCreated,
+                                  DynamicModelLoaded,
+                                  DynamicModelRequest,
+                                  StaticModelLoaded,
+                                  StaticModelRequest,
+                                  WindowIconified,
                                   WindowClosed,
                                   KeyEvent,
                                   MouseMoved,
@@ -75,5 +157,4 @@ using EventVariant = std::variant<WindowIconified,
                                   SwapchainResized,
                                   SwapchainCreated,
                                   FrameEndEvent>;
-
 }

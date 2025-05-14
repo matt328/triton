@@ -95,6 +95,10 @@ auto GlfwWindow::createVulkanSurface(const vk::Instance& instance, VkSurfaceKHR*
   glfwCreateWindowSurface(&(*instance), window, nullptr, outSurface);
 }
 
+auto GlfwWindow::shouldClose() const -> bool {
+  return glfwWindowShouldClose(window) != 0;
+}
+
 auto GlfwWindow::pollEvents() -> void {
   glfwPollEvents();
 }
@@ -107,7 +111,7 @@ auto GlfwWindow::setVulkanVersion(std::string_view vulkanVersion) -> void {
 
 auto GlfwWindow::getFramebufferSize() const -> glm::ivec2 {
   auto size = glm::ivec2(320, 400);
-  glfwGetWindowSize(window, &size.x, &size.y);
+  glfwGetFramebufferSize(window, &size.x, &size.y);
   return size;
 }
 

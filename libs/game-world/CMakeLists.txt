@@ -11,6 +11,7 @@ set(gameworld_SRC
   src/EntityServiceProvider.cxx
   src/WidgetService.cxx
   src/GameObjectProxyImpl.cxx
+  src/EntityManager.cxx
 
   src/ctx/GameWorldContext.cxx
 )

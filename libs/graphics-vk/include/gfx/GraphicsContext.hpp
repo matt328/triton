@@ -3,10 +3,15 @@
 namespace tr {
 
 class IEventQueue;
+class IRenderContext;
+class IStateBuffer;
+class IWindow;
 
 class GraphicsContext {
 public:
-  explicit GraphicsContext(std::shared_ptr<IEventQueue> newEventQueue);
+  GraphicsContext(std::shared_ptr<IEventQueue> newEventQueue,
+                  std::shared_ptr<IRenderContext> newRenderContext,
+                  std::shared_ptr<IStateBuffer> newStateBuffer);
   ~GraphicsContext() = default;
 
   GraphicsContext(const GraphicsContext&) = default;
@@ -14,14 +19,21 @@ public:
   auto operator=(const GraphicsContext&) -> GraphicsContext& = default;
   auto operator=(GraphicsContext&&) -> GraphicsContext& = delete;
 
-  static auto create(std::shared_ptr<IEventQueue> newEventQueue)
-      -> std::shared_ptr<GraphicsContext>;
+  static auto create(std::shared_ptr<IEventQueue> newEventQueue,
+                     std::shared_ptr<IStateBuffer> newStateBuffer,
+                     std::shared_ptr<IWindow> newWindow) -> std::shared_ptr<GraphicsContext>;
 
   auto run() -> void;
   auto stop() -> void;
 
 private:
   std::shared_ptr<IEventQueue> eventQueue;
+  std::shared_ptr<IRenderContext> renderContext;
+  std::shared_ptr<IStateBuffer> stateBuffer;
+  std::shared_ptr<IWindow> window;
+  bool running{};
+
+  std::chrono::steady_clock clock;
 };
 
 }

@@ -1,9 +1,5 @@
 #pragma once
 
-namespace tr {
-class TaskQueue;
-}
-
 namespace ed {
 
 struct AppLog;
@@ -21,7 +17,6 @@ public:
                    std::shared_ptr<AssetViewer> newAssetViewer,
                    std::shared_ptr<DialogManager> newDialogManager,
                    std::shared_ptr<EntityEditor> newEntityEditor,
-                   std::shared_ptr<tr::TaskQueue> newTaskQueue,
                    std::shared_ptr<Properties> newProperties,
                    std::shared_ptr<DataFacade> newDataFacade,
                    std::shared_ptr<AssetTool> newAssetTool);
@@ -41,7 +36,6 @@ private:
   std::shared_ptr<AssetViewer> assetViewer;
   std::shared_ptr<DialogManager> dialogManager;
   std::shared_ptr<EntityEditor> entityEditor;
-  std::shared_ptr<tr::TaskQueue> taskQueue;
   std::shared_ptr<Properties> properties;
   std::shared_ptr<DataFacade> dataFacade;
   std::shared_ptr<AssetTool> assetTool;

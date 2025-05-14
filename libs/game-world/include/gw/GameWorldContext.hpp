@@ -3,10 +3,12 @@
 namespace tr {
 
 class IEventQueue;
+class IEntityManager;
 
 class GameWorldContext {
 public:
-  explicit GameWorldContext(std::shared_ptr<IEventQueue> newEventQueue);
+  GameWorldContext(std::shared_ptr<IEventQueue> newEventQueue,
+                   std::shared_ptr<IEntityManager> newEntityManager);
   ~GameWorldContext() = default;
 
   GameWorldContext(const GameWorldContext&) = default;
@@ -22,6 +24,9 @@ public:
 
 private:
   std::shared_ptr<IEventQueue> eventQueue;
+  std::shared_ptr<IEntityManager> entityManager;
+
+  bool running{};
 };
 
 }

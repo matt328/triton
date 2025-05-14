@@ -1,19 +1,80 @@
 #include "DataFacade.hpp"
 
-#include "api/fx/IGameWorldSystem.hpp"
-#include "bk/TaskQueue.hpp"
-#include "api/vtx/TerrainCreateInfo.hpp"
+#include "api/fx/IEventQueue.hpp"
 
 namespace ed {
 
-DataFacade::DataFacade(std::shared_ptr<tr::IGameWorldSystem> newGameWorldSystem,
-                       std::shared_ptr<tr::TaskQueue> newTaskQueue)
-    : gameWorldSystem{std::move(newGameWorldSystem)}, taskQueue{std::move(newTaskQueue)} {
+DataFacade::DataFacade(std::shared_ptr<tr::IEventQueue> newEventQueue)
+    : eventQueue{std::move(newEventQueue)} {
   Log.trace("Creating DataFacade");
+
+  eventQueue->subscribe<tr::StaticModelLoaded>([this](const tr::StaticModelLoaded& event) {
+    const auto& entityData = inFlightMap.at(event.requestId);
+    dataStore.scene.insert({event.entityName, entityData});
+    dataStore.entityNameMap.insert({event.entityName, event.objectId});
+    engineBusy = false;
+    inFlightMap.erase(event.requestId);
+    Log.info("Finished creating entity: name: {}", event.entityName);
+  });
+
+  eventQueue->subscribe<tr::DynamicModelLoaded>([this](const tr::DynamicModelLoaded& event) {
+    const auto& entityData = inFlightMap.at(event.requestId);
+    dataStore.scene.insert({entityData.name, entityData});
+    dataStore.entityNameMap.insert({entityData.name, event.objectId});
+    engineBusy = false;
+    inFlightMap.erase(event.requestId);
+    Log.info("Finished creating entity: name: {}", entityData.name);
+  });
+
+  eventQueue->subscribe<tr::TerrainCreated>([this](const tr::TerrainCreated& event) {
+    dataStore.entityNameMap.emplace(event.name, event.entityId.value());
+
+    auto chunkIds = std::vector<BlockData>{};
+    chunkIds.reserve(event.chunks.size());
+    std::ranges::transform(event.chunks.begin(),
+                           event.chunks.end(),
+                           std::back_inserter(chunkIds),
+                           [](const tr::BlockResult& chunk) {
+                             return BlockData{.entityId = chunk.entityId.value(),
+                                              .location = chunk.location};
+                           });
+
+    std::ranges::sort(chunkIds, [](const BlockData& a, const BlockData& b) {
+      return std::tie(a.location.z, a.location.y, a.location.x) <
+             std::tie(b.location.z, b.location.y, b.location.x);
+    });
+
+    dataStore.terrainMap.emplace(event.name,
+                                 TerrainData{.name = std::string{event.name},
+                                             .terrainSize = event.terrainSize,
+                                             .chunkData = chunkIds,
+                                             .entityId = event.entityId.value()});
+
+    // Register each Chunk's name -> id
+    for (const auto& chunk : event.chunks) {
+      dataStore.entityNameMap.emplace(chunk.name, chunk.entityId.value());
+    }
+
+    engineBusy = false;
+  });
 }
 
 DataFacade::~DataFacade() {
   Log.trace("Destroying DataFacade");
+}
+
+void DataFacade::createStaticModel(const EntityData& entityData) noexcept {
+  unsaved = true;
+  engineBusy = true;
+  const auto key = requestIdGenerator.getKey();
+  inFlightMap.emplace(key, entityData);
+  eventQueue->emit(tr::StaticModelRequest{
+      .requestId = key,
+      .modelFilename = dataStore.models.at(entityData.modelName).filePath,
+      .entityName = entityData.name,
+      .initialTransform =
+          std::make_optional(tr::TransformData{.position = entityData.orientation.position,
+                                               .rotation = entityData.orientation.rotation})});
 }
 
 void DataFacade::update() const {
@@ -64,32 +125,6 @@ void DataFacade::addModel(std::string_view name, const std::filesystem::path& pa
 void DataFacade::removeModel([[maybe_unused]] std::string_view name) {
 }
 
-void DataFacade::createStaticModel(const EntityData& entityData) noexcept {
-  unsaved = true;
-  const auto modelFilename = dataStore.models.at(entityData.modelName).filePath;
-  const auto entityName = entityData.name;
-
-  const auto onComplete = [this, entityName, entityData](tr::GameObjectId entityId) {
-    dataStore.scene.insert({entityData.name, entityData});
-    dataStore.entityNameMap.insert({entityName, entityId});
-    engineBusy = false;
-    Log.info("Finished creating entity: name: {}", entityData.name);
-  };
-
-  engineBusy = true;
-
-  const auto transform = tr::TransformData{.position = entityData.orientation.position,
-                                           .rotation = entityData.orientation.rotation};
-
-  const auto task = [this, modelFilename, entityName, transform] {
-    return gameWorldSystem->createStaticModelEntity(modelFilename,
-                                                    entityName,
-                                                    std::make_optional(transform));
-  };
-
-  taskQueue->enqueue(task, onComplete);
-}
-
 void DataFacade::createAnimatedModel(const EntityData& entityData) {
   unsaved = true;
 
@@ -97,28 +132,12 @@ void DataFacade::createAnimatedModel(const EntityData& entityData) {
   const auto skeletonFilename = dataStore.skeletons.at(entityData.skeleton).filePath;
   const auto animationFilename = dataStore.animations.at(entityData.animations[0]).filePath;
   const auto entityName = entityData.name;
-
-  const auto onComplete = [this, entityName, entityData](tr::GameObjectId entityId) {
-    dataStore.entityNameMap.insert({entityName, entityId});
-    dataStore.scene.insert({entityName, entityData});
-    engineBusy = false;
-  };
-  engineBusy = true;
-
-  const auto animatedEntityData = tr::AnimatedModelData{.modelFilename = modelFilename,
-                                                        .skeletonFilename = skeletonFilename,
-                                                        .animationFilename = animationFilename,
-                                                        .entityName = entityName};
-
-  const auto transform = tr::TransformData{.position = entityData.orientation.position,
-                                           .rotation = entityData.orientation.rotation};
-
-  const auto task = [this, animatedEntityData, transform] {
-    return gameWorldSystem->createAnimatedModelEntity(animatedEntityData,
-                                                      std::make_optional(transform));
-  };
-
-  taskQueue->enqueue(task, onComplete);
+  const auto requestId = requestIdGenerator.getKey();
+  eventQueue->emit(tr::DynamicModelRequest{.requestId = requestId,
+                                           .modelFilename = modelFilename,
+                                           .skeletonFilename = skeletonFilename,
+                                           .animationFilename = animationFilename,
+                                           .entityName = entityName});
 }
 
 auto DataFacade::deleteEntity(std::string_view name) noexcept -> void {
@@ -142,62 +161,24 @@ void DataFacade::setEntitySkeleton([[maybe_unused]] std::string_view entityName,
 
 void DataFacade::createTerrain(std::string_view terrainName, glm::vec3 terrainSize) {
 
-  const auto task = [this, terrainName] {
-    auto sphereInfo = tr::SdfCreateInfo{};
-    sphereInfo.shapeType = tr::ShapeType::Sphere;
-    sphereInfo.shapeInfo = tr::SphereInfo{.center = glm::vec3(5.f, 5.f, 5.f), .radius = 1.5f};
+  auto sphereInfo = tr::SdfCreateInfo{};
+  sphereInfo.shapeType = tr::ShapeType::Sphere;
+  sphereInfo.shapeInfo = tr::SphereInfo{.center = glm::vec3(5.f, 5.f, 5.f), .radius = 1.5f};
 
-    auto boxInfo = tr::SdfCreateInfo{};
-    boxInfo.shapeType = tr::ShapeType::Box;
-    boxInfo.shapeInfo = tr::BoxInfo{.center = glm::vec3(5.f, 5.f, 5.f), .size = 1.5f};
+  auto boxInfo = tr::SdfCreateInfo{};
+  boxInfo.shapeType = tr::ShapeType::Box;
+  boxInfo.shapeInfo = tr::BoxInfo{.center = glm::vec3(5.f, 5.f, 5.f), .size = 1.5f};
 
-    auto planeInfo = tr::SdfCreateInfo{};
-    planeInfo.shapeType = tr::ShapeType::Plane;
-    planeInfo.shapeInfo = tr::PlaneInfo{.height = 5.f, .normal = glm::vec3(0.f, 1.f, 0.f)};
+  auto planeInfo = tr::SdfCreateInfo{};
+  planeInfo.shapeType = tr::ShapeType::Plane;
+  planeInfo.shapeInfo = tr::PlaneInfo{.height = 5.f, .normal = glm::vec3(0.f, 1.f, 0.f)};
 
-    const auto tci = tr::TerrainCreateInfo{.name = terrainName.data(),
-                                           .sdfCreateInfo = boxInfo,
-                                           .chunkCount = glm::ivec3(3, 3, 3),
-                                           .chunkSize = glm::ivec3(16, 16, 16)};
-
-    return gameWorldSystem->createTerrain(tci);
-  };
-
-  const auto onComplete = [this, terrainName, terrainSize](const tr::TerrainResult2& result) {
-    // Register the Terrain's name -> entityId
-    dataStore.entityNameMap.emplace(terrainName, result.entityId.value());
-
-    auto chunkIds = std::vector<BlockData>{};
-    chunkIds.reserve(result.chunks.size());
-    std::ranges::transform(result.chunks.begin(),
-                           result.chunks.end(),
-                           std::back_inserter(chunkIds),
-                           [](const tr::BlockResult& chunk) {
-                             return BlockData{.entityId = chunk.entityId.value(),
-                                              .location = chunk.location};
-                           });
-
-    std::ranges::sort(chunkIds, [](const BlockData& a, const BlockData& b) {
-      return std::tie(a.location.z, a.location.y, a.location.x) <
-             std::tie(b.location.z, b.location.y, b.location.x);
-    });
-
-    dataStore.terrainMap.emplace(terrainName,
-                                 TerrainData{.name = std::string{terrainName},
-                                             .terrainSize = terrainSize,
-                                             .chunkData = chunkIds,
-                                             .entityId = result.entityId.value()});
-
-    // Register each Chunk's name -> id
-    for (const auto& chunk : result.chunks) {
-      dataStore.entityNameMap.emplace(chunk.name, chunk.entityId.value());
-    }
-
-    engineBusy = false;
-  };
-
-  engineBusy = true;
-  taskQueue->enqueue(task, onComplete);
+  const auto requestId = requestIdGenerator.getKey();
+  eventQueue->emit(tr::TerrainCreateRequest{.requestId = requestId,
+                                            .name = terrainName.data(),
+                                            .sdfCreateInfo = boxInfo,
+                                            .chunkCount = glm::ivec3(3, 3, 3),
+                                            .chunkSize = glm::ivec3(16, 16, 16)});
 }
 
 void DataFacade::save(const std::filesystem::path& outputFile) {

@@ -19,6 +19,7 @@ public:
   virtual auto createVulkanSurface(const vk::Instance& instance, VkSurfaceKHR* outSurface) const
       -> void = 0;
   [[nodiscard]] virtual auto getFramebufferSize() const -> glm::ivec2 = 0;
+  [[nodiscard]] virtual auto shouldClose() const -> bool = 0;
 };
 
 }
