@@ -12,7 +12,7 @@ public:
   GraphicsContext(std::shared_ptr<IEventQueue> newEventQueue,
                   std::shared_ptr<IRenderContext> newRenderContext,
                   std::shared_ptr<IStateBuffer> newStateBuffer);
-  ~GraphicsContext() = default;
+  ~GraphicsContext();
 
   GraphicsContext(const GraphicsContext&) = default;
   GraphicsContext(GraphicsContext&&) = delete;
@@ -31,7 +31,7 @@ private:
   std::shared_ptr<IRenderContext> renderContext;
   std::shared_ptr<IStateBuffer> stateBuffer;
   std::shared_ptr<IWindow> window;
-  bool running{};
+  bool running{true};
 
   std::chrono::steady_clock clock;
 };

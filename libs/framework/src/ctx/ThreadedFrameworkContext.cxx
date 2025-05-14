@@ -64,6 +64,7 @@ auto ThreadedFrameworkContext::startGameworld() -> void {
     try {
       gameWorldContext = GameWorldContext::create(eventQueue);
       gameWorldContext->run();
+      gameWorldContext = nullptr;
     } catch (const std::exception& e) {
       Log.error("Exception in game thread: {}", e.what());
     } catch (...) { Log.error("Unknown exception in game thread"); }
@@ -75,6 +76,8 @@ auto ThreadedFrameworkContext::startRenderer() -> void {
     try {
       graphicsContext = GraphicsContext::create(eventQueue, stateBuffer, window);
       graphicsContext->run();
+      Log.trace("Nulling out graphicsContext");
+      graphicsContext = nullptr;
     } catch (const std::exception& e) {
       Log.error("Exception in render thread: {}", e.what());
     } catch (...) { Log.error("Unknown exception in render thread"); }

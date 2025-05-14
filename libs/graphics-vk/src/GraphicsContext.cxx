@@ -39,6 +39,11 @@ GraphicsContext::GraphicsContext(std::shared_ptr<IEventQueue> newEventQueue,
       stateBuffer{std::move(newStateBuffer)} {
 }
 
+GraphicsContext::~GraphicsContext() {
+  Log.trace("Destroying GraphicsContext, threadId: {}",
+            std::hash<std::thread::id>{}(std::this_thread::get_id()));
+}
+
 auto GraphicsContext::create(std::shared_ptr<IEventQueue> newEventQueue,
                              std::shared_ptr<IStateBuffer> newStateBuffer,
                              std::shared_ptr<IWindow> newWindow)
@@ -119,6 +124,8 @@ auto GraphicsContext::run() -> void {
 }
 
 auto GraphicsContext::stop() -> void {
+  Log.trace("GraphicsContext::stop(), threadId: {}",
+            std::hash<std::thread::id>{}(std::this_thread::get_id()));
   running = false;
 }
 

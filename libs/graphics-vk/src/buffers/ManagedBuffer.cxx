@@ -8,14 +8,18 @@ ManagedBuffer::ManagedBuffer(vk::Buffer newVkBuffer,
                              vma::Allocation newAllocation)
     : vkBuffer{newVkBuffer},
       bufferMeta{std::move(newBufferMeta)},
-      allocator{std::move(newAllocator)},
-      allocation{newAllocation} {
-  Log.trace("Creating Managed Buffer");
+      allocation{newAllocation},
+      allocator{std::move(newAllocator)} {
+  Log.trace("Creating ManagedBuffer, threadId: {}",
+            std::hash<std::thread::id>{}(std::this_thread::get_id()));
 }
 
 ManagedBuffer::~ManagedBuffer() {
-  Log.trace("Destroying ManagedBuffer");
-  allocator->destroyBuffer(vkBuffer, allocation);
+  Log.trace("Destroying ManagedBuffer, threadId: {}",
+            std::hash<std::thread::id>{}(std::this_thread::get_id()));
+  if (vkBuffer && allocation) {
+    allocator->destroyBuffer(vkBuffer, allocation);
+  }
 }
 
 auto ManagedBuffer::isMappable() -> bool {

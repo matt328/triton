@@ -46,8 +46,8 @@ public:
 private:
   vk::Buffer vkBuffer;
   BufferMeta bufferMeta;
-  std::shared_ptr<vma::Allocator> allocator;
   vma::Allocation allocation;
+  std::shared_ptr<vma::Allocator> allocator;
 };
 
 }
