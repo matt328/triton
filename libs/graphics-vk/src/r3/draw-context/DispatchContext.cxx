@@ -6,14 +6,18 @@
 namespace tr {
 
 DispatchContext::DispatchContext(DispatchContextConfig newConfig,
-                                 std::shared_ptr<BufferSystem> newBufferSystem)
-    : bufferSystem{std::move(newBufferSystem)}, config{std::move(newConfig)} {
+                                 std::shared_ptr<BufferSystem> newBufferSystem,
+                                 DispatchPushConstantsBuilder&& builder)
+    : bufferSystem{std::move(newBufferSystem)},
+      config{std::move(newConfig)},
+      pushConstantsBuilder{std::move(builder)} {
 }
 
 auto DispatchContext::bind(const Frame* frame,
                            vk::raii::CommandBuffer& commandBuffer,
                            const vk::raii::PipelineLayout& layout) -> void {
-  auto pcBlob = config.pushConstantBuilder(config, *frame);
+
+  auto pcBlob = pushConstantsBuilder(config, *frame);
 
   const auto pushConstantInfo =
       vk::PushConstantsInfo{.layout = layout,

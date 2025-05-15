@@ -2,6 +2,7 @@
 
 #include "bk/Handle.hpp"
 #include "bk/HandleGenerator.hpp"
+#include "PushConstantBuilders.hpp"
 
 namespace tr {
 
@@ -25,8 +26,9 @@ public:
   auto getDrawContextHandle(const std::string& id) -> Handle<DrawContext>;
   auto getDrawContext(const Handle<DrawContext>& handle) -> std::unique_ptr<DrawContext>&;
 
-  auto createDispatchContext(std::string id, const DispatchContextConfig& config)
-      -> Handle<DispatchContext>;
+  auto createDispatchContext(std::string id,
+                             const DispatchContextConfig& config,
+                             DispatchPushConstantsBuilder builder) -> Handle<DispatchContext>;
   auto getDispatchContextHandle(const std::string& id) -> Handle<DispatchContext>;
   auto getDispatchContext(const Handle<DispatchContext>& handle)
       -> std::unique_ptr<DispatchContext>&;

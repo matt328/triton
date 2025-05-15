@@ -30,11 +30,15 @@ auto ContextFactory::getDrawContext(const Handle<DrawContext>& handle)
   return drawContextMap.at(handle);
 }
 
-auto ContextFactory::createDispatchContext(std::string id, const DispatchContextConfig& config)
+auto ContextFactory::createDispatchContext(std::string id,
+                                           const DispatchContextConfig& config,
+                                           DispatchPushConstantsBuilder builder)
     -> Handle<DispatchContext> {
   const auto handle = dispatchHandleGenerator.requestHandle();
 
-  dispatchContextMap.emplace(handle, std::make_unique<DispatchContext>(config, bufferSystem));
+  dispatchContextMap.emplace(
+      handle,
+      std::make_unique<DispatchContext>(config, bufferSystem, std::move(builder)));
 
   dispatchContextIdMap.emplace(id, handle);
 

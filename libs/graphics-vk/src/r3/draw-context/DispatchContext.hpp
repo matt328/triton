@@ -3,19 +3,16 @@
 #include "bk/Handle.hpp"
 #include "buffers/ManagedBuffer.hpp"
 #include "r3/draw-context/PushConstantBlob.hpp"
+#include "r3/draw-context/PushConstantBuilders.hpp"
 
 namespace tr {
 
 struct DispatchContextConfig;
 class Frame;
 
-using DispatchPushConstantBuilder =
-    std::function<PushConstantBlob(const DispatchContextConfig&, const Frame&)>;
-
 struct DispatchContextConfig {
   std::vector<LogicalHandle<ManagedBuffer>> logicalBuffers;
   std::vector<Handle<ManagedBuffer>> buffers;
-  DispatchPushConstantBuilder pushConstantBuilder;
 };
 
 class Frame;
@@ -23,7 +20,9 @@ class BufferSystem;
 
 class DispatchContext {
 public:
-  DispatchContext(DispatchContextConfig newConfig, std::shared_ptr<BufferSystem> newBufferSystem);
+  DispatchContext(DispatchContextConfig newConfig,
+                  std::shared_ptr<BufferSystem> newBufferSystem,
+                  DispatchPushConstantsBuilder&& builder);
   ~DispatchContext() = default;
 
   DispatchContext(const DispatchContext&) = default;
@@ -39,6 +38,7 @@ public:
 private:
   std::shared_ptr<BufferSystem> bufferSystem;
   DispatchContextConfig config;
+  DispatchPushConstantsBuilder pushConstantsBuilder;
 };
 
 }

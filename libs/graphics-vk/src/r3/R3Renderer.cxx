@@ -88,26 +88,27 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
                                              globalBuffers.geometryTexCoords,
                                              globalBuffers.geometryColors};
 
-  const DispatchPushConstantBuilder pushConstantBuilder =
-      [this](const DispatchContextConfig& config, const Frame& frame) -> PushConstantBlob {
+  auto* bs = bufferSystem.get();
+  const DispatchPushConstantsBuilder pushConstantBuilder =
+      [bs](const DispatchContextConfig& config, const Frame& frame) -> PushConstantBlob {
     auto pcBlob =
         PushConstantBlob{.data = {}, .stageFlags = vk::ShaderStageFlagBits::eCompute, .offset = 0};
 
     pcBlob.data.reserve(config.logicalBuffers.size() * 8);
 
     for (const auto& handle : config.logicalBuffers) {
-      auto address = bufferSystem->getBufferAddress(frame.getLogicalBuffer(handle));
-      // TODO(matt): handle inserting arbitrary data like objectCount
-      pcBlob.data.insert(pcBlob.data.end(), address, address + sizeof(address));
+      auto address = bs->getBufferAddress(frame.getLogicalBuffer(handle));
+      // TODO(matt) track number of objects per frame in the Frame
+      pcBlob.data.insert(pcBlob.data.end(), sizeof(uint32_t), 1);
+      pcBlob.data.insert(pcBlob.data.end(), sizeof(address), address);
     }
     return pcBlob;
   };
 
   drawContextFactory->createDispatchContext(
       CullingDispatchContextName,
-      DispatchContextConfig{.logicalBuffers = logicalBuffers,
-                            .buffers = buffers,
-                            .pushConstantBuilder = pushConstantBuilder});
+      DispatchContextConfig{.logicalBuffers = logicalBuffers, .buffers = buffers},
+      pushConstantBuilder);
 
   for (const auto& [contextId, passIds] : GraphicsMap) {
     for (const auto& passId : passIds) {
@@ -284,7 +285,7 @@ auto R3Renderer::createComputeCullingPass() -> void {
       PipelineLayoutInfo{.pushConstantInfoList = {PushConstantInfo{
                              .stageFlags = vk::ShaderStageFlagBits::eCompute,
                              .offset = 0,
-                             .size = 72, // TODO(matt) Figure out how to not hardcode this
+                             .size = 80, // TODO(matt) Figure out how to not hardcode this
                          }}};
 
   const auto shaderStageInfo = ShaderStageInfo{.stage = vk::ShaderStageFlagBits::eCompute,
