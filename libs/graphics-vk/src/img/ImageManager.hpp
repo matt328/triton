@@ -26,12 +26,14 @@ struct ImageUsageProfile {
 class Allocator;
 class IDebugManager;
 class Device;
+class IFrameManager;
 
 class ImageManager {
 public:
   ImageManager(std::shared_ptr<Allocator> newAllocator,
                std::shared_ptr<IDebugManager> newDebugManager,
-               std::shared_ptr<Device> newDevice);
+               std::shared_ptr<Device> newDevice,
+               std::shared_ptr<IFrameManager> newFrameManager);
   ~ImageManager();
 
   ImageManager(const ImageManager&) = delete;
@@ -39,13 +41,15 @@ public:
   auto operator=(const ImageManager&) -> ImageManager& = delete;
   auto operator=(ImageManager&&) -> ImageManager& = delete;
 
-  auto createImage(const ImageRequest& request) -> Handle<ManagedImage>;
+  auto createImage(ImageRequest request) -> Handle<ManagedImage>;
+  auto createPerFrameImage(ImageRequest request) -> LogicalHandle<ManagedImage>;
   auto getImage(Handle<ManagedImage> imageHandle) -> ManagedImage&;
 
 private:
   std::shared_ptr<Allocator> allocator;
   std::shared_ptr<IDebugManager> debugManager;
   std::shared_ptr<Device> device;
+  std::shared_ptr<IFrameManager> frameManager;
 
   HandleGenerator<ManagedImage> generator;
   std::unordered_map<Handle<ManagedImage>, std::unique_ptr<ManagedImage>> imageMap;

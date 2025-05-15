@@ -4,7 +4,6 @@
 #include "Frame.hpp"
 #include "Maths.hpp"
 #include "api/fx/Events.hpp"
-#include "img/ImageRegistry.hpp"
 #include "vk/core/Swapchain.hpp"
 
 namespace tr {
@@ -18,15 +17,13 @@ DefaultFrameManager::DefaultFrameManager(
     std::shared_ptr<Swapchain> newSwapchain,
     std::shared_ptr<VkResourceManager> newResourceManager,
     std::shared_ptr<IEventQueue> newEventQueue,
-    std::shared_ptr<IDebugManager> debugManager,
-    std::shared_ptr<ImageRegistry> newImageRegistry)
+    std::shared_ptr<IDebugManager> debugManager)
     : renderConfig{newRenderContextConfig},
       commandBufferManager{std::move(newCommandBufferManager)},
       device{std::move(newDevice)},
       swapchain{std::move(newSwapchain)},
       resourceManager{std::move(newResourceManager)},
       eventQueue{std::move(newEventQueue)},
-      imageRegistry{std::move(newImageRegistry)},
       currentFrame{0} {
 
   for (uint8_t i = 0; i < renderConfig.framesInFlight; ++i) {
@@ -63,8 +60,8 @@ DefaultFrameManager::~DefaultFrameManager() {
 }
 
 auto DefaultFrameManager::handleSwapchainResized(const SwapchainResized& event) -> void {
-  imageRegistry->swapchainResized(vk::Extent2D{.width = event.width, .height = event.height},
-                                  renderConfig.renderScale);
+  // imageRegistry->swapchainResized(vk::Extent2D{.width = event.width, .height = event.height},
+  //                                 renderConfig.renderScale);
 }
 
 auto DefaultFrameManager::acquireFrame() -> std::variant<Frame*, ImageAcquireResult> {

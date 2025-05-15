@@ -24,7 +24,9 @@
 #include "r3/draw-context/ContextFactory.hpp"
 #include "r3/draw-context/DispatchContext.hpp"
 #include "buffers/BufferSystem.hpp"
+#include "img/ImageManager.hpp"
 
+#define BOOST_DI_CFG_CTOR_LIMIT_SIZE 11
 #include <di.hpp>
 
 namespace di = boost::di;
@@ -84,8 +86,7 @@ auto GraphicsContext::create(std::shared_ptr<IEventQueue> newEventQueue,
                         di::bind<IFrameGraph>.to<DebugFrameGraph>(),
                         di::bind<PipelineFactory>.to<PipelineFactory>(),
                         di::bind<ImageManager>.to<ImageManager>(),
-                        di::bind<RenderPassFactory>.to<RenderPassFactory>(),
-                        di::bind<ImageRegistry>.to<ImageRegistry>());
+                        di::bind<RenderPassFactory>.to<RenderPassFactory>());
 
   return injector.create<std::shared_ptr<GraphicsContext>>();
 }

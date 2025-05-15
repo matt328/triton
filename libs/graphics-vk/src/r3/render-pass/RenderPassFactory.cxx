@@ -25,40 +25,38 @@ auto RenderPassFactory::createGraphicsPass(const GraphicsPassCreateInfo& createI
     -> std::unique_ptr<GraphicsPass> {
   Log.trace("RenderPassFactory::createGraphicsPass()");
 
-  auto formats = createInfo.colorAttachmentInfos |
-                 std::views::transform(&AttachmentCreateInfo::format) |
-                 std::ranges::to<std::vector<vk::Format>>();
+  auto colorFormats = std::vector<vk::Format>{};
+  std::optional<vk::Format> depthFormat = std::nullopt;
+  for (const auto& imageUsage : createInfo.outputs) {
+    if (imageUsage.accessFlags & vk::AccessFlagBits::eColorAttachmentWrite) {
+      colorFormats.push_back(imageUsage.imageFormat);
+    }
+    if (imageUsage.accessFlags & vk::AccessFlagBits::eDepthStencilAttachmentWrite) {
+      depthFormat = imageUsage.imageFormat;
+    }
+  }
 
-  const auto pipelineCreateInfo = PipelineCreateInfo{
-      .id = createInfo.id,
-      .pipelineType = PipelineType::Graphics,
-      .pipelineLayoutInfo = createInfo.pipelineLayoutInfo,
-      .colorAttachmentFormats = formats,
-      .depthAttachmentFormat = createInfo.depthAttachmentFormat.has_value()
-                                   ? std::optional{createInfo.depthAttachmentFormat->format}
-                                   : std::nullopt,
-      .shaderStageInfo = createInfo.shaderStageInfo};
+  const auto pipelineCreateInfo =
+      PipelineCreateInfo{.id = createInfo.id,
+                         .pipelineType = PipelineType::Graphics,
+                         .pipelineLayoutInfo = createInfo.pipelineLayoutInfo,
+                         .colorAttachmentFormats = colorFormats,
+                         .depthAttachmentFormat = depthFormat,
+                         .shaderStageInfo = createInfo.shaderStageInfo};
   auto [layout, pipeline] = pipelineFactory->createPipeline(pipelineCreateInfo);
 
+  // Extract color and depth attachment info
   auto colorAttachmentList = std::vector<AttachmentConfig>{};
-  colorAttachmentList.reserve(createInfo.colorAttachmentInfos.size());
-  for (const auto& info : createInfo.colorAttachmentInfos) {
-    const auto request = ImageRequest{
-        .logicalName = std::format("{}", createInfo.id),
-        .format = info.format,
-        .extent = createInfo.extent,
-        .usageFlags = vk::ImageUsageFlagBits::eColorAttachment,
-        .aspectFlags = vk::ImageAspectFlagBits::eColor,
-    };
-    const auto logicalHandle = imageHandleGenerator.requestLogicalHandle();
-    for (const auto& frame : frameManager->getFrames()) {
-      const auto handle = imageManager->createImage(request);
-      frame->addLogicalImage(logicalHandle, handle);
+  std::optional<AttachmentConfig> depthAttachmentConfig = std::nullopt;
+  for (const auto& imageUsageInfo : createInfo.outputs) {
+    if (imageUsageInfo.accessFlags & vk::AccessFlagBits::eColorAttachmentWrite) {
+      colorAttachmentList.push_back(
+          {.logicalImage = imageUsageInfo.imageHandle, .clearValue = imageUsageInfo.clearValue});
     }
-    colorAttachmentList.push_back({
-        .logicalImage = logicalHandle,
-        .clearValue = info.clearValue,
-    });
+    if (imageUsageInfo.accessFlags & vk::AccessFlagBits::eDepthStencilAttachmentWrite) {
+      depthAttachmentConfig = AttachmentConfig{.logicalImage = imageUsageInfo.imageHandle,
+                                               .clearValue = imageUsageInfo.clearValue};
+    }
   }
 
   auto config = GraphicsPassConfig{
@@ -66,6 +64,7 @@ auto RenderPassFactory::createGraphicsPass(const GraphicsPassCreateInfo& createI
       .pipeline = std::move(pipeline),
       .pipelineLayout = std::move(layout),
       .colorAttachmentConfigs = colorAttachmentList,
+      .depthAttachmentConfig = depthAttachmentConfig,
       .extent = createInfo.extent,
   };
 

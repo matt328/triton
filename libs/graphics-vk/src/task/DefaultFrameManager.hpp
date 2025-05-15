@@ -11,7 +11,6 @@ namespace tr {
 class CommandBufferManager;
 class Swapchain;
 class VkResourceManager;
-class ImageRegistry;
 class BufferRegistry;
 class IEventQueue;
 
@@ -23,8 +22,7 @@ public:
                                std::shared_ptr<Swapchain> newSwapchain,
                                std::shared_ptr<VkResourceManager> newResourceManager,
                                std::shared_ptr<IEventQueue> newEventQueue,
-                               std::shared_ptr<IDebugManager> debugManager,
-                               std::shared_ptr<ImageRegistry> newImageRegistry);
+                               std::shared_ptr<IDebugManager> debugManager);
   ~DefaultFrameManager() override;
 
   DefaultFrameManager(const DefaultFrameManager&) = delete;
@@ -43,7 +41,6 @@ private:
   std::shared_ptr<Swapchain> swapchain;
   std::shared_ptr<VkResourceManager> resourceManager;
   std::shared_ptr<IEventQueue> eventQueue;
-  std::shared_ptr<ImageRegistry> imageRegistry;
   std::shared_ptr<BufferRegistry> bufferRegistry;
 
   size_t currentFrame;

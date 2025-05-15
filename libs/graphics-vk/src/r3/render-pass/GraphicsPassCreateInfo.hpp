@@ -1,8 +1,19 @@
 #pragma once
 
+#include "bk/Handle.hpp"
+#include "img/ManagedImage.hpp"
 #include "r3/render-pass/PipelineCreateInfo.hpp"
 
 namespace tr {
+
+struct ImageUsageInfo {
+  LogicalHandle<ManagedImage> imageHandle;
+  vk::Format imageFormat;
+  vk::AccessFlags accessFlags;
+  vk::PipelineStageFlags stageFlags;
+  vk::ImageAspectFlags aspectFlags;
+  vk::ClearValue clearValue;
+};
 
 struct AttachmentCreateInfo {
   vk::Format format;
@@ -12,8 +23,10 @@ struct AttachmentCreateInfo {
 struct GraphicsPassCreateInfo {
   std::string id;
   PipelineLayoutInfo pipelineLayoutInfo;
-  std::vector<AttachmentCreateInfo> colorAttachmentInfos;
-  std::optional<AttachmentCreateInfo> depthAttachmentFormat = std::nullopt;
+
+  std::vector<ImageUsageInfo> inputs;
+  std::vector<ImageUsageInfo> outputs;
+
   std::vector<ShaderStageInfo> shaderStageInfo;
 
   vk::PrimitiveTopology topology = vk::PrimitiveTopology::eTriangleList;

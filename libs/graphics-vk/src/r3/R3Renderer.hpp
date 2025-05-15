@@ -33,6 +33,11 @@ struct GlobalBuffers {
   Handle<ManagedBuffer> geometryColors;
 };
 
+struct GlobalImages {
+  LogicalHandle<ManagedImage> forwardColorImage;
+  LogicalHandle<ManagedImage> forwardDepthImage;
+};
+
 class R3Renderer : public tr::IRenderContext {
 public:
   R3Renderer(RenderContextConfig newRenderConfig,
@@ -44,7 +49,8 @@ public:
              std::shared_ptr<CommandBufferManager> newCommandBufferManager,
              std::shared_ptr<BufferSystem> newBufferSystem,
              std::shared_ptr<ContextFactory> newDrawContextFactory,
-             std::shared_ptr<IStateBuffer> newStateBuffer);
+             std::shared_ptr<IStateBuffer> newStateBuffer,
+             std::shared_ptr<ImageManager> newImageManager);
   ~R3Renderer() override = default;
 
   R3Renderer(const R3Renderer&) = delete;
@@ -72,14 +78,17 @@ private:
   std::shared_ptr<BufferSystem> bufferSystem;
   std::shared_ptr<ContextFactory> drawContextFactory;
   std::shared_ptr<IStateBuffer> stateBuffer;
+  std::shared_ptr<ImageManager> imageManager;
 
   std::unordered_map<RenderPassType, GraphicsPass> renderPasses;
 
   std::vector<vk::CommandBuffer> buffers;
 
   GlobalBuffers globalBuffers{};
+  GlobalImages globalImages{};
 
   auto createGlobalBuffers() -> void;
+  auto createGlobalImages() -> void;
   auto createComputeCullingPass() -> void;
   auto createForwardRenderPass() -> void;
   auto createCompositionRenderPass() -> void;

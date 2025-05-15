@@ -15,7 +15,7 @@ GraphicsPass::GraphicsPass(GraphicsPassConfig&& config,
       .renderArea = vk::Rect2D{.offset = {.x = 0, .y = 0}, .extent = passConfig.extent},
       .layerCount = 1};
 
-  colorAttachmentInfo.reserve(passConfig.colorAttachmentConfigs.size());
+  colorAttachmentInfo.resize(passConfig.colorAttachmentConfigs.size());
   for (size_t i = 0; i < passConfig.colorAttachmentConfigs.size(); ++i) {
     const auto& attachmentConfig = passConfig.colorAttachmentConfigs[i];
     colorAttachmentInfo[i].setImageLayout(vk::ImageLayout::eColorAttachmentOptimal);

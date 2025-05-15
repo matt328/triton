@@ -5,6 +5,7 @@
 #include "gfx/IFrameGraph.hpp"
 #include "gfx/IFrameManager.hpp"
 #include "gfx/QueueTypes.hpp"
+#include "img/ImageManager.hpp"
 #include "r3/draw-context/ContextFactory.hpp"
 #include "r3/draw-context/DispatchContext.hpp"
 #include "r3/render-pass/ComputePass.hpp"
@@ -17,16 +18,16 @@
 namespace tr {
 
 constexpr std::string CullingPassId = "pass.culling";
-constexpr std::string ForwardId = "pass.forward";
+constexpr std::string ForwardPassId = "pass.forward";
 
-constexpr std::string CubeDrawContext = "context.cube";
-constexpr std::string CullingDispatchContext = "context.culling";
+constexpr std::string CubeDrawContextName = "context.cube";
+constexpr std::string CullingDispatchContextName = "context.culling";
 
 const std::unordered_map<std::string, std::vector<std::string>> GraphicsMap = {
-    {CubeDrawContext, {ForwardId}}};
+    {CubeDrawContextName, {ForwardPassId}}};
 
 const std::unordered_map<std::string, std::vector<std::string>> ComputeMap = {
-    {CullingDispatchContext, {CullingPassId}}};
+    {CullingDispatchContextName, {CullingPassId}}};
 
 R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
                        std::shared_ptr<IFrameManager> newFrameManager,
@@ -37,7 +38,8 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
                        std::shared_ptr<CommandBufferManager> newCommandBufferManager,
                        std::shared_ptr<BufferSystem> newBufferSystem,
                        std::shared_ptr<ContextFactory> newDrawContextFactory,
-                       std::shared_ptr<IStateBuffer> newStateBuffer)
+                       std::shared_ptr<IStateBuffer> newStateBuffer,
+                       std::shared_ptr<ImageManager> newImageManager)
     : rendererConfig{newRenderConfig},
       frameManager{std::move(newFrameManager)},
       graphicsQueue{std::move(newGraphicsQueue)},
@@ -47,7 +49,8 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
       commandBufferManager{std::move(newCommandBufferManager)},
       bufferSystem{std::move(newBufferSystem)},
       drawContextFactory{std::move(newDrawContextFactory)},
-      stateBuffer{std::move(newStateBuffer)} {
+      stateBuffer{std::move(newStateBuffer)},
+      imageManager{std::move(newImageManager)} {
 
   /*
     TODO(matt): createComputeCullingPass()
@@ -61,17 +64,18 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
     - todo tomorrow
   */
   createGlobalBuffers();
+  createGlobalImages();
   createComputeCullingPass();
   createForwardRenderPass();
   // createCompositionRenderPass();
 
   drawContextFactory->createDrawContext(
-      CubeDrawContext,
+      CubeDrawContextName,
       DrawContextConfig{.logicalBuffers = {},
                         .indirectBuffer = globalBuffers.drawCommands,
                         .countBuffer = globalBuffers.drawCounts,
                         .indirectMetadata = IndirectMetadata{}});
-  drawContextFactory->createDispatchContext(CullingDispatchContext,
+  drawContextFactory->createDispatchContext(CullingDispatchContextName,
                                             DispatchContextConfig{.logicalBuffers = {}});
 
   for (const auto& [contextId, passIds] : GraphicsMap) {
@@ -123,6 +127,16 @@ auto R3Renderer::createGlobalBuffers() -> void {
       bufferSystem->registerBuffer(BufferCreateInfo{.bufferType = BufferType::DeviceArena,
                                                     .itemStride = sizeof(glm::vec4),
                                                     .debugName = "GeometryColors"});
+}
+
+auto R3Renderer::createGlobalImages() -> void {
+  globalImages.forwardColorImage = imageManager->createPerFrameImage(ImageRequest{
+      .logicalName = "forward",
+      .format = vk::Format::eR16G16B16A16Sfloat,
+      .extent = vk::Extent2D{.width = rendererConfig.initialWidth,
+                             .height = rendererConfig.initialHeight},
+      .usageFlags = vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled,
+      .aspectFlags = vk::ImageAspectFlagBits::eColor});
 }
 
 auto R3Renderer::registerRenderable([[maybe_unused]] const RenderableData& data)
@@ -253,11 +267,6 @@ auto R3Renderer::createComputeCullingPass() -> void {
 }
 
 auto R3Renderer::createForwardRenderPass() -> void {
-  auto colorAttachmentInfo = AttachmentCreateInfo{
-      .format = vk::Format::eR16G16B16A16Sfloat,
-      .clearValue = vk::ClearValue{
-          .color = vk::ClearColorValue{std::array<float, 4>{0.392f, 0.584f, 0.929f, 1.0f}}}};
-
   const auto vertexStage = ShaderStageInfo{
       .stage = vk::ShaderStageFlagBits::eVertex,
       .shaderFile = SHADER_ROOT / "static.vert.spv",
@@ -276,7 +285,17 @@ auto R3Renderer::createForwardRenderPass() -> void {
                                                    .stageFlags = vk::ShaderStageFlagBits::eVertex,
                                                    .offset = 0,
                                                    .size = 36}}}, // TODO(matt): Fix this
-      .colorAttachmentInfos = {colorAttachmentInfo},
+      .inputs = {},
+      .outputs = {ImageUsageInfo{
+          .imageHandle = globalImages.forwardColorImage,
+          .imageFormat = vk::Format::eR16G16B16A16Sfloat,
+          .accessFlags = vk::AccessFlagBits::eColorAttachmentWrite,
+          .stageFlags = vk::PipelineStageFlagBits::eColorAttachmentOutput,
+          .aspectFlags = vk::ImageAspectFlagBits::eColor,
+          .clearValue =
+              vk::ClearValue{
+                  .color =
+                      vk::ClearColorValue{std::array<float, 4>{0.392f, 0.584f, 0.929f, 1.0f}}}}},
       .shaderStageInfo = {vertexStage, fragmentStage},
       .extent = vk::Extent2D{.width = rendererConfig.initialWidth,
                              .height = rendererConfig.initialHeight}};
@@ -296,7 +315,7 @@ auto R3Renderer::createForwardRenderPass() -> void {
 
   commandBufferManager->allocateCommandBuffers(commandBufferInfo);
 
-  frameGraph->addPass(std::move(forwardPass), PassGraphInfo{.id = ForwardId});
+  frameGraph->addPass(std::move(forwardPass), PassGraphInfo{.id = ForwardPassId});
 }
 
 auto R3Renderer::createCompositionRenderPass() -> void {
@@ -320,7 +339,8 @@ auto R3Renderer::createCompositionRenderPass() -> void {
   const auto compositionPassCreateInfo =
       GraphicsPassCreateInfo{.id = "composition",
                              .pipelineLayoutInfo = PipelineLayoutInfo{},
-                             .colorAttachmentInfos = {colorAttachmentInfo},
+                             .inputs = {},
+                             .outputs = {},
                              .shaderStageInfo = {vertexStage, fragmentStage},
                              .extent = vk::Extent2D{.width = rendererConfig.initialWidth,
                                                     .height = rendererConfig.initialHeight}};
