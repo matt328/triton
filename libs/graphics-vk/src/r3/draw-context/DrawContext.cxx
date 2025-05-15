@@ -27,6 +27,7 @@ auto DrawContext::bind(const Frame* frame,
       .layout = layout,
       .stageFlags = pcBlob.stageFlags,
       .offset = pcBlob.offset,
+      .size = static_cast<uint32_t>(pcBlob.data.size() * sizeof(uint8_t)),
       .pValues = pcBlob.data.data(),
   };
   commandBuffer.pushConstants2(pushConstantInfo);

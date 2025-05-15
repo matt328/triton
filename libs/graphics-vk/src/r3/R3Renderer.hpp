@@ -29,7 +29,10 @@ struct GlobalBuffers {
   LogicalHandle<ManagedBuffer> drawMetadata;
   LogicalHandle<ManagedBuffer> objectData;
   Handle<ManagedBuffer> geometryEntry;
+  Handle<ManagedBuffer> geometryIndices;
   Handle<ManagedBuffer> geometryPositions;
+  Handle<ManagedBuffer> geometryNormals;
+  Handle<ManagedBuffer> geometryTexCoords;
   Handle<ManagedBuffer> geometryColors;
 };
 

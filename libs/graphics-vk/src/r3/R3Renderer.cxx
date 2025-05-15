@@ -8,6 +8,7 @@
 #include "img/ImageManager.hpp"
 #include "r3/draw-context/ContextFactory.hpp"
 #include "r3/draw-context/DispatchContext.hpp"
+#include "r3/draw-context/PushConstantBlob.hpp"
 #include "r3/render-pass/ComputePass.hpp"
 #include "r3/render-pass/RenderPassFactory.hpp"
 #include "task/Frame.hpp"
@@ -72,11 +73,41 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
   drawContextFactory->createDrawContext(
       CubeDrawContextName,
       DrawContextConfig{.logicalBuffers = {},
+                        .buffers = {},
                         .indirectBuffer = globalBuffers.drawCommands,
                         .countBuffer = globalBuffers.drawCounts,
                         .indirectMetadata = IndirectMetadata{}});
-  drawContextFactory->createDispatchContext(CullingDispatchContextName,
-                                            DispatchContextConfig{.logicalBuffers = {}});
+
+  std::vector<LogicalHandle<ManagedBuffer>> logicalBuffers{globalBuffers.objectData,
+                                                           globalBuffers.drawCommands,
+                                                           globalBuffers.drawCounts};
+  std::vector<Handle<ManagedBuffer>> buffers{globalBuffers.geometryEntry,
+                                             globalBuffers.geometryIndices,
+                                             globalBuffers.geometryPositions,
+                                             globalBuffers.geometryNormals,
+                                             globalBuffers.geometryTexCoords,
+                                             globalBuffers.geometryColors};
+
+  const DispatchPushConstantBuilder pushConstantBuilder =
+      [this](const DispatchContextConfig& config, const Frame& frame) -> PushConstantBlob {
+    auto pcBlob =
+        PushConstantBlob{.data = {}, .stageFlags = vk::ShaderStageFlagBits::eCompute, .offset = 0};
+
+    pcBlob.data.reserve(config.logicalBuffers.size() * 8);
+
+    for (const auto& handle : config.logicalBuffers) {
+      auto address = bufferSystem->getBufferAddress(frame.getLogicalBuffer(handle));
+      // TODO(matt): handle inserting arbitrary data like objectCount
+      pcBlob.data.insert(pcBlob.data.end(), address, address + sizeof(address));
+    }
+    return pcBlob;
+  };
+
+  drawContextFactory->createDispatchContext(
+      CullingDispatchContextName,
+      DispatchContextConfig{.logicalBuffers = logicalBuffers,
+                            .buffers = buffers,
+                            .pushConstantBuilder = pushConstantBuilder});
 
   for (const auto& [contextId, passIds] : GraphicsMap) {
     for (const auto& passId : passIds) {
@@ -118,11 +149,24 @@ auto R3Renderer::createGlobalBuffers() -> void {
                                                     .itemStride = sizeof(GpuGeometryRegionData),
                                                     .debugName = "GeometryEntry"});
 
+  globalBuffers.geometryIndices =
+      bufferSystem->registerBuffer(BufferCreateInfo{.bufferType = BufferType::DeviceArena,
+                                                    .itemStride = sizeof(uint32_t),
+                                                    .debugName = "GeometryIndex"});
+
   globalBuffers.geometryPositions =
       bufferSystem->registerBuffer(BufferCreateInfo{.bufferType = BufferType::DeviceArena,
                                                     .itemStride = sizeof(glm::vec3),
                                                     .debugName = "GeometryPosition"});
 
+  globalBuffers.geometryNormals =
+      bufferSystem->registerBuffer(BufferCreateInfo{.bufferType = BufferType::DeviceArena,
+                                                    .itemStride = sizeof(glm::vec3),
+                                                    .debugName = "GeometryNormal"});
+  globalBuffers.geometryTexCoords =
+      bufferSystem->registerBuffer(BufferCreateInfo{.bufferType = BufferType::DeviceArena,
+                                                    .itemStride = sizeof(glm::vec2),
+                                                    .debugName = "GeometryTexCoords"});
   globalBuffers.geometryColors =
       bufferSystem->registerBuffer(BufferCreateInfo{.bufferType = BufferType::DeviceArena,
                                                     .itemStride = sizeof(glm::vec4),
@@ -240,27 +284,29 @@ auto R3Renderer::createComputeCullingPass() -> void {
       PipelineLayoutInfo{.pushConstantInfoList = {PushConstantInfo{
                              .stageFlags = vk::ShaderStageFlagBits::eCompute,
                              .offset = 0,
-                             .size = sizeof(ComputePushConstants),
+                             .size = 72, // TODO(matt) Figure out how to not hardcode this
                          }}};
 
-  const auto cullingPassInfo = ComputePassCreateInfo{
-      .id = "culling",
-      .pipelineLayoutInfo = pipelineLayoutInfo,
-      .shaderStageInfo = ShaderStageInfo{.stage = vk::ShaderStageFlagBits::eCompute,
-                                         .shaderFile = SHADER_ROOT / "compute2.comp.spv",
-                                         .entryPoint = "main"}};
+  const auto shaderStageInfo = ShaderStageInfo{.stage = vk::ShaderStageFlagBits::eCompute,
+                                               .shaderFile = SHADER_ROOT / "compute2.comp.spv",
+                                               .entryPoint = "main"};
+
+  const auto cullingPassInfo = ComputePassCreateInfo{.id = "culling",
+                                                     .pipelineLayoutInfo = pipelineLayoutInfo,
+                                                     .shaderStageInfo = shaderStageInfo};
+
   auto cullingPass = renderPassFactory->createComputePass(cullingPassInfo);
 
-  auto uses = std::vector<CommandBufferUse>{};
+  auto cmdBufferUses = std::vector<CommandBufferUse>{};
 
   for (const auto& frame : frameManager->getFrames()) {
-    uses.emplace_back(CommandBufferUse{.threadId = std::this_thread::get_id(),
-                                       .frameId = frame->getIndex(),
-                                       .passId = cullingPass->getId()});
+    cmdBufferUses.emplace_back(CommandBufferUse{.threadId = std::this_thread::get_id(),
+                                                .frameId = frame->getIndex(),
+                                                .passId = cullingPass->getId()});
   }
 
   const auto commandBufferInfo = CommandBufferInfo{
-      .queueConfigs = {QueueConfig{.queueType = QueueType::Compute, .uses = uses}}};
+      .queueConfigs = {QueueConfig{.queueType = QueueType::Compute, .uses = cmdBufferUses}}};
   commandBufferManager->allocateCommandBuffers(commandBufferInfo);
 
   frameGraph->addPass(std::move(cullingPass), PassGraphInfo{.id = CullingPassId});
@@ -279,39 +325,44 @@ auto R3Renderer::createForwardRenderPass() -> void {
       .entryPoint = "main",
   };
 
-  const auto forwardPassCreateInfo = GraphicsPassCreateInfo{
-      .id = "forward",
-      .pipelineLayoutInfo = PipelineLayoutInfo{.pushConstantInfoList = {PushConstantInfo{
-                                                   .stageFlags = vk::ShaderStageFlagBits::eVertex,
-                                                   .offset = 0,
-                                                   .size = 36}}}, // TODO(matt): Fix this
-      .inputs = {},
-      .outputs = {ImageUsageInfo{
-          .imageHandle = globalImages.forwardColorImage,
-          .imageFormat = vk::Format::eR16G16B16A16Sfloat,
-          .accessFlags = vk::AccessFlagBits::eColorAttachmentWrite,
-          .stageFlags = vk::PipelineStageFlagBits::eColorAttachmentOutput,
-          .aspectFlags = vk::ImageAspectFlagBits::eColor,
-          .clearValue =
-              vk::ClearValue{
-                  .color =
-                      vk::ClearColorValue{std::array<float, 4>{0.392f, 0.584f, 0.929f, 1.0f}}}}},
-      .shaderStageInfo = {vertexStage, fragmentStage},
-      .extent = vk::Extent2D{.width = rendererConfig.initialWidth,
-                             .height = rendererConfig.initialHeight}};
+  const auto pipelineLayoutInfo =
+      PipelineLayoutInfo{.pushConstantInfoList = {PushConstantInfo{
+                             .stageFlags = vk::ShaderStageFlagBits::eVertex,
+                             .offset = 0,
+                             .size = 36}}}; // TODO(matt): size shouldn't be hardcoded
+
+  const auto colorImageInfo = ImageUsageInfo{
+      .imageHandle = globalImages.forwardColorImage,
+      .imageFormat = vk::Format::eR16G16B16A16Sfloat,
+      .accessFlags = vk::AccessFlagBits::eColorAttachmentWrite,
+      .stageFlags = vk::PipelineStageFlagBits::eColorAttachmentOutput,
+      .aspectFlags = vk::ImageAspectFlagBits::eColor,
+      .clearValue = vk::ClearValue{
+          .color = vk::ClearColorValue{std::array<float, 4>{0.392f, 0.584f, 0.929f, 1.0f}}}};
+
+  const auto extent =
+      vk::Extent2D{.width = rendererConfig.initialWidth, .height = rendererConfig.initialHeight};
+
+  const auto forwardPassCreateInfo =
+      GraphicsPassCreateInfo{.id = "forward",
+                             .pipelineLayoutInfo = pipelineLayoutInfo,
+                             .inputs = {},
+                             .outputs = {colorImageInfo},
+                             .shaderStageInfo = {vertexStage, fragmentStage},
+                             .extent = extent};
 
   auto forwardPass = renderPassFactory->createGraphicsPass(forwardPassCreateInfo);
 
-  std::vector<CommandBufferUse> uses{};
+  std::vector<CommandBufferUse> cmdBufferUses{};
 
   for (const auto& frame : frameManager->getFrames()) {
-    uses.emplace_back(CommandBufferUse{.threadId = std::this_thread::get_id(),
-                                       .frameId = frame->getIndex(),
-                                       .passId = forwardPass->getId()});
+    cmdBufferUses.emplace_back(CommandBufferUse{.threadId = std::this_thread::get_id(),
+                                                .frameId = frame->getIndex(),
+                                                .passId = forwardPass->getId()});
   }
 
   const auto commandBufferInfo = CommandBufferInfo{
-      .queueConfigs = {QueueConfig{.queueType = QueueType::Graphics, .uses = uses}}};
+      .queueConfigs = {QueueConfig{.queueType = QueueType::Graphics, .uses = cmdBufferUses}}};
 
   commandBufferManager->allocateCommandBuffers(commandBufferInfo);
 
@@ -347,20 +398,19 @@ auto R3Renderer::createCompositionRenderPass() -> void {
 
   auto compositionPass = renderPassFactory->createGraphicsPass(compositionPassCreateInfo);
 
-  std::vector<CommandBufferUse> uses{};
+  std::vector<CommandBufferUse> cmdBufferUses{};
 
   for (const auto& frame : frameManager->getFrames()) {
-    uses.emplace_back(CommandBufferUse{.threadId = std::this_thread::get_id(),
-                                       .frameId = frame->getIndex(),
-                                       .passId = compositionPass->getId()});
+    cmdBufferUses.emplace_back(CommandBufferUse{.threadId = std::this_thread::get_id(),
+                                                .frameId = frame->getIndex(),
+                                                .passId = compositionPass->getId()});
   }
 
   const auto commandBufferInfo = CommandBufferInfo{
-      .queueConfigs = {QueueConfig{.queueType = QueueType::Graphics, .uses = uses}}};
+      .queueConfigs = {QueueConfig{.queueType = QueueType::Graphics, .uses = cmdBufferUses}}};
 
   commandBufferManager->allocateCommandBuffers(commandBufferInfo);
 
   frameGraph->addPass(std::move(compositionPass), PassGraphInfo{.id = CullingPassId});
 }
-
 }

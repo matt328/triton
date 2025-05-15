@@ -12,6 +12,7 @@ struct IndirectMetadata {
 
 struct DrawContextConfig {
   std::vector<LogicalHandle<ManagedBuffer>> logicalBuffers;
+  std::vector<LogicalHandle<ManagedBuffer>> buffers;
   LogicalHandle<ManagedBuffer> indirectBuffer;
   LogicalHandle<ManagedBuffer> countBuffer;
   IndirectMetadata indirectMetadata;

@@ -2,11 +2,20 @@
 
 #include "bk/Handle.hpp"
 #include "buffers/ManagedBuffer.hpp"
+#include "r3/draw-context/PushConstantBlob.hpp"
 
 namespace tr {
 
+struct DispatchContextConfig;
+class Frame;
+
+using DispatchPushConstantBuilder =
+    std::function<PushConstantBlob(const DispatchContextConfig&, const Frame&)>;
+
 struct DispatchContextConfig {
   std::vector<LogicalHandle<ManagedBuffer>> logicalBuffers;
+  std::vector<Handle<ManagedBuffer>> buffers;
+  DispatchPushConstantBuilder pushConstantBuilder;
 };
 
 class Frame;
