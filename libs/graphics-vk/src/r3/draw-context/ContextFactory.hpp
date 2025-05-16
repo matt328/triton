@@ -30,7 +30,7 @@ public:
 
   auto createDispatchContext(std::string id,
                              const DispatchContextConfig& config,
-                             DispatchPushConstantsBuilder builder) -> Handle<DispatchContext>;
+                             DispatchBinder builder) -> Handle<DispatchContext>;
   auto getDispatchContextHandle(const std::string& id) -> Handle<DispatchContext>;
   auto getDispatchContext(const Handle<DispatchContext>& handle)
       -> std::unique_ptr<DispatchContext>&;

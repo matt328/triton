@@ -108,8 +108,8 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
                                              globalBuffers.geometryColors};
 
   auto* bs = bufferSystem.get();
-  const DispatchPushConstantsBuilder pushConstantBuilder =
-      [bs](const DispatchContextConfig& config, const Frame& frame) -> PushConstantBlob {
+  const DispatchBinder pushConstantBuilder = [bs](const DispatchContextConfig& config,
+                                                  const Frame& frame) -> PushConstantBlob {
     auto pcBlob =
         PushConstantBlob{.data = {}, .stageFlags = vk::ShaderStageFlagBits::eCompute, .offset = 0};
 

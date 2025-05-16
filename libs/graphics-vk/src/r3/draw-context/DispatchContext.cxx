@@ -7,7 +7,7 @@ namespace tr {
 
 DispatchContext::DispatchContext(DispatchContextConfig newConfig,
                                  std::shared_ptr<BufferSystem> newBufferSystem,
-                                 DispatchPushConstantsBuilder&& builder)
+                                 DispatchBinder&& builder)
     : bufferSystem{std::move(newBufferSystem)},
       config{std::move(newConfig)},
       pushConstantsBuilder{std::move(builder)} {

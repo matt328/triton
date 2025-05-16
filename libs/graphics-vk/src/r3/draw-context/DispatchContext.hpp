@@ -21,7 +21,7 @@ class DispatchContext {
 public:
   DispatchContext(DispatchContextConfig newConfig,
                   std::shared_ptr<BufferSystem> newBufferSystem,
-                  DispatchPushConstantsBuilder&& builder);
+                  DispatchBinder&& builder);
   ~DispatchContext() = default;
 
   DispatchContext(const DispatchContext&) = default;
@@ -37,7 +37,7 @@ public:
 private:
   std::shared_ptr<BufferSystem> bufferSystem;
   DispatchContextConfig config;
-  DispatchPushConstantsBuilder pushConstantsBuilder;
+  DispatchBinder pushConstantsBuilder;
 };
 
 }

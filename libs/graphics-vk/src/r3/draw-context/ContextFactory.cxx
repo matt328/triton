@@ -34,8 +34,7 @@ auto ContextFactory::getDrawContext(const Handle<DrawContext>& handle)
 
 auto ContextFactory::createDispatchContext(std::string id,
                                            const DispatchContextConfig& config,
-                                           DispatchPushConstantsBuilder builder)
-    -> Handle<DispatchContext> {
+                                           DispatchBinder builder) -> Handle<DispatchContext> {
   const auto handle = dispatchHandleGenerator.requestHandle();
 
   dispatchContextMap.emplace(
