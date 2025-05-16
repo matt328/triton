@@ -94,9 +94,8 @@ auto BufferSystem::removeData(Handle<ManagedBuffer> handle, const BufferRegion& 
 
 auto BufferSystem::fromCreateInfo(const BufferCreateInfo& createInfo)
     -> std::tuple<vk::BufferCreateInfo, vma::AllocationCreateInfo> {
-  auto bci = vk::BufferCreateInfo{
-      .size = createInfo.initialSize,
-  };
+  auto bci = vk::BufferCreateInfo{.size = createInfo.initialSize,
+                                  .usage = vk::BufferUsageFlagBits::eShaderDeviceAddress};
   auto aci = vma::AllocationCreateInfo{};
 
   switch (createInfo.bufferUsage) {
@@ -117,14 +116,17 @@ auto BufferSystem::fromCreateInfo(const BufferCreateInfo& createInfo)
     aci.setUsage(vma::MemoryUsage::eGpuOnly);
     aci.setRequiredFlags(vk::MemoryPropertyFlagBits::eDeviceLocal);
   } else if (createInfo.bufferType == BufferType::IndirectCommand) {
-    bci.usage |=
-        vk::BufferUsageFlagBits::eShaderDeviceAddress | vk::BufferUsageFlagBits::eIndirectBuffer;
+    bci.usage |= vk::BufferUsageFlagBits::eShaderDeviceAddress;
     aci.setUsage(vma::MemoryUsage::eGpuOnly);
     aci.setRequiredFlags(vk::MemoryPropertyFlagBits::eDeviceLocal);
   } else if (createInfo.bufferType == BufferType::HostTransient) {
     bci.usage |= vk::BufferUsageFlagBits::eShaderDeviceAddress;
     aci.setUsage(vma::MemoryUsage::eCpuToGpu);
     aci.setRequiredFlags(vk::MemoryPropertyFlagBits::eHostCoherent);
+  }
+
+  if (createInfo.indirect) {
+    bci.usage |= vk::BufferUsageFlagBits::eIndirectBuffer;
   }
 
   return {bci, aci};

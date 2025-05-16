@@ -2,7 +2,6 @@
 
 #include "bk/Handle.hpp"
 #include "buffers/ManagedBuffer.hpp"
-#include "r3/draw-context/PushConstantBlob.hpp"
 #include "r3/draw-context/PushConstantBuilders.hpp"
 
 namespace tr {

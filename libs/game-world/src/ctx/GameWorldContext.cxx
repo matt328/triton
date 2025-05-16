@@ -24,6 +24,7 @@ auto GameWorldContext::create(std::shared_ptr<IEventQueue> newEventQueue)
 }
 
 auto GameWorldContext::run() -> void {
+  Log.trace("Starting GameworldContext");
   using clock = std::chrono::steady_clock;
   constexpr int targetHz = 240;
   constexpr auto timestep = std::chrono::nanoseconds(1'000'000'000 / targetHz);

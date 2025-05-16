@@ -5,8 +5,12 @@
 namespace tr {
 
 struct DispatchContextConfig;
+struct DrawContextConfig;
 class Frame;
 
 using DispatchPushConstantsBuilder =
     std::function<PushConstantBlob(const DispatchContextConfig&, const Frame&)>;
+
+using DrawPushConstantsBuilder =
+    std::function<PushConstantBlob(const DrawContextConfig&, const Frame&)>;
 }

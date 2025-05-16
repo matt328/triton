@@ -20,5 +20,6 @@ struct BufferCreateInfo {
   size_t initialSize = 1024;
   size_t itemStride = 0;
   std::string debugName;
+  bool indirect{false};
 };
 }

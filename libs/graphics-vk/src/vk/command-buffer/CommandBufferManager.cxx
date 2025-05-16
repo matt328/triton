@@ -43,7 +43,7 @@ auto CommandBufferManager::allocateCommandBuffers(const CommandBufferInfo& info)
     for (const auto& use : queueConfig.uses) {
       const auto poolKey = PoolKey{.threadId = use.threadId,
                                    .frameId = use.frameId,
-                                   .queueType = QueueType::Graphics};
+                                   .queueType = queueConfig.queueType};
 
       if (createdPools.insert(poolKey).second) {
         const auto poolCreateInfo = vk::CommandPoolCreateInfo{

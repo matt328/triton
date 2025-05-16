@@ -8,11 +8,13 @@ ContextFactory::ContextFactory(std::shared_ptr<BufferSystem> newBufferSystem)
     : bufferSystem{std::move(newBufferSystem)} {
 }
 
-auto ContextFactory::createDrawContext(std::string id, const DrawContextConfig& config)
-    -> Handle<DrawContext> {
+auto ContextFactory::createDrawContext(std::string id,
+                                       const DrawContextConfig& config,
+                                       DrawPushConstantsBuilder builder) -> Handle<DrawContext> {
   const auto handle = drawHandleGenerator.requestHandle();
 
-  drawContextMap.emplace(handle, std::make_unique<DrawContext>(config, bufferSystem));
+  drawContextMap.emplace(handle,
+                         std::make_unique<DrawContext>(config, bufferSystem, std::move(builder)));
 
   drawContextIdMap.emplace(id, handle);
 

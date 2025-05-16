@@ -5,23 +5,18 @@
 
 namespace tr {
 
-DrawContext::DrawContext(DrawContextConfig config, std::shared_ptr<BufferSystem> newBufferSystem)
-    : bufferSystem{std::move(newBufferSystem)}, config{std::move(config)} {
+DrawContext::DrawContext(DrawContextConfig config,
+                         std::shared_ptr<BufferSystem> newBufferSystem,
+                         DrawPushConstantsBuilder&& builder)
+    : bufferSystem{std::move(newBufferSystem)},
+      config{std::move(config)},
+      pushConstantsBuilder{std::move(builder)} {
 }
 
 auto DrawContext::bind(const Frame* frame,
                        vk::raii::CommandBuffer& commandBuffer,
                        vk::raii::PipelineLayout& layout) -> void {
-  auto pcBlob = PushConstantBlob{
-      .data = {},
-      .stageFlags = vk::ShaderStageFlagBits::eVertex,
-      .offset = 0,
-  };
-  pcBlob.data.reserve(config.logicalBuffers.size() * 8);
-  for (const auto& handle : config.logicalBuffers) {
-    auto address = bufferSystem->getBufferAddress(frame->getLogicalBuffer(handle));
-    pcBlob.data.insert(pcBlob.data.end(), address, address + sizeof(address));
-  }
+  auto pcBlob = pushConstantsBuilder(config, *frame);
 
   const auto pushConstantInfo = vk::PushConstantsInfo{
       .layout = layout,
@@ -38,12 +33,16 @@ auto DrawContext::record(const Frame* frame, vk::raii::CommandBuffer& commandBuf
   const auto indirectBuffer = bufferSystem->getVkBuffer(indirectBufferHandle);
   const auto countBuffer = bufferSystem->getVkBuffer(frame->getLogicalBuffer(config.countBuffer));
 
-  commandBuffer.drawIndexedIndirectCount(indirectBuffer,
-                                         config.indirectMetadata.indirectOffset,
-                                         countBuffer,
-                                         config.indirectMetadata.countOffset,
-                                         1024,
-                                         sizeof(vk::DrawIndexedIndirectCommand));
+  commandBuffer.setViewportWithCount({config.viewport});
+  commandBuffer.setScissorWithCount({config.scissor});
+
+  commandBuffer.drawIndirectCount(
+      indirectBuffer,
+      config.indirectMetadata.indirectOffset,
+      countBuffer,
+      config.indirectMetadata.countOffset,
+      128, // TODO(matt) calculate and set the max number of objects on the frame
+      sizeof(vk::DrawIndexedIndirectCommand));
 }
 
 auto DrawContext::updateIndirectMetadata(const IndirectMetadata& data) -> void {

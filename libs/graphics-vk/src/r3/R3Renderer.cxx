@@ -70,13 +70,32 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
   createForwardRenderPass();
   // createCompositionRenderPass();
 
+  const DrawPushConstantsBuilder drawPushConstantsBuilder =
+      [this](const DrawContextConfig& config, const Frame& frame) -> PushConstantBlob {
+    auto pcBlob =
+        PushConstantBlob{.data = {}, .stageFlags = vk::ShaderStageFlagBits::eVertex, .offset = 0};
+    pcBlob.data.insert(pcBlob.data.end(), sizeof(uint32_t), 1);
+    return pcBlob;
+  };
+
+  const auto viewport = vk::Viewport{.width = static_cast<float>(rendererConfig.initialWidth),
+                                     .height = static_cast<float>(rendererConfig.initialHeight),
+                                     .minDepth = 0.f,
+                                     .maxDepth = 1.f};
+  const auto scissor = vk::Rect2D{.offset = vk::Offset2D{.x = 0, .y = 0},
+                                  .extent = vk::Extent2D{.width = rendererConfig.initialWidth,
+                                                         .height = rendererConfig.initialHeight}};
+
   drawContextFactory->createDrawContext(
       CubeDrawContextName,
       DrawContextConfig{.logicalBuffers = {},
                         .buffers = {},
                         .indirectBuffer = globalBuffers.drawCommands,
                         .countBuffer = globalBuffers.drawCounts,
-                        .indirectMetadata = IndirectMetadata{}});
+                        .indirectMetadata = IndirectMetadata{},
+                        .viewport = viewport,
+                        .scissor = scissor},
+      drawPushConstantsBuilder);
 
   std::vector<LogicalHandle<ManagedBuffer>> logicalBuffers{globalBuffers.objectData,
                                                            globalBuffers.drawCommands,
@@ -96,10 +115,10 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
 
     pcBlob.data.reserve(config.logicalBuffers.size() * 8);
 
+    // TODO(matt) track number of objects per frame in the Frame
+    pcBlob.data.insert(pcBlob.data.end(), sizeof(uint32_t), 1);
     for (const auto& handle : config.logicalBuffers) {
       auto address = bs->getBufferAddress(frame.getLogicalBuffer(handle));
-      // TODO(matt) track number of objects per frame in the Frame
-      pcBlob.data.insert(pcBlob.data.end(), sizeof(uint32_t), 1);
       pcBlob.data.insert(pcBlob.data.end(), sizeof(address), address);
     }
     return pcBlob;
@@ -128,13 +147,15 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
 auto R3Renderer::createGlobalBuffers() -> void {
   globalBuffers.drawCommands = bufferSystem->registerPerFrameBuffer(
       BufferCreateInfo{.bufferType = BufferType::IndirectCommand,
-                       .initialSize = 10240,
-                       .debugName = "DrawCommands"});
+                       .initialSize = 20480,
+                       .debugName = "DrawCommands",
+                       .indirect = true});
 
   globalBuffers.drawCounts =
       bufferSystem->registerPerFrameBuffer(BufferCreateInfo{.bufferType = BufferType::Device,
                                                             .initialSize = 64,
-                                                            .debugName = "DrawCounts"});
+                                                            .debugName = "DrawCounts",
+                                                            .indirect = true});
 
   // Specifies how the DIIC and DrawCounts buffers are sliced, providing maximum space as if all
   // renderables would be rendered this frame. Determines offset values for DIIC and DrawCounts

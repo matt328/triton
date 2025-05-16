@@ -22,7 +22,9 @@ public:
   auto operator=(const ContextFactory&) -> ContextFactory& = delete;
   auto operator=(ContextFactory&&) -> ContextFactory& = delete;
 
-  auto createDrawContext(std::string id, const DrawContextConfig& config) -> Handle<DrawContext>;
+  auto createDrawContext(std::string id,
+                         const DrawContextConfig& config,
+                         DrawPushConstantsBuilder builder) -> Handle<DrawContext>;
   auto getDrawContextHandle(const std::string& id) -> Handle<DrawContext>;
   auto getDrawContext(const Handle<DrawContext>& handle) -> std::unique_ptr<DrawContext>&;
 

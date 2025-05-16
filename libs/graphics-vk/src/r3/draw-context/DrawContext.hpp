@@ -2,6 +2,7 @@
 
 #include "bk/Handle.hpp"
 #include "buffers/ManagedBuffer.hpp"
+#include "r3/draw-context/PushConstantBuilders.hpp"
 
 namespace tr {
 
@@ -16,6 +17,8 @@ struct DrawContextConfig {
   LogicalHandle<ManagedBuffer> indirectBuffer;
   LogicalHandle<ManagedBuffer> countBuffer;
   IndirectMetadata indirectMetadata;
+  vk::Viewport viewport;
+  vk::Rect2D scissor;
 };
 
 class Frame;
@@ -23,7 +26,9 @@ class BufferSystem;
 
 class DrawContext {
 public:
-  DrawContext(DrawContextConfig config, std::shared_ptr<BufferSystem> newBufferSystem);
+  DrawContext(DrawContextConfig config,
+              std::shared_ptr<BufferSystem> newBufferSystem,
+              DrawPushConstantsBuilder&& builder);
   ~DrawContext() = default;
 
   DrawContext(const DrawContext&) = default;
@@ -41,6 +46,7 @@ public:
 private:
   std::shared_ptr<BufferSystem> bufferSystem;
   DrawContextConfig config;
+  DrawPushConstantsBuilder pushConstantsBuilder;
 };
 
 }
