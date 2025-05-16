@@ -6,9 +6,12 @@
 
 namespace tr {
 
+class Swapchain;
+
 class DebugFrameGraph : public IFrameGraph {
 public:
-  explicit DebugFrameGraph(std::shared_ptr<CommandBufferManager> newCommandBufferManager);
+  explicit DebugFrameGraph(std::shared_ptr<CommandBufferManager> newCommandBufferManager,
+                           std::shared_ptr<Swapchain> newSwapchain);
   ~DebugFrameGraph() override;
 
   DebugFrameGraph(const DebugFrameGraph&) = default;
@@ -29,6 +32,7 @@ public:
 
 private:
   std::shared_ptr<CommandBufferManager> commandBufferManager;
+  std::shared_ptr<Swapchain> swapchain;
 
   std::unordered_map<std::string, std::unique_ptr<ComputePass>> computePasses;
   std::unordered_map<std::string, std::unique_ptr<GraphicsPass>> graphicsPasses;

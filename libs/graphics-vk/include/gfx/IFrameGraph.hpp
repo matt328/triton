@@ -22,7 +22,7 @@ struct PassInfo {
 };
 
 struct FrameGraphResult {
-  std::vector<const vk::CommandBuffer*> commandBuffers;
+  std::vector<vk::CommandBuffer> commandBuffers;
 };
 
 class IFrameGraph {

@@ -53,8 +53,6 @@ auto GraphicsPass::execute(const Frame* frame, vk::raii::CommandBuffer& cmdBuffe
   renderingInfo.setColorAttachmentCount(colorAttachmentInfo.size());
   renderingInfo.setColorAttachments(colorAttachmentInfo);
 
-  cmdBuffer.begin(
-      vk::CommandBufferBeginInfo{.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse});
   cmdBuffer.beginRendering(renderingInfo);
   cmdBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, passConfig.pipeline);
 
@@ -65,7 +63,6 @@ auto GraphicsPass::execute(const Frame* frame, vk::raii::CommandBuffer& cmdBuffe
   }
 
   cmdBuffer.endRendering();
-  cmdBuffer.end();
 }
 
 auto GraphicsPass::registerDrawContext(Handle<DrawContext> handle) -> void {

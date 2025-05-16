@@ -114,9 +114,13 @@ auto PhysicalDevice::createDevice() -> std::unique_ptr<vk::raii::Device> {
 
   auto features2 = physicalDevice->getFeatures2<vk::PhysicalDeviceFeatures2,
                                                 vk::PhysicalDevice16BitStorageFeatures,
-                                                vk::PhysicalDeviceDescriptorIndexingFeaturesEXT>();
+                                                vk::PhysicalDeviceDescriptorIndexingFeaturesEXT,
+                                                vk::PhysicalDeviceSynchronization2Features>();
 
   auto indexingFeatures = features2.get<vk::PhysicalDeviceDescriptorIndexingFeatures>();
+
+  auto synchronization2Features = features2.get<vk::PhysicalDeviceSynchronization2Features>();
+  synchronization2Features.synchronization2 = VK_TRUE;
 
   auto drawParamsFeatures =
       vk::PhysicalDeviceShaderDrawParametersFeatures{.shaderDrawParameters = VK_TRUE};
@@ -160,6 +164,7 @@ auto PhysicalDevice::createDevice() -> std::unique_ptr<vk::raii::Device> {
                              drawParamsFeatures,
                              dynamicRenderingFeatures,
                              extendedDynamicStateFeatures,
+                             synchronization2Features,
                              /*dbFeatures*/};
 
   return std::make_unique<vk::raii::Device>(physicalDevice->createDevice(c.get(), nullptr));

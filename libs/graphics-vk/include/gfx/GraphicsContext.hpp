@@ -6,12 +6,14 @@ class IEventQueue;
 class IRenderContext;
 class IStateBuffer;
 class IWindow;
+class Device;
 
 class GraphicsContext {
 public:
   GraphicsContext(std::shared_ptr<IEventQueue> newEventQueue,
                   std::shared_ptr<IRenderContext> newRenderContext,
-                  std::shared_ptr<IStateBuffer> newStateBuffer);
+                  std::shared_ptr<IStateBuffer> newStateBuffer,
+                  std::shared_ptr<Device> newDevice);
   ~GraphicsContext();
 
   GraphicsContext(const GraphicsContext&) = default;
@@ -31,6 +33,7 @@ private:
   std::shared_ptr<IRenderContext> renderContext;
   std::shared_ptr<IStateBuffer> stateBuffer;
   std::shared_ptr<IWindow> window;
+  std::shared_ptr<Device> device;
   bool running{true};
 
   std::chrono::steady_clock clock;

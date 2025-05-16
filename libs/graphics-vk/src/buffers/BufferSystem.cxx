@@ -16,8 +16,7 @@ BufferSystem::BufferSystem(std::shared_ptr<IFrameManager> newFrameManager,
       device{std::move(newDevice)},
       allocator{std::move(newAllocator)} {
 
-  Log.trace("Creating BufferSystem, threadId: {}",
-            std::hash<std::thread::id>{}(std::this_thread::get_id()));
+  Log.trace("Creating BufferSystem");
 
   const auto hostVisibleHandle = strategyHandleGenerator.requestHandle();
   strategyMap.emplace(hostVisibleHandle, std::make_unique<HostVisibleStrategy>());
@@ -27,8 +26,8 @@ BufferSystem::BufferSystem(std::shared_ptr<IFrameManager> newFrameManager,
 }
 
 BufferSystem::~BufferSystem() {
-  Log.trace("Destroying BufferSystem, threadId: {}",
-            std::hash<std::thread::id>{}(std::this_thread::get_id()));
+  Log.trace("Destroying BufferSystem");
+  device->waitIdle();
   strategyMap.clear();
   bufferMap.clear();
   Log.trace("BufferSystem Destroyed");

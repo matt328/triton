@@ -10,13 +10,9 @@ ManagedBuffer::ManagedBuffer(vk::Buffer newVkBuffer,
       bufferMeta{std::move(newBufferMeta)},
       allocation{newAllocation},
       allocator{std::move(newAllocator)} {
-  Log.trace("Creating ManagedBuffer, threadId: {}",
-            std::hash<std::thread::id>{}(std::this_thread::get_id()));
 }
 
 ManagedBuffer::~ManagedBuffer() {
-  Log.trace("Destroying ManagedBuffer, threadId: {}",
-            std::hash<std::thread::id>{}(std::this_thread::get_id()));
   if (vkBuffer && allocation) {
     allocator->destroyBuffer(vkBuffer, allocation);
   }

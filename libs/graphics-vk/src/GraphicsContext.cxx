@@ -35,15 +35,16 @@ namespace tr {
 
 GraphicsContext::GraphicsContext(std::shared_ptr<IEventQueue> newEventQueue,
                                  std::shared_ptr<IRenderContext> newRenderContext,
-                                 std::shared_ptr<IStateBuffer> newStateBuffer)
+                                 std::shared_ptr<IStateBuffer> newStateBuffer,
+                                 std::shared_ptr<Device> newDevice)
     : eventQueue{std::move(newEventQueue)},
       renderContext{std::move(newRenderContext)},
-      stateBuffer{std::move(newStateBuffer)} {
+      stateBuffer{std::move(newStateBuffer)},
+      device{std::move(newDevice)} {
 }
 
 GraphicsContext::~GraphicsContext() {
-  Log.trace("Destroying GraphicsContext, threadId: {}",
-            std::hash<std::thread::id>{}(std::this_thread::get_id()));
+  Log.trace("Destroying GraphicsContext");
 }
 
 auto GraphicsContext::create(std::shared_ptr<IEventQueue> newEventQueue,
@@ -122,11 +123,12 @@ auto GraphicsContext::run() -> void {
 
     FrameMark;
   }
+  Log.trace("Waiting Device Idle");
+  device->waitIdle();
 }
 
 auto GraphicsContext::stop() -> void {
-  Log.trace("GraphicsContext::stop(), threadId: {}",
-            std::hash<std::thread::id>{}(std::this_thread::get_id()));
+  Log.trace("GraphicsContext::stop()");
   running = false;
 }
 

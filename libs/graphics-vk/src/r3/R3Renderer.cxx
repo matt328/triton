@@ -116,7 +116,7 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
     pcBlob.data.reserve(config.logicalBuffers.size() * 8);
 
     // TODO(matt) track number of objects per frame in the Frame
-    pcBlob.data.insert(pcBlob.data.end(), sizeof(uint32_t), 1);
+    pcBlob.data.insert(pcBlob.data.end(), sizeof(uint32_t), 0);
     for (const auto& handle : config.logicalBuffers) {
       auto address = bs->getBufferAddress(frame.getLogicalBuffer(handle));
       pcBlob.data.insert(pcBlob.data.end(), sizeof(address), address);
@@ -258,14 +258,17 @@ auto R3Renderer::endFrame(const Frame* frame, const FrameGraphResult& results) -
       .waitSemaphoreCount = 1,
       .pWaitSemaphores = &*frame->getImageAvailableSemaphore(),
       .pWaitDstStageMask = waitStages.data(),
-      .commandBufferCount = static_cast<uint32_t>(buffers.size()),
-      .pCommandBuffers = buffers.data(),
+      .commandBufferCount = static_cast<uint32_t>(results.commandBuffers.size()),
+      .pCommandBuffers = results.commandBuffers.data(),
       .signalSemaphoreCount = 1,
       .pSignalSemaphores = &*frame->getRenderFinishedSemaphore(),
   };
 
   std::string msg = fmt::format("Submitting Queue for frame {}", frame->getIndex());
   TracyMessage(msg.data(), msg.size());
+
+  // 1. a shader is probably jacked up causing ErrorDeviceLost.
+  // 2. Attempt to handle this and gracefully exit the program I guess?
 
   try {
     const auto fence = *frame->getInFlightFence();
@@ -328,7 +331,7 @@ auto R3Renderer::createComputeCullingPass() -> void {
   }
 
   const auto commandBufferInfo = CommandBufferInfo{
-      .queueConfigs = {QueueConfig{.queueType = QueueType::Compute, .uses = cmdBufferUses}}};
+      .queueConfigs = {QueueConfig{.queueType = QueueType::Graphics, .uses = cmdBufferUses}}};
   commandBufferManager->allocateCommandBuffers(commandBufferInfo);
 
   frameGraph->addPass(std::move(cullingPass), PassGraphInfo{.id = CullingPassId});
