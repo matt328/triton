@@ -1,6 +1,5 @@
 #pragma once
 
-#include "r3/draw-context/DrawContext.hpp"
 #include "r3/render-pass/GraphicsPassConfig.hpp"
 #include "r3/render-pass/BindFunctions.hpp"
 
@@ -9,6 +8,7 @@ namespace tr {
 class ImageManager;
 class Frame;
 class ContextFactory;
+class IDispatchContext;
 
 class GraphicsPass {
 public:
@@ -24,7 +24,7 @@ public:
 
   auto execute(const Frame* frame, vk::raii::CommandBuffer& cmdBuffer) -> void;
 
-  auto registerDrawContext(Handle<DrawContext> handle) -> void;
+  auto registerDrawContext(Handle<IDispatchContext> handle) -> void;
 
   [[nodiscard]] auto getId() const {
     return passConfig.id;
@@ -39,7 +39,7 @@ private:
   std::vector<vk::RenderingAttachmentInfo> colorAttachmentInfo;
   std::optional<vk::RenderingAttachmentInfo> depthAttachmentInfo;
 
-  std::vector<Handle<DrawContext>> drawableContexts;
+  std::vector<Handle<IDispatchContext>> drawableContexts;
 };
 
 }

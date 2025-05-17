@@ -8,7 +8,7 @@ namespace tr {
 
 class Frame;
 class ImageManager;
-class DispatchContext;
+class IDispatchContext;
 class ContextFactory;
 
 class ComputePass {
@@ -25,7 +25,7 @@ public:
 
   auto dispatch(const Frame* frame, vk::raii::CommandBuffer& cmdBuffer) const -> void;
 
-  auto registerDispatchContext(Handle<DispatchContext> handle) -> void;
+  auto registerDispatchContext(Handle<IDispatchContext> handle) -> void;
 
   [[nodiscard]] auto getId() const {
     return config.id;
@@ -36,7 +36,7 @@ private:
   ComputePassConfig config;
   std::shared_ptr<ContextFactory> contextFactory;
 
-  std::vector<Handle<DispatchContext>> dispatchableContexts;
+  std::vector<Handle<IDispatchContext>> dispatchableContexts;
 };
 
 }

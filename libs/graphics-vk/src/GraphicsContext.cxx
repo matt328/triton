@@ -22,7 +22,7 @@
 #include "r3/graph/DebugFrameGraph.hpp"
 #include "r3/render-pass/PipelineFactory.hpp"
 #include "r3/draw-context/ContextFactory.hpp"
-#include "r3/draw-context/DispatchContext.hpp"
+#include "r3/draw-context/IDispatchContext.hpp"
 #include "buffers/BufferSystem.hpp"
 #include "img/ImageManager.hpp"
 

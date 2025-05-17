@@ -7,9 +7,9 @@ set(graphicsvk_SRC
   src/r3/render-pass/PipelineFactory.cxx
   src/r3/render-pass/GraphicsPass.cxx
   src/r3/render-pass/ComputePass.cxx
-  src/r3/draw-context/DrawContext.cxx
-  src/r3/draw-context/DispatchContext.cxx
   src/r3/draw-context/ContextFactory.cxx
+  src/r3/draw-context/CullingDispatchContext.cxx
+  src/r3/draw-context/ForwardDrawContext.cxx
 
   src/buffers/ManagedBuffer.cxx
   src/buffers/HostVisibleStrategy.cxx

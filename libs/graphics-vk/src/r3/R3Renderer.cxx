@@ -7,14 +7,13 @@
 #include "gfx/QueueTypes.hpp"
 #include "img/ImageManager.hpp"
 #include "r3/draw-context/ContextFactory.hpp"
-#include "r3/draw-context/DispatchContext.hpp"
+#include "r3/draw-context/IDispatchContext.hpp"
 #include "r3/draw-context/PushConstantBlob.hpp"
 #include "r3/render-pass/ComputePass.hpp"
 #include "r3/render-pass/RenderPassFactory.hpp"
 #include "task/Frame.hpp"
 #include "render-pass/GraphicsPassCreateInfo.hpp"
 #include "gfx/PassGraphInfo.hpp"
-#include "vk/ComputePushConstants.hpp"
 
 namespace tr {
 
@@ -70,69 +69,34 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
   createForwardRenderPass();
   // createCompositionRenderPass();
 
-  const DrawPushConstantsBuilder drawPushConstantsBuilder =
-      [this](const DrawContextConfig& config, const Frame& frame) -> PushConstantBlob {
-    auto pcBlob =
-        PushConstantBlob{.data = {}, .stageFlags = vk::ShaderStageFlagBits::eVertex, .offset = 0};
-    pcBlob.data.insert(pcBlob.data.end(), sizeof(uint32_t), 1);
-    return pcBlob;
-  };
+  const auto forwardDrawCreateInfo = ForwardDrawContextCreateInfo{
+      .viewport = vk::Viewport{.width = static_cast<float>(rendererConfig.initialWidth),
+                               .height = static_cast<float>(rendererConfig.initialHeight),
+                               .minDepth = 0.f,
+                               .maxDepth = 1.f},
+      .scissor = vk::Rect2D{.offset = vk::Offset2D{.x = 0, .y = 0},
+                            .extent = vk::Extent2D{.width = rendererConfig.initialWidth,
+                                                   .height = rendererConfig.initialHeight}}};
 
-  const auto viewport = vk::Viewport{.width = static_cast<float>(rendererConfig.initialWidth),
-                                     .height = static_cast<float>(rendererConfig.initialHeight),
-                                     .minDepth = 0.f,
-                                     .maxDepth = 1.f};
-  const auto scissor = vk::Rect2D{.offset = vk::Offset2D{.x = 0, .y = 0},
-                                  .extent = vk::Extent2D{.width = rendererConfig.initialWidth,
-                                                         .height = rendererConfig.initialHeight}};
+  drawContextFactory->createDispatchContext(CubeDrawContextName, forwardDrawCreateInfo);
 
-  drawContextFactory->createDrawContext(
-      CubeDrawContextName,
-      DrawContextConfig{.logicalBuffers = {},
-                        .buffers = {},
-                        .indirectBuffer = globalBuffers.drawCommands,
-                        .countBuffer = globalBuffers.drawCounts,
-                        .indirectMetadata = IndirectMetadata{},
-                        .viewport = viewport,
-                        .scissor = scissor},
-      drawPushConstantsBuilder);
+  const auto cullingCreateInfo =
+      CullingDispatchContextCreateInfo{.objectData = globalBuffers.objectData,
+                                       .indirectCommand = globalBuffers.drawCommands,
+                                       .indirectCount = globalBuffers.drawCounts,
+                                       .geometryRegion = globalBuffers.geometryEntry,
+                                       .indexData = globalBuffers.geometryIndices,
+                                       .vertexPosition = globalBuffers.geometryPositions,
+                                       .vertexNormal = globalBuffers.geometryNormals,
+                                       .vertexTexCoord = globalBuffers.geometryTexCoords,
+                                       .vertexColor = globalBuffers.geometryColors};
 
-  std::vector<LogicalHandle<ManagedBuffer>> logicalBuffers{globalBuffers.objectData,
-                                                           globalBuffers.drawCommands,
-                                                           globalBuffers.drawCounts};
-  std::vector<Handle<ManagedBuffer>> buffers{globalBuffers.geometryEntry,
-                                             globalBuffers.geometryIndices,
-                                             globalBuffers.geometryPositions,
-                                             globalBuffers.geometryNormals,
-                                             globalBuffers.geometryTexCoords,
-                                             globalBuffers.geometryColors};
-
-  auto* bs = bufferSystem.get();
-  const DispatchBinder pushConstantBuilder = [bs](const DispatchContextConfig& config,
-                                                  const Frame& frame) -> PushConstantBlob {
-    auto pcBlob =
-        PushConstantBlob{.data = {}, .stageFlags = vk::ShaderStageFlagBits::eCompute, .offset = 0};
-
-    pcBlob.data.reserve(config.logicalBuffers.size() * 8);
-
-    // TODO(matt) track number of objects per frame in the Frame
-    pcBlob.data.insert(pcBlob.data.end(), sizeof(uint32_t), 0);
-    for (const auto& handle : config.logicalBuffers) {
-      auto address = bs->getBufferAddress(frame.getLogicalBuffer(handle));
-      pcBlob.data.insert(pcBlob.data.end(), sizeof(address), address);
-    }
-    return pcBlob;
-  };
-
-  drawContextFactory->createDispatchContext(
-      CullingDispatchContextName,
-      DispatchContextConfig{.logicalBuffers = logicalBuffers, .buffers = buffers},
-      pushConstantBuilder);
+  drawContextFactory->createDispatchContext(CullingDispatchContextName, cullingCreateInfo);
 
   for (const auto& [contextId, passIds] : GraphicsMap) {
     for (const auto& passId : passIds) {
       frameGraph->getGraphicsPass(passId)->registerDrawContext(
-          drawContextFactory->getDrawContextHandle(contextId));
+          drawContextFactory->getDispatchContextHandle(contextId));
     }
   }
 
@@ -221,7 +185,9 @@ void R3Renderer::update() {
   */
 }
 
-void R3Renderer::setStates(SimState previous, SimState next, float alpha) {
+void R3Renderer::setStates([[maybe_unused]] SimState previous,
+                           [[maybe_unused]] SimState next,
+                           [[maybe_unused]] float alpha) {
 }
 
 void R3Renderer::renderNextFrame() {

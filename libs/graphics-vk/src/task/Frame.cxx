@@ -62,6 +62,10 @@ auto Frame::getDebugObjectCount() const -> uint32_t {
   return debugObjectCount;
 }
 
+auto Frame::getObjectCount() const -> uint32_t {
+  return objectCount;
+}
+
 auto Frame::addLogicalImage(LogicalHandle<ManagedImage> logicalHandle,
                             Handle<ManagedImage> imageHandle) -> void {
   assert(!imageHandles.contains(logicalHandle) &&
@@ -106,6 +110,10 @@ auto Frame::setTerrainChunkCount(uint32_t newObjectCount) -> void {
 
 auto Frame::setDebugObjectCount(uint32_t newDebugObjectCount) -> void {
   debugObjectCount = newDebugObjectCount;
+}
+
+auto Frame::setObjectCount(uint32_t newObjectCount) -> void {
+  objectCount = newObjectCount;
 }
 
 auto Frame::transitionImage(const vk::raii::CommandBuffer& cmd,

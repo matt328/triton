@@ -62,6 +62,8 @@ public:
   [[nodiscard]] auto getTerrainChunkCount() const -> uint32_t;
   [[nodiscard]] auto getDebugObjectCount() const -> uint32_t;
 
+  [[nodiscard]] auto getObjectCount() const -> uint32_t;
+
   [[nodiscard]] auto getBufferHandle(BufferHandleType type) const -> BufferHandle;
 
   [[nodiscard]] auto getDepthImageHandle() const -> ImageHandle;
@@ -94,6 +96,8 @@ public:
   auto setTerrainChunkCount(uint32_t newObjectCount) -> void;
   auto setDebugObjectCount(uint32_t newDebugObjectCount) -> void;
 
+  auto setObjectCount(uint32_t newObjectCount) -> void;
+
   auto setupRenderingInfo(const std::shared_ptr<VkResourceManager>& resourceManager) -> void;
 
 private:
@@ -114,6 +118,8 @@ private:
   uint32_t dynamicObjectCount;
   uint32_t terrainChunkCount;
   uint32_t debugObjectCount;
+
+  uint32_t objectCount;
 
   static auto transitionImage(const vk::raii::CommandBuffer& cmd,
                               const vk::Image& image,

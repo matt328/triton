@@ -1,6 +1,7 @@
 #include "ContextFactory.hpp"
-#include "r3/draw-context/DispatchContext.hpp"
-#include "r3/draw-context/DrawContext.hpp"
+#include "r3/draw-context/ForwardDrawContext.hpp"
+#include "r3/draw-context/IDispatchContext.hpp"
+#include "r3/draw-context/CullingDispatchContext.hpp"
 
 namespace tr {
 
@@ -8,51 +9,40 @@ ContextFactory::ContextFactory(std::shared_ptr<BufferSystem> newBufferSystem)
     : bufferSystem{std::move(newBufferSystem)} {
 }
 
-auto ContextFactory::createDrawContext(std::string id,
-                                       const DrawContextConfig& config,
-                                       DrawPushConstantsBuilder builder) -> Handle<DrawContext> {
-  const auto handle = drawHandleGenerator.requestHandle();
-
-  drawContextMap.emplace(handle,
-                         std::make_unique<DrawContext>(config, bufferSystem, std::move(builder)));
-
-  drawContextIdMap.emplace(id, handle);
-
-  return handle;
-}
-
-auto ContextFactory::getDrawContextHandle(const std::string& id) -> Handle<DrawContext> {
-  assert(drawContextIdMap.contains(id));
-  return drawContextIdMap.at(id);
-}
-
-auto ContextFactory::getDrawContext(const Handle<DrawContext>& handle)
-    -> std::unique_ptr<DrawContext>& {
-  assert(drawContextMap.contains(handle));
-  return drawContextMap.at(handle);
-}
-
-auto ContextFactory::createDispatchContext(std::string id,
-                                           const DispatchContextConfig& config,
-                                           DispatchBinder builder) -> Handle<DispatchContext> {
+auto ContextFactory::createDispatchContext(std::string id, DispatchCreateInfo createInfo)
+    -> Handle<IDispatchContext> {
   const auto handle = dispatchHandleGenerator.requestHandle();
 
-  dispatchContextMap.emplace(
-      handle,
-      std::make_unique<DispatchContext>(config, bufferSystem, std::move(builder)));
-
+  std::visit(
+      [&](auto&& ci) {
+        using T = std::decay_t<decltype(ci)>;
+        if constexpr (std::is_same_v<T, CullingDispatchContextCreateInfo>) {
+          dispatchContextMap.emplace(
+              handle,
+              std::make_unique<CullingDispatchContext>(id,
+                                                       bufferSystem,
+                                                       std::forward<decltype(ci)>(ci)));
+        }
+        if constexpr (std::is_same_v<T, ForwardDrawContextCreateInfo>) {
+          dispatchContextMap.emplace(
+              handle,
+              std::make_unique<ForwardDrawContext>(id,
+                                                   bufferSystem,
+                                                   std::forward<decltype(ci)>(ci)));
+        }
+      },
+      std::move(createInfo));
   dispatchContextIdMap.emplace(id, handle);
-
   return handle;
 }
 
-auto ContextFactory::getDispatchContextHandle(const std::string& id) -> Handle<DispatchContext> {
+auto ContextFactory::getDispatchContextHandle(const std::string& id) -> Handle<IDispatchContext> {
   assert(dispatchContextIdMap.contains(id));
   return dispatchContextIdMap.at(id);
 }
 
-auto ContextFactory::getDispatchContext(const Handle<DispatchContext>& handle)
-    -> std::unique_ptr<DispatchContext>& {
+auto ContextFactory::getDispatchContext(const Handle<IDispatchContext>& handle)
+    -> std::unique_ptr<IDispatchContext>& {
   assert(dispatchContextMap.contains(handle));
   return dispatchContextMap.at(handle);
 }

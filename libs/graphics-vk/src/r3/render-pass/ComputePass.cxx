@@ -1,6 +1,6 @@
 #include "ComputePass.hpp"
 #include "r3/draw-context/ContextFactory.hpp"
-#include "r3/draw-context/DispatchContext.hpp"
+#include "r3/draw-context/IDispatchContext.hpp"
 
 namespace tr {
 
@@ -12,7 +12,7 @@ ComputePass::ComputePass(ComputePassConfig&& newConfig,
       contextFactory{std::move(newContextFactory)} {
 }
 
-auto ComputePass::registerDispatchContext(Handle<DispatchContext> handle) -> void {
+auto ComputePass::registerDispatchContext(Handle<IDispatchContext> handle) -> void {
   dispatchableContexts.push_back(handle);
 }
 

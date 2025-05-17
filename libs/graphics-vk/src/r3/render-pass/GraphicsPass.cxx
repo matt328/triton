@@ -1,5 +1,6 @@
 #include "GraphicsPass.hpp"
 #include "img/ImageManager.hpp"
+#include "r3/draw-context/IDispatchContext.hpp"
 #include "task/Frame.hpp"
 #include "r3/draw-context/ContextFactory.hpp"
 
@@ -57,15 +58,15 @@ auto GraphicsPass::execute(const Frame* frame, vk::raii::CommandBuffer& cmdBuffe
   cmdBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, passConfig.pipeline);
 
   for (const auto& handle : drawableContexts) {
-    const auto& drawContext = drawContextFactory->getDrawContext(handle);
+    const auto& drawContext = drawContextFactory->getDispatchContext(handle);
     drawContext->bind(frame, cmdBuffer, passConfig.pipelineLayout);
-    drawContext->record(frame, cmdBuffer);
+    drawContext->dispatch(frame, cmdBuffer);
   }
 
   cmdBuffer.endRendering();
 }
 
-auto GraphicsPass::registerDrawContext(Handle<DrawContext> handle) -> void {
+auto GraphicsPass::registerDrawContext(Handle<IDispatchContext> handle) -> void {
   drawableContexts.push_back(handle);
 }
 
