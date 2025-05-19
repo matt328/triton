@@ -14,6 +14,9 @@ ManagedBuffer::ManagedBuffer(vk::Buffer newVkBuffer,
 
 ManagedBuffer::~ManagedBuffer() {
   if (vkBuffer && allocation) {
+    if (mappedData != nullptr) {
+      allocator->unmapMemory(allocation);
+    }
     allocator->destroyBuffer(vkBuffer, allocation);
   }
 }
@@ -21,6 +24,19 @@ ManagedBuffer::~ManagedBuffer() {
 auto ManagedBuffer::isMappable() -> bool {
   const auto memProps = allocator->getAllocationMemoryProperties(allocation);
   return (memProps & vk::MemoryPropertyFlagBits::eHostCoherent) != vk::MemoryPropertyFlagBits{};
+}
+
+auto ManagedBuffer::map() -> void {
+  if (mappedData == nullptr) {
+    mappedData = allocator->mapMemory(allocation);
+  }
+}
+
+auto ManagedBuffer::uploadData(const void* srcData, size_t size, size_t offset) -> void {
+  if (mappedData == nullptr) {
+    map();
+  }
+  std::memcpy(static_cast<char*>(mappedData) + offset, srcData, size);
 }
 
 [[nodiscard]] auto ManagedBuffer::getVkBuffer() const -> const vk::Buffer& {

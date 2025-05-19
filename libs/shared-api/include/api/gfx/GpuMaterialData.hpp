@@ -12,7 +12,7 @@ struct GpuObjectData {
   uint32_t geometryRegionId;
   uint32_t materialId;
   uint32_t animationId;
-  uint32_t _padding;
+  uint32_t _padding = 0;
 };
 
 struct GpuTransformData {
@@ -29,7 +29,7 @@ struct GpuScaleData {
   float _pad0 = 0.f;
 };
 
-/// Describes a single Mesh in the GpuVertexData struct by indexing into the GpuIndexData buffer
+/// Describes a single Mesh in the GpuVertex*Data struct by indexing into the GpuIndexData buffer
 struct GpuGeometryRegionData {
   uint32_t indexCount = 0;
   uint32_t indexOffset = INVALID_OFFSET;
@@ -40,7 +40,7 @@ struct GpuGeometryRegionData {
   uint32_t normalOffset = INVALID_OFFSET;
 };
 
-// Typical Index Data each index 'indexes' into the GpuVertexData buffer
+// Typical Index Data each index 'indexes' into the GpuVertex*Data buffer
 struct GpuIndexData {
   uint32_t index;
 };

@@ -5,6 +5,9 @@
 namespace tr {
 struct CullingDispatchContextCreateInfo {
   LogicalHandle<ManagedBuffer> objectData;
+  LogicalHandle<ManagedBuffer> objectPositions;
+  LogicalHandle<ManagedBuffer> objectRotations;
+  LogicalHandle<ManagedBuffer> objectScales;
   LogicalHandle<ManagedBuffer> indirectCommand;
   LogicalHandle<ManagedBuffer> indirectCount;
   Handle<ManagedBuffer> geometryRegion;

@@ -21,6 +21,12 @@ auto CullingDispatchContext::bind(const Frame* frame,
       .objectCount = frame->getObjectCount(),
       .objectDataAddress =
           bufferSystem->getBufferAddress(frame->getLogicalBuffer(createInfo.objectData)),
+      .objectPositionsAddress =
+          bufferSystem->getBufferAddress(frame->getLogicalBuffer(createInfo.objectPositions)),
+      .objectRotationsAddress =
+          bufferSystem->getBufferAddress(frame->getLogicalBuffer(createInfo.objectRotations)),
+      .objectScalesAddress =
+          bufferSystem->getBufferAddress(frame->getLogicalBuffer(createInfo.objectScales)),
       .outputIndirectCommandAddress =
           bufferSystem->getBufferAddress(frame->getLogicalBuffer(createInfo.indirectCommand)),
       .outputIndirectCountAddress =
@@ -42,6 +48,10 @@ auto CullingDispatchContext::dispatch(const Frame* frame, vk::raii::CommandBuffe
     -> void {
   uint32_t workgroupCount = (frame->getObjectCount() + WorkgroupSize - 1) / WorkgroupSize;
   commandBuffer.dispatch(workgroupCount, 1, 1);
+}
+
+auto CullingDispatchContext::getPushConstantSize() -> size_t {
+  return sizeof(PushConstants);
 }
 
 }

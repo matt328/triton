@@ -22,6 +22,8 @@ public:
                     const vk::raii::PipelineLayout& layout) -> void = 0;
   virtual auto dispatch(const Frame* frame, vk::raii::CommandBuffer& commandBuffer) -> void = 0;
 
+  virtual auto getPushConstantSize() -> size_t = 0;
+
 protected:
   std::string id;
   std::shared_ptr<BufferSystem> bufferSystem;

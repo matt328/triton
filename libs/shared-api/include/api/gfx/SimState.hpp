@@ -10,9 +10,9 @@ struct SimState {
   Timestamp timeStamp{};
   uint64_t tag{};
   std::vector<GpuObjectData> objectMetadata;
-  std::vector<glm::vec3> positions;
-  std::vector<glm::quat> rotations;
-  std::vector<glm::vec3> scales;
+  std::vector<GpuTransformData> positions;
+  std::vector<GpuRotationData> rotations;
+  std::vector<GpuScaleData> scales;
 
   // Pre-allocate memory for the vectors when creating a SimState
   explicit SimState(size_t numObjects)

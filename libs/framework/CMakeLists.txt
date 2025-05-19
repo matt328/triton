@@ -4,12 +4,10 @@ set(framework_SRC
   src/ActionSystem.cxx
   src/DefaultAssetService.cxx
   src/DefaultEventBus.cxx
-  src/FixedGameLoop.cxx
   src/ctx/ThreadedFrameworkContext.cxx
   src/GuiCallbackRegistrar.cxx
   src/GeometryGenerator.cxx
   src/RingBuffer.cxx
-  src/ThreadedGameLoop.cxx
 )
 
 add_library(${PROJECT_NAME} STATIC ${framework_SRC})

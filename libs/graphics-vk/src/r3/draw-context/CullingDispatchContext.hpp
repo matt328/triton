@@ -23,10 +23,16 @@ public:
 
   auto dispatch(const Frame* frame, vk::raii::CommandBuffer& commandBuffer) -> void override;
 
+  auto getPushConstantSize() -> size_t override;
+
 private:
   struct PushConstants {
     uint32_t objectCount;
     uint64_t objectDataAddress;
+    uint64_t objectPositionsAddress;
+    uint64_t objectRotationsAddress;
+    uint64_t objectScalesAddress;
+
     uint64_t outputIndirectCommandAddress;
     uint64_t outputIndirectCountAddress;
     uint64_t geometryRegionAddress;

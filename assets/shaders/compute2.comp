@@ -11,10 +11,24 @@
 #define IndirectCommandSize 20
 
 layout(buffer_reference, scalar) buffer GpuObjectDataBuffer {
-  mat4 modelMatrix;
+  uint positionIndex;
+  uint rotationIndex;
+  uint scaleIndex;
   uint geometryRegionId;
   uint materialId;
   uint animationId;
+};
+
+layout(buffer_reference, scalar) buffer GpuPositionDataBuffer {
+  vec3 position;
+};
+
+layout(buffer_reference, scalar) buffer GpuRotationDataBuffer {
+  vec4 position;
+};
+
+layout(buffer_reference, scalar) buffer GpuScaleDataBuffer {
+  vec3 scale;
 };
 
 layout(buffer_reference, scalar) buffer GpuGeometryRegionDataBuffer {
@@ -45,6 +59,10 @@ layout(buffer_reference, scalar) buffer GpuIndirectCommandBuffer {
 layout(push_constant) uniform PushConstants {
   uint objectCount;
   uint64_t objectDataAddress;
+  uint64_t objectPositionsAddress;
+  uint64_t objectRotationsAddress;
+  uint64_t objectScalesAddress;
+
   uint64_t outputIndirectCommandAddress;
   uint64_t outputIndirectCountAddress;
 

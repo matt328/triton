@@ -1,5 +1,7 @@
 #include "gfx/GraphicsContext.hpp"
+#include "resources/DefaultAssetSystem.hpp"
 #include "DefaultDebugManager.hpp"
+#include "resources/DefaultUploadSystem.hpp"
 #include "ImmediateTransferContext.hpp"
 #include "VkGraphicsCreateInfo.hpp"
 #include "api/fx/IEventQueue.hpp"
@@ -25,6 +27,7 @@
 #include "r3/draw-context/IDispatchContext.hpp"
 #include "buffers/BufferSystem.hpp"
 #include "img/ImageManager.hpp"
+#include "DebugStateBuffer.hpp"
 
 #define BOOST_DI_CFG_CTOR_LIMIT_SIZE 11
 #include <di.hpp>
@@ -36,11 +39,15 @@ namespace tr {
 GraphicsContext::GraphicsContext(std::shared_ptr<IEventQueue> newEventQueue,
                                  std::shared_ptr<IRenderContext> newRenderContext,
                                  std::shared_ptr<IStateBuffer> newStateBuffer,
-                                 std::shared_ptr<Device> newDevice)
+                                 std::shared_ptr<Device> newDevice,
+                                 std::shared_ptr<IAssetSystem> newAssetSystem,
+                                 std::shared_ptr<IUploadSystem> newUploadSystem)
     : eventQueue{std::move(newEventQueue)},
       renderContext{std::move(newRenderContext)},
       stateBuffer{std::move(newStateBuffer)},
-      device{std::move(newDevice)} {
+      device{std::move(newDevice)},
+      assetSystem{std::move(newAssetSystem)},
+      uploadSystem{std::move(newUploadSystem)} {
 }
 
 GraphicsContext::~GraphicsContext() {
@@ -49,7 +56,8 @@ GraphicsContext::~GraphicsContext() {
 
 auto GraphicsContext::create(std::shared_ptr<IEventQueue> newEventQueue,
                              std::shared_ptr<IStateBuffer> newStateBuffer,
-                             std::shared_ptr<IWindow> newWindow)
+                             std::shared_ptr<IWindow> newWindow,
+                             std::shared_ptr<IAssetService> newAssetService)
     -> std::shared_ptr<GraphicsContext> {
   const auto rendererConfig = RenderContextConfig{.useDescriptorBuffers = false,
                                                   .maxStaticObjects = 1024,
@@ -62,7 +70,8 @@ auto GraphicsContext::create(std::shared_ptr<IEventQueue> newEventQueue,
                                                   .maxDebugObjects = 32};
   const auto injector =
       di::make_injector(di::bind<IEventQueue>.to<>(newEventQueue),
-                        di::bind<IStateBuffer>.to<>(newStateBuffer),
+                        // di::bind<IStateBuffer>.to<>(newStateBuffer),
+                        di::bind<IStateBuffer>.to<DebugStateBuffer>(),
                         di::bind<IWindow>.to<>(newWindow),
                         di::bind<RenderContextConfig>.to<>(rendererConfig),
                         di::bind<Context>.to<Context>(),
@@ -71,6 +80,7 @@ auto GraphicsContext::create(std::shared_ptr<IEventQueue> newEventQueue,
                         di::bind<PhysicalDevice>.to<PhysicalDevice>(),
                         di::bind<Surface>.to<Surface>(),
                         di::bind<Instance>.to<Instance>(),
+                        di::bind<Swapchain>.to<Swapchain>(),
                         di::bind<ImmediateTransferContext>.to<ImmediateTransferContext>(),
                         di::bind<queue::Graphics>.to<queue::Graphics>(),
                         di::bind<queue::Transfer>.to<queue::Transfer>(),
@@ -87,7 +97,12 @@ auto GraphicsContext::create(std::shared_ptr<IEventQueue> newEventQueue,
                         di::bind<IFrameGraph>.to<DebugFrameGraph>(),
                         di::bind<PipelineFactory>.to<PipelineFactory>(),
                         di::bind<ImageManager>.to<ImageManager>(),
-                        di::bind<RenderPassFactory>.to<RenderPassFactory>());
+                        di::bind<BufferSystem>.to<BufferSystem>(),
+                        di::bind<ContextFactory>.to<ContextFactory>(),
+                        di::bind<RenderPassFactory>.to<RenderPassFactory>(),
+                        di::bind<IAssetSystem>.to<DefaultAssetSystem>(),
+                        di::bind<IUploadSystem>.to<DefaultUploadSystem>(),
+                        di::bind<IAssetService>.to<>(newAssetService));
 
   return injector.create<std::shared_ptr<GraphicsContext>>();
 }
@@ -95,8 +110,6 @@ auto GraphicsContext::create(std::shared_ptr<IEventQueue> newEventQueue,
 auto GraphicsContext::run() -> void {
   using Clock = std::chrono::steady_clock;
   auto currentTime = Clock::now();
-  auto dt = std::chrono::milliseconds(16);
-  auto accumulator = Clock::duration::zero();
 
   while (running) {
     auto newTime = Clock::now();
@@ -105,20 +118,8 @@ auto GraphicsContext::run() -> void {
       frameTime = std::chrono::milliseconds(250);
     }
     currentTime = newTime;
-    accumulator += frameTime;
-
-    float alpha = float(accumulator.count()) / dt.count();
-
-    SimState prev{1024};
-    SimState next{1024};
-
-    if (stateBuffer->getInterpolatedStates(prev, next, alpha, currentTime)) {
-      renderContext->setStates(prev, next, alpha);
-    }
 
     eventQueue->dispatchPending();
-
-    renderContext->update();
     renderContext->renderNextFrame();
 
     FrameMark;

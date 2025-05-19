@@ -4,6 +4,8 @@
 
 namespace tr {
 
+class IEntityManager;
+
 class TransformSystem {
 public:
   explicit TransformSystem(std::shared_ptr<EntityService> newEntityService);
@@ -17,7 +19,7 @@ public:
   auto update() -> void;
 
 private:
-  std::shared_ptr<EntityService> entityService;
+  std::shared_ptr<IEntityManager> entityService;
 };
 
 }

@@ -28,6 +28,9 @@ struct GlobalBuffers {
   LogicalHandle<ManagedBuffer> drawCounts;
   LogicalHandle<ManagedBuffer> drawMetadata;
   LogicalHandle<ManagedBuffer> objectData;
+  LogicalHandle<ManagedBuffer> objectPositions;
+  LogicalHandle<ManagedBuffer> objectRotations;
+  LogicalHandle<ManagedBuffer> objectScales;
   Handle<ManagedBuffer> geometryEntry;
   Handle<ManagedBuffer> geometryIndices;
   Handle<ManagedBuffer> geometryPositions;
@@ -61,14 +64,8 @@ public:
   auto operator=(const R3Renderer&) -> R3Renderer& = delete;
   auto operator=(R3Renderer&&) -> R3Renderer& = delete;
 
-  auto registerRenderable(const RenderableData& data) -> RenderableResources override;
-
-  void update() override;
   void renderNextFrame() override;
   void waitIdle() override;
-  void setStates(SimState previous, SimState next, float alpha) override;
-
-  void setRenderData(const RenderData& renderData) override;
 
 private:
   RenderContextConfig rendererConfig;

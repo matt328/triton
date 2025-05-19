@@ -15,4 +15,8 @@ auto ForwardDrawContext::bind(const Frame* frame,
 auto ForwardDrawContext::dispatch(const Frame* frame, vk::raii::CommandBuffer& commandBuffer)
     -> void {
 }
+
+auto ForwardDrawContext::getPushConstantSize() -> size_t {
+  return sizeof(0);
+}
 }

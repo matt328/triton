@@ -1,9 +1,11 @@
 #pragma once
 
 namespace tr {
+
 struct Transform {
-  glm::vec3 rotation{};
-  glm::vec3 position{};
-  glm::mat4 transformation{};
+  glm::quat rotation{glm::identity<glm::quat>()};
+  glm::vec3 position{glm::zero<glm::vec3>()};
+  glm::vec3 scale{glm::one<glm::vec3>()};
 };
+
 }

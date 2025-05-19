@@ -2,11 +2,14 @@
 
 namespace tr {
 
-auto ArenaStrategy::insert(ManagedBuffer& buffer, const void* data, size_t size) -> BufferRegion {
+auto ArenaStrategy::insert([[maybe_unused]] ManagedBuffer& buffer,
+                           [[maybe_unused]] const void* data,
+                           [[maybe_unused]] size_t size) -> BufferRegion {
   return {.offset = 0, .size = size};
 }
 
-auto ArenaStrategy::remove(ManagedBuffer& buffer, BufferRegion region) -> void {
+auto ArenaStrategy::remove([[maybe_unused]] ManagedBuffer& buffer,
+                           [[maybe_unused]] BufferRegion region) -> void {
 }
 
 }

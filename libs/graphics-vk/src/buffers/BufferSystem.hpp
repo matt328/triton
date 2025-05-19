@@ -55,6 +55,9 @@ private:
   std::shared_ptr<Device> device;
   std::shared_ptr<Allocator> allocator;
 
+  Handle<IBufferStrategy> hostVisibleStrategyHandle;
+  Handle<IBufferStrategy> arenaStrategyHandle;
+
   HandleGenerator<ManagedBuffer> bufferHandleGenerator;
   std::unordered_map<Handle<ManagedBuffer>, std::unique_ptr<ManagedBuffer>> bufferMap;
 

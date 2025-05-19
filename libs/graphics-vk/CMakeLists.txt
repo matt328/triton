@@ -1,6 +1,8 @@
 project("graphics-vk")
 
 set(graphicsvk_SRC
+  src/DebugStateBuffer.cxx
+
   src/r3/R3Renderer.cxx
   src/r3/graph/DebugFrameGraph.cxx
   src/r3/render-pass/RenderPassFactory.cxx
@@ -10,6 +12,9 @@ set(graphicsvk_SRC
   src/r3/draw-context/ContextFactory.cxx
   src/r3/draw-context/CullingDispatchContext.cxx
   src/r3/draw-context/ForwardDrawContext.cxx
+
+  src/resources/DefaultAssetSystem.cxx
+  src/resources/DefaultUploadSystem.cxx
 
   src/buffers/ManagedBuffer.cxx
   src/buffers/HostVisibleStrategy.cxx
@@ -94,6 +99,7 @@ target_precompile_headers(${PROJECT_NAME}
   <vk_mem_alloc.hpp>
   <vulkan/vulkan_raii.hpp>
   <tracy/TracyVulkan.hpp>
+  <readerwriterqueue.h>
   PRIVATE
 )
 
@@ -106,6 +112,7 @@ target_link_libraries(${PROJECT_NAME}
   imgui_custom
   Tracy::TracyClient
   base-kit
+  readerwriterqueue
   ${Vulkan_LIBRARIES}
   VulkanMemoryAllocator-Hpp
   PRIVATE

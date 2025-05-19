@@ -11,6 +11,7 @@ class IActionSystem;
 class IStateBuffer;
 class IApplication;
 class IWindow;
+class IAssetService;
 
 class ThreadedFrameworkContext {
 public:
@@ -21,7 +22,8 @@ public:
                            std::shared_ptr<IEventQueue> newEventQueue,
                            std::shared_ptr<IActionSystem> newActionSystem,
                            std::shared_ptr<IStateBuffer> newStateBuffer,
-                           std::shared_ptr<IWindow> newWindow);
+                           std::shared_ptr<IWindow> newWindow,
+                           std::shared_ptr<IAssetService> newAssetService);
 
   ~ThreadedFrameworkContext();
 
@@ -44,6 +46,7 @@ private:
   std::shared_ptr<IActionSystem> actionSystem;
   std::shared_ptr<IStateBuffer> stateBuffer;
   std::shared_ptr<IWindow> window;
+  std::shared_ptr<IAssetService> assetService;
 
   std::shared_ptr<GameWorldContext> gameWorldContext;
   std::shared_ptr<GraphicsContext> graphicsContext;

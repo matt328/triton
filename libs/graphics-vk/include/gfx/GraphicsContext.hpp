@@ -7,13 +7,18 @@ class IRenderContext;
 class IStateBuffer;
 class IWindow;
 class Device;
+class IAssetSystem;
+class IUploadSystem;
+class IAssetService;
 
 class GraphicsContext {
 public:
   GraphicsContext(std::shared_ptr<IEventQueue> newEventQueue,
                   std::shared_ptr<IRenderContext> newRenderContext,
                   std::shared_ptr<IStateBuffer> newStateBuffer,
-                  std::shared_ptr<Device> newDevice);
+                  std::shared_ptr<Device> newDevice,
+                  std::shared_ptr<IAssetSystem> newAssetSystem,
+                  std::shared_ptr<IUploadSystem> newUploadSystem);
   ~GraphicsContext();
 
   GraphicsContext(const GraphicsContext&) = default;
@@ -23,7 +28,9 @@ public:
 
   static auto create(std::shared_ptr<IEventQueue> newEventQueue,
                      std::shared_ptr<IStateBuffer> newStateBuffer,
-                     std::shared_ptr<IWindow> newWindow) -> std::shared_ptr<GraphicsContext>;
+                     std::shared_ptr<IWindow> newWindow,
+                     std::shared_ptr<IAssetService> newAssetService)
+      -> std::shared_ptr<GraphicsContext>;
 
   auto run() -> void;
   auto stop() -> void;
@@ -34,6 +41,8 @@ private:
   std::shared_ptr<IStateBuffer> stateBuffer;
   std::shared_ptr<IWindow> window;
   std::shared_ptr<Device> device;
+  std::shared_ptr<IAssetSystem> assetSystem;
+  std::shared_ptr<IUploadSystem> uploadSystem;
   bool running{true};
 
   std::chrono::steady_clock clock;

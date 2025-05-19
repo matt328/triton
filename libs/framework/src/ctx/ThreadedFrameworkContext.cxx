@@ -1,12 +1,12 @@
 #include "fx/ThreadedFrameworkContext.hpp"
 #include "ActionSystem.hpp"
+#include "DefaultAssetService.hpp"
 #include "EventQueue.hpp"
 #include "GlfwWindow.hpp"
 #include "RingBuffer.hpp"
-#include "ThreadedGameLoop.hpp"
 #include "api/fx/IApplication.hpp"
+#include "api/fx/IAssetService.hpp"
 #include "bk/TaskQueue.hpp"
-#include "fx/IGameLoop.hpp"
 #include "gw/GameWorldContext.hpp"
 #include "gfx/GraphicsContext.hpp"
 
@@ -35,12 +35,13 @@ auto ThreadedFrameworkContext::create(const FrameworkConfig& config,
                                    eventQueue,
                                    guiAdapter);
 
-  const auto frameworkInjector = di::make_injector(di::bind<IGameLoop>.to<ThreadedGameLoop>(),
-                                                   di::bind<TaskQueue>.to<>(taskQueue),
-                                                   di::bind<IEventQueue>.to<>(eventQueue),
-                                                   di::bind<IActionSystem>.to<>(actionSystem),
-                                                   di::bind<IStateBuffer>.to<>(stateBuffer),
-                                                   di::bind<IWindow>.to<>(window));
+  const auto frameworkInjector =
+      di::make_injector(di::bind<TaskQueue>.to<>(taskQueue),
+                        di::bind<IEventQueue>.to<>(eventQueue),
+                        di::bind<IActionSystem>.to<>(actionSystem),
+                        di::bind<IStateBuffer>.to<>(stateBuffer),
+                        di::bind<IWindow>.to<>(window),
+                        di::bind<IAssetService>.to<DefaultAssetService>());
   return frameworkInjector.create<std::shared_ptr<ThreadedFrameworkContext>>();
 }
 
@@ -52,11 +53,13 @@ ThreadedFrameworkContext::ThreadedFrameworkContext(const FrameworkConfig& config
                                                    std::shared_ptr<IEventQueue> newEventQueue,
                                                    std::shared_ptr<IActionSystem> newActionSystem,
                                                    std::shared_ptr<IStateBuffer> newStateBuffer,
-                                                   std::shared_ptr<IWindow> newWindow)
+                                                   std::shared_ptr<IWindow> newWindow,
+                                                   std::shared_ptr<IAssetService> newAssetService)
     : eventQueue{std::move(newEventQueue)},
       actionSystem{std::move(newActionSystem)},
       stateBuffer{std::move(newStateBuffer)},
-      window{std::move(newWindow)} {
+      window{std::move(newWindow)},
+      assetService{std::move(newAssetService)} {
 }
 
 auto ThreadedFrameworkContext::startGameworld() -> void {
@@ -74,7 +77,7 @@ auto ThreadedFrameworkContext::startGameworld() -> void {
 auto ThreadedFrameworkContext::startRenderer() -> void {
   graphicsThread = std::thread([this] {
     try {
-      graphicsContext = GraphicsContext::create(eventQueue, stateBuffer, window);
+      graphicsContext = GraphicsContext::create(eventQueue, stateBuffer, window, assetService);
       graphicsContext->run();
       Log.trace("Nulling out graphicsContext");
       graphicsContext = nullptr;

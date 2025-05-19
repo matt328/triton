@@ -1,18 +1,7 @@
 project("game-world")
 
 set(gameworld_SRC
-  src/systems/AnimationSystem.cxx
-  src/systems/CameraSystem.cxx
-  src/systems/RenderDataSystem.cxx
-  src/systems/TransformSystem.cxx
-
-  src/DefaultGameplaySystem.cxx
-  src/EntityService.cxx
-  src/EntityServiceProvider.cxx
-  src/WidgetService.cxx
-  src/GameObjectProxyImpl.cxx
   src/EntityManager.cxx
-
   src/ctx/GameWorldContext.cxx
 )
 

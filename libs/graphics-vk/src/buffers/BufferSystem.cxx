@@ -18,11 +18,11 @@ BufferSystem::BufferSystem(std::shared_ptr<IFrameManager> newFrameManager,
 
   Log.trace("Creating BufferSystem");
 
-  const auto hostVisibleHandle = strategyHandleGenerator.requestHandle();
-  strategyMap.emplace(hostVisibleHandle, std::make_unique<HostVisibleStrategy>());
+  hostVisibleStrategyHandle = strategyHandleGenerator.requestHandle();
+  strategyMap.emplace(hostVisibleStrategyHandle, std::make_unique<HostVisibleStrategy>());
 
-  const auto arenaHandle = strategyHandleGenerator.requestHandle();
-  strategyMap.emplace(arenaHandle, std::make_unique<ArenaStrategy>());
+  arenaStrategyHandle = strategyHandleGenerator.requestHandle();
+  strategyMap.emplace(arenaStrategyHandle, std::make_unique<ArenaStrategy>());
 }
 
 BufferSystem::~BufferSystem() {
@@ -47,8 +47,13 @@ auto BufferSystem::getVkBuffer(Handle<ManagedBuffer> handle) -> const vk::Buffer
 auto BufferSystem::registerBuffer(BufferCreateInfo createInfo) -> Handle<ManagedBuffer> {
   const auto handle = bufferHandleGenerator.requestHandle();
 
+  const auto strategyHandle = createInfo.bufferType == BufferType::HostTransient
+                                  ? hostVisibleStrategyHandle
+                                  : arenaStrategyHandle;
+
   auto [bci, aci] = fromCreateInfo(createInfo);
-  bufferMap.emplace(handle, allocator->createBuffer2(&bci, &aci, createInfo.debugName));
+  bufferMap.emplace(handle,
+                    allocator->createBuffer2(&bci, &aci, strategyHandle, createInfo.debugName));
 
   return handle;
 }

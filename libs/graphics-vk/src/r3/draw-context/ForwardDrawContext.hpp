@@ -23,6 +23,8 @@ public:
 
   auto dispatch(const Frame* frame, vk::raii::CommandBuffer& commandBuffer) -> void override;
 
+  auto getPushConstantSize() -> size_t override;
+
 private:
   ForwardDrawContextCreateInfo createInfo;
 };

@@ -1,5 +1,4 @@
 #include "R3Renderer.hpp"
-#include "api/gw/RenderableResources.hpp"
 #include "buffers/BufferCreateInfo.hpp"
 #include "buffers/BufferSystem.hpp"
 #include "gfx/IFrameGraph.hpp"
@@ -8,7 +7,6 @@
 #include "img/ImageManager.hpp"
 #include "r3/draw-context/ContextFactory.hpp"
 #include "r3/draw-context/IDispatchContext.hpp"
-#include "r3/draw-context/PushConstantBlob.hpp"
 #include "r3/render-pass/ComputePass.hpp"
 #include "r3/render-pass/RenderPassFactory.hpp"
 #include "task/Frame.hpp"
@@ -16,6 +14,15 @@
 #include "gfx/PassGraphInfo.hpp"
 
 namespace tr {
+
+/*
+  ResourceUploadSystem
+    - context will enqueue (Image/Data)uploadRequest inside the System's lock free queue.
+    - System will work off (stagingBufferSize) items at a time until the queue is empty.
+    - working off involves copying data into the staging buffer, recording and submitting the
+  command buffer, awaiting its fence, and then emitting UploadResponse events for each uploaded
+  resource
+*/
 
 constexpr std::string CullingPassId = "pass.culling";
 constexpr std::string ForwardPassId = "pass.forward";
@@ -82,6 +89,9 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
 
   const auto cullingCreateInfo =
       CullingDispatchContextCreateInfo{.objectData = globalBuffers.objectData,
+                                       .objectPositions = globalBuffers.objectPositions,
+                                       .objectRotations = globalBuffers.objectRotations,
+                                       .objectScales = globalBuffers.objectScales,
                                        .indirectCommand = globalBuffers.drawCommands,
                                        .indirectCount = globalBuffers.drawCounts,
                                        .geometryRegion = globalBuffers.geometryEntry,
@@ -121,14 +131,23 @@ auto R3Renderer::createGlobalBuffers() -> void {
                                                             .debugName = "DrawCounts",
                                                             .indirect = true});
 
-  // Specifies how the DIIC and DrawCounts buffers are sliced, providing maximum space as if all
-  // renderables would be rendered this frame. Determines offset values for DIIC and DrawCounts
-  // buffers during drawIndexedIndirect command redording.
   globalBuffers.drawMetadata = bufferSystem->registerPerFrameBuffer(
       BufferCreateInfo{.bufferType = BufferType::HostTransient, .debugName = "DrawMetadata"});
 
   globalBuffers.objectData = bufferSystem->registerPerFrameBuffer(
-      BufferCreateInfo{.bufferType = BufferType::HostTransient, .debugName = "ObjectData"});
+      BufferCreateInfo{.bufferType = BufferType::HostTransient, .debugName = "Buffer-ObjectData"});
+
+  globalBuffers.objectPositions =
+      bufferSystem->registerPerFrameBuffer(BufferCreateInfo{.bufferType = BufferType::HostTransient,
+                                                            .debugName = "Buffer-ObjectPositions"});
+
+  globalBuffers.objectRotations =
+      bufferSystem->registerPerFrameBuffer(BufferCreateInfo{.bufferType = BufferType::HostTransient,
+                                                            .debugName = "Buffer-ObjectRotations"});
+
+  globalBuffers.objectScales =
+      bufferSystem->registerPerFrameBuffer(BufferCreateInfo{.bufferType = BufferType::HostTransient,
+                                                            .debugName = "Buffer-ObjectScales"});
 
   globalBuffers.geometryEntry =
       bufferSystem->registerBuffer(BufferCreateInfo{.bufferType = BufferType::DeviceArena,
@@ -169,27 +188,6 @@ auto R3Renderer::createGlobalImages() -> void {
       .aspectFlags = vk::ImageAspectFlagBits::eColor});
 }
 
-auto R3Renderer::registerRenderable([[maybe_unused]] const RenderableData& data)
-    -> RenderableResources {
-  // This won't actually need to be here. The Renderer will already 'expect' the things that can be
-  // rendered
-  return RenderableResources{};
-}
-
-void R3Renderer::update() {
-  /*
-    TODO(matt): Sketch out how the client can write state into a ring buffer on a fixed interval,
-    and how the renderer can pick up 2 states and an interpolation value from this ring buffer on
-    it's own interval.
-
-  */
-}
-
-void R3Renderer::setStates([[maybe_unused]] SimState previous,
-                           [[maybe_unused]] SimState next,
-                           [[maybe_unused]] float alpha) {
-}
-
 void R3Renderer::renderNextFrame() {
   const auto result = frameManager->acquireFrame();
 
@@ -204,12 +202,31 @@ void R3Renderer::renderNextFrame() {
   }
 
   auto* frame = std::get<Frame*>(result);
-  // Process sync point here
+  // TODO(matt): figure out how to make copies into and out of the state buffer as efficient as
+  // possible
   SimState current{1};
   SimState prev{1};
   float alpha{0};
   Timestamp currentTime = std::chrono::steady_clock::now();
   stateBuffer->getInterpolatedStates(current, prev, alpha, currentTime);
+
+  // Object Data Buffers
+  bufferSystem->rewrite(frame->getLogicalBuffer(globalBuffers.objectData),
+                        current.objectMetadata.data(),
+                        sizeof(GpuObjectData) * current.objectMetadata.size());
+  bufferSystem->rewrite(frame->getLogicalBuffer(globalBuffers.objectPositions),
+                        current.positions.data(),
+                        sizeof(GpuTransformData) * current.positions.size());
+  bufferSystem->rewrite(frame->getLogicalBuffer(globalBuffers.objectRotations),
+                        current.rotations.data(),
+                        sizeof(GpuRotationData) * current.rotations.size());
+  bufferSystem->rewrite(frame->getLogicalBuffer(globalBuffers.objectScales),
+                        current.scales.data(),
+                        sizeof(GpuScaleData) * current.scales.size());
+
+  // Set host values in frame
+  frame->setObjectCount(current.objectMetadata.size());
+
   const auto& results = frameGraph->execute(frame);
   endFrame(frame, results);
 }
@@ -232,9 +249,6 @@ auto R3Renderer::endFrame(const Frame* frame, const FrameGraphResult& results) -
 
   std::string msg = fmt::format("Submitting Queue for frame {}", frame->getIndex());
   TracyMessage(msg.data(), msg.size());
-
-  // 1. a shader is probably jacked up causing ErrorDeviceLost.
-  // 2. Attempt to handle this and gracefully exit the program I guess?
 
   try {
     const auto fence = *frame->getInFlightFence();
@@ -266,16 +280,13 @@ auto R3Renderer::endFrame(const Frame* frame, const FrameGraphResult& results) -
 void R3Renderer::waitIdle() {
 }
 
-void R3Renderer::setRenderData([[maybe_unused]] const RenderData& renderData) {
-}
-
 auto R3Renderer::createComputeCullingPass() -> void {
 
   const auto pipelineLayoutInfo =
       PipelineLayoutInfo{.pushConstantInfoList = {PushConstantInfo{
                              .stageFlags = vk::ShaderStageFlagBits::eCompute,
                              .offset = 0,
-                             .size = 80, // TODO(matt) Figure out how to not hardcode this
+                             .size = 104, // TODO(matt) sizeof()
                          }}};
 
   const auto shaderStageInfo = ShaderStageInfo{.stage = vk::ShaderStageFlagBits::eCompute,

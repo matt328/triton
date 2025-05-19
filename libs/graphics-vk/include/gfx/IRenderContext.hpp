@@ -6,7 +6,7 @@ namespace tr {
 struct RenderableData;
 struct RenderableResources;
 class GeometryBuffer;
-struct SimState;
+struct StateData;
 
 class IRenderContext {
 public:
@@ -18,13 +18,7 @@ public:
   auto operator=(const IRenderContext&) -> IRenderContext& = default;
   auto operator=(IRenderContext&&) -> IRenderContext& = delete;
 
-  virtual auto registerRenderable(const RenderableData& data) -> RenderableResources = 0;
-
-  virtual void update() = 0;
-  virtual void setStates(SimState previous, SimState next, float alpha) = 0;
   virtual void renderNextFrame() = 0;
   virtual void waitIdle() = 0;
-
-  virtual void setRenderData(const RenderData& renderData) = 0;
 };
 }
