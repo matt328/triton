@@ -10,6 +10,7 @@ namespace tr {
 
 class IEventQueue;
 class IAssetService;
+class TrackerManager;
 
 class DefaultAssetSystem : public IAssetSystem {
 public:
@@ -25,6 +26,7 @@ public:
 private:
   std::shared_ptr<IEventQueue> eventQueue;
   std::shared_ptr<IAssetService> assetService;
+  std::shared_ptr<TrackerManager> trackerManager;
 
   std::thread workerThread;
   std::atomic_bool running{true};
@@ -38,6 +40,8 @@ private:
 
   auto handleStaticModelRequest(const StaticModelRequest& smRequest) -> void;
   auto handleStaticModelTask(const StaticModelTask& smTask) -> void;
+
+  auto handleGeometryUploaded(const GeometryUploaded& uploaded) -> void;
 
   static auto fromRequest(const AssetRequest& request) -> AssetTask;
 

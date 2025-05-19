@@ -2,11 +2,13 @@
 
 #include "api/action/Actions.hpp"
 #include "api/action/Inputs.hpp"
+#include "api/gfx/GpuMaterialData.hpp"
 #include "api/gw/GameplayEvents.hpp"
 #include "api/gw/TransformData.hpp"
 #include "api/vtx/SdfCreateInfo.hpp"
 #include "api/vtx/TerrainResult.hpp"
 #include "bk/Color.hpp"
+#include "bk/Handle.hpp"
 
 namespace tr {
 
@@ -70,6 +72,18 @@ struct StaticModelRequest {
   std::string modelFilename;
   std::string entityName;
   std::optional<tr::TransformData> initialTransform = std::nullopt;
+};
+
+struct GeometryData;
+
+struct UploadGeometryRequest {
+  uint64_t requestId;
+  std::unique_ptr<GeometryData> data;
+};
+
+struct GeometryUploaded {
+  uint64_t requestId;
+  Handle<GpuGeometryRegionData> geometryHandle;
 };
 
 struct StaticModelLoaded {
@@ -142,6 +156,8 @@ using EventVariant = std::variant<BoxWidget,
                                   DynamicModelLoaded,
                                   DynamicModelRequest,
                                   StaticModelLoaded,
+                                  UploadGeometryRequest,
+                                  GeometryUploaded,
                                   StaticModelRequest,
                                   WindowIconified,
                                   WindowClosed,

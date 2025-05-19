@@ -3,6 +3,7 @@
 #include "api/fx/IEventQueue.hpp"
 #include "as/Model.hpp"
 #include "resources/AssetTypes.hpp"
+#include "resources/TrackerManager.hpp"
 
 namespace tr {
 
@@ -11,8 +12,13 @@ DefaultAssetSystem::DefaultAssetSystem(std::shared_ptr<IEventQueue> newEventQueu
     : eventQueue{std::move(newEventQueue)}, assetService{std::move(newAssetService)} {
   Log.trace("Constructing DefaultAssetSystem");
 
+  trackerManager = std::make_shared<TrackerManager>();
+
   eventQueue->subscribe<StaticModelRequest>(
       [this](const StaticModelRequest& smRequest) { handleStaticModelRequest(smRequest); });
+
+  eventQueue->subscribe<GeometryUploaded>(
+      [this](const GeometryUploaded& uploaded) { handleGeometryUploaded(uploaded); });
 
   workerThread = std::thread([this] { assetWorkerThreadFn(); });
 }
@@ -55,8 +61,20 @@ auto DefaultAssetSystem::handleStaticModelTask(const StaticModelTask& smTask) ->
   auto geometryData = deInterleave(model.staticVertices.value(), model.indices);
   auto imageData = model.imageData;
 
-  eventQueue->emit(UploadGeometryData{.data = std::move(geometryData)});
-  eventQueue->emit(UploadImageData{data = std::move(imageData)});
+  auto tracker = std::make_shared<ModelLoadTracker>(ModelLoadTracker{.remainingTasks = 2});
+
+  tracker->onComplete = [this, id = smTask.id, tracker]() {
+    auto event = StaticModelLoaded{.requestId = id, .objectId = tracker->handle};
+    eventQueue->emit(event);
+  };
+
+  trackerManager->add(smTask.id, tracker);
+
+  eventQueue->emit(UploadGeometryRequest{.requestId = smTask.id, .data = std::move(geometryData)});
+  // eventQueue->emit(UploadImageData{data = std::move(imageData)});
+}
+
+auto DefaultAssetSystem::handleGeometryUploaded(const GeometryUploaded& uploaded) -> void {
 }
 
 auto DefaultAssetSystem::deInterleave(const std::vector<as::StaticVertex>& vertices,
