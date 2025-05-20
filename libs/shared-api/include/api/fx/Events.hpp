@@ -10,6 +10,8 @@
 #include "bk/Color.hpp"
 #include "bk/Handle.hpp"
 
+#include "ResourceEvents.hpp"
+
 namespace tr {
 
 struct BoxWidget {
@@ -64,29 +66,6 @@ struct DynamicModelRequest {
 
 struct DynamicModelLoaded {
   uint64_t requestId;
-  tr::GameObjectId objectId;
-};
-
-struct StaticModelRequest {
-  uint64_t requestId;
-  std::string modelFilename;
-  std::string entityName;
-  std::optional<tr::TransformData> initialTransform = std::nullopt;
-};
-
-struct UploadGeometryRequest {
-  uint64_t requestId;
-  std::unique_ptr<GeometryData> data;
-};
-
-struct GeometryUploaded {
-  uint64_t requestId;
-  Handle<GpuGeometryRegionData> geometryHandle;
-};
-
-struct StaticModelLoaded {
-  uint64_t requestId;
-  std::string entityName;
   tr::GameObjectId objectId;
 };
 

@@ -17,6 +17,7 @@ add_library(${PROJECT_NAME} STATIC ${assetforge_SRC})
 target_compile_definitions(${PROJECT_NAME}
   PRIVATE
   TINYGLTF_NO_STB_IMAGE_WRITE
+  GLM_ENABLE_EXPERIMENTAL
 )
 
 target_precompile_headers(${PROJECT_NAME}

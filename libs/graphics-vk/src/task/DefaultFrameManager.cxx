@@ -59,7 +59,8 @@ DefaultFrameManager::~DefaultFrameManager() {
   frames.clear();
 }
 
-auto DefaultFrameManager::handleSwapchainResized(const SwapchainResized& event) -> void {
+auto DefaultFrameManager::handleSwapchainResized([[maybe_unused]] const SwapchainResized& event)
+    -> void {
   // imageRegistry->swapchainResized(vk::Extent2D{.width = event.width, .height = event.height},
   //                                 renderConfig.renderScale);
 }

@@ -159,7 +159,8 @@ void DataFacade::setEntitySkeleton([[maybe_unused]] std::string_view entityName,
   unsaved = true;
 }
 
-void DataFacade::createTerrain(std::string_view terrainName, glm::vec3 terrainSize) {
+void DataFacade::createTerrain(std::string_view terrainName,
+                               [[maybe_unused]] glm::vec3 terrainSize) {
 
   auto sphereInfo = tr::SdfCreateInfo{};
   sphereInfo.shapeType = tr::ShapeType::Sphere;

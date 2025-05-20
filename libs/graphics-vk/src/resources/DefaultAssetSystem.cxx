@@ -76,6 +76,14 @@ auto DefaultAssetSystem::handleStaticModelTask(const StaticModelTask& smTask) ->
 }
 
 auto DefaultAssetSystem::handleGeometryUploaded(const GeometryUploaded& uploaded) -> void {
+  trackerManager->with<ModelLoadTracker>(uploaded.requestId,
+                                         [this, uploaded](ModelLoadTracker& tracker) {
+                                           // tracker.handle = uploaded.geometryHandle;
+                                           if (--tracker.remainingTasks == 0) {
+                                             tracker.onComplete();
+                                             trackerManager->remove(uploaded.requestId);
+                                           }
+                                         });
 }
 
 auto DefaultAssetSystem::deInterleave(const std::vector<as::StaticVertex>& vertices,

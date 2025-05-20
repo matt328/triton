@@ -81,12 +81,12 @@ struct GpuIndirectCommand {
 };
 
 struct GeometryData {
-  std::vector<GpuIndexData> indexData;
-  std::vector<GpuVertexPositionData> positionData;
-  std::vector<GpuVertexColorData> colorData;
+  std::vector<GpuIndexData> indexData{};
+  std::vector<GpuVertexPositionData> positionData{};
+  std::vector<GpuVertexColorData> colorData{};
   std::vector<GpuVertexTexCoordData> texCoordData;
-  std::vector<GpuVertexNormalData> normalData;
-  std::vector<GpuAnimationData> animationData;
+  std::vector<GpuVertexNormalData> normalData{};
+  std::vector<GpuAnimationData> animationData{};
 };
 
 /*

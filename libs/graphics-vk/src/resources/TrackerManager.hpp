@@ -38,7 +38,7 @@ public:
     if (it == trackers.end()) {
       return;
     }
-    if (auto* ptr = std::get_if<TrackerType>(&it->second)) {
+    if (auto* ptr = std::get_if<TrackerType>(&*it->second)) {
       func(*ptr);
     }
   }

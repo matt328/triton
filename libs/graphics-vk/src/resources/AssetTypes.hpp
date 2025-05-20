@@ -5,7 +5,7 @@
 namespace tr {
 
 struct StaticModelTask {
-  size_t id;
+  size_t id{0};
   std::string filename;
 };
 
