@@ -80,6 +80,15 @@ struct GpuIndirectCommand {
   uint32_t firstInstance;
 };
 
+struct GeometryData {
+  std::vector<GpuIndexData> indexData;
+  std::vector<GpuVertexPositionData> positionData;
+  std::vector<GpuVertexColorData> colorData;
+  std::vector<GpuVertexTexCoordData> texCoordData;
+  std::vector<GpuVertexNormalData> normalData;
+  std::vector<GpuAnimationData> animationData;
+};
+
 /*
   GpuIndirectCommand fields:
   indexCount * instanceCount == how many times to run the vertex shader

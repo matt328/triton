@@ -74,8 +74,6 @@ struct StaticModelRequest {
   std::optional<tr::TransformData> initialTransform = std::nullopt;
 };
 
-struct GeometryData;
-
 struct UploadGeometryRequest {
   uint64_t requestId;
   std::unique_ptr<GeometryData> data;

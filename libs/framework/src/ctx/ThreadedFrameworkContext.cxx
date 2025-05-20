@@ -49,7 +49,7 @@ ThreadedFrameworkContext::~ThreadedFrameworkContext() {
   Log.trace("Destroying ThreadedFrameworkContext");
 }
 
-ThreadedFrameworkContext::ThreadedFrameworkContext(const FrameworkConfig& config,
+ThreadedFrameworkContext::ThreadedFrameworkContext([[maybe_unused]] const FrameworkConfig& config,
                                                    std::shared_ptr<IEventQueue> newEventQueue,
                                                    std::shared_ptr<IActionSystem> newActionSystem,
                                                    std::shared_ptr<IStateBuffer> newStateBuffer,

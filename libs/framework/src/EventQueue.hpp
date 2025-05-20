@@ -30,7 +30,7 @@ public:
   }
 
   void emit(std::type_index type, const EventVariant& event) override {
-    std::lock_guard lock(emitMutex);
+    const std::lock_guard lock(emitMutex);
     eventQueue.emplace_back(type, event);
   }
 

@@ -64,11 +64,12 @@ auto DefaultAssetSystem::handleStaticModelTask(const StaticModelTask& smTask) ->
   auto tracker = std::make_shared<ModelLoadTracker>(ModelLoadTracker{.remainingTasks = 2});
 
   tracker->onComplete = [this, id = smTask.id, tracker]() {
-    auto event = StaticModelLoaded{.requestId = id, .objectId = tracker->handle};
+    auto event = StaticModelLoaded{.requestId = id};
     eventQueue->emit(event);
   };
 
-  trackerManager->add(smTask.id, tracker);
+  auto variantTracker = std::make_shared<TrackerVariant>(std::move(*tracker));
+  trackerManager->add(smTask.id, variantTracker);
 
   eventQueue->emit(UploadGeometryRequest{.requestId = smTask.id, .data = std::move(geometryData)});
   // eventQueue->emit(UploadImageData{data = std::move(imageData)});

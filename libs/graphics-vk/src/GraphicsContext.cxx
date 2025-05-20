@@ -55,7 +55,7 @@ GraphicsContext::~GraphicsContext() {
 }
 
 auto GraphicsContext::create(std::shared_ptr<IEventQueue> newEventQueue,
-                             std::shared_ptr<IStateBuffer> newStateBuffer,
+                             [[maybe_unused]] std::shared_ptr<IStateBuffer> newStateBuffer,
                              std::shared_ptr<IWindow> newWindow,
                              std::shared_ptr<IAssetService> newAssetService)
     -> std::shared_ptr<GraphicsContext> {
