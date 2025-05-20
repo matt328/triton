@@ -41,7 +41,7 @@ private:
   auto handleStaticModelRequest(const StaticModelRequest& smRequest) -> void;
   auto handleStaticModelTask(const StaticModelTask& smTask) -> void;
 
-  auto handleGeometryUploaded(const GeometryUploaded& uploaded) -> void;
+  auto handleGeometryUploaded(const UploadGeometryResponse& uploaded) -> void;
 
   static auto fromRequest(const AssetRequest& request) -> AssetTask;
 

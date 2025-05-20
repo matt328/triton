@@ -8,7 +8,7 @@ DataFacade::DataFacade(std::shared_ptr<tr::IEventQueue> newEventQueue)
     : eventQueue{std::move(newEventQueue)} {
   Log.trace("Creating DataFacade");
 
-  eventQueue->subscribe<tr::StaticModelLoaded>([this](const tr::StaticModelLoaded& event) {
+  eventQueue->subscribe<tr::StaticModelResponse>([this](const tr::StaticModelResponse& event) {
     const auto& entityData = inFlightMap.at(event.requestId);
     dataStore.scene.insert({event.entityName, entityData});
     dataStore.entityNameMap.insert({event.entityName, event.objectId});

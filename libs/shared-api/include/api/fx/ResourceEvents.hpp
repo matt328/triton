@@ -14,7 +14,7 @@ struct StaticModelRequest {
   std::optional<tr::TransformData> initialTransform = std::nullopt;
 };
 
-struct StaticModelLoaded {
+struct StaticModelResponse {
   uint64_t requestId;
   std::string entityName;
   tr::GameObjectId objectId;
@@ -25,7 +25,7 @@ struct UploadGeometryRequest {
   std::unique_ptr<GeometryData> data;
 };
 
-struct GeometryUploaded {
+struct UploadGeometryResponse {
   uint64_t requestId;
   Handle<GpuGeometryRegionData> geometryHandle;
 };

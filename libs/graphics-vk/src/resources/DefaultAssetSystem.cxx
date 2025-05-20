@@ -17,8 +17,8 @@ DefaultAssetSystem::DefaultAssetSystem(std::shared_ptr<IEventQueue> newEventQueu
   eventQueue->subscribe<StaticModelRequest>(
       [this](const StaticModelRequest& smRequest) { handleStaticModelRequest(smRequest); });
 
-  eventQueue->subscribe<GeometryUploaded>(
-      [this](const GeometryUploaded& uploaded) { handleGeometryUploaded(uploaded); });
+  eventQueue->subscribe<UploadGeometryResponse>(
+      [this](const UploadGeometryResponse& uploaded) { handleGeometryUploaded(uploaded); });
 
   workerThread = std::thread([this] { assetWorkerThreadFn(); });
 }
@@ -64,7 +64,7 @@ auto DefaultAssetSystem::handleStaticModelTask(const StaticModelTask& smTask) ->
   auto tracker = std::make_shared<ModelLoadTracker>(ModelLoadTracker{.remainingTasks = 2});
 
   tracker->onComplete = [this, id = smTask.id, tracker]() {
-    auto event = StaticModelLoaded{.requestId = id};
+    auto event = StaticModelResponse{.requestId = id};
     eventQueue->emit(event);
   };
 
@@ -75,7 +75,7 @@ auto DefaultAssetSystem::handleStaticModelTask(const StaticModelTask& smTask) ->
   // eventQueue->emit(UploadImageData{data = std::move(imageData)});
 }
 
-auto DefaultAssetSystem::handleGeometryUploaded(const GeometryUploaded& uploaded) -> void {
+auto DefaultAssetSystem::handleGeometryUploaded(const UploadGeometryResponse& uploaded) -> void {
   trackerManager->with<ModelLoadTracker>(uploaded.requestId,
                                          [this, uploaded](ModelLoadTracker& tracker) {
                                            // tracker.handle = uploaded.geometryHandle;
