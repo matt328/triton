@@ -20,23 +20,9 @@ public:
     handlerMap.handlers[type].emplace_back(std::move(listener));
   }
 
-  template <typename T>
-  void subscribe(std::function<void(const T&)> listener) {
-    subscribe(typeid(T), [listener](const EventVariant& event) {
-      if (const T* typedEvent = std::get_if<T>(&event)) {
-        listener(*typedEvent);
-      }
-    });
-  }
-
-  void emit(std::type_index type, const EventVariant& event) override {
+  void emit(std::type_index type, EventVariant event) override {
     const std::lock_guard lock(emitMutex);
-    eventQueue.emplace_back(type, event);
-  }
-
-  template <typename T>
-  void emit(const T& event) {
-    emit(typeid(T), EventVariant(event));
+    eventQueue.emplace_back(type, std::move(event));
   }
 
   void dispatchPending() override {

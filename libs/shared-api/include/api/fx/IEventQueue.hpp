@@ -17,7 +17,7 @@ public:
   virtual void subscribe(std::type_index type,
                          std::function<void(const EventVariant&)> listener) = 0;
 
-  virtual void emit(std::type_index type, const EventVariant& event) = 0;
+  virtual void emit(std::type_index type, EventVariant event) = 0;
 
   /// Dispatch any handlers that might have been subscribed on the current thread.
   /// Must be called periodically from any thread on which events have been subscribed to.
@@ -33,8 +33,8 @@ public:
   }
 
   template <typename T>
-  void emit(const T& event) {
-    emit(typeid(T), EventVariant(event));
+  void emit(T event) {
+    emit(typeid(T), EventVariant(std::move(event)));
   }
 };
 

@@ -10,7 +10,8 @@ DefaultUploadSystem::DefaultUploadSystem(std::shared_ptr<IEventQueue> newEventQu
       [this](const StaticModelRequest& event) { handleStaticModelRequest(event); });
 }
 
-auto DefaultUploadSystem::handleStaticModelRequest(const StaticModelRequest& event) -> void {
+auto DefaultUploadSystem::handleStaticModelRequest([[maybe_unused]] const StaticModelRequest& event)
+    -> void {
 }
 
 }
