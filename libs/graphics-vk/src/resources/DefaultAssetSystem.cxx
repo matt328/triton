@@ -20,6 +20,9 @@ DefaultAssetSystem::DefaultAssetSystem(std::shared_ptr<IEventQueue> newEventQueu
   eventQueue->subscribe<UploadGeometryResponse>(
       [this](const UploadGeometryResponse& uploaded) { handleGeometryUploaded(uploaded); });
 
+  eventQueue->subscribe<UploadImageResponse>(
+      [this](const UploadImageResponse& uploaded) { handleImageUploaded(uploaded); });
+
   workerThread = std::thread([this] { assetWorkerThreadFn(); });
 
   eventQueue->subscribe<StaticModelResponse>([](const StaticModelResponse& response) {
@@ -69,13 +72,13 @@ auto DefaultAssetSystem::handleStaticModelTask(const StaticModelTask& smTask) ->
   Log.trace("Handling StaticModelTask");
   auto model = assetService->loadModel(smTask.filename);
   auto geometryData = deInterleave(model.staticVertices.value(), model.indices);
-  auto imageData = model.imageData;
+  auto imageData = std::make_unique<as::ImageData>(model.imageData);
 
-  auto tracker = std::make_shared<ModelLoadTracker>(ModelLoadTracker{.remainingTasks = 1});
+  auto tracker = std::make_shared<ModelLoadTracker>(ModelLoadTracker{.remainingTasks = 2});
 
-  tracker->onComplete = [this, id = smTask.id, tracker]() {
-    Log.trace("Tracker::onComplete id={}", id);
-    auto event = StaticModelResponse{.requestId = id};
+  tracker->onComplete = [this, task = smTask, tracker]() {
+    Log.trace("Tracker::onComplete id={}", task.id);
+    auto event = StaticModelResponse{.requestId = task.id, .entityName = task.entityName};
     eventQueue->emit(event);
   };
 
@@ -84,20 +87,41 @@ auto DefaultAssetSystem::handleStaticModelTask(const StaticModelTask& smTask) ->
 
   Log.trace("Emitting UploadGeometryRequest id={}", smTask.id);
   eventQueue->emit(UploadGeometryRequest{.requestId = smTask.id, .data = std::move(geometryData)});
-  // eventQueue->emit(UploadImageData{data = std::move(imageData)});
+  eventQueue->emit(UploadImageRequest{.requestId = smTask.id, .data = std::move(imageData)});
 }
 
 auto DefaultAssetSystem::handleGeometryUploaded(const UploadGeometryResponse& uploaded) -> void {
   Log.trace("Handling UploadGeometryResponse Id={}", uploaded.requestId);
   bool shouldRemove = false;
-  trackerManager->with<ModelLoadTracker>(uploaded.requestId,
-                                         [&shouldRemove](ModelLoadTracker& tracker) {
-                                           // tracker.handle = uploaded.geometryHandle;
-                                           if (--tracker.remainingTasks == 0) {
-                                             tracker.onComplete();
-                                             shouldRemove = true;
-                                           }
-                                         });
+  trackerManager->with<ModelLoadTracker>(
+      uploaded.requestId,
+      [&shouldRemove, id = uploaded.requestId](ModelLoadTracker& tracker) {
+        // tracker.handle = uploaded.geometryHandle;
+        Log.trace("tracker id={} remainingTasks={}", id, tracker.remainingTasks);
+        if (--tracker.remainingTasks == 0) {
+          tracker.onComplete();
+          shouldRemove = true;
+        }
+      });
+  if (shouldRemove) {
+    trackerManager->remove(uploaded.requestId);
+  }
+  Log.trace("Finished Handling UploadGeometryResponse id={}", uploaded.requestId);
+}
+
+auto DefaultAssetSystem::handleImageUploaded(const UploadImageResponse& uploaded) -> void {
+  Log.trace("Handling UploadImageResponse id={}", uploaded.requestId);
+  bool shouldRemove = false;
+  trackerManager->with<ModelLoadTracker>(
+      uploaded.requestId,
+      [&shouldRemove, id = uploaded.requestId](ModelLoadTracker& tracker) {
+        // tracker.handle = uploaded.geometryHandle;
+        Log.trace("tracker id={} remainingTasks={}", id, tracker.remainingTasks);
+        if (--tracker.remainingTasks == 0) {
+          tracker.onComplete();
+          shouldRemove = true;
+        }
+      });
   if (shouldRemove) {
     trackerManager->remove(uploaded.requestId);
   }
@@ -129,7 +153,9 @@ auto DefaultAssetSystem::fromRequest(const AssetRequest& request) -> AssetTask {
       [](auto&& req) {
         using T = std::decay_t<decltype(req)>;
         if constexpr (std::is_same_v<T, StaticModelRequest>) {
-          return StaticModelTask{.id = req.requestId, .filename = req.modelFilename};
+          return StaticModelTask{.id = req.requestId,
+                                 .filename = req.modelFilename,
+                                 .entityName = req.entityName};
         } else {
           static_assert(always_false<T>, "Unhandled AssetRequestType");
         }

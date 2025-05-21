@@ -108,6 +108,7 @@ auto GraphicsContext::create(std::shared_ptr<IEventQueue> newEventQueue,
 }
 
 auto GraphicsContext::run() -> void {
+  pthread_setname_np(pthread_self(), "GraphicsContext");
   using Clock = std::chrono::steady_clock;
   auto currentTime = Clock::now();
 

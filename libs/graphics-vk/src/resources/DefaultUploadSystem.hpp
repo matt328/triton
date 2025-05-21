@@ -22,6 +22,7 @@ private:
   std::shared_ptr<IEventQueue> eventQueue;
 
   auto handleUploadGeometry(const UploadGeometryRequest& event) -> void;
+  auto handleUploadImage(const UploadImageRequest& event) -> void;
 };
 
 }

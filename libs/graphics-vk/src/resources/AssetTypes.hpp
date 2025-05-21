@@ -7,6 +7,7 @@ namespace tr {
 struct StaticModelTask {
   size_t id{0};
   std::string filename;
+  std::string entityName;
 };
 
 using AssetRequest = std::variant<StaticModelRequest>;

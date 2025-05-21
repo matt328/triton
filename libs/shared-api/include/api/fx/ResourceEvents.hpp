@@ -3,6 +3,7 @@
 #include "api/gfx/GpuMaterialData.hpp"
 #include "api/gw/GameObjectType.hpp"
 #include "api/gw/TransformData.hpp"
+#include "as/Model.hpp"
 #include "bk/Handle.hpp"
 
 namespace tr {
@@ -29,5 +30,20 @@ struct UploadGeometryResponse {
   uint64_t requestId;
   Handle<GpuGeometryRegionData> geometryHandle;
 };
+
+struct UploadImageRequest {
+  uint64_t requestId;
+  std::unique_ptr<as::ImageData> data;
+};
+
+struct UploadImageResponse {
+  uint64_t requestId;
+  // Handle<ManagedImage> imageHandle;
+};
+
+/*
+  ManagedImage and GpuGeometryRegionData will need abstractions so they can be returned to the
+  client
+*/
 
 }

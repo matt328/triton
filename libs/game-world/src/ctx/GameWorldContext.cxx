@@ -24,6 +24,7 @@ auto GameWorldContext::create(std::shared_ptr<IEventQueue> newEventQueue)
 }
 
 auto GameWorldContext::run() -> void {
+  pthread_setname_np(pthread_self(), "GameWorld");
   Log.trace("Starting GameworldContext");
   using clock = std::chrono::steady_clock;
   constexpr int targetHz = 240;

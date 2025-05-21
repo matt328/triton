@@ -23,6 +23,7 @@ namespace di = boost::di;
 //                    [[maybe_unused]] _In_ int nShowCmd) {
 // #else
 auto main() -> int {
+  pthread_setname_np(pthread_self(), "main");
   // #endif
   initLogger(spdlog::level::trace, spdlog::level::trace);
 
