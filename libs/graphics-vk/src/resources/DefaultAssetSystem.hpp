@@ -1,6 +1,5 @@
 #pragma once
 
-#include "api/fx/Events.hpp"
 #include "as/StaticVertex.hpp"
 #include "bk/HandleGenerator.hpp"
 #include "gfx/IAssetSystem.hpp"

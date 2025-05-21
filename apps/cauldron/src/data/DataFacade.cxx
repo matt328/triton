@@ -8,14 +8,15 @@ DataFacade::DataFacade(std::shared_ptr<tr::IEventQueue> newEventQueue)
     : eventQueue{std::move(newEventQueue)} {
   Log.trace("Creating DataFacade");
 
-  eventQueue->subscribe<tr::StaticModelResponse>([this](const tr::StaticModelResponse& event) {
-    const auto& entityData = inFlightMap.at(event.requestId);
-    dataStore.scene.insert({event.entityName, entityData});
-    dataStore.entityNameMap.insert({event.entityName, event.objectId});
-    engineBusy = false;
-    inFlightMap.erase(event.requestId);
-    Log.info("Finished creating entity: name: {}", event.entityName);
-  });
+  // eventQueue->subscribe<tr::StaticModelResponse>([this](const tr::StaticModelResponse& event) {
+  //   assert(inFlightMap.contains(event.requestId) && "inFlightMap missing event");
+  //   const auto& entityData = inFlightMap.at(event.requestId);
+  //   dataStore.scene.insert({event.entityName, entityData});
+  //   dataStore.entityNameMap.insert({event.entityName, event.objectId});
+  //   engineBusy = false;
+  //   inFlightMap.erase(event.requestId);
+  //   Log.info("Finished creating entity: name: {}", event.entityName);
+  // });
 
   eventQueue->subscribe<tr::DynamicModelLoaded>([this](const tr::DynamicModelLoaded& event) {
     const auto& entityData = inFlightMap.at(event.requestId);

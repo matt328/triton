@@ -2,7 +2,7 @@
 
 spdlog::logger Log("basic");
 
-const std::string LOG_PATTERN = "%^%t %I:%M:%S %-8l %-8n %v%$";
+const std::string LOG_PATTERN = "%^[%8!t] %I:%M:%S %-8l %-8n %v%$";
 
 void initLogger([[maybe_unused]] spdlog::level::level_enum debugLevel,
                 [[maybe_unused]] spdlog::level::level_enum releaseLevel) {

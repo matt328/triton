@@ -1,5 +1,6 @@
 #pragma once
 
+#include "api/fx/ResourceEvents.hpp"
 #include "gfx/IUploadSystem.hpp"
 
 namespace tr {
@@ -20,7 +21,7 @@ public:
 private:
   std::shared_ptr<IEventQueue> eventQueue;
 
-  auto handleStaticModelRequest(const StaticModelRequest& event) -> void;
+  auto handleUploadGeometry(const UploadGeometryRequest& event) -> void;
 };
 
 }

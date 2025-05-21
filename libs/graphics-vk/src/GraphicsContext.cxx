@@ -111,6 +111,14 @@ auto GraphicsContext::run() -> void {
   using Clock = std::chrono::steady_clock;
   auto currentTime = Clock::now();
 
+  Log.trace("Emitting StaticModelRequest");
+  eventQueue->emit(tr::StaticModelRequest{
+      .requestId = 5,
+      .modelFilename =
+          "/home/matt/Projects/game-assets/models/current/viking_room/viking_room_v4.trm",
+      .entityName = "Test Entity",
+  });
+
   while (running) {
     auto newTime = Clock::now();
     auto frameTime = newTime - currentTime;

@@ -8,6 +8,7 @@ add_library(${PROJECT_NAME} STATIC ${basekit_SRC})
 
 target_compile_definitions(${PROJECT_NAME}
   PRIVATE
+  SPDLOG_ENABLE_THREAD_NAME
 )
 
 target_precompile_headers(${PROJECT_NAME}

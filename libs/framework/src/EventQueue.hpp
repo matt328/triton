@@ -7,7 +7,9 @@ namespace tr {
 class EventQueue : public IEventQueue {
 public:
   EventQueue() = default;
-  ~EventQueue() override = default;
+  ~EventQueue() override {
+    Log.trace("Destroying EventQueue");
+  }
 
   EventQueue(const EventQueue&) = delete;
   EventQueue(EventQueue&&) = delete;
@@ -26,23 +28,39 @@ public:
   }
 
   void dispatchPending() override {
-    auto& handlerMap = getThreadLocalHandlers();
-    std::deque<std::pair<std::type_index, EventVariant>> queueCopy;
-
+    auto& tlh = getThreadLocalHandlers();
     {
       std::lock_guard lock(emitMutex);
-      std::swap(queueCopy, eventQueue);
+      auto& dispatchQueue = tlh.dispatchQueue;
+      auto& handlers = tlh.handlers;
+
+      // Move matching events to this thread's dispatch queue
+      auto it = eventQueue.begin();
+      while (it != eventQueue.end()) {
+        const auto& [type, event] = *it;
+        if (handlers.contains(type)) {
+          dispatchQueue.emplace_back(type, std::move(const_cast<EventVariant&>(event)));
+          it = eventQueue.erase(it);
+        } else {
+          ++it;
+        }
+      }
     }
 
-    for (const auto& [type, event] : queueCopy) {
-      std::lock_guard lock(handlerMap.mutex);
-      auto it = handlerMap.handlers.find(type);
-      if (it != handlerMap.handlers.end()) {
+    // Now dispatch from the thread-local dispatch queue
+    auto& dispatchQueue = tlh.dispatchQueue;
+    auto& handlers = tlh.handlers;
+
+    for (auto& [type, event] : dispatchQueue) {
+      auto it = handlers.find(type);
+      if (it != handlers.end()) {
         for (auto& listener : it->second) {
           listener(event);
         }
       }
     }
+
+    dispatchQueue.clear();
   }
 
 private:
@@ -50,6 +68,7 @@ private:
     std::mutex mutex;
     std::unordered_map<std::type_index, std::vector<std::function<void(const EventVariant&)>>>
         handlers;
+    std::deque<std::pair<std::type_index, EventVariant>> dispatchQueue;
   };
 
   static auto getThreadLocalHandlers() -> ThreadLocalHandlerMap& {

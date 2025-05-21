@@ -67,6 +67,7 @@ auto ThreadedFrameworkContext::startGameworld() -> void {
     try {
       gameWorldContext = GameWorldContext::create(eventQueue);
       gameWorldContext->run();
+      Log.trace("nulling out gameWorldContext");
       gameWorldContext = nullptr;
     } catch (const std::exception& e) {
       Log.error("Exception in game thread: {}", e.what());
@@ -102,11 +103,14 @@ auto ThreadedFrameworkContext::stop() -> void {
   Log.trace("ThreadedFrameworkContext::stop()");
   gameWorldContext->stop();
   if (gameThread.joinable()) {
+    Log.trace("joining gameThread");
     gameThread.join();
   }
   graphicsContext->stop();
   if (graphicsThread.joinable()) {
+    Log.trace("joining graphicsThread");
     graphicsThread.join();
+    Log.trace("graphicsThread joined");
   }
 }
 
