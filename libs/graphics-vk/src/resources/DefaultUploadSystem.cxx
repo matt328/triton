@@ -17,6 +17,7 @@ DefaultUploadSystem::DefaultUploadSystem(std::shared_ptr<IEventQueue> newEventQu
 auto DefaultUploadSystem::handleUploadGeometry([[maybe_unused]] const UploadGeometryRequest& event)
     -> void {
   Log.trace("Handling UploadGeometryRequest Id={}", event.requestId);
+  // Instead of sleeping here, queue the data to be uploaded.
   std::this_thread::sleep_for(std::chrono::milliseconds(1000));
   eventQueue->emit(UploadGeometryResponse{
       .requestId = event.requestId,
@@ -25,6 +26,7 @@ auto DefaultUploadSystem::handleUploadGeometry([[maybe_unused]] const UploadGeom
 
 auto DefaultUploadSystem::handleUploadImage(const UploadImageRequest& event) -> void {
   Log.trace("Handling UploadImageRequest id={}", event.requestId);
+
   std::this_thread::sleep_for(std::chrono::milliseconds(2000));
   eventQueue->emit(UploadImageResponse{
       .requestId = event.requestId,
