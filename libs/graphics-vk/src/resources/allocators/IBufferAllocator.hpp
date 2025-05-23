@@ -7,6 +7,12 @@ namespace tr {
 
 struct ManagedBuffer;
 
+struct UploadRequestData {
+  uint64_t resourceId;
+  size_t currentStagingOffset;
+  UploadRequestVariant requestVariant;
+};
+
 struct CopyRegion {
   size_t stagingOffset;
   size_t destinationOffset;
@@ -29,7 +35,7 @@ public:
   auto operator=(const IBufferAllocator&) -> IBufferAllocator& = default;
   auto operator=(IBufferAllocator&&) -> IBufferAllocator& = delete;
 
-  virtual auto allocate(uint64_t resourceId, const UploadRequestVariant& req)
+  virtual auto allocate(const UploadRequestData& requestData)
       -> std::optional<MeshBufferRegion> = 0;
   virtual auto reset() -> void = 0;
 };
