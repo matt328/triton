@@ -1,28 +1,13 @@
 #pragma once
 
-#include "bk/Handle.hpp"
-#include "resources/UploadRequestVariant.hpp"
-
 namespace tr {
 
-struct ManagedBuffer;
-
-struct UploadRequestData {
-  uint64_t resourceId;
-  size_t currentStagingOffset;
-  UploadRequestVariant requestVariant;
-};
-
-struct CopyRegion {
-  size_t stagingOffset;
-  size_t destinationOffset;
+struct BufferRequest {
   size_t size;
-  Handle<ManagedBuffer> dstBuffer;
 };
 
-struct MeshBufferRegion {
-  uint64_t resourceId;
-  std::vector<CopyRegion> regions;
+struct BufferPosition {
+  size_t offset;
 };
 
 class IBufferAllocator {
@@ -35,8 +20,7 @@ public:
   auto operator=(const IBufferAllocator&) -> IBufferAllocator& = default;
   auto operator=(IBufferAllocator&&) -> IBufferAllocator& = delete;
 
-  virtual auto allocate(const UploadRequestData& requestData)
-      -> std::optional<MeshBufferRegion> = 0;
+  virtual auto allocate(const BufferRequest& requestData) -> std::optional<BufferPosition> = 0;
   virtual auto reset() -> void = 0;
 };
 

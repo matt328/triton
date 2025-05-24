@@ -1,0 +1,25 @@
+#pragma once
+
+#include "IBufferAllocator.hpp"
+
+namespace tr {
+
+class LinearAllocator : public IBufferAllocator {
+public:
+  explicit LinearAllocator(size_t bufferSize);
+  ~LinearAllocator() override = default;
+
+  LinearAllocator(const LinearAllocator&) = default;
+  LinearAllocator(LinearAllocator&&) = delete;
+  auto operator=(const LinearAllocator&) -> LinearAllocator& = default;
+  auto operator=(LinearAllocator&&) -> LinearAllocator& = delete;
+
+  auto allocate(const BufferRequest& bufferRequest) -> std::optional<BufferPosition> override;
+  auto reset() -> void override;
+
+private:
+  size_t currentOffset{};
+  size_t maxBufferSize{};
+};
+
+}

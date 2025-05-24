@@ -1,5 +1,7 @@
 #include "DefaultUploadSystem.hpp"
 #include "api/fx/IEventQueue.hpp"
+#include "resources/allocators/GeometryDispatcher.hpp"
+#include "resources/allocators/IBufferAllocator.hpp"
 
 namespace tr {
 

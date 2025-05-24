@@ -1,10 +1,12 @@
 #include "R3Renderer.hpp"
+#include "FrameState.hpp"
 #include "buffers/BufferCreateInfo.hpp"
 #include "buffers/BufferSystem.hpp"
 #include "gfx/IFrameGraph.hpp"
 #include "gfx/IFrameManager.hpp"
 #include "gfx/QueueTypes.hpp"
 #include "img/ImageManager.hpp"
+#include "r3/GeometryBufferPack.hpp"
 #include "r3/draw-context/ContextFactory.hpp"
 #include "r3/draw-context/IDispatchContext.hpp"
 #include "r3/render-pass/ComputePass.hpp"
@@ -46,7 +48,9 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
                        std::shared_ptr<BufferSystem> newBufferSystem,
                        std::shared_ptr<ContextFactory> newDrawContextFactory,
                        std::shared_ptr<IStateBuffer> newStateBuffer,
-                       std::shared_ptr<ImageManager> newImageManager)
+                       std::shared_ptr<ImageManager> newImageManager,
+                       std::shared_ptr<GeometryBufferPack> newGeometryBufferPack,
+                       std::shared_ptr<FrameState> newFrameState)
     : rendererConfig{newRenderConfig},
       frameManager{std::move(newFrameManager)},
       graphicsQueue{std::move(newGraphicsQueue)},
@@ -57,7 +61,9 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
       bufferSystem{std::move(newBufferSystem)},
       drawContextFactory{std::move(newDrawContextFactory)},
       stateBuffer{std::move(newStateBuffer)},
-      imageManager{std::move(newImageManager)} {
+      imageManager{std::move(newImageManager)},
+      geometryBufferPack{std::move(newGeometryBufferPack)},
+      frameState{std::move(newFrameState)} {
 
   /*
     TODO(matt): createComputeCullingPass()
@@ -94,12 +100,12 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
                                        .objectScales = globalBuffers.objectScales,
                                        .indirectCommand = globalBuffers.drawCommands,
                                        .indirectCount = globalBuffers.drawCounts,
-                                       .geometryRegion = globalBuffers.geometryEntry,
-                                       .indexData = globalBuffers.geometryIndices,
-                                       .vertexPosition = globalBuffers.geometryPositions,
-                                       .vertexNormal = globalBuffers.geometryNormals,
-                                       .vertexTexCoord = globalBuffers.geometryTexCoords,
-                                       .vertexColor = globalBuffers.geometryColors};
+                                       .geometryRegion = geometryBufferPack->getIndexBuffer(),
+                                       .indexData = geometryBufferPack->getIndexBuffer(),
+                                       .vertexPosition = geometryBufferPack->getPositionBuffer(),
+                                       .vertexNormal = geometryBufferPack->getNormalBuffer(),
+                                       .vertexTexCoord = geometryBufferPack->getTexCoordBuffer(),
+                                       .vertexColor = geometryBufferPack->getColorBuffer()};
 
   drawContextFactory->createDispatchContext(CullingDispatchContextName, cullingCreateInfo);
 
@@ -148,34 +154,6 @@ auto R3Renderer::createGlobalBuffers() -> void {
   globalBuffers.objectScales =
       bufferSystem->registerPerFrameBuffer(BufferCreateInfo{.bufferType = BufferType::HostTransient,
                                                             .debugName = "Buffer-ObjectScales"});
-
-  globalBuffers.geometryEntry =
-      bufferSystem->registerBuffer(BufferCreateInfo{.bufferType = BufferType::DeviceArena,
-                                                    .itemStride = sizeof(GpuGeometryRegionData),
-                                                    .debugName = "GeometryEntry"});
-
-  globalBuffers.geometryIndices =
-      bufferSystem->registerBuffer(BufferCreateInfo{.bufferType = BufferType::DeviceArena,
-                                                    .itemStride = sizeof(uint32_t),
-                                                    .debugName = "GeometryIndex"});
-
-  globalBuffers.geometryPositions =
-      bufferSystem->registerBuffer(BufferCreateInfo{.bufferType = BufferType::DeviceArena,
-                                                    .itemStride = sizeof(glm::vec3),
-                                                    .debugName = "GeometryPosition"});
-
-  globalBuffers.geometryNormals =
-      bufferSystem->registerBuffer(BufferCreateInfo{.bufferType = BufferType::DeviceArena,
-                                                    .itemStride = sizeof(glm::vec3),
-                                                    .debugName = "GeometryNormal"});
-  globalBuffers.geometryTexCoords =
-      bufferSystem->registerBuffer(BufferCreateInfo{.bufferType = BufferType::DeviceArena,
-                                                    .itemStride = sizeof(glm::vec2),
-                                                    .debugName = "GeometryTexCoords"});
-  globalBuffers.geometryColors =
-      bufferSystem->registerBuffer(BufferCreateInfo{.bufferType = BufferType::DeviceArena,
-                                                    .itemStride = sizeof(glm::vec4),
-                                                    .debugName = "GeometryColors"});
 }
 
 auto R3Renderer::createGlobalImages() -> void {
@@ -253,6 +231,7 @@ auto R3Renderer::endFrame(const Frame* frame, const FrameGraphResult& results) -
   try {
     const auto fence = *frame->getInFlightFence();
     graphicsQueue->getQueue().submit(submitInfo, fence);
+    frameState->advanceFrame();
   } catch (const std::exception& ex) {
     Log.error("Failed to submit command buffer submission {}", ex.what());
   }

@@ -4,6 +4,7 @@ set(graphicsvk_SRC
   src/DebugStateBuffer.cxx
 
   src/r3/R3Renderer.cxx
+  src/r3/GeometryBufferPack.cxx
   src/r3/graph/DebugFrameGraph.cxx
   src/r3/render-pass/RenderPassFactory.cxx
   src/r3/render-pass/PipelineFactory.cxx
@@ -15,6 +16,8 @@ set(graphicsvk_SRC
 
   src/resources/DefaultAssetSystem.cxx
   src/resources/DefaultUploadSystem.cxx
+  src/resources/allocators/LinearAllocator.cxx
+  src/resources/allocators/GeometryDispatcher.cxx
 
   src/buffers/ManagedBuffer.cxx
   src/buffers/HostVisibleStrategy.cxx

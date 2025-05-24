@@ -1,4 +1,6 @@
 #include "gfx/GraphicsContext.hpp"
+#include "FrameState.hpp"
+#include "r3/GeometryBufferPack.hpp"
 #include "resources/DefaultAssetSystem.hpp"
 #include "DefaultDebugManager.hpp"
 #include "resources/DefaultUploadSystem.hpp"
@@ -29,7 +31,10 @@
 #include "img/ImageManager.hpp"
 #include "DebugStateBuffer.hpp"
 
-#define BOOST_DI_CFG_CTOR_LIMIT_SIZE 11
+#include "resources/allocators/GeometryDispatcher.hpp"
+#include "resources/allocators/IBufferAllocator.hpp"
+
+#define BOOST_DI_CFG_CTOR_LIMIT_SIZE 15
 #include <di.hpp>
 
 namespace di = boost::di;
@@ -102,7 +107,9 @@ auto GraphicsContext::create(std::shared_ptr<IEventQueue> newEventQueue,
                         di::bind<RenderPassFactory>.to<RenderPassFactory>(),
                         di::bind<IAssetSystem>.to<DefaultAssetSystem>(),
                         di::bind<IUploadSystem>.to<DefaultUploadSystem>(),
-                        di::bind<IAssetService>.to<>(newAssetService));
+                        di::bind<IAssetService>.to<>(newAssetService),
+                        di::bind<GeometryBufferPack>.to<GeometryBufferPack>(),
+                        di::bind<FrameState>.to<FrameState>());
 
   return injector.create<std::shared_ptr<GraphicsContext>>();
 }

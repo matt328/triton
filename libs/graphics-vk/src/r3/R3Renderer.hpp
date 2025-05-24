@@ -16,6 +16,8 @@ class RenderPassFactory;
 struct FrameGraphResult;
 class CommandBufferManager;
 class BufferSystem;
+class GeometryBufferPack;
+class FrameState;
 
 namespace queue {
 class Graphics;
@@ -31,12 +33,6 @@ struct GlobalBuffers {
   LogicalHandle<ManagedBuffer> objectPositions;
   LogicalHandle<ManagedBuffer> objectRotations;
   LogicalHandle<ManagedBuffer> objectScales;
-  Handle<ManagedBuffer> geometryEntry;
-  Handle<ManagedBuffer> geometryIndices;
-  Handle<ManagedBuffer> geometryPositions;
-  Handle<ManagedBuffer> geometryNormals;
-  Handle<ManagedBuffer> geometryTexCoords;
-  Handle<ManagedBuffer> geometryColors;
 };
 
 struct GlobalImages {
@@ -56,7 +52,9 @@ public:
              std::shared_ptr<BufferSystem> newBufferSystem,
              std::shared_ptr<ContextFactory> newDrawContextFactory,
              std::shared_ptr<IStateBuffer> newStateBuffer,
-             std::shared_ptr<ImageManager> newImageManager);
+             std::shared_ptr<ImageManager> newImageManager,
+             std::shared_ptr<GeometryBufferPack> newGeometryBufferPack,
+             std::shared_ptr<FrameState> newFrameState);
   ~R3Renderer() override = default;
 
   R3Renderer(const R3Renderer&) = delete;
@@ -79,6 +77,8 @@ private:
   std::shared_ptr<ContextFactory> drawContextFactory;
   std::shared_ptr<IStateBuffer> stateBuffer;
   std::shared_ptr<ImageManager> imageManager;
+  std::shared_ptr<GeometryBufferPack> geometryBufferPack;
+  std::shared_ptr<FrameState> frameState;
 
   std::unordered_map<RenderPassType, GraphicsPass> renderPasses;
 
