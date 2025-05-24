@@ -14,6 +14,11 @@ class Device;
 class Allocator;
 struct BufferCreateInfo;
 
+struct BufferEntry {
+  std::deque<ManagedBuffer> versions;
+  size_t currentSize{0};
+};
+
 class BufferSystem {
 public:
   BufferSystem(std::shared_ptr<IFrameManager> newFrameManager,
@@ -50,6 +55,8 @@ public:
 
   auto getVkBuffer(Handle<ManagedBuffer> handle) -> const vk::Buffer&;
 
+  auto endFrame(uint64_t frameIndex) -> void;
+
 private:
   std::shared_ptr<IFrameManager> frameManager;
   std::shared_ptr<Device> device;
@@ -59,7 +66,7 @@ private:
   Handle<IBufferStrategy> arenaStrategyHandle;
 
   HandleGenerator<ManagedBuffer> bufferHandleGenerator;
-  std::unordered_map<Handle<ManagedBuffer>, std::unique_ptr<ManagedBuffer>> bufferMap;
+  std::unordered_map<Handle<ManagedBuffer>, std::unique_ptr<BufferEntry>> bufferMap;
 
   HandleGenerator<IBufferStrategy> strategyHandleGenerator;
   std::unordered_map<Handle<IBufferStrategy>, std::unique_ptr<IBufferStrategy>> strategyMap;

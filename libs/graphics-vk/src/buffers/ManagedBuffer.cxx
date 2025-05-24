@@ -47,4 +47,12 @@ auto ManagedBuffer::uploadData(const void* srcData, size_t size, size_t offset) 
   return bufferMeta;
 }
 
+auto ManagedBuffer::getValidFromFrame() const -> uint64_t {
+  return validFromFrame;
+}
+
+auto ManagedBuffer::getValidToFrame() -> std::optional<uint64_t> {
+  return validToFrame;
+}
+
 }

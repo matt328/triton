@@ -135,4 +135,19 @@ auto BufferSystem::fromCreateInfo(const BufferCreateInfo& createInfo)
 
   return {bci, aci};
 }
+
+auto BufferSystem::endFrame(uint64_t frameIndex) -> void {
+  for (auto& [handle, entry] : bufferMap) {
+    while (!entry->versions.empty()) {
+      auto& rec = entry->versions.front();
+      if (rec.getValidFromFrame() && *rec.getValidFromFrame() <= frameIndex) {
+        // Should destroy the buffer and deallocate its memory and all that
+        entry->versions.pop_front();
+      } else {
+        break;
+      }
+    }
+  }
+}
+
 }
