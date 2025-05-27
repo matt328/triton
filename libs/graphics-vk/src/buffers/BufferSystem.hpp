@@ -55,8 +55,6 @@ public:
 
   auto getVkBuffer(Handle<ManagedBuffer> handle) -> const vk::Buffer&;
 
-  auto endFrame(uint64_t frameIndex) -> void;
-
 private:
   std::shared_ptr<IFrameManager> frameManager;
   std::shared_ptr<Device> device;
@@ -66,7 +64,7 @@ private:
   Handle<IBufferStrategy> arenaStrategyHandle;
 
   HandleGenerator<ManagedBuffer> bufferHandleGenerator;
-  std::unordered_map<Handle<ManagedBuffer>, std::unique_ptr<BufferEntry>> bufferMap;
+  std::unordered_map<Handle<ManagedBuffer>, std::unique_ptr<ManagedBuffer>> bufferMap;
 
   HandleGenerator<IBufferStrategy> strategyHandleGenerator;
   std::unordered_map<Handle<IBufferStrategy>, std::unique_ptr<IBufferStrategy>> strategyMap;

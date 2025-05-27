@@ -18,14 +18,14 @@ DataFacade::DataFacade(std::shared_ptr<tr::IEventQueue> newEventQueue)
   //   Log.info("Finished creating entity: name: {}", event.entityName);
   // });
 
-  eventQueue->subscribe<tr::DynamicModelLoaded>([this](const tr::DynamicModelLoaded& event) {
-    const auto& entityData = inFlightMap.at(event.requestId);
-    dataStore.scene.insert({entityData.name, entityData});
-    dataStore.entityNameMap.insert({entityData.name, event.objectId});
-    engineBusy = false;
-    inFlightMap.erase(event.requestId);
-    Log.info("Finished creating entity: name: {}", entityData.name);
-  });
+  // eventQueue->subscribe<tr::DynamicModelLoaded>([this](const tr::DynamicModelLoaded& event) {
+  //   const auto& entityData = inFlightMap.at(event.requestId);
+  //   dataStore.scene.insert({entityData.name, entityData});
+  //   dataStore.entityNameMap.insert({entityData.name, event.objectId});
+  //   engineBusy = false;
+  //   inFlightMap.erase(event.requestId);
+  //   Log.info("Finished creating entity: name: {}", entityData.name);
+  // });
 
   eventQueue->subscribe<tr::TerrainCreated>([this](const tr::TerrainCreated& event) {
     dataStore.entityNameMap.emplace(event.name, event.entityId.value());
@@ -58,6 +58,40 @@ DataFacade::DataFacade(std::shared_ptr<tr::IEventQueue> newEventQueue)
 
     engineBusy = false;
   });
+
+  eventQueue->subscribe<tr::StaticModelResponse>(
+      [&](const tr::StaticModelResponse& event) {
+        Log.trace("Received StaticModelResponse id={}", event.requestId);
+      },
+      "test_group");
+
+  const auto beginBatch = tr::BeginResourceBatch{.batchId = 1};
+  const auto endBatch = tr::EndResourceBatch{.batchId = 1};
+  const auto vikingRoomRequest = tr::StaticModelRequest{
+      .batchId = 1,
+      .requestId = 4,
+      .modelFilename =
+          "/home/matt/Projects/game-assets/models/current/viking_room/viking_room_v4.trm",
+      .entityName = "Viking Room #1"};
+  const auto vikingRoomRequest2 = tr::StaticModelRequest{
+      .batchId = 1,
+      .requestId = 6,
+      .modelFilename =
+          "/home/matt/Projects/game-assets/models/current/viking_room/viking_room_v4.trm",
+      .entityName = "Viking Room #2"};
+
+  const auto peasant = tr::DynamicModelRequest{
+      .batchId = 1,
+      .requestId = 7,
+      .modelFilename =
+          "/home/matt/Projects/game-assets/models/current/viking_room/viking_room_v4.trm",
+      .entityName = "Viking Room #2"};
+
+  eventQueue->emit(beginBatch, "test_group");
+  eventQueue->emit(vikingRoomRequest, "test_group");
+  eventQueue->emit(peasant, "test_group");
+  eventQueue->emit(vikingRoomRequest2, "test_group");
+  eventQueue->emit(endBatch, "test_group");
 }
 
 DataFacade::~DataFacade() {
@@ -69,13 +103,14 @@ void DataFacade::createStaticModel(const EntityData& entityData) noexcept {
   engineBusy = true;
   const auto key = requestIdGenerator.getKey();
   inFlightMap.emplace(key, entityData);
-  eventQueue->emit(tr::StaticModelRequest{
-      .requestId = key,
-      .modelFilename = dataStore.models.at(entityData.modelName).filePath,
-      .entityName = entityData.name,
-      .initialTransform =
-          std::make_optional(tr::TransformData{.position = entityData.orientation.position,
-                                               .rotation = entityData.orientation.rotation})});
+  eventQueue->emit(
+      tr::StaticModelRequest{.requestId = key,
+                             .modelFilename = dataStore.models.at(entityData.modelName).filePath,
+                             .entityName = entityData.name,
+                             .initialTransform = std::make_optional(
+                                 tr::TransformData{.position = entityData.orientation.position,
+                                                   .rotation = entityData.orientation.rotation})},
+      "test_group");
 }
 
 void DataFacade::update() const {
@@ -134,11 +169,11 @@ void DataFacade::createAnimatedModel(const EntityData& entityData) {
   const auto animationFilename = dataStore.animations.at(entityData.animations[0]).filePath;
   const auto entityName = entityData.name;
   const auto requestId = requestIdGenerator.getKey();
-  eventQueue->emit(tr::DynamicModelRequest{.requestId = requestId,
-                                           .modelFilename = modelFilename,
-                                           .skeletonFilename = skeletonFilename,
-                                           .animationFilename = animationFilename,
-                                           .entityName = entityName});
+  // eventQueue->emit(tr::DynamicModelRequest{.requestId = requestId,
+  //                                          .modelFilename = modelFilename,
+  //                                          .skeletonFilename = skeletonFilename,
+  //                                          .animationFilename = animationFilename,
+  //                                          .entityName = entityName});
 }
 
 auto DataFacade::deleteEntity(std::string_view name) noexcept -> void {

@@ -1,5 +1,6 @@
 #include "gfx/GraphicsContext.hpp"
 #include "FrameState.hpp"
+#include "buffers/DeviceBufferSystem.hpp"
 #include "r3/GeometryBufferPack.hpp"
 #include "resources/DefaultAssetSystem.hpp"
 #include "DefaultDebugManager.hpp"
@@ -118,14 +119,6 @@ auto GraphicsContext::run() -> void {
   pthread_setname_np(pthread_self(), "GraphicsContext");
   using Clock = std::chrono::steady_clock;
   auto currentTime = Clock::now();
-
-  Log.trace("Emitting StaticModelRequest");
-  eventQueue->emit(tr::StaticModelRequest{
-      .requestId = 5,
-      .modelFilename =
-          "/home/matt/Projects/game-assets/models/current/viking_room/viking_room_v4.trm",
-      .entityName = "Test Entity",
-  });
 
   while (running) {
     auto newTime = Clock::now();

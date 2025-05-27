@@ -47,8 +47,8 @@ public:
 
   [[nodiscard]] auto getMeta() const -> const BufferMeta&;
 
-  auto getValidFromFrame() const -> uint64_t;
-  auto getValidToFrame() -> std::optional<uint64_t>;
+  [[nodiscard]] auto getValidFromFrame() const -> uint64_t;
+  [[nodiscard]] auto getValidToFrame() const -> std::optional<uint64_t>;
 
 private:
   vk::Buffer vkBuffer;
@@ -56,6 +56,7 @@ private:
   vma::Allocation allocation;
   std::shared_ptr<vma::Allocator> allocator;
   void* mappedData = nullptr;
+
   uint64_t validFromFrame;
   std::optional<uint64_t> validToFrame;
 };

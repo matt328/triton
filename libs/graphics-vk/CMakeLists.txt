@@ -23,6 +23,7 @@ set(graphicsvk_SRC
   src/buffers/HostVisibleStrategy.cxx
   src/buffers/ArenaStrategy.cxx
   src/buffers/BufferSystem.cxx
+  src/buffers/DeviceBufferSystem.cxx
 
   src/GraphicsContext.cxx
   src/ResourceProxyImpl.cxx

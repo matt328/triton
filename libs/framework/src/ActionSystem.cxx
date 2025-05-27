@@ -65,17 +65,16 @@ ActionSystem::~ActionSystem() {
 }
 
 void ActionSystem::mapSource(Source source, StateType sType, ActionType aType) {
-  std::visit(
-      [&]<typename T>(T&& arg) {
-        using U = std::decay_t<T>;
-        if constexpr (std::is_same_v<U, Key>) {
-          keyActionMap.insert_or_assign(arg, Action{.actionType = aType, .stateType = sType});
-        } else if constexpr (std::is_same_v<U, MouseInput>) {
-          mouseActionMap.insert_or_assign(arg, Action{.actionType = aType, .stateType = sType});
-        } else if constexpr (std::is_same_v<U, GamepadInput>) {
-        }
-      },
-      source.src);
+  auto visitor = [&]<typename T>(T&& arg) {
+    using U = std::decay_t<T>;
+    if constexpr (std::is_same_v<U, Key>) {
+      keyActionMap.insert_or_assign(arg, Action{.actionType = aType, .stateType = sType});
+    } else if constexpr (std::is_same_v<U, MouseInput>) {
+      mouseActionMap.insert_or_assign(arg, Action{.actionType = aType, .stateType = sType});
+    } else if constexpr (std::is_same_v<U, GamepadInput>) {
+    }
+  };
+  std::visit(visitor, source.src);
 }
 
 }

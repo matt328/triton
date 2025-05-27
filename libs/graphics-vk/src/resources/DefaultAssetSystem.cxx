@@ -2,129 +2,124 @@
 #include "api/fx/IAssetService.hpp"
 #include "api/fx/IEventQueue.hpp"
 #include "as/Model.hpp"
-#include "resources/AssetTypes.hpp"
-#include "resources/TrackerManager.hpp"
+#include "buffers/BufferCreateInfo.hpp"
+#include "buffers/BufferSystem.hpp"
+#include "buffers/DeviceBufferSystem.hpp"
+#include "buffers/UploadPlan.hpp"
+#include "r3/GeometryBufferPack.hpp"
 
 namespace tr {
 
 DefaultAssetSystem::DefaultAssetSystem(std::shared_ptr<IEventQueue> newEventQueue,
-                                       std::shared_ptr<IAssetService> newAssetService)
-    : eventQueue{std::move(newEventQueue)}, assetService{std::move(newAssetService)} {
+                                       std::shared_ptr<IAssetService> newAssetService,
+                                       std::shared_ptr<DeviceBufferSystem> newDeviceBufferSystem,
+                                       std::shared_ptr<BufferSystem> newBufferSystem,
+                                       std::shared_ptr<GeometryBufferPack> newGeometryBufferPack)
+    : eventQueue{std::move(newEventQueue)},
+      assetService{std::move(newAssetService)},
+      deviceBufferSystem{std::move(newDeviceBufferSystem)},
+      bufferSystem{std::move(newBufferSystem)},
+      geometryBufferPack{std::move(newGeometryBufferPack)},
+      stagingBufferHandle{
+          bufferSystem->registerBuffer(BufferCreateInfo{.bufferType = BufferType::HostTransient,
+                                                        .bufferUsage = BufferUsage::Storage,
+                                                        .initialSize = 10240,
+                                                        .debugName = "Buffer-GeometryStaging"})} {
   Log.trace("Constructing DefaultAssetSystem");
 
-  trackerManager = std::make_shared<TrackerManager>();
+  eventQueue->subscribe<BeginResourceBatch>(
+      [this](const BeginResourceBatch& batch) {
+        eventBatches[batch.batchId] = std::vector<const EventVariant*>{};
+      },
+      "test_group");
 
   eventQueue->subscribe<StaticModelRequest>(
-      [this](const StaticModelRequest& smRequest) { handleStaticModelRequest(smRequest); });
+      [this](const StaticModelRequest& smRequest, const EventVariant& eventVariant) {
+        eventBatches[smRequest.batchId].push_back(&eventVariant);
+      },
+      "test_group");
+
+  eventQueue->subscribe<DynamicModelRequest>(
+      [this](const DynamicModelRequest& dmRequest, const EventVariant& eventVariant) {
+        eventBatches[dmRequest.batchId].push_back(&eventVariant);
+      },
+      "test_group");
+
+  eventQueue->subscribe<EndResourceBatch>(
+      [this](const EndResourceBatch& batch) { handleEndResourceBatch(batch.batchId); },
+      "test_group");
 
   eventQueue->subscribe<UploadGeometryResponse>(
       [this](const UploadGeometryResponse& uploaded) { handleGeometryUploaded(uploaded); });
 
   eventQueue->subscribe<UploadImageResponse>(
       [this](const UploadImageResponse& uploaded) { handleImageUploaded(uploaded); });
-
-  workerThread = std::thread([this] { assetWorkerThreadFn(); });
-
-  eventQueue->subscribe<StaticModelResponse>([](const StaticModelResponse& response) {
-    Log.trace("StaticModelResponse id={}", response.requestId);
-  });
 }
 
 DefaultAssetSystem::~DefaultAssetSystem() {
   Log.trace("Destroying DefaultAssetSystem");
-  running = false;
-  if (workerThread.joinable()) {
-    workerThread.join();
-  }
 }
 
-auto DefaultAssetSystem::assetWorkerThreadFn() -> void {
-  Log.trace("Starting AssetWorker Thread");
-  pthread_setname_np(pthread_self(), "AssetWorker");
-  while (running) {
-    AssetTask task;
-    if (!taskQueue.try_dequeue(task)) {
-      std::this_thread::sleep_for(std::chrono::milliseconds(1));
-      continue;
-    }
-    Log.trace("Starting Task");
-    std::visit(
-        [this](auto&& assetTask) {
-          using T = std::decay_t<decltype(assetTask)>;
-          if constexpr (std::is_same_v<T, StaticModelTask>) {
-            handleStaticModelTask(assetTask);
-          }
-        },
-        task);
+auto DefaultAssetSystem::handleEndResourceBatch(uint64_t batchId) -> void {
+  auto uploadPlan = UploadPlan{.stagingBuffer = stagingBufferHandle};
+
+  for (auto& eventVariant : eventBatches[batchId]) {
+    auto visitor = [&](auto&& arg) -> void {
+      using T = std::decay_t<decltype(arg)>;
+      if constexpr (std::is_same_v<T, StaticModelRequest>) {
+        Log.trace("Handling Static Model Request ID: {}", arg.requestId);
+        const auto model = assetService->loadModel(arg.modelFilename);
+
+        const auto geometryData = deInterleave(*model.staticVertices, model.indices);
+        const auto uploadData = fromGeometryData(*geometryData);
+        uploadPlan.uploads.insert(uploadPlan.uploads.end(), uploadData.begin(), uploadData.end());
+
+        const auto imageUploadData = fromImageData(model.imageData);
+        uploadPlan.uploads.insert(uploadPlan.uploads.end(),
+                                  imageUploadData.begin(),
+                                  imageUploadData.end());
+      }
+      if constexpr (std::is_same_v<T, DynamicModelRequest>) {
+        Log.trace("Handling Dynamic Model Request ID: {}", arg.requestId);
+      }
+    };
+    std::visit(visitor, *eventVariant);
   }
-  Log.trace("AssetWorker Thread Finished");
+  uploadPlan.sortByBuffer();
+  // TODO(matt): check staging buffer budget and handle overage somehow
+  deviceBufferSystem->resizeBuffers(uploadPlan);
+
+  /*
+    - Add support for the GeometryRegionData buffer.
+    - Add IBufferAllocator support to the BufferSystems so each buffer can have an
+    AllocationStrategy an the BufferSystems can have a method like allocate(bufferHandle, size,
+    stride) that returns an offset of where to copy the data
+    - During the Allocation phase, track and fill out a GpuGeometryRegionData for each separate
+    'mesh' and make sure to then allocate that and create an UploadData for it as well.
+    - Memcopy the data into the staging buffer, and capture copy commands into the commandBuffer,
+    'merging' copies into the same dstBuffer.
+    - Submit the commandbuffer, wait on the fence, and emit all the StaticModelResponses
+    - Think about the usefulness of a BatchComplete event.
+    - Think about how to extend the UploadPlan to include images as well
+    - Figure out how to split batches according to staging buffer size.
+  */
 }
 
 auto DefaultAssetSystem::handleStaticModelRequest(const StaticModelRequest& smRequest) -> void {
   Log.trace("Handling Static Model Request ID: {}", smRequest.requestId);
-  auto task = fromRequest(smRequest);
-  while (!taskQueue.try_enqueue(task)) {
-    std::this_thread::yield();
-  }
-}
-
-auto DefaultAssetSystem::handleStaticModelTask(const StaticModelTask& smTask) -> void {
-  Log.trace("Handling StaticModelTask");
-  auto model = assetService->loadModel(smTask.filename);
-  auto geometryData = deInterleave(model.staticVertices.value(), model.indices);
-  auto imageData = std::make_unique<as::ImageData>(model.imageData);
-
-  auto tracker = std::make_shared<ModelLoadTracker>(ModelLoadTracker{.remainingTasks = 2});
-
-  tracker->onComplete = [this, task = smTask, tracker]() {
-    Log.trace("Tracker::onComplete id={}", task.id);
-    auto event = StaticModelResponse{.requestId = task.id, .entityName = task.entityName};
-    eventQueue->emit(event);
-  };
-
-  auto variantTracker = std::make_shared<TrackerVariant>(std::move(*tracker));
-  trackerManager->add(smTask.id, variantTracker);
-
-  Log.trace("Emitting UploadGeometryRequest id={}", smTask.id);
-  eventQueue->emit(UploadGeometryRequest{.requestId = smTask.id, .data = std::move(geometryData)});
-  eventQueue->emit(UploadImageRequest{.requestId = smTask.id, .data = std::move(imageData)});
 }
 
 auto DefaultAssetSystem::handleGeometryUploaded(const UploadGeometryResponse& uploaded) -> void {
-  Log.trace("Handling UploadGeometryResponse Id={}", uploaded.requestId);
-  bool shouldRemove = false;
-  trackerManager->with<ModelLoadTracker>(
-      uploaded.requestId,
-      [&shouldRemove, id = uploaded.requestId](ModelLoadTracker& tracker) {
-        // tracker.handle = uploaded.geometryHandle;
-        Log.trace("tracker id={} remainingTasks={}", id, tracker.remainingTasks);
-        if (--tracker.remainingTasks == 0) {
-          tracker.onComplete();
-          shouldRemove = true;
-        }
-      });
-  if (shouldRemove) {
-    trackerManager->remove(uploaded.requestId);
-  }
+  Log.trace("Handling UploadGeometryResponse Id={}, batchId={}",
+            uploaded.requestId,
+            uploaded.batchId);
+
   Log.trace("Finished Handling UploadGeometryResponse id={}", uploaded.requestId);
 }
 
 auto DefaultAssetSystem::handleImageUploaded(const UploadImageResponse& uploaded) -> void {
-  Log.trace("Handling UploadImageResponse id={}", uploaded.requestId);
-  bool shouldRemove = false;
-  trackerManager->with<ModelLoadTracker>(
-      uploaded.requestId,
-      [&shouldRemove, id = uploaded.requestId](ModelLoadTracker& tracker) {
-        // tracker.handle = uploaded.geometryHandle;
-        Log.trace("tracker id={} remainingTasks={}", id, tracker.remainingTasks);
-        if (--tracker.remainingTasks == 0) {
-          tracker.onComplete();
-          shouldRemove = true;
-        }
-      });
-  if (shouldRemove) {
-    trackerManager->remove(uploaded.requestId);
-  }
+  Log.trace("Handling UploadImageResponse id={}, batchId={}", uploaded.requestId, uploaded.batchId);
+
   Log.trace("Finished Handling UploadGeometryResponse id={}", uploaded.requestId);
 }
 
@@ -148,19 +143,40 @@ auto DefaultAssetSystem::deInterleave(const std::vector<as::StaticVertex>& verti
       GeometryData{.indexData = indices, .positionData = positions, .texCoordData = texCoords});
 }
 
-auto DefaultAssetSystem::fromRequest(const AssetRequest& request) -> AssetTask {
-  return std::visit(
-      [](auto&& req) {
-        using T = std::decay_t<decltype(req)>;
-        if constexpr (std::is_same_v<T, StaticModelRequest>) {
-          return StaticModelTask{.id = req.requestId,
-                                 .filename = req.modelFilename,
-                                 .entityName = req.entityName};
-        } else {
-          static_assert(always_false<T>, "Unhandled AssetRequestType");
-        }
-      },
-      request);
+auto DefaultAssetSystem::fromGeometryData(const GeometryData& geometryData)
+    -> std::vector<UploadData> {
+  auto uploadDataList = std::vector<UploadData>{};
+  uploadDataList.reserve(6);
+
+  if (!geometryData.indexData.empty()) {
+    auto size = geometryData.indexData.size() * sizeof(GpuIndexData);
+    uploadDataList.emplace_back(
+        UploadData{.dataSize = size,
+                   .data = static_cast<const void*>(geometryData.indexData.data()),
+                   .dstBuffer = geometryBufferPack->getIndexBuffer()});
+  }
+
+  if (!geometryData.positionData.empty()) {
+    auto size = geometryData.positionData.size() * sizeof(GpuVertexPositionData);
+    uploadDataList.emplace_back(
+        UploadData{.dataSize = size,
+                   .data = static_cast<const void*>(geometryData.positionData.data()),
+                   .dstBuffer = geometryBufferPack->getPositionBuffer()});
+  }
+
+  if (!geometryData.texCoordData.empty()) {
+    auto size = geometryData.texCoordData.size() * sizeof(GpuVertexTexCoordData);
+    uploadDataList.emplace_back(
+        UploadData{.dataSize = size,
+                   .data = static_cast<const void*>(geometryData.texCoordData.data()),
+                   .dstBuffer = geometryBufferPack->getTexCoordBuffer()});
+  }
+
+  return uploadDataList;
+}
+
+auto DefaultAssetSystem::fromImageData(const as::ImageData& imageData) -> std::vector<UploadData> {
+  return {};
 }
 
 }

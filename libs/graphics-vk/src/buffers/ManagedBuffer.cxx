@@ -51,7 +51,7 @@ auto ManagedBuffer::getValidFromFrame() const -> uint64_t {
   return validFromFrame;
 }
 
-auto ManagedBuffer::getValidToFrame() -> std::optional<uint64_t> {
+auto ManagedBuffer::getValidToFrame() const -> std::optional<uint64_t> {
   return validToFrame;
 }
 

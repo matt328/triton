@@ -1,12 +1,14 @@
 #include "DefaultUploadSystem.hpp"
 #include "api/fx/IEventQueue.hpp"
+#include "buffers/DeviceBufferSystem.hpp"
 #include "resources/allocators/GeometryDispatcher.hpp"
 #include "resources/allocators/IBufferAllocator.hpp"
 
 namespace tr {
 
-DefaultUploadSystem::DefaultUploadSystem(std::shared_ptr<IEventQueue> newEventQueue)
-    : eventQueue{std::move(newEventQueue)} {
+DefaultUploadSystem::DefaultUploadSystem(std::shared_ptr<IEventQueue> newEventQueue,
+                                         std::shared_ptr<DeviceBufferSystem> newDeviceBufferSystem)
+    : eventQueue{std::move(newEventQueue)}, bufferSystem{std::move(newDeviceBufferSystem)} {
   Log.trace("Constructing DefaultUploadSystem");
 
   eventQueue->subscribe<UploadGeometryRequest>(
@@ -18,12 +20,25 @@ DefaultUploadSystem::DefaultUploadSystem(std::shared_ptr<IEventQueue> newEventQu
 
 auto DefaultUploadSystem::handleUploadGeometry([[maybe_unused]] const UploadGeometryRequest& event)
     -> void {
-  Log.trace("Handling UploadGeometryRequest Id={}", event.requestId);
-  // Instead of sleeping here, queue the data to be uploaded.
-  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+  Log.trace("Handling UploadGeometryRequest, id={}, batchId={}", event.requestId, event.batchId);
+
+  const auto uploadInfoList = splitGeometry(event);
+
+  auto uploadResults = std::vector<std::optional<BufferRegion>>{};
+  for (const auto& uploadInfo : uploadInfoList) {
+    uploadResults.push_back(
+        bufferSystem->tryInsert(uploadInfo.dstBuffer, uploadInfo.srcData, uploadInfo.size));
+  }
+
   eventQueue->emit(UploadGeometryResponse{
+      .batchId = event.batchId,
       .requestId = event.requestId,
   });
+}
+
+auto DefaultUploadSystem::splitGeometry(const UploadGeometryRequest& event)
+    -> std::vector<UploadInfo> {
+  return {};
 }
 
 auto DefaultUploadSystem::handleUploadImage(const UploadImageRequest& event) -> void {

@@ -56,19 +56,6 @@ struct TerrainCreated {
   std::optional<tr::GameObjectId> entityId = std::nullopt;
 };
 
-struct DynamicModelRequest {
-  uint64_t requestId;
-  std::string modelFilename;
-  std::string skeletonFilename;
-  std::string animationFilename;
-  std::string entityName;
-};
-
-struct DynamicModelLoaded {
-  uint64_t requestId;
-  tr::GameObjectId objectId;
-};
-
 struct WindowIconified {
   int iconified;
 };
@@ -130,7 +117,7 @@ using EventVariant = std::variant<BoxWidget,
                                   ChunkTriangulateRequest,
                                   TerrainCreateRequest,
                                   TerrainCreated,
-                                  DynamicModelLoaded,
+                                  DynamicModelResponse,
                                   DynamicModelRequest,
                                   StaticModelResponse,
                                   UploadGeometryRequest,
@@ -151,5 +138,7 @@ using EventVariant = std::variant<BoxWidget,
                                   EntityCreated,
                                   SwapchainResized,
                                   SwapchainCreated,
-                                  FrameEndEvent>;
+                                  FrameEndEvent,
+                                  BeginResourceBatch,
+                                  EndResourceBatch>;
 }

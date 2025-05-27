@@ -54,3 +54,35 @@ private:
 };
 
 }
+
+/*
+  use this like this:
+
+  auto DefaultAssetSystem::handleStaticModelTask(const StaticModelTask& smTask) -> void {
+  Log.trace("Handling StaticModelTask, loading model");
+  auto model = assetService->loadModel(smTask.filename);
+  auto geometryData = deInterleave(model.staticVertices.value(), model.indices);
+  auto imageData = std::make_unique<as::ImageData>(model.imageData);
+
+  auto tracker = std::make_shared<ModelLoadTracker>(ModelLoadTracker{.remainingTasks = 2});
+
+  tracker->onComplete = [this, task = smTask, tracker]() {
+    Log.trace("Tracker::onComplete id={}", task.id);
+    auto event = StaticModelResponse{.batchId = task.batchId,
+                                     .requestId = task.id,
+                                     .entityName = task.entityName};
+    eventQueue->emit(event, "test_group");
+  };
+
+  auto variantTracker = std::make_shared<TrackerVariant>(std::move(*tracker));
+  trackerManager->add(smTask.id, variantTracker);
+
+  Log.trace("Emitting UploadGeometryRequest id={}", smTask.id);
+  eventQueue->emit(UploadGeometryRequest{.batchId = smTask.batchId,
+                                         .requestId = smTask.id,
+                                         .data = std::move(geometryData)});
+  eventQueue->emit(UploadImageRequest{.batchId = smTask.batchId,
+                                      .requestId = smTask.id,
+                                      .data = std::move(imageData)});
+}
+*/
