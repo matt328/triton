@@ -40,7 +40,6 @@ Allocator::~Allocator() {
 
 auto Allocator::createBuffer2(vk::BufferCreateInfo* bci,
                               vma::AllocationCreateInfo* aci,
-                              Handle<IBufferStrategy> strategyHandle,
                               const std::string_view& name) const
     -> std::unique_ptr<ManagedBuffer> {
 
@@ -50,13 +49,11 @@ auto Allocator::createBuffer2(vk::BufferCreateInfo* bci,
     allocator->setAllocationName(allocation, name.data());
     debugManager->setObjectName(buffer, name.data());
 
-    return std::make_unique<ManagedBuffer>(buffer,
-                                           BufferMeta{.bufferCreateInfo = bci,
-                                                      .allocationInfo = info,
-                                                      .allocationCreateInfo = aci,
-                                                      .strategyHandle = strategyHandle},
-                                           allocator,
-                                           allocation);
+    return std::make_unique<ManagedBuffer>(
+        buffer,
+        BufferMeta{.bufferCreateInfo = bci, .allocationInfo = info, .allocationCreateInfo = aci},
+        allocator,
+        allocation);
   } catch (const std::exception& ex) {
     throw AllocationException(
         fmt::format("Error creating and/or naming Buffer: {0}, {1}", name, ex.what()));

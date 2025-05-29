@@ -1,5 +1,6 @@
 #pragma once
 
+#include "api/gfx/Geometry.hpp"
 #include "api/gfx/GpuMaterialData.hpp"
 #include "api/gw/GameObjectType.hpp"
 #include "api/gw/TransformData.hpp"
@@ -43,7 +44,7 @@ struct StaticModelResponse {
   uint64_t batchId;
   uint64_t requestId;
   std::string entityName;
-  tr::GameObjectId objectId;
+  Handle<Geometry> geometryHandle;
 };
 
 struct UploadGeometryRequest {

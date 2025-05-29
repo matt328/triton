@@ -9,9 +9,11 @@ struct GpuObjectData {
   uint32_t transformIndex;
   uint32_t rotationIndex;
   uint32_t scaleIndex;
+
   uint32_t geometryRegionId;
   uint32_t materialId;
   uint32_t animationId;
+
   uint32_t _padding = 0;
 };
 

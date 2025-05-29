@@ -14,7 +14,8 @@ public:
   auto operator=(const LinearAllocator&) -> LinearAllocator& = default;
   auto operator=(LinearAllocator&&) -> LinearAllocator& = delete;
 
-  auto allocate(const BufferRequest& bufferRequest) -> std::optional<BufferPosition> override;
+  auto allocate(const BufferRequest& bufferRequest) -> std::optional<BufferRegion> override;
+  auto freeRegion(const BufferRegion& region) -> void override;
   auto reset() -> void override;
 
 private:

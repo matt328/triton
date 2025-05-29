@@ -1,0 +1,106 @@
+#include "TransferSystem.hpp"
+#include "buffers/BufferSystem.hpp"
+#include "gfx/QueueTypes.hpp"
+#include "resources/allocators/LinearAllocator.hpp"
+#include "vk/command-buffer/CommandBufferManager.hpp"
+
+namespace tr {
+
+constexpr size_t StagingBufferSize = 83886080;
+
+TransferSystem::TransferSystem(std::shared_ptr<BufferSystem> newBufferSystem,
+                               std::shared_ptr<Device> newDevice,
+                               std::shared_ptr<queue::Transfer> newTransferQueue,
+                               const std::shared_ptr<CommandBufferManager>& commandBufferManager)
+    : bufferSystem{std::move(newBufferSystem)},
+      device{std::move(newDevice)},
+      transferQueue{std::move(newTransferQueue)},
+      commandBuffer{std::make_unique<vk::raii::CommandBuffer>(
+          commandBufferManager->getTransferCommandBuffer())},
+      fence(std::make_unique<vk::raii::Fence>(
+          device->getVkDevice().createFence(vk::FenceCreateInfo{}))) {
+  transferContext.stagingBuffer =
+      bufferSystem->registerBuffer(BufferCreateInfo{.bufferLifetime = BufferLifetime::Transient,
+                                                    .bufferUsage = BufferUsage::Transfer,
+                                                    .initialSize = StagingBufferSize,
+                                                    .debugName = "Buffer-GeometryStaging"});
+  transferContext.stagingAllocator = std::make_unique<LinearAllocator>(StagingBufferSize);
+}
+
+auto TransferSystem::beginUpload(UploadPlan& uploadPlan) -> void {
+  uploadPlan.sortByBuffer();
+  const auto resizeList = checkSizes(uploadPlan);
+  if (!resizeList.empty()) {
+    processResizes(resizeList);
+  }
+}
+
+// TODO(Resources-1): Allocator can provide grouping hints, but the complexity of that warrants a
+// need that is demonstrated by profiling.
+auto TransferSystem::finalizeUpload(UploadPlan& uploadPlan) -> void {
+  std::unordered_map<Handle<ManagedBuffer>, std::vector<vk::BufferCopy2>> bufferCopies{};
+
+  for (const auto& upload : uploadPlan.uploads) {
+    const auto stagingBufferRegion =
+        bufferSystem->insert(transferContext.stagingBuffer,
+                             upload.data,
+                             BufferRegion{.offset = upload.stagingOffset, .size = upload.dataSize});
+    const auto region = vk::BufferCopy2{.srcOffset = stagingBufferRegion->offset,
+                                        .dstOffset = upload.dstOffset,
+                                        .size = upload.dataSize};
+    bufferCopies[upload.dstBuffer].push_back(region);
+  }
+
+  constexpr vk::CommandBufferBeginInfo cmdBeginInfo{
+      .flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit};
+  commandBuffer->begin(cmdBeginInfo);
+
+  for (const auto& [dstHandle, regions] : bufferCopies) {
+    const auto copyInfo2 = vk::CopyBufferInfo2{
+        .srcBuffer = *bufferSystem->getVkBuffer(transferContext.stagingBuffer).value(),
+        .dstBuffer = *bufferSystem->getVkBuffer(dstHandle).value(),
+        .regionCount = static_cast<uint32_t>(regions.size()),
+        .pRegions = regions.data()};
+    commandBuffer->copyBuffer2(copyInfo2);
+  }
+
+  commandBuffer->end();
+
+  const auto submitInfo =
+      vk::SubmitInfo{.commandBufferCount = 1, .pCommandBuffers = &**commandBuffer};
+
+  transferQueue->getQueue().submit(submitInfo, **fence);
+
+  if (const auto result = device->getVkDevice().waitForFences(**fence, 1u, UINT64_MAX);
+      result != vk::Result::eSuccess) {
+    Log.warn("Timeout waiting for fence during asnyc submit");
+  }
+  device->getVkDevice().resetFences(**fence);
+}
+
+auto TransferSystem::getTransferContext() -> TransferContext& {
+  return transferContext;
+}
+
+auto TransferSystem::enqueueResize(const ResizeRequest& resize) -> void {
+}
+
+auto TransferSystem::defragment(const DefragRequest& defrag) -> void {
+}
+
+auto TransferSystem::checkSizes([[maybe_unused]] const UploadPlan& uploadPlan)
+    -> std::vector<ResizeRequest> {
+  // TODO(resources): Actually check sizes
+  return {};
+}
+
+auto TransferSystem::processResizes(const std::vector<ResizeRequest>& resizeRequestList) -> void {
+}
+
+auto TransferSystem::allocate(UploadPlan& uploadPlan) -> void {
+}
+
+auto TransferSystem::buildGeometryRegion(UploadPlan& uploadPlan) -> void {
+}
+
+}

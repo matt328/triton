@@ -126,34 +126,35 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
 
 auto R3Renderer::createGlobalBuffers() -> void {
   globalBuffers.drawCommands = bufferSystem->registerPerFrameBuffer(
-      BufferCreateInfo{.bufferType = BufferType::IndirectCommand,
+      BufferCreateInfo{.bufferLifetime = BufferLifetime::Transient,
                        .initialSize = 20480,
                        .debugName = "DrawCommands",
                        .indirect = true});
 
-  globalBuffers.drawCounts =
-      bufferSystem->registerPerFrameBuffer(BufferCreateInfo{.bufferType = BufferType::Device,
-                                                            .initialSize = 64,
-                                                            .debugName = "DrawCounts",
-                                                            .indirect = true});
+  globalBuffers.drawCounts = bufferSystem->registerPerFrameBuffer(
+      BufferCreateInfo{.bufferLifetime = BufferLifetime::Transient,
+                       .initialSize = 64,
+                       .debugName = "DrawCounts",
+                       .indirect = true});
 
   globalBuffers.drawMetadata = bufferSystem->registerPerFrameBuffer(
-      BufferCreateInfo{.bufferType = BufferType::HostTransient, .debugName = "DrawMetadata"});
+      BufferCreateInfo{.bufferLifetime = BufferLifetime::Transient, .debugName = "DrawMetadata"});
 
   globalBuffers.objectData = bufferSystem->registerPerFrameBuffer(
-      BufferCreateInfo{.bufferType = BufferType::HostTransient, .debugName = "Buffer-ObjectData"});
+      BufferCreateInfo{.bufferLifetime = BufferLifetime::Transient,
+                       .debugName = "Buffer-ObjectData"});
 
-  globalBuffers.objectPositions =
-      bufferSystem->registerPerFrameBuffer(BufferCreateInfo{.bufferType = BufferType::HostTransient,
-                                                            .debugName = "Buffer-ObjectPositions"});
+  globalBuffers.objectPositions = bufferSystem->registerPerFrameBuffer(
+      BufferCreateInfo{.bufferLifetime = BufferLifetime::Transient,
+                       .debugName = "Buffer-ObjectPositions"});
 
-  globalBuffers.objectRotations =
-      bufferSystem->registerPerFrameBuffer(BufferCreateInfo{.bufferType = BufferType::HostTransient,
-                                                            .debugName = "Buffer-ObjectRotations"});
+  globalBuffers.objectRotations = bufferSystem->registerPerFrameBuffer(
+      BufferCreateInfo{.bufferLifetime = BufferLifetime::Transient,
+                       .debugName = "Buffer-ObjectRotations"});
 
-  globalBuffers.objectScales =
-      bufferSystem->registerPerFrameBuffer(BufferCreateInfo{.bufferType = BufferType::HostTransient,
-                                                            .debugName = "Buffer-ObjectScales"});
+  globalBuffers.objectScales = bufferSystem->registerPerFrameBuffer(
+      BufferCreateInfo{.bufferLifetime = BufferLifetime::Transient,
+                       .debugName = "Buffer-ObjectScales"});
 }
 
 auto R3Renderer::createGlobalImages() -> void {
@@ -189,18 +190,18 @@ void R3Renderer::renderNextFrame() {
   stateBuffer->getInterpolatedStates(current, prev, alpha, currentTime);
 
   // Object Data Buffers
-  bufferSystem->rewrite(frame->getLogicalBuffer(globalBuffers.objectData),
-                        current.objectMetadata.data(),
-                        sizeof(GpuObjectData) * current.objectMetadata.size());
-  bufferSystem->rewrite(frame->getLogicalBuffer(globalBuffers.objectPositions),
-                        current.positions.data(),
-                        sizeof(GpuTransformData) * current.positions.size());
-  bufferSystem->rewrite(frame->getLogicalBuffer(globalBuffers.objectRotations),
-                        current.rotations.data(),
-                        sizeof(GpuRotationData) * current.rotations.size());
-  bufferSystem->rewrite(frame->getLogicalBuffer(globalBuffers.objectScales),
-                        current.scales.data(),
-                        sizeof(GpuScaleData) * current.scales.size());
+  bufferSystem->insert(frame->getLogicalBuffer(globalBuffers.objectData),
+                       current.objectMetadata.data(),
+                       BufferRegion{.size = sizeof(GpuObjectData) * current.objectMetadata.size()});
+  bufferSystem->insert(frame->getLogicalBuffer(globalBuffers.objectPositions),
+                       current.positions.data(),
+                       BufferRegion{.size = sizeof(GpuTransformData) * current.positions.size()});
+  bufferSystem->insert(frame->getLogicalBuffer(globalBuffers.objectRotations),
+                       current.rotations.data(),
+                       BufferRegion{.size = sizeof(GpuRotationData) * current.rotations.size()});
+  bufferSystem->insert(frame->getLogicalBuffer(globalBuffers.objectScales),
+                       current.scales.data(),
+                       BufferRegion{.size = sizeof(GpuScaleData) * current.scales.size()});
 
   // Set host values in frame
   frame->setObjectCount(current.objectMetadata.size());

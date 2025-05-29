@@ -20,8 +20,6 @@ struct BufferMeta {
   vk::BufferCreateInfo* bufferCreateInfo;
   vma::AllocationInfo allocationInfo;
   vma::AllocationCreateInfo* allocationCreateInfo;
-  std::optional<ArenaInfo> arenaInfo = std::nullopt;
-  Handle<IBufferStrategy> strategyHandle;
 };
 
 class ManagedBuffer {

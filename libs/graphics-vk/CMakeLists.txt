@@ -15,15 +15,13 @@ set(graphicsvk_SRC
   src/r3/draw-context/ForwardDrawContext.cxx
 
   src/resources/DefaultAssetSystem.cxx
-  src/resources/DefaultUploadSystem.cxx
+  src/resources/TransferSystem.cxx
   src/resources/allocators/LinearAllocator.cxx
-  src/resources/allocators/GeometryDispatcher.cxx
+  src/resources/allocators/GeometryAllocator.cxx
+  src/resources/allocators/ArenaAllocator.cxx
 
   src/buffers/ManagedBuffer.cxx
-  src/buffers/HostVisibleStrategy.cxx
-  src/buffers/ArenaStrategy.cxx
   src/buffers/BufferSystem.cxx
-  src/buffers/DeviceBufferSystem.cxx
 
   src/GraphicsContext.cxx
   src/ResourceProxyImpl.cxx

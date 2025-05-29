@@ -23,12 +23,12 @@ struct GpuBufferEntry {
   uint32_t padding;
 };
 
-struct GeometryRegion {
-  uint32_t indexCount;
-  uint32_t firstIndex;
-  uint32_t vertexOffset;
-  uint32_t instanceCount;
-  uint32_t firstInstance;
-  uint32_t padding;
-};
+// struct GeometryRegion {
+// uint32_t indexCount;
+// uint32_t firstIndex;
+// uint32_t vertexOffset;
+// uint32_t instanceCount;
+// uint32_t firstInstance;
+// uint32_t padding;
+// };
 }

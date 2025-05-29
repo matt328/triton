@@ -2,29 +2,29 @@
 #include "api/fx/IAssetService.hpp"
 #include "api/fx/IEventQueue.hpp"
 #include "as/Model.hpp"
-#include "buffers/BufferCreateInfo.hpp"
 #include "buffers/BufferSystem.hpp"
-#include "buffers/DeviceBufferSystem.hpp"
 #include "buffers/UploadPlan.hpp"
 #include "r3/GeometryBufferPack.hpp"
+#include "resources/TransferSystem.hpp"
+#include "resources/allocators/GeometryAllocator.hpp"
 
 namespace tr {
 
-DefaultAssetSystem::DefaultAssetSystem(std::shared_ptr<IEventQueue> newEventQueue,
-                                       std::shared_ptr<IAssetService> newAssetService,
-                                       std::shared_ptr<DeviceBufferSystem> newDeviceBufferSystem,
-                                       std::shared_ptr<BufferSystem> newBufferSystem,
-                                       std::shared_ptr<GeometryBufferPack> newGeometryBufferPack)
+DefaultAssetSystem::DefaultAssetSystem(
+    std::shared_ptr<IEventQueue> newEventQueue,
+    std::shared_ptr<IAssetService> newAssetService,
+    std::shared_ptr<BufferSystem> newBufferSystem,
+    std::shared_ptr<GeometryBufferPack> newGeometryBufferPack,
+    std::shared_ptr<TransferSystem> newTransferSystem,
+    std::shared_ptr<GeometryAllocator> newGeometryAllocator,
+    std::shared_ptr<GeometryHandleMapper> newGeometryHandleMapper)
     : eventQueue{std::move(newEventQueue)},
       assetService{std::move(newAssetService)},
-      deviceBufferSystem{std::move(newDeviceBufferSystem)},
       bufferSystem{std::move(newBufferSystem)},
       geometryBufferPack{std::move(newGeometryBufferPack)},
-      stagingBufferHandle{
-          bufferSystem->registerBuffer(BufferCreateInfo{.bufferType = BufferType::HostTransient,
-                                                        .bufferUsage = BufferUsage::Storage,
-                                                        .initialSize = 10240,
-                                                        .debugName = "Buffer-GeometryStaging"})} {
+      transferSystem{std::move(newTransferSystem)},
+      geometryAllocator{std::move(newGeometryAllocator)},
+      geometryHandleMapper{std::move(newGeometryHandleMapper)} {
   Log.trace("Constructing DefaultAssetSystem");
 
   eventQueue->subscribe<BeginResourceBatch>(
@@ -48,12 +48,6 @@ DefaultAssetSystem::DefaultAssetSystem(std::shared_ptr<IEventQueue> newEventQueu
   eventQueue->subscribe<EndResourceBatch>(
       [this](const EndResourceBatch& batch) { handleEndResourceBatch(batch.batchId); },
       "test_group");
-
-  eventQueue->subscribe<UploadGeometryResponse>(
-      [this](const UploadGeometryResponse& uploaded) { handleGeometryUploaded(uploaded); });
-
-  eventQueue->subscribe<UploadImageResponse>(
-      [this](const UploadImageResponse& uploaded) { handleImageUploaded(uploaded); });
 }
 
 DefaultAssetSystem::~DefaultAssetSystem() {
@@ -61,23 +55,18 @@ DefaultAssetSystem::~DefaultAssetSystem() {
 }
 
 auto DefaultAssetSystem::handleEndResourceBatch(uint64_t batchId) -> void {
-  auto uploadPlan = UploadPlan{.stagingBuffer = stagingBufferHandle};
+  auto uploadPlan = UploadPlan{.stagingBuffer = transferSystem->getTransferContext().stagingBuffer};
+  std::vector<StaticModelResponse> responses{};
+  // TODO(Resources-1): change models to store data via unique_ptr that can be moved into
+  // whatever needs to own the data. Doesn't change functionality, but expresses clearer ownership
+  // semantics.
+  std::vector<as::Model> loadedModels{};
 
   for (auto& eventVariant : eventBatches[batchId]) {
     auto visitor = [&](auto&& arg) -> void {
       using T = std::decay_t<decltype(arg)>;
       if constexpr (std::is_same_v<T, StaticModelRequest>) {
-        Log.trace("Handling Static Model Request ID: {}", arg.requestId);
-        const auto model = assetService->loadModel(arg.modelFilename);
-
-        const auto geometryData = deInterleave(*model.staticVertices, model.indices);
-        const auto uploadData = fromGeometryData(*geometryData);
-        uploadPlan.uploads.insert(uploadPlan.uploads.end(), uploadData.begin(), uploadData.end());
-
-        const auto imageUploadData = fromImageData(model.imageData);
-        uploadPlan.uploads.insert(uploadPlan.uploads.end(),
-                                  imageUploadData.begin(),
-                                  imageUploadData.end());
+        handleStaticModelRequest(arg, uploadPlan, responses, loadedModels);
       }
       if constexpr (std::is_same_v<T, DynamicModelRequest>) {
         Log.trace("Handling Dynamic Model Request ID: {}", arg.requestId);
@@ -85,42 +74,44 @@ auto DefaultAssetSystem::handleEndResourceBatch(uint64_t batchId) -> void {
     };
     std::visit(visitor, *eventVariant);
   }
-  uploadPlan.sortByBuffer();
-  // TODO(matt): check staging buffer budget and handle overage somehow
-  deviceBufferSystem->resizeBuffers(uploadPlan);
 
-  /*
-    - Add support for the GeometryRegionData buffer.
-    - Add IBufferAllocator support to the BufferSystems so each buffer can have an
-    AllocationStrategy an the BufferSystems can have a method like allocate(bufferHandle, size,
-    stride) that returns an offset of where to copy the data
-    - During the Allocation phase, track and fill out a GpuGeometryRegionData for each separate
-    'mesh' and make sure to then allocate that and create an UploadData for it as well.
-    - Memcopy the data into the staging buffer, and capture copy commands into the commandBuffer,
-    'merging' copies into the same dstBuffer.
-    - Submit the commandbuffer, wait on the fence, and emit all the StaticModelResponses
-    - Think about the usefulness of a BatchComplete event.
-    - Think about how to extend the UploadPlan to include images as well
-    - Figure out how to split batches according to staging buffer size.
-  */
+  transferSystem->beginUpload(uploadPlan);
+
+  transferSystem->finalizeUpload(uploadPlan);
+
+  loadedModels.clear();
+
+  for (const auto& response : responses) {
+    eventQueue->emit(response);
+  }
 }
 
-auto DefaultAssetSystem::handleStaticModelRequest(const StaticModelRequest& smRequest) -> void {
+auto DefaultAssetSystem::handleStaticModelRequest(const StaticModelRequest& smRequest,
+                                                  UploadPlan& uploadPlan,
+                                                  std::vector<StaticModelResponse>& responses,
+                                                  std::vector<as::Model>& loadedModels) -> void {
   Log.trace("Handling Static Model Request ID: {}", smRequest.requestId);
-}
+  loadedModels.push_back(assetService->loadModel(smRequest.modelFilename));
+  const auto& model = loadedModels.back();
+  const auto geometryData = deInterleave(*model.staticVertices, model.indices);
 
-auto DefaultAssetSystem::handleGeometryUploaded(const UploadGeometryResponse& uploaded) -> void {
-  Log.trace("Handling UploadGeometryResponse Id={}, batchId={}",
-            uploaded.requestId,
-            uploaded.batchId);
+  const auto [regionHandle, uploads] =
+      geometryAllocator->allocate(*geometryData, transferSystem->getTransferContext());
 
-  Log.trace("Finished Handling UploadGeometryResponse id={}", uploaded.requestId);
-}
+  // Note: store off this region handle so we can emit a StaticModelResponse event
+  [[maybe_unused]] const auto returnableHandle = geometryHandleMapper->toPublic(regionHandle);
+  responses.push_back(StaticModelResponse{
+      .batchId = smRequest.batchId,
+      .requestId = smRequest.requestId,
+      .entityName = smRequest.entityName,
+      .geometryHandle = returnableHandle,
+  });
 
-auto DefaultAssetSystem::handleImageUploaded(const UploadImageResponse& uploaded) -> void {
-  Log.trace("Handling UploadImageResponse id={}, batchId={}", uploaded.requestId, uploaded.batchId);
-
-  Log.trace("Finished Handling UploadGeometryResponse id={}", uploaded.requestId);
+  uploadPlan.uploads.insert(uploadPlan.uploads.end(), uploads.begin(), uploads.end());
+  const auto imageUploadData = fromImageData(model.imageData);
+  uploadPlan.uploads.insert(uploadPlan.uploads.end(),
+                            imageUploadData.begin(),
+                            imageUploadData.end());
 }
 
 auto DefaultAssetSystem::deInterleave(const std::vector<as::StaticVertex>& vertices,
@@ -128,14 +119,14 @@ auto DefaultAssetSystem::deInterleave(const std::vector<as::StaticVertex>& verti
     -> std::unique_ptr<GeometryData> {
   auto positions = std::vector<GpuVertexPositionData>{};
   auto texCoords = std::vector<GpuVertexTexCoordData>{};
-  positions.resize(vertices.size());
-  texCoords.resize(vertices.size());
+  positions.reserve(vertices.size());
+  texCoords.reserve(vertices.size());
   for (const auto& vertex : vertices) {
     positions.push_back({vertex.position});
     texCoords.push_back({vertex.texCoord});
   }
   auto indices = std::vector<GpuIndexData>{};
-  indices.resize(indexData.size());
+  indices.reserve(indexData.size());
   for (const auto& index : indexData) {
     indices.push_back({index});
   }
