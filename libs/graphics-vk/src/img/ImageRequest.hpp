@@ -42,7 +42,7 @@ struct ImageKey {
 
 namespace std {
 template <>
-struct std::hash<tr::ImageRequest> {
+struct hash<tr::ImageRequest> {
   auto operator()(const tr::ImageRequest& req) const -> std::size_t {
     std::size_t h = std::hash<std::string>{}(req.logicalName);
     h ^= std::hash<int>{}(static_cast<int>(req.format)) + 0x9e3779b9 + (h << 6) + (h >> 2);

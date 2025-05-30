@@ -38,6 +38,8 @@
 #include "resources/allocators/IBufferAllocator.hpp"
 #include "gfx/GeometryHandleMapper.hpp"
 
+#include "bk/ThreadedSystem.hpp"
+
 #define BOOST_DI_CFG_CTOR_LIMIT_SIZE 15
 #include <di.hpp>
 

@@ -29,9 +29,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 
 if(APPLE OR UNIX)
   set(CMAKE_CXX_FLAGS -std=c++23)
-  add_compile_options(-stdlib=libc++)
-  add_link_options(-fuse-ld=lld -stdlib=libc++)
-  set(CMAKE_EXE_LINKER_FLAGS "-L/usr/local/opt/llvm/lib/c++ -L/usr/local/opt/llvm/lib/unwind -lunwind -lc++ -lc++abi")
+  add_link_options(-fuse-ld=lld)
 endif()
 
 set(CATCH2_VERSION v3.6.0)

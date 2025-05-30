@@ -54,6 +54,13 @@ DefaultAssetSystem::~DefaultAssetSystem() {
   Log.trace("Destroying DefaultAssetSystem");
 }
 
+auto DefaultAssetSystem::run(std::stop_token token) -> void {
+  while (!token.stop_requested()) {
+    eventQueue->dispatchPending();
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+  }
+}
+
 auto DefaultAssetSystem::handleEndResourceBatch(uint64_t batchId) -> void {
   auto uploadPlan = UploadPlan{.stagingBuffer = transferSystem->getTransferContext().stagingBuffer};
   std::vector<StaticModelResponse> responses{};

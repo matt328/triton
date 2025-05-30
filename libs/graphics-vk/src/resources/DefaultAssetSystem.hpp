@@ -34,6 +34,8 @@ public:
   auto operator=(const DefaultAssetSystem&) -> DefaultAssetSystem& = delete;
   auto operator=(DefaultAssetSystem&&) -> DefaultAssetSystem& = delete;
 
+  auto run(std::stop_token token) -> void;
+
 private:
   std::shared_ptr<IEventQueue> eventQueue;
   std::shared_ptr<IAssetService> assetService;
