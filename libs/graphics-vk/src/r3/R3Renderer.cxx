@@ -64,7 +64,7 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
       imageManager{std::move(newImageManager)},
       geometryBufferPack{std::move(newGeometryBufferPack)},
       frameState{std::move(newFrameState)} {
-
+  Log.trace("Constructing R3Renderer");
   /*
     TODO(matt): createComputeCullingPass()
     - register a fullscreen quad geometry specifically for use by the composition pass to write onto

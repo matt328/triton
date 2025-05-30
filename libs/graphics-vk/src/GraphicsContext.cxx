@@ -2,6 +2,7 @@
 #include "FrameState.hpp"
 #include "api/gfx/Geometry.hpp"
 #include "bk/HandleMapper.hpp"
+#include "gfx/ThreadedAssetSystem.hpp"
 #include "r3/GeometryBufferPack.hpp"
 #include "resources/DefaultAssetSystem.hpp"
 #include "DefaultDebugManager.hpp"
@@ -51,7 +52,7 @@ GraphicsContext::GraphicsContext(std::shared_ptr<IEventQueue> newEventQueue,
                                  std::shared_ptr<IRenderContext> newRenderContext,
                                  std::shared_ptr<IStateBuffer> newStateBuffer,
                                  std::shared_ptr<Device> newDevice,
-                                 std::shared_ptr<IAssetSystem> newAssetSystem)
+                                 std::shared_ptr<ThreadedAssetSystem> newAssetSystem)
     : eventQueue{std::move(newEventQueue)},
       renderContext{std::move(newRenderContext)},
       stateBuffer{std::move(newStateBuffer)},
@@ -68,6 +69,7 @@ auto GraphicsContext::create(std::shared_ptr<IEventQueue> newEventQueue,
                              std::shared_ptr<IWindow> newWindow,
                              std::shared_ptr<IAssetService> newAssetService)
     -> std::shared_ptr<GraphicsContext> {
+  Log.trace("GraphicsContext::create()");
   const auto rendererConfig = RenderContextConfig{.useDescriptorBuffers = false,
                                                   .maxStaticObjects = 1024,
                                                   .maxDynamicObjects = 1024,
@@ -110,11 +112,17 @@ auto GraphicsContext::create(std::shared_ptr<IEventQueue> newEventQueue,
       di::bind<BufferSystem>.to<BufferSystem>(),
       di::bind<ContextFactory>.to<ContextFactory>(),
       di::bind<RenderPassFactory>.to<RenderPassFactory>(),
-      di::bind<IAssetSystem>.to<DefaultAssetSystem>(),
       di::bind<IAssetService>.to<>(newAssetService),
       di::bind<GeometryBufferPack>.to<GeometryBufferPack>(),
       di::bind<FrameState>.to<FrameState>(),
-      di::bind<GeometryHandleMapper>.to(std::make_shared<GeometryHandleMapper>()));
+      di::bind<GeometryHandleMapper>.to(std::make_shared<GeometryHandleMapper>()),
+      di::bind<IAssetSystem>.to<DefaultAssetSystem>(),
+      di::bind<std::function<std::unique_ptr<IAssetSystem>()>>.to([](const auto& injector) {
+        return [&injector]() {
+          Log.trace("Calling IAssetSystem Factory");
+          return injector.template create<std::unique_ptr<IAssetSystem>>();
+        };
+      }));
 
   return injector.create<std::shared_ptr<GraphicsContext>>();
 }
@@ -139,6 +147,7 @@ auto GraphicsContext::run() -> void {
   }
   Log.trace("Waiting Device Idle");
   device->waitIdle();
+  assetSystem->requestStop();
 }
 
 auto GraphicsContext::stop() -> void {

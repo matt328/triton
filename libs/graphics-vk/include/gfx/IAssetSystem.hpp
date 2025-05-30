@@ -11,6 +11,8 @@ public:
   IAssetSystem(IAssetSystem&&) = delete;
   auto operator=(const IAssetSystem&) -> IAssetSystem& = default;
   auto operator=(IAssetSystem&&) -> IAssetSystem& = delete;
+
+  virtual auto run(std::stop_token token) -> void = 0;
 };
 
 }

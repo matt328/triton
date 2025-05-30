@@ -173,7 +173,8 @@ auto DefaultAssetSystem::fromGeometryData(const GeometryData& geometryData)
   return uploadDataList;
 }
 
-auto DefaultAssetSystem::fromImageData(const as::ImageData& imageData) -> std::vector<UploadData> {
+auto DefaultAssetSystem::fromImageData([[maybe_unused]] const as::ImageData& imageData)
+    -> std::vector<UploadData> {
   return {};
 }
 
