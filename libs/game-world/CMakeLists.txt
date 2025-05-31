@@ -3,6 +3,7 @@ project("game-world")
 set(gameworld_SRC
   src/EntityManager.cxx
   src/ctx/GameWorldContext.cxx
+  src/systems2/FinalizerSystem.cxx
 )
 
 add_library(${PROJECT_NAME} STATIC ${gameworld_SRC})

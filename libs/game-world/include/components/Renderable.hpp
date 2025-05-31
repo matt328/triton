@@ -1,11 +1,12 @@
 #pragma once
 
-#include "api/gw/AssetStructs.hpp"
+#include "api/gfx/Geometry.hpp"
+#include "bk/Handle.hpp"
 
 namespace tr {
 
 struct Renderable {
-  std::vector<MeshData> meshData;
+  std::vector<Handle<Geometry>> geometryHandles;
 };
 
 }

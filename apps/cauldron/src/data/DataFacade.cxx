@@ -60,32 +60,53 @@ DataFacade::DataFacade(std::shared_ptr<tr::IEventQueue> newEventQueue)
   });
 
   eventQueue->subscribe<tr::StaticModelResponse>(
-      [&](const tr::StaticModelResponse& event) {
-        Log.trace("Received StaticModelResponse id={}", event.requestId);
-      },
+      [&](const tr::StaticModelResponse& event) { handleStaticModelResponse(event); },
       "test_group");
 
   const auto beginBatch = tr::BeginResourceBatch{.batchId = 1};
   const auto endBatch = tr::EndResourceBatch{.batchId = 1};
+  const auto vikingRoomRequestId = requestIdGenerator.getKey();
   const auto vikingRoomRequest = tr::StaticModelRequest{
       .batchId = 1,
-      .requestId = 4,
+      .requestId = vikingRoomRequestId,
       .modelFilename =
           "/home/matt/Projects/game-assets/models/current/viking_room/viking_room_v4.trm",
       .entityName = "Viking Room #1"};
+  const auto vikingRoomRequest2Id = requestIdGenerator.getKey();
   const auto vikingRoomRequest2 = tr::StaticModelRequest{
       .batchId = 1,
-      .requestId = 6,
+      .requestId = vikingRoomRequest2Id,
       .modelFilename =
           "/home/matt/Projects/game-assets/models/current/viking_room/viking_room_v4.trm",
       .entityName = "Viking Room #2"};
 
+  const auto peasantRequestId = requestIdGenerator.getKey();
   const auto peasant = tr::DynamicModelRequest{
       .batchId = 1,
-      .requestId = 7,
+      .requestId = peasantRequestId,
       .modelFilename =
           "/home/matt/Projects/game-assets/models/current/viking_room/viking_room_v4.trm",
       .entityName = "Viking Room #2"};
+
+  inFlightMap.emplace(vikingRoomRequestId,
+                      EntityData{.name = "viking room 1",
+                                 .orientation = Orientation{.position = glm::vec3{1.f, 2.4f, 3.f}},
+                                 .modelName = "VikingRoom",
+                                 .skeleton = "",
+                                 .animations = {}});
+
+  inFlightMap.emplace(vikingRoomRequest2Id,
+                      EntityData{.name = "Viking Room 2",
+                                 .orientation = Orientation{.position = glm::vec3{1.f, 2.4f, 3.f}},
+                                 .modelName = "VikingRoom",
+                                 .skeleton = "",
+                                 .animations = {}});
+  inFlightMap.emplace(peasantRequestId,
+                      EntityData{.name = "peasant1",
+                                 .orientation = Orientation{.position = glm::vec3{1.f, 2.4f, 3.f}},
+                                 .modelName = "PeasantModel",
+                                 .skeleton = "MainSkeleton",
+                                 .animations = {"Idle", "Walk"}});
 
   eventQueue->emit(beginBatch, "test_group");
   eventQueue->emit(vikingRoomRequest, "test_group");
@@ -96,6 +117,16 @@ DataFacade::DataFacade(std::shared_ptr<tr::IEventQueue> newEventQueue)
 
 DataFacade::~DataFacade() {
   Log.trace("Destroying DataFacade");
+}
+
+auto DataFacade::handleStaticModelResponse(const tr::StaticModelResponse& response) -> void {
+  Log.trace("Received StaticModelResponse id={}, gameObjectId={}",
+            response.requestId,
+            response.gameObjectId);
+  dataStore.entityNameMap.emplace(response.entityName, response.gameObjectId);
+  const auto entityData = inFlightMap.at(response.requestId);
+  dataStore.scene.insert({entityData.name, entityData});
+  inFlightMap.erase(response.requestId);
 }
 
 void DataFacade::createStaticModel(const EntityData& entityData) noexcept {

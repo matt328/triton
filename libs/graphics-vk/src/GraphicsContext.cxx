@@ -1,12 +1,9 @@
 #include "gfx/GraphicsContext.hpp"
 #include "FrameState.hpp"
-#include "api/gfx/Geometry.hpp"
-#include "bk/HandleMapper.hpp"
 #include "r3/GeometryBufferPack.hpp"
 #include "resources/DefaultAssetSystem.hpp"
 #include "DefaultDebugManager.hpp"
 #include "ImmediateTransferContext.hpp"
-#include "VkGraphicsCreateInfo.hpp"
 #include "api/fx/IEventQueue.hpp"
 #include "mem/Allocator.hpp"
 #include "pipeline/SpirvShaderModuleFactory.hpp"
@@ -31,11 +28,9 @@
 #include "r3/draw-context/ContextFactory.hpp"
 #include "r3/draw-context/IDispatchContext.hpp"
 #include "buffers/BufferSystem.hpp"
-#include "img/ImageManager.hpp"
 #include "DebugStateBuffer.hpp"
 
 #include "resources/allocators/GeometryDispatcher.hpp"
-#include "resources/allocators/IBufferAllocator.hpp"
 #include "gfx/GeometryHandleMapper.hpp"
 
 #define BOOST_DI_CFG_CTOR_LIMIT_SIZE 15
@@ -62,7 +57,7 @@ GraphicsContext::~GraphicsContext() {
 }
 
 auto GraphicsContext::create(std::shared_ptr<IEventQueue> newEventQueue,
-                             [[maybe_unused]] std::shared_ptr<IStateBuffer> newStateBuffer,
+                             std::shared_ptr<IStateBuffer> newStateBuffer,
                              std::shared_ptr<IWindow> newWindow,
                              std::shared_ptr<IAssetService> newAssetService)
     -> std::shared_ptr<GraphicsContext> {
@@ -79,8 +74,7 @@ auto GraphicsContext::create(std::shared_ptr<IEventQueue> newEventQueue,
 
   const auto injector =
       di::make_injector(di::bind<IEventQueue>.to<>(newEventQueue),
-                        // di::bind<IStateBuffer>.to<>(newStateBuffer),
-                        di::bind<IStateBuffer>.to<DebugStateBuffer>(),
+                        di::bind<IStateBuffer>.to<>(newStateBuffer),
                         di::bind<IWindow>.to<>(newWindow),
                         di::bind<RenderContextConfig>.to<>(rendererConfig),
                         di::bind<Context>.to<Context>(),

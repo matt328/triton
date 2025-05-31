@@ -3,6 +3,7 @@
 #include "DefaultAssetService.hpp"
 #include "EventQueue.hpp"
 #include "GlfwWindow.hpp"
+#include "QueueStateBuffer.hpp"
 #include "RingBuffer.hpp"
 #include "api/fx/IApplication.hpp"
 #include "api/fx/IAssetService.hpp"
@@ -25,8 +26,7 @@ auto ThreadedFrameworkContext::create(const FrameworkConfig& config,
   const auto actionSystem = std::make_shared<ActionSystem>(eventQueue);
 
   const auto taskQueue = std::make_shared<TaskQueue>(TaskQueueConfig{.maxQueueSize = 1024});
-  const auto stateBuffer =
-      std::make_shared<RingBuffer>(RingBufferConfig{.capacity = 6, .maxObjectCount = 1024});
+  const auto stateBuffer = std::make_shared<QueueStateBuffer>();
 
   const auto window =
       std::make_shared<GlfwWindow>(WindowCreateInfo{.height = config.initialWindowSize.y,
@@ -66,7 +66,7 @@ auto ThreadedFrameworkContext::startGameworld() -> void {
   gameThread = std::jthread([this](std::stop_token token) {
     pthread_setname_np(pthread_self(), "GameWorld");
     try {
-      gameWorldContext = GameWorldContext::create(eventQueue);
+      gameWorldContext = GameWorldContext::create(eventQueue, stateBuffer);
       gameWorldContext->run(token);
       Log.trace("nulling out gameWorldContext");
       gameWorldContext = nullptr;

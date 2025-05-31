@@ -6,6 +6,7 @@ set(framework_SRC
    src/ctx/ThreadedFrameworkContext.cxx
    src/GuiCallbackRegistrar.cxx
    src/GeometryGenerator.cxx
+   src/QueueStateBuffer.cxx
    src/RingBuffer.cxx
 )
 

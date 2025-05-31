@@ -54,7 +54,7 @@ private:
 
   auto handleStaticModelRequest(const StaticModelRequest& smRequest,
                                 UploadPlan& uploadPlan,
-                                std::vector<StaticModelResponse>& responses,
+                                std::vector<StaticModelUploaded>& responses,
                                 std::vector<as::Model>& loadedModels) -> void;
 
   auto fromGeometryData(const GeometryData& geometryData) -> std::vector<UploadData>;

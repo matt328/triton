@@ -1,6 +1,7 @@
 #include "gw/GameWorldContext.hpp"
 #include "EntityManager.hpp"
 #include "api/fx/IEventQueue.hpp"
+#include "api/fx/IStateBuffer.hpp"
 #include "gw/IEntityManager.hpp"
 
 #include <di.hpp>
@@ -10,15 +11,20 @@ namespace di = boost::di;
 namespace tr {
 
 GameWorldContext::GameWorldContext(std::shared_ptr<IEventQueue> newEventQueue,
-                                   std::shared_ptr<IEntityManager> newEntityManager)
-    : eventQueue{std::move(newEventQueue)}, entityManager{std::move(newEntityManager)} {
+                                   std::shared_ptr<IEntityManager> newEntityManager,
+                                   std::shared_ptr<IStateBuffer> newStateBuffer)
+    : eventQueue{std::move(newEventQueue)},
+      entityManager{std::move(newEntityManager)},
+      stateBuffer{std::move(newStateBuffer)} {
 }
 
-auto GameWorldContext::create(std::shared_ptr<IEventQueue> newEventQueue)
+auto GameWorldContext::create(std::shared_ptr<IEventQueue> newEventQueue,
+                              std::shared_ptr<IStateBuffer> newStateBuffer)
     -> std::shared_ptr<GameWorldContext> {
 
   const auto injector = di::make_injector(di::bind<IEventQueue>.to<>(newEventQueue),
-                                          di::bind<IEntityManager>.to<EntityManager>());
+                                          di::bind<IEntityManager>.to<EntityManager>(),
+                                          di::bind<IStateBuffer>.to<>(newStateBuffer));
 
   return injector.create<std::shared_ptr<GameWorldContext>>();
 }

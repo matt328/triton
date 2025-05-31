@@ -60,6 +60,7 @@ auto CullingDispatchContext::bind(const Frame* frame,
 
 auto CullingDispatchContext::dispatch(const Frame* frame, vk::raii::CommandBuffer& commandBuffer)
     -> void {
+  Log.trace("objectCount={}", frame->getObjectCount());
   uint32_t workgroupCount = (frame->getObjectCount() + WorkgroupSize - 1) / WorkgroupSize;
   commandBuffer.dispatch(workgroupCount, 1, 1);
 }

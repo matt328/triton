@@ -3,7 +3,7 @@
 namespace tr {
 
 struct BufferRegion {
-  size_t offset{};
+  size_t offset = 0;
   size_t size{};
 
   auto operator==(const BufferRegion& other) const -> bool {

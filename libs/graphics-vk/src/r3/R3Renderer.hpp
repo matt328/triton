@@ -6,6 +6,7 @@
 #include "gfx/IRenderContext.hpp"
 #include "gfx/RenderContextConfig.hpp"
 #include "r3/render-pass/GraphicsPass.hpp"
+#include "gfx/GeometryHandleMapper.hpp"
 
 namespace tr {
 
@@ -18,6 +19,7 @@ class CommandBufferManager;
 class BufferSystem;
 class GeometryBufferPack;
 class FrameState;
+class GeometryAllocator;
 
 namespace queue {
 class Graphics;
@@ -33,6 +35,7 @@ struct GlobalBuffers {
   LogicalHandle<ManagedBuffer> objectPositions;
   LogicalHandle<ManagedBuffer> objectRotations;
   LogicalHandle<ManagedBuffer> objectScales;
+  LogicalHandle<ManagedBuffer> geometryRegion;
 };
 
 struct GlobalImages {
@@ -54,7 +57,9 @@ public:
              std::shared_ptr<IStateBuffer> newStateBuffer,
              std::shared_ptr<ImageManager> newImageManager,
              std::shared_ptr<GeometryBufferPack> newGeometryBufferPack,
-             std::shared_ptr<FrameState> newFrameState);
+             std::shared_ptr<FrameState> newFrameState,
+             std::shared_ptr<GeometryAllocator> newGeometryAllocator,
+             std::shared_ptr<GeometryHandleMapper> newGeometryHandleMapper);
   ~R3Renderer() override = default;
 
   R3Renderer(const R3Renderer&) = delete;
@@ -79,6 +84,8 @@ private:
   std::shared_ptr<ImageManager> imageManager;
   std::shared_ptr<GeometryBufferPack> geometryBufferPack;
   std::shared_ptr<FrameState> frameState;
+  std::shared_ptr<GeometryAllocator> geometryAllocator;
+  std::shared_ptr<GeometryHandleMapper> geometryHandleMapper;
 
   std::unordered_map<RenderPassType, GraphicsPass> renderPasses;
 
@@ -87,11 +94,17 @@ private:
   GlobalBuffers globalBuffers{};
   GlobalImages globalImages{};
 
+  std::vector<GpuGeometryRegionData> geometryRegionContents;
+
   auto createGlobalBuffers() -> void;
   auto createGlobalImages() -> void;
   auto createComputeCullingPass() -> void;
   auto createForwardRenderPass() -> void;
   auto createCompositionRenderPass() -> void;
   auto endFrame(const Frame* frame, const FrameGraphResult& result) -> void;
+
+  auto buildFrameState(std::vector<GpuObjectData>& objectData,
+                       std::vector<StateHandles>& stateHandles,
+                       std::vector<GpuGeometryRegionData>& regionBuffer) -> void;
 };
 }

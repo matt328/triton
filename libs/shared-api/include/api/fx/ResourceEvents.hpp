@@ -17,12 +17,32 @@ struct EndResourceBatch {
   uint64_t batchId;
 };
 
+/// Clients emits
+/// AssetSystem handles
 struct StaticModelRequest {
   uint64_t batchId;
   uint64_t requestId;
   std::string modelFilename;
   std::string entityName;
   std::optional<tr::TransformData> initialTransform = std::nullopt;
+};
+
+/// AssetSystem emits
+/// EntityManager handles
+struct StaticModelUploaded {
+  uint64_t batchId;
+  uint64_t requestId;
+  std::string entityName;
+  Handle<Geometry> geometryHandle;
+};
+
+/// EntityManager emits
+/// Client Handles
+struct StaticModelResponse {
+  uint64_t batchId;
+  uint64_t requestId;
+  std::string entityName;
+  GameObjectId gameObjectId;
 };
 
 struct DynamicModelRequest {
@@ -38,13 +58,6 @@ struct DynamicModelResponse {
   uint64_t requestId;
   std::string entityName;
   tr::GameObjectId objectId;
-};
-
-struct StaticModelResponse {
-  uint64_t batchId;
-  uint64_t requestId;
-  std::string entityName;
-  Handle<Geometry> geometryHandle;
 };
 
 struct UploadGeometryRequest {

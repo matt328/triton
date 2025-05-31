@@ -1,5 +1,6 @@
 #pragma once
 
+#include "api/fx/ResourceEvents.hpp"
 #include "api/gw/GameObjectType.hpp"
 #include "DataStore.hpp"
 #include "bk/Rando.hpp"
@@ -106,6 +107,8 @@ private:
   tr::MapKey requestIdGenerator;
 
   std::unordered_map<uint64_t, EntityData> inFlightMap;
+
+  auto handleStaticModelResponse(const tr::StaticModelResponse& response) -> void;
 };
 
 }

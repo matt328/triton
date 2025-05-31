@@ -11,9 +11,11 @@
 #include "r3/draw-context/IDispatchContext.hpp"
 #include "r3/render-pass/ComputePass.hpp"
 #include "r3/render-pass/RenderPassFactory.hpp"
+#include "resources/allocators/GeometryAllocator.hpp"
 #include "task/Frame.hpp"
 #include "render-pass/GraphicsPassCreateInfo.hpp"
 #include "gfx/PassGraphInfo.hpp"
+#include "gfx/GeometryHandleMapper.hpp"
 
 namespace tr {
 
@@ -50,7 +52,9 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
                        std::shared_ptr<IStateBuffer> newStateBuffer,
                        std::shared_ptr<ImageManager> newImageManager,
                        std::shared_ptr<GeometryBufferPack> newGeometryBufferPack,
-                       std::shared_ptr<FrameState> newFrameState)
+                       std::shared_ptr<FrameState> newFrameState,
+                       std::shared_ptr<GeometryAllocator> newGeometryAllocator,
+                       std::shared_ptr<GeometryHandleMapper> newGeometryHandleMapper)
     : rendererConfig{newRenderConfig},
       frameManager{std::move(newFrameManager)},
       graphicsQueue{std::move(newGraphicsQueue)},
@@ -63,7 +67,9 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
       stateBuffer{std::move(newStateBuffer)},
       imageManager{std::move(newImageManager)},
       geometryBufferPack{std::move(newGeometryBufferPack)},
-      frameState{std::move(newFrameState)} {
+      frameState{std::move(newFrameState)},
+      geometryAllocator{std::move(newGeometryAllocator)},
+      geometryHandleMapper{std::move(newGeometryHandleMapper)} {
   Log.trace("Constructing R3Renderer");
   /*
     TODO(matt): createComputeCullingPass()
@@ -155,6 +161,10 @@ auto R3Renderer::createGlobalBuffers() -> void {
   globalBuffers.objectScales = bufferSystem->registerPerFrameBuffer(
       BufferCreateInfo{.bufferLifetime = BufferLifetime::Transient,
                        .debugName = "Buffer-ObjectScales"});
+
+  globalBuffers.geometryRegion = bufferSystem->registerPerFrameBuffer(
+      BufferCreateInfo{.bufferLifetime = BufferLifetime::Transient,
+                       .debugName = "Buffer-GeometryRegion"});
 }
 
 auto R3Renderer::createGlobalImages() -> void {
@@ -189,6 +199,16 @@ void R3Renderer::renderNextFrame() {
   Timestamp currentTime = std::chrono::steady_clock::now();
   stateBuffer->getInterpolatedStates(current, prev, alpha, currentTime);
 
+  // There will eventually be two states sent to the Compute shader. It will interpolate them.
+  // For now, just use current.
+  buildFrameState(current.objectMetadata, current.stateHandles, geometryRegionContents);
+
+  // GeometryRegionBuffer
+  bufferSystem->insert(
+      frame->getLogicalBuffer(globalBuffers.geometryRegion),
+      geometryRegionContents.data(),
+      BufferRegion{.size = sizeof(GpuGeometryRegionData) * geometryRegionContents.size()});
+
   // Object Data Buffers
   bufferSystem->insert(frame->getLogicalBuffer(globalBuffers.objectData),
                        current.objectMetadata.data(),
@@ -208,6 +228,19 @@ void R3Renderer::renderNextFrame() {
 
   const auto& results = frameGraph->execute(frame);
   endFrame(frame, results);
+}
+
+auto R3Renderer::buildFrameState(std::vector<GpuObjectData>& objectData,
+                                 std::vector<StateHandles>& stateHandles,
+                                 std::vector<GpuGeometryRegionData>& regionBuffer) -> void {
+  regionBuffer.clear();
+  regionBuffer.reserve(objectData.size());
+  for (size_t i = 0; i < objectData.size(); ++i) {
+    auto regionHandle = geometryHandleMapper->toInternal(stateHandles[i].geometryHandle);
+    auto regionData = geometryAllocator->getRegionData(*regionHandle);
+    objectData[i].geometryRegionId = regionBuffer.size();
+    regionBuffer.push_back(regionData);
+  }
 }
 
 auto R3Renderer::endFrame(const Frame* frame, const FrameGraphResult& results) -> void {

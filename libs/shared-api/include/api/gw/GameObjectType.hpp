@@ -2,7 +2,6 @@
 
 namespace tr {
 
-enum class GameObjectId : uint32_t {
-};
+using GameObjectId = uint32_t;
 
 }

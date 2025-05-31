@@ -75,7 +75,7 @@ auto DefaultAssetSystem::requestStop() -> void {
 
 auto DefaultAssetSystem::handleEndResourceBatch(uint64_t batchId) -> void {
   auto uploadPlan = UploadPlan{.stagingBuffer = transferSystem->getTransferContext().stagingBuffer};
-  std::vector<StaticModelResponse> responses{};
+  std::vector<StaticModelUploaded> responses{};
   // TODO(Resources-1): change models to store data via unique_ptr that can be moved into
   // whatever needs to own the data. Doesn't change functionality, but expresses clearer ownership
   // semantics.
@@ -105,7 +105,7 @@ auto DefaultAssetSystem::handleEndResourceBatch(uint64_t batchId) -> void {
 
 auto DefaultAssetSystem::handleStaticModelRequest(const StaticModelRequest& smRequest,
                                                   UploadPlan& uploadPlan,
-                                                  std::vector<StaticModelResponse>& responses,
+                                                  std::vector<StaticModelUploaded>& responses,
                                                   std::vector<as::Model>& loadedModels) -> void {
   Log.trace("Handling Static Model Request ID: {}", smRequest.requestId);
   loadedModels.push_back(assetService->loadModel(smRequest.modelFilename));
@@ -115,7 +115,7 @@ auto DefaultAssetSystem::handleStaticModelRequest(const StaticModelRequest& smRe
   const auto [regionHandle, uploads] =
       geometryAllocator->allocate(*geometryData, transferSystem->getTransferContext());
 
-  responses.push_back(StaticModelResponse{
+  responses.push_back(StaticModelUploaded{
       .batchId = smRequest.batchId,
       .requestId = smRequest.requestId,
       .entityName = smRequest.entityName,
