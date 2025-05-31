@@ -26,39 +26,51 @@ DefaultAssetSystem::DefaultAssetSystem(
       geometryAllocator{std::move(newGeometryAllocator)},
       geometryHandleMapper{std::move(newGeometryHandleMapper)} {
   Log.trace("Constructing DefaultAssetSystem");
-
-  eventQueue->subscribe<BeginResourceBatch>(
-      [this](const BeginResourceBatch& batch) {
-        eventBatches[batch.batchId] = std::vector<const EventVariant*>{};
-      },
-      "test_group");
-
-  eventQueue->subscribe<StaticModelRequest>(
-      [this](const StaticModelRequest& smRequest, const EventVariant& eventVariant) {
-        eventBatches[smRequest.batchId].push_back(&eventVariant);
-      },
-      "test_group");
-
-  eventQueue->subscribe<DynamicModelRequest>(
-      [this](const DynamicModelRequest& dmRequest, const EventVariant& eventVariant) {
-        eventBatches[dmRequest.batchId].push_back(&eventVariant);
-      },
-      "test_group");
-
-  eventQueue->subscribe<EndResourceBatch>(
-      [this](const EndResourceBatch& batch) { handleEndResourceBatch(batch.batchId); },
-      "test_group");
 }
 
 DefaultAssetSystem::~DefaultAssetSystem() {
   Log.trace("Destroying DefaultAssetSystem");
 }
 
-auto DefaultAssetSystem::run(std::stop_token token) -> void {
-  while (!token.stop_requested()) {
-    eventQueue->dispatchPending();
-    std::this_thread::sleep_for(std::chrono::milliseconds(1));
-  }
+auto DefaultAssetSystem::run() -> void {
+  Log.trace("DefaultAssetSystem::run()");
+
+  thread = std::jthread([&](std::stop_token token) mutable {
+    pthread_setname_np(pthread_self(), "AssetSystem");
+    Log.trace("Started AssetSystemThread");
+    // Create all subscriptions on the thread
+    eventQueue->subscribe<BeginResourceBatch>(
+        [this](const BeginResourceBatch& batch) {
+          eventBatches[batch.batchId] = std::vector<const EventVariant*>{};
+        },
+        "test_group");
+
+    eventQueue->subscribe<StaticModelRequest>(
+        [this](const StaticModelRequest& smRequest, const EventVariant& eventVariant) {
+          eventBatches[smRequest.batchId].push_back(&eventVariant);
+        },
+        "test_group");
+
+    eventQueue->subscribe<DynamicModelRequest>(
+        [this](const DynamicModelRequest& dmRequest, const EventVariant& eventVariant) {
+          eventBatches[dmRequest.batchId].push_back(&eventVariant);
+        },
+        "test_group");
+
+    eventQueue->subscribe<EndResourceBatch>(
+        [this](const EndResourceBatch& batch) { handleEndResourceBatch(batch.batchId); },
+        "test_group");
+
+    while (!token.stop_requested()) {
+      eventQueue->dispatchPending();
+      std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+    Log.trace("AssetSystem thread shutting down");
+  });
+}
+
+auto DefaultAssetSystem::requestStop() -> void {
+  thread.request_stop();
 }
 
 auto DefaultAssetSystem::handleEndResourceBatch(uint64_t batchId) -> void {

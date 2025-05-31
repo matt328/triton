@@ -34,7 +34,8 @@ public:
   auto operator=(const DefaultAssetSystem&) -> DefaultAssetSystem& = delete;
   auto operator=(DefaultAssetSystem&&) -> DefaultAssetSystem& = delete;
 
-  auto run(std::stop_token token) -> void override;
+  auto run() -> void override;
+  auto requestStop() -> void override;
 
 private:
   std::shared_ptr<IEventQueue> eventQueue;
@@ -44,6 +45,8 @@ private:
   std::shared_ptr<TransferSystem> transferSystem;
   std::shared_ptr<GeometryAllocator> geometryAllocator;
   std::shared_ptr<GeometryHandleMapper> geometryHandleMapper;
+
+  std::jthread thread;
 
   std::unordered_map<uint64_t, std::vector<const EventVariant*>> eventBatches;
 

@@ -9,7 +9,6 @@ class IWindow;
 class Device;
 class IAssetSystem;
 class IAssetService;
-class ThreadedAssetSystem;
 
 class GraphicsContext {
 public:
@@ -17,7 +16,7 @@ public:
                   std::shared_ptr<IRenderContext> newRenderContext,
                   std::shared_ptr<IStateBuffer> newStateBuffer,
                   std::shared_ptr<Device> newDevice,
-                  std::shared_ptr<ThreadedAssetSystem> newAssetSystem);
+                  std::shared_ptr<IAssetSystem> newAssetSystem);
   ~GraphicsContext();
 
   GraphicsContext(const GraphicsContext&) = default;
@@ -40,7 +39,7 @@ private:
   std::shared_ptr<IStateBuffer> stateBuffer;
   std::shared_ptr<IWindow> window;
   std::shared_ptr<Device> device;
-  std::shared_ptr<ThreadedAssetSystem> assetSystem;
+  std::shared_ptr<IAssetSystem> assetSystem;
   bool running{true};
 
   std::chrono::steady_clock clock;
