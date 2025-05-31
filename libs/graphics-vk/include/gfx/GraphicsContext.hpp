@@ -30,8 +30,7 @@ public:
                      std::shared_ptr<IAssetService> newAssetService)
       -> std::shared_ptr<GraphicsContext>;
 
-  auto run() -> void;
-  auto stop() -> void;
+  auto run(std::stop_token token) -> void;
 
 private:
   std::shared_ptr<IEventQueue> eventQueue;
@@ -40,7 +39,6 @@ private:
   std::shared_ptr<IWindow> window;
   std::shared_ptr<Device> device;
   std::shared_ptr<IAssetSystem> assetSystem;
-  bool running{true};
 
   std::chrono::steady_clock clock;
 };

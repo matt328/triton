@@ -19,14 +19,11 @@ public:
   static auto create(std::shared_ptr<IEventQueue> newEventQueue)
       -> std::shared_ptr<GameWorldContext>;
 
-  auto run() -> void;
-  auto stop() -> void;
+  auto run(std::stop_token token) -> void;
 
 private:
   std::shared_ptr<IEventQueue> eventQueue;
   std::shared_ptr<IEntityManager> entityManager;
-
-  bool running{};
 };
 
 }

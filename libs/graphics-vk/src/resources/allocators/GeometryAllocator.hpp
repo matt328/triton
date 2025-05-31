@@ -13,11 +13,13 @@ struct UploadData;
 class GeometryBufferPack;
 
 struct GeometryRegion {
-  uint32_t indexCount;
+  uint32_t indexCount{};
   BufferRegion indexRegion;
   BufferRegion positionRegion;
   std::optional<BufferRegion> normalRegion;
   std::optional<BufferRegion> texCoordRegion;
+  std::optional<BufferRegion> colorRegion;
+  std::optional<BufferRegion> animationDataRegion;
 };
 
 class GeometryAllocator {

@@ -51,8 +51,8 @@ private:
   std::shared_ptr<GameWorldContext> gameWorldContext;
   std::shared_ptr<GraphicsContext> graphicsContext;
 
-  std::thread gameThread;
-  std::thread graphicsThread;
+  std::jthread gameThread;
+  std::jthread graphicsThread;
 
   auto configureGameWorldContext() -> std::shared_ptr<GameWorldContext>;
   auto configureGraphicsContext() -> std::shared_ptr<GraphicsContext>;

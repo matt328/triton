@@ -11,7 +11,10 @@ struct TaskQueueConfig {
 class TaskQueue {
 public:
   explicit TaskQueue(const TaskQueueConfig& config) : maxQueueSize{config.maxQueueSize} {
-    thread = std::thread([this]() { this->worker(); });
+    thread = std::thread([this]() {
+      pthread_setname_np(pthread_self(), "TaskQueue");
+      this->worker();
+    });
   }
 
   ~TaskQueue() {
@@ -28,9 +31,8 @@ public:
   auto operator=(TaskQueue&&) -> TaskQueue& = delete;
 
   template <class F, class... Args, class OnComplete>
-  auto enqueue(F&& f,
-               OnComplete&& onComplete,
-               Args&&... args) -> std::future<std::invoke_result_t<F&&, Args&&...>> {
+  auto enqueue(F&& f, OnComplete&& onComplete, Args&&... args)
+      -> std::future<std::invoke_result_t<F&&, Args&&...>> {
     using ReturnType = std::invoke_result_t<F&&, Args&&...>;
 
     auto task = std::make_shared<std::packaged_task<ReturnType()>>(

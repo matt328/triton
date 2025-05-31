@@ -27,17 +27,12 @@ TransferSystem::TransferSystem(std::shared_ptr<BufferSystem> newBufferSystem,
   transferContext.stagingAllocator = std::make_unique<LinearAllocator>(StagingBufferSize);
 }
 
-auto TransferSystem::beginUpload(UploadPlan& uploadPlan) -> void {
+auto TransferSystem::upload(UploadPlan& uploadPlan) -> void {
   uploadPlan.sortByBuffer();
   const auto resizeList = checkSizes(uploadPlan);
   if (!resizeList.empty()) {
     processResizes(resizeList);
   }
-}
-
-// TODO(Resources-1): Allocator can provide grouping hints, but the complexity of that warrants a
-// need that is demonstrated by profiling.
-auto TransferSystem::finalizeUpload(UploadPlan& uploadPlan) -> void {
   std::unordered_map<Handle<ManagedBuffer>, std::vector<vk::BufferCopy2>> bufferCopies{};
 
   for (const auto& upload : uploadPlan.uploads) {
@@ -95,12 +90,6 @@ auto TransferSystem::checkSizes([[maybe_unused]] const UploadPlan& uploadPlan)
 }
 
 auto TransferSystem::processResizes(const std::vector<ResizeRequest>& resizeRequestList) -> void {
-}
-
-auto TransferSystem::allocate(UploadPlan& uploadPlan) -> void {
-}
-
-auto TransferSystem::buildGeometryRegion(UploadPlan& uploadPlan) -> void {
 }
 
 }

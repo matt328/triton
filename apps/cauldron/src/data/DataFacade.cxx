@@ -28,7 +28,7 @@ DataFacade::DataFacade(std::shared_ptr<tr::IEventQueue> newEventQueue)
   // });
 
   eventQueue->subscribe<tr::TerrainCreated>([this](const tr::TerrainCreated& event) {
-    dataStore.entityNameMap.emplace(event.name, event.entityId.value());
+    // dataStore.entityNameMap.emplace(event.name, event.entityId.value());
 
     auto chunkIds = std::vector<BlockData>{};
     chunkIds.reserve(event.chunks.size());
@@ -53,7 +53,7 @@ DataFacade::DataFacade(std::shared_ptr<tr::IEventQueue> newEventQueue)
 
     // Register each Chunk's name -> id
     for (const auto& chunk : event.chunks) {
-      dataStore.entityNameMap.emplace(chunk.name, chunk.entityId.value());
+      // dataStore.entityNameMap.emplace(chunk.name, chunk.entityId.value());
     }
 
     engineBusy = false;
@@ -263,11 +263,11 @@ void DataFacade::load(const std::filesystem::path& inputFile) {
 auto DataFacade::getEntityNames() -> std::vector<std::tuple<std::string, tr::GameObjectId>> {
   auto names = std::vector<std::tuple<std::string, tr::GameObjectId>>{};
   for (const auto& [name, _] : dataStore.scene) {
-    names.emplace_back(name, dataStore.entityNameMap.at(name));
+    // names.emplace_back(name, dataStore.entityNameMap.at(name));
   }
 
   for (const auto& [name, _] : dataStore.terrainMap) {
-    names.emplace_back(name, dataStore.entityNameMap.at(name));
+    // names.emplace_back(name, dataStore.entityNameMap.at(name));
   }
 
   return names;

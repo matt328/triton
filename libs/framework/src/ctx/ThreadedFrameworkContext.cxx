@@ -63,10 +63,11 @@ ThreadedFrameworkContext::ThreadedFrameworkContext([[maybe_unused]] const Framew
 }
 
 auto ThreadedFrameworkContext::startGameworld() -> void {
-  gameThread = std::thread([this] {
+  gameThread = std::jthread([this](std::stop_token token) {
+    pthread_setname_np(pthread_self(), "GameWorld");
     try {
       gameWorldContext = GameWorldContext::create(eventQueue);
-      gameWorldContext->run();
+      gameWorldContext->run(token);
       Log.trace("nulling out gameWorldContext");
       gameWorldContext = nullptr;
     } catch (const std::exception& e) {
@@ -76,10 +77,11 @@ auto ThreadedFrameworkContext::startGameworld() -> void {
 }
 
 auto ThreadedFrameworkContext::startRenderer() -> void {
-  graphicsThread = std::thread([this] {
+  graphicsThread = std::jthread([this](std::stop_token token) {
+    pthread_setname_np(pthread_self(), "GraphicsContext");
     try {
       graphicsContext = GraphicsContext::create(eventQueue, stateBuffer, window, assetService);
-      graphicsContext->run();
+      graphicsContext->run(token);
       Log.trace("Nulling out graphicsContext");
       graphicsContext = nullptr;
     } catch (const std::exception& e) {
@@ -101,17 +103,14 @@ auto ThreadedFrameworkContext::runApplication(const std::shared_ptr<IApplication
 
 auto ThreadedFrameworkContext::stop() -> void {
   Log.trace("ThreadedFrameworkContext::stop()");
-  gameWorldContext->stop();
-  if (gameThread.joinable()) {
-    Log.trace("joining gameThread");
-    gameThread.join();
-  }
-  graphicsContext->stop();
-  if (graphicsThread.joinable()) {
-    Log.trace("joining graphicsThread");
-    graphicsThread.join();
-    Log.trace("graphicsThread joined");
-  }
+
+  Log.trace("gameThread.request_stop()");
+  gameThread.request_stop();
+  gameThread.join();
+
+  Log.trace("graphicsThread.request_stop()");
+  graphicsThread.request_stop();
+  graphicsThread.join();
 }
 
 auto ThreadedFrameworkContext::getEventQueue() -> std::shared_ptr<IEventQueue> {

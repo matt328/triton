@@ -23,8 +23,7 @@ auto GameWorldContext::create(std::shared_ptr<IEventQueue> newEventQueue)
   return injector.create<std::shared_ptr<GameWorldContext>>();
 }
 
-auto GameWorldContext::run() -> void {
-  pthread_setname_np(pthread_self(), "GameWorld");
+auto GameWorldContext::run(std::stop_token token) -> void {
   Log.trace("Starting GameworldContext");
   using clock = std::chrono::steady_clock;
   constexpr int targetHz = 240;
@@ -32,8 +31,7 @@ auto GameWorldContext::run() -> void {
 
   auto nextTick = clock::now();
 
-  running = true;
-  while (running) {
+  while (!token.stop_requested()) {
     auto now = clock::now();
     if (now >= nextTick) {
 
@@ -50,11 +48,6 @@ auto GameWorldContext::run() -> void {
       std::this_thread::sleep_until(nextTick);
     }
   }
-}
-
-auto GameWorldContext::stop() -> void {
-  Log.trace("GameWorldContext::stop()");
-  running = false;
 }
 
 }

@@ -1,7 +1,9 @@
 #pragma once
 
 #include "GlmCereal.hpp"
+#include "api/gfx/Geometry.hpp"
 #include "api/gw/GameObjectType.hpp"
+#include "bk/Handle.hpp"
 
 namespace ed {
 
@@ -93,7 +95,7 @@ struct DataStore {
   // Terrain
   std::unordered_map<std::string, TerrainData> terrainMap;
 
-  std::unordered_map<std::string, tr::GameObjectId> entityNameMap;
+  std::unordered_map<std::string, tr::Handle<tr::Geometry>> entityNameMap;
 
   template <class T>
   void serialize(T& archive) {

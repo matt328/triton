@@ -30,13 +30,10 @@ public:
   auto operator=(const TransferSystem&) -> TransferSystem& = delete;
   auto operator=(TransferSystem&&) -> TransferSystem& = delete;
 
-  auto beginUpload(UploadPlan& uploadPlan) -> void;
-  auto finalizeUpload(UploadPlan& uploadPlan) -> void;
+  auto upload(UploadPlan& uploadPlan) -> void;
   auto enqueueResize(const ResizeRequest& resize) -> void;
   auto defragment(const DefragRequest& defrag) -> void;
 
-  [[nodiscard]] auto getStagingBufferHandle() const -> Handle<ManagedBuffer>;
-  [[nodiscard]] auto getStagingBufferAllocator() const -> std::shared_ptr<IBufferAllocator>;
   auto getTransferContext() -> TransferContext&;
 
 private:
@@ -51,8 +48,6 @@ private:
 
   auto checkSizes(const UploadPlan& uploadPlan) -> std::vector<ResizeRequest>;
   auto processResizes(const std::vector<ResizeRequest>& resizeRequestList) -> void;
-  auto allocate(UploadPlan& uploadPlan) -> void;
-  auto buildGeometryRegion(UploadPlan& uploadPlan) -> void;
 };
 
 }

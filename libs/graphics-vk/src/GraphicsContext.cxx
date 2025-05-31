@@ -118,14 +118,17 @@ auto GraphicsContext::create(std::shared_ptr<IEventQueue> newEventQueue,
   return injector.create<std::shared_ptr<GraphicsContext>>();
 }
 
-auto GraphicsContext::run() -> void {
-  pthread_setname_np(pthread_self(), "GraphicsContext");
+auto GraphicsContext::run(std::stop_token token) -> void {
   using Clock = std::chrono::steady_clock;
   auto currentTime = Clock::now();
 
   assetSystem->run();
 
-  while (running) {
+  Log.trace("GraphicsContext::run: stop_possible = {}, stop_requested = {}",
+            token.stop_possible(),
+            token.stop_requested());
+
+  while (!token.stop_requested()) {
     auto newTime = Clock::now();
     auto frameTime = newTime - currentTime;
     if (frameTime > std::chrono::milliseconds(250)) {
@@ -138,14 +141,9 @@ auto GraphicsContext::run() -> void {
 
     FrameMark;
   }
-  Log.trace("Waiting Device Idle");
+  Log.trace("graphicsThread token stop_requested()");
   device->waitIdle();
   assetSystem->requestStop();
-}
-
-auto GraphicsContext::stop() -> void {
-  Log.trace("GraphicsContext::stop()");
-  running = false;
 }
 
 }

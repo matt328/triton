@@ -94,9 +94,7 @@ auto DefaultAssetSystem::handleEndResourceBatch(uint64_t batchId) -> void {
     std::visit(visitor, *eventVariant);
   }
 
-  transferSystem->beginUpload(uploadPlan);
-
-  transferSystem->finalizeUpload(uploadPlan);
+  transferSystem->upload(uploadPlan);
 
   loadedModels.clear();
 
@@ -117,13 +115,11 @@ auto DefaultAssetSystem::handleStaticModelRequest(const StaticModelRequest& smRe
   const auto [regionHandle, uploads] =
       geometryAllocator->allocate(*geometryData, transferSystem->getTransferContext());
 
-  // Note: store off this region handle so we can emit a StaticModelResponse event
-  [[maybe_unused]] const auto returnableHandle = geometryHandleMapper->toPublic(regionHandle);
   responses.push_back(StaticModelResponse{
       .batchId = smRequest.batchId,
       .requestId = smRequest.requestId,
       .entityName = smRequest.entityName,
-      .geometryHandle = returnableHandle,
+      .geometryHandle = geometryHandleMapper->toPublic(regionHandle),
   });
 
   uploadPlan.uploads.insert(uploadPlan.uploads.end(), uploads.begin(), uploads.end());
