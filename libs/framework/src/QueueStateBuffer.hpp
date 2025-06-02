@@ -25,10 +25,10 @@ public:
   auto commitWrite() -> void override;
 
 private:
-  std::array<SimState, BufferSize> buffer;
-  size_t writeIndex;
-  size_t readIndex;
-  std::atomic<size_t> count;
+  SimState buffer[BufferSize];
+
+  std::atomic<int> writeIndex;
+  int readIndex;
 };
 
 }

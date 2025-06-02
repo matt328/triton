@@ -196,11 +196,15 @@ void R3Renderer::renderNextFrame() {
   SimState current{1};
   SimState prev{1};
   float alpha{0};
-  Timestamp currentTime = std::chrono::steady_clock::now();
-  stateBuffer->getInterpolatedStates(current, prev, alpha, currentTime);
+  auto gotState = false;
+  while (!gotState) {
+    Timestamp currentTime = std::chrono::steady_clock::now();
+    gotState = stateBuffer->getInterpolatedStates(current, prev, alpha, currentTime);
+  }
 
   // There will eventually be two states sent to the Compute shader. It will interpolate them.
   // For now, just use current.
+
   buildFrameState(current.objectMetadata, current.stateHandles, geometryRegionContents);
 
   // GeometryRegionBuffer

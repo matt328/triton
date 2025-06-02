@@ -4,28 +4,12 @@
 
 namespace ed {
 
+constexpr auto ModelFile =
+    "/home/matt/projects/matt/game-assets/models/current/viking_room/viking_room_v4.trm";
+
 DataFacade::DataFacade(std::shared_ptr<tr::IEventQueue> newEventQueue)
     : eventQueue{std::move(newEventQueue)} {
   Log.trace("Creating DataFacade");
-
-  // eventQueue->subscribe<tr::StaticModelResponse>([this](const tr::StaticModelResponse& event) {
-  //   assert(inFlightMap.contains(event.requestId) && "inFlightMap missing event");
-  //   const auto& entityData = inFlightMap.at(event.requestId);
-  //   dataStore.scene.insert({event.entityName, entityData});
-  //   dataStore.entityNameMap.insert({event.entityName, event.objectId});
-  //   engineBusy = false;
-  //   inFlightMap.erase(event.requestId);
-  //   Log.info("Finished creating entity: name: {}", event.entityName);
-  // });
-
-  // eventQueue->subscribe<tr::DynamicModelLoaded>([this](const tr::DynamicModelLoaded& event) {
-  //   const auto& entityData = inFlightMap.at(event.requestId);
-  //   dataStore.scene.insert({entityData.name, entityData});
-  //   dataStore.entityNameMap.insert({entityData.name, event.objectId});
-  //   engineBusy = false;
-  //   inFlightMap.erase(event.requestId);
-  //   Log.info("Finished creating entity: name: {}", entityData.name);
-  // });
 
   eventQueue->subscribe<tr::TerrainCreated>([this](const tr::TerrainCreated& event) {
     // dataStore.entityNameMap.emplace(event.name, event.entityId.value());
@@ -66,27 +50,21 @@ DataFacade::DataFacade(std::shared_ptr<tr::IEventQueue> newEventQueue)
   const auto beginBatch = tr::BeginResourceBatch{.batchId = 1};
   const auto endBatch = tr::EndResourceBatch{.batchId = 1};
   const auto vikingRoomRequestId = requestIdGenerator.getKey();
-  const auto vikingRoomRequest = tr::StaticModelRequest{
-      .batchId = 1,
-      .requestId = vikingRoomRequestId,
-      .modelFilename =
-          "/home/matt/Projects/game-assets/models/current/viking_room/viking_room_v4.trm",
-      .entityName = "Viking Room #1"};
+  const auto vikingRoomRequest = tr::StaticModelRequest{.batchId = 1,
+                                                        .requestId = vikingRoomRequestId,
+                                                        .modelFilename = ModelFile,
+                                                        .entityName = "Viking Room #1"};
   const auto vikingRoomRequest2Id = requestIdGenerator.getKey();
-  const auto vikingRoomRequest2 = tr::StaticModelRequest{
-      .batchId = 1,
-      .requestId = vikingRoomRequest2Id,
-      .modelFilename =
-          "/home/matt/Projects/game-assets/models/current/viking_room/viking_room_v4.trm",
-      .entityName = "Viking Room #2"};
+  const auto vikingRoomRequest2 = tr::StaticModelRequest{.batchId = 1,
+                                                         .requestId = vikingRoomRequest2Id,
+                                                         .modelFilename = ModelFile,
+                                                         .entityName = "Viking Room #2"};
 
   const auto peasantRequestId = requestIdGenerator.getKey();
-  const auto peasant = tr::DynamicModelRequest{
-      .batchId = 1,
-      .requestId = peasantRequestId,
-      .modelFilename =
-          "/home/matt/Projects/game-assets/models/current/viking_room/viking_room_v4.trm",
-      .entityName = "Viking Room #2"};
+  const auto peasant = tr::DynamicModelRequest{.batchId = 1,
+                                               .requestId = peasantRequestId,
+                                               .modelFilename = ModelFile,
+                                               .entityName = "Viking Room #2"};
 
   inFlightMap.emplace(vikingRoomRequestId,
                       EntityData{.name = "viking room 1",
