@@ -61,3 +61,5 @@ target_include_directories(${PROJECT_NAME}
    PRIVATE
    src
 )
+
+add_subdirectory(test)

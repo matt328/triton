@@ -4,6 +4,7 @@ project("testarea" VERSION "0.0.1" LANGUAGES CXX)
 # Source files for the main target
 set(testarea_SRC
   src/main.cxx
+  src/QueueStateBuffer.cxx
 )
 
 # Main executable target
@@ -15,7 +16,6 @@ target_code_coverage(${PROJECT_NAME} AUTO ALL)
 target_link_libraries(${PROJECT_NAME}
   PRIVATE
   base-kit
-  tlsf
 )
 
 # Main target settings
