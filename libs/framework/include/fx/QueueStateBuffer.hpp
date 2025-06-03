@@ -14,7 +14,7 @@ public:
   auto operator=(const QueueStateBuffer&) -> QueueStateBuffer& = delete;
   auto operator=(QueueStateBuffer&&) -> QueueStateBuffer& = delete;
 
-  static constexpr size_t BufferSize = 6;
+  static constexpr uint32_t BufferSize = 6;
 
   auto getInterpolatedStates(SimState& stateA,
                              SimState& stateB,
@@ -25,10 +25,10 @@ public:
   auto commitWrite() -> void override;
 
 private:
-  SimState buffer[BufferSize];
-
-  std::atomic<int> writeIndex;
+  std::array<SimState, BufferSize> buffer;
+  int writeIndex;
   int readIndex;
+  std::atomic<int> count;
 };
 
 }

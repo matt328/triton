@@ -9,16 +9,15 @@ TEST_CASE("QueueStateBuffer stalls if timestamps are too old", "[QueueStateBuffe
   tr::Timestamp base = std::chrono::steady_clock::now();
 
   // Producer fills the buffer with old timestamps
-  for (int i = 0; i < BufferSize; ++i) {
+  for (size_t i = 0; i < 50; ++i) {
     tr::SimState* slot = buffer.getWriteSlot();
     REQUIRE(slot != nullptr);
     slot->timeStamp = base + std::chrono::milliseconds(i * 10);
-    slot->value = i;
     buffer.commitWrite();
   }
 
   // Simulate the consumer waking up *much later*
-  tr::Timestamp currentTime = base + std::chrono::milliseconds(100);
+  tr::Timestamp currentTime = base + std::chrono::milliseconds(1000);
 
   tr::SimState a, b;
   float alpha;

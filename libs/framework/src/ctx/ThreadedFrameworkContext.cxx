@@ -3,7 +3,7 @@
 #include "DefaultAssetService.hpp"
 #include "EventQueue.hpp"
 #include "GlfwWindow.hpp"
-#include "QueueStateBuffer.hpp"
+#include "fx/QueueStateBuffer.hpp"
 #include "RingBuffer.hpp"
 #include "api/fx/IApplication.hpp"
 #include "api/fx/IAssetService.hpp"

@@ -7,6 +7,7 @@ add_executable(framework-test ${test_SRC})
 target_compile_definitions(framework-test
   PRIVATE
   TINYGLTF_NO_STB_IMAGE_WRITE
+  GLM_ENABLE_EXPERIMENTAL
 )
 
 target_precompile_headers(framework-test
@@ -19,7 +20,6 @@ target_precompile_headers(framework-test
   <glm/gtx/matrix_decompose.hpp>
   <glm/gtx/quaternion.hpp>
   <glm/gtx/string_cast.hpp>
-  <ToString.hpp>
   <cereal/cereal.hpp>
   <cereal/types/vector.hpp>
   <cereal/types/unordered_map.hpp>
@@ -36,6 +36,7 @@ target_link_libraries(framework-test
   trompeloeil::trompeloeil
   Catch2::Catch2WithMain
   framework
+  shared-api
   base-kit
 )
 

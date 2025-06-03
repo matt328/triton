@@ -69,7 +69,8 @@
         "assettool",
         "testarea-tests",
         "triton-tests",
-        "testarea"
+        "testarea",
+        "framework-test"
       ]
     },
     {
@@ -83,7 +84,8 @@
         "testarea-tests",
         "triton-tests",
         "triton-tests-coverage",
-        "testarea"
+        "testarea",
+        "framework-test"
       ]
     },
     {
