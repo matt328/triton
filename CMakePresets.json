@@ -80,7 +80,6 @@
       "jobs": 18,
       "targets": [
         "Cauldron",
-        "assettool",
         "testarea-tests",
         "triton-tests",
         "triton-tests-coverage",

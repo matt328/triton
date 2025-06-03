@@ -1,5 +1,7 @@
 set(test_SRC
   TestStateBuffer.cxx
+  RenderProxyRingBufferTest.cxx
+  RenderProxyRingBufferStressTest.cxx
 )
 
 add_executable(framework-test ${test_SRC})
@@ -54,9 +56,6 @@ add_custom_target(run_coverage
   COMMENT "Running code coverage export"
 )
 
-# add_test(NAME CoverageExport
-# COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target ccov-all-export
-# )
 include(CTest)
 include(Catch)
 catch_discover_tests(framework-test)

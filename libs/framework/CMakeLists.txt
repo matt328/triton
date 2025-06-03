@@ -62,4 +62,6 @@ target_include_directories(${PROJECT_NAME}
    src
 )
 
+target_code_coverage(${PROJECT_NAME})
+
 add_subdirectory(test)

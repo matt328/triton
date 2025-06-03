@@ -59,11 +59,6 @@ auto QueueStateBuffer::getWriteSlot() -> SimState* {
 auto QueueStateBuffer::commitWrite() -> void {
   writeIndex = (writeIndex + 1) % BufferSize;
   count.fetch_add(1, std::memory_order_release);
-  std::cout << "commitWrite, timestamp="
-            << std::chrono::duration_cast<std::chrono::milliseconds>(
-                   buffer[writeIndex].timeStamp.time_since_epoch())
-                   .count()
-            << "\n";
 }
 
 }

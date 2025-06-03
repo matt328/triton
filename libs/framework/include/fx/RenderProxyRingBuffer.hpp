@@ -27,28 +27,29 @@ public:
   }
 
   auto getStates(uint64_t targetFrame) -> std::optional<std::pair<T, T>> {
+
     std::array<Entry, N> snapshot;
     for (size_t i = 0; i < N; ++i) {
       snapshot[i] = buffer[i];
     }
-    Entry* a = nullptr;
-    Entry* b = nullptr;
+    Entry* lower = nullptr;
+    Entry* upper = nullptr;
 
     for (size_t i = 0; i < N; ++i) {
       const Entry& curr = snapshot[i];
       if (curr.frameIndex <= targetFrame) {
-        if ((a == nullptr) || curr.frameIndex > a->frameIndex) {
-          a = const_cast<Entry*>(&curr);
+        if ((lower == nullptr) || curr.frameIndex > lower->frameIndex) {
+          lower = const_cast<Entry*>(&curr);
         }
       }
-      if (curr.frameIndex >= targetFrame) {
-        if ((b == nullptr) || curr.frameIndex < b->frameIndex) {
-          b = const_cast<Entry*>(&curr);
+      if (curr.frameIndex > targetFrame) {
+        if (upper == nullptr || curr.frameIndex < upper->frameIndex) {
+          upper = const_cast<Entry*>(&curr);
         }
       }
     }
-    if (a && b && a->frameIndex != b->frameIndex) {
-      return std::make_pair(a->state, b->state);
+    if (lower && upper && lower->frameIndex != upper->frameIndex) {
+      return std::make_pair(lower->state, upper->state);
     }
     return std::nullopt;
   }
