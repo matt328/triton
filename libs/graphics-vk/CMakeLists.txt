@@ -1,8 +1,6 @@
 project("graphics-vk")
 
 set(graphicsvk_SRC
-  src/DebugStateBuffer.cxx
-
   src/r3/R3Renderer.cxx
   src/r3/GeometryBufferPack.cxx
   src/r3/graph/DebugFrameGraph.cxx

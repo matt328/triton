@@ -199,7 +199,7 @@ void R3Renderer::renderNextFrame() {
   auto gotState = false;
   while (!gotState) {
     Timestamp currentTime = std::chrono::steady_clock::now();
-    gotState = stateBuffer->getInterpolatedStates(current, prev, alpha, currentTime);
+    // gotState = stateBuffer->getInterpolatedStates(current, prev, alpha, currentTime);
   }
 
   // There will eventually be two states sent to the Compute shader. It will interpolate them.

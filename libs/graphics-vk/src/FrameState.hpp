@@ -12,7 +12,7 @@ public:
   auto operator=(const FrameState&) -> FrameState& = delete;
   auto operator=(FrameState&&) -> FrameState& = delete;
 
-  auto getFrame() const {
+  [[nodiscard]] auto getFrame() const {
     return currentFrame.load(std::memory_order_acquire);
   }
 

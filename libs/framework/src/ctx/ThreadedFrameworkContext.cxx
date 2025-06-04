@@ -3,11 +3,10 @@
 #include "DefaultAssetService.hpp"
 #include "EventQueue.hpp"
 #include "GlfwWindow.hpp"
-#include "fx/QueueStateBuffer.hpp"
-#include "RingBuffer.hpp"
 #include "api/fx/IApplication.hpp"
 #include "api/fx/IAssetService.hpp"
 #include "bk/TaskQueue.hpp"
+#include "fx/HorribleStateBuffer.hpp"
 #include "gw/GameWorldContext.hpp"
 #include "gfx/GraphicsContext.hpp"
 
@@ -26,7 +25,7 @@ auto ThreadedFrameworkContext::create(const FrameworkConfig& config,
   const auto actionSystem = std::make_shared<ActionSystem>(eventQueue);
 
   const auto taskQueue = std::make_shared<TaskQueue>(TaskQueueConfig{.maxQueueSize = 1024});
-  const auto stateBuffer = std::make_shared<QueueStateBuffer>();
+  const auto stateBuffer = std::make_shared<HorribleStateBuffer>();
 
   const auto window =
       std::make_shared<GlfwWindow>(WindowCreateInfo{.height = config.initialWindowSize.y,

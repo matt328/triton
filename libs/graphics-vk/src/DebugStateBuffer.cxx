@@ -24,10 +24,10 @@ DebugStateBuffer::DebugStateBuffer() : previous{SimState{2}}, next{SimState{2}} 
   previous.scales[1] = GpuScaleData{.scale = glm::vec3(3.f, 3.f, 3.f)};
 }
 
-auto DebugStateBuffer::getInterpolatedStates(SimState& stateA,
-                                             SimState& stateB,
-                                             float& alpha,
-                                             Timestamp currentTimeSec) -> bool {
+auto DebugStateBuffer::getStates(SimState& stateA,
+                                 SimState& stateB,
+                                 float& alpha,
+                                 Timestamp currentTimeSec) -> bool {
   stateA = previous;
   stateB = next;
   alpha = constAlpha;

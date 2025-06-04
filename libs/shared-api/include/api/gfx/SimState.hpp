@@ -13,15 +13,15 @@ struct StateHandles {
 };
 
 struct SimState {
-  Timestamp timeStamp{};
-  uint64_t tag{};
-  std::vector<GpuObjectData> objectMetadata;
-  std::vector<GpuTransformData> positions;
-  std::vector<GpuRotationData> rotations;
-  std::vector<GpuScaleData> scales;
+  Timestamp timeStamp{};                     // 8
+  uint64_t tag{};                            // 8
+  std::vector<GpuObjectData> objectMetadata; // 28
+  std::vector<GpuTransformData> positions;   // 20
+  std::vector<GpuRotationData> rotations;    // 20
+  std::vector<GpuScaleData> scales;          // 20
 
   // Parallel vector to GpuObjectData.
-  std::vector<StateHandles> stateHandles;
+  std::vector<StateHandles> stateHandles; // 8
 
   // Pre-allocate memory for the vectors when creating a SimState
   explicit SimState(size_t initialCapacity = 0) {

@@ -28,7 +28,6 @@
 #include "r3/draw-context/ContextFactory.hpp"
 #include "r3/draw-context/IDispatchContext.hpp"
 #include "buffers/BufferSystem.hpp"
-#include "DebugStateBuffer.hpp"
 
 #include "resources/allocators/GeometryDispatcher.hpp"
 #include "gfx/GeometryHandleMapper.hpp"

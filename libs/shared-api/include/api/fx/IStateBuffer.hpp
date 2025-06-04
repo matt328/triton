@@ -4,6 +4,8 @@
 
 namespace tr {
 
+using Timestamp = std::chrono::steady_clock::time_point;
+
 class IStateBuffer {
 public:
   IStateBuffer() = default;
@@ -14,13 +16,8 @@ public:
   auto operator=(const IStateBuffer&) -> IStateBuffer& = default;
   auto operator=(IStateBuffer&&) -> IStateBuffer& = delete;
 
-  virtual auto getInterpolatedStates(SimState& stateA,
-                                     SimState& stateB,
-                                     float& alpha,
-                                     Timestamp currentTime) -> bool = 0;
-
-  virtual auto getWriteSlot() -> SimState* = 0;
-  virtual auto commitWrite() -> void = 0;
+  virtual auto getStates(Timestamp t) -> std::optional<std::pair<SimState, SimState>> = 0;
+  virtual auto pushState(const SimState& newState, Timestamp t) -> void = 0;
 };
 
 }

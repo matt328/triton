@@ -7,6 +7,7 @@ namespace tr {
 class IEventQueue;
 class FinalizerSystem;
 class IStateBuffer;
+class FrameState;
 
 class EntityManager : public IEntityManager {
 public:

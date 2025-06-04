@@ -35,13 +35,9 @@ EntityManager::~EntityManager() {
 }
 
 auto EntityManager::update() -> void {
-  auto* writeState = stateBuffer->getWriteSlot();
-  if (writeState != nullptr) {
-    Log.trace("write state not null");
-    tr::FinalizerSystem::update(*registry, *writeState);
-    stateBuffer->commitWrite();
-  } else {
-  }
+  SimState* writeState = nullptr;
+  tr::FinalizerSystem::update(*registry, *writeState);
+  // stateBuffer->pushState(*writeState);
 }
 
 }

@@ -6,8 +6,7 @@ set(framework_SRC
    src/ctx/ThreadedFrameworkContext.cxx
    src/GuiCallbackRegistrar.cxx
    src/GeometryGenerator.cxx
-   src/QueueStateBuffer.cxx
-   src/RingBuffer.cxx
+   src/HorribleStateBuffer.cxx
 )
 
 add_library(${PROJECT_NAME} STATIC ${framework_SRC})

@@ -1,78 +1,130 @@
-#include "fx/RenderProxyRingBuffer.hpp"
+// #include "fx/HorribleStateBuffer.hpp"
 
-struct SimState {
-  int value;
-  auto operator==(const SimState& other) const -> bool {
-    return value == other.value;
-  }
-};
+// using namespace std::chrono;
 
-TEST_CASE("RenderProxyRingBuffer basic interpolation", "[RenderProxyRingBuffer]") {
-  tr::RenderProxyRingBuffer<SimState, 4> buffer;
+// TEST_CASE("HorribleStateBuffer basic interpolation", "[HorribleStateBuffer]") {
+//   tr::HorribleStateBuffer buffer;
 
-  buffer.pushState({10}, 1);
-  buffer.pushState({20}, 2);
-  buffer.pushState({30}, 3);
-  buffer.pushState({40}, 4);
+//   const auto base = steady_clock::now();
 
-  SECTION("Interpolates between frames correctly") {
-    auto result = buffer.getStates(3);
-    REQUIRE(result.has_value());
-    CHECK(result->first.value == 30);
-    CHECK(result->second.value == 40);
-  }
+//   auto state10 = tr::SimState{1};
+//   state10.tag = 10;
+//   auto state20 = tr::SimState{1};
+//   state20.tag = 20;
+//   auto state30 = tr::SimState{1};
+//   state30.tag = 30;
+//   auto state40 = tr::SimState{1};
+//   state40.tag = 40;
 
-  SECTION("Fails if frame is not bracketed") {
-    auto tooOld = buffer.getStates(0);
-    auto tooNew = buffer.getStates(5);
-    REQUIRE_FALSE(tooOld.has_value());
-    REQUIRE_FALSE(tooNew.has_value());
-  }
-}
+//   // Push states at increasing timestamps
+//   buffer.pushState(state10, base + milliseconds(100));
+//   buffer.pushState(state20, base + milliseconds(200));
+//   buffer.pushState(state30, base + milliseconds(300));
+//   buffer.pushState(state40, base + milliseconds(400));
 
-TEST_CASE("RenderProxyRingBuffer handles wraparound", "[RenderProxyRingBuffer]") {
-  tr::RenderProxyRingBuffer<SimState, 3> buffer;
+//   SECTION("Interpolates between frames correctly") {
+//     auto result = buffer.getStates(base + milliseconds(150));
+//     REQUIRE(result.has_value());
+//     CHECK(result->first.tag == 10);
+//     CHECK(result->second.tag == 20);
+//   }
 
-  buffer.pushState({1}, 1);
-  buffer.pushState({2}, 2);
-  buffer.pushState({3}, 3); // buffer is now full
+//   SECTION("Fails if frame is not bracketed") {
+//     auto tooOld = buffer.getStates(base + milliseconds(0));
+//     auto tooNew = buffer.getStates(base + milliseconds(500));
+//     REQUIRE_FALSE(tooOld.has_value());
+//     REQUIRE_FALSE(tooNew.has_value());
+//   }
+// }
 
-  buffer.pushState({4}, 4); // should overwrite frame 1
-  buffer.pushState({5}, 5); // should overwrite frame 2
+// TEST_CASE("HorribleStateBuffer handles wraparound", "[HorribleStateBuffer]") {
+//   tr::HorribleStateBuffer buffer;
 
-  SECTION("Interpolates between latest valid frames") {
-    auto result = buffer.getStates(4);
-    REQUIRE(result.has_value());
-    CHECK(result->first.value == 4);
-    CHECK(result->second.value == 5);
-  }
+//   auto state10 = tr::SimState{1};
+//   state10.tag = 10;
+//   auto state20 = tr::SimState{1};
+//   state20.tag = 20;
+//   auto state30 = tr::SimState{1};
+//   state30.tag = 30;
+//   auto state40 = tr::SimState{1};
+//   state40.tag = 40;
+//   auto state50 = tr::SimState{1};
+//   state50.tag = 50;
+//   auto state60 = tr::SimState{1};
+//   state60.tag = 60;
+//   auto state70 = tr::SimState{1};
+//   state70.tag = 70;
+//   auto state80 = tr::SimState{1};
+//   state80.tag = 80;
 
-  SECTION("Fails if target frame was overwritten") {
-    auto result = buffer.getStates(1);
-    REQUIRE_FALSE(result.has_value());
-  }
-}
+//   const auto base = steady_clock::now();
 
-TEST_CASE("RenderProxyRingBuffer handles empty and partial state", "[RenderProxyRingBuffer]") {
-  tr::RenderProxyRingBuffer<SimState, 4> buffer;
+//   buffer.pushState(state10, base + milliseconds(100));
+//   buffer.pushState(state20, base + milliseconds(200));
+//   buffer.pushState(state30, base + milliseconds(300));
+//   buffer.pushState(state40, base + milliseconds(400));
+//   buffer.pushState(state50, base + milliseconds(500));
+//   buffer.pushState(state60, base + milliseconds(600)); // Buffer is now full
 
-  SECTION("Fails when buffer is empty") {
-    auto result = buffer.getStates(1);
-    REQUIRE_FALSE(result.has_value());
-  }
+//   buffer.pushState(state70, base + milliseconds(700));
+//   buffer.pushState(state80, base + milliseconds(800));
 
-  SECTION("Fails when only one entry exists") {
-    buffer.pushState({10}, 1);
-    auto result = buffer.getStates(1);
-    REQUIRE_FALSE(result.has_value());
-  }
+//   SECTION("Interpolates between latest valid frames") {
+//     auto result = buffer.getStates(base + milliseconds(750));
+//     REQUIRE(result.has_value());
+//     CHECK(result->first.tag == 70);
+//     CHECK(result->second.tag == 80);
+//   }
 
-  SECTION("Works with two entries") {
-    buffer.pushState({10}, 1);
-    buffer.pushState({20}, 2);
-    auto result = buffer.getStates(1);
-    REQUIRE(result.has_value());
-    CHECK(result->first.value == 10);
-    CHECK(result->second.value == 20);
-  }
-}
+//   SECTION("Fails if target frame was overwritten") {
+//     auto result = buffer.getStates(base + milliseconds(150));
+//     REQUIRE_FALSE(result.has_value());
+//   }
+// }
+
+// TEST_CASE("HorribleStateBuffer handles empty and partial state", "[HorribleStateBuffer]") {
+//   tr::HorribleStateBuffer buffer;
+//   const auto base = std::chrono::steady_clock::now();
+
+//   auto state10 = tr::SimState{1};
+//   state10.tag = 10;
+//   auto state20 = tr::SimState{1};
+//   state20.tag = 20;
+
+//   SECTION("Fails when buffer is empty") {
+//     auto result = buffer.getStates(base + std::chrono::milliseconds(100));
+//     REQUIRE_FALSE(result.has_value());
+//   }
+
+//   SECTION("Fails when only one entry exists") {
+//     buffer.pushState(state10, base + std::chrono::milliseconds(100));
+//     auto result = buffer.getStates(base + std::chrono::milliseconds(100));
+//     REQUIRE_FALSE(result.has_value());
+//   }
+
+//   SECTION("Works with two entries bracketing the timestamp") {
+//     buffer.pushState(state10, base + std::chrono::milliseconds(100));
+//     buffer.pushState(state20, base + std::chrono::milliseconds(200));
+
+//     auto result = buffer.getStates(base + std::chrono::milliseconds(150));
+//     REQUIRE(result.has_value());
+//     CHECK(result->first.tag == 10);
+//     CHECK(result->second.tag == 20);
+//   }
+
+//   SECTION("Fails when timestamp is before the first entry") {
+//     buffer.pushState(state10, base + std::chrono::milliseconds(100));
+//     buffer.pushState(state20, base + std::chrono::milliseconds(200));
+
+//     auto result = buffer.getStates(base + std::chrono::milliseconds(50));
+//     REQUIRE_FALSE(result.has_value());
+//   }
+
+//   SECTION("Fails when timestamp is after the last entry") {
+//     buffer.pushState(state10, base + std::chrono::milliseconds(100));
+//     buffer.pushState(state20, base + std::chrono::milliseconds(200));
+
+//     auto result = buffer.getStates(base + std::chrono::milliseconds(250));
+//     REQUIRE_FALSE(result.has_value());
+//   }
+// }

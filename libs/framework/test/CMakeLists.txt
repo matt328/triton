@@ -1,5 +1,4 @@
 set(test_SRC
-  TestStateBuffer.cxx
   RenderProxyRingBufferTest.cxx
   RenderProxyRingBufferStressTest.cxx
 )

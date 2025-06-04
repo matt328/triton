@@ -14,13 +14,8 @@ public:
   auto operator=(const DebugStateBuffer&) -> DebugStateBuffer& = default;
   auto operator=(DebugStateBuffer&&) -> DebugStateBuffer& = delete;
 
-  auto getInterpolatedStates(SimState& stateA,
-                             SimState& stateB,
-                             float& alpha,
-                             Timestamp currentTimeSec) -> bool override;
-
-  auto getWriteSlot() -> SimState* override;
-  auto commitWrite() -> void override;
+  auto getStates(uint64_t targetFrame) -> std::optional<std::pair<SimState, SimState>> override;
+  auto pushState(const SimState& newState, uint64_t frameIndex) -> void override;
 
 private:
   SimState previous;
