@@ -117,10 +117,6 @@ auto GraphicsContext::run(std::stop_token token) -> void {
 
   assetSystem->run();
 
-  Log.trace("GraphicsContext::run: stop_possible = {}, stop_requested = {}",
-            token.stop_possible(),
-            token.stop_requested());
-
   while (!token.stop_requested()) {
     auto newTime = Clock::now();
     auto frameTime = newTime - currentTime;

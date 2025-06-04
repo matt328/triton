@@ -6,7 +6,7 @@
 
 #define INVALID_OFFSET 0xFFFFFFFFu
 
-#define ObjectDataSize 76
+#define ObjectDataSize 24
 #define GeometryRegionSize 24
 #define IndirectCommandSize 20
 
@@ -52,7 +52,7 @@ layout(buffer_reference, scalar) buffer GpuIndirectCommandBuffer {
   uint indexCount;
   uint instanceCount;
   uint firstIndex;
-  int vertexOffset;
+  uint vertexOffset;
   uint firstInstance;
 };
 
@@ -84,15 +84,18 @@ void main() {
 
   GpuObjectDataBuffer objectData =
       GpuObjectDataBuffer(pushConstants.objectDataAddress + idx * ObjectDataSize);
+
   GpuGeometryRegionDataBuffer geomData = GpuGeometryRegionDataBuffer(
       pushConstants.geometryRegionAddress + objectData.geometryRegionId * GeometryRegionSize);
 
   GpuIndirectCommandBuffer outCmd = GpuIndirectCommandBuffer(
       pushConstants.outputIndirectCommandAddress + idx * IndirectCommandSize);
 
+  // Second objectdata is referencing the first geomData value for some reason
+
   outCmd.indexCount = geomData.indexCount;
   outCmd.instanceCount = 1;
   outCmd.firstIndex = geomData.indexOffset;
-  outCmd.vertexOffset = 0;
+  outCmd.vertexOffset = objectData.geometryRegionId;
   outCmd.firstInstance = idx;
 }

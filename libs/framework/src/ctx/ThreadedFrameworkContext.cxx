@@ -109,7 +109,9 @@ auto ThreadedFrameworkContext::stop() -> void {
 
   Log.trace("graphicsThread.request_stop()");
   graphicsThread.request_stop();
+  Log.trace("graphicsThread.join()");
   graphicsThread.join();
+  Log.trace("graphicsThread after join()");
 }
 
 auto ThreadedFrameworkContext::getEventQueue() -> std::shared_ptr<IEventQueue> {

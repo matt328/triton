@@ -101,12 +101,12 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
 
   const auto cullingCreateInfo =
       CullingDispatchContextCreateInfo{.objectData = globalBuffers.objectData,
+                                       .geometryRegion = globalBuffers.geometryRegion,
                                        .objectPositions = globalBuffers.objectPositions,
                                        .objectRotations = globalBuffers.objectRotations,
                                        .objectScales = globalBuffers.objectScales,
                                        .indirectCommand = globalBuffers.drawCommands,
                                        .indirectCount = globalBuffers.drawCounts,
-                                       .geometryRegion = geometryBufferPack->getIndexBuffer(),
                                        .indexData = geometryBufferPack->getIndexBuffer(),
                                        .vertexPosition = geometryBufferPack->getPositionBuffer(),
                                        .vertexNormal = geometryBufferPack->getNormalBuffer(),
@@ -193,17 +193,19 @@ void R3Renderer::renderNextFrame() {
   auto* frame = std::get<Frame*>(result);
   // TODO(matt): figure out how to make copies into and out of the state buffer as efficient as
   // possible
-  SimState current{1};
-  SimState prev{1};
-  float alpha{0};
-  auto gotState = false;
-  while (!gotState) {
-    Timestamp currentTime = std::chrono::steady_clock::now();
-    // gotState = stateBuffer->getInterpolatedStates(current, prev, alpha, currentTime);
+  // This might need to capture the current timestamp inside the while loop.
+  Timestamp currentTime = std::chrono::steady_clock::now();
+  std::optional<std::pair<SimState, SimState>> states = std::nullopt;
+  int retries = 100; // e.g. timeout after ~100 * 10ms = 1s
+  while (retries-- > 0 && states == std::nullopt) {
+    states = stateBuffer->getStates(currentTime);
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
 
   // There will eventually be two states sent to the Compute shader. It will interpolate them.
   // For now, just use current.
+
+  auto& current = (*states).first;
 
   buildFrameState(current.objectMetadata, current.stateHandles, geometryRegionContents);
 

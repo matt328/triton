@@ -43,7 +43,8 @@ auto CullingDispatchContext::bind(const Frame* frame,
           bufferSystem->getBufferAddress(frame->getLogicalBuffer(createInfo.indirectCount))
               .value_or(0L),
       .geometryRegionAddress =
-          bufferSystem->getBufferAddress(createInfo.geometryRegion).value_or(0L),
+          bufferSystem->getBufferAddress(frame->getLogicalBuffer(createInfo.geometryRegion))
+              .value_or(0L),
       .indexDataAddress = bufferSystem->getBufferAddress(createInfo.indexData).value_or(0L),
       .vertexPositionAddress =
           bufferSystem->getBufferAddress(createInfo.vertexPosition).value_or(0L),
@@ -60,7 +61,6 @@ auto CullingDispatchContext::bind(const Frame* frame,
 
 auto CullingDispatchContext::dispatch(const Frame* frame, vk::raii::CommandBuffer& commandBuffer)
     -> void {
-  Log.trace("objectCount={}", frame->getObjectCount());
   uint32_t workgroupCount = (frame->getObjectCount() + WorkgroupSize - 1) / WorkgroupSize;
   commandBuffer.dispatch(workgroupCount, 1, 1);
 }

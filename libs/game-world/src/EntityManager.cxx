@@ -35,9 +35,10 @@ EntityManager::~EntityManager() {
 }
 
 auto EntityManager::update() -> void {
-  SimState* writeState = nullptr;
-  tr::FinalizerSystem::update(*registry, *writeState);
-  // stateBuffer->pushState(*writeState);
+  Timestamp currentTime = std::chrono::steady_clock::now();
+  SimState writeState = SimState{1};
+  tr::FinalizerSystem::update(*registry, writeState, currentTime);
+  stateBuffer->pushState(writeState, currentTime);
 }
 
 }

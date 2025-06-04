@@ -14,7 +14,7 @@ public:
   auto operator=(const FinalizerSystem&) -> FinalizerSystem& = default;
   auto operator=(FinalizerSystem&&) -> FinalizerSystem& = delete;
 
-  static auto update(entt::registry& registry, SimState& simState) -> void;
+  static auto update(entt::registry& registry, SimState& simState, Timestamp t) -> void;
 };
 
 }

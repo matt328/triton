@@ -4,14 +4,10 @@
 
 namespace tr {
 
-auto FinalizerSystem::update(entt::registry& registry, SimState& simState) -> void {
-  simState.clear();
-  simState.timeStamp = std::chrono::steady_clock::now();
-
-  Log.trace(
-      "setting state, timestamp={}",
-      std::chrono::duration_cast<std::chrono::milliseconds>(simState.timeStamp.time_since_epoch())
-          .count());
+auto FinalizerSystem::update(entt::registry& registry, SimState& simState, Timestamp t) -> void {
+  // simState.clear();
+  simState = SimState{1};
+  simState.timeStamp = t;
 
   const auto view = registry.view<Renderable, Transform>();
   const auto size = view.size_hint();

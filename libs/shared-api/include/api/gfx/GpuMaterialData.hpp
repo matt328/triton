@@ -13,8 +13,6 @@ struct GpuObjectData {
   uint32_t geometryRegionId;
   uint32_t materialId;
   uint32_t animationId;
-
-  uint32_t _padding = 0;
 };
 
 struct GpuTransformData {
