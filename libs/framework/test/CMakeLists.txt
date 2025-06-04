@@ -1,6 +1,6 @@
 set(test_SRC
-  RenderProxyRingBufferTest.cxx
-  RenderProxyRingBufferStressTest.cxx
+  HorribleRingBufferTest.cxx
+  HorribleRingBufferStressTest.cxx
 )
 
 add_executable(framework-test ${test_SRC})
