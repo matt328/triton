@@ -131,35 +131,29 @@ auto DefaultAssetSystem::handleStaticModelRequest(const StaticModelRequest& smRe
 auto DefaultAssetSystem::deInterleave(const std::vector<as::StaticVertex>& vertices,
                                       const std::vector<uint32_t>& indexData)
     -> std::unique_ptr<GeometryData> {
-  auto positions = std::make_shared<std::vector<std::byte>>();
-  auto texCoords = std::make_shared<std::vector<std::byte>>();
-  auto indices = std::make_shared<std::vector<std::byte>>();
+  auto positions = std::make_shared<std::vector<GpuVertexPositionData>>();
+  auto texCoords = std::make_shared<std::vector<GpuVertexTexCoordData>>();
+  auto indices = std::make_shared<std::vector<GpuIndexData>>();
 
   positions->reserve(vertices.size() * sizeof(GpuVertexPositionData));
   texCoords->reserve(vertices.size() * sizeof(GpuVertexTexCoordData));
   indices->reserve(indexData.size() * sizeof(GpuIndexData));
 
   for (const auto& vertex : vertices) {
-    const auto pos = GpuVertexPositionData{vertex.position};
-    const auto tex = GpuVertexTexCoordData{vertex.texCoord};
-
-    positions->insert(positions->end(),
-                      reinterpret_cast<const std::byte*>(&pos),
-                      reinterpret_cast<const std::byte*>(&pos + 1));
-    texCoords->insert(texCoords->end(),
-                      reinterpret_cast<const std::byte*>(&tex),
-                      reinterpret_cast<const std::byte*>(&tex + 1));
+    positions->emplace_back(vertex.position);
+    texCoords->emplace_back(vertex.texCoord);
   }
 
   for (auto index : indexData) {
-    GpuIndexData idx{index};
-    indices->insert(indices->end(),
-                    reinterpret_cast<const std::byte*>(&idx),
-                    reinterpret_cast<const std::byte*>(&idx + 1));
+    indices->emplace_back(index);
   }
 
-  return std::make_unique<GeometryData>(
-      GeometryData{.indexData = indices, .positionData = positions, .texCoordData = texCoords});
+  return std::make_unique<GeometryData>(GeometryData{.indexData = indices,
+                                                     .positionData = positions,
+                                                     .colorData = nullptr,
+                                                     .texCoordData = texCoords,
+                                                     .normalData = nullptr,
+                                                     .animationData = nullptr});
 }
 
 auto DefaultAssetSystem::fromGeometryData(const GeometryData& geometryData)

@@ -36,8 +36,8 @@ public:
 
   /// Creates a Buffer
   /// @throws AllocationException if there is an error allocating or naming the buffer.
-  auto createBuffer2(vk::BufferCreateInfo* bci,
-                     vma::AllocationCreateInfo* aci,
+  auto createBuffer2(vk::BufferCreateInfo bci,
+                     vma::AllocationCreateInfo aci,
                      const std::string_view& name = "unnamed buffer") const
       -> std::unique_ptr<ManagedBuffer>;
 

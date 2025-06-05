@@ -6,7 +6,7 @@ namespace tr {
 
 struct UploadData {
   size_t dataSize{};
-  std::shared_ptr<std::vector<std::byte>> data = nullptr;
+  std::shared_ptr<void> data = nullptr;
   Handle<ManagedBuffer> dstBuffer{};
 
   size_t stagingOffset{};

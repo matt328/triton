@@ -17,9 +17,9 @@ struct ArenaInfo {
 };
 
 struct BufferMeta {
-  vk::BufferCreateInfo* bufferCreateInfo;
+  vk::BufferCreateInfo bufferCreateInfo;
   vma::AllocationInfo allocationInfo;
-  vma::AllocationCreateInfo* allocationCreateInfo;
+  vma::AllocationCreateInfo allocationCreateInfo;
 };
 
 class ManagedBuffer {

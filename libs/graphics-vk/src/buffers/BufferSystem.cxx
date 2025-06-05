@@ -53,7 +53,7 @@ auto BufferSystem::registerBuffer(const BufferCreateInfo& createInfo) -> Handle<
   auto [bci, aci] = fromCreateInfo(createInfo);
 
   auto versions = std::deque<std::unique_ptr<ManagedBuffer>>{};
-  versions.emplace_back(allocator->createBuffer2(&bci, &aci, createInfo.debugName));
+  versions.emplace_back(allocator->createBuffer2(bci, aci, createInfo.debugName));
   bufferMap.emplace(
       handle,
       std::make_unique<BufferEntry>(BufferEntry{.lifetime = createInfo.bufferLifetime,

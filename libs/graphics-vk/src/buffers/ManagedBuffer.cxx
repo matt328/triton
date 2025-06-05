@@ -1,4 +1,5 @@
 #include "ManagedBuffer.hpp"
+#include "api/gfx/GpuMaterialData.hpp"
 
 namespace tr {
 
@@ -14,7 +15,7 @@ ManagedBuffer::ManagedBuffer(vk::Buffer newVkBuffer,
 
 ManagedBuffer::~ManagedBuffer() {
   if (vkBuffer && allocation) {
-    if (mappedData != nullptr) {
+    if (this->mappedData != nullptr) {
       allocator->unmapMemory(allocation);
     }
     allocator->destroyBuffer(vkBuffer, allocation);
@@ -27,17 +28,22 @@ auto ManagedBuffer::isMappable() -> bool {
 }
 
 auto ManagedBuffer::map() -> void {
-  if (mappedData == nullptr) {
-    mappedData = allocator->mapMemory(allocation);
+  if (this->mappedData == nullptr) {
+    try {
+      this->mappedData = allocator->mapMemory(allocation);
+    } catch (const std::runtime_error& e) {
+      Log.error("Failed to map memory: {}", e.what());
+      this->mappedData = nullptr;
+    }
   }
 }
 
 auto ManagedBuffer::uploadData(const void* srcData, size_t size, size_t offset) -> void {
-  if (mappedData == nullptr) {
+  if (this->mappedData == nullptr) {
     map();
   }
   // This is segfaulting for some reason
-  std::memcpy(static_cast<char*>(mappedData) + offset, srcData, size);
+  std::memcpy(static_cast<char*>(this->mappedData) + offset, srcData, size);
 }
 
 [[nodiscard]] auto ManagedBuffer::getVkBuffer() const -> const vk::Buffer& {

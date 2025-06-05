@@ -38,14 +38,14 @@ Allocator::~Allocator() {
   allocator->destroy();
 }
 
-auto Allocator::createBuffer2(vk::BufferCreateInfo* bci,
-                              vma::AllocationCreateInfo* aci,
+auto Allocator::createBuffer2(vk::BufferCreateInfo bci,
+                              vma::AllocationCreateInfo aci,
                               const std::string_view& name) const
     -> std::unique_ptr<ManagedBuffer> {
 
   vma::AllocationInfo info{};
   try {
-    auto [buffer, allocation] = allocator->createBuffer(*bci, *aci, info);
+    auto [buffer, allocation] = allocator->createBuffer(bci, aci, info);
     allocator->setAllocationName(allocation, name.data());
     debugManager->setObjectName(buffer, name.data());
 
