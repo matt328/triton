@@ -6,7 +6,7 @@
 
 namespace tr {
 
-constexpr size_t StagingBufferSize = 83886080;
+constexpr size_t StagingBufferSize = 183886080;
 
 TransferSystem::TransferSystem(std::shared_ptr<BufferSystem> newBufferSystem,
                                std::shared_ptr<Device> newDevice,
@@ -36,13 +36,22 @@ auto TransferSystem::upload(UploadPlan& uploadPlan) -> void {
   std::unordered_map<Handle<ManagedBuffer>, std::vector<vk::BufferCopy2>> bufferCopies{};
 
   for (const auto& upload : uploadPlan.uploads) {
+    Log.trace("Copying into staging buffer offset={}, size={}, dstBuffer={}",
+              upload.stagingOffset,
+              upload.dataSize,
+              upload.dstBuffer.id);
+
     const auto stagingBufferRegion =
         bufferSystem->insert(transferContext.stagingBuffer,
-                             upload.data,
+                             reinterpret_cast<const void*>(upload.data->data()),
                              BufferRegion{.offset = upload.stagingOffset, .size = upload.dataSize});
     const auto region = vk::BufferCopy2{.srcOffset = stagingBufferRegion->offset,
                                         .dstOffset = upload.dstOffset,
                                         .size = upload.dataSize};
+    Log.trace("Created copy region, srcOffset={}, dstOffset={}, dstBuffer={}",
+              stagingBufferRegion->offset,
+              upload.dstOffset,
+              upload.dstBuffer.id);
     bufferCopies[upload.dstBuffer].push_back(region);
   }
 
@@ -71,6 +80,7 @@ auto TransferSystem::upload(UploadPlan& uploadPlan) -> void {
     Log.warn("Timeout waiting for fence during asnyc submit");
   }
   device->getVkDevice().resetFences(**fence);
+  transferContext.stagingAllocator.reset();
 }
 
 auto TransferSystem::getTransferContext() -> TransferContext& {

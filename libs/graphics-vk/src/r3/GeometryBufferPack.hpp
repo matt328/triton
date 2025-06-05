@@ -8,7 +8,7 @@ class BufferSystem;
 class IBufferAllocator;
 
 constexpr size_t IndexBufferInitialSize = 1024000;
-constexpr size_t PositionBufferInitialSize = 1024000;
+constexpr size_t PositionBufferInitialSize = 2671552;
 constexpr size_t ColorBufferInitialSize = 1024000;
 constexpr size_t TexCoordBufferInitialSize = 1024000;
 constexpr size_t NormalBufferInitialSize = 1024000;

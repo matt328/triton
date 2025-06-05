@@ -76,9 +76,7 @@ auto DefaultAssetSystem::requestStop() -> void {
 auto DefaultAssetSystem::handleEndResourceBatch(uint64_t batchId) -> void {
   auto uploadPlan = UploadPlan{.stagingBuffer = transferSystem->getTransferContext().stagingBuffer};
   std::vector<StaticModelUploaded> responses{};
-  // TODO(Resources-1): change models to store data via unique_ptr that can be moved into
-  // whatever needs to own the data. Doesn't change functionality, but expresses clearer ownership
-  // semantics.
+
   std::vector<as::Model> loadedModels{};
 
   for (auto& eventVariant : eventBatches[batchId]) {
@@ -110,6 +108,7 @@ auto DefaultAssetSystem::handleStaticModelRequest(const StaticModelRequest& smRe
   Log.trace("Handling Static Model Request ID: {}", smRequest.requestId);
   loadedModels.push_back(assetService->loadModel(smRequest.modelFilename));
   const auto& model = loadedModels.back();
+
   const auto geometryData = deInterleave(*model.staticVertices, model.indices);
 
   const auto [regionHandle, uploads] =
@@ -132,19 +131,33 @@ auto DefaultAssetSystem::handleStaticModelRequest(const StaticModelRequest& smRe
 auto DefaultAssetSystem::deInterleave(const std::vector<as::StaticVertex>& vertices,
                                       const std::vector<uint32_t>& indexData)
     -> std::unique_ptr<GeometryData> {
-  auto positions = std::vector<GpuVertexPositionData>{};
-  auto texCoords = std::vector<GpuVertexTexCoordData>{};
-  positions.reserve(vertices.size());
-  texCoords.reserve(vertices.size());
+  auto positions = std::make_shared<std::vector<std::byte>>();
+  auto texCoords = std::make_shared<std::vector<std::byte>>();
+  auto indices = std::make_shared<std::vector<std::byte>>();
+
+  positions->reserve(vertices.size() * sizeof(GpuVertexPositionData));
+  texCoords->reserve(vertices.size() * sizeof(GpuVertexTexCoordData));
+  indices->reserve(indexData.size() * sizeof(GpuIndexData));
+
   for (const auto& vertex : vertices) {
-    positions.push_back({vertex.position});
-    texCoords.push_back({vertex.texCoord});
+    const auto pos = GpuVertexPositionData{vertex.position};
+    const auto tex = GpuVertexTexCoordData{vertex.texCoord};
+
+    positions->insert(positions->end(),
+                      reinterpret_cast<const std::byte*>(&pos),
+                      reinterpret_cast<const std::byte*>(&pos + 1));
+    texCoords->insert(texCoords->end(),
+                      reinterpret_cast<const std::byte*>(&tex),
+                      reinterpret_cast<const std::byte*>(&tex + 1));
   }
-  auto indices = std::vector<GpuIndexData>{};
-  indices.reserve(indexData.size());
-  for (const auto& index : indexData) {
-    indices.push_back({index});
+
+  for (auto index : indexData) {
+    GpuIndexData idx{index};
+    indices->insert(indices->end(),
+                    reinterpret_cast<const std::byte*>(&idx),
+                    reinterpret_cast<const std::byte*>(&idx + 1));
   }
+
   return std::make_unique<GeometryData>(
       GeometryData{.indexData = indices, .positionData = positions, .texCoordData = texCoords});
 }
@@ -154,28 +167,25 @@ auto DefaultAssetSystem::fromGeometryData(const GeometryData& geometryData)
   auto uploadDataList = std::vector<UploadData>{};
   uploadDataList.reserve(6);
 
-  if (!geometryData.indexData.empty()) {
-    auto size = geometryData.indexData.size() * sizeof(GpuIndexData);
-    uploadDataList.emplace_back(
-        UploadData{.dataSize = size,
-                   .data = static_cast<const void*>(geometryData.indexData.data()),
-                   .dstBuffer = geometryBufferPack->getIndexBuffer()});
+  if (geometryData.indexData != nullptr) {
+    auto size = geometryData.indexData->size() * sizeof(GpuIndexData);
+    uploadDataList.emplace_back(UploadData{.dataSize = size,
+                                           .data = geometryData.indexData,
+                                           .dstBuffer = geometryBufferPack->getIndexBuffer()});
   }
 
-  if (!geometryData.positionData.empty()) {
-    auto size = geometryData.positionData.size() * sizeof(GpuVertexPositionData);
-    uploadDataList.emplace_back(
-        UploadData{.dataSize = size,
-                   .data = static_cast<const void*>(geometryData.positionData.data()),
-                   .dstBuffer = geometryBufferPack->getPositionBuffer()});
+  if (geometryData.positionData != nullptr) {
+    auto size = geometryData.positionData->size() * sizeof(GpuVertexPositionData);
+    uploadDataList.emplace_back(UploadData{.dataSize = size,
+                                           .data = geometryData.positionData,
+                                           .dstBuffer = geometryBufferPack->getPositionBuffer()});
   }
 
-  if (!geometryData.texCoordData.empty()) {
-    auto size = geometryData.texCoordData.size() * sizeof(GpuVertexTexCoordData);
-    uploadDataList.emplace_back(
-        UploadData{.dataSize = size,
-                   .data = static_cast<const void*>(geometryData.texCoordData.data()),
-                   .dstBuffer = geometryBufferPack->getTexCoordBuffer()});
+  if (geometryData.texCoordData != nullptr) {
+    auto size = geometryData.texCoordData->size() * sizeof(GpuVertexTexCoordData);
+    uploadDataList.emplace_back(UploadData{.dataSize = size,
+                                           .data = geometryData.texCoordData,
+                                           .dstBuffer = geometryBufferPack->getTexCoordBuffer()});
   }
 
   return uploadDataList;

@@ -96,7 +96,7 @@ auto BufferSystem::insert(Handle<ManagedBuffer> handle,
 
   if (lifetime == BufferLifetime::Transient) {
     if (managedBuffer.has_value()) {
-      managedBuffer.value()->uploadData(data, targetRegion.size);
+      managedBuffer.value()->uploadData(data, targetRegion.size, targetRegion.offset);
       maybeBufferRegion.emplace(targetRegion.offset, targetRegion.size);
       return maybeBufferRegion;
     }

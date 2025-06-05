@@ -16,14 +16,19 @@ auto GeometryAllocator::allocate(const GeometryData& data, TransferContext& tran
   auto uploadList = std::vector<UploadData>{};
 
   {
-    auto size = data.indexData.size() * sizeof(GpuIndexData);
+    auto size = data.indexData->size() * sizeof(GpuIndexData);
     auto stagingRegion = transferContext.stagingAllocator->allocate(BufferRequest{.size = size});
+    Log.trace("Allocated index data in staging buffer, region.size={}, region.offset={}",
+              stagingRegion->size,
+              stagingRegion->offset);
     geometryRegion.indexRegion =
         geometryBufferPack->getIndexBufferAllocator().allocate(BufferRequest{.size = size}).value();
-    geometryRegion.indexCount = data.indexData.size();
+
+    geometryRegion.indexCount = data.indexData->size();
+
     uploadList.push_back(UploadData{
         .dataSize = size,
-        .data = data.indexData.data(),
+        .data = data.indexData,
         .dstBuffer = geometryBufferPack->getIndexBuffer(),
         .stagingOffset = stagingRegion->offset,
         .dstOffset = geometryRegion.indexRegion.offset,
@@ -31,29 +36,35 @@ auto GeometryAllocator::allocate(const GeometryData& data, TransferContext& tran
   }
 
   {
-    auto size = data.positionData.size() * sizeof(GpuVertexPositionData);
+    auto size = data.positionData->size() * sizeof(GpuVertexPositionData);
     auto stagingRegion = transferContext.stagingAllocator->allocate(BufferRequest{.size = size});
+    Log.trace("Allocated position data in staging buffer, region.size={}, region.offset={}",
+              stagingRegion->size,
+              stagingRegion->offset);
     geometryRegion.positionRegion = geometryBufferPack->getPositionBufferAllocator()
                                         .allocate(BufferRequest{.size = size})
                                         .value();
     uploadList.push_back(UploadData{
         .dataSize = size,
-        .data = data.positionData.data(),
+        .data = data.positionData,
         .dstBuffer = geometryBufferPack->getPositionBuffer(),
         .stagingOffset = stagingRegion->offset,
         .dstOffset = geometryRegion.positionRegion.offset,
     });
   }
 
-  if (!data.texCoordData.empty()) {
-    auto size = data.texCoordData.size() * sizeof(GpuVertexTexCoordData);
+  if (data.texCoordData != nullptr) {
+    auto size = data.texCoordData->size() * sizeof(GpuVertexTexCoordData);
     auto stagingRegion = transferContext.stagingAllocator->allocate(BufferRequest{.size = size});
+    Log.trace("Allocated texCoord data in staging buffer, region.size={}, region.offset={}",
+              stagingRegion->size,
+              stagingRegion->offset);
     geometryRegion.texCoordRegion = geometryBufferPack->getTexCoordBufferAllocator()
                                         .allocate(BufferRequest{.size = size})
                                         .value();
     uploadList.push_back(UploadData{
         .dataSize = size,
-        .data = data.texCoordData.data(),
+        .data = data.texCoordData,
         .dstBuffer = geometryBufferPack->getTexCoordBuffer(),
         .stagingOffset = stagingRegion->offset,
         .dstOffset = geometryRegion.texCoordRegion->offset,

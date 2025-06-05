@@ -7,7 +7,11 @@ LinearAllocator::LinearAllocator(size_t bufferSize) : maxBufferSize{bufferSize} 
 
 auto LinearAllocator::allocate(const BufferRequest& bufferRequest) -> std::optional<BufferRegion> {
   if (currentOffset + bufferRequest.size > maxBufferSize) {
-    Log.warn("Requested buffer size={}, maxBufferSize={}", bufferRequest.size, maxBufferSize);
+    Log.warn("current buffer size={} + requested size={} ({})> maxBufferSize={}",
+             currentOffset,
+             bufferRequest.size,
+             currentOffset + bufferRequest.size,
+             maxBufferSize);
     return std::nullopt;
   }
 

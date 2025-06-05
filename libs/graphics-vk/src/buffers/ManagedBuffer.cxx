@@ -36,6 +36,7 @@ auto ManagedBuffer::uploadData(const void* srcData, size_t size, size_t offset) 
   if (mappedData == nullptr) {
     map();
   }
+  // This is segfaulting for some reason
   std::memcpy(static_cast<char*>(mappedData) + offset, srcData, size);
 }
 
