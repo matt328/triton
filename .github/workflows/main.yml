@@ -16,11 +16,6 @@ jobs:
           submodules: "recursive"
           fetch-depth: 1
 
-      - name: Install LLVM and Clang
-        uses: KyleMayes/install-llvm-action@master
-        with:
-          version: "18.1.8"
-
       - name: Prepare Vulkan SDK
         uses: humbletim/setup-vulkan-sdk@main
         with:
@@ -32,10 +27,10 @@ jobs:
         uses: seanmiddleditch/gha-setup-ninja@master
 
       - name: CMake Generate
-        run: cmake --preset release
+        run: cmake --preset msvc-debug
 
       - name: Build
-        run: cmake --build --preset release
+        run: cmake --build --preset msvc-debug
 
   build-linux:
     runs-on: ubuntu-24.04
