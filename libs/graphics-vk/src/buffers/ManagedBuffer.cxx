@@ -17,6 +17,7 @@ ManagedBuffer::~ManagedBuffer() {
   if (vkBuffer && allocation) {
     if (this->mappedData != nullptr) {
       allocator->unmapMemory(allocation);
+      this->mappedData = nullptr;
     }
     allocator->destroyBuffer(vkBuffer, allocation);
   }
@@ -24,7 +25,7 @@ ManagedBuffer::~ManagedBuffer() {
 
 auto ManagedBuffer::isMappable() -> bool {
   const auto memProps = allocator->getAllocationMemoryProperties(allocation);
-  return (memProps & vk::MemoryPropertyFlagBits::eHostCoherent) != vk::MemoryPropertyFlagBits{};
+  return (memProps & vk::MemoryPropertyFlagBits::eHostVisible) != vk::MemoryPropertyFlagBits{};
 }
 
 auto ManagedBuffer::map() -> void {
@@ -38,10 +39,21 @@ auto ManagedBuffer::map() -> void {
   }
 }
 
-auto ManagedBuffer::uploadData(const void* srcData, size_t size, size_t offset) -> void {
+auto ManagedBuffer::uploadData(void* srcData, size_t size, size_t offset) -> void {
+  assert(isMappable());
   if (this->mappedData == nullptr) {
     map();
   }
+
+  assert(this->mappedData != nullptr);
+  assert(srcData != nullptr);
+  assert(offset + size <= bufferMeta.bufferCreateInfo.size);
+
+  volatile char* s = static_cast<volatile char*>(srcData);
+  for (size_t i = 0; i < size; ++i) {
+    char tmp = s[i]; // try to read from srcData
+  }
+
   // This is segfaulting for some reason
   std::memcpy(static_cast<char*>(this->mappedData) + offset, srcData, size);
 }

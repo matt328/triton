@@ -81,12 +81,12 @@ struct GpuIndirectCommand {
 };
 
 struct GeometryData {
-  std::shared_ptr<std::vector<GpuIndexData>> indexData;
-  std::shared_ptr<std::vector<GpuVertexPositionData>> positionData;
-  std::shared_ptr<std::vector<GpuVertexColorData>> colorData;
-  std::shared_ptr<std::vector<GpuVertexTexCoordData>> texCoordData;
-  std::shared_ptr<std::vector<GpuVertexNormalData>> normalData;
-  std::shared_ptr<std::vector<GpuAnimationData>> animationData;
+  std::shared_ptr<std::vector<std::byte>> indexData;
+  std::shared_ptr<std::vector<std::byte>> positionData;
+  std::shared_ptr<std::vector<std::byte>> colorData;
+  std::shared_ptr<std::vector<std::byte>> texCoordData;
+  std::shared_ptr<std::vector<std::byte>> normalData;
+  std::shared_ptr<std::vector<std::byte>> animationData;
 };
 
 /*

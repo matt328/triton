@@ -44,7 +44,7 @@ public:
   auto registerPerFrameBuffer(const BufferCreateInfo& createInfo) -> LogicalHandle<ManagedBuffer>;
 
   /// Write `size` data at the specified `offset` in the buffer.
-  auto insert(Handle<ManagedBuffer> handle, const void* data, const BufferRegion& targetRegion)
+  auto insert(Handle<ManagedBuffer> handle, void* data, const BufferRegion& targetRegion)
       -> std::optional<BufferRegion>;
 
   /// Removes the data from the buffer described by the given `BufferRegion`. Should be quick as it

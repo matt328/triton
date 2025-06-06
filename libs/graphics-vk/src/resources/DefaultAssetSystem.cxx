@@ -5,6 +5,7 @@
 #include "buffers/BufferSystem.hpp"
 #include "buffers/UploadPlan.hpp"
 #include "r3/GeometryBufferPack.hpp"
+#include "resources/ByteConverters.hpp"
 #include "resources/TransferSystem.hpp"
 #include "resources/allocators/GeometryAllocator.hpp"
 
@@ -148,41 +149,16 @@ auto DefaultAssetSystem::deInterleave(const std::vector<as::StaticVertex>& verti
     indices->emplace_back(index);
   }
 
-  return std::make_unique<GeometryData>(GeometryData{.indexData = indices,
-                                                     .positionData = positions,
+  auto indicesBytes = toByteVector(indices);
+  auto texCoordBytes = toByteVector(texCoords);
+  auto positionBytes = toByteVector(positions);
+
+  return std::make_unique<GeometryData>(GeometryData{.indexData = indicesBytes,
+                                                     .positionData = positionBytes,
                                                      .colorData = nullptr,
-                                                     .texCoordData = texCoords,
+                                                     .texCoordData = texCoordBytes,
                                                      .normalData = nullptr,
                                                      .animationData = nullptr});
-}
-
-auto DefaultAssetSystem::fromGeometryData(const GeometryData& geometryData)
-    -> std::vector<UploadData> {
-  auto uploadDataList = std::vector<UploadData>{};
-  uploadDataList.reserve(6);
-
-  if (geometryData.indexData != nullptr) {
-    auto size = geometryData.indexData->size() * sizeof(GpuIndexData);
-    uploadDataList.emplace_back(UploadData{.dataSize = size,
-                                           .data = geometryData.indexData,
-                                           .dstBuffer = geometryBufferPack->getIndexBuffer()});
-  }
-
-  if (geometryData.positionData != nullptr) {
-    auto size = geometryData.positionData->size() * sizeof(GpuVertexPositionData);
-    uploadDataList.emplace_back(UploadData{.dataSize = size,
-                                           .data = geometryData.positionData,
-                                           .dstBuffer = geometryBufferPack->getPositionBuffer()});
-  }
-
-  if (geometryData.texCoordData != nullptr) {
-    auto size = geometryData.texCoordData->size() * sizeof(GpuVertexTexCoordData);
-    uploadDataList.emplace_back(UploadData{.dataSize = size,
-                                           .data = geometryData.texCoordData,
-                                           .dstBuffer = geometryBufferPack->getTexCoordBuffer()});
-  }
-
-  return uploadDataList;
 }
 
 auto DefaultAssetSystem::fromImageData([[maybe_unused]] const as::ImageData& imageData)

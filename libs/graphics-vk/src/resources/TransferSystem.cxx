@@ -2,6 +2,7 @@
 #include "api/gfx/GpuMaterialData.hpp"
 #include "buffers/BufferSystem.hpp"
 #include "gfx/QueueTypes.hpp"
+#include "resources/ByteConverters.hpp"
 #include "resources/allocators/LinearAllocator.hpp"
 #include "vk/command-buffer/CommandBufferManager.hpp"
 
@@ -42,13 +43,12 @@ auto TransferSystem::upload(UploadPlan& uploadPlan) -> void {
               upload.dataSize,
               upload.dstBuffer.id);
 
-    std::shared_ptr<std::vector<GpuIndexData>> testVector =
-        std::static_pointer_cast<std::vector<GpuIndexData>>(upload.data);
-    Log.trace("testVector.size()={}", testVector->size());
+    auto data = upload.data;
+    const auto nonByteData = fromByteVector<GpuIndexData>(data);
 
     const auto stagingBufferRegion =
         bufferSystem->insert(transferContext.stagingBuffer,
-                             upload.data.get(),
+                             upload.data->data(),
                              BufferRegion{.offset = upload.stagingOffset, .size = upload.dataSize});
     const auto region = vk::BufferCopy2{.srcOffset = stagingBufferRegion->offset,
                                         .dstOffset = upload.dstOffset,

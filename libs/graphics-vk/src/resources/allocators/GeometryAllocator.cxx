@@ -16,7 +16,7 @@ auto GeometryAllocator::allocate(const GeometryData& data, TransferContext& tran
   auto uploadList = std::vector<UploadData>{};
 
   {
-    auto size = data.indexData->size() * sizeof(GpuIndexData);
+    auto size = data.indexData->size();
     auto stagingRegion = transferContext.stagingAllocator->allocate(BufferRequest{.size = size});
     Log.trace("Allocated index data in staging buffer, region.size={}, region.offset={}",
               stagingRegion->size,
@@ -24,7 +24,7 @@ auto GeometryAllocator::allocate(const GeometryData& data, TransferContext& tran
     geometryRegion.indexRegion =
         geometryBufferPack->getIndexBufferAllocator().allocate(BufferRequest{.size = size}).value();
 
-    geometryRegion.indexCount = data.indexData->size();
+    geometryRegion.indexCount = data.indexData->size() / sizeof(GpuIndexData);
 
     uploadList.push_back(UploadData{
         .dataSize = size,
@@ -36,7 +36,7 @@ auto GeometryAllocator::allocate(const GeometryData& data, TransferContext& tran
   }
 
   {
-    auto size = data.positionData->size() * sizeof(GpuVertexPositionData);
+    auto size = data.positionData->size();
     auto stagingRegion = transferContext.stagingAllocator->allocate(BufferRequest{.size = size});
     Log.trace("Allocated position data in staging buffer, region.size={}, region.offset={}",
               stagingRegion->size,
@@ -54,7 +54,7 @@ auto GeometryAllocator::allocate(const GeometryData& data, TransferContext& tran
   }
 
   if (data.texCoordData != nullptr) {
-    auto size = data.texCoordData->size() * sizeof(GpuVertexTexCoordData);
+    auto size = data.texCoordData->size();
     auto stagingRegion = transferContext.stagingAllocator->allocate(BufferRequest{.size = size});
     Log.trace("Allocated texCoord data in staging buffer, region.size={}, region.offset={}",
               stagingRegion->size,
@@ -81,10 +81,10 @@ auto GeometryAllocator::getRegionData(Handle<GeometryRegion> handle) const
   assert(regionTable.contains(handle) && "No RegionTable entry for given handle");
   const auto& region = regionTable.at(handle);
 
-  auto regionData =
-      GpuGeometryRegionData{.indexCount = region.indexCount,
-                            .indexOffset = static_cast<uint32_t>(region.indexRegion.offset),
-                            .positionOffset = static_cast<uint32_t>(region.positionRegion.offset)};
+  auto regionData = GpuGeometryRegionData{
+      .indexCount = region.indexCount,
+      .indexOffset = static_cast<uint32_t>(region.indexRegion.offset / sizeof(GpuIndexData)),
+      .positionOffset = static_cast<uint32_t>(region.positionRegion.offset)};
   if (region.texCoordRegion) {
     regionData.texCoordOffset = region.texCoordRegion->offset;
   }

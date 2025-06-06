@@ -88,7 +88,7 @@ auto BufferSystem::registerPerFrameBuffer(const BufferCreateInfo& createInfo)
 
 // Figure out why buffer data isn't showing up
 auto BufferSystem::insert(Handle<ManagedBuffer> handle,
-                          const void* data,
+                          void* data,
                           const BufferRegion& targetRegion) -> std::optional<BufferRegion> {
   std::optional<BufferRegion> maybeBufferRegion = std::nullopt;
   auto managedBuffer = getCurrentManagedBuffer(handle);
@@ -178,7 +178,8 @@ auto BufferSystem::fromCreateInfo(const BufferCreateInfo& createInfo)
   } else if (createInfo.bufferLifetime == BufferLifetime::Transient) {
     bci.usage |= vk::BufferUsageFlagBits::eShaderDeviceAddress;
     aci.setUsage(vma::MemoryUsage::eCpuToGpu);
-    aci.setRequiredFlags(vk::MemoryPropertyFlagBits::eHostCoherent);
+    aci.setRequiredFlags(vk::MemoryPropertyFlagBits::eHostCoherent |
+                         vk::MemoryPropertyFlagBits::eHostVisible);
   }
 
   if (createInfo.indirect) {

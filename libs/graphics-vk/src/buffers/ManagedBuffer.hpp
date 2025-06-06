@@ -41,7 +41,7 @@ public:
 
   auto map() -> void;
 
-  auto uploadData(const void* srcData, size_t size, size_t offset = 0) -> void;
+  auto uploadData(void* srcData, size_t size, size_t offset = 0) -> void;
 
   [[nodiscard]] auto getMeta() const -> const BufferMeta&;
 

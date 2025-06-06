@@ -210,25 +210,35 @@ void R3Renderer::renderNextFrame() {
   buildFrameState(current.objectMetadata, current.stateHandles, geometryRegionContents);
 
   // GeometryRegionBuffer
-  bufferSystem->insert(
-      frame->getLogicalBuffer(globalBuffers.geometryRegion),
-      geometryRegionContents.data(),
-      BufferRegion{.size = sizeof(GpuGeometryRegionData) * geometryRegionContents.size()});
+  if (!geometryRegionContents.empty()) {
+    bufferSystem->insert(
+        frame->getLogicalBuffer(globalBuffers.geometryRegion),
+        geometryRegionContents.data(),
+        BufferRegion{.size = sizeof(GpuGeometryRegionData) * geometryRegionContents.size()});
+  }
 
   // Object Data Buffers
-  bufferSystem->insert(frame->getLogicalBuffer(globalBuffers.objectData),
-                       current.objectMetadata.data(),
-                       BufferRegion{.size = sizeof(GpuObjectData) * current.objectMetadata.size()});
-  bufferSystem->insert(frame->getLogicalBuffer(globalBuffers.objectPositions),
-                       current.positions.data(),
-                       BufferRegion{.size = sizeof(GpuTransformData) * current.positions.size()});
-  bufferSystem->insert(frame->getLogicalBuffer(globalBuffers.objectRotations),
-                       current.rotations.data(),
-                       BufferRegion{.size = sizeof(GpuRotationData) * current.rotations.size()});
-  bufferSystem->insert(frame->getLogicalBuffer(globalBuffers.objectScales),
-                       current.scales.data(),
-                       BufferRegion{.size = sizeof(GpuScaleData) * current.scales.size()});
-
+  if (!current.objectMetadata.empty()) {
+    bufferSystem->insert(
+        frame->getLogicalBuffer(globalBuffers.objectData),
+        current.objectMetadata.data(),
+        BufferRegion{.size = sizeof(GpuObjectData) * current.objectMetadata.size()});
+  }
+  if (!current.positions.empty()) {
+    bufferSystem->insert(frame->getLogicalBuffer(globalBuffers.objectPositions),
+                         current.positions.data(),
+                         BufferRegion{.size = sizeof(GpuTransformData) * current.positions.size()});
+  }
+  if (!current.rotations.empty()) {
+    bufferSystem->insert(frame->getLogicalBuffer(globalBuffers.objectRotations),
+                         current.rotations.data(),
+                         BufferRegion{.size = sizeof(GpuRotationData) * current.rotations.size()});
+  }
+  if (!current.scales.empty()) {
+    bufferSystem->insert(frame->getLogicalBuffer(globalBuffers.objectScales),
+                         current.scales.data(),
+                         BufferRegion{.size = sizeof(GpuScaleData) * current.scales.size()});
+  }
   // Set host values in frame
   frame->setObjectCount(current.objectMetadata.size());
 

@@ -57,12 +57,10 @@ private:
                                 std::vector<StaticModelUploaded>& responses,
                                 std::vector<as::Model>& loadedModels) -> void;
 
-  auto fromGeometryData(const GeometryData& geometryData) -> std::vector<UploadData>;
-
   /// Eventually Update the TRM model formats to store data on disk in a deinterleaved format so
   /// this method is unnecessary, but just convert it here for now.
-  static auto deInterleave(const std::vector<as::StaticVertex>& vertices,
-                           const std::vector<uint32_t>& indexData) -> std::unique_ptr<GeometryData>;
+  auto deInterleave(const std::vector<as::StaticVertex>& vertices,
+                    const std::vector<uint32_t>& indexData) -> std::unique_ptr<GeometryData>;
   static auto fromImageData(const as::ImageData& imageData) -> std::vector<UploadData>;
 };
 
