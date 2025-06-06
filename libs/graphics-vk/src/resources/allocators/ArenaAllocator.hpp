@@ -19,7 +19,7 @@ public:
   auto reset() -> void override;
 
 private:
-  size_t initialSize{};
+  [[maybe_unused]] size_t initialSize{};
 };
 
 }

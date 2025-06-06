@@ -95,7 +95,7 @@ struct DataStore {
   // Terrain
   std::unordered_map<std::string, TerrainData> terrainMap;
 
-  std::unordered_map<std::string, tr::Handle<tr::Geometry>> entityNameMap;
+  std::unordered_map<std::string, tr::GameObjectId> entityNameMap;
 
   template <class T>
   void serialize(T& archive) {

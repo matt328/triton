@@ -330,9 +330,10 @@ auto R3Renderer::createComputeCullingPass() -> void {
                              .size = 104, // TODO(matt) sizeof()
                          }}};
 
-  const auto shaderStageInfo = ShaderStageInfo{.stage = vk::ShaderStageFlagBits::eCompute,
-                                               .shaderFile = (SHADER_ROOT / "compute2.comp.spv").string(),
-                                               .entryPoint = "main"};
+  const auto shaderStageInfo =
+      ShaderStageInfo{.stage = vk::ShaderStageFlagBits::eCompute,
+                      .shaderFile = (SHADER_ROOT / "compute2.comp.spv").string(),
+                      .entryPoint = "main"};
 
   const auto cullingPassInfo = ComputePassCreateInfo{.id = "culling",
                                                      .pipelineLayoutInfo = pipelineLayoutInfo,
@@ -413,10 +414,10 @@ auto R3Renderer::createForwardRenderPass() -> void {
 }
 
 auto R3Renderer::createCompositionRenderPass() -> void {
-  auto colorAttachmentInfo = AttachmentCreateInfo{
-      .format = vk::Format::eR16G16B16A16Sfloat,
-      .clearValue = vk::ClearValue{
-          .color = vk::ClearColorValue{std::array<float, 4>{0.392f, 0.584f, 0.929f, 1.0f}}}};
+  // auto colorAttachmentInfo = AttachmentCreateInfo{
+  //     .format = vk::Format::eR16G16B16A16Sfloat,
+  //     .clearValue = vk::ClearValue{
+  //         .color = vk::ClearColorValue{std::array<float, 4>{0.392f, 0.584f, 0.929f, 1.0f}}}};
 
   const auto vertexStage = ShaderStageInfo{
       .stage = vk::ShaderStageFlagBits::eVertex,

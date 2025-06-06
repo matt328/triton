@@ -104,10 +104,10 @@ auto TransferSystem::getTransferContext() -> TransferContext& {
   return transferContext;
 }
 
-auto TransferSystem::enqueueResize(const ResizeRequest& resize) -> void {
+auto TransferSystem::enqueueResize([[maybe_unused]] const ResizeRequest& resize) -> void {
 }
 
-auto TransferSystem::defragment(const DefragRequest& defrag) -> void {
+auto TransferSystem::defragment([[maybe_unused]] const DefragRequest& defrag) -> void {
 }
 
 auto TransferSystem::checkSizes([[maybe_unused]] const UploadPlan& uploadPlan)
@@ -116,7 +116,8 @@ auto TransferSystem::checkSizes([[maybe_unused]] const UploadPlan& uploadPlan)
   return {};
 }
 
-auto TransferSystem::processResizes(const std::vector<ResizeRequest>& resizeRequestList) -> void {
+auto TransferSystem::processResizes(
+    [[maybe_unused]] const std::vector<ResizeRequest>& resizeRequestList) -> void {
 }
 
 }

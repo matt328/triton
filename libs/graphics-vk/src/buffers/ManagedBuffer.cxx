@@ -49,12 +49,12 @@ auto ManagedBuffer::uploadData(void* srcData, size_t size, size_t offset) -> voi
   assert(srcData != nullptr);
   assert(offset + size <= bufferMeta.bufferCreateInfo.size);
 
-  volatile char* s = static_cast<volatile char*>(srcData);
-  for (size_t i = 0; i < size; ++i) {
-    char tmp = s[i]; // try to read from srcData
-  }
+  // Uncomment this if the memcpy line starts segfaulting again.
+  // volatile char* s = static_cast<volatile char*>(srcData);
+  // for (size_t i = 0; i < size; ++i) {
+  //   char tmp = s[i]; // try to read from srcData
+  // }
 
-  // This is segfaulting for some reason
   std::memcpy(static_cast<char*>(this->mappedData) + offset, srcData, size);
 }
 

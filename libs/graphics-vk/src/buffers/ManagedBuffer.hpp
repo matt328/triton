@@ -55,7 +55,7 @@ private:
   std::shared_ptr<vma::Allocator> allocator;
   void* mappedData = nullptr;
 
-  uint64_t validFromFrame;
+  uint64_t validFromFrame{};
   std::optional<uint64_t> validToFrame;
 };
 

@@ -7,13 +7,13 @@ ForwardDrawContext::ForwardDrawContext(std::string newId,
     : IDispatchContext{std::move(newId), std::move(newBufferSystem)}, createInfo{newCreateInfo} {
 }
 
-auto ForwardDrawContext::bind(const Frame* frame,
-                              vk::raii::CommandBuffer& commandBuffer,
-                              const vk::raii::PipelineLayout& layout) -> void {
+auto ForwardDrawContext::bind([[maybe_unused]] const Frame* frame,
+                              [[maybe_unused]] vk::raii::CommandBuffer& commandBuffer,
+                              [[maybe_unused]] const vk::raii::PipelineLayout& layout) -> void {
 }
 
-auto ForwardDrawContext::dispatch(const Frame* frame, vk::raii::CommandBuffer& commandBuffer)
-    -> void {
+auto ForwardDrawContext::dispatch([[maybe_unused]] const Frame* frame,
+                                  [[maybe_unused]] vk::raii::CommandBuffer& commandBuffer) -> void {
 }
 
 auto ForwardDrawContext::getPushConstantSize() -> size_t {

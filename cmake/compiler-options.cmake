@@ -29,7 +29,7 @@ if(ENABLE_ALL_WARNINGS)
    elseif(MSVC)
       # MSVC
       add_compile_options(/EHsc)
-      add_compile_options(/W4)
+      add_compile_options(/w)
    endif()
 endif()
 

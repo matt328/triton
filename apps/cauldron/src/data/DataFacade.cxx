@@ -4,11 +4,11 @@
 
 namespace ed {
 
-// constexpr auto ModelFile =
-//     "/home/matt/projects/matt/game-assets/models/current/viking_room/viking_room_v4.trm";
-
 constexpr auto ModelFile =
-    "/home/matt/Projects/game-assets/models/current/viking_room/viking_room_v4.trm";
+    "/home/matt/projects/matt/game-assets/models/current/viking_room/viking_room_v4.trm";
+
+// constexpr auto ModelFile =
+//     "/home/matt/Projects/game-assets/models/current/viking_room/viking_room_v4.trm";
 
 DataFacade::DataFacade(std::shared_ptr<tr::IEventQueue> newEventQueue)
     : eventQueue{std::move(newEventQueue)} {
@@ -39,9 +39,9 @@ DataFacade::DataFacade(std::shared_ptr<tr::IEventQueue> newEventQueue)
                                              .entityId = event.entityId.value()});
 
     // Register each Chunk's name -> id
-    for (const auto& chunk : event.chunks) {
-      // dataStore.entityNameMap.emplace(chunk.name, chunk.entityId.value());
-    }
+    // for (const auto& chunk : event.chunks) {
+    // dataStore.entityNameMap.emplace(chunk.name, chunk.entityId.value());
+    // }
 
     engineBusy = false;
   });
@@ -125,9 +125,12 @@ void DataFacade::createStaticModel(const EntityData& entityData) noexcept {
   unsaved = true;
   engineBusy = true;
   const auto key = requestIdGenerator.getKey();
+  const auto batchId = batchIdGenerator.getKey();
   inFlightMap.emplace(key, entityData);
+  // TODO(resources-1): Emit a begin batch and end batch and a response handler as well
   eventQueue->emit(
-      tr::StaticModelRequest{.requestId = key,
+      tr::StaticModelRequest{.batchId = batchId,
+                             .requestId = key,
                              .modelFilename = dataStore.models.at(entityData.modelName).filePath,
                              .entityName = entityData.name,
                              .initialTransform = std::make_optional(
@@ -191,7 +194,7 @@ void DataFacade::createAnimatedModel(const EntityData& entityData) {
   const auto skeletonFilename = dataStore.skeletons.at(entityData.skeleton).filePath;
   const auto animationFilename = dataStore.animations.at(entityData.animations[0]).filePath;
   const auto entityName = entityData.name;
-  const auto requestId = requestIdGenerator.getKey();
+  // const auto requestId = requestIdGenerator.getKey();
   // eventQueue->emit(tr::DynamicModelRequest{.requestId = requestId,
   //                                          .modelFilename = modelFilename,
   //                                          .skeletonFilename = skeletonFilename,
@@ -286,11 +289,11 @@ void DataFacade::load(const std::filesystem::path& inputFile) {
 auto DataFacade::getEntityNames() -> std::vector<std::tuple<std::string, tr::GameObjectId>> {
   auto names = std::vector<std::tuple<std::string, tr::GameObjectId>>{};
   for (const auto& [name, _] : dataStore.scene) {
-    // names.emplace_back(name, dataStore.entityNameMap.at(name));
+    names.emplace_back(name, dataStore.entityNameMap.at(name));
   }
 
   for (const auto& [name, _] : dataStore.terrainMap) {
-    // names.emplace_back(name, dataStore.entityNameMap.at(name));
+    names.emplace_back(name, dataStore.entityNameMap.at(name));
   }
 
   return names;

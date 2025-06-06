@@ -55,8 +55,7 @@ public:
   auto getEntityNames() -> std::vector<std::tuple<std::string, tr::GameObjectId>>;
 
   [[nodiscard]] auto getEntityId(std::string_view name) const -> tr::GameObjectId {
-    // return dataStore.entityNameMap.at(name.data());
-    return static_cast<tr::GameObjectId>(0);
+    return dataStore.entityNameMap.at(name.data());
   }
 
   [[nodiscard]] auto getEntityData(std::string_view name) -> EntityData* {
@@ -105,6 +104,7 @@ private:
   DataStore dataStore;
 
   tr::MapKey requestIdGenerator;
+  tr::MapKey batchIdGenerator;
 
   std::unordered_map<uint64_t, EntityData> inFlightMap;
 
