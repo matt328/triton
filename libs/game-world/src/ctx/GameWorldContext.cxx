@@ -38,11 +38,18 @@ auto GameWorldContext::run(std::stop_token token) -> void {
   auto nextTick = clock::now();
 
   while (!token.stop_requested()) {
+    ZoneScopedN("Gameworld Loop");
     auto now = clock::now();
     if (now >= nextTick) {
 
-      eventQueue->dispatchPending();
-      entityManager->update();
+      {
+        ZoneScopedN("event dispatch");
+        eventQueue->dispatchPending();
+      }
+      {
+        ZoneScopedN("entityManager update");
+        entityManager->update();
+      }
 
       nextTick += timestep;
 
@@ -51,6 +58,7 @@ auto GameWorldContext::run(std::stop_token token) -> void {
         nextTick = now;
       }
     } else {
+      ZoneScopedN("sleep");
       std::this_thread::sleep_until(nextTick);
     }
   }

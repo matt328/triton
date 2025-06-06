@@ -178,6 +178,7 @@ auto R3Renderer::createGlobalImages() -> void {
 }
 
 void R3Renderer::renderNextFrame() {
+  ZoneScopedN("renderNextFrame");
   const auto result = frameManager->acquireFrame();
 
   if (std::holds_alternative<ImageAcquireResult>(result)) {
@@ -191,56 +192,67 @@ void R3Renderer::renderNextFrame() {
   }
 
   auto* frame = std::get<Frame*>(result);
-  // TODO(matt): figure out how to make copies into and out of the state buffer as efficient as
-  // possible
-  // This might need to capture the current timestamp inside the while loop.
-  Timestamp currentTime = std::chrono::steady_clock::now();
+
   std::optional<std::pair<SimState, SimState>> states = std::nullopt;
-  int retries = 100; // e.g. timeout after ~100 * 10ms = 1s
-  while (retries-- > 0 && states == std::nullopt) {
-    states = stateBuffer->getStates(currentTime);
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+  {
+    ZoneScopedN("getStates");
+    Timestamp currentTime = std::chrono::steady_clock::now();
+    int retries = 100; // e.g. timeout after ~100 * 10ms = 1s
+    while (retries-- > 0 && states == std::nullopt) {
+      ZoneScopedN("getStates try");
+      states = stateBuffer->getStates(currentTime);
+      if (states == std::nullopt) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+      }
+    }
   }
 
-  // There will eventually be two states sent to the Compute shader. It will interpolate them.
-  // For now, just use current.
+  if (states != std::nullopt) {
+    auto& current = (*states).first;
 
-  auto& current = (*states).first;
+    buildFrameState(current.objectMetadata, current.stateHandles, geometryRegionContents);
 
-  buildFrameState(current.objectMetadata, current.stateHandles, geometryRegionContents);
+    {
+      ZoneScopedN("Per Frame buffers");
+      // GeometryRegionBuffer
+      if (!geometryRegionContents.empty()) {
+        bufferSystem->insert(
+            frame->getLogicalBuffer(globalBuffers.geometryRegion),
+            geometryRegionContents.data(),
+            BufferRegion{.size = sizeof(GpuGeometryRegionData) * geometryRegionContents.size()});
+      }
 
-  // GeometryRegionBuffer
-  if (!geometryRegionContents.empty()) {
-    bufferSystem->insert(
-        frame->getLogicalBuffer(globalBuffers.geometryRegion),
-        geometryRegionContents.data(),
-        BufferRegion{.size = sizeof(GpuGeometryRegionData) * geometryRegionContents.size()});
+      // Object Data Buffers
+      if (!current.objectMetadata.empty()) {
+        bufferSystem->insert(
+            frame->getLogicalBuffer(globalBuffers.objectData),
+            current.objectMetadata.data(),
+            BufferRegion{.size = sizeof(GpuObjectData) * current.objectMetadata.size()});
+      }
+      if (!current.positions.empty()) {
+        bufferSystem->insert(
+            frame->getLogicalBuffer(globalBuffers.objectPositions),
+            current.positions.data(),
+            BufferRegion{.size = sizeof(GpuTransformData) * current.positions.size()});
+      }
+      if (!current.rotations.empty()) {
+        bufferSystem->insert(
+            frame->getLogicalBuffer(globalBuffers.objectRotations),
+            current.rotations.data(),
+            BufferRegion{.size = sizeof(GpuRotationData) * current.rotations.size()});
+      }
+      if (!current.scales.empty()) {
+        bufferSystem->insert(frame->getLogicalBuffer(globalBuffers.objectScales),
+                             current.scales.data(),
+                             BufferRegion{.size = sizeof(GpuScaleData) * current.scales.size()});
+      }
+      // Set host values in frame
+      frame->setObjectCount(current.objectMetadata.size());
+    }
+  } else {
+    Log.warn(
+        "Failed to get states this frame. Either game world is behind, or we're shutting down");
   }
-
-  // Object Data Buffers
-  if (!current.objectMetadata.empty()) {
-    bufferSystem->insert(
-        frame->getLogicalBuffer(globalBuffers.objectData),
-        current.objectMetadata.data(),
-        BufferRegion{.size = sizeof(GpuObjectData) * current.objectMetadata.size()});
-  }
-  if (!current.positions.empty()) {
-    bufferSystem->insert(frame->getLogicalBuffer(globalBuffers.objectPositions),
-                         current.positions.data(),
-                         BufferRegion{.size = sizeof(GpuTransformData) * current.positions.size()});
-  }
-  if (!current.rotations.empty()) {
-    bufferSystem->insert(frame->getLogicalBuffer(globalBuffers.objectRotations),
-                         current.rotations.data(),
-                         BufferRegion{.size = sizeof(GpuRotationData) * current.rotations.size()});
-  }
-  if (!current.scales.empty()) {
-    bufferSystem->insert(frame->getLogicalBuffer(globalBuffers.objectScales),
-                         current.scales.data(),
-                         BufferRegion{.size = sizeof(GpuScaleData) * current.scales.size()});
-  }
-  // Set host values in frame
-  frame->setObjectCount(current.objectMetadata.size());
 
   const auto& results = frameGraph->execute(frame);
   endFrame(frame, results);
@@ -249,6 +261,7 @@ void R3Renderer::renderNextFrame() {
 auto R3Renderer::buildFrameState(std::vector<GpuObjectData>& objectData,
                                  std::vector<StateHandles>& stateHandles,
                                  std::vector<GpuGeometryRegionData>& regionBuffer) -> void {
+  ZoneScopedN("R3Renderer::buildFrameState");
   regionBuffer.clear();
   regionBuffer.reserve(objectData.size());
   for (size_t i = 0; i < objectData.size(); ++i) {
@@ -260,6 +273,7 @@ auto R3Renderer::buildFrameState(std::vector<GpuObjectData>& objectData,
 }
 
 auto R3Renderer::endFrame(const Frame* frame, const FrameGraphResult& results) -> void {
+  ZoneScopedN("R3Renderer::endFrame");
   buffers.clear();
 
   constexpr auto waitStages =
@@ -275,10 +289,8 @@ auto R3Renderer::endFrame(const Frame* frame, const FrameGraphResult& results) -
       .pSignalSemaphores = &*frame->getRenderFinishedSemaphore(),
   };
 
-  std::string msg = fmt::format("Submitting Queue for frame {}", frame->getIndex());
-  TracyMessage(msg.data(), msg.size());
-
   try {
+    ZoneScopedN("queue submit");
     const auto fence = *frame->getInFlightFence();
     graphicsQueue->getQueue().submit(submitInfo, fence);
     frameState->advanceFrame();
@@ -287,6 +299,7 @@ auto R3Renderer::endFrame(const Frame* frame, const FrameGraphResult& results) -
   }
 
   try {
+    ZoneScopedN("queue present");
     const auto swapchainImageIndex = frame->getSwapchainImageIndex();
     const auto chain = swapchain->getSwapchain();
 
@@ -297,12 +310,11 @@ auto R3Renderer::endFrame(const Frame* frame, const FrameGraphResult& results) -
                            .pSwapchains = &chain,
                            .pImageIndices = &swapchainImageIndex};
 
-    std::string msg = fmt::format("Presenting frame {}", frame->getIndex());
-    TracyMessage(msg.data(), msg.size());
     if (const auto result2 = graphicsQueue->getQueue().presentKHR(presentInfo);
         result2 == vk::Result::eSuboptimalKHR || result2 == vk::Result::eErrorOutOfDateKHR) {
       Log.trace("Swapchain Needs Resized");
     }
+    FrameMark;
   } catch (const std::exception& ex) { Log.trace("Swapchain needs recreated: {0}", ex.what()); }
 }
 

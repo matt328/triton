@@ -127,8 +127,6 @@ auto GraphicsContext::run(std::stop_token token) -> void {
 
     eventQueue->dispatchPending();
     renderContext->renderNextFrame();
-
-    FrameMark;
   }
   Log.trace("graphicsThread token stop_requested()");
   device->waitIdle();

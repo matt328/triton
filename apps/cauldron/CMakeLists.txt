@@ -27,7 +27,6 @@ configure_file(src/config.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/config.h)
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   target_compile_definitions(${PROJECT_NAME}
     PUBLIC
-
     BUILD_TYPE_DEBUG
   )
 endif()
@@ -45,6 +44,7 @@ target_compile_definitions(${PROJECT_NAME}
   GLM_FORCE_DEPTH_ZERO_TO_ONE
   GLM_ENABLE_EXPERIMENTAL
   TRACY_DELAYED_INIT
+  TRACY_CALLSTACK=5
 )
 
 target_precompile_headers(${PROJECT_NAME}

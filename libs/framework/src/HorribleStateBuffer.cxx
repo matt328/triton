@@ -3,6 +3,7 @@
 namespace tr {
 
 auto HorribleStateBuffer::pushState(const SimState& newState, Timestamp t) -> void {
+  ZoneScoped;
   const size_t idx = writeIndex.fetch_add(1, std::memory_order_acq_rel) % BufferSize;
   std::lock_guard lock(bufferMutex);
   buffer[idx] = Entry{.timestamp = t, .state = newState, .valid = true};

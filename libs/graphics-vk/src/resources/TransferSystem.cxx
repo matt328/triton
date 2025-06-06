@@ -30,6 +30,7 @@ TransferSystem::TransferSystem(std::shared_ptr<BufferSystem> newBufferSystem,
 }
 
 auto TransferSystem::upload(UploadPlan& uploadPlan) -> void {
+  ZoneScoped;
   uploadPlan.sortByBuffer();
   const auto resizeList = checkSizes(uploadPlan);
   if (!resizeList.empty()) {
@@ -65,12 +66,23 @@ auto TransferSystem::upload(UploadPlan& uploadPlan) -> void {
   commandBuffer->begin(cmdBeginInfo);
 
   for (const auto& [dstHandle, regions] : bufferCopies) {
-    const auto copyInfo2 = vk::CopyBufferInfo2{
-        .srcBuffer = *bufferSystem->getVkBuffer(transferContext.stagingBuffer).value(),
-        .dstBuffer = *bufferSystem->getVkBuffer(dstHandle).value(),
-        .regionCount = static_cast<uint32_t>(regions.size()),
-        .pRegions = regions.data()};
-    commandBuffer->copyBuffer2(copyInfo2);
+    const auto srcBuffer = bufferSystem->getVkBuffer(transferContext.stagingBuffer);
+    const auto dstBuffer = bufferSystem->getVkBuffer(dstHandle);
+    if (srcBuffer.has_value() && dstBuffer.has_value()) {
+      const auto copyInfo2 =
+          vk::CopyBufferInfo2{.srcBuffer = *srcBuffer.value(),
+                              .dstBuffer = *dstBuffer.value(),
+                              .regionCount = static_cast<uint32_t>(regions.size()),
+                              .pRegions = regions.data()};
+      commandBuffer->copyBuffer2(copyInfo2);
+    } else {
+      if (!srcBuffer.has_value()) {
+        Log.warn("transferContext staging buffer could not be resolved");
+      }
+      if (!dstBuffer.has_value()) {
+        Log.warn("transfer destination buffer could not be resolved");
+      }
+    }
   }
 
   commandBuffer->end();

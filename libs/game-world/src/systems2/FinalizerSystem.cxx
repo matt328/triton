@@ -5,6 +5,7 @@
 namespace tr {
 
 auto FinalizerSystem::update(entt::registry& registry, SimState& simState, Timestamp t) -> void {
+  ZoneScopedN("FinalizerSystem::update");
   // simState.clear();
   simState = SimState{1};
   simState.timeStamp = t;

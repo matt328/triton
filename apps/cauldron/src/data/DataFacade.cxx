@@ -50,6 +50,21 @@ DataFacade::DataFacade(std::shared_ptr<tr::IEventQueue> newEventQueue)
       [&](const tr::StaticModelResponse& event) { handleStaticModelResponse(event); },
       "test_group");
 
+  scheduleDelayed([this] { testResources(); }, std::chrono::seconds(5));
+}
+
+DataFacade::~DataFacade() {
+  Log.trace("Destroying DataFacade");
+}
+
+void DataFacade::scheduleDelayed(std::function<void()> func, std::chrono::milliseconds delay) {
+  std::thread([func = std::move(func), delay]() {
+    std::this_thread::sleep_for(delay);
+    func();
+  }).detach(); // fire-and-forget
+}
+
+auto DataFacade::testResources() -> void {
   const auto beginBatch = tr::BeginResourceBatch{.batchId = 1};
   const auto endBatch = tr::EndResourceBatch{.batchId = 1};
   const auto vikingRoomRequestId = requestIdGenerator.getKey();
@@ -94,10 +109,6 @@ DataFacade::DataFacade(std::shared_ptr<tr::IEventQueue> newEventQueue)
   eventQueue->emit(peasant, "test_group");
   eventQueue->emit(vikingRoomRequest2, "test_group");
   eventQueue->emit(endBatch, "test_group");
-}
-
-DataFacade::~DataFacade() {
-  Log.trace("Destroying DataFacade");
 }
 
 auto DataFacade::handleStaticModelResponse(const tr::StaticModelResponse& response) -> void {

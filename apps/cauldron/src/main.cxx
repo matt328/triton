@@ -14,6 +14,8 @@
 #include "fx/ThreadedFrameworkContext.hpp"
 #include "api/fx/IEventQueue.hpp"
 
+// #include "TracyDefines.hpp"
+
 namespace di = boost::di;
 
 // #ifdef WIN32

@@ -38,6 +38,7 @@ auto DebugFrameGraph::bake() -> void {
 }
 
 auto DebugFrameGraph::execute(const Frame* frame) -> FrameGraphResult {
+  ZoneScopedN("DebugFrameGraph::execute");
   auto frameGraphResult = FrameGraphResult{};
 
   for (const auto& pass : computePasses | std::views::values) {

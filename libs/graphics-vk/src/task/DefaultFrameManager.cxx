@@ -66,14 +66,13 @@ auto DefaultFrameManager::handleSwapchainResized([[maybe_unused]] const Swapchai
 }
 
 auto DefaultFrameManager::acquireFrame() -> std::variant<Frame*, ImageAcquireResult> {
+  ZoneScopedN("DefaultFrameManager::acquireFrame()");
+
   currentFrame = (currentFrame + 1) % frames.size();
   auto* frame = frames[currentFrame].get();
 
-  const std::string msg = fmt::format("Waiting for fence for frame {}", currentFrame);
-  TracyMessage(msg.data(), msg.size());
-
   {
-    ZoneNamedN(var, "waitForFences", true);
+    ZoneScopedN("waitForFences");
     const uint64_t timeout = 1'000'000; // 1ms
     vk::Result res;
     do {
@@ -88,7 +87,7 @@ auto DefaultFrameManager::acquireFrame() -> std::variant<Frame*, ImageAcquireRes
   std::variant<uint32_t, ImageAcquireResult> result{};
 
   {
-    ZoneNamedN(var, "acquireNextImage", true);
+    ZoneScopedN("acquireNextImage");
     result = swapchain->acquireNextImage(frame->getImageAvailableSemaphore());
   }
 

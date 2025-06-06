@@ -34,6 +34,7 @@ DefaultAssetSystem::~DefaultAssetSystem() {
 }
 
 auto DefaultAssetSystem::run() -> void {
+  ZoneScopedN("DefaultAssetSystem::run");
   Log.trace("DefaultAssetSystem::run()");
 
   thread = std::jthread([&](std::stop_token token) mutable {
@@ -75,6 +76,7 @@ auto DefaultAssetSystem::requestStop() -> void {
 }
 
 auto DefaultAssetSystem::handleEndResourceBatch(uint64_t batchId) -> void {
+  ZoneScoped;
   auto uploadPlan = UploadPlan{.stagingBuffer = transferSystem->getTransferContext().stagingBuffer};
   std::vector<StaticModelUploaded> responses{};
 
@@ -106,6 +108,7 @@ auto DefaultAssetSystem::handleStaticModelRequest(const StaticModelRequest& smRe
                                                   UploadPlan& uploadPlan,
                                                   std::vector<StaticModelUploaded>& responses,
                                                   std::vector<as::Model>& loadedModels) -> void {
+  ZoneScoped;
   Log.trace("Handling Static Model Request ID: {}", smRequest.requestId);
   loadedModels.push_back(assetService->loadModel(smRequest.modelFilename));
   const auto& model = loadedModels.back();

@@ -14,6 +14,7 @@ EntityManager::EntityManager(std::shared_ptr<IEventQueue> newEventQueue,
   Log.trace("Created EntityManager");
 
   eventQueue->subscribe<StaticModelUploaded>([this](const StaticModelUploaded& event) {
+    ZoneScopedN("static model uploaded handler");
     Log.trace("EntityManager handling StaticModelUploaded, geometryHandle={}",
               event.geometryHandle.id);
     auto entityId = registry->create();

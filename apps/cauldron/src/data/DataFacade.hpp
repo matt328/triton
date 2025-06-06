@@ -108,7 +108,10 @@ private:
 
   std::unordered_map<uint64_t, EntityData> inFlightMap;
 
+  auto testResources() -> void;
   auto handleStaticModelResponse(const tr::StaticModelResponse& response) -> void;
+
+  static auto scheduleDelayed(std::function<void()> func, std::chrono::milliseconds delay) -> void;
 };
 
 }
