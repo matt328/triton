@@ -10,6 +10,7 @@ IF(WIN32)
   target_compile_definitions(${PROJECT_NAME}
     PRIVATE
     -D_CRT_SECURE_NO_WARNINGS
+    GLFW_EXPOSE_NATIVE_WIN32
   )
 ENDIF(WIN32)
 

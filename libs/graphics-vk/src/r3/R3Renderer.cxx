@@ -28,11 +28,11 @@ namespace tr {
   resource
 */
 
-constexpr std::string CullingPassId = "pass.culling";
-constexpr std::string ForwardPassId = "pass.forward";
+const std::string CullingPassId = "pass.culling";
+const std::string ForwardPassId = "pass.forward";
 
-constexpr std::string CubeDrawContextName = "context.cube";
-constexpr std::string CullingDispatchContextName = "context.culling";
+const std::string CubeDrawContextName = "context.cube";
+const std::string CullingDispatchContextName = "context.culling";
 
 const std::unordered_map<std::string, std::vector<std::string>> GraphicsMap = {
     {CubeDrawContextName, {ForwardPassId}}};
@@ -331,7 +331,7 @@ auto R3Renderer::createComputeCullingPass() -> void {
                          }}};
 
   const auto shaderStageInfo = ShaderStageInfo{.stage = vk::ShaderStageFlagBits::eCompute,
-                                               .shaderFile = SHADER_ROOT / "compute2.comp.spv",
+                                               .shaderFile = (SHADER_ROOT / "compute2.comp.spv").string(),
                                                .entryPoint = "main"};
 
   const auto cullingPassInfo = ComputePassCreateInfo{.id = "culling",
@@ -358,13 +358,13 @@ auto R3Renderer::createComputeCullingPass() -> void {
 auto R3Renderer::createForwardRenderPass() -> void {
   const auto vertexStage = ShaderStageInfo{
       .stage = vk::ShaderStageFlagBits::eVertex,
-      .shaderFile = SHADER_ROOT / "static.vert.spv",
+      .shaderFile = (SHADER_ROOT / "static.vert.spv").string(),
       .entryPoint = "main",
   };
 
   const auto fragmentStage = ShaderStageInfo{
       .stage = vk::ShaderStageFlagBits::eFragment,
-      .shaderFile = SHADER_ROOT / "static.frag.spv",
+      .shaderFile = (SHADER_ROOT / "static.frag.spv").string(),
       .entryPoint = "main",
   };
 
@@ -420,13 +420,13 @@ auto R3Renderer::createCompositionRenderPass() -> void {
 
   const auto vertexStage = ShaderStageInfo{
       .stage = vk::ShaderStageFlagBits::eVertex,
-      .shaderFile = SHADER_ROOT / "composition.vert.spv",
+      .shaderFile = (SHADER_ROOT / "composition.vert.spv").string(),
       .entryPoint = "main",
   };
 
   const auto fragmentStage = ShaderStageInfo{
       .stage = vk::ShaderStageFlagBits::eFragment,
-      .shaderFile = SHADER_ROOT / "composition.frag.spv",
+      .shaderFile = (SHADER_ROOT / "composition.frag.spv").string(),
       .entryPoint = "main",
   };
 

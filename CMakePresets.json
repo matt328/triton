@@ -1,5 +1,5 @@
 {
-  "version": 6,
+  "version": 5,
   "configurePresets": [
     {
       "name": "base",
@@ -64,7 +64,24 @@
         "CMAKE_EXE_LINKER_FLAGS": "-fsanitize=address,undefined,leak",
         "CMAKE_SHARED_LINKER_FLAGS": "-fsanitize=address,undefined,leak"
       }
-    }
+    },
+    {
+      "name": "msvc-debug",
+      "displayName": "MSVC Debug",
+      "generator": "Visual Studio 17 2022",
+      "binaryDir": "build/msvc-debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      },
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_CXX_STANDARD": "23",
+        "CMAKE_CXX_STANDARD_REQUIRED": "ON",
+        "CMAKE_CXX_EXTENSIONS": "OFF"
+      }
+         }
   ],
   "buildPresets": [
     {
@@ -112,6 +129,16 @@
       "configurePreset": "release",
       "configuration": "Release",
       "jobs": 18,
+      "targets": [
+        "Cauldron"
+      ]
+    },
+    {
+      "name": "msvc-debug",
+      "displayName": "MSVC Debug Build",
+      "configurePreset": "msvc-debug",
+      "configuration": "Debug",
+      "jobs": 12,
       "targets": [
         "Cauldron"
       ]

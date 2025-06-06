@@ -12,7 +12,7 @@
 
 inline auto getCurrentThreadName() -> std::string {
 #if defined(_WIN32)
-  wchar_t name[64] = {};
+  PWSTR name = nullptr;
   HRESULT hr = GetThreadDescription(GetCurrentThread(), &name);
   if (SUCCEEDED(hr) && name) {
     std::wstring wname{name};

@@ -4,6 +4,12 @@
 #include "api/fx/IEventQueue.hpp"
 #include "api/fx/IGuiAdapter.hpp"
 
+#ifdef _WIN32
+#include <GLFW/glfw3native.h>
+#include <Windows.h>
+#include <dwmapi.h>
+#endif
+
 namespace tr {
 
 constexpr int MinWidth = 320;
@@ -28,7 +34,6 @@ GlfwWindow::GlfwWindow(const WindowCreateInfo& createInfo,
                               nullptr);
 
 #ifdef _WIN32
-
     auto* hWnd = glfwGetWin32Window(window);
     // Paints the background of the window black
     PAINTSTRUCT ps;
