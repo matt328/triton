@@ -50,7 +50,7 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y ninja-build cmake clang lld libx11-dev libxi-dev libgl1-mesa-dev libvulkan-dev libtinfo5 libxinerama-dev libxcursor-dev
+          sudo apt-get install -y ninja-build cmake clang lld libx11-dev libxi-dev libgl1-mesa-dev libvulkan-dev libtinfo5 libxinerama-dev libxcursor-dev build-essential g++ libstdc++-11-dev
 
       - name: Install LLVM
         uses: KyleMayes/install-llvm-action@master
@@ -61,7 +61,7 @@ jobs:
         uses: humbletim/setup-vulkan-sdk@main
         with:
           vulkan-query-version: 1.4.304.1
-          vulkan-components: Vulkan-Headers, Vulkan-Loader, Glslang, SPIRV-Tools
+          vulkan-components: Vulkan-Headers, Vulkan-Loader, Glslang
           vulkan-use-cache: true
 
       - name: CMake Generate
