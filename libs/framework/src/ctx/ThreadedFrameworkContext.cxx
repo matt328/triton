@@ -63,7 +63,7 @@ ThreadedFrameworkContext::ThreadedFrameworkContext([[maybe_unused]] const Framew
 
 auto ThreadedFrameworkContext::startGameworld() -> void {
   gameThread = std::jthread([this](std::stop_token token) {
-    pthread_setname_np(pthread_self(), "GameWorld");
+    pthread_setname_np(pthread_self(), "Game");
     try {
       gameWorldContext = GameWorldContext::create(eventQueue, stateBuffer);
       gameWorldContext->run(token);
@@ -77,7 +77,7 @@ auto ThreadedFrameworkContext::startGameworld() -> void {
 
 auto ThreadedFrameworkContext::startRenderer() -> void {
   graphicsThread = std::jthread([this](std::stop_token token) {
-    pthread_setname_np(pthread_self(), "GraphicsContext");
+    pthread_setname_np(pthread_self(), "Graphics");
     try {
       graphicsContext = GraphicsContext::create(eventQueue, stateBuffer, window, assetService);
       graphicsContext->run(token);

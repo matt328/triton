@@ -24,7 +24,7 @@ public:
   }
 };
 
-const std::string LOG_PATTERN = "%16* %I:%M:%S %^%-8l%$ %v";
+const std::string LOG_PATTERN = "%I:%M:%S [%10*] %^%-8l%$ %v";
 
 void initLogger([[maybe_unused]] spdlog::level::level_enum debugLevel,
                 [[maybe_unused]] spdlog::level::level_enum releaseLevel) {

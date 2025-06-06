@@ -38,7 +38,7 @@ auto DefaultAssetSystem::run() -> void {
   Log.trace("DefaultAssetSystem::run()");
 
   thread = std::jthread([&](std::stop_token token) mutable {
-    pthread_setname_np(pthread_self(), "AssetSystem");
+    pthread_setname_np(pthread_self(), "Assets");
     Log.trace("Started AssetSystemThread");
     // Create all subscriptions on the thread
     eventQueue->subscribe<BeginResourceBatch>(

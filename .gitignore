@@ -22,4 +22,5 @@ vendor/imgui/*
 .idea/workspace.xml
 .idea/editor.xml
 .idea/misc.xml
-logs/my_log.txt
+logs/
+
