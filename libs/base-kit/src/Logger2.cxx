@@ -1,12 +1,7 @@
 #include "bk/Logger2.hpp"
+#include "bk/ThreadName.hpp"
 
 spdlog::logger Log("basic");
-
-static auto getCurrentThreadName() -> std::string {
-  std::array<char, 16> name{};
-  pthread_getname_np(pthread_self(), name.data(), name.size());
-  return std::string{name.data()};
-}
 
 #include "spdlog/pattern_formatter.h"
 class my_formatter_flag : public spdlog::custom_flag_formatter {

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "bk/ThreadName.hpp"
 namespace tr {
 
 constexpr size_t DefaultMaxQueueSize = 2;
@@ -12,7 +13,7 @@ class TaskQueue {
 public:
   explicit TaskQueue(const TaskQueueConfig& config) : maxQueueSize{config.maxQueueSize} {
     thread = std::thread([this]() {
-      pthread_setname_np(pthread_self(), "TaskQueue");
+      setCurrentThreadName("TaskQueue");
       this->worker();
     });
   }

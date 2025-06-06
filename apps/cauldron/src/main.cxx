@@ -2,6 +2,7 @@
 
 // Following aren't referenced in this file, but need to be here for BoostDI to work
 #include "Properties.hpp"
+#include "bk/ThreadName.hpp"
 #include "ui/Manager.hpp"
 #include "ui/components/Menu.hpp"
 #include "data/DataFacade.hpp"
@@ -25,7 +26,7 @@ namespace di = boost::di;
 //                    [[maybe_unused]] _In_ int nShowCmd) {
 // #else
 auto main() -> int {
-  pthread_setname_np(pthread_self(), "Main");
+  setCurrentThreadName("Main");
   // #endif
   initLogger(spdlog::level::trace, spdlog::level::trace);
 
