@@ -1,5 +1,6 @@
 #pragma once
 
+#include "r3/ComponentIds.hpp"
 namespace tr {
 
 class Frame;
@@ -7,8 +8,8 @@ class BufferSystem;
 
 class IDispatchContext {
 public:
-  explicit IDispatchContext(std::string newId, std::shared_ptr<BufferSystem> newBufferSystem)
-      : id{std::move(newId)}, bufferSystem{std::move(newBufferSystem)} {
+  explicit IDispatchContext(ContextId newId, std::shared_ptr<BufferSystem> newBufferSystem)
+      : id{newId}, bufferSystem{std::move(newBufferSystem)} {
   }
   virtual ~IDispatchContext() = default;
 
@@ -25,7 +26,7 @@ public:
   virtual auto getPushConstantSize() -> size_t = 0;
 
 protected:
-  std::string id;
+  ContextId id;
   std::shared_ptr<BufferSystem> bufferSystem;
 };
 

@@ -22,14 +22,12 @@ auto DebugFrameGraph::addPass(std::unique_ptr<ComputePass>&& pass, PassGraphInfo
   computePasses.emplace(passInfo.id, std::move(pass));
 }
 
-[[nodiscard]] auto DebugFrameGraph::getGraphicsPass(std::string id)
-    -> std::unique_ptr<GraphicsPass>& {
+[[nodiscard]] auto DebugFrameGraph::getGraphicsPass(PassId id) -> std::unique_ptr<GraphicsPass>& {
   assert(graphicsPasses.contains(id) && "Requested a graphics pass that doesn't exist");
   return graphicsPasses.at(id);
 }
 
-[[nodiscard]] auto DebugFrameGraph::getComputePass(std::string id)
-    -> std::unique_ptr<ComputePass>& {
+[[nodiscard]] auto DebugFrameGraph::getComputePass(PassId id) -> std::unique_ptr<ComputePass>& {
   assert(computePasses.contains(id) && "Requested a compute pass that doesn't exist");
   return computePasses.at(id);
 }

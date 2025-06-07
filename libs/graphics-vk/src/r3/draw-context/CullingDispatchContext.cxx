@@ -8,7 +8,7 @@ namespace tr {
 
 constexpr uint32_t WorkgroupSize = 64;
 
-CullingDispatchContext::CullingDispatchContext(std::string newId,
+CullingDispatchContext::CullingDispatchContext(ContextId newId,
                                                std::shared_ptr<BufferSystem> newBufferSystem,
                                                CullingDispatchContextCreateInfo newCreateInfo)
     : IDispatchContext{std::move(newId), std::move(newBufferSystem)}, createInfo{newCreateInfo} {

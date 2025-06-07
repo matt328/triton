@@ -1,6 +1,7 @@
 #pragma once
 
 #include "bk/Handle.hpp"
+#include "r3/ComponentIds.hpp"
 #include "vk/ResourceManagerHandles.hpp"
 #include "gfx/PassGraphInfo.hpp"
 
@@ -38,8 +39,8 @@ public:
   virtual auto addPass(std::unique_ptr<GraphicsPass>&& pass, PassGraphInfo passInfo) -> void = 0;
   virtual auto addPass(std::unique_ptr<ComputePass>&& pass, PassGraphInfo passInfo) -> void = 0;
 
-  [[nodiscard]] virtual auto getGraphicsPass(std::string id) -> std::unique_ptr<GraphicsPass>& = 0;
-  [[nodiscard]] virtual auto getComputePass(std::string id) -> std::unique_ptr<ComputePass>& = 0;
+  [[nodiscard]] virtual auto getGraphicsPass(PassId id) -> std::unique_ptr<GraphicsPass>& = 0;
+  [[nodiscard]] virtual auto getComputePass(PassId id) -> std::unique_ptr<ComputePass>& = 0;
 
   virtual auto bake() -> void = 0;
 

@@ -1,10 +1,10 @@
 #include "ForwardDrawContext.hpp"
 
 namespace tr {
-ForwardDrawContext::ForwardDrawContext(std::string newId,
+ForwardDrawContext::ForwardDrawContext(ContextId newId,
                                        std::shared_ptr<BufferSystem> newBufferSystem,
                                        ForwardDrawContextCreateInfo newCreateInfo)
-    : IDispatchContext{std::move(newId), std::move(newBufferSystem)}, createInfo{newCreateInfo} {
+    : IDispatchContext{newId, std::move(newBufferSystem)}, createInfo{newCreateInfo} {
 }
 
 auto ForwardDrawContext::bind([[maybe_unused]] const Frame* frame,

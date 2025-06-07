@@ -22,9 +22,9 @@ public:
   auto addPass(std::unique_ptr<GraphicsPass>&& pass, PassGraphInfo passInfo) -> void override;
   auto addPass(std::unique_ptr<ComputePass>&& pass, PassGraphInfo passInfo) -> void override;
 
-  [[nodiscard]] auto getGraphicsPass(std::string id) -> std::unique_ptr<GraphicsPass>& override;
+  [[nodiscard]] auto getGraphicsPass(PassId id) -> std::unique_ptr<GraphicsPass>& override;
 
-  [[nodiscard]] auto getComputePass(std::string id) -> std::unique_ptr<ComputePass>& override;
+  [[nodiscard]] auto getComputePass(PassId id) -> std::unique_ptr<ComputePass>& override;
 
   auto bake() -> void override;
 
@@ -34,8 +34,8 @@ private:
   std::shared_ptr<CommandBufferManager> commandBufferManager;
   std::shared_ptr<Swapchain> swapchain;
 
-  std::unordered_map<std::string, std::unique_ptr<ComputePass>> computePasses;
-  std::unordered_map<std::string, std::unique_ptr<GraphicsPass>> graphicsPasses;
+  std::unordered_map<PassId, std::unique_ptr<ComputePass>> computePasses;
+  std::unordered_map<PassId, std::unique_ptr<GraphicsPass>> graphicsPasses;
 };
 
 }

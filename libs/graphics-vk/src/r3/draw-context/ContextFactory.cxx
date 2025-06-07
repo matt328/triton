@@ -1,4 +1,5 @@
 #include "ContextFactory.hpp"
+#include "r3/ComponentIds.hpp"
 #include "r3/draw-context/ForwardDrawContext.hpp"
 #include "r3/draw-context/IDispatchContext.hpp"
 #include "r3/draw-context/CullingDispatchContext.hpp"
@@ -9,7 +10,7 @@ ContextFactory::ContextFactory(std::shared_ptr<BufferSystem> newBufferSystem)
     : bufferSystem{std::move(newBufferSystem)} {
 }
 
-auto ContextFactory::createDispatchContext(std::string id, DispatchCreateInfo createInfo)
+auto ContextFactory::createDispatchContext(ContextId id, DispatchCreateInfo createInfo)
     -> Handle<IDispatchContext> {
   const auto handle = dispatchHandleGenerator.requestHandle();
 
@@ -36,7 +37,7 @@ auto ContextFactory::createDispatchContext(std::string id, DispatchCreateInfo cr
   return handle;
 }
 
-auto ContextFactory::getDispatchContextHandle(const std::string& id) -> Handle<IDispatchContext> {
+auto ContextFactory::getDispatchContextHandle(ContextId id) -> Handle<IDispatchContext> {
   assert(dispatchContextIdMap.contains(id));
   return dispatchContextIdMap.at(id);
 }

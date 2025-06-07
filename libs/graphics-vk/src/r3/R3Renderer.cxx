@@ -16,29 +16,15 @@
 #include "render-pass/GraphicsPassCreateInfo.hpp"
 #include "gfx/PassGraphInfo.hpp"
 #include "gfx/GeometryHandleMapper.hpp"
+#include "ComponentIds.hpp"
 
 namespace tr {
 
-/*
-  ResourceUploadSystem
-    - context will enqueue (Image/Data)uploadRequest inside the System's lock free queue.
-    - System will work off (stagingBufferSize) items at a time until the queue is empty.
-    - working off involves copying data into the staging buffer, recording and submitting the
-  command buffer, awaiting its fence, and then emitting UploadResponse events for each uploaded
-  resource
-*/
+const std::unordered_map<ContextId, std::vector<PassId>> GraphicsMap = {
+    {ContextId::Cube, {PassId::Forward}}};
 
-const std::string CullingPassId = "pass.culling";
-const std::string ForwardPassId = "pass.forward";
-
-const std::string CubeDrawContextName = "context.cube";
-const std::string CullingDispatchContextName = "context.culling";
-
-const std::unordered_map<std::string, std::vector<std::string>> GraphicsMap = {
-    {CubeDrawContextName, {ForwardPassId}}};
-
-const std::unordered_map<std::string, std::vector<std::string>> ComputeMap = {
-    {CullingDispatchContextName, {CullingPassId}}};
+const std::unordered_map<ContextId, std::vector<PassId>> ComputeMap = {
+    {ContextId::Culling, {PassId::Culling}}};
 
 R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
                        std::shared_ptr<IFrameManager> newFrameManager,
@@ -97,7 +83,7 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
                             .extent = vk::Extent2D{.width = rendererConfig.initialWidth,
                                                    .height = rendererConfig.initialHeight}}};
 
-  drawContextFactory->createDispatchContext(CubeDrawContextName, forwardDrawCreateInfo);
+  drawContextFactory->createDispatchContext(ContextId::Cube, forwardDrawCreateInfo);
 
   const auto cullingCreateInfo =
       CullingDispatchContextCreateInfo{.objectData = globalBuffers.objectData,
@@ -113,7 +99,7 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
                                        .vertexTexCoord = geometryBufferPack->getTexCoordBuffer(),
                                        .vertexColor = geometryBufferPack->getColorBuffer()};
 
-  drawContextFactory->createDispatchContext(CullingDispatchContextName, cullingCreateInfo);
+  drawContextFactory->createDispatchContext(ContextId::Culling, cullingCreateInfo);
 
   for (const auto& [contextId, passIds] : GraphicsMap) {
     for (const auto& passId : passIds) {
@@ -353,7 +339,7 @@ auto R3Renderer::createComputeCullingPass() -> void {
       .queueConfigs = {QueueConfig{.queueType = QueueType::Graphics, .uses = cmdBufferUses}}};
   commandBufferManager->allocateCommandBuffers(commandBufferInfo);
 
-  frameGraph->addPass(std::move(cullingPass), PassGraphInfo{.id = CullingPassId});
+  frameGraph->addPass(std::move(cullingPass), PassGraphInfo{.id = PassId::Culling});
 }
 
 auto R3Renderer::createForwardRenderPass() -> void {
@@ -410,7 +396,7 @@ auto R3Renderer::createForwardRenderPass() -> void {
 
   commandBufferManager->allocateCommandBuffers(commandBufferInfo);
 
-  frameGraph->addPass(std::move(forwardPass), PassGraphInfo{.id = ForwardPassId});
+  frameGraph->addPass(std::move(forwardPass), PassGraphInfo{.id = PassId::Forward});
 }
 
 auto R3Renderer::createCompositionRenderPass() -> void {
@@ -455,6 +441,6 @@ auto R3Renderer::createCompositionRenderPass() -> void {
 
   commandBufferManager->allocateCommandBuffers(commandBufferInfo);
 
-  frameGraph->addPass(std::move(compositionPass), PassGraphInfo{.id = CullingPassId});
+  frameGraph->addPass(std::move(compositionPass), PassGraphInfo{.id = PassId::Culling});
 }
 }

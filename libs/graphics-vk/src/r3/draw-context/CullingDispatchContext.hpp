@@ -1,13 +1,14 @@
 #pragma once
 
 #include "IDispatchContext.hpp"
+#include "r3/ComponentIds.hpp"
 #include "r3/draw-context/DispatchCreateInfos.hpp"
 
 namespace tr {
 
 class CullingDispatchContext : public IDispatchContext {
 public:
-  CullingDispatchContext(std::string newId,
+  CullingDispatchContext(ContextId newId,
                          std::shared_ptr<BufferSystem> newBufferSystem,
                          CullingDispatchContextCreateInfo newCreateInfo);
   ~CullingDispatchContext() override = default;

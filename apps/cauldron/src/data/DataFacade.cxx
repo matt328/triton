@@ -4,11 +4,11 @@
 
 namespace ed {
 
-constexpr auto ModelFile =
-    "/home/matt/projects/matt/game-assets/models/current/viking_room/viking_room_v4.trm";
-
 // constexpr auto ModelFile =
-//     "/home/matt/Projects/game-assets/models/current/viking_room/viking_room_v4.trm";
+//     "/home/matt/projects/matt/game-assets/models/current/viking_room/viking_room_v4.trm";
+
+constexpr auto ModelFile =
+    "/home/matt/Projects/game-assets/models/current/viking_room/viking_room_v4.trm";
 
 DataFacade::DataFacade(std::shared_ptr<tr::IEventQueue> newEventQueue)
     : eventQueue{std::move(newEventQueue)} {

@@ -2,6 +2,7 @@
 
 #include "bk/Handle.hpp"
 #include "bk/HandleGenerator.hpp"
+#include "r3/ComponentIds.hpp"
 #include "r3/draw-context/DispatchCreateInfos.hpp"
 
 namespace tr {
@@ -20,9 +21,9 @@ public:
   auto operator=(const ContextFactory&) -> ContextFactory& = delete;
   auto operator=(ContextFactory&&) -> ContextFactory& = delete;
 
-  auto createDispatchContext(std::string id, DispatchCreateInfo createInfo)
+  auto createDispatchContext(ContextId id, DispatchCreateInfo createInfo)
       -> Handle<IDispatchContext>;
-  auto getDispatchContextHandle(const std::string& id) -> Handle<IDispatchContext>;
+  auto getDispatchContextHandle(ContextId id) -> Handle<IDispatchContext>;
   auto getDispatchContext(const Handle<IDispatchContext>& handle)
       -> std::unique_ptr<IDispatchContext>&;
 
@@ -32,7 +33,7 @@ private:
   HandleGenerator<IDispatchContext> dispatchHandleGenerator;
   std::unordered_map<Handle<IDispatchContext>, std::unique_ptr<IDispatchContext>>
       dispatchContextMap;
-  std::unordered_map<std::string, Handle<IDispatchContext>> dispatchContextIdMap;
+  std::unordered_map<ContextId, Handle<IDispatchContext>> dispatchContextIdMap;
 };
 
 }

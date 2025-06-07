@@ -6,7 +6,6 @@
 
 #define INVALID_OFFSET 0xFFFFFFFFu
 
-
 #define ObjectDataSize 24
 #define GeometryRegionSize 24
 #define IndirectCommandSize 20
@@ -91,8 +90,6 @@ void main() {
 
   GpuIndirectCommandBuffer outCmd = GpuIndirectCommandBuffer(
       pushConstants.outputIndirectCommandAddress + idx * IndirectCommandSize);
-
-  // Second objectdata is referencing the first geomData value for some reason
 
   outCmd.indexCount = geomData.indexCount;
   outCmd.instanceCount = 1;

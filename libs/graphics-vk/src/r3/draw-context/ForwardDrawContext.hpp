@@ -7,7 +7,7 @@ namespace tr {
 
 class ForwardDrawContext : public IDispatchContext {
 public:
-  ForwardDrawContext(std::string newId,
+  ForwardDrawContext(ContextId newId,
                      std::shared_ptr<BufferSystem> newBufferSystem,
                      ForwardDrawContextCreateInfo newCreateInfo);
   ~ForwardDrawContext() override = default;

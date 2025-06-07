@@ -1,9 +1,10 @@
 #pragma once
 
+#include "r3/ComponentIds.hpp"
 namespace tr {
 
 struct PassGraphInfo {
-  std::string id;
+  PassId id;
 };
 
 }
