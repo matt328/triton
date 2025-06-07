@@ -9,8 +9,10 @@ set(no_dev_warnings_backup "$CACHE{CMAKE_SUPPRESS_DEVELOPER_WARNINGS}")
 
 # Suppress warnings globally
 if(MSVC)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w")
+  string(REGEX REPLACE "/W[0-4]" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+  string(REGEX REPLACE "/W[0-4]" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /w")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w")
 else()
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")

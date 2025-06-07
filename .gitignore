@@ -23,4 +23,4 @@ vendor/imgui/*
 .idea/editor.xml
 .idea/misc.xml
 logs/
-
+.vs/

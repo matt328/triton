@@ -10,14 +10,30 @@
 #include <array>
 #endif
 
+#if defined(_WIN32)
+inline auto wideToUtf8(const std::wstring& wstr) -> std::string {
+  if (wstr.empty())
+    return {};
+
+  int size = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, nullptr, 0, nullptr, nullptr);
+  if (size <= 0)
+    return {};
+
+  std::string result(size - 1, '\0'); // size includes null terminator
+  WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, result.data(), size, nullptr, nullptr);
+  return result;
+}
+#endif
+
 inline auto getCurrentThreadName() -> std::string {
 #if defined(_WIN32)
+
   PWSTR name = nullptr;
   HRESULT hr = GetThreadDescription(GetCurrentThread(), &name);
   if (SUCCEEDED(hr) && name) {
     std::wstring wname{name};
     LocalFree(name);
-    return std::string(wname.begin(), wname.end());
+    return wideToUtf8(wname);
   }
   return {};
 #elif defined(__APPLE__) || defined(__linux__)
