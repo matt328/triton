@@ -23,6 +23,12 @@ struct ImageUsageProfile {
   std::optional<std::string> debugName = std::nullopt;
 };
 
+struct ImageMetadata {
+  vk::Format format;
+  vk::Extent2D extent;
+  vk::ImageUsageFlags imageUsage;
+};
+
 class Allocator;
 class IDebugManager;
 class Device;
@@ -44,6 +50,8 @@ public:
   auto createImage(ImageRequest request) -> Handle<ManagedImage>;
   auto createPerFrameImage(ImageRequest request) -> LogicalHandle<ManagedImage>;
   auto getImage(Handle<ManagedImage> imageHandle) -> ManagedImage&;
+  auto getImageMetadata(LogicalHandle<ManagedImage> logicalHandle) -> ImageMetadata;
+  auto getImageMetadata(Handle<ManagedImage> handle) -> ImageMetadata;
 
 private:
   std::shared_ptr<Allocator> allocator;

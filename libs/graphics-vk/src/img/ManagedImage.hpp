@@ -31,8 +31,14 @@ class ManagedImage {
 public:
   ManagedImage(std::unique_ptr<AllocatedImage> newImage,
                vk::raii::ImageView newImageView,
-               vk::Extent2D newExtent)
-      : image(std::move(newImage)), imageView(std::move(newImageView)), extent(newExtent) {
+               vk::Extent2D newExtent,
+               vk::Format newFormat,
+               vk::ImageUsageFlags newFlags)
+      : image(std::move(newImage)),
+        imageView(std::move(newImageView)),
+        extent(newExtent),
+        format(newFormat),
+        usageFlags(newFlags) {
   }
 
   ~ManagedImage() = default;
@@ -54,10 +60,20 @@ public:
     return image->getImage();
   }
 
+  [[nodiscard]] auto getFormat() const -> vk::Format {
+    return format;
+  }
+
+  [[nodiscard]] auto getUsageFlags() const -> vk::ImageUsageFlags {
+    return usageFlags;
+  }
+
 private:
   std::unique_ptr<AllocatedImage> image;
   vk::raii::ImageView imageView;
   vk::Extent2D extent;
+  vk::Format format;
+  vk::ImageUsageFlags usageFlags;
 };
 
 }

@@ -5,8 +5,8 @@
 #include "buffers/ManagedBuffer.hpp"
 #include "gfx/IRenderContext.hpp"
 #include "gfx/RenderContextConfig.hpp"
-#include "r3/render-pass/GraphicsPass.hpp"
 #include "gfx/GeometryHandleMapper.hpp"
+#include "img/ManagedImage.hpp"
 
 namespace tr {
 
@@ -20,6 +20,9 @@ class BufferSystem;
 class GeometryBufferPack;
 class FrameState;
 class GeometryAllocator;
+class ContextFactory;
+class ImageManager;
+class Frame;
 
 namespace queue {
 class Graphics;
@@ -86,8 +89,6 @@ private:
   std::shared_ptr<FrameState> frameState;
   std::shared_ptr<GeometryAllocator> geometryAllocator;
   std::shared_ptr<GeometryHandleMapper> geometryHandleMapper;
-
-  std::unordered_map<RenderPassType, GraphicsPass> renderPasses;
 
   std::vector<vk::CommandBuffer> buffers;
 

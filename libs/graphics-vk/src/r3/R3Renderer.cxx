@@ -9,12 +9,10 @@
 #include "r3/GeometryBufferPack.hpp"
 #include "r3/draw-context/ContextFactory.hpp"
 #include "r3/draw-context/IDispatchContext.hpp"
-#include "r3/render-pass/ComputePass.hpp"
+#include "r3/render-pass/IRenderPass.hpp"
 #include "r3/render-pass/RenderPassFactory.hpp"
 #include "resources/allocators/GeometryAllocator.hpp"
 #include "task/Frame.hpp"
-#include "render-pass/GraphicsPassCreateInfo.hpp"
-#include "gfx/PassGraphInfo.hpp"
 #include "gfx/GeometryHandleMapper.hpp"
 #include "ComponentIds.hpp"
 
@@ -103,14 +101,14 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
 
   for (const auto& [contextId, passIds] : GraphicsMap) {
     for (const auto& passId : passIds) {
-      frameGraph->getGraphicsPass(passId)->registerDrawContext(
+      frameGraph->getPass(passId)->registerDispatchContext(
           drawContextFactory->getDispatchContextHandle(contextId));
     }
   }
 
   for (const auto& [contextId, passIds] : ComputeMap) {
     for (const auto& passId : passIds) {
-      frameGraph->getComputePass(passId)->registerDispatchContext(
+      frameGraph->getPass(passId)->registerDispatchContext(
           drawContextFactory->getDispatchContextHandle(contextId));
     }
   }
@@ -321,11 +319,11 @@ auto R3Renderer::createComputeCullingPass() -> void {
                       .shaderFile = (SHADER_ROOT / "compute2.comp.spv").string(),
                       .entryPoint = "main"};
 
-  const auto cullingPassInfo = ComputePassCreateInfo{.id = "culling",
+  const auto cullingPassInfo = ComputePassCreateInfo{.id = 1,
                                                      .pipelineLayoutInfo = pipelineLayoutInfo,
                                                      .shaderStageInfo = shaderStageInfo};
 
-  auto cullingPass = renderPassFactory->createComputePass(cullingPassInfo);
+  auto cullingPass = renderPassFactory->createRenderPass(RenderPassType::Culling, PassId::Culling);
 
   auto cmdBufferUses = std::vector<CommandBufferUse>{};
 
@@ -339,49 +337,11 @@ auto R3Renderer::createComputeCullingPass() -> void {
       .queueConfigs = {QueueConfig{.queueType = QueueType::Graphics, .uses = cmdBufferUses}}};
   commandBufferManager->allocateCommandBuffers(commandBufferInfo);
 
-  frameGraph->addPass(std::move(cullingPass), PassGraphInfo{.id = PassId::Culling});
+  frameGraph->addPass(std::move(cullingPass));
 }
 
 auto R3Renderer::createForwardRenderPass() -> void {
-  const auto vertexStage = ShaderStageInfo{
-      .stage = vk::ShaderStageFlagBits::eVertex,
-      .shaderFile = (SHADER_ROOT / "static.vert.spv").string(),
-      .entryPoint = "main",
-  };
-
-  const auto fragmentStage = ShaderStageInfo{
-      .stage = vk::ShaderStageFlagBits::eFragment,
-      .shaderFile = (SHADER_ROOT / "static.frag.spv").string(),
-      .entryPoint = "main",
-  };
-
-  const auto pipelineLayoutInfo =
-      PipelineLayoutInfo{.pushConstantInfoList = {PushConstantInfo{
-                             .stageFlags = vk::ShaderStageFlagBits::eVertex,
-                             .offset = 0,
-                             .size = 36}}}; // TODO(matt): size shouldn't be hardcoded
-
-  const auto colorImageInfo = ImageUsageInfo{
-      .imageHandle = globalImages.forwardColorImage,
-      .imageFormat = vk::Format::eR16G16B16A16Sfloat,
-      .accessFlags = vk::AccessFlagBits::eColorAttachmentWrite,
-      .stageFlags = vk::PipelineStageFlagBits::eColorAttachmentOutput,
-      .aspectFlags = vk::ImageAspectFlagBits::eColor,
-      .clearValue = vk::ClearValue{
-          .color = vk::ClearColorValue{std::array<float, 4>{0.392f, 0.584f, 0.929f, 1.0f}}}};
-
-  const auto extent =
-      vk::Extent2D{.width = rendererConfig.initialWidth, .height = rendererConfig.initialHeight};
-
-  const auto forwardPassCreateInfo =
-      GraphicsPassCreateInfo{.id = "forward",
-                             .pipelineLayoutInfo = pipelineLayoutInfo,
-                             .inputs = {},
-                             .outputs = {colorImageInfo},
-                             .shaderStageInfo = {vertexStage, fragmentStage},
-                             .extent = extent};
-
-  auto forwardPass = renderPassFactory->createGraphicsPass(forwardPassCreateInfo);
+  auto forwardPass = renderPassFactory->createRenderPass(RenderPassType::Forward, PassId::Forward);
 
   std::vector<CommandBufferUse> cmdBufferUses{};
 
@@ -396,37 +356,12 @@ auto R3Renderer::createForwardRenderPass() -> void {
 
   commandBufferManager->allocateCommandBuffers(commandBufferInfo);
 
-  frameGraph->addPass(std::move(forwardPass), PassGraphInfo{.id = PassId::Forward});
+  frameGraph->addPass(std::move(forwardPass));
 }
 
 auto R3Renderer::createCompositionRenderPass() -> void {
-  // auto colorAttachmentInfo = AttachmentCreateInfo{
-  //     .format = vk::Format::eR16G16B16A16Sfloat,
-  //     .clearValue = vk::ClearValue{
-  //         .color = vk::ClearColorValue{std::array<float, 4>{0.392f, 0.584f, 0.929f, 1.0f}}}};
-
-  const auto vertexStage = ShaderStageInfo{
-      .stage = vk::ShaderStageFlagBits::eVertex,
-      .shaderFile = (SHADER_ROOT / "composition.vert.spv").string(),
-      .entryPoint = "main",
-  };
-
-  const auto fragmentStage = ShaderStageInfo{
-      .stage = vk::ShaderStageFlagBits::eFragment,
-      .shaderFile = (SHADER_ROOT / "composition.frag.spv").string(),
-      .entryPoint = "main",
-  };
-
-  const auto compositionPassCreateInfo =
-      GraphicsPassCreateInfo{.id = "composition",
-                             .pipelineLayoutInfo = PipelineLayoutInfo{},
-                             .inputs = {},
-                             .outputs = {},
-                             .shaderStageInfo = {vertexStage, fragmentStage},
-                             .extent = vk::Extent2D{.width = rendererConfig.initialWidth,
-                                                    .height = rendererConfig.initialHeight}};
-
-  auto compositionPass = renderPassFactory->createGraphicsPass(compositionPassCreateInfo);
+  auto compositionPass =
+      renderPassFactory->createRenderPass(RenderPassType::Composition, PassId::Composition);
 
   std::vector<CommandBufferUse> cmdBufferUses{};
 
@@ -441,6 +376,6 @@ auto R3Renderer::createCompositionRenderPass() -> void {
 
   commandBufferManager->allocateCommandBuffers(commandBufferInfo);
 
-  frameGraph->addPass(std::move(compositionPass), PassGraphInfo{.id = PassId::Culling});
+  frameGraph->addPass(std::move(compositionPass));
 }
 }

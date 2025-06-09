@@ -2,7 +2,7 @@
 
 namespace tr {
 
-enum class RenderPassType : uint32_t {
+enum class RenderPassTypeArch : uint32_t {
   GBuffer = 1 << 0,
   MotionVectors = 1 << 1,
   DeferredLighting = 1 << 2,
@@ -14,15 +14,15 @@ enum class RenderPassType : uint32_t {
   Tonemapping = 1 << 9
 };
 
-constexpr auto operator|(RenderPassType lhs, RenderPassType rhs) -> RenderPassType {
-  return static_cast<RenderPassType>(static_cast<uint32_t>(lhs) | static_cast<uint32_t>(rhs));
+constexpr auto operator|(RenderPassTypeArch lhs, RenderPassTypeArch rhs) -> RenderPassTypeArch {
+  return static_cast<RenderPassTypeArch>(static_cast<uint32_t>(lhs) | static_cast<uint32_t>(rhs));
 }
 
-constexpr auto operator&(RenderPassType lhs, RenderPassType rhs) -> RenderPassType {
-  return static_cast<RenderPassType>(static_cast<uint32_t>(lhs) & static_cast<uint32_t>(rhs));
+constexpr auto operator&(RenderPassTypeArch lhs, RenderPassTypeArch rhs) -> RenderPassTypeArch {
+  return static_cast<RenderPassTypeArch>(static_cast<uint32_t>(lhs) & static_cast<uint32_t>(rhs));
 }
 
-constexpr auto any(RenderPassType mask, RenderPassType test) -> bool {
+constexpr auto any(RenderPassTypeArch mask, RenderPassTypeArch test) -> bool {
   return static_cast<uint32_t>(mask & test) != 0;
 }
 

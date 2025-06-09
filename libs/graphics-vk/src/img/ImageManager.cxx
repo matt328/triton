@@ -62,7 +62,9 @@ auto ImageManager::createImage(ImageRequest request) -> Handle<ManagedImage> {
       std::make_unique<ManagedImage>(
           std::make_unique<AllocatedImage>(image, allocation, *allocator->getAllocator()),
           device->getVkDevice().createImageView(imageViewInfo),
-          request.extent));
+          request.extent,
+          request.format,
+          request.usageFlags));
   return key;
 }
 
@@ -71,7 +73,7 @@ auto ImageManager::createPerFrameImage(ImageRequest request) -> LogicalHandle<Ma
   for (const auto& frame : frameManager->getFrames()) {
     if (request.debugName) {
       request.debugName = std::make_optional(
-          fmt::format("{}-Frame-{}", request.debugName.value(), frame->getIndex()));
+          std::format("{}-Frame-{}", request.debugName.value(), frame->getIndex()));
     }
     const auto handle = createImage(request);
     frame->addLogicalImage(logicalHandle, handle);
@@ -82,6 +84,22 @@ auto ImageManager::createPerFrameImage(ImageRequest request) -> LogicalHandle<Ma
 auto ImageManager::getImage(Handle<ManagedImage> imageHandle) -> ManagedImage& {
   assert(imageMap.contains(imageHandle));
   return *imageMap.at(imageHandle);
+}
+
+auto ImageManager::getImageMetadata(LogicalHandle<ManagedImage> logicalHandle) -> ImageMetadata {
+  const auto& frame = frameManager->getFrames().front();
+  const auto handle = frame->getLogicalImage(logicalHandle);
+  return getImageMetadata(handle);
+}
+
+auto ImageManager::getImageMetadata(Handle<ManagedImage> handle) -> ImageMetadata {
+  assert(imageMap.contains(handle));
+  const auto& image = imageMap.at(handle);
+  return ImageMetadata{
+      .format = image->getFormat(),
+      .extent = image->getExtent(),
+      .imageUsage = image->getUsageFlags(),
+  };
 }
 
 }

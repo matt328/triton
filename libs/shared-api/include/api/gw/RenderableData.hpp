@@ -16,7 +16,7 @@ struct AnimationData2 {
 
 struct ObjectData {
   glm::mat4 modelMatrix = glm::identity<glm::mat4>();
-  RenderPassType renderPassType;
+  // RenderPassType renderPassType;
 };
 
 struct MaterialData {

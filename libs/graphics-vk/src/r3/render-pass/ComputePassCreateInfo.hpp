@@ -4,7 +4,7 @@
 namespace tr {
 
 struct ComputePassCreateInfo {
-  std::string id;
+  uint8_t id;
   PipelineLayoutInfo pipelineLayoutInfo;
   ShaderStageInfo shaderStageInfo;
 };

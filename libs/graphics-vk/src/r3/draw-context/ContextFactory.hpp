@@ -24,6 +24,7 @@ public:
   auto createDispatchContext(ContextId id, DispatchCreateInfo createInfo)
       -> Handle<IDispatchContext>;
   auto getDispatchContextHandle(ContextId id) -> Handle<IDispatchContext>;
+
   auto getDispatchContext(const Handle<IDispatchContext>& handle)
       -> std::unique_ptr<IDispatchContext>&;
 

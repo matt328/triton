@@ -4,10 +4,13 @@ set(graphicsvk_SRC
   src/r3/R3Renderer.cxx
   src/r3/GeometryBufferPack.cxx
   src/r3/graph/DebugFrameGraph.cxx
+  src/r3/graph/ResourceAliasRegistry.cxx
+
   src/r3/render-pass/RenderPassFactory.cxx
   src/r3/render-pass/PipelineFactory.cxx
-  src/r3/render-pass/GraphicsPass.cxx
-  src/r3/render-pass/ComputePass.cxx
+  src/r3/render-pass/ForwardGraphicsPass.cxx
+  src/r3/render-pass/CullingPass.cxx
+
   src/r3/draw-context/ContextFactory.cxx
   src/r3/draw-context/CullingDispatchContext.cxx
   src/r3/draw-context/ForwardDrawContext.cxx

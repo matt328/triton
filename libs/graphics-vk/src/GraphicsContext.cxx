@@ -1,6 +1,7 @@
 #include "gfx/GraphicsContext.hpp"
 #include "FrameState.hpp"
 #include "r3/GeometryBufferPack.hpp"
+#include "r3/graph/ResourceAliasRegistry.hpp"
 #include "resources/DefaultAssetSystem.hpp"
 #include "DefaultDebugManager.hpp"
 #include "ImmediateTransferContext.hpp"
@@ -106,7 +107,8 @@ auto GraphicsContext::create(std::shared_ptr<IEventQueue> newEventQueue,
                         di::bind<GeometryBufferPack>.to<GeometryBufferPack>(),
                         di::bind<FrameState>.to<FrameState>(),
                         di::bind<GeometryHandleMapper>.to(std::make_shared<GeometryHandleMapper>()),
-                        di::bind<IAssetSystem>.to<DefaultAssetSystem>());
+                        di::bind<IAssetSystem>.to<DefaultAssetSystem>(),
+                        di::bind<ResourceAliasRegistry>.to<ResourceAliasRegistry>());
 
   return injector.create<std::shared_ptr<GraphicsContext>>();
 }

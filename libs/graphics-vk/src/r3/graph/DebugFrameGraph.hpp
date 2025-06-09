@@ -1,7 +1,7 @@
 #pragma once
 
 #include "gfx/IFrameGraph.hpp"
-#include "r3/render-pass/GraphicsPass.hpp"
+#include "r3/render-pass/IRenderPass.hpp"
 #include "task/Frame.hpp"
 
 namespace tr {
@@ -19,12 +19,9 @@ public:
   auto operator=(const DebugFrameGraph&) -> DebugFrameGraph& = default;
   auto operator=(DebugFrameGraph&&) -> DebugFrameGraph& = delete;
 
-  auto addPass(std::unique_ptr<GraphicsPass>&& pass, PassGraphInfo passInfo) -> void override;
-  auto addPass(std::unique_ptr<ComputePass>&& pass, PassGraphInfo passInfo) -> void override;
+  auto addPass(std::unique_ptr<IRenderPass>&& pass) -> void override;
 
-  [[nodiscard]] auto getGraphicsPass(PassId id) -> std::unique_ptr<GraphicsPass>& override;
-
-  [[nodiscard]] auto getComputePass(PassId id) -> std::unique_ptr<ComputePass>& override;
+  [[nodiscard]] auto getPass(PassId id) -> std::unique_ptr<IRenderPass>& override;
 
   auto bake() -> void override;
 
@@ -34,8 +31,7 @@ private:
   std::shared_ptr<CommandBufferManager> commandBufferManager;
   std::shared_ptr<Swapchain> swapchain;
 
-  std::unordered_map<PassId, std::unique_ptr<ComputePass>> computePasses;
-  std::unordered_map<PassId, std::unique_ptr<GraphicsPass>> graphicsPasses;
+  std::unordered_map<PassId, std::unique_ptr<IRenderPass>> passes;
 };
 
 }

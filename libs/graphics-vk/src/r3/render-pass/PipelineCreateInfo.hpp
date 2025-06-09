@@ -1,5 +1,6 @@
 #pragma once
 
+#include "r3/ComponentIds.hpp"
 namespace tr {
 enum class PipelineType : uint8_t {
   Compute = 0u,
@@ -24,7 +25,7 @@ struct ShaderStageInfo {
 };
 
 struct PipelineCreateInfo {
-  std::string id;
+  PassId id;
   PipelineType pipelineType;
   PipelineLayoutInfo pipelineLayoutInfo;
   std::vector<vk::Format> colorAttachmentFormats{};
