@@ -13,20 +13,20 @@ enum class RenderPassType : uint8_t {
 };
 
 struct ForwardPassCreateInfo {
-  ResourceAlias colorImage;
-  ResourceAlias depthImage;
+  ImageAlias colorImage;
+  ImageAlias depthImage;
 };
 
 struct CullingPassCreateInfo {
-  ResourceAlias objectDataBuffer;
-  ResourceAlias geometryRegionBuffer;
-  ResourceAlias indirectCommandBuffer;
-  ResourceAlias indirectCommandCountBuffer;
+  BufferAlias objectDataBuffer;
+  BufferAlias geometryRegionBuffer;
+  BufferAlias indirectCommandBuffer;
+  BufferAlias indirectCommandCountBuffer;
 };
 
 struct CompositionPassCreateInfo {
-  ResourceAlias colorImage;
-  ResourceAlias swapchainImage;
+  ImageAlias colorImage;
+  ImageAlias swapchainImage;
 };
 
 using PassInfo =

@@ -346,8 +346,8 @@ auto R3Renderer::createComputeCullingPass() -> void {
 auto R3Renderer::createForwardRenderPass() -> void {
   auto forwardPass = renderPassFactory->createRenderPass(RenderPassCreateInfo{
       .passId = PassId::Forward,
-      .passInfo = ForwardPassCreateInfo{.colorImage = ResourceAlias::GeometryColorImage,
-                                        .depthImage = ResourceAlias::DepthImage}});
+      .passInfo = ForwardPassCreateInfo{.colorImage = ImageAlias::GeometryColorImage,
+                                        .depthImage = ImageAlias::DepthImage}});
 
   std::vector<CommandBufferUse> cmdBufferUses{};
 
