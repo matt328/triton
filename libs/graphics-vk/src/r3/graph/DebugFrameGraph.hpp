@@ -7,6 +7,9 @@
 namespace tr {
 
 class Swapchain;
+class ResourceAliasRegistry;
+class ImageManager;
+class BufferSystem;
 
 struct ImageState {
   vk::ImageLayout layout;
@@ -19,10 +22,23 @@ struct BufferState {
   vk::PipelineStageFlags2 stageFlags;
 };
 
+struct ImageBarrierData {
+  vk::ImageMemoryBarrier2 imageBarrier;
+  ImageAlias alias;
+};
+
+struct BufferBarrierData {
+  vk::BufferMemoryBarrier2 bufferBarrier;
+  BufferAlias alias;
+};
+
 class DebugFrameGraph : public IFrameGraph {
 public:
   explicit DebugFrameGraph(std::shared_ptr<CommandBufferManager> newCommandBufferManager,
-                           std::shared_ptr<Swapchain> newSwapchain);
+                           std::shared_ptr<Swapchain> newSwapchain,
+                           std::shared_ptr<ResourceAliasRegistry> newAliasRegistry,
+                           std::shared_ptr<ImageManager> newImageManager,
+                           std::shared_ptr<BufferSystem> newBufferSystem);
   ~DebugFrameGraph() override;
 
   DebugFrameGraph(const DebugFrameGraph&) = default;
@@ -41,8 +57,15 @@ public:
 private:
   std::shared_ptr<CommandBufferManager> commandBufferManager;
   std::shared_ptr<Swapchain> swapchain;
+  std::shared_ptr<ResourceAliasRegistry> aliasRegistry;
+  std::shared_ptr<ImageManager> imageManager;
+  std::shared_ptr<BufferSystem> bufferSystem;
 
   std::unordered_map<PassId, std::unique_ptr<IRenderPass>> passes;
+
+  std::vector<PassId> sortedPasses{};
+  std::unordered_map<PassId, std::vector<ImageBarrierData>> imageBarriers;
+  std::unordered_map<PassId, std::vector<BufferBarrierData>> bufferBarriers;
 };
 
 }

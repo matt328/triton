@@ -1,13 +1,23 @@
 #include "DebugFrameGraph.hpp"
+#include "buffers/BufferSystem.hpp"
+#include "img/ImageManager.hpp"
 #include "r3/graph/DirectedGraph.hpp"
+#include "r3/graph/ResourceAliasRegistry.hpp"
 #include "r3/render-pass/IRenderPass.hpp"
 #include "vk/core/Swapchain.hpp"
 
 namespace tr {
 
 DebugFrameGraph::DebugFrameGraph(std::shared_ptr<CommandBufferManager> newCommandBufferManager,
-                                 std::shared_ptr<Swapchain> newSwapchain)
-    : commandBufferManager{std::move(newCommandBufferManager)}, swapchain{std::move(newSwapchain)} {
+                                 std::shared_ptr<Swapchain> newSwapchain,
+                                 std::shared_ptr<ResourceAliasRegistry> newAliasRegistry,
+                                 std::shared_ptr<ImageManager> newImageManager,
+                                 std::shared_ptr<BufferSystem> newBufferSystem)
+    : commandBufferManager{std::move(newCommandBufferManager)},
+      swapchain{std::move(newSwapchain)},
+      aliasRegistry{std::move(newAliasRegistry)},
+      imageManager{std::move(newImageManager)},
+      bufferSystem{std::move(newBufferSystem)} {
 }
 
 DebugFrameGraph::~DebugFrameGraph() {
@@ -23,16 +33,18 @@ auto DebugFrameGraph::getPass(PassId id) -> std::unique_ptr<IRenderPass>& {
   return passes.at(id);
 }
 
+/// Updates sortedPasses and imageBarriers and bufferBarriers
+/// Relatively expensive and sloppy, so don't call every frame
 auto DebugFrameGraph::bake() -> void {
   // Use a DAG to order passes so that writes
   auto graph = DirectedGraph<PassId>{};
-  auto lastWriter = std::unordered_map<ResourceAlias, PassId>{};
+  auto lastWriter = std::unordered_map<ImageAlias, PassId>{};
   for (const auto& [id, pass] : passes) {
     const auto& info = pass->getGraphInfo();
 
     const auto process = [&](const auto& usageList, bool isWrite) {
       for (const auto& usage : usageList) {
-        ResourceAlias alias = usage.alias;
+        auto alias = usage.alias;
 
         if (isWrite) {
           if (lastWriter.contains(alias)) {
@@ -47,19 +59,18 @@ auto DebugFrameGraph::bake() -> void {
       }
     };
 
+    // Need to split out separate process functions for images and buffers
     process(info.imageReads, false);
     process(info.imageWrites, true);
     process(info.bufferReads, false);
     process(info.bufferWrites, true);
   }
 
-  auto sortedPasses = graph.topologicalSort();
-
-  auto imageStates = std::unordered_map<ResourceAlias, ImageState>{};
-  auto bufferStates = std::unordered_map<ResourceAlias, BufferState>{};
+  auto imageStates = std::unordered_map<ImageAlias, ImageState>{};
+  auto bufferStates = std::unordered_map<ImageAlias, BufferState>{};
 
   auto processImageUsage =
-      [&](const auto& usages, auto& stateMap, auto& barrierVec, auto&& makeBarrier) {
+      [&](PassId passId, const auto& usages, auto& stateMap, auto& barrierVec, auto&& makeBarrier) {
         for (const auto& usage : usages) {
           const auto alias = usage.alias;
           const auto newLayout = usage.layout;
@@ -71,7 +82,7 @@ auto DebugFrameGraph::bake() -> void {
             const auto& prev = it->second;
             if (prev.layout != newLayout || prev.accessFlags != newAccess ||
                 prev.stageFlags != newStage) {
-              barrierVec.push_back(makeBarrier(alias, prev, usage));
+              barrierVec[passId].push_back(makeBarrier(alias, prev, usage));
             }
           }
           stateMap[alias] =
@@ -79,104 +90,147 @@ auto DebugFrameGraph::bake() -> void {
         }
       };
 
-  auto processBufferUsage =
-      [&](const auto& usages, auto& stateMap, auto& barrierVec, auto&& makeBarrier) {
-        for (const auto& usage : usages) {
-          const auto alias = usage.alias;
-          const auto newAccess = usage.accessFlags;
-          const auto newStage = usage.stageFlags;
+  auto processBufferUsage = [&](PassId passId,
+                                const std::vector<BufferUsageInfo>& usages,
+                                auto& stateMap,
+                                auto& barrierVec,
+                                auto&& makeBarrier) {
+    for (const auto& usage : usages) {
+      const auto alias = usage.alias;
+      const auto newAccess = usage.accessFlags;
+      const auto newStage = usage.stageFlags;
 
-          auto it = stateMap.find(alias);
-          if (it != stateMap.end()) {
-            const auto& prev = it->second;
-            if (prev.accessFlags != newAccess || prev.stageFlags != newStage) {
-              barrierVec.push_back(makeBarrier(alias, prev, usage));
-            }
-          }
-          stateMap[alias] = BufferState{.accessFlags = newAccess, .stageFlags = newStage};
+      auto it = stateMap.find(alias);
+      if (it != stateMap.end()) {
+        const auto& prev = it->second;
+        if (prev.accessFlags != newAccess || prev.stageFlags != newStage) {
+          barrierVec[passId].push_back(makeBarrier(alias, prev, usage));
         }
-      };
+      }
+      stateMap[alias] = BufferState{.accessFlags = newAccess, .stageFlags = newStage};
+    }
+  };
 
   for (const auto passId : sortedPasses) {
     const auto& pass = *passes.at(passId);
     const auto& info = pass.getGraphInfo();
 
-    // These need to be maps to include alias, so the actual images and buffers can be looked up and
-    // filled in at render time
-    // These two maps along with sorted passes i think make up the state produced by the bake()
-    // method
-    auto imageBarriers = std::vector<vk::ImageMemoryBarrier2>{};
-    auto bufferBarriers = std::vector<vk::BufferMemoryBarrier2>{};
-
-    processImageUsage(info.imageReads,
+    processImageUsage(passId,
+                      info.imageReads,
                       imageStates,
                       imageBarriers,
-                      [](ResourceAlias, const ImageState& prev, const ImageUsageInfo& usage) {
-                        return vk::ImageMemoryBarrier2{.srcStageMask = prev.stageFlags,
-                                                       .srcAccessMask = prev.accessFlags,
-                                                       .dstStageMask = usage.stageFlags,
-                                                       .dstAccessMask = usage.accessFlags,
-                                                       .oldLayout = prev.layout,
-                                                       .newLayout = usage.layout,
-                                                       .image = nullptr,
-                                                       .subresourceRange = {}};
+                      [](ImageAlias alias, const ImageState& prev, const ImageUsageInfo& usage) {
+                        return ImageBarrierData{.imageBarrier =
+                                                    vk::ImageMemoryBarrier2{
+                                                        .srcStageMask = prev.stageFlags,
+                                                        .srcAccessMask = prev.accessFlags,
+                                                        .dstStageMask = usage.stageFlags,
+                                                        .dstAccessMask = usage.accessFlags,
+                                                        .oldLayout = prev.layout,
+                                                        .newLayout = usage.layout,
+                                                        .image = nullptr,
+                                                        .subresourceRange = {},
+                                                    },
+                                                .alias = alias};
                       });
 
-    processImageUsage(info.imageWrites,
+    processImageUsage(passId,
+                      info.imageWrites,
                       imageStates,
                       imageBarriers,
-                      [](ResourceAlias, const ImageState& prev, const ImageUsageInfo& usage) {
-                        return vk::ImageMemoryBarrier2{.srcStageMask = prev.stageFlags,
-                                                       .srcAccessMask = prev.accessFlags,
-                                                       .dstStageMask = usage.stageFlags,
-                                                       .dstAccessMask = usage.accessFlags,
-                                                       .oldLayout = prev.layout,
-                                                       .newLayout = usage.layout,
-                                                       .image = nullptr,
-                                                       .subresourceRange = {}};
+                      [](ImageAlias alias, const ImageState& prev, const ImageUsageInfo& usage) {
+                        return ImageBarrierData{
+                            .imageBarrier =
+                                vk::ImageMemoryBarrier2{.srcStageMask = prev.stageFlags,
+                                                        .srcAccessMask = prev.accessFlags,
+                                                        .dstStageMask = usage.stageFlags,
+                                                        .dstAccessMask = usage.accessFlags,
+                                                        .oldLayout = prev.layout,
+                                                        .newLayout = usage.layout,
+                                                        .image = nullptr,
+                                                        .subresourceRange = {}},
+                            .alias = alias};
                       });
 
-    processBufferUsage(info.bufferReads,
-                       bufferStates,
-                       bufferBarriers,
-                       [](ResourceAlias, const BufferState& prev, const BufferUsageInfo& usage) {
-                         return vk::BufferMemoryBarrier2{.srcStageMask = prev.stageFlags,
-                                                         .srcAccessMask = prev.accessFlags,
-                                                         .dstStageMask = usage.stageFlags,
-                                                         .dstAccessMask = usage.accessFlags,
-                                                         .buffer = nullptr, // set later
-                                                         .offset = 0,
-                                                         .size = VK_WHOLE_SIZE};
-                       });
+    processBufferUsage(
+        passId,
+        info.bufferReads,
+        bufferStates,
+        bufferBarriers,
+        [](BufferAlias alias, const BufferState& prev, const BufferUsageInfo& usage) {
+          return BufferBarrierData{.bufferBarrier =
+                                       vk::BufferMemoryBarrier2{.srcStageMask = prev.stageFlags,
+                                                                .srcAccessMask = prev.accessFlags,
+                                                                .dstStageMask = usage.stageFlags,
+                                                                .dstAccessMask = usage.accessFlags,
+                                                                .buffer = nullptr, // set later
+                                                                .offset = 0,
+                                                                .size = VK_WHOLE_SIZE},
+                                   .alias = alias};
+        });
 
-    processBufferUsage(info.bufferWrites,
-                       bufferStates,
-                       bufferBarriers,
-                       [](ResourceAlias, const BufferState& prev, const BufferUsageInfo& usage) {
-                         return vk::BufferMemoryBarrier2{.srcStageMask = prev.stageFlags,
-                                                         .srcAccessMask = prev.accessFlags,
-                                                         .dstStageMask = usage.stageFlags,
-                                                         .dstAccessMask = usage.accessFlags,
-                                                         .buffer = nullptr,
-                                                         .offset = 0,
-                                                         .size = VK_WHOLE_SIZE};
-                       });
-
-    // Store Barriers
-    auto dependencyInfo = vk::DependencyInfo{
-        .memoryBarrierCount = 0,
-        .pMemoryBarriers = nullptr,
-        .bufferMemoryBarrierCount = static_cast<uint32_t>(bufferBarriers.size()),
-        .pBufferMemoryBarriers = bufferBarriers.data(),
-        .imageMemoryBarrierCount = static_cast<uint32_t>(imageBarriers.size()),
-        .pImageMemoryBarriers = imageBarriers.data(),
-    };
+    processBufferUsage(
+        passId,
+        info.bufferWrites,
+        bufferStates,
+        bufferBarriers,
+        [](BufferAlias alias, const BufferState& prev, const BufferUsageInfo& usage) {
+          return BufferBarrierData{.bufferBarrier =
+                                       vk::BufferMemoryBarrier2{.srcStageMask = prev.stageFlags,
+                                                                .srcAccessMask = prev.accessFlags,
+                                                                .dstStageMask = usage.stageFlags,
+                                                                .dstAccessMask = usage.accessFlags,
+                                                                .buffer = nullptr,
+                                                                .offset = 0,
+                                                                .size = VK_WHOLE_SIZE},
+                                   .alias = alias};
+        });
   }
 }
 
-auto DebugFrameGraph::execute(const Frame* frame) -> FrameGraphResult {
+auto DebugFrameGraph::execute([[maybe_unused]] const Frame* frame) -> FrameGraphResult {
   ZoneScopedN("DebugFrameGraph::execute");
   auto frameGraphResult = FrameGraphResult{};
+
+  for (const auto& passId : sortedPasses) {
+    auto& pass = passes.at(passId);
+    auto& imageBarrierDataList = imageBarriers.at(passId);
+    auto& bufferBarrierDataList = bufferBarriers.at(passId);
+
+    // Resolve the Aliases to Images
+    auto imageBarrierList = std::vector<vk::ImageMemoryBarrier2>{};
+    for (auto& ibd : imageBarrierDataList) {
+      const auto handle = frame->getLogicalImage(aliasRegistry->getHandle(ibd.alias));
+      const auto& image = imageManager->getImage(handle);
+      ibd.imageBarrier.setImage(image.getImage());
+      imageBarrierList.push_back(ibd.imageBarrier);
+    }
+
+    auto bufferBarrierList = std::vector<vk::BufferMemoryBarrier2>{};
+    for (auto& bufferBarrierData : bufferBarrierDataList) {
+      const auto handle =
+          frame->getLogicalBuffer(aliasRegistry->getHandle(bufferBarrierData.alias));
+      auto buffer = bufferSystem->getVkBuffer(handle);
+      bufferBarrierData.bufferBarrier.setBuffer(**buffer);
+      bufferBarrierList.push_back(bufferBarrierData.bufferBarrier);
+    }
+
+    auto dependencyInfo = vk::DependencyInfo{
+        .bufferMemoryBarrierCount = static_cast<uint32_t>(bufferBarrierList.size()),
+        .pBufferMemoryBarriers = bufferBarrierList.data(),
+        .imageMemoryBarrierCount = static_cast<uint32_t>(imageBarrierList.size()),
+        .pImageMemoryBarriers = imageBarrierList.data(),
+    };
+
+    const auto request = CommandBufferRequest{.threadId = std::this_thread::get_id(),
+                                              .frameId = frame->getIndex(),
+                                              .passId = pass->getId(),
+                                              .queueType = QueueType::Graphics};
+    auto& commandBuffer = commandBufferManager->requestCommandBuffer(request);
+    commandBuffer.pipelineBarrier2(dependencyInfo);
+    pass->execute(frame, commandBuffer);
+    frameGraphResult.commandBuffers.push_back(commandBuffer);
+  }
 
   // for (const auto& pass : computePasses | std::views::values) {
   //   const auto request = CommandBufferRequest{.threadId = std::this_thread::get_id(),

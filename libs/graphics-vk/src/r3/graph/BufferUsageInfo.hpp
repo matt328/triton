@@ -4,7 +4,7 @@
 
 namespace tr {
 struct BufferUsageInfo {
-  ResourceAlias alias;
+  BufferAlias alias;
   vk::AccessFlags2 accessFlags;
   vk::PipelineStageFlags2 stageFlags;
   vk::DeviceSize offset = 0;

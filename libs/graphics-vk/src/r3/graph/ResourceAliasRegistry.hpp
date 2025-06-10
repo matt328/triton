@@ -1,6 +1,7 @@
 #pragma once
 
 #include "bk/Handle.hpp"
+#include "buffers/ManagedBuffer.hpp"
 #include "img/ManagedImage.hpp"
 #include "r3/graph/ResourceAliases.hpp"
 
@@ -16,12 +17,15 @@ public:
   auto operator=(const ResourceAliasRegistry&) -> ResourceAliasRegistry& = default;
   auto operator=(ResourceAliasRegistry&&) -> ResourceAliasRegistry& = delete;
 
-  [[nodiscard]] auto getHandle(ResourceAlias alias) const -> LogicalHandle<ManagedImage>;
-  auto setHandle(ResourceAlias alias, LogicalHandle<ManagedImage> handle) -> void;
+  [[nodiscard]] auto getHandle(ImageAlias alias) const -> LogicalHandle<ManagedImage>;
+  auto setHandle(ImageAlias alias, LogicalHandle<ManagedImage> handle) -> void;
+  [[nodiscard]] auto getHandle(BufferAlias alias) const -> LogicalHandle<ManagedBuffer>;
+  auto setHandle(BufferAlias alias, LogicalHandle<ManagedBuffer> handle) -> void;
   auto reset() -> void;
 
 private:
-  std::array<LogicalHandle<ManagedImage>, static_cast<size_t>(ResourceAlias::Count)> handles;
+  std::array<LogicalHandle<ManagedImage>, static_cast<size_t>(ImageAlias::Count)> handles;
+  std::array<LogicalHandle<ManagedBuffer>, static_cast<size_t>(BufferAlias::Count)> bufferHandles;
 };
 
 }

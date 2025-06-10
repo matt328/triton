@@ -13,8 +13,8 @@ class ResourceAliasRegistry;
 class PipelineFactory;
 
 struct ImageUse {
-  ResourceAlias color;
-  ResourceAlias depth;
+  ImageAlias color;
+  ImageAlias depth;
 };
 
 class ForwardGraphicsPass : public IRenderPass {
@@ -42,8 +42,8 @@ private:
   std::shared_ptr<ContextFactory> drawContextFactory;
   std::shared_ptr<ResourceAliasRegistry> aliasRegistry;
   std::shared_ptr<PipelineFactory> pipelineFactory;
-  ResourceAlias colorAlias;
-  ResourceAlias depthAlias;
+  ImageAlias colorAlias;
+  ImageAlias depthAlias;
   PassId id;
 
   std::optional<vk::raii::Pipeline> pipeline;

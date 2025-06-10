@@ -4,7 +4,7 @@
 namespace tr {
 
 struct ImageUsageInfo {
-  ResourceAlias alias;
+  ImageAlias alias;
   vk::AccessFlags2 accessFlags;
   vk::PipelineStageFlags2 stageFlags;
   vk::ImageAspectFlags aspectFlags;
