@@ -13,7 +13,7 @@ class Frame;
 class IRenderPass;
 struct PassGraphInfo;
 
-struct PassInfo {
+struct PassInfo2 {
   std::vector<Handle<ManagedImage>> readImages{};
   std::vector<Handle<ManagedImage>> writeImages{};
 

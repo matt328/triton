@@ -8,6 +8,17 @@ namespace tr {
 
 class Swapchain;
 
+struct ImageState {
+  vk::ImageLayout layout;
+  vk::AccessFlags2 accessFlags;
+  vk::PipelineStageFlags2 stageFlags;
+};
+
+struct BufferState {
+  vk::AccessFlags2 accessFlags;
+  vk::PipelineStageFlags2 stageFlags;
+};
+
 class DebugFrameGraph : public IFrameGraph {
 public:
   explicit DebugFrameGraph(std::shared_ptr<CommandBufferManager> newCommandBufferManager,

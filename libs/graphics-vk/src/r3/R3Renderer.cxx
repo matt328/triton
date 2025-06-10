@@ -323,7 +323,10 @@ auto R3Renderer::createComputeCullingPass() -> void {
                                                      .pipelineLayoutInfo = pipelineLayoutInfo,
                                                      .shaderStageInfo = shaderStageInfo};
 
-  auto cullingPass = renderPassFactory->createRenderPass(RenderPassType::Culling, PassId::Culling);
+  auto cullingPass = renderPassFactory->createRenderPass(RenderPassCreateInfo{
+      .passId = PassId::Culling,
+      .passInfo = CullingPassCreateInfo{},
+  });
 
   auto cmdBufferUses = std::vector<CommandBufferUse>{};
 
@@ -341,7 +344,10 @@ auto R3Renderer::createComputeCullingPass() -> void {
 }
 
 auto R3Renderer::createForwardRenderPass() -> void {
-  auto forwardPass = renderPassFactory->createRenderPass(RenderPassType::Forward, PassId::Forward);
+  auto forwardPass = renderPassFactory->createRenderPass(RenderPassCreateInfo{
+      .passId = PassId::Forward,
+      .passInfo = ForwardPassCreateInfo{.colorImage = ResourceAlias::GeometryColorImage,
+                                        .depthImage = ResourceAlias::DepthImage}});
 
   std::vector<CommandBufferUse> cmdBufferUses{};
 
@@ -360,8 +366,10 @@ auto R3Renderer::createForwardRenderPass() -> void {
 }
 
 auto R3Renderer::createCompositionRenderPass() -> void {
-  auto compositionPass =
-      renderPassFactory->createRenderPass(RenderPassType::Composition, PassId::Composition);
+  auto compositionPass = renderPassFactory->createRenderPass(RenderPassCreateInfo{
+      .passId = PassId::Composition,
+      .passInfo = CompositionPassCreateInfo{},
+  });
 
   std::vector<CommandBufferUse> cmdBufferUses{};
 

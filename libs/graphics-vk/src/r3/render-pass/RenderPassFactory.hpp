@@ -3,6 +3,7 @@
 #include "bk/HandleGenerator.hpp"
 #include "r3/ComponentIds.hpp"
 #include "r3/render-pass/ComputePassCreateInfo.hpp"
+#include "r3/render-pass/CreateInfo.hpp"
 
 namespace tr {
 
@@ -15,13 +16,6 @@ class ManagedImage;
 class ContextFactory;
 class IRenderPass;
 class ResourceAliasRegistry;
-
-enum class RenderPassType : uint8_t {
-  Forward = 0,
-  Composition,
-  Culling,
-  Count
-};
 
 class RenderPassFactory {
 public:
@@ -37,7 +31,7 @@ public:
   auto operator=(const RenderPassFactory&) -> RenderPassFactory& = delete;
   auto operator=(RenderPassFactory&&) -> RenderPassFactory& = delete;
 
-  auto createRenderPass(RenderPassType passType, PassId passId) -> std::unique_ptr<IRenderPass>;
+  auto createRenderPass(RenderPassCreateInfo createInfo) -> std::unique_ptr<IRenderPass>;
 
 private:
   std::shared_ptr<PipelineFactory> pipelineFactory;
@@ -47,6 +41,13 @@ private:
   std::shared_ptr<ResourceAliasRegistry> aliasRegistry;
 
   HandleGenerator<ManagedImage> imageHandleGenerator;
+
+  auto createForwardPass(PassId passId, ForwardPassCreateInfo createInfo)
+      -> std::unique_ptr<IRenderPass>;
+  auto createCullingPass(PassId passId, CullingPassCreateInfo createInfo)
+      -> std::unique_ptr<IRenderPass>;
+  auto createCompositionPass(PassId passId, CompositionPassCreateInfo createInfo)
+      -> std::unique_ptr<IRenderPass>;
 };
 
 }

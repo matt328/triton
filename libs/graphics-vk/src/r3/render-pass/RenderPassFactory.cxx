@@ -19,31 +19,47 @@ RenderPassFactory::RenderPassFactory(std::shared_ptr<PipelineFactory> newPipelin
       aliasRegistry{std::move(newAliasRegistry)} {
 }
 
-auto RenderPassFactory::createRenderPass(RenderPassType passType, PassId passId)
+auto RenderPassFactory::createRenderPass(RenderPassCreateInfo createInfo)
     -> std::unique_ptr<IRenderPass> {
   Log.trace("RenderPassFactory::createGraphicsPass()");
-  switch (passType) {
-    case RenderPassType::Forward:
-      return std::make_unique<ForwardGraphicsPass>(imageManager,
-                                                   drawContextFactory,
-                                                   aliasRegistry,
-                                                   pipelineFactory,
-                                                   ImageUse{},
-                                                   passId);
-      break;
-    case RenderPassType::Composition:
-      Log.warn("TODO: Implement CompositionGraphicsPass");
-      return nullptr;
-      break;
-    case RenderPassType::Culling:
-      return std::make_unique<CullingPass>(drawContextFactory, pipelineFactory, passId);
-      break;
-    case RenderPassType::Count:
-      assert(false);
-      Log.warn("Should not have requested graphics pass type 'Count'");
-      return nullptr;
-      break;
-  }
+
+  const auto visitor = [&](auto&& arg) -> std::unique_ptr<IRenderPass> {
+    using T = std::decay_t<decltype(arg)>;
+    if constexpr (std::is_same_v<T, ForwardPassCreateInfo>) {
+      return createForwardPass(createInfo.passId, arg);
+    }
+    if constexpr (std::is_same_v<T, CullingPassCreateInfo>) {
+      return createCullingPass(createInfo.passId, arg);
+    }
+    if constexpr (std::is_same_v<T, CompositionPassCreateInfo>) {
+      return createCompositionPass(createInfo.passId, arg);
+    }
+    return nullptr;
+  };
+
+  return std::visit(visitor, createInfo.passInfo);
+}
+
+auto RenderPassFactory::createForwardPass(PassId passId, ForwardPassCreateInfo createInfo)
+    -> std::unique_ptr<IRenderPass> {
+  return std::make_unique<ForwardGraphicsPass>(imageManager,
+                                               drawContextFactory,
+                                               aliasRegistry,
+                                               pipelineFactory,
+                                               createInfo,
+                                               passId);
+}
+
+auto RenderPassFactory::createCullingPass(PassId passId, CullingPassCreateInfo createInfo)
+    -> std::unique_ptr<IRenderPass> {
+  return std::make_unique<CullingPass>(drawContextFactory, pipelineFactory, passId);
+}
+
+auto RenderPassFactory::createCompositionPass(PassId passId, CompositionPassCreateInfo createInfo)
+    -> std::unique_ptr<IRenderPass> {
+  // return std::make_unique<CompositionPass>(drawContextFactory, pipelineFactory, passId);
+  Log.warn("TODO: implement CompositionPass");
+  return nullptr;
 }
 
 }

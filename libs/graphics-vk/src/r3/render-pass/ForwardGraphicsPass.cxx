@@ -17,14 +17,14 @@ ForwardGraphicsPass::ForwardGraphicsPass(std::shared_ptr<ImageManager> newImageM
                                          std::shared_ptr<ContextFactory> newDrawContextFactory,
                                          std::shared_ptr<ResourceAliasRegistry> newAliasRegistry,
                                          std::shared_ptr<PipelineFactory> newPipelineFactory,
-                                         ImageUse imageUse,
+                                         ForwardPassCreateInfo createInfo,
                                          PassId newPassId)
     : imageManager{std::move(newImageManager)},
       drawContextFactory{std::move(newDrawContextFactory)},
       aliasRegistry{std::move(newAliasRegistry)},
       pipelineFactory{std::move(newPipelineFactory)},
-      colorAlias{imageUse.color},
-      depthAlias{imageUse.depth},
+      colorAlias{createInfo.colorImage},
+      depthAlias{createInfo.depthImage},
       id{newPassId} {
   Log.trace("Creating ForwardGraphicsPass");
 
@@ -128,19 +128,21 @@ auto ForwardGraphicsPass::registerDispatchContext(Handle<IDispatchContext> handl
 
 [[nodiscard]] auto ForwardGraphicsPass::getGraphInfo() const -> PassGraphInfo {
   return PassGraphInfo{
-      .writes = {
+      .imageWrites = {
           ImageUsageInfo{
               .alias = colorAlias,
-              .accessFlags = vk::AccessFlagBits::eColorAttachmentWrite,
-              .stageFlags = vk::PipelineStageFlagBits::eColorAttachmentOutput,
+              .accessFlags = vk::AccessFlagBits2::eColorAttachmentWrite,
+              .stageFlags = vk::PipelineStageFlagBits2::eColorAttachmentOutput,
               .aspectFlags = vk::ImageAspectFlagBits::eColor,
+              .layout = vk::ImageLayout::eColorAttachmentOptimal,
               .clearValue = vk::ClearValue{.color = {std::array<float, 4>{0.f, 0.f, 0.f, 1.f}}},
           },
           ImageUsageInfo{
               .alias = depthAlias,
-              .accessFlags = vk::AccessFlagBits::eDepthStencilAttachmentWrite,
-              .stageFlags = vk::PipelineStageFlagBits::eEarlyFragmentTests,
+              .accessFlags = vk::AccessFlagBits2::eDepthStencilAttachmentWrite,
+              .stageFlags = vk::PipelineStageFlagBits2::eEarlyFragmentTests,
               .aspectFlags = vk::ImageAspectFlagBits::eDepth,
+              .layout = vk::ImageLayout::eDepthAttachmentOptimal,
               .clearValue =
                   vk::ClearValue{.depthStencil =
                                      vk::ClearDepthStencilValue{.depth = 1.0f, .stencil = 0}},

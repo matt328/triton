@@ -3,6 +3,7 @@
 #include "IRenderPass.hpp"
 #include "r3/ComponentIds.hpp"
 #include "r3/graph/ResourceAliases.hpp"
+#include "r3/render-pass/CreateInfo.hpp"
 
 namespace tr {
 
@@ -22,7 +23,7 @@ public:
                       std::shared_ptr<ContextFactory> newDrawContextFactory,
                       std::shared_ptr<ResourceAliasRegistry> newAliasRegistry,
                       std::shared_ptr<PipelineFactory> newPipelineFactory,
-                      ImageUse imageUse,
+                      ForwardPassCreateInfo createInfo,
                       PassId newPassId);
   ~ForwardGraphicsPass() override = default;
 
