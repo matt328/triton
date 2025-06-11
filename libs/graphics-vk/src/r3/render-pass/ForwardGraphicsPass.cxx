@@ -33,7 +33,7 @@ ForwardGraphicsPass::ForwardGraphicsPass(std::shared_ptr<ImageManager> newImageM
   // HACK
   const auto extent = imageManager->getImageMetadata(colorHandle).extent;
 
-  const auto depthHandle = newAliasRegistry->getHandle(depthAlias);
+  const auto depthHandle = aliasRegistry->getHandle(depthAlias);
   const auto depthFormat = imageManager->getImageMetadata(depthHandle).format;
 
   const auto vertexStage = ShaderStageInfo{
@@ -127,7 +127,7 @@ auto ForwardGraphicsPass::registerDispatchContext(Handle<IDispatchContext> handl
 }
 
 [[nodiscard]] auto ForwardGraphicsPass::getGraphInfo() const -> PassGraphInfo {
-  return PassGraphInfo{
+  auto graphInfo = PassGraphInfo{
       .imageWrites = {
           ImageUsageInfo{
               .alias = colorAlias,
@@ -147,6 +147,24 @@ auto ForwardGraphicsPass::registerDispatchContext(Handle<IDispatchContext> handl
                   vk::ClearValue{.depthStencil =
                                      vk::ClearDepthStencilValue{.depth = 1.0f, .stencil = 0}},
           }}};
+
+  auto passGraphInfo = PassGraphInfo{};
+
+  for (const auto& handle : drawableContexts) {
+    const auto& dispatchContext = drawContextFactory->getDispatchContext(handle);
+    const auto contextInfo = dispatchContext->getGraphInfo();
+    passGraphInfo.bufferReads.insert(contextInfo.bufferReads.begin(),
+                                     contextInfo.bufferReads.end());
+    passGraphInfo.bufferWrites.insert(contextInfo.bufferWrites.begin(),
+                                      contextInfo.bufferWrites.end());
+    passGraphInfo.imageReads.insert(contextInfo.imageReads.begin(), contextInfo.imageReads.end());
+    passGraphInfo.imageWrites.insert(contextInfo.imageWrites.begin(),
+                                     contextInfo.imageWrites.end());
+  }
+
+  return passGraphInfo;
+
+  return graphInfo;
 }
 
 }

@@ -78,7 +78,7 @@ auto BufferSystem::registerPerFrameBuffer(const BufferCreateInfo& createInfo)
 
   for (const auto& frame : frameManager->getFrames()) {
     auto newCreateInfo = createInfo;
-    newCreateInfo.debugName = fmt::format("{}-Frame-{}", createInfo.debugName, frame->getIndex());
+    newCreateInfo.debugName = std::format("{}-Frame-{}", createInfo.debugName, frame->getIndex());
     const auto handle = registerBuffer(newCreateInfo);
     frame->addLogicalBuffer(logicalHandle, handle);
   }

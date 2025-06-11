@@ -26,7 +26,7 @@ auto DefaultDebugManager::checkDebugSupport() -> void {
       }
     }
     if (!layerFound) {
-      throw std::runtime_error(fmt::format("Layer {} requested but not found", layerName));
+      throw std::runtime_error(std::format("Layer {} requested but not found", layerName));
     }
   }
 }

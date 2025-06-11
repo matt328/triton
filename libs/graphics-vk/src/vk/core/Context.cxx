@@ -28,7 +28,7 @@ auto Context::createInstance(const vk::InstanceCreateInfo& createInfo) const
 
 auto Context::getVulkanVersion() const -> std::string {
   auto version = context->enumerateInstanceVersion();
-  const auto versionString = fmt::format("{}.{}.{}",
+  const auto versionString = std::format("{}.{}.{}",
                                          VK_VERSION_MAJOR(version),
                                          VK_VERSION_MINOR(version),
                                          VK_VERSION_PATCH(version));

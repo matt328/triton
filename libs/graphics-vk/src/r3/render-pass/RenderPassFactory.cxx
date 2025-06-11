@@ -50,12 +50,14 @@ auto RenderPassFactory::createForwardPass(PassId passId, ForwardPassCreateInfo c
                                                passId);
 }
 
-auto RenderPassFactory::createCullingPass(PassId passId, CullingPassCreateInfo createInfo)
+auto RenderPassFactory::createCullingPass(PassId passId,
+                                          [[maybe_unused]] CullingPassCreateInfo createInfo)
     -> std::unique_ptr<IRenderPass> {
   return std::make_unique<CullingPass>(drawContextFactory, pipelineFactory, passId);
 }
 
-auto RenderPassFactory::createCompositionPass(PassId passId, CompositionPassCreateInfo createInfo)
+auto RenderPassFactory::createCompositionPass([[maybe_unused]] PassId passId,
+                                              [[maybe_unused]] CompositionPassCreateInfo createInfo)
     -> std::unique_ptr<IRenderPass> {
   // return std::make_unique<CompositionPass>(drawContextFactory, pipelineFactory, passId);
   Log.warn("TODO: implement CompositionPass");

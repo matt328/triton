@@ -28,7 +28,7 @@ auto DebugTerrainSystem::registerTerrain(const TerrainCreateInfo& createInfo) ->
       for (int x = 0; x < createInfo.chunkCount.x; ++x) {
         const auto blockHandle = blockKeygen.getKey();
         const auto location = glm::ivec3(x, y, z);
-        const auto name = fmt::format("Chunk ({}, {}, {})", location.x, location.y, location.z);
+        const auto name = std::format("Chunk ({}, {}, {})", location.x, location.y, location.z);
         blockMap.emplace(blockHandle,
                          BlockResult{.name = name,
                                      .chunkHandle = blockHandle,

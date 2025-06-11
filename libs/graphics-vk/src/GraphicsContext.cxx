@@ -33,7 +33,7 @@
 #include "resources/allocators/GeometryDispatcher.hpp"
 #include "gfx/GeometryHandleMapper.hpp"
 
-#define BOOST_DI_CFG_CTOR_LIMIT_SIZE 15
+#define BOOST_DI_CFG_CTOR_LIMIT_SIZE 20
 #include <di.hpp>
 
 namespace di = boost::di;

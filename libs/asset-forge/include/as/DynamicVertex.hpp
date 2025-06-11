@@ -25,20 +25,15 @@ struct DynamicVertex {
 }
 
 template <>
-struct fmt::formatter<as::DynamicVertex> {
-  constexpr auto parse(fmt::format_parse_context& ctx) {
-    return ctx.begin();
-  }
-
-  template <typename FormatContext>
-  auto format(const as::DynamicVertex& vert, FormatContext& ctx) {
-    return fmt::format_to(ctx.out(),
-                          "position: ({}, {}, {}), texCoord: ({}, {})",
-                          vert.position.x,
-                          vert.position.y,
-                          vert.position.z,
-                          vert.texCoord.x,
-                          vert.texCoord.y);
+struct std::formatter<as::DynamicVertex> : std::formatter<std::string> {
+  auto format(const as::DynamicVertex& vert, std::format_context& ctx) const {
+    auto str = std::format("position: ({}, {}, {}), texCoord: ({}, {})",
+                           vert.position.x,
+                           vert.position.y,
+                           vert.position.z,
+                           vert.texCoord.x,
+                           vert.texCoord.y);
+    return std::formatter<std::string>::format(str, ctx);
   }
 };
 

@@ -43,6 +43,8 @@ auto DebugFrameGraph::bake() -> void {
   for (const auto& [id, pass] : passes) {
     const auto& info = pass->getGraphInfo();
 
+    Log.trace("Processing Pass {} with PassGraphInfo={}", id, info);
+
     const auto processImages = [&](const auto& usageList, bool isWrite) {
       for (const auto& usage : usageList) {
         auto alias = usage.alias;
@@ -108,26 +110,23 @@ auto DebugFrameGraph::bake() -> void {
         }
       };
 
-  auto processBufferUsage = [&](PassId passId,
-                                const std::vector<BufferUsageInfo>& usages,
-                                auto& stateMap,
-                                auto& barrierVec,
-                                auto&& makeBarrier) {
-    for (const auto& usage : usages) {
-      const auto alias = usage.alias;
-      const auto newAccess = usage.accessFlags;
-      const auto newStage = usage.stageFlags;
+  auto processBufferUsage =
+      [&](PassId passId, const auto& usages, auto& stateMap, auto& barrierVec, auto&& makeBarrier) {
+        for (const auto& usage : usages) {
+          const auto alias = usage.alias;
+          const auto newAccess = usage.accessFlags;
+          const auto newStage = usage.stageFlags;
 
-      auto it = stateMap.find(alias);
-      if (it != stateMap.end()) {
-        const auto& prev = it->second;
-        if (prev.accessFlags != newAccess || prev.stageFlags != newStage) {
-          barrierVec[passId].push_back(makeBarrier(alias, prev, usage));
+          auto it = stateMap.find(alias);
+          if (it != stateMap.end()) {
+            const auto& prev = it->second;
+            if (prev.accessFlags != newAccess || prev.stageFlags != newStage) {
+              barrierVec[passId].push_back(makeBarrier(alias, prev, usage));
+            }
+          }
+          stateMap[alias] = BufferState{.accessFlags = newAccess, .stageFlags = newStage};
         }
-      }
-      stateMap[alias] = BufferState{.accessFlags = newAccess, .stageFlags = newStage};
-    }
-  };
+      };
 
   for (const auto passId : sortedPasses) {
     const auto& pass = *passes.at(passId);
@@ -203,6 +202,36 @@ auto DebugFrameGraph::bake() -> void {
                                                                 .size = VK_WHOLE_SIZE},
                                    .alias = alias};
         });
+  }
+  for (const auto& passId : sortedPasses) {
+    Log.debug("Pass {}:", passId);
+
+    if (auto it = imageBarriers.find(passId); it != imageBarriers.end()) {
+      for (const auto& barrier : it->second) {
+        const auto& b = barrier.imageBarrier;
+        Log.debug(
+            "  Image Transition [alias={}] Layout: {} -> {}, Access: {} -> {}, Stages: {} -> {}",
+            static_cast<int>(barrier.alias),
+            vk::to_string(b.oldLayout),
+            vk::to_string(b.newLayout),
+            vk::to_string(b.srcAccessMask),
+            vk::to_string(b.dstAccessMask),
+            vk::to_string(b.srcStageMask),
+            vk::to_string(b.dstStageMask));
+      }
+    }
+
+    if (auto it = bufferBarriers.find(passId); it != bufferBarriers.end()) {
+      for (const auto& barrier : it->second) {
+        const auto& b = barrier.bufferBarrier;
+        Log.debug("  Buffer Barrier [alias={}] Access: {} -> {}, Stages: {} -> {}",
+                  static_cast<int>(barrier.alias),
+                  vk::to_string(b.srcAccessMask),
+                  vk::to_string(b.dstAccessMask),
+                  vk::to_string(b.srcStageMask),
+                  vk::to_string(b.dstStageMask));
+      }
+    }
   }
 }
 

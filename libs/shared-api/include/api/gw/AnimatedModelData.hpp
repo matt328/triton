@@ -11,16 +11,15 @@ struct AnimatedModelData {
 
 }
 
-// Specialize fmt::formatter for AnimatedModelData
 template <>
-struct fmt::formatter<tr::AnimatedModelData> {
-  constexpr auto parse(fmt::format_parse_context& ctx) -> decltype(ctx.begin()) {
+struct std::formatter<tr::AnimatedModelData> {
+  constexpr auto parse(std::format_parse_context& ctx) {
     return ctx.begin();
   }
 
   template <typename FormatContext>
-  auto format(const tr::AnimatedModelData& data, FormatContext& ctx) -> decltype(ctx.out()) {
-    return fmt::format_to(
+  auto format(const tr::AnimatedModelData& data, FormatContext& ctx) const {
+    return std::format_to(
         ctx.out(),
         "AnimatedModelData(modelFilename: '{}', skeletonFilename: '{}', animationFilename: '{}')",
         data.modelFilename,

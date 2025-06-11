@@ -21,14 +21,14 @@ struct TerrainVertex {
 }
 
 template <>
-struct fmt::formatter<as::TerrainVertex> {
-  constexpr auto parse(fmt::format_parse_context& ctx) {
+struct std::formatter<as::TerrainVertex> {
+  constexpr auto parse(std::format_parse_context& ctx) {
     return ctx.begin();
   }
 
   template <typename FormatContext>
-  auto format(const as::TerrainVertex& vert, FormatContext& ctx) {
-    return fmt::format_to(ctx.out(),
+  auto format(const as::TerrainVertex& vert, FormatContext& ctx) const {
+    return std::format_to(ctx.out(),
                           "position: ({}, {}, {}), texCoord: ({}, {})",
                           vert.position.x,
                           vert.position.y,

@@ -56,6 +56,21 @@ auto CullingPass::registerDispatchContext(Handle<IDispatchContext> handle) -> vo
 }
 
 auto CullingPass::getGraphInfo() const -> PassGraphInfo {
+  auto passGraphInfo = PassGraphInfo{};
+
+  for (const auto& handle : dispatchableContexts) {
+    const auto& dispatchContext = contextFactory->getDispatchContext(handle);
+    const auto contextInfo = dispatchContext->getGraphInfo();
+    passGraphInfo.bufferReads.insert(contextInfo.bufferReads.begin(),
+                                     contextInfo.bufferReads.end());
+    passGraphInfo.bufferWrites.insert(contextInfo.bufferWrites.begin(),
+                                      contextInfo.bufferWrites.end());
+    passGraphInfo.imageReads.insert(contextInfo.imageReads.begin(), contextInfo.imageReads.end());
+    passGraphInfo.imageWrites.insert(contextInfo.imageWrites.begin(),
+                                     contextInfo.imageWrites.end());
+  }
+
+  return passGraphInfo;
 }
 
 }

@@ -9,6 +9,7 @@
 #include "r3/GeometryBufferPack.hpp"
 #include "r3/draw-context/ContextFactory.hpp"
 #include "r3/draw-context/IDispatchContext.hpp"
+#include "r3/graph/ResourceAliasRegistry.hpp"
 #include "r3/render-pass/IRenderPass.hpp"
 #include "r3/render-pass/RenderPassFactory.hpp"
 #include "resources/allocators/GeometryAllocator.hpp"
@@ -18,6 +19,7 @@
 
 namespace tr {
 
+// TODO(tomorrow): Finish filling out ForwardPass and Cube DrawContext's graphInfo
 const std::unordered_map<ContextId, std::vector<PassId>> GraphicsMap = {
     {ContextId::Cube, {PassId::Forward}}};
 
@@ -38,7 +40,8 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
                        std::shared_ptr<GeometryBufferPack> newGeometryBufferPack,
                        std::shared_ptr<FrameState> newFrameState,
                        std::shared_ptr<GeometryAllocator> newGeometryAllocator,
-                       std::shared_ptr<GeometryHandleMapper> newGeometryHandleMapper)
+                       std::shared_ptr<GeometryHandleMapper> newGeometryHandleMapper,
+                       std::shared_ptr<ResourceAliasRegistry> newAliasRegistry)
     : rendererConfig{newRenderConfig},
       frameManager{std::move(newFrameManager)},
       graphicsQueue{std::move(newGraphicsQueue)},
@@ -53,7 +56,8 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
       geometryBufferPack{std::move(newGeometryBufferPack)},
       frameState{std::move(newFrameState)},
       geometryAllocator{std::move(newGeometryAllocator)},
-      geometryHandleMapper{std::move(newGeometryHandleMapper)} {
+      geometryHandleMapper{std::move(newGeometryHandleMapper)},
+      aliasRegistry{std::move(newAliasRegistry)} {
   Log.trace("Constructing R3Renderer");
   /*
     TODO(matt): createComputeCullingPass()
@@ -112,6 +116,8 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
           drawContextFactory->getDispatchContextHandle(contextId));
     }
   }
+
+  frameGraph->bake();
 }
 
 auto R3Renderer::createGlobalBuffers() -> void {
@@ -159,6 +165,18 @@ auto R3Renderer::createGlobalImages() -> void {
                              .height = rendererConfig.initialHeight},
       .usageFlags = vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled,
       .aspectFlags = vk::ImageAspectFlagBits::eColor});
+
+  // TODO(renderer-1): fix depth image, handle non-per frame images
+  globalImages.forwardDepthImage = imageManager->createPerFrameImage(
+      ImageRequest{.logicalName = "depth",
+                   .format = vk::Format::eD32Sfloat,
+                   .extent = vk::Extent2D{.width = rendererConfig.initialWidth,
+                                          .height = rendererConfig.initialHeight},
+                   .usageFlags = vk::ImageUsageFlagBits::eDepthStencilAttachment,
+                   .aspectFlags = vk::ImageAspectFlagBits::eDepth});
+
+  aliasRegistry->setHandle(ImageAlias::GeometryColorImage, globalImages.forwardColorImage);
+  aliasRegistry->setHandle(ImageAlias::DepthImage, globalImages.forwardDepthImage);
 }
 
 void R3Renderer::renderNextFrame() {

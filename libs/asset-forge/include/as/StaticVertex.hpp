@@ -21,14 +21,14 @@ struct StaticVertex {
 }
 
 template <>
-struct fmt::formatter<as::StaticVertex> {
-  constexpr auto parse(fmt::format_parse_context& ctx) {
+struct std::formatter<as::StaticVertex> {
+  // No custom parse needed, so just return the begin iterator
+  constexpr auto parse(std::format_parse_context& ctx) {
     return ctx.begin();
   }
 
-  template <typename FormatContext>
-  auto format(const as::StaticVertex& vert, FormatContext& ctx) {
-    return fmt::format_to(ctx.out(),
+  auto format(const as::StaticVertex& vert, std::format_context& ctx) const {
+    return std::format_to(ctx.out(),
                           "position: ({}, {}, {}), texCoord: ({}, {})",
                           vert.position.x,
                           vert.position.y,

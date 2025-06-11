@@ -69,4 +69,72 @@ auto CullingDispatchContext::getPushConstantSize() -> size_t {
   return sizeof(PushConstants);
 }
 
+[[nodiscard]] auto CullingDispatchContext::getGraphInfo() const -> PassGraphInfo {
+  auto passGraphInfo = PassGraphInfo{
+      .bufferWrites =
+          {
+              BufferUsageInfo{
+                  .alias = BufferAlias::IndirectCommand,
+                  .accessFlags = vk::AccessFlagBits2::eShaderWrite,
+                  .stageFlags = vk::PipelineStageFlagBits2::eComputeShader,
+              },
+              BufferUsageInfo{
+                  .alias = BufferAlias::IndirectCommandCount,
+                  .accessFlags = vk::AccessFlagBits2::eShaderWrite,
+                  .stageFlags = vk::PipelineStageFlagBits2::eComputeShader,
+              },
+          },
+      .bufferReads = {BufferUsageInfo{
+                          .alias = BufferAlias::ObjectData,
+                          .accessFlags = vk::AccessFlagBits2::eShaderRead,
+                          .stageFlags = vk::PipelineStageFlagBits2::eComputeShader,
+                      },
+                      BufferUsageInfo{
+                          .alias = BufferAlias::ObjectPositions,
+                          .accessFlags = vk::AccessFlagBits2::eShaderRead,
+                          .stageFlags = vk::PipelineStageFlagBits2::eComputeShader,
+                      },
+                      BufferUsageInfo{
+                          .alias = BufferAlias::ObjectRotations,
+                          .accessFlags = vk::AccessFlagBits2::eShaderRead,
+                          .stageFlags = vk::PipelineStageFlagBits2::eComputeShader,
+                      },
+                      BufferUsageInfo{
+                          .alias = BufferAlias::ObjectScales,
+                          .accessFlags = vk::AccessFlagBits2::eShaderRead,
+                          .stageFlags = vk::PipelineStageFlagBits2::eComputeShader,
+                      },
+                      BufferUsageInfo{
+                          .alias = BufferAlias::GeometryRegion,
+                          .accessFlags = vk::AccessFlagBits2::eShaderRead,
+                          .stageFlags = vk::PipelineStageFlagBits2::eComputeShader,
+                      },
+                      BufferUsageInfo{
+                          .alias = BufferAlias::IndexData,
+                          .accessFlags = vk::AccessFlagBits2::eShaderRead,
+                          .stageFlags = vk::PipelineStageFlagBits2::eComputeShader,
+                      },
+                      BufferUsageInfo{
+                          .alias = BufferAlias::VertexPositions,
+                          .accessFlags = vk::AccessFlagBits2::eShaderRead,
+                          .stageFlags = vk::PipelineStageFlagBits2::eComputeShader,
+                      },
+                      BufferUsageInfo{
+                          .alias = BufferAlias::VertexNormal,
+                          .accessFlags = vk::AccessFlagBits2::eShaderRead,
+                          .stageFlags = vk::PipelineStageFlagBits2::eComputeShader,
+                      },
+                      BufferUsageInfo{
+                          .alias = BufferAlias::VertexTexCoord,
+                          .accessFlags = vk::AccessFlagBits2::eShaderRead,
+                          .stageFlags = vk::PipelineStageFlagBits2::eComputeShader,
+                      },
+                      BufferUsageInfo{
+                          .alias = BufferAlias::VertexColor,
+                          .accessFlags = vk::AccessFlagBits2::eShaderRead,
+                          .stageFlags = vk::PipelineStageFlagBits2::eComputeShader,
+                      }},
+  };
+  return passGraphInfo;
+}
 }

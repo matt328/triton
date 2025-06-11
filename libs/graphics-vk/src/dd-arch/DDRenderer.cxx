@@ -179,7 +179,7 @@ auto DDRenderer::endFrame(const Frame* frame) -> void {
       .pSignalSemaphores = &*frame->getRenderFinishedSemaphore(),
   };
 
-  std::string msg = fmt::format("Submitting Queue for frame {}", frame->getIndex());
+  std::string msg = std::format("Submitting Queue for frame {}", frame->getIndex());
   TracyMessage(msg.data(), msg.size());
 
   try {
@@ -201,7 +201,7 @@ auto DDRenderer::endFrame(const Frame* frame) -> void {
                            .pSwapchains = &chain,
                            .pImageIndices = &swapchainImageIndex};
 
-    std::string msg = fmt::format("Presenting frame {}", frame->getIndex());
+    std::string msg = std::format("Presenting frame {}", frame->getIndex());
     TracyMessage(msg.data(), msg.size());
     if (const auto result2 = graphicsQueue->getQueue().presentKHR(presentInfo);
         result2 == vk::Result::eSuboptimalKHR || result2 == vk::Result::eErrorOutOfDateKHR) {

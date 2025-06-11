@@ -110,7 +110,7 @@ auto GlfwWindow::pollEvents() -> void {
 
 auto GlfwWindow::setVulkanVersion(std::string_view vulkanVersion) -> void {
   const auto* const currentTitle = glfwGetWindowTitle(window);
-  auto newWindowTitle = fmt::format("{} Vulkan {}", currentTitle, vulkanVersion.data());
+  auto newWindowTitle = std::format("{} Vulkan {}", currentTitle, vulkanVersion.data());
   glfwSetWindowTitle(window, newWindowTitle.c_str());
 }
 

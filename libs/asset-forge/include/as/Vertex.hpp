@@ -25,14 +25,14 @@ struct Vertex {
 }
 
 template <>
-struct fmt::formatter<as::Vertex> {
-  constexpr auto parse(fmt::format_parse_context& ctx) {
+struct std::formatter<as::Vertex> {
+  constexpr auto parse(std::format_parse_context& ctx) {
     return ctx.begin();
   }
 
   template <typename FormatContext>
-  auto format(const as::Vertex& vert, FormatContext& ctx) {
-    return fmt::format_to(ctx.out(), "(pos: {}, {}, {})", vert.pos.x, vert.pos.y, vert.pos.z);
+  auto format(const as::Vertex& vert, FormatContext& ctx) const {
+    return std::format_to(ctx.out(), "(pos: {}, {}, {})", vert.pos.x, vert.pos.y, vert.pos.z);
   }
 };
 

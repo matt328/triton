@@ -6,7 +6,6 @@ target_precompile_headers(${PROJECT_NAME}
   INTERFACE
   <algorithm>
   <any>
-  <fmt/format.h>
   <functional>
   <future>
   <glm/glm.hpp>

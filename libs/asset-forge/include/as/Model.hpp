@@ -45,7 +45,7 @@ struct Model {
   template <class Archive>
   void serialize(Archive& archive, std::uint32_t const version) {
     if (version != as::SERIAL_VERSION) {
-      auto msg = fmt::format("Version mismatch in as:Model, found {0}, expected {1}",
+      auto msg = std::format("Version mismatch in as:Model, found {0}, expected {1}",
                              version,
                              as::SERIAL_VERSION);
       throw SerializationException(msg);

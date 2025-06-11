@@ -67,14 +67,14 @@ private:
 }
 
 template <>
-struct fmt::formatter<tr::BlockUpdate> {
-  constexpr auto parse(format_parse_context& ctx) -> format_parse_context::iterator {
+struct std::formatter<tr::BlockUpdate> {
+  constexpr auto parse(std::format_parse_context& ctx) -> std::format_parse_context::iterator {
     return ctx.begin();
   }
 
   template <typename FormatContext>
-  auto format(const tr::BlockUpdate& bu, FormatContext& ctx) -> FormatContext::iterator {
-    return fmt::format_to(
+  auto format(const tr::BlockUpdate& bu, FormatContext& ctx) const -> FormatContext::iterator {
+    return std::format_to(
         ctx.out(),
         "BlockUpdate {{ Type: {}, Position: ({}, {}, {}), LOD: {}, NeighborsMask: {:06b} }}",
         static_cast<int>(bu.updateType),

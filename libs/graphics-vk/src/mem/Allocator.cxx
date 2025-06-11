@@ -56,7 +56,7 @@ auto Allocator::createBuffer2(vk::BufferCreateInfo bci,
         allocation);
   } catch (const std::exception& ex) {
     throw AllocationException(
-        fmt::format("Error creating and/or naming Buffer: {0}, {1}", name, ex.what()));
+        std::format("Error creating and/or naming Buffer: {0}, {1}", name, ex.what()));
   }
 }
 
@@ -79,7 +79,7 @@ auto Allocator::createBuffer(const vk::BufferCreateInfo* bci,
                                     aci);
   } catch (const std::exception& ex) {
     throw AllocationException(
-        fmt::format("Error creating and/or naming Buffer: {0}, {1}", name, ex.what()));
+        std::format("Error creating and/or naming Buffer: {0}, {1}", name, ex.what()));
   }
 }
 
@@ -138,7 +138,7 @@ auto Allocator::createImage(const vk::ImageCreateInfo& imageCreateInfo,
     return std::make_unique<Image>(*allocator, image, allocation);
   } catch (const std::exception& ex) {
     throw AllocationException(
-        fmt::format("Error creating and/or naming Image: {0}, {1}", newName, ex.what()));
+        std::format("Error creating and/or naming Image: {0}, {1}", newName, ex.what()));
   }
 }
 
@@ -160,7 +160,7 @@ auto Allocator::mapMemory(const Buffer& Buffer) const -> void* {
   try {
     return allocator->mapMemory(Buffer.getAllocation());
   } catch (const std::exception& ex) {
-    throw AllocationException(fmt::format("Error mapping buffer: {0}", ex.what()));
+    throw AllocationException(std::format("Error mapping buffer: {0}", ex.what()));
   }
 }
 
@@ -168,7 +168,7 @@ void Allocator::unmapMemory(const Buffer& Buffer) const {
   try {
     return allocator->unmapMemory(Buffer.getAllocation());
   } catch (const std::exception& ex) {
-    throw AllocationException(fmt::format("Error ummapping buffer: {0}", ex.what()));
+    throw AllocationException(std::format("Error ummapping buffer: {0}", ex.what()));
   }
 }
 
@@ -176,7 +176,7 @@ auto Allocator::mapMemory(const Image& Image) const -> void* {
   try {
     return allocator->mapMemory(Image.getAllocation());
   } catch (const std::exception& ex) {
-    throw AllocationException(fmt::format("Error mapping Image: {0}", ex.what()));
+    throw AllocationException(std::format("Error mapping Image: {0}", ex.what()));
   }
 }
 
@@ -184,7 +184,7 @@ void Allocator::unmapMemory(const Image& Image) const {
   try {
     allocator->unmapMemory(Image.getAllocation());
   } catch (const std::exception& ex) {
-    throw AllocationException(fmt::format("Error unmapping Image: {0}", ex.what()));
+    throw AllocationException(std::format("Error unmapping Image: {0}", ex.what()));
   }
 }
 }

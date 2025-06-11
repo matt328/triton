@@ -29,8 +29,8 @@ struct Action {
 
 // Custom fmt formatter for ActionType
 template <>
-struct fmt::formatter<tr::ActionType> : fmt::formatter<std::string> {
-  auto format(tr::ActionType actionType, fmt::format_context& ctx) {
+struct std::formatter<tr::ActionType> : std::formatter<std::string> {
+  auto format(tr::ActionType actionType, std::format_context& ctx) const {
     std::string name;
     switch (actionType) {
       case tr::ActionType::MoveForward:
@@ -63,16 +63,19 @@ struct fmt::formatter<tr::ActionType> : fmt::formatter<std::string> {
       case tr::ActionType::Cancel:
         name = "Cancel";
         break;
+      default:
+        name = "Unknown";
+        break;
     }
-    return fmt::formatter<std::string>::format(name, ctx);
+    return std::formatter<std::string>::format(name, ctx);
   }
 };
 
 // Custom fmt formatter for StateType
 template <>
-struct fmt::formatter<tr::StateType> : fmt::formatter<std::string> {
-  auto format(tr::StateType stateType, fmt::format_context& ctx) {
-    std::string name;
+struct std::formatter<tr::StateType> : std::formatter<std::string_view> {
+  auto format(tr::StateType stateType, std::format_context& ctx) const {
+    std::string_view name;
     switch (stateType) {
       case tr::StateType::Action:
         name = "Action";
@@ -84,30 +87,27 @@ struct fmt::formatter<tr::StateType> : fmt::formatter<std::string> {
         name = "Range";
         break;
     }
-    return fmt::formatter<std::string>::format(name, ctx);
+    return std::formatter<std::string_view>::format(name, ctx);
   }
 };
 
 // Custom fmt formatter for Action
 template <>
-struct fmt::formatter<tr::Action> {
-  constexpr auto parse(fmt::format_parse_context& ctx) {
-    return ctx.begin();
-  }
-
-  auto format(const tr::Action& action, fmt::format_context& ctx) {
+struct std::formatter<tr::Action> : std::formatter<std::string> {
+  auto format(const tr::Action& action, std::format_context& ctx) const {
     std::string valueStr = std::visit(
         [](const auto& value) -> std::string {
           if constexpr (std::is_same_v<decltype(value), bool>) {
             return value ? "true" : "false";
           } else if constexpr (std::is_same_v<decltype(value), float>) {
-            return fmt::format("{:.2f}", value);
+            return std::format("{:.2f}", value);
+          } else {
+            return "unknown";
           }
-          return "unknown";
         },
         action.value);
 
-    return fmt::format_to(ctx.out(),
+    return std::format_to(ctx.out(),
                           "Action {{ actionType: {}, stateType: {}, value: {} }}",
                           action.actionType,
                           action.stateType,

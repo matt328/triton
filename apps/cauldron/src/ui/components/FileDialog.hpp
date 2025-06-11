@@ -68,7 +68,7 @@ struct FilterItem {
   std::string displayName;
 
   [[nodiscard]] auto getString() const -> std::string {
-    return fmt::format("{} (*{})", displayName, filter);
+    return std::format("{} (*{})", displayName, filter);
   }
 };
 

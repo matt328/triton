@@ -53,15 +53,6 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(EnTT)
 
-# fmt
-FetchContent_Declare(
-  fmt
-  GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-  GIT_TAG ${FMT_VERSION}
-  SYSTEM
-)
-FetchContent_MakeAvailable(fmt)
-
 # glfw
 set(GLFW_BUILD_WAYLAND OFF)
 set(GLFW_BUILD_X11 ON)
@@ -141,6 +132,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(readerwriterqueue)
 
 # spdlog
+set(SPDLOG_USE_STD_FORMAT ON)
 FetchContent_Declare(
   spdlog
   GIT_REPOSITORY https://github.com/gabime/spdlog.git

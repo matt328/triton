@@ -1,17 +1,19 @@
 #pragma once
 
 #include "r3/ComponentIds.hpp"
+#include "r3/graph/IGraphInfoProvider.hpp"
 namespace tr {
 
 class Frame;
 class BufferSystem;
 
-class IDispatchContext {
+class IDispatchContext : public IGraphInfoProvider {
 public:
   explicit IDispatchContext(ContextId newId, std::shared_ptr<BufferSystem> newBufferSystem)
       : id{newId}, bufferSystem{std::move(newBufferSystem)} {
   }
-  virtual ~IDispatchContext() = default;
+
+  ~IDispatchContext() override = default;
 
   IDispatchContext(const IDispatchContext&) = default;
   IDispatchContext(IDispatchContext&&) = delete;

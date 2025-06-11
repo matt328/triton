@@ -26,6 +26,8 @@ public:
 
   auto getPushConstantSize() -> size_t override;
 
+  [[nodiscard]] auto getGraphInfo() const -> PassGraphInfo override;
+
 private:
   struct PushConstants {
     uint32_t objectCount;

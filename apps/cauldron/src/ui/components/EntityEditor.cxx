@@ -108,7 +108,7 @@ void EntityEditor::render() {
           const auto terrainId = terrainData->entityId;
           static size_t selectedChunkIndex = 0;
           const auto chunkLabel =
-              fmt::format("Chunk ({},{},{})",
+              std::format("Chunk ({},{},{})",
                           terrainData->chunkData[selectedChunkIndex].location.x,
                           terrainData->chunkData[selectedChunkIndex].location.y,
                           terrainData->chunkData[selectedChunkIndex].location.z);
@@ -199,7 +199,7 @@ void EntityEditor::createAnimatedEntityDialog() const {
 
     for (int i = 0; i < dialog.getValue<int>("count"); ++i) {
       dataFacade->createAnimatedModel(EntityData{
-          .name = fmt::format("{} {}", dialog.getValue<std::string>("name").value(), i),
+          .name = std::format("{} {}", dialog.getValue<std::string>("name").value(), i),
           .orientation = Orientation{.position = glm::vec3{dis(gen), dis(gen), dis(gen)}},
           .modelName = dialog.getValue<std::string>("model").value(),
           .skeleton = dialog.getValue<std::string>("skeleton").value(),
@@ -248,7 +248,7 @@ void EntityEditor::createStaticEntityDialog() const {
     std::uniform_real_distribution<float> dis(-5.f, 5.f);
     for (int i = 0; i < dialog.getValue<int>("count"); ++i) {
       dataFacade->createStaticModel(EntityData{
-          .name = fmt::format("{} {}", dialog.getValue<std::string>("name").value(), i),
+          .name = std::format("{} {}", dialog.getValue<std::string>("name").value(), i),
           .orientation = Orientation{.position = glm::vec3{dis(gen), dis(gen), dis(gen)}},
           .modelName = dialog.getValue<std::string>("model").value(),
           .skeleton = "",

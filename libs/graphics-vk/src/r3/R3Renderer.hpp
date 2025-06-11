@@ -23,6 +23,7 @@ class GeometryAllocator;
 class ContextFactory;
 class ImageManager;
 class Frame;
+class ResourceAliasRegistry;
 
 namespace queue {
 class Graphics;
@@ -62,7 +63,8 @@ public:
              std::shared_ptr<GeometryBufferPack> newGeometryBufferPack,
              std::shared_ptr<FrameState> newFrameState,
              std::shared_ptr<GeometryAllocator> newGeometryAllocator,
-             std::shared_ptr<GeometryHandleMapper> newGeometryHandleMapper);
+             std::shared_ptr<GeometryHandleMapper> newGeometryHandleMapper,
+             std::shared_ptr<ResourceAliasRegistry> newAliasRegistry);
   ~R3Renderer() override = default;
 
   R3Renderer(const R3Renderer&) = delete;
@@ -89,6 +91,7 @@ private:
   std::shared_ptr<FrameState> frameState;
   std::shared_ptr<GeometryAllocator> geometryAllocator;
   std::shared_ptr<GeometryHandleMapper> geometryHandleMapper;
+  std::shared_ptr<ResourceAliasRegistry> aliasRegistry;
 
   std::vector<vk::CommandBuffer> buffers;
 

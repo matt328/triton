@@ -63,7 +63,7 @@ private:
 
   std::unordered_map<PassId, std::unique_ptr<IRenderPass>> passes;
 
-  std::vector<PassId> sortedPasses{};
+  std::vector<PassId> sortedPasses;
   std::unordered_map<PassId, std::vector<ImageBarrierData>> imageBarriers;
   std::unordered_map<PassId, std::vector<BufferBarrierData>> bufferBarriers;
 };

@@ -19,4 +19,10 @@ auto ForwardDrawContext::dispatch([[maybe_unused]] const Frame* frame,
 auto ForwardDrawContext::getPushConstantSize() -> size_t {
   return sizeof(0);
 }
+
+[[nodiscard]] auto ForwardDrawContext::getGraphInfo() const -> PassGraphInfo {
+  auto pgInfo = PassGraphInfo{};
+
+  return pgInfo;
+}
 }
