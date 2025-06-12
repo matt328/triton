@@ -148,21 +148,14 @@ auto ForwardGraphicsPass::registerDispatchContext(Handle<IDispatchContext> handl
                                      vk::ClearDepthStencilValue{.depth = 1.0f, .stencil = 0}},
           }}};
 
-  auto passGraphInfo = PassGraphInfo{};
-
   for (const auto& handle : drawableContexts) {
     const auto& dispatchContext = drawContextFactory->getDispatchContext(handle);
     const auto contextInfo = dispatchContext->getGraphInfo();
-    passGraphInfo.bufferReads.insert(contextInfo.bufferReads.begin(),
-                                     contextInfo.bufferReads.end());
-    passGraphInfo.bufferWrites.insert(contextInfo.bufferWrites.begin(),
-                                      contextInfo.bufferWrites.end());
-    passGraphInfo.imageReads.insert(contextInfo.imageReads.begin(), contextInfo.imageReads.end());
-    passGraphInfo.imageWrites.insert(contextInfo.imageWrites.begin(),
-                                     contextInfo.imageWrites.end());
+    graphInfo.bufferReads.insert(contextInfo.bufferReads.begin(), contextInfo.bufferReads.end());
+    graphInfo.bufferWrites.insert(contextInfo.bufferWrites.begin(), contextInfo.bufferWrites.end());
+    graphInfo.imageReads.insert(contextInfo.imageReads.begin(), contextInfo.imageReads.end());
+    graphInfo.imageWrites.insert(contextInfo.imageWrites.begin(), contextInfo.imageWrites.end());
   }
-
-  return passGraphInfo;
 
   return graphInfo;
 }

@@ -10,6 +10,7 @@ public:
   }
 
   auto addEdge(const T& from, const T& to) -> void {
+    Log.trace("addEdge() from={}, to={}", from, to);
     addNode(from);
     addNode(to);
     adjacencyList[from].insert(to);
@@ -44,6 +45,10 @@ public:
     }
 
     return result;
+  }
+
+  auto hasEdge(const T& from, const T& to) -> bool {
+    return adjacencyList.contains(from) && adjacencyList.at(from).contains(to);
   }
 
 private:

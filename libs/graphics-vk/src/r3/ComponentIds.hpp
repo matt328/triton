@@ -5,7 +5,8 @@ namespace tr {
 enum class PassId : uint8_t {
   Culling = 0,
   Forward,
-  Composition
+  Composition,
+  PostProcessing,
 };
 
 enum class ContextId : uint8_t {
@@ -32,6 +33,9 @@ struct std::formatter<tr::PassId> {
         break;
       case tr::PassId::Composition:
         name = "Composition";
+        break;
+      case tr::PassId::PostProcessing:
+        name = "PostProcessing";
         break;
     }
     return std::format_to(ctx.out(), "{}", name);

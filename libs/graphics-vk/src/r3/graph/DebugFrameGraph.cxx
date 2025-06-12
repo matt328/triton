@@ -5,6 +5,7 @@
 #include "r3/graph/ResourceAliasRegistry.hpp"
 #include "r3/render-pass/IRenderPass.hpp"
 #include "vk/core/Swapchain.hpp"
+#include "PassGraphBuilder.hpp"
 
 namespace tr {
 
@@ -37,54 +38,10 @@ auto DebugFrameGraph::getPass(PassId id) -> std::unique_ptr<IRenderPass>& {
 /// Relatively expensive and sloppy, so don't call every frame
 auto DebugFrameGraph::bake() -> void {
   // Use a DAG to order passes so that writes
-  auto graph = DirectedGraph<PassId>{};
-  auto lastWriter = std::unordered_map<ImageAlias, PassId>{};
-  auto lastWriterBuffers = std::unordered_map<BufferAlias, PassId>{};
-  for (const auto& [id, pass] : passes) {
-    const auto& info = pass->getGraphInfo();
+  const auto builder = PassGraphBuilder{};
+  auto graph = builder.build(passes);
 
-    Log.trace("Processing Pass {} with PassGraphInfo={}", id, info);
-
-    const auto processImages = [&](const auto& usageList, bool isWrite) {
-      for (const auto& usage : usageList) {
-        auto alias = usage.alias;
-
-        if (isWrite) {
-          if (lastWriter.contains(alias)) {
-            graph.addEdge(lastWriter[alias], id);
-          }
-          lastWriter[alias] = id;
-        } else {
-          if (lastWriter.contains(alias)) {
-            graph.addEdge(lastWriter[alias], id);
-          }
-        }
-      }
-    };
-
-    const auto processBuffers = [&](const auto& usageList, bool isWrite) {
-      for (const auto& usage : usageList) {
-        auto alias = usage.alias;
-
-        if (isWrite) {
-          if (lastWriterBuffers.contains(alias)) {
-            graph.addEdge(lastWriterBuffers[alias], id);
-          }
-          lastWriterBuffers[alias] = id;
-        } else {
-          if (lastWriterBuffers.contains(alias)) {
-            graph.addEdge(lastWriterBuffers[alias], id);
-          }
-        }
-      }
-    };
-
-    // Need to split out separate process functions for images and buffers
-    processImages(info.imageReads, false);
-    processImages(info.imageWrites, true);
-    processBuffers(info.bufferReads, false);
-    processBuffers(info.bufferWrites, true);
-  }
+  sortedPasses = graph.topologicalSort();
 
   auto imageStates = std::unordered_map<ImageAlias, ImageState>{};
   auto bufferStates = std::unordered_map<BufferAlias, BufferState>{};

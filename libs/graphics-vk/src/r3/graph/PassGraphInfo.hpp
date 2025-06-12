@@ -18,6 +18,21 @@ struct PassGraphInfo {
 template <typename Set, typename Context>
 auto format_set(const Set& s, Context& ctx) {
   auto out = ctx.out();
+  using T = typename Set::value_type;
+  std::formatter<T> formatter;
+  for (auto it = s.begin(); it != s.end(); ++it) {
+    out = std::format_to(out, "\n    ");
+    out = formatter.format(*it, ctx);
+  }
+  if (!s.empty()) {
+    out = std::format_to(out, "\n  ");
+  }
+  return out;
+}
+
+template <typename Set, typename Context>
+auto format_set2(const Set& s, Context& ctx) {
+  auto out = ctx.out();
   bool first = true;
   for (const auto& elem : s) {
     if (!first) {
