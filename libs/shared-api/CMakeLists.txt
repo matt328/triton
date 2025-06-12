@@ -36,7 +36,6 @@ target_link_libraries(${PROJECT_NAME}
   INTERFACE
   glm
   ozz_animation
-  fmt
   asset-forge
 )
 

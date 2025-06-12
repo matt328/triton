@@ -1,4 +1,6 @@
 set(test_SRC
+  ../src/r3/graph/DebugFrameGraph.cxx
+  ../src/r3/graph/PassGraphBuilder.cxx
   DebugFrameGraphTest.cxx
 )
 
@@ -7,6 +9,7 @@ add_executable(graphics-vk-test ${test_SRC})
 target_compile_definitions(graphics-vk-test
   PRIVATE
   GLM_ENABLE_EXPERIMENTAL
+  VULKAN_HPP_NO_CONSTRUCTORS
 )
 
 target_precompile_headers(graphics-vk-test

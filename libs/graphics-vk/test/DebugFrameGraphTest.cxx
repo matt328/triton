@@ -77,4 +77,41 @@ TEST_CASE("PassGraphBuilder builds correct dependency graph", "[PassGraphBuilder
   REQUIRE_FALSE(graph.hasEdge(PassId::Forward, PassId::PostProcessing));
   REQUIRE_FALSE(graph.hasEdge(PassId::Culling, PassId::Composition));
 }
+
+TEST_CASE("PassGraphBuilder connects last writer for reads and writes") {
+  initLogger(spdlog::level::trace, spdlog::level::trace);
+  // Culling writes GeometryColorImage
+  auto passA = std::make_unique<MockRenderPass>(
+      PassId::Culling,
+      PassGraphInfo{
+          .imageWrites = {ImageUsageInfo{.alias = ImageAlias::GeometryColorImage}},
+      });
+
+  // Forward reads GeometryColorImage (should depend on A)
+  auto passB = std::make_unique<MockRenderPass>(
+      PassId::Forward,
+      PassGraphInfo{
+          .imageReads = {ImageUsageInfo{.alias = ImageAlias::GeometryColorImage}},
+      });
+
+  // Composition also writes GeometryColorImage (should depend on A)
+  auto passC = std::make_unique<MockRenderPass>(
+      PassId::Composition,
+      PassGraphInfo{
+          .imageWrites = {ImageUsageInfo{.alias = ImageAlias::GeometryColorImage}},
+      });
+
+  std::unordered_map<PassId, std::unique_ptr<IRenderPass>> passes;
+  passes.emplace(PassId::Culling, std::move(passA));
+  passes.emplace(PassId::Forward, std::move(passB));
+  passes.emplace(PassId::Composition, std::move(passC));
+
+  // Act
+  auto graph = PassGraphBuilder{}.build(passes);
+
+  // Assert
+  REQUIRE(graph.hasEdge(PassId::Culling, PassId::Forward));     // Writer → Reader
+  REQUIRE(graph.hasEdge(PassId::Culling, PassId::Composition)); // Writer → Writer
+}
+
 }

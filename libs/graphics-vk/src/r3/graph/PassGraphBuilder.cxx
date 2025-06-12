@@ -24,14 +24,15 @@ auto PassGraphBuilder::build(const std::unordered_map<PassId, std::unique_ptr<IR
               // Connect to all prior readers (deferred edge)
               if (pendingReadersMap.contains(alias)) {
                 for (PassId readerId : pendingReadersMap[alias]) {
-                  graph.addEdge(readerId, id);
+                  graph.addEdge(id, readerId);
                 }
                 pendingReadersMap.erase(alias);
               }
 
               // Connect to last writer
               if (lastWriterMap.contains(alias)) {
-                graph.addEdge(lastWriterMap[alias], id);
+                Log.trace("addingEdge for lastWriter");
+                graph.addEdge(id, lastWriterMap[alias]);
               }
 
               lastWriterMap[alias] = id;
@@ -39,7 +40,8 @@ auto PassGraphBuilder::build(const std::unordered_map<PassId, std::unique_ptr<IR
             } else {
               // Connect to last writer
               if (lastWriterMap.contains(alias)) {
-                graph.addEdge(lastWriterMap[alias], id);
+                Log.trace("addingEdge for last write #2");
+                graph.addEdge(id, lastWriterMap[alias]);
               } else {
                 // No writer yet — defer connection
                 pendingReadersMap[alias].push_back(id);
