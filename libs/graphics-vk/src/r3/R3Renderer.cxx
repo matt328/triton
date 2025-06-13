@@ -19,7 +19,6 @@
 
 namespace tr {
 
-// TODO(tomorrow): Finish filling out ForwardPass and Cube DrawContext's graphInfo
 const std::unordered_map<ContextId, std::vector<PassId>> GraphicsMap = {
     {ContextId::Cube, {PassId::Forward}}};
 
@@ -72,9 +71,13 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
   */
   createGlobalBuffers();
   createGlobalImages();
-  createComputeCullingPass();
-  createForwardRenderPass();
-  // createCompositionRenderPass();
+  auto cullingPass = createComputeCullingPass();
+  auto forwardPass = createForwardRenderPass();
+  auto compositionPass = createCompositionRenderPass();
+
+  frameGraph->addPass(std::move(cullingPass));
+  frameGraph->addPass(std::move(forwardPass));
+  frameGraph->addPass(std::move(compositionPass));
 
   const auto forwardDrawCreateInfo = ForwardDrawContextCreateInfo{
       .viewport = vk::Viewport{.width = static_cast<float>(rendererConfig.initialWidth),
@@ -323,7 +326,7 @@ auto R3Renderer::endFrame(const Frame* frame, const FrameGraphResult& results) -
 void R3Renderer::waitIdle() {
 }
 
-auto R3Renderer::createComputeCullingPass() -> void {
+auto R3Renderer::createComputeCullingPass() -> std::unique_ptr<IRenderPass> {
 
   const auto pipelineLayoutInfo =
       PipelineLayoutInfo{.pushConstantInfoList = {PushConstantInfo{
@@ -358,10 +361,10 @@ auto R3Renderer::createComputeCullingPass() -> void {
       .queueConfigs = {QueueConfig{.queueType = QueueType::Graphics, .uses = cmdBufferUses}}};
   commandBufferManager->allocateCommandBuffers(commandBufferInfo);
 
-  frameGraph->addPass(std::move(cullingPass));
+  return cullingPass;
 }
 
-auto R3Renderer::createForwardRenderPass() -> void {
+auto R3Renderer::createForwardRenderPass() -> std::unique_ptr<IRenderPass> {
   auto forwardPass = renderPassFactory->createRenderPass(RenderPassCreateInfo{
       .passId = PassId::Forward,
       .passInfo = ForwardPassCreateInfo{.colorImage = ImageAlias::GeometryColorImage,
@@ -380,10 +383,10 @@ auto R3Renderer::createForwardRenderPass() -> void {
 
   commandBufferManager->allocateCommandBuffers(commandBufferInfo);
 
-  frameGraph->addPass(std::move(forwardPass));
+  return forwardPass;
 }
 
-auto R3Renderer::createCompositionRenderPass() -> void {
+auto R3Renderer::createCompositionRenderPass() -> std::unique_ptr<IRenderPass> {
   auto compositionPass = renderPassFactory->createRenderPass(RenderPassCreateInfo{
       .passId = PassId::Composition,
       .passInfo = CompositionPassCreateInfo{},
@@ -402,6 +405,6 @@ auto R3Renderer::createCompositionRenderPass() -> void {
 
   commandBufferManager->allocateCommandBuffers(commandBufferInfo);
 
-  frameGraph->addPass(std::move(compositionPass));
+  return compositionPass;
 }
 }

@@ -24,6 +24,7 @@ class ContextFactory;
 class ImageManager;
 class Frame;
 class ResourceAliasRegistry;
+class IRenderPass;
 
 namespace queue {
 class Graphics;
@@ -102,9 +103,9 @@ private:
 
   auto createGlobalBuffers() -> void;
   auto createGlobalImages() -> void;
-  auto createComputeCullingPass() -> void;
-  auto createForwardRenderPass() -> void;
-  auto createCompositionRenderPass() -> void;
+  auto createComputeCullingPass() -> std::unique_ptr<IRenderPass>;
+  auto createForwardRenderPass() -> std::unique_ptr<IRenderPass>;
+  auto createCompositionRenderPass() -> std::unique_ptr<IRenderPass>;
   auto endFrame(const Frame* frame, const FrameGraphResult& result) -> void;
 
   auto buildFrameState(std::vector<GpuObjectData>& objectData,

@@ -1,7 +1,8 @@
 set(test_SRC
   ../src/r3/graph/DebugFrameGraph.cxx
   ../src/r3/graph/PassGraphBuilder.cxx
-  DebugFrameGraphTest.cxx
+  ../src/r3/graph/BarrierGenerator.cxx
+  BarrierGeneratorTest.cxx
 )
 
 add_executable(graphics-vk-test ${test_SRC})
@@ -76,7 +77,7 @@ target_include_directories(graphics-vk-test
 )
 
 add_custom_target(run_coverage2
-  COMMAND ${CMAKE_COMMAND} --build . --target ccov-all-export
+  COMMAND ${CMAKE_COMMAND} --build . --target ccov-graphics-vk-test-export
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
   COMMENT "Running code coverage export"
 )

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gfx/IFrameGraph.hpp"
+#include "r3/graph/BarrierData.hpp"
 #include "r3/render-pass/IRenderPass.hpp"
 #include "task/Frame.hpp"
 
@@ -20,16 +21,6 @@ struct ImageState {
 struct BufferState {
   vk::AccessFlags2 accessFlags;
   vk::PipelineStageFlags2 stageFlags;
-};
-
-struct ImageBarrierData {
-  vk::ImageMemoryBarrier2 imageBarrier;
-  ImageAlias alias;
-};
-
-struct BufferBarrierData {
-  vk::BufferMemoryBarrier2 bufferBarrier;
-  BufferAlias alias;
 };
 
 class DebugFrameGraph : public IFrameGraph {

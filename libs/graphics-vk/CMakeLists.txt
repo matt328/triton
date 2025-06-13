@@ -6,6 +6,7 @@ set(graphicsvk_SRC
   src/r3/graph/DebugFrameGraph.cxx
   src/r3/graph/ResourceAliasRegistry.cxx
   src/r3/graph/PassGraphBuilder.cxx
+  src/r3/graph/BarrierGenerator.cxx
 
   src/r3/render-pass/RenderPassFactory.cxx
   src/r3/render-pass/PipelineFactory.cxx
