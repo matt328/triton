@@ -73,11 +73,11 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
   createGlobalImages();
   auto cullingPass = createComputeCullingPass();
   auto forwardPass = createForwardRenderPass();
-  auto compositionPass = createCompositionRenderPass();
+  // auto compositionPass = createCompositionRenderPass();
 
   frameGraph->addPass(std::move(cullingPass));
   frameGraph->addPass(std::move(forwardPass));
-  frameGraph->addPass(std::move(compositionPass));
+  // frameGraph->addPass(std::move(compositionPass));
 
   const auto forwardDrawCreateInfo = ForwardDrawContextCreateInfo{
       .viewport = vk::Viewport{.width = static_cast<float>(rendererConfig.initialWidth),
@@ -129,35 +129,43 @@ auto R3Renderer::createGlobalBuffers() -> void {
                        .initialSize = 20480,
                        .debugName = "DrawCommands",
                        .indirect = true});
+  aliasRegistry->setHandle(BufferAlias::IndirectCommand, globalBuffers.drawCommands);
 
   globalBuffers.drawCounts = bufferSystem->registerPerFrameBuffer(
       BufferCreateInfo{.bufferLifetime = BufferLifetime::Transient,
                        .initialSize = 64,
                        .debugName = "DrawCounts",
                        .indirect = true});
+  aliasRegistry->setHandle(BufferAlias::IndirectCommandCount, globalBuffers.drawCounts);
 
   globalBuffers.drawMetadata = bufferSystem->registerPerFrameBuffer(
       BufferCreateInfo{.bufferLifetime = BufferLifetime::Transient, .debugName = "DrawMetadata"});
+  aliasRegistry->setHandle(BufferAlias::IndirectMetaData, globalBuffers.drawMetadata);
 
   globalBuffers.objectData = bufferSystem->registerPerFrameBuffer(
       BufferCreateInfo{.bufferLifetime = BufferLifetime::Transient,
                        .debugName = "Buffer-ObjectData"});
+  aliasRegistry->setHandle(BufferAlias::ObjectData, globalBuffers.objectData);
 
   globalBuffers.objectPositions = bufferSystem->registerPerFrameBuffer(
       BufferCreateInfo{.bufferLifetime = BufferLifetime::Transient,
                        .debugName = "Buffer-ObjectPositions"});
+  aliasRegistry->setHandle(BufferAlias::ObjectPositions, globalBuffers.objectPositions);
 
   globalBuffers.objectRotations = bufferSystem->registerPerFrameBuffer(
       BufferCreateInfo{.bufferLifetime = BufferLifetime::Transient,
                        .debugName = "Buffer-ObjectRotations"});
+  aliasRegistry->setHandle(BufferAlias::ObjectRotations, globalBuffers.objectRotations);
 
   globalBuffers.objectScales = bufferSystem->registerPerFrameBuffer(
       BufferCreateInfo{.bufferLifetime = BufferLifetime::Transient,
                        .debugName = "Buffer-ObjectScales"});
+  aliasRegistry->setHandle(BufferAlias::ObjectScales, globalBuffers.objectScales);
 
   globalBuffers.geometryRegion = bufferSystem->registerPerFrameBuffer(
       BufferCreateInfo{.bufferLifetime = BufferLifetime::Transient,
                        .debugName = "Buffer-GeometryRegion"});
+  aliasRegistry->setHandle(BufferAlias::GeometryRegion, globalBuffers.geometryRegion);
 }
 
 auto R3Renderer::createGlobalImages() -> void {

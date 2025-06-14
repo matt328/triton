@@ -31,7 +31,8 @@ CullingPass::CullingPass(std::shared_ptr<ContextFactory> newContextFactory,
                                                      .pipelineLayoutInfo = pipelineLayoutInfo,
                                                      .shaderStageInfo = {shaderStageInfo}};
 
-  auto [layout, pipeline] = pipelineFactory->createPipeline(pipelineCreateInfo);
+  std::tie(this->pipelineLayout, this->pipeline) =
+      pipelineFactory->createPipeline(pipelineCreateInfo);
 }
 
 auto CullingPass::getId() const -> PassId {
@@ -39,7 +40,6 @@ auto CullingPass::getId() const -> PassId {
 }
 
 auto CullingPass::execute(const Frame* frame, vk::raii::CommandBuffer& cmdBuffer) -> void {
-  cmdBuffer.begin(vk::CommandBufferBeginInfo{});
   cmdBuffer.bindPipeline(vk::PipelineBindPoint::eCompute, *pipeline);
 
   for (const auto& handle : dispatchableContexts) {
@@ -47,8 +47,6 @@ auto CullingPass::execute(const Frame* frame, vk::raii::CommandBuffer& cmdBuffer
     dispatchContext->bind(frame, cmdBuffer, *pipelineLayout);
     dispatchContext->dispatch(frame, cmdBuffer);
   }
-
-  cmdBuffer.end();
 }
 
 auto CullingPass::registerDispatchContext(Handle<IDispatchContext> handle) -> void {

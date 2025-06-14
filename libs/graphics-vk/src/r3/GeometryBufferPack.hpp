@@ -5,6 +5,7 @@
 namespace tr {
 
 class BufferSystem;
+class ResourceAliasRegistry;
 class IBufferAllocator;
 
 constexpr size_t IndexBufferInitialSize = 1024000;
@@ -16,7 +17,8 @@ constexpr size_t AnimationBufferInitialSize = 1024000;
 
 class GeometryBufferPack {
 public:
-  explicit GeometryBufferPack(const std::shared_ptr<BufferSystem>& bufferSystem);
+  GeometryBufferPack(const std::shared_ptr<BufferSystem>& bufferSystem,
+                     const std::shared_ptr<ResourceAliasRegistry>& aliasRegistry);
   ~GeometryBufferPack() = default;
 
   GeometryBufferPack(const GeometryBufferPack&) = delete;

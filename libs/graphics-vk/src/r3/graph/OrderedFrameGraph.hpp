@@ -5,9 +5,17 @@
 
 namespace tr {
 
+class CommandBufferManager;
+class ResourceAliasRegistry;
+class ImageManager;
+class BufferSystem;
+
 class OrderedFrameGraph : public IFrameGraph {
 public:
-  OrderedFrameGraph() = default;
+  OrderedFrameGraph(std::shared_ptr<CommandBufferManager> newCommandBufferManager,
+                    std::shared_ptr<ResourceAliasRegistry> newAliasRegistry,
+                    std::shared_ptr<ImageManager> newImageManager,
+                    std::shared_ptr<BufferSystem> newBufferSystem);
   ~OrderedFrameGraph() override = default;
 
   OrderedFrameGraph(const OrderedFrameGraph&) = delete;
@@ -24,6 +32,11 @@ public:
   auto execute(const Frame* frame) -> FrameGraphResult override;
 
 private:
+  std::shared_ptr<CommandBufferManager> commandBufferManager;
+  std::shared_ptr<ResourceAliasRegistry> aliasRegistry;
+  std::shared_ptr<ImageManager> imageManager;
+  std::shared_ptr<BufferSystem> bufferSystem;
+
   std::vector<std::unique_ptr<IRenderPass>> renderPasses;
   std::unordered_map<PassId, size_t> passesById;
   std::unique_ptr<BarrierPlan> barrierPlan;

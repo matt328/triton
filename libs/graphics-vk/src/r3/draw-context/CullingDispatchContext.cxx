@@ -1,5 +1,3 @@
-#include <utility>
-
 #include "CullingDispatchContext.hpp"
 #include "buffers/BufferSystem.hpp"
 #include "task/Frame.hpp"
@@ -11,7 +9,7 @@ constexpr uint32_t WorkgroupSize = 64;
 CullingDispatchContext::CullingDispatchContext(ContextId newId,
                                                std::shared_ptr<BufferSystem> newBufferSystem,
                                                CullingDispatchContextCreateInfo newCreateInfo)
-    : IDispatchContext{std::move(newId), std::move(newBufferSystem)}, createInfo{newCreateInfo} {
+    : IDispatchContext{newId, std::move(newBufferSystem)}, createInfo{newCreateInfo} {
 }
 
 auto CullingDispatchContext::bind(const Frame* frame,
@@ -110,27 +108,27 @@ auto CullingDispatchContext::getPushConstantSize() -> size_t {
                           .stageFlags = vk::PipelineStageFlagBits2::eComputeShader,
                       },
                       BufferUsageInfo{
-                          .alias = BufferAlias::IndexData,
+                          .alias = GlobalBufferAlias::Index,
                           .accessFlags = vk::AccessFlagBits2::eShaderRead,
                           .stageFlags = vk::PipelineStageFlagBits2::eComputeShader,
                       },
                       BufferUsageInfo{
-                          .alias = BufferAlias::VertexPositions,
+                          .alias = GlobalBufferAlias::Position,
                           .accessFlags = vk::AccessFlagBits2::eShaderRead,
                           .stageFlags = vk::PipelineStageFlagBits2::eComputeShader,
                       },
                       BufferUsageInfo{
-                          .alias = BufferAlias::VertexNormal,
+                          .alias = GlobalBufferAlias::Normal,
                           .accessFlags = vk::AccessFlagBits2::eShaderRead,
                           .stageFlags = vk::PipelineStageFlagBits2::eComputeShader,
                       },
                       BufferUsageInfo{
-                          .alias = BufferAlias::VertexTexCoord,
+                          .alias = GlobalBufferAlias::TexCoord,
                           .accessFlags = vk::AccessFlagBits2::eShaderRead,
                           .stageFlags = vk::PipelineStageFlagBits2::eComputeShader,
                       },
                       BufferUsageInfo{
-                          .alias = BufferAlias::VertexColor,
+                          .alias = GlobalBufferAlias::Color,
                           .accessFlags = vk::AccessFlagBits2::eShaderRead,
                           .stageFlags = vk::PipelineStageFlagBits2::eComputeShader,
                       }},

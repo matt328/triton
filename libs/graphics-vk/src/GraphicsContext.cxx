@@ -1,6 +1,7 @@
 #include "gfx/GraphicsContext.hpp"
 #include "FrameState.hpp"
 #include "r3/GeometryBufferPack.hpp"
+#include "r3/graph/OrderedFrameGraph.hpp"
 #include "r3/graph/ResourceAliasRegistry.hpp"
 #include "resources/DefaultAssetSystem.hpp"
 #include "DefaultDebugManager.hpp"
@@ -97,7 +98,7 @@ auto GraphicsContext::create(std::shared_ptr<IEventQueue> newEventQueue,
                         di::bind<VkResourceManager>.to<VkResourceManager>(),
                         di::bind<IFrameManager>.to<DefaultFrameManager>(),
                         di::bind<IRenderContext>.to<R3Renderer>(),
-                        di::bind<IFrameGraph>.to<DebugFrameGraph>(),
+                        di::bind<IFrameGraph>.to<OrderedFrameGraph>(),
                         di::bind<PipelineFactory>.to<PipelineFactory>(),
                         di::bind<ImageManager>.to<ImageManager>(),
                         di::bind<BufferSystem>.to<BufferSystem>(),

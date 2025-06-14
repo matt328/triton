@@ -3,16 +3,15 @@ project("graphics-vk")
 set(graphicsvk_SRC
   src/r3/R3Renderer.cxx
   src/r3/GeometryBufferPack.cxx
-  src/r3/graph/DebugFrameGraph.cxx
+  src/r3/graph/OrderedFrameGraph.cxx
   src/r3/graph/ResourceAliasRegistry.cxx
-  src/r3/graph/PassGraphBuilder.cxx
   src/r3/graph/BarrierGenerator.cxx
 
   src/r3/render-pass/RenderPassFactory.cxx
   src/r3/render-pass/PipelineFactory.cxx
   src/r3/render-pass/ForwardGraphicsPass.cxx
   src/r3/render-pass/CullingPass.cxx
-  
+
   src/r3/draw-context/ContextFactory.cxx
   src/r3/draw-context/CullingDispatchContext.cxx
   src/r3/draw-context/ForwardDrawContext.cxx

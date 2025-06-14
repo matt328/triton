@@ -44,7 +44,15 @@ auto BarrierGenerator::build(const std::vector<std::unique_ptr<IRenderPass>>& pa
                                                     .dstStageMask = write.stageFlags,
                                                     .dstAccessMask = write.accessFlags,
                                                     .oldLayout = last.layout,
-                                                    .newLayout = write.layout},
+                                                    .newLayout = write.layout,
+                                                    .subresourceRange =
+                                                        vk::ImageSubresourceRange{
+                                                            .aspectMask = write.aspectFlags,
+                                                            .baseMipLevel = 0,
+                                                            .levelCount = 1,
+                                                            .baseArrayLayer = 0,
+                                                            .layerCount = 1,
+                                                        }},
             .alias = alias,
         });
       }
@@ -63,7 +71,8 @@ auto BarrierGenerator::build(const std::vector<std::unique_ptr<IRenderPass>>& pa
             .bufferBarrier = vk::BufferMemoryBarrier2{.srcStageMask = last.stageMask,
                                                       .srcAccessMask = last.accessMask,
                                                       .dstStageMask = read.stageFlags,
-                                                      .dstAccessMask = read.accessFlags},
+                                                      .dstAccessMask = read.accessFlags,
+                                                      .size = vk::WholeSize},
             .alias = alias,
         });
       }
@@ -81,7 +90,8 @@ auto BarrierGenerator::build(const std::vector<std::unique_ptr<IRenderPass>>& pa
             .bufferBarrier = vk::BufferMemoryBarrier2{.srcStageMask = last.stageMask,
                                                       .srcAccessMask = last.accessMask,
                                                       .dstStageMask = write.stageFlags,
-                                                      .dstAccessMask = write.accessFlags},
+                                                      .dstAccessMask = write.accessFlags,
+                                                      .size = vk::WholeSize},
             .alias = alias,
         });
       }

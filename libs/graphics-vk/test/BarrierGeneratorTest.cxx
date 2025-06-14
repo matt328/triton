@@ -18,6 +18,13 @@ TEST_CASE("BarrierGenerator generates correct image and buffer barriers") {
               .aspectFlags = vk::ImageAspectFlagBits::eColor,
               .layout = vk::ImageLayout::eColorAttachmentOptimal,
           }},
+          .imageReads = {ImageUsageInfo{
+              .alias = ImageAlias::DepthImage,
+              .accessFlags = vk::AccessFlagBits2::eShaderRead,
+              .stageFlags = vk::PipelineStageFlagBits2::eComputeShader,
+              .aspectFlags = vk::ImageAspectFlagBits::eColor,
+              .layout = vk::ImageLayout::eShaderReadOnlyOptimal,
+          }},
           .bufferWrites = {{
               .alias = BufferAlias::IndirectCommand,
               .accessFlags = vk::AccessFlagBits2::eVertexAttributeRead,
@@ -29,6 +36,13 @@ TEST_CASE("BarrierGenerator generates correct image and buffer barriers") {
   auto passB = std::make_unique<MockRenderPass>(
       PassId::Forward,
       PassGraphInfo{
+          .imageWrites = {ImageUsageInfo{
+              .alias = ImageAlias::DepthImage,
+              .accessFlags = vk::AccessFlagBits2::eDepthStencilAttachmentWrite,
+              .stageFlags = vk::PipelineStageFlagBits2::eColorAttachmentOutput,
+              .aspectFlags = vk::ImageAspectFlagBits::eColor,
+              .layout = vk::ImageLayout::eColorAttachmentOptimal,
+          }},
           .imageReads = {ImageUsageInfo{
               .alias = ImageAlias::GeometryColorImage,
               .accessFlags = vk::AccessFlagBits2::eShaderRead,
@@ -51,7 +65,7 @@ TEST_CASE("BarrierGenerator generates correct image and buffer barriers") {
 
   SECTION("Forward pass has image barrier from Culling") {
     auto& imageBarriers = plan.imageBarriers[PassId::Forward];
-    REQUIRE(imageBarriers.size() == 1);
+    REQUIRE(imageBarriers.size() == 2);
     const auto& barrier = imageBarriers[0];
     REQUIRE(barrier.alias == ImageAlias::GeometryColorImage);
     REQUIRE(barrier.imageBarrier.srcAccessMask == vk::AccessFlagBits2::eColorAttachmentWrite);
@@ -69,5 +83,4 @@ TEST_CASE("BarrierGenerator generates correct image and buffer barriers") {
     REQUIRE(barrier.bufferBarrier.dstAccessMask == vk::AccessFlagBits2::eVertexAttributeRead);
   }
 }
-
 }

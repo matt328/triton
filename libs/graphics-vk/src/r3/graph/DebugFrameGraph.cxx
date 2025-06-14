@@ -182,7 +182,7 @@ auto DebugFrameGraph::bake() -> void {
       for (const auto& barrier : it->second) {
         const auto& b = barrier.bufferBarrier;
         Log.debug("  Buffer Barrier [alias={}] Access: {} -> {}, Stages: {} -> {}",
-                  static_cast<int>(barrier.alias),
+                  barrier.alias,
                   vk::to_string(b.srcAccessMask),
                   vk::to_string(b.dstAccessMask),
                   vk::to_string(b.srcStageMask),

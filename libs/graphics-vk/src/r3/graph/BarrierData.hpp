@@ -10,7 +10,7 @@ struct ImageBarrierData {
 
 struct BufferBarrierData {
   vk::BufferMemoryBarrier2 bufferBarrier;
-  BufferAlias alias;
+  BufferAliasVariant alias;
 };
 
 }

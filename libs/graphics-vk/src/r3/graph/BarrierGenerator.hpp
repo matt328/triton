@@ -39,7 +39,7 @@ public:
 
 private:
   std::unordered_map<ImageAlias, LastImageUse> lastImageUses;
-  std::unordered_map<BufferAlias, LastBufferUse> lastBufferUses;
+  std::unordered_map<BufferAliasVariant, LastBufferUse> lastBufferUses;
 };
 
 }

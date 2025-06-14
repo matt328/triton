@@ -1,12 +1,14 @@
 #include "GeometryBufferPack.hpp"
 #include "buffers/BufferCreateInfo.hpp"
 #include "buffers/BufferSystem.hpp"
+#include "r3/graph/ResourceAliasRegistry.hpp"
 #include "resources/allocators/IBufferAllocator.hpp"
 #include "resources/allocators/LinearAllocator.hpp"
 
 namespace tr {
 
-GeometryBufferPack::GeometryBufferPack(const std::shared_ptr<BufferSystem>& bufferSystem)
+GeometryBufferPack::GeometryBufferPack(const std::shared_ptr<BufferSystem>& bufferSystem,
+                                       const std::shared_ptr<ResourceAliasRegistry>& aliasRegistry)
     : indexBuffer{bufferSystem->registerBuffer(
           BufferCreateInfo{.allocationStrategy = AllocationStrategy::Arena,
                            .bufferLifetime = BufferLifetime::Persistent,
@@ -49,6 +51,13 @@ GeometryBufferPack::GeometryBufferPack(const std::shared_ptr<BufferSystem>& buff
   texCoordBufferAllocator = std::make_unique<LinearAllocator>(TexCoordBufferInitialSize);
   normalBufferAllocator = std::make_unique<LinearAllocator>(NormalBufferInitialSize);
   animationBufferAllocator = std::make_unique<LinearAllocator>(AnimationBufferInitialSize);
+
+  aliasRegistry->setHandle(GlobalBufferAlias::Index, indexBuffer);
+  aliasRegistry->setHandle(GlobalBufferAlias::Position, positionBuffer);
+  aliasRegistry->setHandle(GlobalBufferAlias::Color, colorBuffer);
+  aliasRegistry->setHandle(GlobalBufferAlias::TexCoord, texCoordBuffer);
+  aliasRegistry->setHandle(GlobalBufferAlias::Normal, normalBuffer);
+  aliasRegistry->setHandle(GlobalBufferAlias::Animation, animationBuffer);
 }
 
 auto GeometryBufferPack::getIndexBuffer() const -> const Handle<ManagedBuffer>& {

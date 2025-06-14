@@ -12,6 +12,11 @@ namespace tr {
   return bufferHandles[static_cast<size_t>(alias)];
 }
 
+[[nodiscard]] auto ResourceAliasRegistry::getHandle(GlobalBufferAlias alias) const
+    -> Handle<ManagedBuffer> {
+  return globalBufferHandles[static_cast<size_t>(alias)];
+}
+
 auto ResourceAliasRegistry::setHandle(ImageAlias alias, LogicalHandle<ManagedImage> handle)
     -> void {
   handles[static_cast<size_t>(alias)] = handle;
@@ -20,6 +25,11 @@ auto ResourceAliasRegistry::setHandle(ImageAlias alias, LogicalHandle<ManagedIma
 auto ResourceAliasRegistry::setHandle(BufferAlias alias, LogicalHandle<ManagedBuffer> handle)
     -> void {
   bufferHandles[static_cast<size_t>(alias)] = handle;
+}
+
+auto ResourceAliasRegistry::setHandle(GlobalBufferAlias alias, Handle<ManagedBuffer> handle)
+    -> void {
+  globalBufferHandles[static_cast<size_t>(alias)] = handle;
 }
 
 auto ResourceAliasRegistry::reset() -> void {

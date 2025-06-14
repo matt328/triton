@@ -18,14 +18,19 @@ public:
   auto operator=(ResourceAliasRegistry&&) -> ResourceAliasRegistry& = delete;
 
   [[nodiscard]] auto getHandle(ImageAlias alias) const -> LogicalHandle<ManagedImage>;
-  auto setHandle(ImageAlias alias, LogicalHandle<ManagedImage> handle) -> void;
   [[nodiscard]] auto getHandle(BufferAlias alias) const -> LogicalHandle<ManagedBuffer>;
+  [[nodiscard]] auto getHandle(GlobalBufferAlias alias) const -> Handle<ManagedBuffer>;
+
+  auto setHandle(ImageAlias alias, LogicalHandle<ManagedImage> handle) -> void;
   auto setHandle(BufferAlias alias, LogicalHandle<ManagedBuffer> handle) -> void;
+  auto setHandle(GlobalBufferAlias alias, Handle<ManagedBuffer> handle) -> void;
   auto reset() -> void;
 
 private:
   std::array<LogicalHandle<ManagedImage>, static_cast<size_t>(ImageAlias::Count)> handles;
   std::array<LogicalHandle<ManagedBuffer>, static_cast<size_t>(BufferAlias::Count)> bufferHandles;
+  std::array<Handle<ManagedBuffer>, static_cast<size_t>(GlobalBufferAlias::Count)>
+      globalBufferHandles;
 };
 
 }
