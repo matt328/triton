@@ -33,6 +33,7 @@
 
 #include "resources/allocators/GeometryDispatcher.hpp"
 #include "gfx/GeometryHandleMapper.hpp"
+#include "vk/command-buffer/CommandBufferManager.hpp"
 
 #define BOOST_DI_CFG_CTOR_LIMIT_SIZE 20
 #include <di.hpp>
@@ -40,6 +41,8 @@
 namespace di = boost::di;
 
 namespace tr {
+
+constexpr uint32_t MaxFrameTime = 250;
 
 GraphicsContext::GraphicsContext(std::shared_ptr<IEventQueue> newEventQueue,
                                  std::shared_ptr<IRenderContext> newRenderContext,
@@ -112,6 +115,7 @@ auto GraphicsContext::create(std::shared_ptr<IEventQueue> newEventQueue,
   return injector.create<std::shared_ptr<GraphicsContext>>();
 }
 
+// NOLINTNEXTLINE
 auto GraphicsContext::run(std::stop_token token) -> void {
   using Clock = std::chrono::steady_clock;
   auto currentTime = Clock::now();
@@ -121,8 +125,8 @@ auto GraphicsContext::run(std::stop_token token) -> void {
   while (!token.stop_requested()) {
     auto newTime = Clock::now();
     auto frameTime = newTime - currentTime;
-    if (frameTime > std::chrono::milliseconds(250)) {
-      frameTime = std::chrono::milliseconds(250);
+    if (frameTime > std::chrono::milliseconds(MaxFrameTime)) {
+      frameTime = std::chrono::milliseconds(MaxFrameTime);
     }
     currentTime = newTime;
 

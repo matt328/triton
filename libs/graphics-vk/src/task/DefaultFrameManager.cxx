@@ -2,7 +2,6 @@
 #include "api/fx/IEventQueue.hpp"
 #include "gfx/RenderContextConfig.hpp"
 #include "Frame.hpp"
-#include "bk/Maths.hpp"
 #include "api/fx/Events.hpp"
 #include "vk/core/Swapchain.hpp"
 
@@ -16,7 +15,7 @@ DefaultFrameManager::DefaultFrameManager(
     std::shared_ptr<Device> newDevice,
     std::shared_ptr<Swapchain> newSwapchain,
     std::shared_ptr<IEventQueue> newEventQueue,
-    std::shared_ptr<IDebugManager> debugManager)
+    const std::shared_ptr<IDebugManager>& debugManager)
     : renderConfig{newRenderContextConfig},
       commandBufferManager{std::move(newCommandBufferManager)},
       device{std::move(newDevice)},
@@ -72,7 +71,7 @@ auto DefaultFrameManager::acquireFrame() -> std::variant<Frame*, ImageAcquireRes
   {
     ZoneScopedN("waitForFences");
     const uint64_t timeout = 1'000'000; // 1ms
-    vk::Result res;
+    vk::Result res{};
     do {
       res = device->getVkDevice().waitForFences(*frame->getInFlightFence(), vk::True, timeout);
     } while (res == vk::Result::eTimeout);

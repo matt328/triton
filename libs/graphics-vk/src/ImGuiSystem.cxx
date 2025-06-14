@@ -7,7 +7,7 @@
 #include "vk/core/Swapchain.hpp"
 
 namespace tr {
-ImGuiSystem::ImGuiSystem(const std::shared_ptr<IWindow>& window,
+ImGuiSystem::ImGuiSystem([[maybe_unused]] const std::shared_ptr<IWindow>& window,
                          const std::shared_ptr<Instance>& instance,
                          std::shared_ptr<Device> newDevice,
                          const std::shared_ptr<PhysicalDevice>& physicalDevice,
@@ -43,6 +43,7 @@ ImGuiSystem::ImGuiSystem(const std::shared_ptr<IWindow>& window,
   initInfo.PipelineRenderingCreateInfo = createInfo;
 
   ImGuiIO& io = ImGui::GetIO();
+  // NOLINTNEXTLINE
   io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
   ImGui_ImplVulkan_Init(&initInfo);

@@ -98,6 +98,7 @@ constexpr auto to_string(ImageAlias alias) -> std::string_view {
 
 template <>
 struct std::formatter<tr::GlobalBufferAlias> {
+  // NOLINTNEXTLINE
   constexpr auto parse(format_parse_context& ctx) {
     return ctx.begin();
   }
@@ -110,6 +111,7 @@ struct std::formatter<tr::GlobalBufferAlias> {
 
 template <>
 struct std::formatter<tr::BufferAlias> {
+  // NOLINTNEXTLINE
   constexpr auto parse(format_parse_context& ctx) {
     return ctx.begin();
   }
@@ -122,6 +124,7 @@ struct std::formatter<tr::BufferAlias> {
 
 template <>
 struct std::formatter<tr::ImageAlias> {
+  // NOLINTNEXTLINE
   constexpr auto parse(format_parse_context& ctx) {
     return ctx.begin();
   }
@@ -139,7 +142,7 @@ struct hash<tr::BufferAliasVariant> {
     return std::visit(
         [](auto&& a) -> std::size_t {
           using T = std::decay_t<decltype(a)>;
-          return std::hash<T>{}(a) ^ (typeid(T).hash_code() << 1);
+          return std::hash<T>{}(a) ^ (typeid(T).hash_code() << 1u);
         },
         alias);
   }

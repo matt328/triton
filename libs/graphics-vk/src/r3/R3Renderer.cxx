@@ -16,6 +16,7 @@
 #include "task/Frame.hpp"
 #include "gfx/GeometryHandleMapper.hpp"
 #include "ComponentIds.hpp"
+#include "vk/command-buffer/CommandBufferManager.hpp"
 
 namespace tr {
 

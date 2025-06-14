@@ -2,6 +2,12 @@ include(FetchContent)
 
 set(IMGUI_SRC_DIR ${CMAKE_BINARY_DIR}/_deps/imgui)
 
+# Save current clang-tidy setting
+set(_OLD_CLANG_TIDY "${CMAKE_CXX_CLANG_TIDY}")
+
+# Disable clang-tidy for imgui
+set(CMAKE_CXX_CLANG_TIDY "")
+
 FetchContent_Populate(imgui
   URL https://github.com/ocornut/imgui/archive/refs/tags/v1.91.0-docking.zip
   SOURCE_DIR ${IMGUI_SRC_DIR}
@@ -29,3 +35,6 @@ target_include_directories(imgui_custom
   ${IMGUI_SRC_DIR}
   ${IMGUI_SRC_DIR}/backends
 )
+
+# Restore clang-tidy setting
+set(CMAKE_CXX_CLANG_TIDY "${_OLD_CLANG_TIDY}")

@@ -5,6 +5,7 @@
 #include "r3/graph/ResourceAliasRegistry.hpp"
 #include "r3/render-pass/IRenderPass.hpp"
 #include "task/Frame.hpp"
+#include "vk/command-buffer/CommandBufferManager.hpp"
 #include "vk/command-buffer/CommandBufferRequest.hpp"
 
 namespace tr {
@@ -59,11 +60,11 @@ auto OrderedFrameGraph::execute(const Frame* frame) -> FrameGraphResult {
       const auto visitor = [&]<typename T>(T&& arg) {
         using U = std::decay_t<T>;
         if constexpr (std::is_same_v<U, BufferAlias>) {
-          const auto logicalHandle = aliasRegistry->getHandle(arg);
+          const auto logicalHandle = aliasRegistry->getHandle(std::forward<T>(arg));
           return bufferSystem->getVkBuffer(frame->getLogicalBuffer(logicalHandle));
         }
         if constexpr (std::is_same_v<U, GlobalBufferAlias>) {
-          const auto handle = aliasRegistry->getHandle(arg);
+          const auto handle = aliasRegistry->getHandle(std::forward<T>(arg));
           return bufferSystem->getVkBuffer(handle);
         }
       };

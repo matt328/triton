@@ -1,10 +1,8 @@
 #pragma once
-#include "api/fx/IStateBuffer.hpp"
 #include "bk/Handle.hpp"
 #include "buffers/ManagedBuffer.hpp"
 #include "img/ManagedImage.hpp"
 #include "vk/ResourceManagerHandles.hpp"
-#include "vk/command-buffer/CommandBufferManager.hpp"
 
 namespace tr {
 

@@ -1,8 +1,21 @@
 project("graphics-vk")
 
 set(graphicsvk_SRC
+  src/buffers/ManagedBuffer.cxx
+  src/buffers/BufferSystem.cxx
+
+  src/img/ImageManager.cxx
+  src/img/ImageRegistry.cxx
+
+  src/mem/Allocator.cxx
+  src/mem/Buffer.cxx
+  src/mem/Image.cxx
+
+  src/pipeline/SpirvShaderModuleFactory.cxx
+
   src/r3/R3Renderer.cxx
   src/r3/GeometryBufferPack.cxx
+
   src/r3/graph/OrderedFrameGraph.cxx
   src/r3/graph/ResourceAliasRegistry.cxx
   src/r3/graph/BarrierGenerator.cxx
@@ -22,26 +35,11 @@ set(graphicsvk_SRC
   src/resources/allocators/GeometryAllocator.cxx
   src/resources/allocators/ArenaAllocator.cxx
 
-  src/buffers/ManagedBuffer.cxx
-  src/buffers/BufferSystem.cxx
+  src/task/Frame.cxx
+  src/task/DefaultFrameManager.cxx
 
-  src/GraphicsContext.cxx
-  src/VkGraphicsContext.cxx
-  
-  src/img/ImageManager.cxx
-  src/img/ImageRegistry.cxx
-
-  src/mem/Allocator.cxx
-  src/mem/Buffer.cxx
-  src/mem/Image.cxx
-
-  src/geo/VertexAttributes.cxx
-  src/geo/DynamicGeometryData.cxx
-  src/geo/StaticGeometryData.cxx
-  src/geo/TerrainGeometryData.cxx
-  src/DefaultDebugManager.cxx
-  src/NoopDebugManager.cxx
   src/vk/command-buffer/CommandBufferManager.cxx
+
   src/vk/core/Context.cxx
   src/vk/core/Instance.cxx
   src/vk/core/Surface.cxx
@@ -49,13 +47,16 @@ set(graphicsvk_SRC
   src/vk/core/Device.cxx
   src/vk/core/QueueTypes.cxx
   src/vk/core/Swapchain.cxx
+
   src/vk/sb/DSShaderBinding.cxx
   src/vk/sb/DSShaderBindingFactory.cxx
   src/vk/sb/DSLayoutManager.cxx
   src/vk/sb/DSLayout.cxx
-  src/task/Frame.cxx
-  src/task/DefaultFrameManager.cxx
-  src/pipeline/SpirvShaderModuleFactory.cxx
+
+  src/GraphicsContext.cxx
+  src/VkGraphicsContext.cxx
+  src/DefaultDebugManager.cxx
+  src/NoopDebugManager.cxx
 )
 
 add_library(${PROJECT_NAME} STATIC ${graphicsvk_SRC})

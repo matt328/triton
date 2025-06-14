@@ -1,8 +1,5 @@
 #pragma once
 
-#include "bk/Handle.hpp"
-#include "img/ImageRequest.hpp"
-#include "img/ManagedImage.hpp"
 #include "vk/core/Swapchain.hpp"
 
 namespace tr {

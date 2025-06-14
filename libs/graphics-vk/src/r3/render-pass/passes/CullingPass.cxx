@@ -1,11 +1,10 @@
 #include "CullingPass.hpp"
+#include "bk/DebugPaths.hpp"
 #include "r3/draw-context/ContextFactory.hpp"
 #include "r3/draw-context/IDispatchContext.hpp"
 #include "r3/render-pass/PipelineFactory.hpp"
 
 namespace tr {
-
-const std::filesystem::path SHADER_ROOT = std::filesystem::current_path() / "assets" / "shaders";
 
 CullingPass::CullingPass(std::shared_ptr<ContextFactory> newContextFactory,
                          std::shared_ptr<PipelineFactory> newPipelineFactory,
@@ -23,7 +22,7 @@ CullingPass::CullingPass(std::shared_ptr<ContextFactory> newContextFactory,
 
   const auto shaderStageInfo =
       ShaderStageInfo{.stage = vk::ShaderStageFlagBits::eCompute,
-                      .shaderFile = (SHADER_ROOT / "compute2.comp.spv").string(),
+                      .shaderFile = (getShaderRootPath() / "compute2.comp.spv").string(),
                       .entryPoint = "main"};
 
   const auto pipelineCreateInfo = PipelineCreateInfo{.id = id,

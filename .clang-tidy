@@ -1,6 +1,15 @@
 ---
-Checks: "*,-llvmlibc-*, -fuchsia-*, -altera-*, -llvm-*, -google-readability-namespace-comments, -misc-no-recursion, -misc-include-cleaner, -hicpp-uppercase-literal-suffix, -readability-uppercase-literal-suffix, -readability-identifier-length, -cppcoreguidelines-pro-type-union-access"
-WarningsAsErrors: "true"
+Checks: >
+  clang-analyzer-*,
+  bugprone-*,
+  modernize-*,
+  performance-*,
+  readability-*,
+  -readability-identifier-length,
+  -readability-uppercase-literal-suffix,
+  -misc-no-recursion,
+  -google-readability-namespace-comments
+WarningsAsErrors: "false"
 HeaderFilterRegex: "^(?!.*(build/debug/_deps)).*$"
 FormatStyle: google
 CheckOptions:

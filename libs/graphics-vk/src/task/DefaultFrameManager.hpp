@@ -5,6 +5,7 @@
 #include "bk/Rando.hpp"
 #include "gfx/IFrameManager.hpp"
 #include "gfx/RenderContextConfig.hpp"
+#include "img/ManagedImage.hpp"
 
 namespace tr {
 
@@ -20,7 +21,7 @@ public:
                                std::shared_ptr<Device> newDevice,
                                std::shared_ptr<Swapchain> newSwapchain,
                                std::shared_ptr<IEventQueue> newEventQueue,
-                               std::shared_ptr<IDebugManager> debugManager);
+                               const std::shared_ptr<IDebugManager>& debugManager);
   ~DefaultFrameManager() override;
 
   DefaultFrameManager(const DefaultFrameManager&) = delete;
