@@ -1,6 +1,6 @@
 #pragma once
 
-#include "IRenderPass.hpp"
+#include "r3/render-pass/IRenderPass.hpp"
 #include "r3/ComponentIds.hpp"
 #include "r3/graph/ResourceAliases.hpp"
 #include "r3/render-pass/CreateInfo.hpp"

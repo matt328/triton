@@ -1,11 +1,10 @@
 #pragma once
 #include "api/fx/IStateBuffer.hpp"
 #include "bk/Handle.hpp"
-#include "LogicalBufferHandle.hpp"
+#include "buffers/ManagedBuffer.hpp"
 #include "img/ManagedImage.hpp"
+#include "vk/ResourceManagerHandles.hpp"
 #include "vk/command-buffer/CommandBufferManager.hpp"
-#include "VkResourceManager.hpp"
-#include "LogicalImageHandle.hpp"
 
 namespace tr {
 
@@ -97,8 +96,6 @@ public:
   auto setDebugObjectCount(uint32_t newDebugObjectCount) -> void;
 
   auto setObjectCount(uint32_t newObjectCount) -> void;
-
-  auto setupRenderingInfo(const std::shared_ptr<VkResourceManager>& resourceManager) -> void;
 
 private:
   uint8_t index;

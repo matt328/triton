@@ -59,15 +59,12 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
       aliasRegistry{std::move(newAliasRegistry)} {
   Log.trace("Constructing R3Renderer");
   /*
-    TODO(matt): createComputeCullingPass()
+    TODO(matt): compositionPass()
     - register a fullscreen quad geometry specifically for use by the composition pass to write onto
     the swapchain image.
     - This will exercise all the geometry buffer and basically the entire pipeline.
     - Start with culling pass. Make sure it creates the correct DIIC, count, and uses the DIIC
     metadata buffer
-
-    Culling Shader:
-    - todo tomorrow
   */
   createGlobalBuffers();
   createGlobalImages();
@@ -335,22 +332,6 @@ void R3Renderer::waitIdle() {
 }
 
 auto R3Renderer::createComputeCullingPass() -> std::unique_ptr<IRenderPass> {
-
-  const auto pipelineLayoutInfo =
-      PipelineLayoutInfo{.pushConstantInfoList = {PushConstantInfo{
-                             .stageFlags = vk::ShaderStageFlagBits::eCompute,
-                             .offset = 0,
-                             .size = 104, // TODO(matt) sizeof()
-                         }}};
-
-  const auto shaderStageInfo =
-      ShaderStageInfo{.stage = vk::ShaderStageFlagBits::eCompute,
-                      .shaderFile = (SHADER_ROOT / "compute2.comp.spv").string(),
-                      .entryPoint = "main"};
-
-  const auto cullingPassInfo = ComputePassCreateInfo{.id = 1,
-                                                     .pipelineLayoutInfo = pipelineLayoutInfo,
-                                                     .shaderStageInfo = shaderStageInfo};
 
   auto cullingPass = renderPassFactory->createRenderPass(RenderPassCreateInfo{
       .passId = PassId::Culling,

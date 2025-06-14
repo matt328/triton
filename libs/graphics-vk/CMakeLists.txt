@@ -9,8 +9,8 @@ set(graphicsvk_SRC
 
   src/r3/render-pass/RenderPassFactory.cxx
   src/r3/render-pass/PipelineFactory.cxx
-  src/r3/render-pass/ForwardGraphicsPass.cxx
-  src/r3/render-pass/CullingPass.cxx
+  src/r3/render-pass/passes/ForwardGraphicsPass.cxx
+  src/r3/render-pass/passes/CullingPass.cxx
 
   src/r3/draw-context/ContextFactory.cxx
   src/r3/draw-context/CullingDispatchContext.cxx
@@ -26,11 +26,8 @@ set(graphicsvk_SRC
   src/buffers/BufferSystem.cxx
 
   src/GraphicsContext.cxx
-  src/ResourceProxyImpl.cxx
   src/VkGraphicsContext.cxx
-  src/VkResourceManager.cxx
-  src/ImmediateTransferContext.cxx
-
+  
   src/img/ImageManager.cxx
   src/img/ImageRegistry.cxx
 
@@ -45,7 +42,6 @@ set(graphicsvk_SRC
   src/DefaultDebugManager.cxx
   src/NoopDebugManager.cxx
   src/vk/command-buffer/CommandBufferManager.cxx
-  src/vk/TextureManager.cxx
   src/vk/core/Context.cxx
   src/vk/core/Instance.cxx
   src/vk/core/Surface.cxx
@@ -59,13 +55,7 @@ set(graphicsvk_SRC
   src/vk/sb/DSLayout.cxx
   src/task/Frame.cxx
   src/task/DefaultFrameManager.cxx
-  src/pipeline/IndirectPipeline.cxx
-  src/pipeline/StaticPipeline.cxx
-  src/pipeline/ComputePipeline.cxx
-  src/pipeline/TerrainPipeline.cxx
   src/pipeline/SpirvShaderModuleFactory.cxx
-
-  src/task/debugshapes/DebugPipeline.cxx
 )
 
 add_library(${PROJECT_NAME} STATIC ${graphicsvk_SRC})

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "IRenderPass.hpp"
+#include "r3/render-pass/IRenderPass.hpp"
 
 namespace tr {
 

@@ -10,7 +10,6 @@ namespace tr {
 
 class CommandBufferManager;
 class Swapchain;
-class VkResourceManager;
 class BufferRegistry;
 class IEventQueue;
 
@@ -20,7 +19,6 @@ public:
                                std::shared_ptr<CommandBufferManager> newCommandBufferManager,
                                std::shared_ptr<Device> newDevice,
                                std::shared_ptr<Swapchain> newSwapchain,
-                               std::shared_ptr<VkResourceManager> newResourceManager,
                                std::shared_ptr<IEventQueue> newEventQueue,
                                std::shared_ptr<IDebugManager> debugManager);
   ~DefaultFrameManager() override;
@@ -39,7 +37,6 @@ private:
   std::shared_ptr<CommandBufferManager> commandBufferManager;
   std::shared_ptr<Device> device;
   std::shared_ptr<Swapchain> swapchain;
-  std::shared_ptr<VkResourceManager> resourceManager;
   std::shared_ptr<IEventQueue> eventQueue;
   std::shared_ptr<BufferRegistry> bufferRegistry;
 

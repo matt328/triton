@@ -1,9 +1,9 @@
 #include "RenderPassFactory.hpp"
 #include "gfx/IFrameManager.hpp"
 #include "img/ImageManager.hpp"
-#include "r3/render-pass/CullingPass.hpp"
+#include "r3/render-pass//passes/CullingPass.hpp"
 #include "r3/render-pass/PipelineFactory.hpp"
-#include "ForwardGraphicsPass.hpp"
+#include "r3/render-pass/passes/ForwardGraphicsPass.hpp"
 
 namespace tr {
 

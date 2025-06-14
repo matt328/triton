@@ -4,7 +4,6 @@
 
 #include "gfx/QueueTypes.hpp"
 #include "vk/core/Device.hpp"
-#include "VkResourceManager.hpp"
 
 namespace tr {
 
@@ -21,7 +20,6 @@ public:
               const std::shared_ptr<PhysicalDevice>& physicalDevice,
               const std::shared_ptr<queue::Graphics>& graphicsQueue,
               const std::shared_ptr<Swapchain>& swapchain,
-              std::shared_ptr<VkResourceManager> newResourceManager,
               std::shared_ptr<IGuiCallbackRegistrar> newGuiCallbackRegistrar);
   ~ImGuiSystem() override;
 
@@ -35,7 +33,6 @@ public:
               const vk::Extent2D& swapchainExtent) -> void override;
 
 private:
-  std::shared_ptr<VkResourceManager> resourceManager;
   std::shared_ptr<Device> device;
   std::shared_ptr<IGuiCallbackRegistrar> guiCallbackRegistrar;
 

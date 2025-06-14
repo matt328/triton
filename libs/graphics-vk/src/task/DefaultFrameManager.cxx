@@ -2,7 +2,7 @@
 #include "api/fx/IEventQueue.hpp"
 #include "gfx/RenderContextConfig.hpp"
 #include "Frame.hpp"
-#include "Maths.hpp"
+#include "bk/Maths.hpp"
 #include "api/fx/Events.hpp"
 #include "vk/core/Swapchain.hpp"
 
@@ -15,14 +15,12 @@ DefaultFrameManager::DefaultFrameManager(
     std::shared_ptr<CommandBufferManager> newCommandBufferManager,
     std::shared_ptr<Device> newDevice,
     std::shared_ptr<Swapchain> newSwapchain,
-    std::shared_ptr<VkResourceManager> newResourceManager,
     std::shared_ptr<IEventQueue> newEventQueue,
     std::shared_ptr<IDebugManager> debugManager)
     : renderConfig{newRenderContextConfig},
       commandBufferManager{std::move(newCommandBufferManager)},
       device{std::move(newDevice)},
       swapchain{std::move(newSwapchain)},
-      resourceManager{std::move(newResourceManager)},
       eventQueue{std::move(newEventQueue)},
       currentFrame{0} {
 

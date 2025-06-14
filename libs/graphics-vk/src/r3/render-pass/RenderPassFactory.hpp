@@ -2,7 +2,6 @@
 
 #include "bk/HandleGenerator.hpp"
 #include "r3/ComponentIds.hpp"
-#include "r3/render-pass/ComputePassCreateInfo.hpp"
 #include "r3/render-pass/CreateInfo.hpp"
 
 namespace tr {

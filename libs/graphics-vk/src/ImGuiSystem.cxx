@@ -13,18 +13,15 @@ ImGuiSystem::ImGuiSystem(const std::shared_ptr<IWindow>& window,
                          const std::shared_ptr<PhysicalDevice>& physicalDevice,
                          const std::shared_ptr<queue::Graphics>& graphicsQueue,
                          const std::shared_ptr<Swapchain>& swapchain,
-                         std::shared_ptr<VkResourceManager> newResourceManager,
                          std::shared_ptr<IGuiCallbackRegistrar> newGuiCallbackRegistrar)
-    : resourceManager{std::move(newResourceManager)},
-      device{std::move(newDevice)},
-      guiCallbackRegistrar{std::move(newGuiCallbackRegistrar)} {
+    : device{std::move(newDevice)}, guiCallbackRegistrar{std::move(newGuiCallbackRegistrar)} {
   Log.trace("Creating ImGuiSystem");
 
-  descriptorPool = resourceManager->createDefaultDescriptorPool();
+  // descriptorPool = resourceManager->createDefaultDescriptorPool();
 
   ImGui::CreateContext();
 
-  ImGui_ImplGlfw_InitForVulkan(static_cast<GLFWwindow*>(window->getNativeWindow()), true);
+  // ImGui_ImplGlfw_InitForVulkan(static_cast<GLFWwindow*>(window->getNativeWindow()), true);
 
   ImGui_ImplVulkan_InitInfo initInfo = {};
   initInfo.Instance = instance->getVkInstance();

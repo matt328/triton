@@ -1,11 +1,11 @@
 #include "gfx/GraphicsContext.hpp"
 #include "FrameState.hpp"
+#include "gfx/QueueTypes.hpp"
 #include "r3/GeometryBufferPack.hpp"
 #include "r3/graph/OrderedFrameGraph.hpp"
 #include "r3/graph/ResourceAliasRegistry.hpp"
 #include "resources/DefaultAssetSystem.hpp"
 #include "DefaultDebugManager.hpp"
-#include "ImmediateTransferContext.hpp"
 #include "api/fx/IEventQueue.hpp"
 #include "mem/Allocator.hpp"
 #include "pipeline/SpirvShaderModuleFactory.hpp"
@@ -85,7 +85,6 @@ auto GraphicsContext::create(std::shared_ptr<IEventQueue> newEventQueue,
                         di::bind<Surface>.to<Surface>(),
                         di::bind<Instance>.to<Instance>(),
                         di::bind<Swapchain>.to<Swapchain>(),
-                        di::bind<ImmediateTransferContext>.to<ImmediateTransferContext>(),
                         di::bind<queue::Graphics>.to<queue::Graphics>(),
                         di::bind<queue::Transfer>.to<queue::Transfer>(),
                         di::bind<queue::Present>.to<queue::Present>(),
@@ -95,7 +94,6 @@ auto GraphicsContext::create(std::shared_ptr<IEventQueue> newEventQueue,
                         di::bind<DSLayoutManager>.to<DSLayoutManager>(),
                         di::bind<IShaderBindingFactory>.to<DSShaderBindingFactory>(),
                         di::bind<Allocator>.to<Allocator>(),
-                        di::bind<VkResourceManager>.to<VkResourceManager>(),
                         di::bind<IFrameManager>.to<DefaultFrameManager>(),
                         di::bind<IRenderContext>.to<R3Renderer>(),
                         di::bind<IFrameGraph>.to<OrderedFrameGraph>(),
