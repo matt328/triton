@@ -3,6 +3,7 @@
 #include "img/ImageManager.hpp"
 #include "r3/render-pass//passes/CullingPass.hpp"
 #include "r3/render-pass/PipelineFactory.hpp"
+#include "r3/render-pass/passes/CompositionPass.hpp"
 #include "r3/render-pass/passes/ForwardGraphicsPass.hpp"
 
 namespace tr {
@@ -56,12 +57,14 @@ auto RenderPassFactory::createCullingPass(PassId passId,
   return std::make_unique<CullingPass>(drawContextFactory, pipelineFactory, passId);
 }
 
-auto RenderPassFactory::createCompositionPass([[maybe_unused]] PassId passId,
-                                              [[maybe_unused]] CompositionPassCreateInfo createInfo)
+auto RenderPassFactory::createCompositionPass(PassId passId, CompositionPassCreateInfo createInfo)
     -> std::unique_ptr<IRenderPass> {
-  // return std::make_unique<CompositionPass>(drawContextFactory, pipelineFactory, passId);
-  Log.warn("TODO: implement CompositionPass");
-  return nullptr;
+  return std::make_unique<CompositionPass>(imageManager,
+                                           drawContextFactory,
+                                           aliasRegistry,
+                                           pipelineFactory,
+                                           createInfo,
+                                           passId);
 }
 
 }

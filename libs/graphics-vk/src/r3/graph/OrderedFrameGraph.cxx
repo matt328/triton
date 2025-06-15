@@ -91,6 +91,19 @@ auto OrderedFrameGraph::execute(const Frame* frame) -> FrameGraphResult {
     commandBuffer.begin(vk::CommandBufferBeginInfo{});
     commandBuffer.pipelineBarrier2(dependencyInfo);
     renderPass->execute(frame, commandBuffer);
+
+    if (passId == PassId::Composition) { // This is the last pass, transition the swapchain image
+      const auto handle =
+          frame->getLogicalImage(aliasRegistry->getHandle(barrierPlan->swapchainBarrier.alias));
+      const auto& image = imageManager->getImage(handle);
+      barrierPlan->swapchainBarrier.imageBarrier.setImage(image.getImage());
+
+      auto dependencyInfo =
+          vk::DependencyInfo{.imageMemoryBarrierCount = 1,
+                             .pImageMemoryBarriers = &barrierPlan->swapchainBarrier.imageBarrier};
+      commandBuffer.pipelineBarrier2(dependencyInfo);
+    }
+
     commandBuffer.end();
     result.commandBuffers.push_back(commandBuffer);
   }

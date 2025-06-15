@@ -21,7 +21,8 @@
 namespace tr {
 
 const std::unordered_map<ContextId, std::vector<PassId>> GraphicsMap = {
-    {ContextId::Cube, {PassId::Forward}}};
+    {ContextId::Cube, {PassId::Forward}},
+    {ContextId::Composition, {PassId::Composition}}};
 
 const std::unordered_map<ContextId, std::vector<PassId>> ComputeMap = {
     {ContextId::Culling, {PassId::Culling}}};
@@ -59,23 +60,16 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
       geometryHandleMapper{std::move(newGeometryHandleMapper)},
       aliasRegistry{std::move(newAliasRegistry)} {
   Log.trace("Constructing R3Renderer");
-  /*
-    TODO(matt): compositionPass()
-    - register a fullscreen quad geometry specifically for use by the composition pass to write onto
-    the swapchain image.
-    - This will exercise all the geometry buffer and basically the entire pipeline.
-    - Start with culling pass. Make sure it creates the correct DIIC, count, and uses the DIIC
-    metadata buffer
-  */
+
   createGlobalBuffers();
   createGlobalImages();
   auto cullingPass = createComputeCullingPass();
   auto forwardPass = createForwardRenderPass();
-  // auto compositionPass = createCompositionRenderPass();
+  auto compositionPass = createCompositionRenderPass();
 
   frameGraph->addPass(std::move(cullingPass));
   frameGraph->addPass(std::move(forwardPass));
-  // frameGraph->addPass(std::move(compositionPass));
+  frameGraph->addPass(std::move(compositionPass));
 
   const auto forwardDrawCreateInfo = ForwardDrawContextCreateInfo{
       .viewport = vk::Viewport{.width = static_cast<float>(rendererConfig.initialWidth),
@@ -103,6 +97,10 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
                                        .vertexColor = geometryBufferPack->getColorBuffer()};
 
   drawContextFactory->createDispatchContext(ContextId::Culling, cullingCreateInfo);
+
+  const auto compositionCreateInfo = CompositionContextCreateInfo{};
+
+  drawContextFactory->createDispatchContext(ContextId::Composition, compositionCreateInfo);
 
   for (const auto& [contextId, passIds] : GraphicsMap) {
     for (const auto& passId : passIds) {
@@ -167,6 +165,7 @@ auto R3Renderer::createGlobalBuffers() -> void {
 }
 
 auto R3Renderer::createGlobalImages() -> void {
+
   globalImages.forwardColorImage = imageManager->createPerFrameImage(ImageRequest{
       .logicalName = "forward",
       .format = vk::Format::eR16G16B16A16Sfloat,
@@ -183,6 +182,8 @@ auto R3Renderer::createGlobalImages() -> void {
                                           .height = rendererConfig.initialHeight},
                    .usageFlags = vk::ImageUsageFlagBits::eDepthStencilAttachment,
                    .aspectFlags = vk::ImageAspectFlagBits::eDepth});
+
+  aliasRegistry->setHandle(ImageAlias::SwapchainImage, imageManager->getSwapchainImageHandle());
 
   aliasRegistry->setHandle(ImageAlias::GeometryColorImage, globalImages.forwardColorImage);
   aliasRegistry->setHandle(ImageAlias::DepthImage, globalImages.forwardDepthImage);
@@ -379,7 +380,8 @@ auto R3Renderer::createForwardRenderPass() -> std::unique_ptr<IRenderPass> {
 auto R3Renderer::createCompositionRenderPass() -> std::unique_ptr<IRenderPass> {
   auto compositionPass = renderPassFactory->createRenderPass(RenderPassCreateInfo{
       .passId = PassId::Composition,
-      .passInfo = CompositionPassCreateInfo{},
+      .passInfo = CompositionPassCreateInfo{.colorImage = ImageAlias::GeometryColorImage,
+                                            .swapchainImage = ImageAlias::SwapchainImage},
   });
 
   std::vector<CommandBufferUse> cmdBufferUses{};

@@ -27,6 +27,8 @@ private:
   vma::Allocator allocator;
 };
 
+// TODO(Images) This class can have images or external images, and its intent could be
+// expressed more clearly.
 class ManagedImage {
 public:
   ManagedImage(std::unique_ptr<AllocatedImage> newImage,
@@ -41,6 +43,20 @@ public:
         usageFlags(newFlags) {
   }
 
+  ManagedImage(vk::Image externalImage,
+               vk::ImageView newImageView,
+               vk::Extent2D newExtent,
+               vk::Format newFormat,
+               vk::ImageUsageFlags newFlags)
+      : image(nullptr), // no AllocatedImage
+        externalImage(externalImage),
+        imageView(nullptr),
+        externalImageView(newImageView),
+        extent(newExtent),
+        format(newFormat),
+        usageFlags(newFlags) {
+  }
+
   ~ManagedImage() = default;
 
   ManagedImage(const ManagedImage&) = delete;
@@ -49,7 +65,7 @@ public:
   auto operator=(ManagedImage&&) -> ManagedImage& = delete;
 
   [[nodiscard]] auto getImageView() const -> const vk::ImageView& {
-    return *imageView;
+    return image ? *imageView : externalImageView;
   }
 
   [[nodiscard]] auto getExtent() const -> vk::Extent2D {
@@ -57,7 +73,7 @@ public:
   }
 
   [[nodiscard]] auto getImage() const -> const vk::Image& {
-    return image->getImage();
+    return image ? image->getImage() : externalImage;
   }
 
   [[nodiscard]] auto getFormat() const -> vk::Format {
@@ -68,9 +84,19 @@ public:
     return usageFlags;
   }
 
+  auto setExternalImage(vk::Image newImage) -> void {
+    this->externalImage = newImage;
+  }
+
+  auto setExternalImageView(vk::ImageView newImageView) -> void {
+    this->externalImageView = newImageView;
+  }
+
 private:
-  std::unique_ptr<AllocatedImage> image;
+  std::unique_ptr<AllocatedImage> image = nullptr;
+  vk::Image externalImage;
   vk::raii::ImageView imageView;
+  vk::ImageView externalImageView;
   vk::Extent2D extent;
   vk::Format format;
   vk::ImageUsageFlags usageFlags;

@@ -23,7 +23,10 @@ struct ForwardDrawContextCreateInfo {
   vk::Rect2D scissor;
 };
 
-using DispatchCreateInfo =
-    std::variant<CullingDispatchContextCreateInfo, ForwardDrawContextCreateInfo>;
+struct CompositionContextCreateInfo {};
+
+using DispatchCreateInfo = std::variant<CullingDispatchContextCreateInfo,
+                                        ForwardDrawContextCreateInfo,
+                                        CompositionContextCreateInfo>;
 
 }

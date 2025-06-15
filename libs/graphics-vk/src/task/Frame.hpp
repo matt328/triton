@@ -82,6 +82,9 @@ public:
   [[nodiscard]] auto getLogicalBuffer(LogicalHandle<ManagedBuffer> logicalHandle) const
       -> Handle<ManagedBuffer>;
 
+  auto registerSwapchainLogicalHandle(LogicalHandle<ManagedImage> logicalHandle) -> void;
+  auto addSwapchainImage(Handle<ManagedImage> handle, uint32_t index) -> void;
+
   auto setDepthImageHandle(ImageHandle handle) -> void;
   auto setDrawImageHandle(ImageHandle handle) -> void;
 
@@ -108,6 +111,9 @@ private:
 
   std::unordered_map<LogicalHandle<ManagedBuffer>, Handle<ManagedBuffer>> bufferHandles;
   std::unordered_map<LogicalHandle<ManagedImage>, Handle<ManagedImage>> imageHandles;
+
+  LogicalHandle<ManagedImage> swapchainLogicalHandle;
+  std::unordered_map<uint32_t, Handle<ManagedImage>> swapchainImageHandles;
 
   uint32_t staticObjectCount;
   uint32_t dynamicObjectCount;

@@ -72,8 +72,21 @@ auto Frame::addLogicalImage(LogicalHandle<ManagedImage> logicalHandle,
   imageHandles.emplace(logicalHandle, imageHandle);
 }
 
+auto Frame::registerSwapchainLogicalHandle(LogicalHandle<ManagedImage> logicalHandle) -> void {
+  Log.trace("Frame registering swapchain logicalHandle={}", logicalHandle.id);
+  this->swapchainLogicalHandle = logicalHandle;
+}
+
+auto Frame::addSwapchainImage(Handle<ManagedImage> handle, uint32_t index) -> void {
+  Log.trace("Frame {} adding swapchain image, handle={}, index={}", this->index, handle.id, index);
+  swapchainImageHandles.emplace(index, handle);
+}
+
 auto Frame::getLogicalImage(LogicalHandle<ManagedImage> logicalHandle) const
     -> Handle<ManagedImage> {
+  if (logicalHandle == swapchainLogicalHandle) {
+    return swapchainImageHandles.at(swapchainImageIndex);
+  }
   assert(imageHandles.contains(logicalHandle));
   return imageHandles.at(logicalHandle);
 }

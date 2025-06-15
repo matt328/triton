@@ -13,6 +13,7 @@ class CommandBufferManager;
 class Swapchain;
 class BufferRegistry;
 class IEventQueue;
+class FrameState;
 
 class DefaultFrameManager final : public IFrameManager {
 public:
@@ -21,6 +22,7 @@ public:
                                std::shared_ptr<Device> newDevice,
                                std::shared_ptr<Swapchain> newSwapchain,
                                std::shared_ptr<IEventQueue> newEventQueue,
+                               std::shared_ptr<FrameState> newFrameState,
                                const std::shared_ptr<IDebugManager>& debugManager);
   ~DefaultFrameManager() override;
 
@@ -40,6 +42,7 @@ private:
   std::shared_ptr<Swapchain> swapchain;
   std::shared_ptr<IEventQueue> eventQueue;
   std::shared_ptr<BufferRegistry> bufferRegistry;
+  std::shared_ptr<FrameState> frameState;
 
   size_t currentFrame;
   std::vector<std::unique_ptr<Frame>> frames;

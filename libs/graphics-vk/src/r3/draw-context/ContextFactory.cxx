@@ -1,5 +1,6 @@
 #include "ContextFactory.hpp"
 #include "r3/ComponentIds.hpp"
+#include "r3/draw-context/CompositionContext.hpp"
 #include "r3/draw-context/ForwardDrawContext.hpp"
 #include "r3/draw-context/IDispatchContext.hpp"
 #include "r3/draw-context/CullingDispatchContext.hpp"
@@ -28,6 +29,13 @@ auto ContextFactory::createDispatchContext(ContextId id, DispatchCreateInfo crea
           dispatchContextMap.emplace(
               handle,
               std::make_unique<ForwardDrawContext>(id,
+                                                   bufferSystem,
+                                                   std::forward<decltype(ci)>(ci)));
+        }
+        if constexpr (std::is_same_v<T, CompositionContextCreateInfo>) {
+          dispatchContextMap.emplace(
+              handle,
+              std::make_unique<CompositionContext>(id,
                                                    bufferSystem,
                                                    std::forward<decltype(ci)>(ci)));
         }

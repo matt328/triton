@@ -24,10 +24,12 @@ set(graphicsvk_SRC
   src/r3/render-pass/PipelineFactory.cxx
   src/r3/render-pass/passes/ForwardGraphicsPass.cxx
   src/r3/render-pass/passes/CullingPass.cxx
+  src/r3/render-pass/passes/CompositionPass.cxx
 
   src/r3/draw-context/ContextFactory.cxx
   src/r3/draw-context/CullingDispatchContext.cxx
   src/r3/draw-context/ForwardDrawContext.cxx
+  src/r3/draw-context/CompositionContext.cxx
 
   src/resources/DefaultAssetSystem.cxx
   src/resources/TransferSystem.cxx

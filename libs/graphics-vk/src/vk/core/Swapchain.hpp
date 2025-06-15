@@ -31,6 +31,7 @@ public:
   [[nodiscard]] auto getSwapchainImage(uint32_t imageIndex) const -> vk::Image;
   [[nodiscard]] auto getSwapchainImageView(uint32_t imageIndex) const -> vk::ImageView;
   [[nodiscard]] auto getDepthFormat() const -> vk::Format;
+  [[nodiscard]] auto getImages() const -> const std::vector<vk::Image>&;
 
   [[nodiscard]] auto acquireNextImage(const vk::Semaphore& semaphore) const
       -> std::variant<uint32_t, ImageAcquireResult>;

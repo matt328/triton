@@ -86,12 +86,6 @@ ForwardGraphicsPass::ForwardGraphicsPass(std::shared_ptr<ImageManager> newImageM
       .clearValue =
           vk::ClearValue{.depthStencil = vk::ClearDepthStencilValue{.depth = 1.f, .stencil = 0}},
   });
-
-  // Figure out what is needed for the passgraph info so that the framegraph can take a previous
-  // pass outputs and a next pass inputs and create barriers and transitions automatically
-
-  // Create a PassGraphInfo that describes the ResourceAliases and how they are used so the frame
-  // graph can transition them
 }
 
 [[nodiscard]] auto ForwardGraphicsPass::getId() const -> PassId {

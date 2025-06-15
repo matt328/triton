@@ -55,6 +55,26 @@ auto BarrierGenerator::build(const std::vector<std::unique_ptr<IRenderPass>>& pa
                                                         }},
             .alias = alias,
         });
+      } else if (alias == ImageAlias::SwapchainImage) {
+        barrierPlan.imageBarriers[currentPassId].push_back(ImageBarrierData{
+            .imageBarrier =
+                vk::ImageMemoryBarrier2{.srcStageMask = {},
+                                        .srcAccessMask = {},
+                                        .dstStageMask = write.stageFlags,
+                                        .dstAccessMask = write.accessFlags,
+                                        .oldLayout =
+                                            vk::ImageLayout::eUndefined, // or ePresentSrcKHR
+                                        .newLayout = write.layout,
+                                        .subresourceRange =
+                                            vk::ImageSubresourceRange{
+                                                .aspectMask = write.aspectFlags,
+                                                .baseMipLevel = 0,
+                                                .levelCount = 1,
+                                                .baseArrayLayer = 0,
+                                                .layerCount = 1,
+                                            }},
+            .alias = alias,
+        });
       }
       lastImageUses[alias] = LastImageUse{.passId = currentPassId,
                                           .accessMask = write.accessFlags,
@@ -100,6 +120,28 @@ auto BarrierGenerator::build(const std::vector<std::unique_ptr<IRenderPass>>& pa
                                             .stageMask = write.stageFlags};
     }
   }
+
+  barrierPlan.swapchainBarrier = ImageBarrierData{
+      .imageBarrier =
+          vk::ImageMemoryBarrier2{
+              .srcStageMask = vk::PipelineStageFlagBits2::eColorAttachmentOutput,
+              .srcAccessMask = vk::AccessFlagBits2::eColorAttachmentWrite,
+              .dstStageMask = vk::PipelineStageFlagBits2::eBottomOfPipe,
+              .dstAccessMask = vk::AccessFlagBits2::eNone,
+              .oldLayout = vk::ImageLayout::eColorAttachmentOptimal,
+              .newLayout = vk::ImageLayout::ePresentSrcKHR,
+              .subresourceRange =
+                  vk::ImageSubresourceRange{
+                      .aspectMask = vk::ImageAspectFlagBits::eColor,
+                      .baseMipLevel = 0,
+                      .levelCount = 1,
+                      .baseArrayLayer = 0,
+                      .layerCount = 1,
+                  },
+          },
+      .alias = ImageAlias::SwapchainImage,
+  };
+
   return barrierPlan;
 }
 

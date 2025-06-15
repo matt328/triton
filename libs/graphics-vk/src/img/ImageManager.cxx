@@ -11,11 +11,15 @@ namespace tr {
 ImageManager::ImageManager(std::shared_ptr<Allocator> newAllocator,
                            std::shared_ptr<IDebugManager> newDebugManager,
                            std::shared_ptr<Device> newDevice,
-                           std::shared_ptr<IFrameManager> newFrameManager)
+                           std::shared_ptr<IFrameManager> newFrameManager,
+                           std::shared_ptr<Swapchain> newSwapchain)
     : allocator{std::move(newAllocator)},
       debugManager{std::move(newDebugManager)},
       device{std::move(newDevice)},
-      frameManager{std::move(newFrameManager)} {
+      frameManager{std::move(newFrameManager)},
+      swapchain{std::move(newSwapchain)} {
+
+  registerSwapchainImages();
 }
 
 ImageManager::~ImageManager() {
@@ -81,7 +85,46 @@ auto ImageManager::createPerFrameImage(ImageRequest request) -> LogicalHandle<Ma
   return logicalHandle;
 }
 
+auto ImageManager::registerSwapchainImages() -> void {
+  swapchainLogicalHandle = generator.requestLogicalHandle();
+
+  for (const auto& frame : frameManager->getFrames()) {
+    for (uint32_t index = 0; index < swapchain->getImages().size(); ++index) {
+      frame->registerSwapchainLogicalHandle(swapchainLogicalHandle);
+      const auto handle = registerSwapchainImage(index);
+      handleToSwapchainIndex.emplace(handle, index);
+      frame->addSwapchainImage(handle, index);
+    }
+  }
+}
+
+auto ImageManager::registerSwapchainImage(uint32_t index) -> Handle<ManagedImage> {
+  const auto handle = generator.requestHandle();
+
+  Log.trace("Registering swapchain image index={}, handle={}", index, handle.id);
+
+  imageMap.emplace(handle,
+                   std::make_unique<ManagedImage>(swapchain->getSwapchainImage(index),
+                                                  swapchain->getSwapchainImageView(index),
+                                                  swapchain->getImageExtent(),
+                                                  swapchain->getImageFormat(),
+                                                  vk::ImageUsageFlagBits::eColorAttachment));
+
+  return handle;
+}
+
+auto ImageManager::getSwapchainImageHandle() const -> LogicalHandle<ManagedImage> {
+  return swapchainLogicalHandle;
+}
+
 auto ImageManager::getImage(Handle<ManagedImage> imageHandle) -> ManagedImage& {
+  if (handleToSwapchainIndex.contains(imageHandle)) {
+    const auto imageIndex = handleToSwapchainIndex.at(imageHandle);
+    auto& managedImage = imageMap.at(imageHandle);
+    managedImage->setExternalImage(swapchain->getSwapchainImage(imageIndex));
+    managedImage->setExternalImageView(swapchain->getSwapchainImageView(imageIndex));
+    return *managedImage;
+  }
   assert(imageMap.contains(imageHandle));
   return *imageMap.at(imageHandle);
 }

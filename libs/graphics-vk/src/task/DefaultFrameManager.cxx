@@ -1,4 +1,5 @@
 #include "DefaultFrameManager.hpp"
+#include "FrameState.hpp"
 #include "api/fx/IEventQueue.hpp"
 #include "gfx/RenderContextConfig.hpp"
 #include "Frame.hpp"
@@ -15,12 +16,14 @@ DefaultFrameManager::DefaultFrameManager(
     std::shared_ptr<Device> newDevice,
     std::shared_ptr<Swapchain> newSwapchain,
     std::shared_ptr<IEventQueue> newEventQueue,
+    std::shared_ptr<FrameState> newFrameState,
     const std::shared_ptr<IDebugManager>& debugManager)
     : renderConfig{newRenderContextConfig},
       commandBufferManager{std::move(newCommandBufferManager)},
       device{std::move(newDevice)},
       swapchain{std::move(newSwapchain)},
       eventQueue{std::move(newEventQueue)},
+      frameState{std::move(newFrameState)},
       currentFrame{0} {
 
   for (uint8_t i = 0; i < renderConfig.framesInFlight; ++i) {
@@ -89,6 +92,7 @@ auto DefaultFrameManager::acquireFrame() -> std::variant<Frame*, ImageAcquireRes
   }
 
   if (std::holds_alternative<uint32_t>(result)) {
+    frameState->setSwapchainImageIndex(std::get<uint32_t>(result));
     frame->setSwapchainImageIndex(std::get<uint32_t>(result));
     return frame;
   }

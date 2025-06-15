@@ -10,6 +10,7 @@ class IRenderPass;
 struct BarrierPlan {
   std::unordered_map<PassId, std::vector<ImageBarrierData>> imageBarriers;
   std::unordered_map<PassId, std::vector<BufferBarrierData>> bufferBarriers;
+  ImageBarrierData swapchainBarrier;
 };
 
 struct LastImageUse {

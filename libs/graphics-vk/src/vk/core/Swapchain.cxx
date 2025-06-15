@@ -51,6 +51,10 @@ auto Swapchain::getDepthFormat() const -> vk::Format {
   throw std::runtime_error("Failed to find supported format");
 }
 
+auto Swapchain::getImages() const -> const std::vector<vk::Image>& {
+  return swapchainImages;
+}
+
 auto Swapchain::acquireNextImage(const vk::Semaphore& semaphore) const
     -> std::variant<uint32_t, ImageAcquireResult> {
   try {
