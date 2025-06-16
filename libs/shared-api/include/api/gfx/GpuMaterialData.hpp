@@ -70,16 +70,6 @@ struct GpuMaterialData {
   uint32_t albedoTextureId;
 };
 
-using GpuObjectCountData = uint32_t;
-
-struct GpuIndirectCommand {
-  uint32_t indexCount;
-  uint32_t instanceCount;
-  uint32_t firstIndex;
-  int32_t vertexOffset;
-  uint32_t firstInstance;
-};
-
 struct GeometryData {
   std::shared_ptr<std::vector<std::byte>> indexData;
   std::shared_ptr<std::vector<std::byte>> positionData;

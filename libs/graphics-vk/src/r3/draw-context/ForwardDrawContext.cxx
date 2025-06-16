@@ -37,8 +37,8 @@ auto ForwardDrawContext::bind([[maybe_unused]] const Frame* frame,
                                              pushConstants);
 }
 
-auto ForwardDrawContext::dispatch([[maybe_unused]] const Frame* frame,
-                                  [[maybe_unused]] vk::raii::CommandBuffer& commandBuffer) -> void {
+auto ForwardDrawContext::dispatch(const Frame* frame, vk::raii::CommandBuffer& commandBuffer)
+    -> void {
 
   commandBuffer.setViewportWithCount(createInfo.viewport);
   commandBuffer.setScissorWithCount(createInfo.scissor);
@@ -53,7 +53,7 @@ auto ForwardDrawContext::dispatch([[maybe_unused]] const Frame* frame,
                                   **indirectCommandCountBuffer,
                                   0,
                                   frame->getObjectCount(),
-                                  sizeof(vk::DrawIndexedIndirectCommand));
+                                  sizeof(vk::DrawIndirectCommand));
 }
 
 auto ForwardDrawContext::getPushConstantSize() -> size_t {

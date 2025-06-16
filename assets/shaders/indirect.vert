@@ -2,6 +2,8 @@
 #extension GL_EXT_buffer_reference : enable
 #extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
 
+#define INVALID_OFFSET 0xFFFFFFFFu
+
 layout(push_constant) uniform PushConstants {
   uint64_t objectDataBufferAddress;
   uint64_t regionDataAddress;
@@ -67,7 +69,6 @@ layout(location = 2) out vec4 v_color;
 
 void main() {
   ObjectDataBuffer objectDataBuf = ObjectDataBuffer(objectDataBufferAddress);
-
   RegionBuffer regionBuf = RegionBuffer(regionDataAddress);
 
   GpuObjectData object = objectDataBuf.objects[gl_InstanceIndex + gl_BaseInstance];
@@ -83,11 +84,17 @@ void main() {
   TexCoordBuffer texBuf = TexCoordBuffer(texCoordBufferAddress);
   vec2 texCoord = texBuf.texCoords[region.texCoordOffset + vertexIndex];
 
-  NormalBuffer normBuf = NormalBuffer(normalBufferAddress);
-  vec3 normal = normBuf.normals[region.normalOffset + vertexIndex];
+  vec3 normal = vec3(1.0, 1.0, 1.0);
+  if (region.normalOffset != INVALID_OFFSET) {
+    NormalBuffer normBuf = NormalBuffer(normalBufferAddress);
+    normal = normBuf.normals[region.normalOffset + vertexIndex];
+  }
 
-  ColorBuffer colorBuf = ColorBuffer(colorBufferAddress);
-  vec4 color = colorBuf.colors[region.colorOffset + vertexIndex];
+  vec4 color = vec4(1.0, 1.0, 1.0, 1.0);
+  if (region.colorOffset != INVALID_OFFSET) {
+    ColorBuffer colorBuf = ColorBuffer(colorBufferAddress);
+    vec4 color = colorBuf.colors[region.colorOffset + vertexIndex];
+  }
 
   // TODO: pull in object TRS buffers and look them up to multiply the position
 

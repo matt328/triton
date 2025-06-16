@@ -8,7 +8,7 @@
 
 #define ObjectDataSize 24
 #define GeometryRegionSize 24
-#define IndirectCommandSize 20
+#define IndirectCommandSize 16
 
 layout(buffer_reference, scalar) buffer GpuObjectDataBuffer {
   uint positionIndex;
@@ -49,11 +49,14 @@ layout(buffer_reference, scalar) buffer GpuVertexPositionDataBuffer {
 };
 
 layout(buffer_reference, scalar) buffer GpuIndirectCommandBuffer {
-  uint indexCount;
+  uint vertexCount;
   uint instanceCount;
-  uint firstIndex;
-  uint vertexOffset;
+  uint firstVertex;
   uint firstInstance;
+};
+
+layout(buffer_reference, scalar) buffer GpuIndirectCountBuffer {
+  uint count;
 };
 
 layout(push_constant) uniform PushConstants {
@@ -82,6 +85,13 @@ void main() {
   if (idx >= pushConstants.objectCount)
     return;
 
+  GpuIndirectCountBuffer outCount =
+      GpuIndirectCountBuffer(pushConstants.outputIndirectCountAddress);
+
+  if (idx == 0) {
+    outCount.count = 0;
+  }
+
   GpuObjectDataBuffer objectData =
       GpuObjectDataBuffer(pushConstants.objectDataAddress + idx * ObjectDataSize);
 
@@ -91,9 +101,10 @@ void main() {
   GpuIndirectCommandBuffer outCmd = GpuIndirectCommandBuffer(
       pushConstants.outputIndirectCommandAddress + idx * IndirectCommandSize);
 
-  outCmd.indexCount = geomData.indexCount;
+  outCmd.vertexCount = geomData.indexCount;
   outCmd.instanceCount = 1;
-  outCmd.firstIndex = geomData.indexOffset;
-  outCmd.vertexOffset = objectData.geometryRegionId;
+  outCmd.firstVertex = geomData.indexOffset;
   outCmd.firstInstance = idx;
+
+  atomicAdd(outCount.count, 1);
 }

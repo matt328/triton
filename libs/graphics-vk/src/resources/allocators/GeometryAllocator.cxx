@@ -84,7 +84,8 @@ auto GeometryAllocator::getRegionData(Handle<GeometryRegion> handle) const
   auto regionData = GpuGeometryRegionData{
       .indexCount = region.indexCount,
       .indexOffset = static_cast<uint32_t>(region.indexRegion.offset / sizeof(GpuIndexData)),
-      .positionOffset = static_cast<uint32_t>(region.positionRegion.offset)};
+      .positionOffset =
+          static_cast<uint32_t>(region.positionRegion.offset / sizeof(GpuVertexPositionData))};
   if (region.texCoordRegion) {
     regionData.texCoordOffset = region.texCoordRegion->offset;
   }

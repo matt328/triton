@@ -139,7 +139,7 @@ auto R3Renderer::createGlobalBuffers() -> void {
 
   globalBuffers.drawCounts = bufferSystem->registerPerFrameBuffer(
       BufferCreateInfo{.bufferLifetime = BufferLifetime::Transient,
-                       .initialSize = 64,
+                       .initialSize = 4,
                        .debugName = "DrawCounts",
                        .indirect = true});
   aliasRegistry->setHandle(BufferAlias::IndirectCommandCount, globalBuffers.drawCounts);

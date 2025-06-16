@@ -50,7 +50,7 @@ DataFacade::DataFacade(std::shared_ptr<tr::IEventQueue> newEventQueue)
       [&](const tr::StaticModelResponse& event) { handleStaticModelResponse(event); },
       "test_group");
 
-  scheduleDelayed([this] { testResources(); }, std::chrono::seconds(5));
+  scheduleDelayed([this] { testResources(); }, std::chrono::seconds(1));
 }
 
 DataFacade::~DataFacade() {
