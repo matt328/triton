@@ -21,6 +21,15 @@ struct CullingDispatchContextCreateInfo {
 struct ForwardDrawContextCreateInfo {
   vk::Viewport viewport;
   vk::Rect2D scissor;
+  LogicalHandle<ManagedBuffer> objectData;
+  LogicalHandle<ManagedBuffer> geometryRegion;
+  Handle<ManagedBuffer> indexData;
+  Handle<ManagedBuffer> vertexPosition;
+  Handle<ManagedBuffer> vertexTexCoord;
+  Handle<ManagedBuffer> vertexColor;
+  Handle<ManagedBuffer> vertexNormal;
+  LogicalHandle<ManagedBuffer> indirectCommand;
+  LogicalHandle<ManagedBuffer> indirectCount;
 };
 
 struct CompositionContextCreateInfo {};

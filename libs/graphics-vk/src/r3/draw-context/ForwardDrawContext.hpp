@@ -29,6 +29,18 @@ public:
 
 private:
   ForwardDrawContextCreateInfo createInfo;
+
+  struct PushConstants {
+    uint64_t objectDataBufferAddress{};
+    uint64_t regionDataAddress{};
+    uint64_t indexBufferAddress{};
+    uint64_t positionBufferAddress{};
+    uint64_t colorBufferAddress{};
+    uint64_t texCoordBufferAddress{};
+    uint64_t normalBufferAddress{};
+    uint64_t animationBufferAddress{};
+    uint64_t materialBufferAddress{};
+  };
 };
 
 }

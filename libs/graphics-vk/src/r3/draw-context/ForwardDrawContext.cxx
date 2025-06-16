@@ -1,4 +1,6 @@
 #include "ForwardDrawContext.hpp"
+#include "buffers/BufferSystem.hpp"
+#include "task/Frame.hpp"
 
 namespace tr {
 ForwardDrawContext::ForwardDrawContext(ContextId newId,
@@ -8,16 +10,54 @@ ForwardDrawContext::ForwardDrawContext(ContextId newId,
 }
 
 auto ForwardDrawContext::bind([[maybe_unused]] const Frame* frame,
-                              [[maybe_unused]] vk::raii::CommandBuffer& commandBuffer,
-                              [[maybe_unused]] const vk::raii::PipelineLayout& layout) -> void {
+                              vk::raii::CommandBuffer& commandBuffer,
+                              const vk::raii::PipelineLayout& layout) -> void {
+  const auto pushConstants = PushConstants{
+      .objectDataBufferAddress =
+          bufferSystem->getBufferAddress(frame->getLogicalBuffer(createInfo.objectData))
+              .or_else([] {
+                Log.warn("getBufferAddress could not find an address for objectData buffer");
+                return std::optional<uint64_t>{0};
+              })
+              .value(),
+      .regionDataAddress =
+          bufferSystem->getBufferAddress(frame->getLogicalBuffer(createInfo.geometryRegion))
+              .value_or(0L),
+      .indexBufferAddress = bufferSystem->getBufferAddress(createInfo.indexData).value_or(0L),
+      .positionBufferAddress =
+          bufferSystem->getBufferAddress(createInfo.vertexPosition).value_or(0L),
+      .colorBufferAddress = bufferSystem->getBufferAddress(createInfo.vertexColor).value_or(0L),
+      .texCoordBufferAddress =
+          bufferSystem->getBufferAddress(createInfo.vertexTexCoord).value_or(0L),
+      .normalBufferAddress = bufferSystem->getBufferAddress(createInfo.vertexNormal).value_or(0L),
+  };
+  commandBuffer.pushConstants<PushConstants>(layout,
+                                             vk::ShaderStageFlagBits::eVertex,
+                                             0,
+                                             pushConstants);
 }
 
 auto ForwardDrawContext::dispatch([[maybe_unused]] const Frame* frame,
                                   [[maybe_unused]] vk::raii::CommandBuffer& commandBuffer) -> void {
+
+  commandBuffer.setViewportWithCount(createInfo.viewport);
+  commandBuffer.setScissorWithCount(createInfo.scissor);
+
+  const auto indirectCommandBuffer =
+      bufferSystem->getVkBuffer(frame->getLogicalBuffer(createInfo.indirectCommand));
+  const auto indirectCommandCountBuffer =
+      bufferSystem->getVkBuffer(frame->getLogicalBuffer(createInfo.indirectCount));
+
+  commandBuffer.drawIndirectCount(**indirectCommandBuffer,
+                                  0,
+                                  **indirectCommandCountBuffer,
+                                  0,
+                                  frame->getObjectCount(),
+                                  sizeof(vk::DrawIndexedIndirectCommand));
 }
 
 auto ForwardDrawContext::getPushConstantSize() -> size_t {
-  return sizeof(0);
+  return sizeof(PushConstants);
 }
 
 [[nodiscard]] auto ForwardDrawContext::getGraphInfo() const -> PassGraphInfo {

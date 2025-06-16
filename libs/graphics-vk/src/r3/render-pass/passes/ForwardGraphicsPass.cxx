@@ -38,20 +38,20 @@ ForwardGraphicsPass::ForwardGraphicsPass(std::shared_ptr<ImageManager> newImageM
 
   const auto vertexStage = ShaderStageInfo{
       .stage = vk::ShaderStageFlagBits::eVertex,
-      .shaderFile = (SHADER_ROOT / "static.vert.spv").string(),
+      .shaderFile = (SHADER_ROOT / "indirect.vert.spv").string(),
       .entryPoint = "main",
   };
 
   const auto fragmentStage = ShaderStageInfo{
       .stage = vk::ShaderStageFlagBits::eFragment,
-      .shaderFile = (SHADER_ROOT / "static.frag.spv").string(),
+      .shaderFile = (SHADER_ROOT / "indirect.frag.spv").string(),
       .entryPoint = "main",
   };
 
   const auto pipelineLayoutInfo = PipelineLayoutInfo{
       .pushConstantInfoList = {PushConstantInfo{.stageFlags = vk::ShaderStageFlagBits::eVertex,
                                                 .offset = 0,
-                                                .size = 36}}};
+                                                .size = 104}}};
 
   const auto pipelineCreateInfo =
       PipelineCreateInfo{.id = id,

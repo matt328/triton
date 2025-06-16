@@ -78,7 +78,17 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
                                .maxDepth = 1.f},
       .scissor = vk::Rect2D{.offset = vk::Offset2D{.x = 0, .y = 0},
                             .extent = vk::Extent2D{.width = rendererConfig.initialWidth,
-                                                   .height = rendererConfig.initialHeight}}};
+                                                   .height = rendererConfig.initialHeight}},
+      .objectData = globalBuffers.objectData,
+      .geometryRegion = globalBuffers.geometryRegion,
+      .indexData = geometryBufferPack->getIndexBuffer(),
+      .vertexPosition = geometryBufferPack->getPositionBuffer(),
+      .vertexTexCoord = geometryBufferPack->getTexCoordBuffer(),
+      .vertexColor = geometryBufferPack->getColorBuffer(),
+      .vertexNormal = geometryBufferPack->getNormalBuffer(),
+      .indirectCommand = globalBuffers.drawCommands,
+      .indirectCount = globalBuffers.drawCounts,
+  };
 
   drawContextFactory->createDispatchContext(ContextId::Cube, forwardDrawCreateInfo);
 
