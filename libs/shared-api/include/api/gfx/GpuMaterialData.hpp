@@ -4,6 +4,31 @@ namespace tr {
 
 constexpr uint32_t INVALID_OFFSET = std::numeric_limits<uint32_t>::max(); // 0xFFFFFFFF
 
+struct GpuFrameDataBuffer {
+  glm::mat4 view;
+  glm::mat4 projection;
+  glm::vec4 cameraPosition;
+  float time;
+  float _pad0;
+  float _pad1;
+  float _pad2;
+};
+
+struct GpuResourceTable {
+  uint64_t objectDataBufferAddress{};
+  uint64_t objectPositionsAddress{};
+  uint64_t objectRotationsAddress{};
+  uint64_t objectScalesAddress{};
+  uint64_t regionBufferAddress{};
+  uint64_t indexBufferAddress{};
+  uint64_t positionBufferAddress{};
+  uint64_t colorBufferAddress{};
+  uint64_t texCoordBufferAddress{};
+  uint64_t normalBufferAddress{};
+  uint64_t animationBufferAddress{};
+  uint64_t materialBufferAddress{};
+};
+
 /// ObjectData Buffer
 struct GpuObjectData {
   uint32_t transformIndex;

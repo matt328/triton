@@ -41,6 +41,8 @@ struct GlobalBuffers {
   LogicalHandle<ManagedBuffer> objectRotations;
   LogicalHandle<ManagedBuffer> objectScales;
   LogicalHandle<ManagedBuffer> geometryRegion;
+  LogicalHandle<ManagedBuffer> frameData;
+  LogicalHandle<ManagedBuffer> resourceTable;
 };
 
 struct GlobalImages {

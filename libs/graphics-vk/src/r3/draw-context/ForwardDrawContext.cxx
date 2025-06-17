@@ -20,6 +20,15 @@ auto ForwardDrawContext::bind([[maybe_unused]] const Frame* frame,
                 return std::optional<uint64_t>{0};
               })
               .value(),
+      .objectPositionsAddress =
+          bufferSystem->getBufferAddress(frame->getLogicalBuffer(createInfo.objectPositions))
+              .value_or(0L),
+      .objectRotationsAddress =
+          bufferSystem->getBufferAddress(frame->getLogicalBuffer(createInfo.objectRotations))
+              .value_or(0L),
+      .objectScalesAddress =
+          bufferSystem->getBufferAddress(frame->getLogicalBuffer(createInfo.objectScales))
+              .value_or(0L),
       .regionDataAddress =
           bufferSystem->getBufferAddress(frame->getLogicalBuffer(createInfo.geometryRegion))
               .value_or(0L),

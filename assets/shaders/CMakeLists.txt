@@ -36,7 +36,7 @@ foreach(SHADER ${Shaders})
 
   add_custom_command(
     OUTPUT "${SHADER_BINARY}"
-    COMMAND glslangValidator -V "${SHADER_SOURCE}" -o "${SHADER_BINARY}"
+    COMMAND glslangValidator -V -g "${SHADER_SOURCE}" -o "${SHADER_BINARY}"
     COMMENT "Compiling GLSL shader: ${SHADER} -> SPIR-V"
     DEPENDS "${SHADER_SOURCE}"
   )

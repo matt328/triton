@@ -22,6 +22,9 @@ struct ForwardDrawContextCreateInfo {
   vk::Viewport viewport;
   vk::Rect2D scissor;
   LogicalHandle<ManagedBuffer> objectData;
+  LogicalHandle<ManagedBuffer> objectPositions;
+  LogicalHandle<ManagedBuffer> objectRotations;
+  LogicalHandle<ManagedBuffer> objectScales;
   LogicalHandle<ManagedBuffer> geometryRegion;
   Handle<ManagedBuffer> indexData;
   Handle<ManagedBuffer> vertexPosition;

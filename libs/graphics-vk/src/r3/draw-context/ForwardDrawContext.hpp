@@ -32,6 +32,9 @@ private:
 
   struct PushConstants {
     uint64_t objectDataBufferAddress{};
+    uint64_t objectPositionsAddress{};
+    uint64_t objectRotationsAddress{};
+    uint64_t objectScalesAddress{};
     uint64_t regionDataAddress{};
     uint64_t indexBufferAddress{};
     uint64_t positionBufferAddress{};
@@ -40,6 +43,8 @@ private:
     uint64_t normalBufferAddress{};
     uint64_t animationBufferAddress{};
     uint64_t materialBufferAddress{};
+    glm::mat4 projection;
+    glm::mat4 view;
   };
 };
 

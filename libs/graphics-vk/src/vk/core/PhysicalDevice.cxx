@@ -25,6 +25,9 @@ PhysicalDevice::PhysicalDevice(const std::shared_ptr<Instance>& instance,
     Log.error("Failed to select a suitable physical device");
   }
 
+  auto regularProperties = physicalDevice->getProperties();
+  Log.info("Max Push Constant Size: {}b", regularProperties.limits.maxPushConstantsSize);
+
   auto deviceProperties =
       physicalDevice->getProperties2KHR<vk::PhysicalDeviceProperties2KHR,
                                         vk::PhysicalDeviceDescriptorBufferPropertiesEXT>();
