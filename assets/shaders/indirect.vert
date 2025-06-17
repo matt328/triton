@@ -7,11 +7,17 @@
 #define INVALID_OFFSET 0xFFFFFFFFu
 
 layout(push_constant) uniform PushConstants {
+  uint64_t resourceTableAddress;
+  uint64_t frameDataAddress;
+}
+pushConstants;
+
+layout(buffer_reference, scalar) buffer ResourceTable {
   uint64_t objectDataBufferAddress;
   uint64_t objectPositionsAddress;
   uint64_t objectRotationsAddress;
   uint64_t objectScalesAddress;
-  uint64_t regionDataAddress;
+  uint64_t regionBufferAddress;
   uint64_t indexBufferAddress;
   uint64_t positionBufferAddress;
   uint64_t colorBufferAddress;
@@ -19,7 +25,18 @@ layout(push_constant) uniform PushConstants {
   uint64_t normalBufferAddress;
   uint64_t animationBufferAddress;
   uint64_t materialBufferAddress;
-  uint geometryRegionIndex;
+  uint64_t indirectCommandAddress;
+  uint64_t indirectCountAddress;
+};
+
+layout(buffer_reference, scalar) buffer FrameDataBuffer {
+  mat4 view;
+  mat4 projection;
+  vec4 cameraPosition;
+  float time;
+  uint maxObjects;
+  float _pad0;
+  float _pad1;
 };
 
 layout(buffer_reference, std430) buffer IndexBuffer {
@@ -89,40 +106,46 @@ vec3 applyQuaternion(vec4 q, vec3 v) {
 }
 
 void main() {
-  ObjectDataBuffer objectDataBuf = ObjectDataBuffer(objectDataBufferAddress);
-  RegionBuffer regionBuf = RegionBuffer(regionDataAddress);
+
+  ResourceTable resourceTable = ResourceTable(pushConstants.resourceTableAddress);
+  FrameDataBuffer frameData = FrameDataBuffer(pushConstants.frameDataAddress);
+
+  ObjectDataBuffer objectDataBuf = ObjectDataBuffer(resourceTable.objectDataBufferAddress);
+  RegionBuffer regionBuf = RegionBuffer(resourceTable.regionBufferAddress);
 
   GpuObjectData object = objectDataBuf.objects[gl_InstanceIndex + gl_BaseInstance];
 
-  GpuPositionDataBuffer positionDataBuffer = GpuPositionDataBuffer(objectPositionsAddress);
+  GpuPositionDataBuffer positionDataBuffer =
+      GpuPositionDataBuffer(resourceTable.objectPositionsAddress);
   vec3 objectPosition = positionDataBuffer[object.transformIndex].position;
 
-  GpuRotationDataBuffer rotationDataBuffer = GpuRotationDataBuffer(objectRotationsAddress);
+  GpuRotationDataBuffer rotationDataBuffer =
+      GpuRotationDataBuffer(resourceTable.objectRotationsAddress);
   vec4 objectRotation = rotationDataBuffer[object.rotationIndex].rotation;
 
-  GpuScaleDataBuffer scaleDataBuffer = GpuScaleDataBuffer(objectScalesAddress);
+  GpuScaleDataBuffer scaleDataBuffer = GpuScaleDataBuffer(resourceTable.objectScalesAddress);
   vec3 objectScale = scaleDataBuffer[object.scaleIndex].scale;
 
   GpuGeometryRegionData region = regionBuf.regions[object.geometryRegionId];
 
-  IndexBuffer indexBuf = IndexBuffer(indexBufferAddress);
+  IndexBuffer indexBuf = IndexBuffer(resourceTable.indexBufferAddress);
   uint vertexIndex = indexBuf.index[region.indexOffset + gl_VertexIndex];
 
-  PositionBuffer posBuf = PositionBuffer(positionBufferAddress);
+  PositionBuffer posBuf = PositionBuffer(resourceTable.positionBufferAddress);
   vec3 position = posBuf.positions[region.positionOffset + vertexIndex];
 
-  TexCoordBuffer texBuf = TexCoordBuffer(texCoordBufferAddress);
+  TexCoordBuffer texBuf = TexCoordBuffer(resourceTable.texCoordBufferAddress);
   vec2 texCoord = texBuf.texCoords[region.texCoordOffset + vertexIndex];
 
   vec3 normal = vec3(1.0, 1.0, 1.0);
   if (region.normalOffset != INVALID_OFFSET) {
-    NormalBuffer normBuf = NormalBuffer(normalBufferAddress);
+    NormalBuffer normBuf = NormalBuffer(resourceTable.normalBufferAddress);
     normal = normBuf.normals[region.normalOffset + vertexIndex];
   }
 
   vec4 color = vec4(1.0, 1.0, 1.0, 1.0);
   if (region.colorOffset != INVALID_OFFSET) {
-    ColorBuffer colorBuf = ColorBuffer(colorBufferAddress);
+    ColorBuffer colorBuf = ColorBuffer(resourceTable.colorBufferAddress);
     vec4 color = colorBuf.colors[region.colorOffset + vertexIndex];
   }
 

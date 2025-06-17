@@ -30,20 +30,8 @@ public:
 
 private:
   struct PushConstants {
-    uint32_t objectCount;
-    uint64_t objectDataAddress;
-    uint64_t objectPositionsAddress;
-    uint64_t objectRotationsAddress;
-    uint64_t objectScalesAddress;
-
-    uint64_t outputIndirectCommandAddress;
-    uint64_t outputIndirectCountAddress;
-    uint64_t geometryRegionAddress;
-    uint64_t indexDataAddress;
-    uint64_t vertexPositionAddress;
-    uint64_t vertexNormalAddress;
-    uint64_t vertexTexCoordAddress;
-    uint64_t vertexColorAddress;
+    uint64_t resourceTableAddress;
+    uint64_t frameDataAddress;
   };
 
   CullingDispatchContextCreateInfo createInfo;

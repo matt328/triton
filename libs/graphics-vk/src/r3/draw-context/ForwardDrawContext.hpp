@@ -31,20 +31,8 @@ private:
   ForwardDrawContextCreateInfo createInfo;
 
   struct PushConstants {
-    uint64_t objectDataBufferAddress{};
-    uint64_t objectPositionsAddress{};
-    uint64_t objectRotationsAddress{};
-    uint64_t objectScalesAddress{};
-    uint64_t regionDataAddress{};
-    uint64_t indexBufferAddress{};
-    uint64_t positionBufferAddress{};
-    uint64_t colorBufferAddress{};
-    uint64_t texCoordBufferAddress{};
-    uint64_t normalBufferAddress{};
-    uint64_t animationBufferAddress{};
-    uint64_t materialBufferAddress{};
-    glm::mat4 projection;
-    glm::mat4 view;
+    uint64_t resourceTableAddress;
+    uint64_t frameDataAddress;
   };
 };
 

@@ -11,6 +11,8 @@ enum class BufferAlias : uint8_t {
   ObjectRotations,
   ObjectScales,
   GeometryRegion,
+  FrameData,
+  ResourceTable,
   Count
 };
 

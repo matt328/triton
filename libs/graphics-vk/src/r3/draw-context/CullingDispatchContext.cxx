@@ -16,41 +16,12 @@ auto CullingDispatchContext::bind(const Frame* frame,
                                   vk::raii::CommandBuffer& commandBuffer,
                                   const vk::raii::PipelineLayout& layout) -> void {
   const auto pushConstants = PushConstants{
-      .objectCount = frame->getObjectCount(),
-      .objectDataAddress =
-          bufferSystem->getBufferAddress(frame->getLogicalBuffer(createInfo.objectData))
-              .or_else([] {
-                // TODO(matt): Figure out how to handle this gracefully
-                Log.warn("getBufferAddress could not find an address for objectData buffer");
-                return std::optional<uint64_t>{0};
-              })
-              .value(),
-      .objectPositionsAddress =
-          bufferSystem->getBufferAddress(frame->getLogicalBuffer(createInfo.objectPositions))
+      .resourceTableAddress =
+          bufferSystem->getBufferAddress(frame->getLogicalBuffer(createInfo.resourceTable))
               .value_or(0L),
-      .objectRotationsAddress =
-          bufferSystem->getBufferAddress(frame->getLogicalBuffer(createInfo.objectRotations))
-              .value_or(0L),
-      .objectScalesAddress =
-          bufferSystem->getBufferAddress(frame->getLogicalBuffer(createInfo.objectScales))
-              .value_or(0L),
-      .outputIndirectCommandAddress =
-          bufferSystem->getBufferAddress(frame->getLogicalBuffer(createInfo.indirectCommand))
-              .value_or(0L),
-      .outputIndirectCountAddress =
-          bufferSystem->getBufferAddress(frame->getLogicalBuffer(createInfo.indirectCount))
-              .value_or(0L),
-      .geometryRegionAddress =
-          bufferSystem->getBufferAddress(frame->getLogicalBuffer(createInfo.geometryRegion))
-              .value_or(0L),
-      .indexDataAddress = bufferSystem->getBufferAddress(createInfo.indexData).value_or(0L),
-      .vertexPositionAddress =
-          bufferSystem->getBufferAddress(createInfo.vertexPosition).value_or(0L),
-      .vertexNormalAddress = bufferSystem->getBufferAddress(createInfo.vertexNormal).value_or(0L),
-      .vertexTexCoordAddress =
-          bufferSystem->getBufferAddress(createInfo.vertexTexCoord).value_or(0L),
-      .vertexColorAddress = bufferSystem->getBufferAddress(createInfo.vertexColor).value_or(0L),
-  };
+      .frameDataAddress =
+          bufferSystem->getBufferAddress(frame->getLogicalBuffer(createInfo.frameData))
+              .value_or(0L)};
   commandBuffer.pushConstants<PushConstants>(layout,
                                              vk::ShaderStageFlagBits::eCompute,
                                              0,

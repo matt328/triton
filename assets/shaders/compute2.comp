@@ -59,47 +59,64 @@ layout(buffer_reference, scalar) buffer GpuIndirectCountBuffer {
   uint count;
 };
 
-layout(push_constant) uniform PushConstants {
-  uint objectCount;
-  uint64_t objectDataAddress;
+layout(buffer_reference, scalar) buffer ResourceTable {
+  uint64_t objectDataBufferAddress;
   uint64_t objectPositionsAddress;
   uint64_t objectRotationsAddress;
   uint64_t objectScalesAddress;
+  uint64_t regionBufferAddress;
+  uint64_t indexBufferAddress;
+  uint64_t positionBufferAddress;
+  uint64_t colorBufferAddress;
+  uint64_t texCoordBufferAddress;
+  uint64_t normalBufferAddress;
+  uint64_t animationBufferAddress;
+  uint64_t materialBufferAddress;
+  uint64_t indirectCommandAddress;
+  uint64_t indirectCountAddress;
+};
 
-  uint64_t outputIndirectCommandAddress;
-  uint64_t outputIndirectCountAddress;
+layout(buffer_reference, scalar) buffer FrameDataBuffer {
+  mat4 view;
+  mat4 projection;
+  vec4 cameraPosition;
+  float time;
+  uint maxObjects;
+  float _pad0;
+  float _pad1;
+};
 
-  uint64_t geometryRegionAddress;
-  uint64_t indexDataAddress;
-  uint64_t vertexPositionAddress;
-  uint64_t vertexNormalAddress;
-  uint64_t vertexTexCoordAddress;
-  uint64_t vertexColorAddress;
+layout(push_constant) uniform PushConstants {
+  uint64_t resourceTableAddress;
+  uint64_t frameDataAddress;
 }
 pushConstants;
 
 layout(local_size_x = 64) in;
 
 void main() {
+
+  ResourceTable resourceTable = ResourceTable(pushConstants.resourceTableAddress);
+  FrameDataBuffer frameData = FrameDataBuffer(pushConstants.frameDataAddress);
+
   uint idx = gl_GlobalInvocationID.x;
-  if (idx >= pushConstants.objectCount)
+  if (idx >= frameData.maxObjects)
     return;
 
-  GpuIndirectCountBuffer outCount =
-      GpuIndirectCountBuffer(pushConstants.outputIndirectCountAddress);
+  GpuIndirectCountBuffer outCount = GpuIndirectCountBuffer(resourceTable.indirectCountAddress);
 
   if (idx == 0) {
     outCount.count = 0;
   }
 
   GpuObjectDataBuffer objectData =
-      GpuObjectDataBuffer(pushConstants.objectDataAddress + idx * ObjectDataSize);
+      GpuObjectDataBuffer(resourceTable.objectDataBufferAddress + idx * ObjectDataSize);
 
   GpuGeometryRegionDataBuffer geomData = GpuGeometryRegionDataBuffer(
-      pushConstants.geometryRegionAddress + objectData.geometryRegionId * GeometryRegionSize);
+      resourceTable.regionBufferAddress + objectData.geometryRegionId * GeometryRegionSize);
 
-  GpuIndirectCommandBuffer outCmd = GpuIndirectCommandBuffer(
-      pushConstants.outputIndirectCommandAddress + idx * IndirectCommandSize);
+  GpuIndirectCommandBuffer outCmd =
+      GpuIndirectCommandBuffer(resourceTable.indirectCommandAddress + idx * IndirectCommandSize);
 
   outCmd.vertexCount = geomData.indexCount;
   outCmd.instanceCount = 1;

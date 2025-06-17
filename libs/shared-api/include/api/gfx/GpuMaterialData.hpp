@@ -4,14 +4,14 @@ namespace tr {
 
 constexpr uint32_t INVALID_OFFSET = std::numeric_limits<uint32_t>::max(); // 0xFFFFFFFF
 
-struct GpuFrameDataBuffer {
+struct alignas(4) GpuFrameData {
   glm::mat4 view;
   glm::mat4 projection;
   glm::vec4 cameraPosition;
   float time;
-  float _pad0;
-  float _pad1;
-  float _pad2;
+  uint32_t maxObjects;
+  float _pad0{};
+  float _pad1{};
 };
 
 struct GpuResourceTable {
@@ -27,6 +27,8 @@ struct GpuResourceTable {
   uint64_t normalBufferAddress{};
   uint64_t animationBufferAddress{};
   uint64_t materialBufferAddress{};
+  uint64_t indirectCommandAddress{};
+  uint64_t indirectCountAddress{};
 };
 
 /// ObjectData Buffer

@@ -79,35 +79,18 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
       .scissor = vk::Rect2D{.offset = vk::Offset2D{.x = 0, .y = 0},
                             .extent = vk::Extent2D{.width = rendererConfig.initialWidth,
                                                    .height = rendererConfig.initialHeight}},
-      .objectData = globalBuffers.objectData,
-      .objectPositions = globalBuffers.objectPositions,
-      .objectRotations = globalBuffers.objectRotations,
-      .objectScales = globalBuffers.objectScales,
-      .geometryRegion = globalBuffers.geometryRegion,
-      .indexData = geometryBufferPack->getIndexBuffer(),
-      .vertexPosition = geometryBufferPack->getPositionBuffer(),
-      .vertexTexCoord = geometryBufferPack->getTexCoordBuffer(),
-      .vertexColor = geometryBufferPack->getColorBuffer(),
-      .vertexNormal = geometryBufferPack->getNormalBuffer(),
+      .resourceTable = globalBuffers.resourceTable,
+      .frameData = globalBuffers.frameData,
       .indirectCommand = globalBuffers.drawCommands,
-      .indirectCount = globalBuffers.drawCounts,
+      .indirectCommandCount = globalBuffers.drawCounts,
   };
 
   drawContextFactory->createDispatchContext(ContextId::Cube, forwardDrawCreateInfo);
 
-  const auto cullingCreateInfo =
-      CullingDispatchContextCreateInfo{.objectData = globalBuffers.objectData,
-                                       .geometryRegion = globalBuffers.geometryRegion,
-                                       .objectPositions = globalBuffers.objectPositions,
-                                       .objectRotations = globalBuffers.objectRotations,
-                                       .objectScales = globalBuffers.objectScales,
-                                       .indirectCommand = globalBuffers.drawCommands,
-                                       .indirectCount = globalBuffers.drawCounts,
-                                       .indexData = geometryBufferPack->getIndexBuffer(),
-                                       .vertexPosition = geometryBufferPack->getPositionBuffer(),
-                                       .vertexNormal = geometryBufferPack->getNormalBuffer(),
-                                       .vertexTexCoord = geometryBufferPack->getTexCoordBuffer(),
-                                       .vertexColor = geometryBufferPack->getColorBuffer()};
+  const auto cullingCreateInfo = CullingDispatchContextCreateInfo{
+      .resourceTable = globalBuffers.resourceTable,
+      .frameData = globalBuffers.frameData,
+  };
 
   drawContextFactory->createDispatchContext(ContextId::Culling, cullingCreateInfo);
 
@@ -175,6 +158,20 @@ auto R3Renderer::createGlobalBuffers() -> void {
       BufferCreateInfo{.bufferLifetime = BufferLifetime::Transient,
                        .debugName = "Buffer-GeometryRegion"});
   aliasRegistry->setHandle(BufferAlias::GeometryRegion, globalBuffers.geometryRegion);
+
+  globalBuffers.frameData = bufferSystem->registerPerFrameBuffer(BufferCreateInfo{
+      .bufferLifetime = BufferLifetime::Transient,
+      .bufferUsage = BufferUsage::Storage,
+      .debugName = "Buffer-FrameData",
+  });
+  aliasRegistry->setHandle(BufferAlias::FrameData, globalBuffers.frameData);
+
+  globalBuffers.resourceTable = bufferSystem->registerPerFrameBuffer(BufferCreateInfo{
+      .bufferLifetime = BufferLifetime::Transient,
+      .bufferUsage = BufferUsage::Storage,
+      .debugName = "Buffer-ResourceTable",
+  });
+  aliasRegistry->setHandle(BufferAlias::ResourceTable, globalBuffers.resourceTable);
 }
 
 auto R3Renderer::createGlobalImages() -> void {
@@ -239,6 +236,59 @@ void R3Renderer::renderNextFrame() {
 
     {
       ZoneScopedN("Per Frame buffers");
+      // FrameData
+      auto frameData = GpuFrameData{.view = glm::identity<glm::mat4>(),
+                                    .projection = glm::identity<glm::mat4>(),
+                                    .cameraPosition = glm::vec4(0.f, 0.f, 5.f, 1.f),
+                                    .time = 0.f,
+                                    .maxObjects = frame->getObjectCount()};
+
+      bufferSystem->insert(frame->getLogicalBuffer(globalBuffers.frameData),
+                           &frameData,
+                           BufferRegion{.size = sizeof(GpuFrameData)});
+
+      // ResourceTable
+      auto resourceTableData = GpuResourceTable{
+          .objectDataBufferAddress =
+              bufferSystem->getBufferAddress(frame->getLogicalBuffer(globalBuffers.objectData))
+                  .or_else([] {
+                    Log.warn("getBufferAddress could not find an address for objectData buffer");
+                    return std::optional<uint64_t>{0};
+                  })
+                  .value(),
+          .objectPositionsAddress =
+              bufferSystem->getBufferAddress(frame->getLogicalBuffer(globalBuffers.objectPositions))
+                  .value_or(0L),
+          .objectRotationsAddress =
+              bufferSystem->getBufferAddress(frame->getLogicalBuffer(globalBuffers.objectRotations))
+                  .value_or(0L),
+          .objectScalesAddress =
+              bufferSystem->getBufferAddress(frame->getLogicalBuffer(globalBuffers.objectScales))
+                  .value_or(0L),
+          .regionBufferAddress =
+              bufferSystem->getBufferAddress(frame->getLogicalBuffer(globalBuffers.geometryRegion))
+                  .value_or(0L),
+          .indexBufferAddress =
+              bufferSystem->getBufferAddress(geometryBufferPack->getIndexBuffer()).value_or(0L),
+          .positionBufferAddress =
+              bufferSystem->getBufferAddress(geometryBufferPack->getPositionBuffer()).value_or(0L),
+          .colorBufferAddress =
+              bufferSystem->getBufferAddress(geometryBufferPack->getColorBuffer()).value_or(0L),
+          .texCoordBufferAddress =
+              bufferSystem->getBufferAddress(geometryBufferPack->getTexCoordBuffer()).value_or(0L),
+          .normalBufferAddress =
+              bufferSystem->getBufferAddress(geometryBufferPack->getNormalBuffer()).value_or(0L),
+          .indirectCommandAddress =
+              bufferSystem->getBufferAddress(frame->getLogicalBuffer(globalBuffers.drawCommands))
+                  .value_or(0L),
+          .indirectCountAddress =
+              bufferSystem->getBufferAddress(frame->getLogicalBuffer(globalBuffers.drawCounts))
+                  .value_or(0L),
+      };
+      bufferSystem->insert(frame->getLogicalBuffer(globalBuffers.resourceTable),
+                           &resourceTableData,
+                           BufferRegion{.size = sizeof(GpuResourceTable)});
+
       // GeometryRegionBuffer
       if (!geometryRegionContents.empty()) {
         bufferSystem->insert(
