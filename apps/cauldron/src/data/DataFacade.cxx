@@ -4,11 +4,11 @@
 
 namespace ed {
 
-// constexpr auto ModelFile =
-//     "/home/matt/projects/matt/game-assets/models/current/viking_room/viking_room_v4.trm";
-
 constexpr auto ModelFile =
-    "/home/matt/Projects/game-assets/models/current/viking_room/viking_room_v4.trm";
+    "/home/matt/projects/matt/game-assets/models/current/viking_room/viking_room_v4.trm";
+
+// constexpr auto ModelFile =
+//     "/home/matt/Projects/game-assets/models/current/viking_room/viking_room_v4.trm";
 
 DataFacade::DataFacade(std::shared_ptr<tr::IEventQueue> newEventQueue)
     : eventQueue{std::move(newEventQueue)} {
@@ -68,6 +68,48 @@ auto DataFacade::testResources() -> void {
   const auto beginBatch = tr::BeginResourceBatch{.batchId = 1};
   const auto endBatch = tr::EndResourceBatch{.batchId = 1};
   const auto vikingRoomRequestId = requestIdGenerator.getKey();
+
+  const auto positions = std::vector<glm::vec3>{glm::vec3(-1.f, -1.f, 0.f),
+                                                glm::vec3(0.f, 1.f, 0.f),
+                                                glm::vec3(1.f, -1.f, 0.f)};
+
+  const auto colors = std::vector<glm::vec3>{glm::vec3(1.f, 0.f, 0.f),
+                                             glm::vec3(0.f, 1.f, 0.f),
+                                             glm::vec3(0.f, 0.f, 1.f)};
+
+  const auto texCoords =
+      std::vector<glm::vec2>{glm::vec2(0.f, 0.f), glm::vec2(0.5f, 1.f), glm::vec2(1.f, 0.f)};
+
+  const auto indices = std::vector<uint32_t>{0, 1, 2};
+
+  std::vector<std::byte> positionBytes(reinterpret_cast<const std::byte*>(positions.data()),
+                                       reinterpret_cast<const std::byte*>(positions.data()) +
+                                           positions.size() * sizeof(glm::vec3));
+
+  std::vector<std::byte> colorBytes(reinterpret_cast<const std::byte*>(colors.data()),
+                                    reinterpret_cast<const std::byte*>(colors.data()) +
+                                        colors.size() * sizeof(glm::vec3));
+
+  std::vector<std::byte> texCoordBytes(reinterpret_cast<const std::byte*>(texCoords.data()),
+                                       reinterpret_cast<const std::byte*>(texCoords.data()) +
+                                           texCoords.size() * sizeof(glm::vec2));
+
+  std::vector<std::byte> indexBytes(reinterpret_cast<const std::byte*>(indices.data()),
+                                    reinterpret_cast<const std::byte*>(indices.data()) +
+                                        indices.size() * sizeof(uint32_t));
+
+  const auto geometryData =
+      tr::GeometryData{.indexData = std::make_shared<std::vector<std::byte>>(indexBytes),
+                       .positionData = std::make_shared<std::vector<std::byte>>(positionBytes),
+                       .colorData = std::make_shared<std::vector<std::byte>>(colorBytes),
+                       .texCoordData = std::make_shared<std::vector<std::byte>>(texCoordBytes)};
+
+  const auto triangleRequestId = requestIdGenerator.getKey();
+  const auto triangleRequest = tr::StaticMeshRequest{.batchId = 1,
+                                                     .requestId = triangleRequestId,
+                                                     .geometryData = geometryData,
+                                                     .entityName = "Triangle"};
+
   // TODO(tomorrow) Create a way to just feed arbitrary vertex and index data
   const auto vikingRoomRequest = tr::StaticModelRequest{.batchId = 1,
                                                         .requestId = vikingRoomRequestId,
@@ -106,6 +148,7 @@ auto DataFacade::testResources() -> void {
                                  .animations = {"Idle", "Walk"}});
 
   eventQueue->emit(beginBatch, "test_group");
+  eventQueue->emit(triangleRequest, "test_group");
   eventQueue->emit(vikingRoomRequest, "test_group");
   eventQueue->emit(peasant, "test_group");
   eventQueue->emit(vikingRoomRequest2, "test_group");

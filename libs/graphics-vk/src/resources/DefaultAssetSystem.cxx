@@ -53,6 +53,11 @@ auto DefaultAssetSystem::run() -> void {
           eventBatches[smRequest.batchId].push_back(&eventVariant);
         },
         "test_group");
+    eventQueue->subscribe<StaticMeshRequest>(
+        [this](const StaticMeshRequest& smRequest, const EventVariant& eventVariant) {
+          eventBatches[smRequest.batchId].push_back(&eventVariant);
+        },
+        "test_group");
 
     eventQueue->subscribe<DynamicModelRequest>(
         [this](const DynamicModelRequest& dmRequest, const EventVariant& eventVariant) {
@@ -136,7 +141,7 @@ auto DefaultAssetSystem::handleStaticMeshRequest(const StaticMeshRequest& smRequ
                                                  std::vector<StaticModelUploaded>& responses)
     -> void {
   ZoneScoped;
-  Log.trace("Handling Static Model Request ID: {}", smRequest.requestId);
+  Log.trace("Handling Static Mesh Request ID: {}", smRequest.requestId);
   const auto [regionHandle, uploads] =
       geometryAllocator->allocate(smRequest.geometryData, transferSystem->getTransferContext());
 
