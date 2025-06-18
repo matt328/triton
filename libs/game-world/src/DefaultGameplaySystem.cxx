@@ -21,7 +21,7 @@ constexpr auto DefaultPosition = glm::vec3{0.f, 7.f, 5.f};
 DefaultGameplaySystem::DefaultGameplaySystem(std::shared_ptr<IEventBus> newEventBus,
                                              std::shared_ptr<IAssetService> newAssetService,
                                              std::shared_ptr<IActionSystem> newActionSystem,
-                                             std::shared_ptr<CameraSystem> newCameraSystem,
+                                             std::shared_ptr<CameraHandler> newCameraSystem,
                                              std::shared_ptr<TransformSystem> newTransformSystem,
                                              std::shared_ptr<AnimationSystem> newAnimationSystem,
                                              std::shared_ptr<RenderDataSystem> newRenderDataSystem,

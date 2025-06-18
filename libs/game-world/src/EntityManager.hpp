@@ -1,5 +1,6 @@
 #pragma once
 
+#include "api/fx/Events.hpp"
 #include "gw/IEntityManager.hpp"
 
 namespace tr {
@@ -8,6 +9,7 @@ class IEventQueue;
 class FinalizerSystem;
 class IStateBuffer;
 class FrameState;
+class CameraHandler;
 
 class EntityManager : public IEntityManager {
 public:
@@ -27,7 +29,11 @@ private:
   std::shared_ptr<IStateBuffer> stateBuffer;
 
   std::unique_ptr<entt::registry> registry;
-  std::unique_ptr<FinalizerSystem> finalizerSystem;
+
+  auto renderAreaCreated(const SwapchainCreated& event) -> void;
+  auto renderAreaResized(const SwapchainResized& event) -> void;
+  auto registerStaticModel(const StaticModelUploaded& event) -> void;
+  auto createDefaultCamera() -> void;
 };
 
 }

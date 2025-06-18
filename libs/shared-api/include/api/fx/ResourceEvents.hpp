@@ -1,6 +1,7 @@
 #pragma once
 
 #include "api/gfx/Geometry.hpp"
+#include "api/gfx/GeometryData.hpp"
 #include "api/gfx/GpuMaterialData.hpp"
 #include "api/gw/GameObjectType.hpp"
 #include "api/gw/TransformData.hpp"
@@ -23,6 +24,14 @@ struct StaticModelRequest {
   uint64_t batchId;
   uint64_t requestId;
   std::string modelFilename;
+  std::string entityName;
+  std::optional<tr::TransformData> initialTransform = std::nullopt;
+};
+
+struct StaticMeshRequest {
+  uint64_t batchId;
+  uint64_t requestId;
+  GeometryData geometryData;
   std::string entityName;
   std::optional<tr::TransformData> initialTransform = std::nullopt;
 };

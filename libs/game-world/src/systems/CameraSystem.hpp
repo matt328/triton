@@ -8,16 +8,16 @@ namespace tr {
 
 struct Action;
 
-class CameraSystem {
+class CameraHandler {
 public:
-  CameraSystem(const std::shared_ptr<IEventBus>& eventBus,
-               std::shared_ptr<EntityService> newEntityService);
-  ~CameraSystem();
+  CameraHandler(const std::shared_ptr<IEventBus>& eventBus,
+                std::shared_ptr<EntityService> newEntityService);
+  ~CameraHandler();
 
-  CameraSystem(const CameraSystem&) = delete;
-  CameraSystem(CameraSystem&&) = delete;
-  auto operator=(const CameraSystem&) -> CameraSystem& = delete;
-  auto operator=(CameraSystem&&) -> CameraSystem& = delete;
+  CameraHandler(const CameraHandler&) = delete;
+  CameraHandler(CameraHandler&&) = delete;
+  auto operator=(const CameraHandler&) -> CameraHandler& = delete;
+  auto operator=(CameraHandler&&) -> CameraHandler& = delete;
 
   void fixedUpdate();
 

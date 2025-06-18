@@ -9,17 +9,17 @@ constexpr auto CameraSpeed = .010f;
 constexpr auto MouseSensitivity = 0.025f;
 constexpr auto PitchExtent = 89.f;
 
-CameraSystem::CameraSystem(const std::shared_ptr<IEventBus>& eventBus,
-                           std::shared_ptr<EntityService> newEntityService)
+CameraHandler::CameraHandler(const std::shared_ptr<IEventBus>& eventBus,
+                             std::shared_ptr<EntityService> newEntityService)
     : entityService{std::move(newEntityService)} {
   eventBus->subscribe<Action>([&](const Action& action) { handleAction(action); });
 }
 
-CameraSystem::~CameraSystem() {
+CameraHandler::~CameraHandler() {
   Log.trace("Destroying CameraSystem");
 }
 
-auto CameraSystem::handleAction(const Action& action) -> void {
+auto CameraHandler::handleAction(const Action& action) -> void {
 
   entityService->updateCameraActions([action]([[maybe_unused]] entt::entity entity, Camera& cam) {
     if (action.stateType == StateType::State) {
@@ -30,7 +30,7 @@ auto CameraSystem::handleAction(const Action& action) -> void {
   });
 }
 
-auto CameraSystem::handleStateAction(const Action& action, Camera& cam) -> void {
+auto CameraHandler::handleStateAction(const Action& action, Camera& cam) -> void {
   const auto value = std::get<bool>(action.value);
   switch (action.actionType) {
     case ActionType::StrafeLeft:
@@ -49,7 +49,7 @@ auto CameraSystem::handleStateAction(const Action& action, Camera& cam) -> void 
       break;
   }
 }
-auto CameraSystem::handleRangeAction(const Action& action, Camera& cam) -> void {
+auto CameraHandler::handleRangeAction(const Action& action, Camera& cam) -> void {
   const auto value = std::get<float>(action.value);
   switch (action.actionType) {
     case ActionType::LookHorizontal:
@@ -65,7 +65,7 @@ auto CameraSystem::handleRangeAction(const Action& action, Camera& cam) -> void 
   }
 }
 
-void CameraSystem::fixedUpdate() {
+void CameraHandler::fixedUpdate() {
 
   entityService->updateCameras(
       [](int width, int height, [[maybe_unused]] entt::entity entity, Camera& cam) {

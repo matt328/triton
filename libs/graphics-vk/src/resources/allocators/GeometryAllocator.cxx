@@ -1,5 +1,6 @@
 #include "GeometryAllocator.hpp"
 #include "api/gfx/GpuMaterialData.hpp"
+#include "api/gfx/GeometryData.hpp"
 #include "buffers/UploadPlan.hpp"
 #include "r3/GeometryBufferPack.hpp"
 #include "resources/allocators/IBufferAllocator.hpp"

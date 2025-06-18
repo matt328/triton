@@ -137,7 +137,7 @@ void main() {
   TexCoordBuffer texBuf = TexCoordBuffer(resourceTable.texCoordBufferAddress);
   vec2 texCoord = texBuf.texCoords[region.texCoordOffset + vertexIndex];
 
-  vec3 normal = vec3(1.0, 1.0, 1.0);
+  vec3 normal = vec3(0.0, 0.0, 1.0);
   if (region.normalOffset != INVALID_OFFSET) {
     NormalBuffer normBuf = NormalBuffer(resourceTable.normalBufferAddress);
     normal = normBuf.normals[region.normalOffset + vertexIndex];
@@ -146,14 +146,18 @@ void main() {
   vec4 color = vec4(1.0, 1.0, 1.0, 1.0);
   if (region.colorOffset != INVALID_OFFSET) {
     ColorBuffer colorBuf = ColorBuffer(resourceTable.colorBufferAddress);
-    vec4 color = colorBuf.colors[region.colorOffset + vertexIndex];
+    color = colorBuf.colors[region.colorOffset + vertexIndex];
   }
 
   vec3 scaled = objectScale * position;
   vec3 rotated = applyQuaternion(objectRotation, scaled);
   vec3 transformed = rotated + objectPosition;
 
-  gl_Position = vec4(transformed, 1.0);
+  vec4 worldPosition = vec4(transformed, 1.0);
+  vec4 viewPosition = frameData.view * worldPosition;
+  vec4 clipPosition = frameData.projection * viewPosition;
+
+  gl_Position = clipPosition;
   v_texCoord = texCoord;
   v_normal = normal;
   v_color = color;

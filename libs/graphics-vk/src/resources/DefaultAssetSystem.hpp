@@ -54,8 +54,11 @@ private:
 
   auto handleStaticModelRequest(const StaticModelRequest& smRequest,
                                 UploadPlan& uploadPlan,
-                                std::vector<StaticModelUploaded>& responses,
-                                std::vector<as::Model>& loadedModels) -> void;
+                                std::vector<StaticModelUploaded>& responses) -> void;
+
+  auto handleStaticMeshRequest(const StaticMeshRequest& smRequest,
+                               UploadPlan& uploadPlan,
+                               std::vector<StaticModelUploaded>& responses) -> void;
 
   /// Eventually Update the TRM model formats to store data on disk in a deinterleaved format so
   /// this method is unnecessary, but just convert it here for now.

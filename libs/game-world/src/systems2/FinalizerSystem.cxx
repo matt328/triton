@@ -1,5 +1,7 @@
 #include "FinalizerSystem.hpp"
+#include "components/Camera.hpp"
 #include "components/Renderable.hpp"
+#include "components/Resources.hpp"
 #include "components/Transform.hpp"
 
 namespace tr {
@@ -15,6 +17,8 @@ auto FinalizerSystem::update(entt::registry& registry, SimState& simState, Times
 
   simState.ensureCapacity(size);
   size_t current = 0;
+
+  std::tie(simState.view, simState.projection) = createCameraData(registry);
 
   for (const auto& [entity, renderable, transform] : view.each()) {
     simState.stateHandles.push_back(
@@ -32,6 +36,41 @@ auto FinalizerSystem::update(entt::registry& registry, SimState& simState, Times
                       .animationId = 0L});
     ++current;
   }
+}
+
+auto FinalizerSystem::createCameraData(entt::registry& registry)
+    -> std::tuple<glm::mat4, glm::mat4> {
+
+  if (!registry.ctx().contains<WindowDimensions>()) {
+    return {glm::identity<glm::mat4>(), glm::identity<glm::mat4>()};
+  }
+
+  const auto [width, height] = registry.ctx().get<const WindowDimensions>();
+
+  const auto cameraEntity = registry.ctx().get<const CurrentCamera>();
+  auto cam = registry.get<Camera>(cameraEntity.currentCamera);
+
+  auto direction = glm::vec3{cos(glm::radians(cam.yaw)) * cos(glm::radians(cam.pitch)),
+                             sin(glm::radians(cam.pitch)),
+                             sin(glm::radians(cam.yaw)) * cos(glm::radians(cam.pitch))};
+
+  cam.front = normalize(direction);
+  cam.right = normalize(cross(cam.front, glm::vec3(0.0f, 1.0f, 0.0f)));
+
+  glm::mat3 const rotationMatrix{cam.right, worldUp, cam.front};
+
+  const auto rotatedVelocity = rotationMatrix * cam.velocity;
+
+  cam.position += rotatedVelocity;
+
+  cam.view = lookAt(cam.position, cam.position + cam.front, {0.f, 1.f, 0.f});
+
+  const float aspect = static_cast<float>(width) / static_cast<float>(height);
+  cam.projection = glm::perspective(glm::radians(cam.fov), aspect, cam.nearClip, cam.farClip);
+  // Apparently everyone except me knew glm was for OpenGL and you have to adjust these
+  // matrices for Vulkan
+  cam.projection[1][1] *= -1;
+  return {cam.view, cam.projection};
 }
 
 }

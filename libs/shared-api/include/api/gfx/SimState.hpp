@@ -23,6 +23,9 @@ struct SimState {
   // Parallel vector to GpuObjectData.
   std::vector<StateHandles> stateHandles; // 8
 
+  glm::mat4 view;
+  glm::mat4 projection;
+
   // Pre-allocate memory for the vectors when creating a SimState
   explicit SimState(size_t initialCapacity = 0) {
     objectMetadata.reserve(initialCapacity);

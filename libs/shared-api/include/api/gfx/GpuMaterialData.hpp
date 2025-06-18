@@ -97,25 +97,4 @@ struct GpuMaterialData {
   uint32_t albedoTextureId;
 };
 
-struct GeometryData {
-  std::shared_ptr<std::vector<std::byte>> indexData;
-  std::shared_ptr<std::vector<std::byte>> positionData;
-  std::shared_ptr<std::vector<std::byte>> colorData;
-  std::shared_ptr<std::vector<std::byte>> texCoordData;
-  std::shared_ptr<std::vector<std::byte>> normalData;
-  std::shared_ptr<std::vector<std::byte>> animationData;
-};
-
-/*
-  GpuIndirectCommand fields:
-  indexCount * instanceCount == how many times to run the vertex shader
-  instanceCount is tracked in the loop by gl_InstanceIndex
-  indexCount is tracked in the loop by gl_VertexIndex
-  firstInstance sets the base value of gl_InstanceIndex
-  firstIndex and vertexOffset are ignored by vulkan when no vertex/index buffer is bound
-
-  gl_VertexIndex ranges from 0 to indexCount - 1
-  gl_InstanceIndex ranges from firstInstance to firstInstance + instanceCount - 1
-*/
-
 }

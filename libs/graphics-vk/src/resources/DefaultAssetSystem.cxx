@@ -81,13 +81,14 @@ auto DefaultAssetSystem::handleEndResourceBatch(uint64_t batchId) -> void {
   auto uploadPlan = UploadPlan{.stagingBuffer = transferSystem->getTransferContext().stagingBuffer};
   std::vector<StaticModelUploaded> responses{};
 
-  std::vector<as::Model> loadedModels{};
-
   for (auto& eventVariant : eventBatches[batchId]) {
     auto visitor = [&](auto&& arg) -> void {
       using T = std::decay_t<decltype(arg)>;
       if constexpr (std::is_same_v<T, StaticModelRequest>) {
-        handleStaticModelRequest(arg, uploadPlan, responses, loadedModels);
+        handleStaticModelRequest(arg, uploadPlan, responses);
+      }
+      if constexpr (std::is_same_v<T, StaticMeshRequest>) {
+        handleStaticMeshRequest(arg, uploadPlan, responses);
       }
       if constexpr (std::is_same_v<T, DynamicModelRequest>) {
         Log.trace("Handling Dynamic Model Request ID: {}", arg.requestId);
@@ -98,8 +99,6 @@ auto DefaultAssetSystem::handleEndResourceBatch(uint64_t batchId) -> void {
 
   transferSystem->upload(uploadPlan);
 
-  loadedModels.clear();
-
   for (const auto& response : responses) {
     eventQueue->emit(response);
   }
@@ -107,12 +106,11 @@ auto DefaultAssetSystem::handleEndResourceBatch(uint64_t batchId) -> void {
 
 auto DefaultAssetSystem::handleStaticModelRequest(const StaticModelRequest& smRequest,
                                                   UploadPlan& uploadPlan,
-                                                  std::vector<StaticModelUploaded>& responses,
-                                                  std::vector<as::Model>& loadedModels) -> void {
+                                                  std::vector<StaticModelUploaded>& responses)
+    -> void {
   ZoneScoped;
   Log.trace("Handling Static Model Request ID: {}", smRequest.requestId);
-  loadedModels.push_back(assetService->loadModel(smRequest.modelFilename));
-  const auto& model = loadedModels.back();
+  const auto& model = assetService->loadModel(smRequest.modelFilename);
 
   const auto geometryData = deInterleave(*model.staticVertices, model.indices);
 
@@ -131,6 +129,25 @@ auto DefaultAssetSystem::handleStaticModelRequest(const StaticModelRequest& smRe
   uploadPlan.uploads.insert(uploadPlan.uploads.end(),
                             imageUploadData.begin(),
                             imageUploadData.end());
+}
+
+auto DefaultAssetSystem::handleStaticMeshRequest(const StaticMeshRequest& smRequest,
+                                                 UploadPlan& uploadPlan,
+                                                 std::vector<StaticModelUploaded>& responses)
+    -> void {
+  ZoneScoped;
+  Log.trace("Handling Static Model Request ID: {}", smRequest.requestId);
+  const auto [regionHandle, uploads] =
+      geometryAllocator->allocate(smRequest.geometryData, transferSystem->getTransferContext());
+
+  responses.push_back(StaticModelUploaded{
+      .batchId = smRequest.batchId,
+      .requestId = smRequest.requestId,
+      .entityName = smRequest.entityName,
+      .geometryHandle = geometryHandleMapper->toPublic(regionHandle),
+  });
+
+  uploadPlan.uploads.insert(uploadPlan.uploads.end(), uploads.begin(), uploads.end());
 }
 
 auto DefaultAssetSystem::deInterleave(const std::vector<as::StaticVertex>& vertices,

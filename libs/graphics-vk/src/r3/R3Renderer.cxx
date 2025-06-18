@@ -237,8 +237,8 @@ void R3Renderer::renderNextFrame() {
     {
       ZoneScopedN("Per Frame buffers");
       // FrameData
-      auto frameData = GpuFrameData{.view = glm::identity<glm::mat4>(),
-                                    .projection = glm::identity<glm::mat4>(),
+      auto frameData = GpuFrameData{.view = current.view,
+                                    .projection = current.projection,
                                     .cameraPosition = glm::vec4(0.f, 0.f, 5.f, 1.f),
                                     .time = 0.f,
                                     .maxObjects = frame->getObjectCount()};

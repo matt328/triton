@@ -5,7 +5,6 @@ set(framework_SRC
    src/DefaultAssetService.cxx
    src/ctx/ThreadedFrameworkContext.cxx
    src/GuiCallbackRegistrar.cxx
-   src/GeometryGenerator.cxx
    src/HorribleStateBuffer.cxx
 )
 

@@ -68,6 +68,7 @@ auto DataFacade::testResources() -> void {
   const auto beginBatch = tr::BeginResourceBatch{.batchId = 1};
   const auto endBatch = tr::EndResourceBatch{.batchId = 1};
   const auto vikingRoomRequestId = requestIdGenerator.getKey();
+  // TODO(tomorrow) Create a way to just feed arbitrary vertex and index data
   const auto vikingRoomRequest = tr::StaticModelRequest{.batchId = 1,
                                                         .requestId = vikingRoomRequestId,
                                                         .modelFilename = ModelFile,

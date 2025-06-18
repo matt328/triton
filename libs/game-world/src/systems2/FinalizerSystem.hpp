@@ -15,6 +15,9 @@ public:
   auto operator=(FinalizerSystem&&) -> FinalizerSystem& = delete;
 
   static auto update(entt::registry& registry, SimState& simState, Timestamp t) -> void;
+
+private:
+  static auto createCameraData(entt::registry& registry) -> std::tuple<glm::mat4, glm::mat4>;
 };
 
 }
