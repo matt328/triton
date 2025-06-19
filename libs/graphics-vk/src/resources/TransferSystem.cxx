@@ -44,9 +44,6 @@ auto TransferSystem::upload(UploadPlan& uploadPlan) -> void {
               upload.dataSize,
               upload.dstBuffer.id);
 
-    auto data = upload.data;
-    const auto nonByteData = fromByteVector<GpuIndexData>(data);
-
     const auto stagingBufferRegion =
         bufferSystem->insert(transferContext.stagingBuffer,
                              upload.data->data(),

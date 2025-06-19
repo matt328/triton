@@ -4,11 +4,11 @@
 
 namespace ed {
 
-constexpr auto ModelFile =
-    "/home/matt/projects/matt/game-assets/models/current/viking_room/viking_room_v4.trm";
-
 // constexpr auto ModelFile =
-//     "/home/matt/Projects/game-assets/models/current/viking_room/viking_room_v4.trm";
+//     "/home/matt/projects/matt/game-assets/models/current/viking_room/viking_room_v4.trm";
+
+constexpr auto ModelFile =
+    "/home/matt/Projects/game-assets/models/current/viking_room/viking_room_v4.trm";
 
 DataFacade::DataFacade(std::shared_ptr<tr::IEventQueue> newEventQueue)
     : eventQueue{std::move(newEventQueue)} {
@@ -126,6 +126,13 @@ auto DataFacade::testResources() -> void {
                                                .requestId = peasantRequestId,
                                                .modelFilename = ModelFile,
                                                .entityName = "Viking Room #2"};
+
+  inFlightMap.emplace(triangleRequestId,
+                      EntityData{.name = "triangle",
+                                 .orientation = Orientation{.position = glm::vec3{0.f, 0.f, 0.f}},
+                                 .modelName = "Triangle",
+                                 .skeleton = "",
+                                 .animations = {}});
 
   inFlightMap.emplace(vikingRoomRequestId,
                       EntityData{.name = "viking room 1",

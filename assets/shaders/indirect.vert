@@ -35,27 +35,25 @@ layout(buffer_reference, scalar) buffer FrameDataBuffer {
   vec4 cameraPosition;
   float time;
   uint maxObjects;
-  float _pad0;
-  float _pad1;
 };
 
-layout(buffer_reference, std430) buffer IndexBuffer {
+layout(buffer_reference, scalar) buffer IndexBuffer {
   uint index[];
 };
 
-layout(buffer_reference, std430) buffer PositionBuffer {
+layout(buffer_reference, scalar) buffer PositionBuffer {
   vec3 positions[];
 };
 
-layout(buffer_reference, std430) buffer ColorBuffer {
+layout(buffer_reference, scalar) buffer ColorBuffer {
   vec4 colors[];
 };
 
-layout(buffer_reference, std430) buffer TexCoordBuffer {
+layout(buffer_reference, scalar) buffer TexCoordBuffer {
   vec2 texCoords[];
 };
 
-layout(buffer_reference, std430) buffer NormalBuffer {
+layout(buffer_reference, scalar) buffer NormalBuffer {
   vec3 normals[];
 };
 
@@ -68,7 +66,7 @@ struct GpuGeometryRegionData {
   uint normalOffset;
 };
 
-layout(buffer_reference, std430) buffer RegionBuffer {
+layout(buffer_reference, scalar) buffer RegionBuffer {
   GpuGeometryRegionData regions[];
 };
 
@@ -81,7 +79,7 @@ struct GpuObjectData {
   uint animationId;
 };
 
-layout(buffer_reference, std430) buffer ObjectDataBuffer {
+layout(buffer_reference, scalar) buffer ObjectDataBuffer {
   GpuObjectData objects[];
 };
 
@@ -102,7 +100,10 @@ layout(location = 1) out vec3 v_normal;
 layout(location = 2) out vec4 v_color;
 
 vec3 applyQuaternion(vec4 q, vec3 v) {
-  return v + 2.0 * cross(q.xyz, cross(q.xyz, v) + q.w * v);
+  vec3 u = q.xyz;
+  float s = q.w;
+
+  return 2.0 * dot(u, v) * u + (s * s - dot(u, u)) * v + 2.0 * s * cross(u, v);
 }
 
 void main() {
@@ -113,7 +114,7 @@ void main() {
   ObjectDataBuffer objectDataBuf = ObjectDataBuffer(resourceTable.objectDataBufferAddress);
   RegionBuffer regionBuf = RegionBuffer(resourceTable.regionBufferAddress);
 
-  GpuObjectData object = objectDataBuf.objects[gl_InstanceIndex + gl_BaseInstance];
+  GpuObjectData object = objectDataBuf.objects[gl_InstanceIndex];
 
   GpuPositionDataBuffer positionDataBuffer =
       GpuPositionDataBuffer(resourceTable.objectPositionsAddress);
@@ -129,7 +130,7 @@ void main() {
   GpuGeometryRegionData region = regionBuf.regions[object.geometryRegionId];
 
   IndexBuffer indexBuf = IndexBuffer(resourceTable.indexBufferAddress);
-  uint vertexIndex = indexBuf.index[region.indexOffset + gl_VertexIndex];
+  uint vertexIndex = indexBuf.index[gl_VertexIndex];
 
   PositionBuffer posBuf = PositionBuffer(resourceTable.positionBufferAddress);
   vec3 position = posBuf.positions[region.positionOffset + vertexIndex];

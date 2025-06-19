@@ -28,9 +28,9 @@ auto FinalizerSystem::update(entt::registry& registry, SimState& simState, Times
     simState.rotations.push_back({.rotation = transform.rotation});
     simState.scales.push_back({.scale = transform.scale});
     simState.objectMetadata.push_back(
-        GpuObjectData{.transformIndex = static_cast<uint32_t>(simState.positions.size()),
-                      .rotationIndex = static_cast<uint32_t>(simState.rotations.size()),
-                      .scaleIndex = static_cast<uint32_t>(simState.scales.size()),
+        GpuObjectData{.transformIndex = static_cast<uint32_t>(simState.positions.size() - 1),
+                      .rotationIndex = static_cast<uint32_t>(simState.rotations.size() - 1),
+                      .scaleIndex = static_cast<uint32_t>(simState.scales.size() - 1),
                       .geometryRegionId = static_cast<uint32_t>(current),
                       .materialId = 0L,
                       .animationId = 0L});
