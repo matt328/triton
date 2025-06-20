@@ -7,6 +7,8 @@
 #include "r3/render-pass/PipelineCreateInfo.hpp"
 #include "r3/render-pass/PipelineFactory.hpp"
 #include "task/Frame.hpp"
+#include "vk/sb/DSLayout.hpp"
+#include "vk/sb/DSLayoutManager.hpp"
 
 namespace tr {
 
@@ -14,12 +16,16 @@ CompositionPass::CompositionPass(std::shared_ptr<ImageManager> newImageManager,
                                  std::shared_ptr<ContextFactory> newDrawContextFactory,
                                  std::shared_ptr<ResourceAliasRegistry> newAliasRegistry,
                                  std::shared_ptr<PipelineFactory> newPipelineFactory,
+                                 std::shared_ptr<IShaderBindingFactory> newShaderBindingFactory,
+                                 std::shared_ptr<DSLayoutManager> newLayoutManager,
                                  CompositionPassCreateInfo createInfo,
                                  PassId newPassId)
     : imageManager{std::move(newImageManager)},
       drawContextFactory{std::move(newDrawContextFactory)},
       aliasRegistry{std::move(newAliasRegistry)},
       pipelineFactory{std::move(newPipelineFactory)},
+      shaderBindingFactory{std::move(newShaderBindingFactory)},
+      layoutManager{std::move(newLayoutManager)},
       swapchainAlias{createInfo.swapchainImage},
       id{newPassId} {
   Log.trace("Creating CompositionPass");
@@ -30,20 +36,24 @@ CompositionPass::CompositionPass(std::shared_ptr<ImageManager> newImageManager,
 
   const auto vertexStage = ShaderStageInfo{
       .stage = vk::ShaderStageFlagBits::eVertex,
-      .shaderFile = (getShaderRootPath() / "static.vert.spv").string(),
+      .shaderFile = (getShaderRootPath() / "composition.vert.spv").string(),
       .entryPoint = "main",
   };
 
   const auto fragmentStage = ShaderStageInfo{
       .stage = vk::ShaderStageFlagBits::eFragment,
-      .shaderFile = (getShaderRootPath() / "static.frag.spv").string(),
+      .shaderFile = (getShaderRootPath() / "composition.frag.spv").string(),
       .entryPoint = "main",
   };
+
+  const auto& layout = layoutManager->getLayout(createInfo.defaultDSLayout);
+  std::vector<vk::DescriptorSetLayout> layouts = {layout.getVkLayout()};
 
   const auto pipelineLayoutInfo = PipelineLayoutInfo{
       .pushConstantInfoList = {PushConstantInfo{.stageFlags = vk::ShaderStageFlagBits::eVertex,
                                                 .offset = 0,
-                                                .size = 36}}};
+                                                .size = 36}},
+      .descriptorSetLayouts = layouts};
 
   const auto pipelineCreateInfo =
       PipelineCreateInfo{.id = id,

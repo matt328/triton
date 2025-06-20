@@ -1,13 +1,12 @@
 #pragma once
 
+#include "bk/Handle.hpp"
 #include "vk/sb/DSLayoutManager.hpp"
 namespace tr {
 
 class IShaderBinding;
 
-using ShaderBindingHandle = size_t;
-
-enum class ShaderBindingType : uint32_t {
+enum class ShaderBindingType : uint8_t {
   Invalid = 0,
   Textures = 1,
 };
@@ -23,10 +22,10 @@ public:
   auto operator=(IShaderBindingFactory&&) -> IShaderBindingFactory& = delete;
 
   [[nodiscard]] virtual auto createShaderBinding(ShaderBindingType type,
-                                                 DSLayoutHandle layoutHandle)
-      -> ShaderBindingHandle = 0;
+                                                 Handle<DSLayout> layoutHandle)
+      -> LogicalHandle<IShaderBinding> = 0;
 
-  [[nodiscard]] virtual auto getShaderBinding(ShaderBindingHandle handle) -> IShaderBinding& = 0;
+  [[nodiscard]] virtual auto getShaderBinding(Handle<IShaderBinding> handle) -> IShaderBinding& = 0;
 };
 
 }

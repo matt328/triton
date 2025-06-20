@@ -39,7 +39,7 @@ public:
 private:
   std::string name;
   std::shared_ptr<Device> device;
-  std::unique_ptr<vk::raii::DescriptorSet> vkDescriptorSet;
+  std::optional<vk::raii::DescriptorSet> vkDescriptorSet;
   vk::DescriptorType descriptorType;
 };
 

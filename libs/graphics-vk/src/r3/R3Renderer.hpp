@@ -25,6 +25,10 @@ class ImageManager;
 class Frame;
 class ResourceAliasRegistry;
 class IRenderPass;
+class IShaderBinding;
+class IShaderBindingFactory;
+class DSLayoutManager;
+class DSLayout;
 
 namespace queue {
 class Graphics;
@@ -50,6 +54,12 @@ struct GlobalImages {
   LogicalHandle<ManagedImage> forwardDepthImage;
 };
 
+struct GlobalShaderBindings {
+  Handle<DSLayout> defaultBindingLayout;
+  LogicalHandle<IShaderBinding> defaultBinding;
+  Handle<vk::raii::Sampler> defaultSampler;
+};
+
 class R3Renderer : public tr::IRenderContext {
 public:
   R3Renderer(RenderContextConfig newRenderConfig,
@@ -67,7 +77,9 @@ public:
              std::shared_ptr<FrameState> newFrameState,
              std::shared_ptr<GeometryAllocator> newGeometryAllocator,
              std::shared_ptr<GeometryHandleMapper> newGeometryHandleMapper,
-             std::shared_ptr<ResourceAliasRegistry> newAliasRegistry);
+             std::shared_ptr<ResourceAliasRegistry> newAliasRegistry,
+             std::shared_ptr<IShaderBindingFactory> newShaderBindingFactory,
+             std::shared_ptr<DSLayoutManager> newLayoutManager);
   ~R3Renderer() override = default;
 
   R3Renderer(const R3Renderer&) = delete;
@@ -95,16 +107,20 @@ private:
   std::shared_ptr<GeometryAllocator> geometryAllocator;
   std::shared_ptr<GeometryHandleMapper> geometryHandleMapper;
   std::shared_ptr<ResourceAliasRegistry> aliasRegistry;
+  std::shared_ptr<IShaderBindingFactory> shaderBindingFactory;
+  std::shared_ptr<DSLayoutManager> layoutManager;
 
   std::vector<vk::CommandBuffer> buffers;
 
   GlobalBuffers globalBuffers{};
   GlobalImages globalImages{};
+  GlobalShaderBindings globalShaderBindings{};
 
   std::vector<GpuGeometryRegionData> geometryRegionContents;
 
   auto createGlobalBuffers() -> void;
   auto createGlobalImages() -> void;
+  auto createGlobalShaderBindings() -> void;
   auto createComputeCullingPass() -> std::unique_ptr<IRenderPass>;
   auto createForwardRenderPass() -> std::unique_ptr<IRenderPass>;
   auto createCompositionRenderPass() -> std::unique_ptr<IRenderPass>;

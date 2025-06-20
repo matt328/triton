@@ -3,6 +3,9 @@
 #include "buffers/ManagedBuffer.hpp"
 
 namespace tr {
+
+class IShaderBinding;
+
 struct CullingDispatchContextCreateInfo {
   LogicalHandle<ManagedBuffer> resourceTable;
   LogicalHandle<ManagedBuffer> frameData;
@@ -17,7 +20,11 @@ struct ForwardDrawContextCreateInfo {
   LogicalHandle<ManagedBuffer> indirectCommandCount;
 };
 
-struct CompositionContextCreateInfo {};
+struct CompositionContextCreateInfo {
+  vk::Viewport viewport;
+  vk::Rect2D scissor;
+  LogicalHandle<IShaderBinding> defaultShaderBinding;
+};
 
 using DispatchCreateInfo = std::variant<CullingDispatchContextCreateInfo,
                                         ForwardDrawContextCreateInfo,

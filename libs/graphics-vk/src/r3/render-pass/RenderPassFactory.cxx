@@ -12,12 +12,16 @@ RenderPassFactory::RenderPassFactory(std::shared_ptr<PipelineFactory> newPipelin
                                      std::shared_ptr<ImageManager> newImageManager,
                                      std::shared_ptr<IFrameManager> newFrameManager,
                                      std::shared_ptr<ContextFactory> newDrawContextFactory,
-                                     std::shared_ptr<ResourceAliasRegistry> newAliasRegistry)
+                                     std::shared_ptr<ResourceAliasRegistry> newAliasRegistry,
+                                     std::shared_ptr<IShaderBindingFactory> newShaderBindingFactory,
+                                     std::shared_ptr<DSLayoutManager> newLayoutManager)
     : pipelineFactory{std::move(newPipelineFactory)},
       imageManager{std::move(newImageManager)},
       frameManager{std::move(newFrameManager)},
       drawContextFactory{std::move(newDrawContextFactory)},
-      aliasRegistry{std::move(newAliasRegistry)} {
+      aliasRegistry{std::move(newAliasRegistry)},
+      shaderBindingFactory{std::move(newShaderBindingFactory)},
+      layoutManager{std::move(newLayoutManager)} {
 }
 
 auto RenderPassFactory::createRenderPass(RenderPassCreateInfo createInfo)
@@ -63,6 +67,8 @@ auto RenderPassFactory::createCompositionPass(PassId passId, CompositionPassCrea
                                            drawContextFactory,
                                            aliasRegistry,
                                            pipelineFactory,
+                                           shaderBindingFactory,
+                                           layoutManager,
                                            createInfo,
                                            passId);
 }

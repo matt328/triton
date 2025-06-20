@@ -1,5 +1,6 @@
 #pragma once
 
+#include "bk/HandleGenerator.hpp"
 #include "bk/Rando.hpp"
 
 namespace tr {
@@ -7,8 +8,6 @@ namespace tr {
 class DSLayout;
 class Device;
 class IDebugManager;
-
-using DSLayoutHandle = size_t;
 
 class DSLayoutManager {
 public:
@@ -21,16 +20,16 @@ public:
   auto operator=(const DSLayoutManager&) -> DSLayoutManager& = delete;
   auto operator=(DSLayoutManager&&) -> DSLayoutManager& = delete;
 
-  [[nodiscard]] auto createLayout(vk::DescriptorSetLayoutBinding binding,
-                                  std::string_view name) -> DSLayoutHandle;
-  [[nodiscard]] auto getLayout(DSLayoutHandle handle) -> DSLayout&;
+  [[nodiscard]] auto createLayout(vk::DescriptorSetLayoutBinding binding, std::string_view name)
+      -> Handle<DSLayout>;
+  [[nodiscard]] auto getLayout(Handle<DSLayout> handle) -> DSLayout&;
 
 private:
   std::shared_ptr<Device> device;
   std::shared_ptr<IDebugManager> debugManager;
 
-  MapKey keyGen{};
-  std::unordered_map<DSLayoutHandle, std::unique_ptr<DSLayout>> layoutMap;
+  HandleGenerator<DSLayout> handleGenerator;
+  std::unordered_map<Handle<DSLayout>, std::unique_ptr<DSLayout>> layoutMap;
 };
 
 }

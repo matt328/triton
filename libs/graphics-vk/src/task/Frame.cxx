@@ -98,10 +98,23 @@ auto Frame::addLogicalBuffer(LogicalHandle<ManagedBuffer> logicalHandle,
   bufferHandles.emplace(logicalHandle, bufferHandle);
 }
 
+auto Frame::addLogicalShaderBinding(LogicalHandle<IShaderBinding> logicalHandle,
+                                    Handle<IShaderBinding> handle) -> void {
+  assert(!shaderBindingHandles.contains(logicalHandle) &&
+         "Attempted to register same logical ShaderBinding twice");
+  shaderBindingHandles.emplace(logicalHandle, handle);
+}
+
 [[nodiscard]] auto Frame::getLogicalBuffer(LogicalHandle<ManagedBuffer> logicalHandle) const
     -> Handle<ManagedBuffer> {
   assert(bufferHandles.contains(logicalHandle));
   return bufferHandles.at(logicalHandle);
+}
+
+[[nodiscard]] auto Frame::getLogicalShaderBinding(LogicalHandle<IShaderBinding> logicalHandle) const
+    -> Handle<IShaderBinding> {
+  assert(shaderBindingHandles.contains(logicalHandle));
+  return shaderBindingHandles.at(logicalHandle);
 }
 
 auto Frame::setSwapchainImageIndex(const uint32_t index) -> void {

@@ -9,6 +9,8 @@ class ContextFactory;
 class ImageManager;
 class ResourceAliasRegistry;
 class PipelineFactory;
+class IShaderBindingFactory;
+class DSLayoutManager;
 
 class CompositionPass : public IRenderPass {
 public:
@@ -16,6 +18,8 @@ public:
                   std::shared_ptr<ContextFactory> newDrawContextFactory,
                   std::shared_ptr<ResourceAliasRegistry> newAliasRegistry,
                   std::shared_ptr<PipelineFactory> newPipelineFactory,
+                  std::shared_ptr<IShaderBindingFactory> newShaderBindingFactory,
+                  std::shared_ptr<DSLayoutManager> newLayoutManager,
                   CompositionPassCreateInfo createInfo,
                   PassId newPassId);
   ~CompositionPass() = default;
@@ -35,6 +39,8 @@ private:
   std::shared_ptr<ContextFactory> drawContextFactory;
   std::shared_ptr<ResourceAliasRegistry> aliasRegistry;
   std::shared_ptr<PipelineFactory> pipelineFactory;
+  std::shared_ptr<IShaderBindingFactory> shaderBindingFactory;
+  std::shared_ptr<DSLayoutManager> layoutManager;
 
   ImageAlias colorAlias;
   ImageAlias swapchainAlias;

@@ -55,7 +55,9 @@ public:
   auto getImageMetadata(LogicalHandle<ManagedImage> logicalHandle) -> ImageMetadata;
   auto getImageMetadata(Handle<ManagedImage> handle) -> ImageMetadata;
   auto getSwapchainImageHandle() const -> LogicalHandle<ManagedImage>;
+  auto getSampler(Handle<vk::raii::Sampler>) const -> const vk::Sampler&;
   auto registerSwapchainImage(uint32_t index) -> Handle<ManagedImage>;
+  auto registerDefaultSampler() -> Handle<vk::raii::Sampler>;
 
 private:
   std::shared_ptr<Allocator> allocator;
@@ -68,6 +70,9 @@ private:
   std::unordered_map<Handle<ManagedImage>, std::unique_ptr<ManagedImage>> imageMap;
   LogicalHandle<ManagedImage> swapchainLogicalHandle;
   std::unordered_map<Handle<ManagedImage>, uint32_t> handleToSwapchainIndex;
+
+  HandleGenerator<vk::raii::Sampler> samplerGenerator;
+  std::unordered_map<Handle<vk::raii::Sampler>, vk::raii::Sampler> samplers;
 
   auto registerSwapchainImages() -> void;
 };

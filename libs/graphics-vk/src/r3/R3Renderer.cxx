@@ -17,6 +17,10 @@
 #include "gfx/GeometryHandleMapper.hpp"
 #include "ComponentIds.hpp"
 #include "vk/command-buffer/CommandBufferManager.hpp"
+#include "vk/sb/DSLayout.hpp"
+#include "vk/sb/DSLayoutManager.hpp"
+#include "vk/sb/IShaderBinding.hpp"
+#include "vk/sb/IShaderBindingFactory.hpp"
 
 namespace tr {
 
@@ -42,7 +46,9 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
                        std::shared_ptr<FrameState> newFrameState,
                        std::shared_ptr<GeometryAllocator> newGeometryAllocator,
                        std::shared_ptr<GeometryHandleMapper> newGeometryHandleMapper,
-                       std::shared_ptr<ResourceAliasRegistry> newAliasRegistry)
+                       std::shared_ptr<ResourceAliasRegistry> newAliasRegistry,
+                       std::shared_ptr<IShaderBindingFactory> newShaderBindingFactory,
+                       std::shared_ptr<DSLayoutManager> newLayoutManager)
     : rendererConfig{newRenderConfig},
       frameManager{std::move(newFrameManager)},
       graphicsQueue{std::move(newGraphicsQueue)},
@@ -58,11 +64,15 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
       frameState{std::move(newFrameState)},
       geometryAllocator{std::move(newGeometryAllocator)},
       geometryHandleMapper{std::move(newGeometryHandleMapper)},
-      aliasRegistry{std::move(newAliasRegistry)} {
+      aliasRegistry{std::move(newAliasRegistry)},
+      shaderBindingFactory{std::move(newShaderBindingFactory)},
+      layoutManager{std::move(newLayoutManager)} {
   Log.trace("Constructing R3Renderer");
 
   createGlobalBuffers();
   createGlobalImages();
+  createGlobalShaderBindings();
+
   auto cullingPass = createComputeCullingPass();
   auto forwardPass = createForwardRenderPass();
   auto compositionPass = createCompositionRenderPass();
@@ -94,7 +104,15 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
 
   drawContextFactory->createDispatchContext(ContextId::Culling, cullingCreateInfo);
 
-  const auto compositionCreateInfo = CompositionContextCreateInfo{};
+  const auto compositionCreateInfo = CompositionContextCreateInfo{
+      .viewport = vk::Viewport{.width = static_cast<float>(rendererConfig.initialWidth),
+                               .height = static_cast<float>(rendererConfig.initialHeight),
+                               .minDepth = 0.f,
+                               .maxDepth = 1.f},
+      .scissor = vk::Rect2D{.offset = vk::Offset2D{.x = 0, .y = 0},
+                            .extent = vk::Extent2D{.width = rendererConfig.initialWidth,
+                                                   .height = rendererConfig.initialHeight}},
+      .defaultShaderBinding = globalShaderBindings.defaultBinding};
 
   drawContextFactory->createDispatchContext(ContextId::Composition, compositionCreateInfo);
 
@@ -443,8 +461,11 @@ auto R3Renderer::createForwardRenderPass() -> std::unique_ptr<IRenderPass> {
 auto R3Renderer::createCompositionRenderPass() -> std::unique_ptr<IRenderPass> {
   auto compositionPass = renderPassFactory->createRenderPass(RenderPassCreateInfo{
       .passId = PassId::Composition,
-      .passInfo = CompositionPassCreateInfo{.colorImage = ImageAlias::GeometryColorImage,
-                                            .swapchainImage = ImageAlias::SwapchainImage},
+      .passInfo =
+          CompositionPassCreateInfo{.colorImage = ImageAlias::GeometryColorImage,
+                                    .swapchainImage = ImageAlias::SwapchainImage,
+                                    .defaultShaderBinding = globalShaderBindings.defaultBinding,
+                                    .defaultDSLayout = globalShaderBindings.defaultBindingLayout},
   });
 
   std::vector<CommandBufferUse> cmdBufferUses{};
@@ -462,4 +483,43 @@ auto R3Renderer::createCompositionRenderPass() -> std::unique_ptr<IRenderPass> {
 
   return compositionPass;
 }
+
+auto R3Renderer::createGlobalShaderBindings() -> void {
+  const auto defaultLayout = vk::DescriptorSetLayoutBinding{
+      .binding = 0,
+      .descriptorType = vk::DescriptorType::eCombinedImageSampler,
+      .descriptorCount = 256,
+      .stageFlags = vk::ShaderStageFlagBits::eFragment,
+      .pImmutableSamplers = nullptr,
+  };
+
+  globalShaderBindings.defaultBindingLayout =
+      layoutManager->createLayout(defaultLayout, "DefaultLayoutBinding");
+
+  globalShaderBindings.defaultBinding =
+      shaderBindingFactory->createShaderBinding(ShaderBindingType::Textures,
+                                                globalShaderBindings.defaultBindingLayout);
+
+  globalShaderBindings.defaultSampler = imageManager->registerDefaultSampler();
+
+  const auto defaultSampler = imageManager->getSampler(globalShaderBindings.defaultSampler);
+
+  for (const auto& frame : frameManager->getFrames()) {
+
+    const auto bindingHandle = frame->getLogicalShaderBinding(globalShaderBindings.defaultBinding);
+    auto& shaderBinding = shaderBindingFactory->getShaderBinding(bindingHandle);
+
+    const auto imageHandle = frame->getLogicalImage(globalImages.forwardColorImage);
+    const auto& colorImage = imageManager->getImage(imageHandle);
+
+    std::vector<vk::DescriptorImageInfo> imageInfos = {vk::DescriptorImageInfo{
+        .sampler = defaultSampler,
+        .imageView = colorImage.getImageView(),
+        .imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal,
+    }};
+
+    shaderBinding.bindImageSamplers(0, imageInfos);
+  }
+}
+
 }

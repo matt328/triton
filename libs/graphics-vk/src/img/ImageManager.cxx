@@ -113,6 +113,31 @@ auto ImageManager::registerSwapchainImage(uint32_t index) -> Handle<ManagedImage
   return handle;
 }
 
+auto ImageManager::registerDefaultSampler() -> Handle<vk::raii::Sampler> {
+  vk::SamplerCreateInfo samplerInfo{
+      .magFilter = vk::Filter::eLinear,
+      .minFilter = vk::Filter::eLinear,
+      .mipmapMode = vk::SamplerMipmapMode::eLinear,
+      .addressModeU = vk::SamplerAddressMode::eRepeat,
+      .addressModeV = vk::SamplerAddressMode::eRepeat,
+      .addressModeW = vk::SamplerAddressMode::eRepeat,
+      .mipLodBias = 0.0f,
+      .anisotropyEnable = VK_TRUE,
+      .maxAnisotropy = 16.0f,
+      .compareEnable = VK_FALSE,
+      .compareOp = vk::CompareOp::eAlways,
+      .minLod = 0.0f,
+      .maxLod = VK_LOD_CLAMP_NONE,
+      .borderColor = vk::BorderColor::eIntOpaqueBlack,
+      .unnormalizedCoordinates = VK_FALSE,
+  };
+  const auto handle = samplerGenerator.requestHandle();
+
+  samplers.emplace(handle, device->getVkDevice().createSampler(samplerInfo));
+
+  return handle;
+}
+
 auto ImageManager::getSwapchainImageHandle() const -> LogicalHandle<ManagedImage> {
   return swapchainLogicalHandle;
 }
@@ -143,6 +168,12 @@ auto ImageManager::getImageMetadata(Handle<ManagedImage> handle) -> ImageMetadat
       .extent = image->getExtent(),
       .imageUsage = image->getUsageFlags(),
   };
+}
+
+[[nodiscard]] auto ImageManager::getSampler(Handle<vk::raii::Sampler> handle) const
+    -> const vk::Sampler& {
+  assert(samplers.contains(handle));
+  return *samplers.at(handle);
 }
 
 }

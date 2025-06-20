@@ -1,9 +1,13 @@
 #pragma once
 
+#include "bk/Handle.hpp"
 #include "r3/ComponentIds.hpp"
 #include "r3/graph/ResourceAliases.hpp"
 
 namespace tr {
+
+class IShaderBinding;
+class DSLayout;
 
 enum class RenderPassType : uint8_t {
   Forward = 0,
@@ -27,6 +31,8 @@ struct CullingPassCreateInfo {
 struct CompositionPassCreateInfo {
   ImageAlias colorImage;
   ImageAlias swapchainImage;
+  LogicalHandle<IShaderBinding> defaultShaderBinding;
+  Handle<DSLayout> defaultDSLayout;
 };
 
 using PassInfo =

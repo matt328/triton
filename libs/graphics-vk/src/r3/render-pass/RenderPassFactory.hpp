@@ -15,6 +15,8 @@ class ManagedImage;
 class ContextFactory;
 class IRenderPass;
 class ResourceAliasRegistry;
+class IShaderBindingFactory;
+class DSLayoutManager;
 
 class RenderPassFactory {
 public:
@@ -22,7 +24,9 @@ public:
                     std::shared_ptr<ImageManager> newImageManager,
                     std::shared_ptr<IFrameManager> newFrameManager,
                     std::shared_ptr<ContextFactory> newDrawContextFactory,
-                    std::shared_ptr<ResourceAliasRegistry> newAliasRegistry);
+                    std::shared_ptr<ResourceAliasRegistry> newAliasRegistry,
+                    std::shared_ptr<IShaderBindingFactory> newShaderBindingFactory,
+                    std::shared_ptr<DSLayoutManager> newLayoutManager);
   ~RenderPassFactory() = default;
 
   RenderPassFactory(const RenderPassFactory&) = delete;
@@ -38,6 +42,8 @@ private:
   std::shared_ptr<IFrameManager> frameManager;
   std::shared_ptr<ContextFactory> drawContextFactory;
   std::shared_ptr<ResourceAliasRegistry> aliasRegistry;
+  std::shared_ptr<IShaderBindingFactory> shaderBindingFactory;
+  std::shared_ptr<DSLayoutManager> layoutManager;
 
   HandleGenerator<ManagedImage> imageHandleGenerator;
 

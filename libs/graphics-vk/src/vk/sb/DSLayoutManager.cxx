@@ -12,8 +12,8 @@ DSLayoutManager::~DSLayoutManager() {
 }
 
 auto DSLayoutManager::createLayout(vk::DescriptorSetLayoutBinding binding, std::string_view name)
-    -> DSLayoutHandle {
-  const auto key = keyGen.getKey();
+    -> Handle<DSLayout> {
+  const auto handle = handleGenerator.requestHandle();
 
   static constexpr vk::DescriptorBindingFlags bindlessFlags =
       vk::DescriptorBindingFlagBits::ePartiallyBound;
@@ -33,12 +33,12 @@ auto DSLayoutManager::createLayout(vk::DescriptorSetLayoutBinding binding, std::
                                                                .bindingCount = 1,
                                                                .pBindings = &binding};
 
-  layoutMap[key] = std::make_unique<DSLayout>(device, debugManager, dslCreateInfo, name);
+  layoutMap[handle] = std::make_unique<DSLayout>(device, debugManager, dslCreateInfo, name);
 
-  return key;
+  return handle;
 }
 
-auto DSLayoutManager::getLayout(DSLayoutHandle handle) -> DSLayout& {
+auto DSLayoutManager::getLayout(Handle<DSLayout> handle) -> DSLayout& {
   assert(layoutMap.contains(handle));
   return *layoutMap.at(handle);
 }

@@ -7,8 +7,10 @@
 
 namespace tr {
 
-ContextFactory::ContextFactory(std::shared_ptr<BufferSystem> newBufferSystem)
-    : bufferSystem{std::move(newBufferSystem)} {
+ContextFactory::ContextFactory(std::shared_ptr<BufferSystem> newBufferSystem,
+                               std::shared_ptr<IShaderBindingFactory> newShaderBindingFactory)
+    : bufferSystem{std::move(newBufferSystem)},
+      shaderBindingFactory{std::move(newShaderBindingFactory)} {
 }
 
 auto ContextFactory::createDispatchContext(ContextId id, DispatchCreateInfo createInfo)
@@ -37,6 +39,7 @@ auto ContextFactory::createDispatchContext(ContextId id, DispatchCreateInfo crea
               handle,
               std::make_unique<CompositionContext>(id,
                                                    bufferSystem,
+                                                   shaderBindingFactory,
                                                    std::forward<decltype(ci)>(ci)));
         }
       },

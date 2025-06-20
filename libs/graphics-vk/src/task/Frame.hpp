@@ -36,6 +36,8 @@ enum class BufferHandleType : uint8_t {
   TerrainChunkCount,
 };
 
+class IShaderBinding;
+
 class Frame {
 public:
   explicit Frame(uint8_t newIndex,
@@ -78,9 +80,14 @@ public:
 
   auto addLogicalBuffer(LogicalHandle<ManagedBuffer> logicalHandle,
                         Handle<ManagedBuffer> bufferHandle) -> void;
+  auto addLogicalShaderBinding(LogicalHandle<IShaderBinding> logicalHandle,
+                               Handle<IShaderBinding> handle) -> void;
 
   [[nodiscard]] auto getLogicalBuffer(LogicalHandle<ManagedBuffer> logicalHandle) const
       -> Handle<ManagedBuffer>;
+
+  [[nodiscard]] auto getLogicalShaderBinding(LogicalHandle<IShaderBinding> logicalHandle) const
+      -> Handle<IShaderBinding>;
 
   auto registerSwapchainLogicalHandle(LogicalHandle<ManagedImage> logicalHandle) -> void;
   auto addSwapchainImage(Handle<ManagedImage> handle, uint32_t index) -> void;
@@ -111,6 +118,7 @@ private:
 
   std::unordered_map<LogicalHandle<ManagedBuffer>, Handle<ManagedBuffer>> bufferHandles;
   std::unordered_map<LogicalHandle<ManagedImage>, Handle<ManagedImage>> imageHandles;
+  std::unordered_map<LogicalHandle<IShaderBinding>, Handle<IShaderBinding>> shaderBindingHandles;
 
   LogicalHandle<ManagedImage> swapchainLogicalHandle;
   std::unordered_map<uint32_t, Handle<ManagedImage>> swapchainImageHandles;

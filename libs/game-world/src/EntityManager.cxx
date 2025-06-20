@@ -13,7 +13,7 @@ namespace tr {
 constexpr auto DefaultFOV = 60.f;
 constexpr auto DefaultNearClip = 0.1f;
 constexpr auto DefaultFarClip = 10000.f;
-constexpr auto DefaultPosition = glm::vec3{0.f, 0.f, 25.f};
+constexpr auto DefaultPosition = glm::vec3{0.f, 0.f, 5.f};
 
 EntityManager::EntityManager(std::shared_ptr<IEventQueue> newEventQueue,
                              std::shared_ptr<IStateBuffer> newStateBuffer)

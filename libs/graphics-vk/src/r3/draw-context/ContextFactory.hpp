@@ -10,10 +10,12 @@ namespace tr {
 class BufferSystem;
 class IDispatchContext;
 class IDrawContext;
+class IShaderBindingFactory;
 
 class ContextFactory {
 public:
-  explicit ContextFactory(std::shared_ptr<BufferSystem> newBufferSystem);
+  explicit ContextFactory(std::shared_ptr<BufferSystem> newBufferSystem,
+                          std::shared_ptr<IShaderBindingFactory> newShaderBindingFactory);
   ~ContextFactory() = default;
 
   ContextFactory(const ContextFactory&) = delete;
@@ -30,6 +32,7 @@ public:
 
 private:
   std::shared_ptr<BufferSystem> bufferSystem;
+  std::shared_ptr<IShaderBindingFactory> shaderBindingFactory;
 
   HandleGenerator<IDispatchContext> dispatchHandleGenerator;
   std::unordered_map<Handle<IDispatchContext>, std::unique_ptr<IDispatchContext>>

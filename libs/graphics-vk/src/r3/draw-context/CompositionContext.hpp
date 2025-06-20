@@ -5,10 +5,13 @@
 
 namespace tr {
 
+class IShaderBindingFactory;
+
 class CompositionContext : public IDispatchContext {
 public:
   CompositionContext(ContextId newId,
                      std::shared_ptr<BufferSystem> newBufferSystem,
+                     std::shared_ptr<IShaderBindingFactory> newShaderBindingFactory,
                      CompositionContextCreateInfo newCreateInfo);
   ~CompositionContext() = default;
 
@@ -28,6 +31,7 @@ public:
   [[nodiscard]] auto getGraphInfo() const -> PassGraphInfo override;
 
 private:
+  std::shared_ptr<IShaderBindingFactory> shaderBindingFactory;
   CompositionContextCreateInfo createInfo;
 };
 

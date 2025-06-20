@@ -1,4 +1,6 @@
 #include "DSShaderBindingFactory.hpp"
+#include "gfx/IFrameManager.hpp"
+#include "task/Frame.hpp"
 #include "vk/core/Device.hpp"
 #include "vk/sb/DSLayoutManager.hpp"
 #include "vk/sb/DSShaderBinding.hpp"
@@ -7,9 +9,11 @@ namespace tr {
 
 DSShaderBindingFactory::DSShaderBindingFactory(std::shared_ptr<Device> newDevice,
                                                std::shared_ptr<DSLayoutManager> newLayoutManager,
+                                               std::shared_ptr<IFrameManager> newFrameManager,
                                                std::shared_ptr<IDebugManager> newDebugManager)
     : device{std::move(newDevice)},
       layoutManager{std::move(newLayoutManager)},
+      frameManager{std::move(newFrameManager)},
       debugManager{std::move(newDebugManager)} {
 
   Log.trace("Constructing DSShaderBindingFactory");
@@ -39,27 +43,31 @@ DSShaderBindingFactory::~DSShaderBindingFactory() {
 }
 
 auto DSShaderBindingFactory::createShaderBinding(ShaderBindingType type,
-                                                 DSLayoutHandle layoutHandle)
-    -> ShaderBindingHandle {
-  if (type == ShaderBindingType::Textures) {
-    const auto descriptorType = vk::DescriptorType::eCombinedImageSampler;
-    const auto& layout = layoutManager->getLayout(layoutHandle);
+                                                 Handle<DSLayout> layoutHandle)
+    -> LogicalHandle<IShaderBinding> {
 
-    auto key = keyGen.getKey();
+  assert(type == ShaderBindingType::Textures);
 
-    shaderBindingMap.insert({key,
+  const auto descriptorType = vk::DescriptorType::eCombinedImageSampler;
+  const auto& layout = layoutManager->getLayout(layoutHandle);
+
+  const auto logicalHandle = handleGenerator.requestLogicalHandle();
+  for (const auto& frame : frameManager->getFrames()) {
+    const auto handle = handleGenerator.requestHandle();
+    shaderBindingMap.insert({handle,
                              std::make_unique<DSShaderBinding>(device,
                                                                **permanentPool,
                                                                descriptorType,
                                                                layout,
                                                                debugManager,
-                                                               "Texture")});
-    return key;
+                                                               frame->getIndexedName("Texture"))});
+    frame->addLogicalShaderBinding(logicalHandle, handle);
   }
-  return 1;
+
+  return logicalHandle;
 }
 
-auto DSShaderBindingFactory::getShaderBinding(ShaderBindingHandle handle) -> IShaderBinding& {
+auto DSShaderBindingFactory::getShaderBinding(Handle<IShaderBinding> handle) -> IShaderBinding& {
   assert(shaderBindingMap.contains(handle));
   return *shaderBindingMap.at(handle);
 }

@@ -23,7 +23,15 @@ auto BarrierGenerator::build(const std::vector<std::unique_ptr<IRenderPass>>& pa
                                                     .dstStageMask = read.stageFlags,
                                                     .dstAccessMask = read.accessFlags,
                                                     .oldLayout = last.layout,
-                                                    .newLayout = read.layout},
+                                                    .newLayout = read.layout,
+                                                    .subresourceRange =
+                                                        vk::ImageSubresourceRange{
+                                                            .aspectMask = read.aspectFlags,
+                                                            .baseMipLevel = 0,
+                                                            .levelCount = 1,
+                                                            .baseArrayLayer = 0,
+                                                            .layerCount = 1,
+                                                        }},
             .alias = alias,
         });
       }
