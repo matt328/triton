@@ -60,8 +60,6 @@ auto FinalizerSystem::createCameraData(entt::registry& registry)
 
   glm::mat3 const rotationMatrix{cam.right, worldUp, cam.front};
 
-  Log.trace("cam.velocity={}", cam.velocity);
-
   const auto rotatedVelocity = rotationMatrix * cam.velocity;
 
   cam.position += rotatedVelocity;
