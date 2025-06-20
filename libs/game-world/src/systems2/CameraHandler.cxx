@@ -26,6 +26,7 @@ auto CameraHandler::handleStateAction(const Action& action, Camera& cam) -> void
       cam.velocity.x = value ? CameraSpeed : 0.f;
       break;
     case ActionType::MoveForward:
+      Log.debug("MoveForward, value={}", value);
       cam.velocity.z = value ? CameraSpeed : 0.f;
       break;
     case ActionType::MoveBackward:

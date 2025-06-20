@@ -59,6 +59,44 @@ ThreadedFrameworkContext::ThreadedFrameworkContext([[maybe_unused]] const Framew
       stateBuffer{std::move(newStateBuffer)},
       window{std::move(newWindow)},
       assetService{std::move(newAssetService)} {
+
+  // Find some other place to put this
+  // Forward
+  actionSystem->mapSource(Source{Key::Up, SourceType::Boolean},
+                          StateType::State,
+                          ActionType::MoveForward);
+  actionSystem->mapSource(Source{Key::W, SourceType::Boolean},
+                          StateType::State,
+                          ActionType::MoveForward);
+
+  // Backward
+  actionSystem->mapSource(Source{Key::Down, SourceType::Boolean},
+                          StateType::State,
+                          ActionType::MoveBackward);
+  actionSystem->mapSource(Source{Key::S, SourceType::Boolean},
+                          StateType::State,
+                          ActionType::MoveBackward);
+  // Left
+  actionSystem->mapSource(Source{Key::Left, SourceType::Boolean},
+                          StateType::State,
+                          ActionType::StrafeLeft);
+  actionSystem->mapSource(Source{Key::A, SourceType::Boolean},
+                          StateType::State,
+                          ActionType::StrafeLeft);
+  // Right
+  actionSystem->mapSource(Source{Key::Right, SourceType::Boolean},
+                          StateType::State,
+                          ActionType::StrafeRight);
+  actionSystem->mapSource(Source{Key::D, SourceType::Boolean},
+                          StateType::State,
+                          ActionType::StrafeRight);
+  // Look
+  actionSystem->mapSource(Source{MouseInput::MOVE_X, SourceType::Float},
+                          StateType::Range,
+                          ActionType::LookHorizontal);
+  actionSystem->mapSource(Source{MouseInput::MOVE_Y, SourceType::Float},
+                          StateType::Range,
+                          ActionType::LookVertical);
 }
 
 auto ThreadedFrameworkContext::startGameworld() -> void {

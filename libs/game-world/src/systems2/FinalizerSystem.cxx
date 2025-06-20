@@ -3,6 +3,7 @@
 #include "components/Renderable.hpp"
 #include "components/Resources.hpp"
 #include "components/Transform.hpp"
+#include "api/GlmToString.hpp"
 
 namespace tr {
 
@@ -48,7 +49,7 @@ auto FinalizerSystem::createCameraData(entt::registry& registry)
   const auto [width, height] = registry.ctx().get<const WindowDimensions>();
 
   const auto cameraEntity = registry.ctx().get<const CurrentCamera>();
-  auto cam = registry.get<Camera>(cameraEntity.currentCamera);
+  auto& cam = registry.get<Camera>(cameraEntity.currentCamera);
 
   auto direction = glm::vec3{cos(glm::radians(cam.yaw)) * cos(glm::radians(cam.pitch)),
                              sin(glm::radians(cam.pitch)),
@@ -58,6 +59,8 @@ auto FinalizerSystem::createCameraData(entt::registry& registry)
   cam.right = normalize(cross(cam.front, glm::vec3(0.0f, 1.0f, 0.0f)));
 
   glm::mat3 const rotationMatrix{cam.right, worldUp, cam.front};
+
+  Log.trace("cam.velocity={}", cam.velocity);
 
   const auto rotatedVelocity = rotationMatrix * cam.velocity;
 
