@@ -73,14 +73,14 @@ auto DataFacade::testResources() -> void {
                                                 glm::vec3(0.f, 1.f, 0.f),
                                                 glm::vec3(1.f, -1.f, 0.f)};
 
-  const auto colors = std::vector<glm::vec3>{glm::vec3(1.f, 0.f, 0.f),
-                                             glm::vec3(0.f, 1.f, 0.f),
-                                             glm::vec3(0.f, 0.f, 1.f)};
+  const auto colors = std::vector<glm::vec4>{glm::vec4(1.f, 0.f, 0.f, 1.f),
+                                             glm::vec4(0.f, 1.f, 0.f, 1.f),
+                                             glm::vec4(0.f, 0.f, 1.f, 1.f)};
 
   const auto texCoords =
       std::vector<glm::vec2>{glm::vec2(0.f, 0.f), glm::vec2(0.5f, 1.f), glm::vec2(1.f, 0.f)};
 
-  const auto indices = std::vector<uint32_t>{0, 1, 2};
+  const auto indices = std::vector<uint32_t>{2, 1, 0};
 
   std::vector<std::byte> positionBytes(reinterpret_cast<const std::byte*>(positions.data()),
                                        reinterpret_cast<const std::byte*>(positions.data()) +
@@ -88,7 +88,7 @@ auto DataFacade::testResources() -> void {
 
   std::vector<std::byte> colorBytes(reinterpret_cast<const std::byte*>(colors.data()),
                                     reinterpret_cast<const std::byte*>(colors.data()) +
-                                        colors.size() * sizeof(glm::vec3));
+                                        colors.size() * sizeof(glm::vec4));
 
   std::vector<std::byte> texCoordBytes(reinterpret_cast<const std::byte*>(texCoords.data()),
                                        reinterpret_cast<const std::byte*>(texCoords.data()) +
@@ -129,7 +129,7 @@ auto DataFacade::testResources() -> void {
 
   inFlightMap.emplace(triangleRequestId,
                       EntityData{.name = "triangle",
-                                 .orientation = Orientation{.position = glm::vec3{0.f, 0.f, 0.f}},
+                                 .orientation = Orientation{.position = glm::vec3{-5.f, 0.f, 0.f}},
                                  .modelName = "Triangle",
                                  .skeleton = "",
                                  .animations = {}});

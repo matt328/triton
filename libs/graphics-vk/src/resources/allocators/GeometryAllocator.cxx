@@ -54,6 +54,23 @@ auto GeometryAllocator::allocate(const GeometryData& data, TransferContext& tran
     });
   }
 
+  if (data.colorData != nullptr) {
+    auto size = data.colorData->size();
+    auto stagingRegion = transferContext.stagingAllocator->allocate(BufferRequest{.size = size});
+    Log.trace("Allocated color data in staging buffer, region.size={}, region.offset={}",
+              stagingRegion->size,
+              stagingRegion->offset);
+    geometryRegion.colorRegion =
+        geometryBufferPack->getColorBufferAllocator().allocate(BufferRequest{.size = size}).value();
+    uploadList.push_back(UploadData{
+        .dataSize = size,
+        .data = data.colorData,
+        .dstBuffer = geometryBufferPack->getColorBuffer(),
+        .stagingOffset = stagingRegion->offset,
+        .dstOffset = geometryRegion.colorRegion->offset,
+    });
+  }
+
   if (data.texCoordData != nullptr) {
     auto size = data.texCoordData->size();
     auto stagingRegion = transferContext.stagingAllocator->allocate(BufferRequest{.size = size});
@@ -92,6 +109,9 @@ auto GeometryAllocator::getRegionData(Handle<GeometryRegion> handle) const
   }
   if (region.normalRegion) {
     regionData.normalOffset = region.normalRegion->offset;
+  }
+  if (region.colorRegion) {
+    regionData.colorOffset = region.colorRegion->offset;
   }
 
   return regionData;
