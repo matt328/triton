@@ -9,7 +9,8 @@ layout(location = 0) out vec4 outColor;
 layout(set = 0, binding = 0) uniform sampler2D texSampler[];
 
 void main() {
+  vec4 sceneColor = texture(texSampler[0], fragTexCoord);
+  vec4 uiColor = texture(texSampler[1], fragTexCoord);
 
-  uint textureId = 0;
-  outColor = texture(texSampler[textureId], fragTexCoord);
+  outColor = mix(sceneColor, uiColor, uiColor.a);
 }

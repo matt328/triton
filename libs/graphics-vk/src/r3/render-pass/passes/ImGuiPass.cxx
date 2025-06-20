@@ -97,8 +97,9 @@ auto ImGuiPass::execute(const Frame* frame, vk::raii::CommandBuffer& cmdBuffer) 
   const auto colorAttachment = vk::RenderingAttachmentInfo{
       .imageView = image.getImageView(),
       .imageLayout = vk::ImageLayout::eColorAttachmentOptimal,
-      .loadOp = vk::AttachmentLoadOp::eLoad,
+      .loadOp = vk::AttachmentLoadOp::eClear,
       .storeOp = vk::AttachmentStoreOp::eStore,
+      .clearValue = {vk::ClearColorValue{std::array<float, 4>{0.f, 0.f, 0.f, 0.f}}},
   };
 
   const auto renderInfo = vk::RenderingInfo{
@@ -112,7 +113,6 @@ auto ImGuiPass::execute(const Frame* frame, vk::raii::CommandBuffer& cmdBuffer) 
 
   for (const auto& contextHandle : drawableContexts) {
     auto& context = drawContextFactory->getDispatchContext(contextHandle);
-    context->bind(frame, cmdBuffer, *pipelineLayout);
     context->dispatch(frame, cmdBuffer);
   }
 
@@ -121,5 +121,29 @@ auto ImGuiPass::execute(const Frame* frame, vk::raii::CommandBuffer& cmdBuffer) 
 
 auto ImGuiPass::registerDispatchContext(Handle<IDispatchContext> handle) -> void {
   drawableContexts.push_back(handle);
+}
+
+[[nodiscard]] auto ImGuiPass::getGraphInfo() const -> PassGraphInfo {
+  auto graphInfo = PassGraphInfo{
+      .imageWrites = {
+          ImageUsageInfo{
+              .alias = colorAlias,
+              .accessFlags = vk::AccessFlagBits2::eColorAttachmentWrite,
+              .stageFlags = vk::PipelineStageFlagBits2::eColorAttachmentOutput,
+              .aspectFlags = vk::ImageAspectFlagBits::eColor,
+              .layout = vk::ImageLayout::eColorAttachmentOptimal,
+              .clearValue = vk::ClearValue{.color = {std::array<float, 4>{0.f, 0.f, 0.f, 1.f}}},
+          },
+      }};
+
+  for (const auto& handle : drawableContexts) {
+    const auto& contextInfo = drawContextFactory->getDispatchContext(handle)->getGraphInfo();
+    graphInfo.bufferReads.insert(contextInfo.bufferReads.begin(), contextInfo.bufferReads.end());
+    graphInfo.bufferWrites.insert(contextInfo.bufferWrites.begin(), contextInfo.bufferWrites.end());
+    graphInfo.imageReads.insert(contextInfo.imageReads.begin(), contextInfo.imageReads.end());
+    graphInfo.imageWrites.insert(contextInfo.imageWrites.begin(), contextInfo.imageWrites.end());
+  }
+
+  return graphInfo;
 }
 }

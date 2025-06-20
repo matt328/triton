@@ -17,6 +17,13 @@ class IRenderPass;
 class ResourceAliasRegistry;
 class IShaderBindingFactory;
 class DSLayoutManager;
+class Device;
+class IWindow;
+class Instance;
+class PhysicalDevice;
+namespace queue {
+class Graphics;
+}
 
 class RenderPassFactory {
 public:
@@ -26,7 +33,12 @@ public:
                     std::shared_ptr<ContextFactory> newDrawContextFactory,
                     std::shared_ptr<ResourceAliasRegistry> newAliasRegistry,
                     std::shared_ptr<IShaderBindingFactory> newShaderBindingFactory,
-                    std::shared_ptr<DSLayoutManager> newLayoutManager);
+                    std::shared_ptr<DSLayoutManager> newLayoutManager,
+                    std::shared_ptr<Device> newDevice,
+                    std::shared_ptr<IWindow> newWindow,
+                    std::shared_ptr<Instance> newInstance,
+                    std::shared_ptr<PhysicalDevice> newPhysicalDevice,
+                    std::shared_ptr<queue::Graphics> newGraphicsQueue);
   ~RenderPassFactory() = default;
 
   RenderPassFactory(const RenderPassFactory&) = delete;
@@ -44,6 +56,11 @@ private:
   std::shared_ptr<ResourceAliasRegistry> aliasRegistry;
   std::shared_ptr<IShaderBindingFactory> shaderBindingFactory;
   std::shared_ptr<DSLayoutManager> layoutManager;
+  std::shared_ptr<Device> device;
+  std::shared_ptr<IWindow> window;
+  std::shared_ptr<Instance> instance;
+  std::shared_ptr<PhysicalDevice> physicalDevice;
+  std::shared_ptr<queue::Graphics> graphicsQueue;
 
   HandleGenerator<ManagedImage> imageHandleGenerator;
 
@@ -52,6 +69,8 @@ private:
   auto createCullingPass(PassId passId, CullingPassCreateInfo createInfo)
       -> std::unique_ptr<IRenderPass>;
   auto createCompositionPass(PassId passId, CompositionPassCreateInfo createInfo)
+      -> std::unique_ptr<IRenderPass>;
+  auto createImGuiPass(PassId passId, ImGuiPassCreateInfo createInfo)
       -> std::unique_ptr<IRenderPass>;
 };
 

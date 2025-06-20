@@ -17,7 +17,6 @@
 #include "gfx/GeometryHandleMapper.hpp"
 #include "ComponentIds.hpp"
 #include "vk/command-buffer/CommandBufferManager.hpp"
-#include "vk/sb/DSLayout.hpp"
 #include "vk/sb/DSLayoutManager.hpp"
 #include "vk/sb/IShaderBinding.hpp"
 #include "vk/sb/IShaderBindingFactory.hpp"
@@ -26,6 +25,7 @@ namespace tr {
 
 const std::unordered_map<ContextId, std::vector<PassId>> GraphicsMap = {
     {ContextId::Cube, {PassId::Forward}},
+    {ContextId::ImGui, {PassId::ImGui}},
     {ContextId::Composition, {PassId::Composition}}};
 
 const std::unordered_map<ContextId, std::vector<PassId>> ComputeMap = {
@@ -75,10 +75,12 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
 
   auto cullingPass = createComputeCullingPass();
   auto forwardPass = createForwardRenderPass();
+  auto imguiPass = createImGuiPass();
   auto compositionPass = createCompositionRenderPass();
 
   frameGraph->addPass(std::move(cullingPass));
   frameGraph->addPass(std::move(forwardPass));
+  frameGraph->addPass(std::move(imguiPass));
   frameGraph->addPass(std::move(compositionPass));
 
   const auto forwardDrawCreateInfo = ForwardDrawContextCreateInfo{
@@ -115,6 +117,17 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
       .defaultShaderBinding = globalShaderBindings.defaultBinding};
 
   drawContextFactory->createDispatchContext(ContextId::Composition, compositionCreateInfo);
+
+  const auto imguiCreateInfo = ImGuiContextCreateInfo{
+      .viewport = vk::Viewport{.width = static_cast<float>(rendererConfig.initialWidth),
+                               .height = static_cast<float>(rendererConfig.initialHeight),
+                               .minDepth = 0.f,
+                               .maxDepth = 1.f},
+      .scissor = vk::Rect2D{.offset = vk::Offset2D{.x = 0, .y = 0},
+                            .extent = vk::Extent2D{.width = rendererConfig.initialWidth,
+                                                   .height = rendererConfig.initialHeight}},
+  };
+  drawContextFactory->createDispatchContext(ContextId::ImGui, imguiCreateInfo);
 
   for (const auto& [contextId, passIds] : GraphicsMap) {
     for (const auto& passId : passIds) {
@@ -202,6 +215,14 @@ auto R3Renderer::createGlobalImages() -> void {
       .usageFlags = vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled,
       .aspectFlags = vk::ImageAspectFlagBits::eColor});
 
+  globalImages.imguiColorImage = imageManager->createPerFrameImage(ImageRequest{
+      .logicalName = "imgui",
+      .format = vk::Format::eR16G16B16A16Sfloat,
+      .extent = vk::Extent2D{.width = rendererConfig.initialWidth,
+                             .height = rendererConfig.initialHeight},
+      .usageFlags = vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled,
+      .aspectFlags = vk::ImageAspectFlagBits::eColor});
+
   // TODO(renderer-1): fix depth image, handle non-per frame images
   globalImages.forwardDepthImage = imageManager->createPerFrameImage(
       ImageRequest{.logicalName = "depth",
@@ -215,6 +236,7 @@ auto R3Renderer::createGlobalImages() -> void {
 
   aliasRegistry->setHandle(ImageAlias::GeometryColorImage, globalImages.forwardColorImage);
   aliasRegistry->setHandle(ImageAlias::DepthImage, globalImages.forwardDepthImage);
+  aliasRegistry->setHandle(ImageAlias::GuiColorImage, globalImages.imguiColorImage);
 }
 
 void R3Renderer::renderNextFrame() {
@@ -484,6 +506,27 @@ auto R3Renderer::createCompositionRenderPass() -> std::unique_ptr<IRenderPass> {
   return compositionPass;
 }
 
+auto R3Renderer::createImGuiPass() -> std::unique_ptr<IRenderPass> {
+  auto imGuiPass = renderPassFactory->createRenderPass(RenderPassCreateInfo{
+      .passId = PassId::ImGui,
+      .passInfo = ImGuiPassCreateInfo{.colorImage = ImageAlias::GuiColorImage}});
+
+  std::vector<CommandBufferUse> cmdBufferUses{};
+
+  for (const auto& frame : frameManager->getFrames()) {
+    cmdBufferUses.emplace_back(CommandBufferUse{.threadId = std::this_thread::get_id(),
+                                                .frameId = frame->getIndex(),
+                                                .passId = imGuiPass->getId()});
+  }
+
+  const auto commandBufferInfo = CommandBufferInfo{
+      .queueConfigs = {QueueConfig{.queueType = QueueType::Graphics, .uses = cmdBufferUses}}};
+
+  commandBufferManager->allocateCommandBuffers(commandBufferInfo);
+
+  return imGuiPass;
+}
+
 auto R3Renderer::createGlobalShaderBindings() -> void {
   const auto defaultLayout = vk::DescriptorSetLayoutBinding{
       .binding = 0,
@@ -512,11 +555,20 @@ auto R3Renderer::createGlobalShaderBindings() -> void {
     const auto imageHandle = frame->getLogicalImage(globalImages.forwardColorImage);
     const auto& colorImage = imageManager->getImage(imageHandle);
 
-    std::vector<vk::DescriptorImageInfo> imageInfos = {vk::DescriptorImageInfo{
-        .sampler = defaultSampler,
-        .imageView = colorImage.getImageView(),
-        .imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal,
-    }};
+    const auto imguiImageHandle = frame->getLogicalImage(globalImages.imguiColorImage);
+    const auto& imguiImage = imageManager->getImage(imguiImageHandle);
+
+    std::vector<vk::DescriptorImageInfo> imageInfos = {
+        vk::DescriptorImageInfo{
+            .sampler = defaultSampler,
+            .imageView = colorImage.getImageView(),
+            .imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal,
+        },
+        vk::DescriptorImageInfo{
+            .sampler = defaultSampler,
+            .imageView = imguiImage.getImageView(),
+            .imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal,
+        }};
 
     shaderBinding.bindImageSamplers(0, imageInfos);
   }

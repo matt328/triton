@@ -19,6 +19,8 @@ auto ImGuiContext::dispatch([[maybe_unused]] const Frame* frame,
   ImGui_ImplGlfw_NewFrame();
   ImGui::NewFrame();
 
+  ImGui::ShowDemoWindow();
+
   // guiRenderer->render();
 
   ImGui::Render();

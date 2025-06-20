@@ -5,6 +5,7 @@
 #include "r3/render-pass/PipelineFactory.hpp"
 #include "r3/render-pass/passes/CompositionPass.hpp"
 #include "r3/render-pass/passes/ForwardGraphicsPass.hpp"
+#include "r3/render-pass/passes/ImGuiPass.hpp"
 
 namespace tr {
 
@@ -14,14 +15,24 @@ RenderPassFactory::RenderPassFactory(std::shared_ptr<PipelineFactory> newPipelin
                                      std::shared_ptr<ContextFactory> newDrawContextFactory,
                                      std::shared_ptr<ResourceAliasRegistry> newAliasRegistry,
                                      std::shared_ptr<IShaderBindingFactory> newShaderBindingFactory,
-                                     std::shared_ptr<DSLayoutManager> newLayoutManager)
+                                     std::shared_ptr<DSLayoutManager> newLayoutManager,
+                                     std::shared_ptr<Device> newDevice,
+                                     std::shared_ptr<IWindow> newWindow,
+                                     std::shared_ptr<Instance> newInstance,
+                                     std::shared_ptr<PhysicalDevice> newPhysicalDevice,
+                                     std::shared_ptr<queue::Graphics> newGraphicsQueue)
     : pipelineFactory{std::move(newPipelineFactory)},
       imageManager{std::move(newImageManager)},
       frameManager{std::move(newFrameManager)},
       drawContextFactory{std::move(newDrawContextFactory)},
       aliasRegistry{std::move(newAliasRegistry)},
       shaderBindingFactory{std::move(newShaderBindingFactory)},
-      layoutManager{std::move(newLayoutManager)} {
+      layoutManager{std::move(newLayoutManager)},
+      device{std::move(newDevice)},
+      window{std::move(newWindow)},
+      instance{std::move(newInstance)},
+      physicalDevice{std::move(newPhysicalDevice)},
+      graphicsQueue{std::move(newGraphicsQueue)} {
 }
 
 auto RenderPassFactory::createRenderPass(RenderPassCreateInfo createInfo)
@@ -39,10 +50,28 @@ auto RenderPassFactory::createRenderPass(RenderPassCreateInfo createInfo)
     if constexpr (std::is_same_v<T, CompositionPassCreateInfo>) {
       return createCompositionPass(createInfo.passId, arg);
     }
+    if constexpr (std::is_same_v<T, ImGuiPassCreateInfo>) {
+      return createImGuiPass(createInfo.passId, arg);
+    }
     return nullptr;
   };
 
   return std::visit(visitor, createInfo.passInfo);
+}
+
+auto RenderPassFactory::createImGuiPass(PassId passId, ImGuiPassCreateInfo createInfo)
+    -> std::unique_ptr<IRenderPass> {
+  return std::make_unique<ImGuiPass>(imageManager,
+                                     drawContextFactory,
+                                     aliasRegistry,
+                                     pipelineFactory,
+                                     device,
+                                     window,
+                                     instance,
+                                     physicalDevice,
+                                     graphicsQueue,
+                                     createInfo,
+                                     passId);
 }
 
 auto RenderPassFactory::createForwardPass(PassId passId, ForwardPassCreateInfo createInfo)

@@ -30,6 +30,7 @@ enum class ImageAlias : uint8_t {
   GeometryColorImage = 0,
   SwapchainImage,
   DepthImage,
+  GuiColorImage,
   Count
 };
 

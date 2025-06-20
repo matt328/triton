@@ -5,7 +5,7 @@
 
 namespace tr {
 
-class ImGuiContext : IDispatchContext {
+class ImGuiContext : public IDispatchContext {
 public:
   ImGuiContext(ContextId newId,
                std::shared_ptr<BufferSystem> newBufferSystem,

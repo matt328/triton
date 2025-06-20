@@ -4,6 +4,7 @@
 #include "r3/draw-context/ForwardDrawContext.hpp"
 #include "r3/draw-context/IDispatchContext.hpp"
 #include "r3/draw-context/CullingDispatchContext.hpp"
+#include "r3/draw-context/ImGuiContext.hpp"
 
 namespace tr {
 
@@ -41,6 +42,11 @@ auto ContextFactory::createDispatchContext(ContextId id, DispatchCreateInfo crea
                                                    bufferSystem,
                                                    shaderBindingFactory,
                                                    std::forward<decltype(ci)>(ci)));
+        }
+        if constexpr (std::is_same_v<T, ImGuiContextCreateInfo>) {
+          dispatchContextMap.emplace(
+              handle,
+              std::make_unique<ImGuiContext>(id, bufferSystem, std::forward<decltype(ci)>(ci)));
         }
       },
       std::move(createInfo));
