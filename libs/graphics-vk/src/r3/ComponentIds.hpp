@@ -7,12 +7,14 @@ enum class PassId : uint8_t {
   Forward,
   Composition,
   PostProcessing,
+  ImGui,
 };
 
 enum class ContextId : uint8_t {
   Culling = 0,
   Cube,
   Composition,
+  ImGui,
 };
 
 }
@@ -37,6 +39,9 @@ struct std::formatter<tr::PassId> {
         break;
       case tr::PassId::PostProcessing:
         name = "PostProcessing";
+        break;
+      case tr::PassId::ImGui:
+        name = "ImGui";
         break;
     }
     return std::format_to(ctx.out(), "{}", name);

@@ -13,7 +13,12 @@ enum class RenderPassType : uint8_t {
   Forward = 0,
   Composition,
   Culling,
+  ImGui,
   Count
+};
+
+struct ImGuiPassCreateInfo {
+  ImageAlias colorImage;
 };
 
 struct ForwardPassCreateInfo {
@@ -35,8 +40,10 @@ struct CompositionPassCreateInfo {
   Handle<DSLayout> defaultDSLayout;
 };
 
-using PassInfo =
-    std::variant<ForwardPassCreateInfo, CullingPassCreateInfo, CompositionPassCreateInfo>;
+using PassInfo = std::variant<ForwardPassCreateInfo,
+                              CullingPassCreateInfo,
+                              CompositionPassCreateInfo,
+                              ImGuiPassCreateInfo>;
 
 struct RenderPassCreateInfo {
   PassId passId;

@@ -95,6 +95,10 @@ GlfwWindow::~GlfwWindow() {
   }
 }
 
+[[nodiscard]] auto GlfwWindow::getNativeWindow() const -> void* {
+  return window;
+}
+
 auto GlfwWindow::createVulkanSurface(const vk::Instance& instance, VkSurfaceKHR* outSurface) const
     -> void {
   glfwCreateWindowSurface(&(*instance), window, nullptr, outSurface);

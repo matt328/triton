@@ -35,6 +35,8 @@ public:
 
   [[nodiscard]] auto shouldClose() const -> bool override;
 
+  [[nodiscard]] auto getNativeWindow() const -> void* override;
+
 private:
   std::shared_ptr<IEventQueue> eventBus;
   std::shared_ptr<IGuiAdapter> guiAdapter;

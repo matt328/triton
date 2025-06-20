@@ -20,6 +20,7 @@ public:
       -> void = 0;
   [[nodiscard]] virtual auto getFramebufferSize() const -> glm::ivec2 = 0;
   [[nodiscard]] virtual auto shouldClose() const -> bool = 0;
+  [[nodiscard]] virtual auto getNativeWindow() const -> void* = 0;
 };
 
 }

@@ -26,8 +26,14 @@ struct CompositionContextCreateInfo {
   LogicalHandle<IShaderBinding> defaultShaderBinding;
 };
 
+struct ImGuiContextCreateInfo {
+  vk::Viewport viewport;
+  vk::Rect2D scissor;
+};
+
 using DispatchCreateInfo = std::variant<CullingDispatchContextCreateInfo,
                                         ForwardDrawContextCreateInfo,
-                                        CompositionContextCreateInfo>;
+                                        CompositionContextCreateInfo,
+                                        ImGuiContextCreateInfo>;
 
 }
