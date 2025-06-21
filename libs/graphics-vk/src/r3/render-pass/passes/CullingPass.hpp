@@ -20,7 +20,7 @@ public:
   auto operator=(CullingPass&&) -> CullingPass& = delete;
 
   [[nodiscard]] auto getId() const -> PassId override;
-  auto execute(const Frame* frame, vk::raii::CommandBuffer& cmdBuffer) -> void override;
+  auto execute(Frame* frame, vk::raii::CommandBuffer& cmdBuffer) -> void override;
   auto registerDispatchContext(Handle<IDispatchContext> handle) -> void override;
   [[nodiscard]] auto getGraphInfo() const -> PassGraphInfo override;
 

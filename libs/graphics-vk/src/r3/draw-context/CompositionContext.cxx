@@ -38,14 +38,18 @@ auto CompositionContext::getPushConstantSize() -> size_t {
 auto CompositionContext::getGraphInfo() const -> PassGraphInfo {
   auto graphInfo = PassGraphInfo{};
 
-  // TODO figure out why this doesn't need to be here
-  // graphInfo.imageReads = {ImageUsageInfo{.alias = ImageAlias::GeometryColorImage,
-  //                                        .accessFlags = vk::AccessFlagBits2::eShaderSampledRead,
-  //                                        .stageFlags =
-  //                                        vk::PipelineStageFlagBits2::eFragmentShader,
-  //                                        .aspectFlags = vk::ImageAspectFlagBits::eColor,
-  //                                        .layout = vk::ImageLayout::eShaderReadOnlyOptimal,
-  //                                        .clearValue = {}}};
+  graphInfo.imageReads = {ImageUsageInfo{.alias = ImageAlias::GeometryColorImage,
+                                         .accessFlags = vk::AccessFlagBits2::eShaderSampledRead,
+                                         .stageFlags = vk::PipelineStageFlagBits2::eFragmentShader,
+                                         .aspectFlags = vk::ImageAspectFlagBits::eColor,
+                                         .layout = vk::ImageLayout::eShaderReadOnlyOptimal,
+                                         .clearValue = {}},
+                          ImageUsageInfo{.alias = ImageAlias::GuiColorImage,
+                                         .accessFlags = vk::AccessFlagBits2::eShaderSampledRead,
+                                         .stageFlags = vk::PipelineStageFlagBits2::eFragmentShader,
+                                         .aspectFlags = vk::ImageAspectFlagBits::eColor,
+                                         .layout = vk::ImageLayout::eShaderReadOnlyOptimal,
+                                         .clearValue = {}}};
 
   graphInfo.imageWrites = {ImageUsageInfo{
       .alias = ImageAlias::SwapchainImage,

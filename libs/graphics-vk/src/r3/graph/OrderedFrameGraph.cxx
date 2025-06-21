@@ -1,8 +1,9 @@
 #include "OrderedFrameGraph.hpp"
 #include "buffers/BufferSystem.hpp"
 #include "img/ImageManager.hpp"
-#include "r3/graph/BarrierGenerator.hpp"
 #include "r3/graph/ResourceAliasRegistry.hpp"
+#include "r3/graph/barriers/BarrierBuilder.hpp"
+#include "r3/graph/barriers/BarrierPrecursorGenerator.hpp"
 #include "r3/render-pass/IRenderPass.hpp"
 #include "task/Frame.hpp"
 #include "vk/command-buffer/CommandBufferManager.hpp"
@@ -33,29 +34,41 @@ auto OrderedFrameGraph::getPass(PassId id) -> std::unique_ptr<IRenderPass>& {
 }
 
 auto OrderedFrameGraph::bake() -> void {
-  auto barrierGenerator = BarrierGenerator{};
-  barrierPlan = std::make_unique<BarrierPlan>(barrierGenerator.build(renderPasses));
+  auto barrierPrecursorGenerator = BarrierPrecursorGenerator{};
+  barrierPrecursorPlan = barrierPrecursorGenerator.build(renderPasses);
+  Log.debug("{}", barrierPrecursorPlan);
 }
 
-auto OrderedFrameGraph::execute(const Frame* frame) -> FrameGraphResult {
+auto OrderedFrameGraph::execute(Frame* frame) -> FrameGraphResult {
   auto result = FrameGraphResult{};
 
   for (const auto& renderPass : renderPasses) {
     const auto passId = renderPass->getId();
 
     auto imageBarriers = std::vector<vk::ImageMemoryBarrier2>{};
-    if (barrierPlan->imageBarriers.contains(passId)) {
-      for (const auto& imageBarrierData : barrierPlan->imageBarriers.at(passId)) {
-        const auto handle =
-            frame->getLogicalImage(aliasRegistry->getHandle(imageBarrierData.alias));
-        const auto& image = imageManager->getImage(handle);
-        imageBarriers.push_back(imageBarrierData.imageBarrier);
-        imageBarriers.back().setImage(image.getImage());
+
+    if (barrierPrecursorPlan.imagePrecursors.contains(passId)) {
+      for (const auto& precursor : barrierPrecursorPlan.imagePrecursors.at(passId)) {
+        const auto lastUse = frame->getLastImageUse(precursor.alias);
+        auto imageBarrier = BarrierBuilder::build(precursor, lastUse);
+        if (imageBarrier) {
+          const auto handle = frame->getLogicalImage(aliasRegistry->getHandle(precursor.alias));
+          const auto& image = imageManager->getImage(handle);
+          imageBarrier->setImage(image.getImage());
+          imageBarriers.push_back(*imageBarrier);
+        }
+        frame->setLastImageUse(precursor.alias,
+                               LastImageUse{
+                                   .accessMode = precursor.accessMode,
+                                   .access = precursor.accessFlags,
+                                   .stage = precursor.stageFlags,
+                                   .layout = precursor.layout,
+                               });
       }
     }
 
     auto bufferBarriers = std::vector<vk::BufferMemoryBarrier2>{};
-    if (barrierPlan->bufferBarriers.contains(passId)) {
+    if (barrierPrecursorPlan.bufferPrecursors.contains(passId)) {
 
       const auto visitor = [&]<typename T>(T&& arg) {
         using U = std::decay_t<T>;
@@ -69,10 +82,20 @@ auto OrderedFrameGraph::execute(const Frame* frame) -> FrameGraphResult {
         }
       };
 
-      for (const auto& bufferBarrierData : barrierPlan->bufferBarriers.at(passId)) {
-        const auto& buffer = std::visit(visitor, bufferBarrierData.alias);
-        bufferBarriers.push_back(bufferBarrierData.bufferBarrier);
-        bufferBarriers.back().setBuffer(**buffer);
+      for (const auto& precursor : barrierPrecursorPlan.bufferPrecursors.at(passId)) {
+        const auto& buffer = std::visit(visitor, precursor.alias);
+        auto lastUse = frame->getLastBufferUse(precursor.alias);
+        auto bufferBarrier = BarrierBuilder::build(precursor, lastUse);
+        if (bufferBarrier) {
+          bufferBarrier->setBuffer(**buffer);
+          bufferBarriers.push_back(*bufferBarrier);
+        }
+        frame->setLastBufferUse(precursor.alias,
+                                LastBufferUse{
+                                    .passId = passId,
+                                    .accessMask = precursor.accessFlags,
+                                    .stageMask = precursor.stageFlags,
+                                });
       }
     }
 
@@ -91,18 +114,6 @@ auto OrderedFrameGraph::execute(const Frame* frame) -> FrameGraphResult {
     commandBuffer.begin(vk::CommandBufferBeginInfo{});
     commandBuffer.pipelineBarrier2(dependencyInfo);
     renderPass->execute(frame, commandBuffer);
-
-    if (passId == PassId::Composition) { // This is the last pass, transition the swapchain image
-      const auto handle =
-          frame->getLogicalImage(aliasRegistry->getHandle(barrierPlan->swapchainBarrier.alias));
-      const auto& image = imageManager->getImage(handle);
-      barrierPlan->swapchainBarrier.imageBarrier.setImage(image.getImage());
-
-      auto dependencyInfo =
-          vk::DependencyInfo{.imageMemoryBarrierCount = 1,
-                             .pImageMemoryBarriers = &barrierPlan->swapchainBarrier.imageBarrier};
-      commandBuffer.pipelineBarrier2(dependencyInfo);
-    }
 
     commandBuffer.end();
     result.commandBuffers.push_back(commandBuffer);

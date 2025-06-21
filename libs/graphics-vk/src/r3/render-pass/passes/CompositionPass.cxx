@@ -83,7 +83,7 @@ CompositionPass::CompositionPass(std::shared_ptr<ImageManager> newImageManager,
   return id;
 }
 
-auto CompositionPass::execute(const Frame* frame, vk::raii::CommandBuffer& cmdBuffer) -> void {
+auto CompositionPass::execute(Frame* frame, vk::raii::CommandBuffer& cmdBuffer) -> void {
 
   const auto swapchainHandle = aliasRegistry->getHandle(swapchainAlias);
 

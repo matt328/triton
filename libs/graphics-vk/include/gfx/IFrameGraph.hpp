@@ -3,6 +3,7 @@
 #include "bk/Handle.hpp"
 #include "r3/ComponentIds.hpp"
 #include "vk/ResourceManagerHandles.hpp"
+#include "r3/render-pass/IRenderPass.hpp"
 
 namespace tr {
 
@@ -10,7 +11,6 @@ class ManagedImage;
 class GraphicsPass;
 class ComputePass;
 class Frame;
-class IRenderPass;
 struct PassGraphInfo;
 
 struct PassInfo2 {
@@ -42,7 +42,7 @@ public:
 
   virtual auto bake() -> void = 0;
 
-  virtual auto execute(const Frame* frame) -> FrameGraphResult = 0;
+  virtual auto execute(Frame* frame) -> FrameGraphResult = 0;
 };
 
 }

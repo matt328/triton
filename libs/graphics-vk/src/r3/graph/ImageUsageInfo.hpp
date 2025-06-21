@@ -1,6 +1,6 @@
 #pragma once
 
-#include "r3/graph/ResourceAliases.hpp"
+#include "r3/graph/ImageAlias.hpp"
 
 namespace tr {
 
@@ -10,7 +10,7 @@ struct ImageUsageInfo {
   vk::PipelineStageFlags2 stageFlags;
   vk::ImageAspectFlags aspectFlags;
   vk::ImageLayout layout;
-  vk::ClearValue clearValue;
+  vk::ClearValue clearValue{};
 };
 
 // Non-member equality operator

@@ -65,6 +65,28 @@ auto Frame::getObjectCount() const -> uint32_t {
   return objectCount;
 }
 
+auto Frame::setLastImageUse(ImageAlias imageAlias, LastImageUse lastImageUse) -> void {
+  lastImageUses.insert_or_assign(imageAlias, lastImageUse);
+}
+
+auto Frame::getLastImageUse(ImageAlias imageAlias) const -> std::optional<LastImageUse> {
+  if (!lastImageUses.contains(imageAlias)) {
+    return std::nullopt;
+  }
+  return lastImageUses.at(imageAlias);
+}
+
+auto Frame::setLastBufferUse(BufferAliasVariant bufferAlias, LastBufferUse lastBufferUse) -> void {
+  lastBufferUses.insert_or_assign(bufferAlias, lastBufferUse);
+}
+
+auto Frame::getLastBufferUse(BufferAliasVariant bufferAlias) const -> std::optional<LastBufferUse> {
+  if (!lastBufferUses.contains(bufferAlias)) {
+    return std::nullopt;
+  }
+  return lastBufferUses.at(bufferAlias);
+}
+
 auto Frame::addLogicalImage(LogicalHandle<ManagedImage> logicalHandle,
                             Handle<ManagedImage> imageHandle) -> void {
   assert(!imageHandles.contains(logicalHandle) &&

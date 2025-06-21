@@ -26,21 +26,7 @@ enum class GlobalBufferAlias : uint8_t {
   Count
 };
 
-enum class ImageAlias : uint8_t {
-  GeometryColorImage = 0,
-  SwapchainImage,
-  DepthImage,
-  GuiColorImage,
-  Count
-};
-
-using BufferAliasVariant = std::variant<BufferAlias, GlobalBufferAlias>;
-
-constexpr auto to_string(const BufferAliasVariant& alias) -> std::string_view {
-  return std::visit([](auto&& a) -> std::string_view { return to_string(a); }, alias);
-}
-
-constexpr auto to_string(GlobalBufferAlias alias) -> std::string_view {
+inline auto to_string(GlobalBufferAlias alias) -> std::string {
   switch (alias) {
     case GlobalBufferAlias::Index:
       return "Index";
@@ -59,7 +45,7 @@ constexpr auto to_string(GlobalBufferAlias alias) -> std::string_view {
   }
 }
 
-constexpr auto to_string(BufferAlias alias) -> std::string_view {
+inline auto to_string(BufferAlias alias) -> std::string {
   switch (alias) {
     case BufferAlias::IndirectCommand:
       return "IndirectCommand";
@@ -82,62 +68,64 @@ constexpr auto to_string(BufferAlias alias) -> std::string_view {
   }
 }
 
-constexpr auto to_string(ImageAlias alias) -> std::string_view {
-  switch (alias) {
-    case ImageAlias::GeometryColorImage:
-      return "GeometryColorImage";
-    case ImageAlias::SwapchainImage:
-      return "SwapchainImage";
-    case ImageAlias::DepthImage:
-      return "DepthImage";
-    case ImageAlias::Count:
-      return "Count";
-    default:
-      return "UnknownImageAlias";
+using BufferAliasVariant = std::variant<BufferAlias, GlobalBufferAlias>;
+
+// to_string
+struct BufferAliasToStringVisitor {
+  constexpr auto operator()(GlobalBufferAlias a) const -> std::string {
+    return to_string(a);
   }
+  constexpr auto operator()(BufferAlias a) const -> std::string {
+    return to_string(a);
+  }
+};
+
+constexpr auto to_string(const BufferAliasVariant& alias) -> std::string {
+  return std::visit(BufferAliasToStringVisitor{}, alias);
 }
 
 }
 
+// GlobalBufferAlias formatter
 template <>
 struct std::formatter<tr::GlobalBufferAlias> {
-  // NOLINTNEXTLINE
-  constexpr auto parse(format_parse_context& ctx) {
+  constexpr auto parse(std::format_parse_context& ctx) {
     return ctx.begin();
   }
-
-  template <typename FormatContext>
-  auto format(tr::GlobalBufferAlias alias, FormatContext& ctx) {
-    return format_to(ctx.out(), "{}", to_string(alias));
+  auto format(tr::GlobalBufferAlias alias, std::format_context& ctx) const {
+    return std::format_to(ctx.out(), "{}", to_string(alias));
   }
 };
 
+// BufferAlias formatter
 template <>
 struct std::formatter<tr::BufferAlias> {
-  // NOLINTNEXTLINE
-  constexpr auto parse(format_parse_context& ctx) {
+  constexpr auto parse(std::format_parse_context& ctx) {
+    return ctx.begin();
+  }
+  auto format(tr::BufferAlias alias, std::format_context& ctx) const {
+    return std::format_to(ctx.out(), "{}", to_string(alias));
+  }
+};
+
+// Generic variant formatter
+template <typename... Ts>
+struct std::formatter<std::variant<Ts...>> {
+  constexpr auto parse(std::format_parse_context& ctx) {
     return ctx.begin();
   }
 
   template <typename FormatContext>
-  auto format(tr::BufferAlias alias, FormatContext& ctx) {
-    return format_to(ctx.out(), "{}", to_string(alias));
+  auto format(const std::variant<Ts...>& var, FormatContext& ctx) const {
+    return std::visit(
+        [&](const auto& value) {
+          return std::formatter<std::decay_t<decltype(value)>>{}.format(value, ctx);
+        },
+        var);
   }
 };
 
-template <>
-struct std::formatter<tr::ImageAlias> {
-  // NOLINTNEXTLINE
-  constexpr auto parse(format_parse_context& ctx) {
-    return ctx.begin();
-  }
-
-  template <typename FormatContext>
-  auto format(tr::ImageAlias alias, FormatContext& ctx) {
-    return format_to(ctx.out(), "{}", to_string(alias));
-  }
-};
-
+// Hash so it can be a key in a hashmap
 namespace std {
 template <>
 struct hash<tr::BufferAliasVariant> {

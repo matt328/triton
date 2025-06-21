@@ -17,7 +17,8 @@ public:
   Swapchain(std::shared_ptr<PhysicalDevice> newPhysicalDevice,
             std::shared_ptr<Device> newDevice,
             std::shared_ptr<Surface> newSurface,
-            std::shared_ptr<IEventQueue> newEventQueue);
+            std::shared_ptr<IEventQueue> newEventQueue,
+            std::shared_ptr<IDebugManager> newDebugManager);
   ~Swapchain();
 
   Swapchain(const Swapchain&) = delete;
@@ -43,6 +44,7 @@ private:
   std::shared_ptr<Device> device;
   std::shared_ptr<Surface> surface;
   std::shared_ptr<IEventQueue> eventQueue;
+  std::shared_ptr<IDebugManager> debugManager;
 
   std::unique_ptr<vk::raii::SwapchainKHR> oldSwapchain = nullptr;
   std::unique_ptr<vk::raii::SwapchainKHR> swapchain = nullptr;

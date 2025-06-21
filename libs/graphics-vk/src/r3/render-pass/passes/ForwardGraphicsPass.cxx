@@ -92,7 +92,7 @@ ForwardGraphicsPass::ForwardGraphicsPass(std::shared_ptr<ImageManager> newImageM
   return id;
 }
 
-auto ForwardGraphicsPass::execute(const Frame* frame, vk::raii::CommandBuffer& cmdBuffer) -> void {
+auto ForwardGraphicsPass::execute(Frame* frame, vk::raii::CommandBuffer& cmdBuffer) -> void {
   const auto handle = aliasRegistry->getHandle(colorAlias);
   const auto& image = imageManager->getImage(frame->getLogicalImage(handle));
   colorAttachmentInfo->setImageView(image.getImageView());
@@ -121,26 +121,7 @@ auto ForwardGraphicsPass::registerDispatchContext(Handle<IDispatchContext> handl
 }
 
 [[nodiscard]] auto ForwardGraphicsPass::getGraphInfo() const -> PassGraphInfo {
-  auto graphInfo = PassGraphInfo{
-      .imageWrites = {
-          ImageUsageInfo{
-              .alias = colorAlias,
-              .accessFlags = vk::AccessFlagBits2::eColorAttachmentWrite,
-              .stageFlags = vk::PipelineStageFlagBits2::eColorAttachmentOutput,
-              .aspectFlags = vk::ImageAspectFlagBits::eColor,
-              .layout = vk::ImageLayout::eColorAttachmentOptimal,
-              .clearValue = vk::ClearValue{.color = {std::array<float, 4>{0.f, 0.f, 0.f, 1.f}}},
-          },
-          ImageUsageInfo{
-              .alias = depthAlias,
-              .accessFlags = vk::AccessFlagBits2::eDepthStencilAttachmentWrite,
-              .stageFlags = vk::PipelineStageFlagBits2::eEarlyFragmentTests,
-              .aspectFlags = vk::ImageAspectFlagBits::eDepth,
-              .layout = vk::ImageLayout::eDepthAttachmentOptimal,
-              .clearValue =
-                  vk::ClearValue{.depthStencil =
-                                     vk::ClearDepthStencilValue{.depth = 1.0f, .stencil = 0}},
-          }}};
+  auto graphInfo = PassGraphInfo{};
 
   for (const auto& handle : drawableContexts) {
     const auto& dispatchContext = drawContextFactory->getDispatchContext(handle);

@@ -1,7 +1,4 @@
 set(test_SRC
-  ../src/r3/graph/DebugFrameGraph.cxx
-  ../src/r3/graph/PassGraphBuilder.cxx
-  ../src/r3/graph/BarrierGenerator.cxx
   BarrierGeneratorTest.cxx
 )
 

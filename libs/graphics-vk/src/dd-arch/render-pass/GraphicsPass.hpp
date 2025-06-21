@@ -21,7 +21,7 @@ public:
   auto bind(const Frame* frame, vk::raii::CommandBuffer& cmdBuffer, PushConstantsBindFn& bindFn)
       -> void;
 
-  auto execute(const Frame* frame, vk::raii::CommandBuffer& cmdBuffer) -> void;
+  auto execute(Frame* frame, vk::raii::CommandBuffer& cmdBuffer) -> void;
 
 private:
   std::shared_ptr<ImageManager> imageManager;

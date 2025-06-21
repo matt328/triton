@@ -90,7 +90,7 @@ ImGuiPass::~ImGuiPass() {
   return PassId::ImGui;
 }
 
-auto ImGuiPass::execute(const Frame* frame, vk::raii::CommandBuffer& cmdBuffer) -> void {
+auto ImGuiPass::execute(Frame* frame, vk::raii::CommandBuffer& cmdBuffer) -> void {
   const auto imageHandle = aliasRegistry->getHandle(colorAlias);
   const auto& image = imageManager->getImage(frame->getLogicalImage(imageHandle));
   const auto extent = image.getExtent();

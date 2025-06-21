@@ -18,7 +18,8 @@ set(graphicsvk_SRC
 
   src/r3/graph/OrderedFrameGraph.cxx
   src/r3/graph/ResourceAliasRegistry.cxx
-  src/r3/graph/BarrierGenerator.cxx
+  src/r3/graph/barriers/BarrierBuilder.cxx
+  src/r3/graph/barriers/BarrierPrecursorGenerator.cxx
 
   src/r3/render-pass/RenderPassFactory.cxx
   src/r3/render-pass/PipelineFactory.cxx
@@ -26,6 +27,7 @@ set(graphicsvk_SRC
   src/r3/render-pass/passes/CullingPass.cxx
   src/r3/render-pass/passes/CompositionPass.cxx
   src/r3/render-pass/passes/ImGuiPass.cxx
+  src/r3/render-pass/passes/PresentPass.cxx
 
   src/r3/draw-context/ContextFactory.cxx
   src/r3/draw-context/CullingDispatchContext.cxx

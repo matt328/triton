@@ -25,7 +25,6 @@
 #include "img/ImageManager.hpp"
 #include "r3/render-pass/RenderPassFactory.hpp"
 #include "r3/R3Renderer.hpp"
-#include "r3/graph/DebugFrameGraph.hpp"
 #include "r3/render-pass/PipelineFactory.hpp"
 #include "r3/draw-context/ContextFactory.hpp"
 #include "r3/draw-context/IDispatchContext.hpp"

@@ -2,6 +2,7 @@
 
 #include "bk/Handle.hpp"
 #include "r3/ComponentIds.hpp"
+#include "r3/graph/ImageAlias.hpp"
 #include "r3/graph/ResourceAliases.hpp"
 
 namespace tr {

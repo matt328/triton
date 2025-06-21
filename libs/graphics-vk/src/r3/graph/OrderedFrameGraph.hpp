@@ -1,7 +1,7 @@
 #pragma once
 
 #include "gfx/IFrameGraph.hpp"
-#include "r3/graph/BarrierGenerator.hpp"
+#include "r3/graph/barriers/BarrierPrecursorPlan.hpp"
 
 namespace tr {
 
@@ -29,7 +29,7 @@ public:
 
   auto bake() -> void override;
 
-  auto execute(const Frame* frame) -> FrameGraphResult override;
+  auto execute(Frame* frame) -> FrameGraphResult override;
 
 private:
   std::shared_ptr<CommandBufferManager> commandBufferManager;
@@ -39,7 +39,7 @@ private:
 
   std::vector<std::unique_ptr<IRenderPass>> renderPasses;
   std::unordered_map<PassId, size_t> passesById;
-  std::unique_ptr<BarrierPlan> barrierPlan;
+  BarrierPrecursorPlan barrierPrecursorPlan;
 };
 
 }

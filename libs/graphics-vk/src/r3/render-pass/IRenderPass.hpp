@@ -20,7 +20,7 @@ public:
   auto operator=(IRenderPass&&) -> IRenderPass& = delete;
 
   [[nodiscard]] virtual auto getId() const -> PassId = 0;
-  virtual auto execute(const Frame* frame, vk::raii::CommandBuffer& cmdBuffer) -> void = 0;
+  virtual auto execute(Frame* frame, vk::raii::CommandBuffer& cmdBuffer) -> void = 0;
   virtual auto registerDispatchContext(Handle<IDispatchContext> handle) -> void = 0;
 };
 

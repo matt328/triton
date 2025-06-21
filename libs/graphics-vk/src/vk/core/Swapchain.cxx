@@ -7,11 +7,13 @@ namespace tr {
 Swapchain::Swapchain(std::shared_ptr<PhysicalDevice> newPhysicalDevice,
                      std::shared_ptr<Device> newDevice,
                      std::shared_ptr<Surface> newSurface,
-                     std::shared_ptr<IEventQueue> newEventQueue)
+                     std::shared_ptr<IEventQueue> newEventQueue,
+                     std::shared_ptr<IDebugManager> newDebugManager)
     : physicalDevice{std::move(newPhysicalDevice)},
       device{std::move(newDevice)},
       surface{std::move(newSurface)},
-      eventQueue{std::move(newEventQueue)} {
+      eventQueue{std::move(newEventQueue)},
+      debugManager{std::move(newDebugManager)} {
   createSwapchain();
 }
 
@@ -128,6 +130,7 @@ auto Swapchain::createSwapchain() -> void {
   swapchainImageFormat = surfaceFormat.format;
 
   swapchainImages = swapchain->getImages();
+
   swapchainImageViews.reserve(swapchainImages.size());
 
   constexpr vk::ComponentMapping components{.r = vk::ComponentSwizzle::eIdentity,
@@ -142,7 +145,10 @@ auto Swapchain::createSwapchain() -> void {
                                                        .baseArrayLayer = 0,
                                                        .layerCount = 1};
 
+  size_t index = 0;
   for (const auto& image : swapchainImages) {
+    debugManager->setObjectName(image, std::format("SwapchainImage-{}", index));
+    ++index;
     const auto createInfo = vk::ImageViewCreateInfo{.image = image,
                                                     .viewType = vk::ImageViewType::e2D,
                                                     .format = surfaceFormat.format,

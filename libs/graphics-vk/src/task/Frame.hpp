@@ -2,6 +2,10 @@
 #include "bk/Handle.hpp"
 #include "buffers/ManagedBuffer.hpp"
 #include "img/ManagedImage.hpp"
+#include "r3/graph/ImageAlias.hpp"
+#include "r3/graph/ResourceAliases.hpp"
+#include "r3/graph/barriers/LastBufferUse.hpp"
+#include "r3/graph/barriers/LastImageUse.hpp"
 #include "vk/ResourceManagerHandles.hpp"
 
 namespace tr {
@@ -105,6 +109,12 @@ public:
 
   auto setObjectCount(uint32_t newObjectCount) -> void;
 
+  auto setLastImageUse(ImageAlias imageAlias, LastImageUse lastImageUse) -> void;
+  auto getLastImageUse(ImageAlias imageAlias) const -> std::optional<LastImageUse>;
+
+  auto setLastBufferUse(BufferAliasVariant bufferAlias, LastBufferUse lastBufferUse) -> void;
+  auto getLastBufferUse(BufferAliasVariant bufferAlias) const -> std::optional<LastBufferUse>;
+
 private:
   uint8_t index;
 
@@ -122,6 +132,9 @@ private:
 
   LogicalHandle<ManagedImage> swapchainLogicalHandle;
   std::unordered_map<uint32_t, Handle<ManagedImage>> swapchainImageHandles;
+
+  std::unordered_map<ImageAlias, LastImageUse> lastImageUses;
+  std::unordered_map<BufferAliasVariant, LastBufferUse> lastBufferUses;
 
   uint32_t staticObjectCount;
   uint32_t dynamicObjectCount;

@@ -3,6 +3,7 @@
 #include "bk/Handle.hpp"
 #include "buffers/ManagedBuffer.hpp"
 #include "img/ManagedImage.hpp"
+#include "r3/graph/ImageAlias.hpp"
 #include "r3/graph/ResourceAliases.hpp"
 
 namespace tr {

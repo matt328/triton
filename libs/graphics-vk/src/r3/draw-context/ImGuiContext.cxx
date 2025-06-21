@@ -41,6 +41,15 @@ auto ImGuiContext::getPushConstantSize() -> size_t {
 [[nodiscard]] auto ImGuiContext::getGraphInfo() const -> PassGraphInfo {
   auto passGraphInfo = PassGraphInfo{};
 
+  passGraphInfo.imageWrites = {ImageUsageInfo{
+      .alias = ImageAlias::GuiColorImage,
+      .accessFlags = vk::AccessFlagBits2::eColorAttachmentWrite,
+      .stageFlags = vk::PipelineStageFlagBits2::eColorAttachmentOutput,
+      .aspectFlags = vk::ImageAspectFlagBits::eColor,
+      .layout = vk::ImageLayout::eColorAttachmentOptimal,
+      .clearValue = {vk::ClearColorValue{std::array<float, 4>{0.392f, 0.584f, 0.929f, 1.0f}}},
+  }};
+
   return passGraphInfo;
 }
 

@@ -17,7 +17,7 @@ struct MockRenderPass : public IRenderPass {
     return info;
   }
 
-  auto execute(const Frame* frame, vk::raii::CommandBuffer& cmdBuffer) -> void override {};
+  auto execute(Frame* frame, vk::raii::CommandBuffer& cmdBuffer) -> void override {};
   auto registerDispatchContext(Handle<IDispatchContext> handle) -> void override {};
 };
 

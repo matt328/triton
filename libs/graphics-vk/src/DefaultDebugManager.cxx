@@ -72,7 +72,6 @@ auto DefaultDebugManager::setObjectName(const ObjectHandle& handle, std::string_
     Log.warn("Attempted to set object name before Device was initialized");
     return;
   }
-
   switch (handle.type) {
     case ObjectHandle::Type::Semaphore: {
       const auto l = reinterpret_cast<uint64_t>(static_cast<VkSemaphore>(handle.semaphore));

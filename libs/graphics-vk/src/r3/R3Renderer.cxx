@@ -12,6 +12,7 @@
 #include "r3/graph/ResourceAliasRegistry.hpp"
 #include "r3/render-pass/IRenderPass.hpp"
 #include "r3/render-pass/RenderPassFactory.hpp"
+#include "r3/render-pass/passes/PresentPass.hpp"
 #include "resources/allocators/GeometryAllocator.hpp"
 #include "task/Frame.hpp"
 #include "gfx/GeometryHandleMapper.hpp"
@@ -77,11 +78,13 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
   auto forwardPass = createForwardRenderPass();
   auto imguiPass = createImGuiPass();
   auto compositionPass = createCompositionRenderPass();
+  auto presentPass = createPresentPass();
 
   frameGraph->addPass(std::move(cullingPass));
   frameGraph->addPass(std::move(forwardPass));
   frameGraph->addPass(std::move(imguiPass));
   frameGraph->addPass(std::move(compositionPass));
+  frameGraph->addPass(std::move(presentPass));
 
   const auto forwardDrawCreateInfo = ForwardDrawContextCreateInfo{
       .viewport = vk::Viewport{.width = static_cast<float>(rendererConfig.initialWidth),
@@ -525,6 +528,23 @@ auto R3Renderer::createImGuiPass() -> std::unique_ptr<IRenderPass> {
   commandBufferManager->allocateCommandBuffers(commandBufferInfo);
 
   return imGuiPass;
+}
+
+auto R3Renderer::createPresentPass() -> std::unique_ptr<IRenderPass> {
+  auto pass = std::make_unique<PresentPass>(PassId::Present);
+  std::vector<CommandBufferUse> cmdBufferUses{};
+
+  for (const auto& frame : frameManager->getFrames()) {
+    cmdBufferUses.emplace_back(CommandBufferUse{.threadId = std::this_thread::get_id(),
+                                                .frameId = frame->getIndex(),
+                                                .passId = pass->getId()});
+  }
+
+  const auto commandBufferInfo = CommandBufferInfo{
+      .queueConfigs = {QueueConfig{.queueType = QueueType::Graphics, .uses = cmdBufferUses}}};
+
+  commandBufferManager->allocateCommandBuffers(commandBufferInfo);
+  return pass;
 }
 
 auto R3Renderer::createGlobalShaderBindings() -> void {

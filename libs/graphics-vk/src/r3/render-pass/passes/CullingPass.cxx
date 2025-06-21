@@ -38,7 +38,7 @@ auto CullingPass::getId() const -> PassId {
   return id;
 }
 
-auto CullingPass::execute(const Frame* frame, vk::raii::CommandBuffer& cmdBuffer) -> void {
+auto CullingPass::execute(Frame* frame, vk::raii::CommandBuffer& cmdBuffer) -> void {
   cmdBuffer.bindPipeline(vk::PipelineBindPoint::eCompute, *pipeline);
 
   for (const auto& handle : dispatchableContexts) {

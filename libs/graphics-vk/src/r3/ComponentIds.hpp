@@ -8,6 +8,7 @@ enum class PassId : uint8_t {
   Composition,
   PostProcessing,
   ImGui,
+  Present,
 };
 
 enum class ContextId : uint8_t {
@@ -21,10 +22,12 @@ enum class ContextId : uint8_t {
 
 template <>
 struct std::formatter<tr::PassId> {
+  // NOLINTNEXTLINE
   constexpr auto parse(std::format_parse_context& ctx) {
     return ctx.begin();
   }
 
+  // NOLINTNEXTLINE
   auto format(tr::PassId id, std::format_context& ctx) const {
     std::string_view name = "Unknown";
     switch (id) {
@@ -42,6 +45,9 @@ struct std::formatter<tr::PassId> {
         break;
       case tr::PassId::ImGui:
         name = "ImGui";
+        break;
+      case tr::PassId::Present:
+        name = "Present";
         break;
     }
     return std::format_to(ctx.out(), "{}", name);

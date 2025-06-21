@@ -126,6 +126,7 @@ private:
   auto createForwardRenderPass() -> std::unique_ptr<IRenderPass>;
   auto createCompositionRenderPass() -> std::unique_ptr<IRenderPass>;
   auto createImGuiPass() -> std::unique_ptr<IRenderPass>;
+  auto createPresentPass() -> std::unique_ptr<IRenderPass>;
   auto endFrame(const Frame* frame, const FrameGraphResult& result) -> void;
 
   auto buildFrameState(std::vector<GpuObjectData>& objectData,
