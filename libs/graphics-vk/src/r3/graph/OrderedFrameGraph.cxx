@@ -42,6 +42,11 @@ auto OrderedFrameGraph::bake() -> void {
 auto OrderedFrameGraph::execute(Frame* frame) -> FrameGraphResult {
   auto result = FrameGraphResult{};
 
+  /*
+    Not sure why but swapchain images are not being transitioned from undefined to PresentSrc on the
+    first execution of each frame. Once they have a lastUse, they're good.
+  */
+
   for (const auto& renderPass : renderPasses) {
     const auto passId = renderPass->getId();
 
@@ -49,21 +54,33 @@ auto OrderedFrameGraph::execute(Frame* frame) -> FrameGraphResult {
 
     if (barrierPrecursorPlan.imagePrecursors.contains(passId)) {
       for (const auto& precursor : barrierPrecursorPlan.imagePrecursors.at(passId)) {
-        const auto lastUse = frame->getLastImageUse(precursor.alias);
+        const auto handle = frame->getLogicalImage(aliasRegistry->getHandle(precursor.alias));
+
+        auto lastUse = std::optional<LastImageUse>();
+
+        if (precursor.alias == ImageAlias::SwapchainImage) {
+          lastUse = getSwapchainImageLastUse(handle);
+        } else {
+          lastUse = frame->getLastImageUse(precursor.alias);
+        }
         auto imageBarrier = BarrierBuilder::build(precursor, lastUse);
         if (imageBarrier) {
-          const auto handle = frame->getLogicalImage(aliasRegistry->getHandle(precursor.alias));
+
           const auto& image = imageManager->getImage(handle);
           imageBarrier->setImage(image.getImage());
           imageBarriers.push_back(*imageBarrier);
         }
-        frame->setLastImageUse(precursor.alias,
-                               LastImageUse{
-                                   .accessMode = precursor.accessMode,
-                                   .access = precursor.accessFlags,
-                                   .stage = precursor.stageFlags,
-                                   .layout = precursor.layout,
-                               });
+        const auto newLastUse = LastImageUse{
+            .accessMode = precursor.accessMode,
+            .access = precursor.accessFlags,
+            .stage = precursor.stageFlags,
+            .layout = precursor.layout,
+        };
+        if (precursor.alias == ImageAlias::SwapchainImage) {
+          setSwapchainImageLastUse(handle, newLastUse);
+        } else {
+          frame->setLastImageUse(precursor.alias, newLastUse);
+        }
       }
     }
 
@@ -120,6 +137,18 @@ auto OrderedFrameGraph::execute(Frame* frame) -> FrameGraphResult {
   }
 
   return result;
+}
+
+auto OrderedFrameGraph::getSwapchainImageLastUse(Handle<ManagedImage> handle)
+    -> std::optional<LastImageUse> {
+  return swapchainLastUses.contains(handle)
+             ? std::make_optional<LastImageUse>(swapchainLastUses.at(handle))
+             : std::nullopt;
+}
+
+auto OrderedFrameGraph::setSwapchainImageLastUse(Handle<ManagedImage> handle,
+                                                 LastImageUse lastImageUse) -> void {
+  swapchainLastUses.insert_or_assign(handle, lastImageUse);
 }
 
 }

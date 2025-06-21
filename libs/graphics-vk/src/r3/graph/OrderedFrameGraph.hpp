@@ -2,6 +2,7 @@
 
 #include "gfx/IFrameGraph.hpp"
 #include "r3/graph/barriers/BarrierPrecursorPlan.hpp"
+#include "r3/graph/barriers/LastImageUse.hpp"
 
 namespace tr {
 
@@ -31,6 +32,9 @@ public:
 
   auto execute(Frame* frame) -> FrameGraphResult override;
 
+  auto getSwapchainImageLastUse(Handle<ManagedImage> handle) -> std::optional<LastImageUse>;
+  auto setSwapchainImageLastUse(Handle<ManagedImage> handle, LastImageUse lastImageUse) -> void;
+
 private:
   std::shared_ptr<CommandBufferManager> commandBufferManager;
   std::shared_ptr<ResourceAliasRegistry> aliasRegistry;
@@ -40,6 +44,8 @@ private:
   std::vector<std::unique_ptr<IRenderPass>> renderPasses;
   std::unordered_map<PassId, size_t> passesById;
   BarrierPrecursorPlan barrierPrecursorPlan;
+
+  std::unordered_map<Handle<ManagedImage>, LastImageUse> swapchainLastUses;
 };
 
 }
