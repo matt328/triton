@@ -128,27 +128,27 @@ auto DataFacade::testResources() -> void {
                                                .entityName = "Viking Room #2"};
 
   inFlightMap.emplace(triangleRequestId,
-                      EntityData{.name = "triangle",
+                      EntityData{.name = triangleRequest.entityName,
                                  .orientation = Orientation{.position = glm::vec3{-5.f, 0.f, 0.f}},
                                  .modelName = "Triangle",
                                  .skeleton = "",
                                  .animations = {}});
 
   inFlightMap.emplace(vikingRoomRequestId,
-                      EntityData{.name = "viking room 1",
+                      EntityData{.name = vikingRoomRequest.entityName,
                                  .orientation = Orientation{.position = glm::vec3{1.f, 2.4f, 3.f}},
                                  .modelName = "VikingRoom",
                                  .skeleton = "",
                                  .animations = {}});
 
   inFlightMap.emplace(vikingRoomRequest2Id,
-                      EntityData{.name = "Viking Room 2",
+                      EntityData{.name = vikingRoomRequest2.entityName,
                                  .orientation = Orientation{.position = glm::vec3{1.f, 2.4f, 3.f}},
                                  .modelName = "VikingRoom",
                                  .skeleton = "",
                                  .animations = {}});
   inFlightMap.emplace(peasantRequestId,
-                      EntityData{.name = "peasant1",
+                      EntityData{.name = peasant.entityName,
                                  .orientation = Orientation{.position = glm::vec3{1.f, 2.4f, 3.f}},
                                  .modelName = "PeasantModel",
                                  .skeleton = "MainSkeleton",

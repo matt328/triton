@@ -1,5 +1,9 @@
 #pragma once
 
+namespace tr {
+class IGuiCallbackRegistrar;
+}
+
 namespace ed {
 
 struct AppLog;
@@ -19,7 +23,8 @@ public:
                    std::shared_ptr<EntityEditor> newEntityEditor,
                    std::shared_ptr<Properties> newProperties,
                    std::shared_ptr<DataFacade> newDataFacade,
-                   std::shared_ptr<AssetTool> newAssetTool);
+                   std::shared_ptr<AssetTool> newAssetTool,
+                   std::shared_ptr<tr::IGuiCallbackRegistrar> guiCallbackRegistrar);
   ~Manager();
 
   Manager(const Manager&) = delete;
@@ -39,6 +44,9 @@ private:
   std::shared_ptr<Properties> properties;
   std::shared_ptr<DataFacade> dataFacade;
   std::shared_ptr<AssetTool> assetTool;
+  std::shared_ptr<tr::IGuiCallbackRegistrar> guiCallbackRegistrar;
+
+  bool isReady = false;
 
   auto setupFonts() -> void;
 };

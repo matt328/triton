@@ -1,11 +1,16 @@
 #include "ImGuiContext.hpp"
+#include "api/fx/IGuiCallbackRegistrar.hpp"
 
 namespace tr {
 
 ImGuiContext::ImGuiContext(ContextId newId,
                            std::shared_ptr<BufferSystem> newBufferSystem,
+                           std::shared_ptr<IGuiCallbackRegistrar> newGuiCallbackRegistrar,
                            ImGuiContextCreateInfo newCreateInfo)
-    : IDispatchContext{newId, std::move(newBufferSystem)}, createInfo{newCreateInfo} {
+    : IDispatchContext{newId, std::move(newBufferSystem)},
+      guiCallbackRegistrar{std::move(newGuiCallbackRegistrar)},
+      createInfo{newCreateInfo} {
+  guiCallbackRegistrar->ready();
 }
 
 auto ImGuiContext::bind([[maybe_unused]] const Frame* frame,
@@ -19,9 +24,7 @@ auto ImGuiContext::dispatch([[maybe_unused]] const Frame* frame,
   ImGui_ImplGlfw_NewFrame();
   ImGui::NewFrame();
 
-  ImGui::ShowDemoWindow();
-
-  // guiRenderer->render();
+  guiCallbackRegistrar->render();
 
   ImGui::Render();
 

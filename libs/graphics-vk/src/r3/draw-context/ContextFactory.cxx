@@ -9,9 +9,11 @@
 namespace tr {
 
 ContextFactory::ContextFactory(std::shared_ptr<BufferSystem> newBufferSystem,
-                               std::shared_ptr<IShaderBindingFactory> newShaderBindingFactory)
+                               std::shared_ptr<IShaderBindingFactory> newShaderBindingFactory,
+                               std::shared_ptr<IGuiCallbackRegistrar> newGuiCallbackRegistrar)
     : bufferSystem{std::move(newBufferSystem)},
-      shaderBindingFactory{std::move(newShaderBindingFactory)} {
+      shaderBindingFactory{std::move(newShaderBindingFactory)},
+      guiCallbackRegistrar{std::move(newGuiCallbackRegistrar)} {
 }
 
 auto ContextFactory::createDispatchContext(ContextId id, DispatchCreateInfo createInfo)
@@ -46,7 +48,10 @@ auto ContextFactory::createDispatchContext(ContextId id, DispatchCreateInfo crea
         if constexpr (std::is_same_v<T, ImGuiContextCreateInfo>) {
           dispatchContextMap.emplace(
               handle,
-              std::make_unique<ImGuiContext>(id, bufferSystem, std::forward<decltype(ci)>(ci)));
+              std::make_unique<ImGuiContext>(id,
+                                             bufferSystem,
+                                             guiCallbackRegistrar,
+                                             std::forward<decltype(ci)>(ci)));
         }
       },
       std::move(createInfo));

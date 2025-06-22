@@ -3,6 +3,7 @@
 // Following aren't referenced in this file, but need to be here for BoostDI to work
 #include "Properties.hpp"
 #include "bk/ThreadName.hpp"
+#include "fx/GuiCallbackRegistrar.hpp"
 #include "ui/Manager.hpp"
 #include "ui/components/Menu.hpp"
 #include "data/DataFacade.hpp"
@@ -51,15 +52,18 @@ auto main() -> int {
 
   try {
     const auto guiAdapter = std::make_shared<tr::ImGuiAdapter>();
+    const auto guiCallbackRegistrar = std::make_shared<tr::GuiCallBackRegistrar>();
     const auto frameworkConfig = tr::FrameworkConfig{.initialWindowSize = glm::ivec2(width, height),
                                                      .windowTitle = windowTitle.str()};
 
-    auto frameworkContext = tr::ThreadedFrameworkContext::create(frameworkConfig, guiAdapter);
+    auto frameworkContext =
+        tr::ThreadedFrameworkContext::create(frameworkConfig, guiAdapter, guiCallbackRegistrar);
 
-    const auto injector = di::make_injector(di::bind<ed::Properties>.to<>(properties),
-                                            di::bind<tr::IEventQueue>.to<>([&frameworkContext] {
-                                              return frameworkContext->getEventQueue();
-                                            }));
+    const auto injector =
+        di::make_injector(di::bind<ed::Properties>.to<>(properties),
+                          di::bind<tr::IEventQueue>.to<>(
+                              [&frameworkContext] { return frameworkContext->getEventQueue(); }),
+                          di::bind<tr::IGuiCallbackRegistrar>.to<>(guiCallbackRegistrar));
 
     auto app = injector.create<std::shared_ptr<ed::Application>>();
 

@@ -17,8 +17,12 @@ public:
   auto setRenderCallback(std::function<void(void)> newRenderFn) -> void override;
   auto render() -> void override;
 
+  auto setReadyCallback(std::function<void(void)> newReadyFn) -> void override;
+  auto ready() -> void override;
+
 private:
   std::function<void(void)> renderFn;
+  std::function<void(void)> readyCallback;
 };
 
 }

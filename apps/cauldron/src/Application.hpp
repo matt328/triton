@@ -6,6 +6,7 @@ namespace tr {
 class IGuiCallbackRegistrar;
 class IGameLoop;
 class IEventQueue;
+class IGuiCallbackRegistrar;
 }
 
 namespace ed {
@@ -17,7 +18,8 @@ class Application : public tr::IApplication {
 public:
   Application(std::shared_ptr<Properties> newProperties,
               std::shared_ptr<Manager> newManager,
-              std::shared_ptr<tr::IEventQueue> newEventQueue);
+              std::shared_ptr<tr::IEventQueue> newEventQueue,
+              std::shared_ptr<tr::IGuiCallbackRegistrar> newGuiCallbackRegistrar);
 
   ~Application() override;
 
@@ -34,5 +36,6 @@ private:
   std::shared_ptr<Properties> properties;
   std::shared_ptr<Manager> manager;
   std::shared_ptr<tr::IEventQueue> eventQueue;
+  std::shared_ptr<tr::IGuiCallbackRegistrar> guiCallbackRegistrar;
 };
 }

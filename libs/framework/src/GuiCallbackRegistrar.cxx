@@ -11,4 +11,13 @@ auto GuiCallBackRegistrar::render() -> void {
   renderFn();
 }
 
+auto GuiCallBackRegistrar::setReadyCallback(std::function<void(void)> newReadyFn) -> void {
+  readyCallback = newReadyFn;
+}
+
+auto GuiCallBackRegistrar::ready() -> void {
+  assert(readyCallback && "Gui Ready callback not registered");
+  readyCallback();
+}
+
 }

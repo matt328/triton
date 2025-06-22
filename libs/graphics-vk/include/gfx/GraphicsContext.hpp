@@ -9,6 +9,7 @@ class IWindow;
 class Device;
 class IAssetSystem;
 class IAssetService;
+class IGuiCallbackRegistrar;
 
 class GraphicsContext {
 public:
@@ -27,7 +28,8 @@ public:
   static auto create(std::shared_ptr<IEventQueue> newEventQueue,
                      std::shared_ptr<IStateBuffer> newStateBuffer,
                      std::shared_ptr<IWindow> newWindow,
-                     std::shared_ptr<IAssetService> newAssetService)
+                     std::shared_ptr<IAssetService> newAssetService,
+                     std::shared_ptr<IGuiCallbackRegistrar> newGuiCallbackRegistrar)
       -> std::shared_ptr<GraphicsContext>;
 
   auto run(std::stop_token token) -> void;

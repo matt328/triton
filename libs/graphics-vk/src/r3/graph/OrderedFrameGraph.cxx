@@ -42,11 +42,6 @@ auto OrderedFrameGraph::bake() -> void {
 auto OrderedFrameGraph::execute(Frame* frame) -> FrameGraphResult {
   auto result = FrameGraphResult{};
 
-  /*
-    Not sure why but swapchain images are not being transitioned from undefined to PresentSrc on the
-    first execution of each frame. Once they have a lastUse, they're good.
-  */
-
   for (const auto& renderPass : renderPasses) {
     const auto passId = renderPass->getId();
 

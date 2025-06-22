@@ -11,11 +11,13 @@ class BufferSystem;
 class IDispatchContext;
 class IDrawContext;
 class IShaderBindingFactory;
+class IGuiCallbackRegistrar;
 
 class ContextFactory {
 public:
   explicit ContextFactory(std::shared_ptr<BufferSystem> newBufferSystem,
-                          std::shared_ptr<IShaderBindingFactory> newShaderBindingFactory);
+                          std::shared_ptr<IShaderBindingFactory> newShaderBindingFactory,
+                          std::shared_ptr<IGuiCallbackRegistrar> newGuiCallbackRegistrar);
   ~ContextFactory() = default;
 
   ContextFactory(const ContextFactory&) = delete;
@@ -33,6 +35,7 @@ public:
 private:
   std::shared_ptr<BufferSystem> bufferSystem;
   std::shared_ptr<IShaderBindingFactory> shaderBindingFactory;
+  std::shared_ptr<IGuiCallbackRegistrar> guiCallbackRegistrar;
 
   HandleGenerator<IDispatchContext> dispatchHandleGenerator;
   std::unordered_map<Handle<IDispatchContext>, std::unique_ptr<IDispatchContext>>

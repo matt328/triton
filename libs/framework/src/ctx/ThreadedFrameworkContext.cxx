@@ -5,6 +5,7 @@
 #include "GlfwWindow.hpp"
 #include "api/fx/IApplication.hpp"
 #include "api/fx/IAssetService.hpp"
+#include "api/fx/IGuiCallbackRegistrar.hpp"
 #include "bk/TaskQueue.hpp"
 #include "fx/HorribleStateBuffer.hpp"
 #include "gw/GameWorldContext.hpp"
@@ -18,7 +19,8 @@ namespace di = boost::di;
 namespace tr {
 
 auto ThreadedFrameworkContext::create(const FrameworkConfig& config,
-                                      std::shared_ptr<IGuiAdapter> guiAdapter)
+                                      std::shared_ptr<IGuiAdapter> guiAdapter,
+                                      std::shared_ptr<IGuiCallbackRegistrar> guiCallbackRegistrar)
     -> std::shared_ptr<ThreadedFrameworkContext> {
 
   const auto eventQueue = std::make_shared<EventQueue>();
@@ -40,7 +42,8 @@ auto ThreadedFrameworkContext::create(const FrameworkConfig& config,
                         di::bind<IActionSystem>.to<>(actionSystem),
                         di::bind<IStateBuffer>.to<>(stateBuffer),
                         di::bind<IWindow>.to<>(window),
-                        di::bind<IAssetService>.to<DefaultAssetService>());
+                        di::bind<IAssetService>.to<DefaultAssetService>(),
+                        di::bind<IGuiCallbackRegistrar>.to<>(guiCallbackRegistrar));
   return frameworkInjector.create<std::shared_ptr<ThreadedFrameworkContext>>();
 }
 
@@ -48,17 +51,20 @@ ThreadedFrameworkContext::~ThreadedFrameworkContext() {
   Log.trace("Destroying ThreadedFrameworkContext");
 }
 
-ThreadedFrameworkContext::ThreadedFrameworkContext([[maybe_unused]] const FrameworkConfig& config,
-                                                   std::shared_ptr<IEventQueue> newEventQueue,
-                                                   std::shared_ptr<IActionSystem> newActionSystem,
-                                                   std::shared_ptr<IStateBuffer> newStateBuffer,
-                                                   std::shared_ptr<IWindow> newWindow,
-                                                   std::shared_ptr<IAssetService> newAssetService)
+ThreadedFrameworkContext::ThreadedFrameworkContext(
+    [[maybe_unused]] const FrameworkConfig& config,
+    std::shared_ptr<IEventQueue> newEventQueue,
+    std::shared_ptr<IActionSystem> newActionSystem,
+    std::shared_ptr<IStateBuffer> newStateBuffer,
+    std::shared_ptr<IWindow> newWindow,
+    std::shared_ptr<IAssetService> newAssetService,
+    std::shared_ptr<IGuiCallbackRegistrar> newGuiCallbackRegistrar)
     : eventQueue{std::move(newEventQueue)},
       actionSystem{std::move(newActionSystem)},
       stateBuffer{std::move(newStateBuffer)},
       window{std::move(newWindow)},
-      assetService{std::move(newAssetService)} {
+      assetService{std::move(newAssetService)},
+      guiCallbackRegistrar{std::move(newGuiCallbackRegistrar)} {
 
   // Find some other place to put this
   // Forward
@@ -117,7 +123,11 @@ auto ThreadedFrameworkContext::startRenderer() -> void {
   graphicsThread = std::jthread([this](std::stop_token token) {
     setCurrentThreadName("Graphics");
     try {
-      graphicsContext = GraphicsContext::create(eventQueue, stateBuffer, window, assetService);
+      graphicsContext = GraphicsContext::create(eventQueue,
+                                                stateBuffer,
+                                                window,
+                                                assetService,
+                                                guiCallbackRegistrar);
       graphicsContext->run(token);
       Log.trace("Nulling out graphicsContext");
       graphicsContext = nullptr;

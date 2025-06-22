@@ -1,5 +1,6 @@
 #include "gfx/GraphicsContext.hpp"
 #include "FrameState.hpp"
+#include "api/fx/IGuiCallbackRegistrar.hpp"
 #include "gfx/QueueTypes.hpp"
 #include "r3/GeometryBufferPack.hpp"
 #include "r3/graph/OrderedFrameGraph.hpp"
@@ -62,7 +63,8 @@ GraphicsContext::~GraphicsContext() {
 auto GraphicsContext::create(std::shared_ptr<IEventQueue> newEventQueue,
                              std::shared_ptr<IStateBuffer> newStateBuffer,
                              std::shared_ptr<IWindow> newWindow,
-                             std::shared_ptr<IAssetService> newAssetService)
+                             std::shared_ptr<IAssetService> newAssetService,
+                             std::shared_ptr<IGuiCallbackRegistrar> newGuiCallbackRegistrar)
     -> std::shared_ptr<GraphicsContext> {
   Log.trace("GraphicsContext::create()");
   const auto rendererConfig = RenderContextConfig{.useDescriptorBuffers = false,
@@ -109,7 +111,8 @@ auto GraphicsContext::create(std::shared_ptr<IEventQueue> newEventQueue,
                         di::bind<FrameState>.to<FrameState>(),
                         di::bind<GeometryHandleMapper>.to(std::make_shared<GeometryHandleMapper>()),
                         di::bind<IAssetSystem>.to<DefaultAssetSystem>(),
-                        di::bind<ResourceAliasRegistry>.to<ResourceAliasRegistry>());
+                        di::bind<ResourceAliasRegistry>.to<ResourceAliasRegistry>(),
+                        di::bind<IGuiCallbackRegistrar>.to(newGuiCallbackRegistrar));
 
   return injector.create<std::shared_ptr<GraphicsContext>>();
 }

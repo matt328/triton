@@ -5,10 +5,13 @@
 
 namespace tr {
 
+class IGuiCallbackRegistrar;
+
 class ImGuiContext : public IDispatchContext {
 public:
   ImGuiContext(ContextId newId,
                std::shared_ptr<BufferSystem> newBufferSystem,
+               std::shared_ptr<IGuiCallbackRegistrar> newGuiCallbackRegistrar,
                ImGuiContextCreateInfo newCreateInfo);
   ~ImGuiContext() = default;
 
@@ -28,6 +31,7 @@ public:
   [[nodiscard]] auto getGraphInfo() const -> PassGraphInfo override;
 
 private:
+  std::shared_ptr<IGuiCallbackRegistrar> guiCallbackRegistrar;
   ImGuiContextCreateInfo createInfo;
 };
 
