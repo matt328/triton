@@ -6,7 +6,18 @@
 #include "FileDialog.hpp"
 #include "DialogManager.hpp"
 
-#include "api/fx/IEventBus.hpp"
+/*
+  All this ImGui Code now runs on the graphics thread. Any actions any of its components need to
+  take need to be events on the event queue.
+  Make sure all components are refactored to act like proper UI components with data inputs and
+  event outputs.
+
+  Need to be able to have the ui components somehow tell the gameworld what data they need so the
+  gameworld can add it to the state queue
+
+  The components' constructors and other methods will execute on the gameworld thread, its just the
+  render() methods will happen on the graphics thread
+*/
 
 namespace ed {
 
@@ -50,20 +61,14 @@ Menu::~Menu() {
   Log.trace("Destroying Menu");
 }
 
-void Menu::render() {
+auto Menu::bindInput() -> void {
+}
+
+void Menu::render(const UIState& uiState) {
   auto showConfirmDialog = false;
-  static auto showDemoWindow = false;
 
   if (ImGui::BeginMainMenuBar()) {
     if (ImGui::BeginMenu("File")) {
-
-      if (ImGui::MenuItem("Test Dialog")) {
-        dialogManager->setOpen("Test Dialog");
-      }
-
-      if (ImGui::MenuItem("Create Box")) {
-        dataFacade->createAABB();
-      }
 
       if (ImGui::MenuItem("New Project...")) {
         if (dataFacade->isUnsaved()) {
@@ -113,8 +118,8 @@ void Menu::render() {
         this->fullscreen = !this->fullscreen;
         toggleFullscreenFn();
       }
-      if (ImGui::MenuItem("Demo Window", nullptr, showDemoWindow)) {
-        showDemoWindow = !showDemoWindow;
+      if (ImGui::MenuItem("Demo Window", nullptr, state.demoWindowVisible)) {
+        state.demoWindowVisible = !state.demoWindowVisible;
       }
       if (ImGui::MenuItem("Wireframe", nullptr, enableWireframe)) {
         enableWireframe = !enableWireframe;
@@ -155,8 +160,8 @@ void Menu::render() {
   projectSaveDialog->checkShouldOpen();
   projectSaveDialog->render();
 
-  if (showDemoWindow) {
-    ImGui::ShowDemoWindow(&showDemoWindow);
+  if (state.demoWindowVisible) {
+    ImGui::ShowDemoWindow(&state.demoWindowVisible);
   }
 }
 }

@@ -72,7 +72,7 @@ void Manager::render() {
 
   dialogManager->render();
 
-  appMenu->render();
+  appMenu->render({});
   entityEditor->render();
   assetViewer->render();
   assetTool->render();

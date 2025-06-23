@@ -85,6 +85,9 @@ GlfwWindow::GlfwWindow(const WindowCreateInfo& createInfo,
   } else {
     Log.warn("Error initializing GLFW");
   }
+
+  eventBus->subscribe<tr::WindowClosed>(
+      [&](const tr::WindowClosed& event) { glfwSetWindowShouldClose(window, GLFW_TRUE); });
 }
 
 GlfwWindow::~GlfwWindow() {
