@@ -1,15 +1,16 @@
 #pragma once
 
+#include "IComponent.hpp"
+
 namespace ed {
 
 class DataFacade;
 class DialogManager;
 class Properties;
 
-class AssetViewer {
+class AssetViewer : public IComponent {
 public:
-  AssetViewer(std::shared_ptr<DataFacade> newDataFacade,
-              std::shared_ptr<DialogManager> newDialogManager,
+  AssetViewer(std::shared_ptr<DialogManager> newDialogManager,
               std::shared_ptr<Properties> newProperties);
   ~AssetViewer();
 
@@ -18,10 +19,9 @@ public:
   auto operator=(const AssetViewer&) -> AssetViewer& = default;
   auto operator=(AssetViewer&&) -> AssetViewer& = delete;
 
-  void render();
+  auto render(const UIState& uiState) -> void override;
 
 private:
-  std::shared_ptr<DataFacade> dataFacade;
   std::shared_ptr<DialogManager> dialogManager;
   std::shared_ptr<Properties> properties;
 

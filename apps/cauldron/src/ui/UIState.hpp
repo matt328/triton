@@ -2,6 +2,8 @@
 
 namespace ed {
 
-struct UIState {};
+struct UIState {
+  bool saved = true;
+};
 
 }

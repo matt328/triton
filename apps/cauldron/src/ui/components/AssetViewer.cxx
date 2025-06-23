@@ -12,12 +12,9 @@ namespace ed {
 
 constexpr auto ItemIndent = 16.f;
 
-AssetViewer::AssetViewer(std::shared_ptr<DataFacade> newDataFacade,
-                         std::shared_ptr<DialogManager> newDialogManager,
+AssetViewer::AssetViewer(std::shared_ptr<DialogManager> newDialogManager,
                          std::shared_ptr<Properties> newProperties)
-    : dataFacade{std::move(newDataFacade)},
-      dialogManager{std::move(newDialogManager)},
-      properties{std::move(newProperties)} {
+    : dialogManager{std::move(newDialogManager)}, properties{std::move(newProperties)} {
   Log.trace("Constructing AssetViewer");
   createSkeletonDialog();
   createAnimationDialog();
@@ -28,8 +25,8 @@ AssetViewer::~AssetViewer() {
   Log.trace("Destroying AssetViewer");
 }
 
-void AssetViewer::render() {
-  if (const auto unsaved = dataFacade->isUnsaved() ? ImGuiWindowFlags_UnsavedDocument : 0;
+auto AssetViewer::render(const UIState& uiState) -> void {
+  if (const auto unsaved = !uiState.saved ? ImGuiWindowFlags_UnsavedDocument : 0;
       ImGui::Begin("Assets", nullptr, ImGuiWindowFlags_MenuBar | unsaved)) {
 
     if (ImGui::BeginMenuBar()) {
