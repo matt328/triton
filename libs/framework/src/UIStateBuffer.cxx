@@ -1,6 +1,6 @@
-#include "UIStateBuffer.hpp"
+#include "fx/UIStateBuffer.hpp"
 
-namespace ed {
+namespace tr {
 
 auto UIStateBuffer::getStates(Timestamp t) -> std::optional<UIState> {
   std::array<Entry, BufferSize> snapshot;

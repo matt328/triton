@@ -20,21 +20,21 @@ namespace tr {
 
 auto ThreadedFrameworkContext::create(const FrameworkConfig& config,
                                       std::shared_ptr<IGuiAdapter> guiAdapter,
-                                      std::shared_ptr<IGuiCallbackRegistrar> guiCallbackRegistrar)
+                                      std::shared_ptr<IGuiCallbackRegistrar> guiCallbackRegistrar,
+                                      std::shared_ptr<UIStateBuffer> uiStateBuffer)
     -> std::shared_ptr<ThreadedFrameworkContext> {
 
-  const auto eventQueue = std::make_shared<EventQueue>();
-  const auto actionSystem = std::make_shared<ActionSystem>(eventQueue);
+  auto eventQueue = std::make_shared<EventQueue>();
+  auto actionSystem = std::make_shared<ActionSystem>(eventQueue);
 
-  const auto taskQueue = std::make_shared<TaskQueue>(TaskQueueConfig{.maxQueueSize = 1024});
-  const auto stateBuffer = std::make_shared<HorribleStateBuffer>();
+  auto taskQueue = std::make_shared<TaskQueue>(TaskQueueConfig{.maxQueueSize = 1024});
+  auto stateBuffer = std::make_shared<HorribleStateBuffer>();
 
-  const auto window =
-      std::make_shared<GlfwWindow>(WindowCreateInfo{.height = config.initialWindowSize.y,
-                                                    .width = config.initialWindowSize.x,
-                                                    .title = "Temporary Title"},
-                                   eventQueue,
-                                   guiAdapter);
+  auto window = std::make_shared<GlfwWindow>(WindowCreateInfo{.height = config.initialWindowSize.y,
+                                                              .width = config.initialWindowSize.x,
+                                                              .title = "Temporary Title"},
+                                             eventQueue,
+                                             guiAdapter);
 
   const auto frameworkInjector =
       di::make_injector(di::bind<TaskQueue>.to<>(taskQueue),
@@ -43,7 +43,8 @@ auto ThreadedFrameworkContext::create(const FrameworkConfig& config,
                         di::bind<IStateBuffer>.to<>(stateBuffer),
                         di::bind<IWindow>.to<>(window),
                         di::bind<IAssetService>.to<DefaultAssetService>(),
-                        di::bind<IGuiCallbackRegistrar>.to<>(guiCallbackRegistrar));
+                        di::bind<IGuiCallbackRegistrar>.to<>(guiCallbackRegistrar),
+                        di::bind<UIStateBuffer>.to<>(uiStateBuffer));
   return frameworkInjector.create<std::shared_ptr<ThreadedFrameworkContext>>();
 }
 
@@ -58,13 +59,15 @@ ThreadedFrameworkContext::ThreadedFrameworkContext(
     std::shared_ptr<IStateBuffer> newStateBuffer,
     std::shared_ptr<IWindow> newWindow,
     std::shared_ptr<IAssetService> newAssetService,
-    std::shared_ptr<IGuiCallbackRegistrar> newGuiCallbackRegistrar)
+    std::shared_ptr<IGuiCallbackRegistrar> newGuiCallbackRegistrar,
+    std::shared_ptr<UIStateBuffer> newUIStateBuffer)
     : eventQueue{std::move(newEventQueue)},
       actionSystem{std::move(newActionSystem)},
       stateBuffer{std::move(newStateBuffer)},
       window{std::move(newWindow)},
       assetService{std::move(newAssetService)},
-      guiCallbackRegistrar{std::move(newGuiCallbackRegistrar)} {
+      guiCallbackRegistrar{std::move(newGuiCallbackRegistrar)},
+      uiStateBuffer{std::move(newUIStateBuffer)} {
 
   // Find some other place to put this
   // Forward
@@ -127,7 +130,8 @@ auto ThreadedFrameworkContext::startRenderer() -> void {
                                                 stateBuffer,
                                                 window,
                                                 assetService,
-                                                guiCallbackRegistrar);
+                                                guiCallbackRegistrar,
+                                                uiStateBuffer);
       graphicsContext->run(token);
       Log.trace("Nulling out graphicsContext");
       graphicsContext = nullptr;

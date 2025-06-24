@@ -2,6 +2,7 @@
 
 #include "api/action/Actions.hpp"
 #include "api/action/Inputs.hpp"
+#include "api/fx/EditorEvents.hpp"
 #include "api/gfx/GpuMaterialData.hpp"
 #include "api/gw/GameplayEvents.hpp"
 #include "api/gw/TransformData.hpp"
@@ -111,7 +112,10 @@ struct FrameEndEvent {
   std::any fenceHandle;
 };
 
-using EventVariant = std::variant<BoxWidget,
+using EventVariant = std::variant<AddSkeleton,
+                                  AddAnimation,
+                                  AddModel,
+                                  BoxWidget,
                                   DeleteObject,
                                   TransformObject,
                                   ChunkTriangulateRequest,

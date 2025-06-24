@@ -41,8 +41,6 @@ private:
   std::shared_ptr<IWindow> window;
   std::shared_ptr<Device> device;
   std::shared_ptr<IAssetSystem> assetSystem;
-
-  std::chrono::steady_clock clock;
 };
 
 }

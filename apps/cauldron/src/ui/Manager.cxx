@@ -74,7 +74,7 @@ void Manager::render() {
 
   appMenu->render({});
   entityEditor->render();
-  assetViewer->render();
+  assetViewer->render({});
   assetTool->render();
 
   dialogManager->update();

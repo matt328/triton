@@ -2,11 +2,13 @@
 
 #include "api/fx/Events.hpp"
 #include "api/fx/IEventQueue.hpp"
-#include "ui/UIState.hpp"
+#include "fx/UIState.hpp"
+
+namespace tr {
+class IEventQueue;
+}
 
 namespace ed {
-
-class IEventQueue;
 
 class IComponent {
 public:
@@ -18,7 +20,7 @@ public:
   auto operator=(const IComponent&) -> IComponent& = default;
   auto operator=(IComponent&&) -> IComponent& = delete;
 
-  virtual auto render(const UIState& uiState) -> void = 0;
+  virtual auto render(const tr::UIState& uiState) -> void = 0;
   virtual auto bindInput() -> void = 0;
 
   auto emitEvents(tr::IEventQueue& eventQueue) -> void {

@@ -1,6 +1,5 @@
 #include "AssetViewer.hpp"
 
-#include "data/DataFacade.hpp"
 #include "DialogManager.hpp"
 
 #include "api/GlmToString.hpp"
@@ -13,8 +12,11 @@ namespace ed {
 constexpr auto ItemIndent = 16.f;
 
 AssetViewer::AssetViewer(std::shared_ptr<DialogManager> newDialogManager,
-                         std::shared_ptr<Properties> newProperties)
-    : dialogManager{std::move(newDialogManager)}, properties{std::move(newProperties)} {
+                         std::shared_ptr<Properties> newProperties,
+                         std::shared_ptr<tr::IEventQueue> newEventQueue)
+    : dialogManager{std::move(newDialogManager)},
+      properties{std::move(newProperties)},
+      eventQueue{std::move(newEventQueue)} {
   Log.trace("Constructing AssetViewer");
   createSkeletonDialog();
   createAnimationDialog();
@@ -25,7 +27,10 @@ AssetViewer::~AssetViewer() {
   Log.trace("Destroying AssetViewer");
 }
 
-auto AssetViewer::render(const UIState& uiState) -> void {
+auto AssetViewer::bindInput() -> void {
+}
+
+auto AssetViewer::render(const tr::UIState& uiState) -> void {
   if (const auto unsaved = !uiState.saved ? ImGuiWindowFlags_UnsavedDocument : 0;
       ImGui::Begin("Assets", nullptr, ImGuiWindowFlags_MenuBar | unsaved)) {
 
@@ -65,7 +70,7 @@ auto AssetViewer::render(const UIState& uiState) -> void {
       ImGui::SetNextItemOpen(headerState[1]);
       if (ImGui::CollapsingHeader("Skeletons")) {
         ImGui::Indent(ItemIndent);
-        for (const auto& name : dataFacade->getSkeletons() | std::views::keys) {
+        for (const auto& name : uiState.assets.skeletons) {
           ImGui::Selectable((std::string{ICON_LC_BONE} + " " + name).c_str());
         }
         ImGui::Unindent(ItemIndent);
@@ -79,7 +84,7 @@ auto AssetViewer::render(const UIState& uiState) -> void {
       ImGui::SetNextItemOpen(headerState[2]);
       if (ImGui::CollapsingHeader("Animations")) {
         ImGui::Indent(ItemIndent);
-        for (const auto& name : dataFacade->getAnimations() | std::views::keys) {
+        for (const auto& name : uiState.assets.animations) {
           ImGui::Selectable((std::string{ICON_LC_FILE_VIDEO} + " " + name).c_str());
         }
         ImGui::Unindent(ItemIndent);
@@ -93,7 +98,7 @@ auto AssetViewer::render(const UIState& uiState) -> void {
       ImGui::SetNextItemOpen(headerState[3]);
       if (ImGui::CollapsingHeader("Models")) {
         ImGui::Indent(ItemIndent);
-        for (const auto& name : dataFacade->getModels() | std::views::keys) {
+        for (const auto& name : uiState.assets.models) {
           ImGui::Selectable((std::string{ICON_LC_BOX} + " " + name).c_str());
         }
         ImGui::Unindent(ItemIndent);
@@ -114,9 +119,9 @@ void AssetViewer::createSkeletonDialog() {
         Log.trace("name: {0}, file: {1}",
                   dialog.getValue<std::string>("name").value(),
                   dialog.getValue<std::filesystem::path>("filename").value().string());
-        dataFacade->addSkeleton(
-            dialog.getValue<std::string>("name").value(),
-            dialog.getValue<std::filesystem::path>("filename").value().string());
+        eventQueue->emit(tr::AddSkeleton{
+            .name = dialog.getValue<std::string>("name").value(),
+            .fileName = dialog.getValue<std::filesystem::path>("filename").value().string()});
       },
       []() { Log.debug("Cancelled Dialog with no input"); });
 
@@ -139,9 +144,10 @@ void AssetViewer::createAnimationDialog() {
         Log.trace("name: {0}, file: {1}",
                   dialog.getValue<std::string>("name").value(),
                   dialog.getValue<std::filesystem::path>("filename").value().string());
-        dataFacade->addAnimation(
-            dialog.getValue<std::string>("name").value(),
-            dialog.getValue<std::filesystem::path>("filename").value().string());
+        eventQueue->emit(tr::AddModel{
+            .name = dialog.getValue<std::string>("name").value(),
+            .fileName = dialog.getValue<std::filesystem::path>("filename").value().string(),
+        });
       },
       []() { Log.debug("Cancelled Dialog with no input"); });
 
@@ -164,8 +170,9 @@ void AssetViewer::createModelDialog() {
         Log.trace("name: {0}, file: {1}",
                   dialog.getValue<std::string>("name").value(),
                   dialog.getValue<std::filesystem::path>("filename").value().string());
-        dataFacade->addModel(dialog.getValue<std::string>("name").value(),
-                             dialog.getValue<std::filesystem::path>("filename").value().string());
+        eventQueue->emit(tr::AddModel{
+            .name = dialog.getValue<std::string>("name").value(),
+            .fileName = dialog.getValue<std::filesystem::path>("filename").value().string()});
       },
       []() { Log.debug("Cancelled Dialog with no input"); });
 

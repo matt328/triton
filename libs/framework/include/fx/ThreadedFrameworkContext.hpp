@@ -13,12 +13,14 @@ class IStateBuffer;
 class IApplication;
 class IWindow;
 class IAssetService;
+class UIStateBuffer;
 
 class ThreadedFrameworkContext {
 public:
   static auto create(const FrameworkConfig& config,
                      std::shared_ptr<IGuiAdapter> guiAdapter,
-                     std::shared_ptr<IGuiCallbackRegistrar> guiCallbackRegistrar)
+                     std::shared_ptr<IGuiCallbackRegistrar> guiCallbackRegistrar,
+                     std::shared_ptr<UIStateBuffer> uiStateBuffer)
       -> std::shared_ptr<ThreadedFrameworkContext>;
 
   ThreadedFrameworkContext(const FrameworkConfig& config,
@@ -27,7 +29,8 @@ public:
                            std::shared_ptr<IStateBuffer> newStateBuffer,
                            std::shared_ptr<IWindow> newWindow,
                            std::shared_ptr<IAssetService> newAssetService,
-                           std::shared_ptr<IGuiCallbackRegistrar> newGuiCallbackRegistrar);
+                           std::shared_ptr<IGuiCallbackRegistrar> newGuiCallbackRegistrar,
+                           std::shared_ptr<UIStateBuffer> newUIStateBuffer);
 
   ~ThreadedFrameworkContext();
 
@@ -52,6 +55,7 @@ private:
   std::shared_ptr<IWindow> window;
   std::shared_ptr<IAssetService> assetService;
   std::shared_ptr<IGuiCallbackRegistrar> guiCallbackRegistrar;
+  std::shared_ptr<UIStateBuffer> uiStateBuffer;
 
   std::shared_ptr<GameWorldContext> gameWorldContext;
   std::shared_ptr<GraphicsContext> graphicsContext;

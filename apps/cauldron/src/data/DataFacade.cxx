@@ -4,11 +4,11 @@
 
 namespace ed {
 
-constexpr auto ModelFile =
-    "/home/matt/projects/matt/game-assets/models/current/viking_room/viking_room_v4.trm";
-
 // constexpr auto ModelFile =
-//     "/home/matt/Projects/game-assets/models/current/viking_room/viking_room_v4.trm";
+//     "/home/matt/projects/matt/game-assets/models/current/viking_room/viking_room_v4.trm";
+
+constexpr auto ModelFile =
+    "/home/matt/Projects/game-assets/models/current/viking_room/viking_room_v4.trm";
 
 DataFacade::DataFacade(std::shared_ptr<tr::IEventQueue> newEventQueue)
     : eventQueue{std::move(newEventQueue)} {
@@ -49,6 +49,11 @@ DataFacade::DataFacade(std::shared_ptr<tr::IEventQueue> newEventQueue)
   eventQueue->subscribe<tr::StaticModelResponse>(
       [&](const tr::StaticModelResponse& event) { handleStaticModelResponse(event); },
       "test_group");
+
+  eventQueue->subscribe<tr::AddModel>([&](const tr::AddModel& event) {
+    Log.trace("Adding Model: name={}, fileName={}", event.name, event.fileName);
+    addModel(event.name, event.fileName);
+  });
 
   scheduleDelayed([this] { testResources(); }, std::chrono::seconds(1));
 }

@@ -4,6 +4,7 @@
 #include "Properties.hpp"
 #include "bk/ThreadName.hpp"
 #include "fx/GuiCallbackRegistrar.hpp"
+#include "fx/UIStateBuffer.hpp"
 #include "ui/Manager.hpp"
 #include "ui/components/Menu.hpp"
 #include "data/DataFacade.hpp"
@@ -18,6 +19,8 @@
 
 // #include "TracyDefines.hpp"
 
+#define BOOST_DI_CFG_DIAGNOSTICS_LEVEL 2
+#include <di.hpp>
 namespace di = boost::di;
 
 // #ifdef WIN32
@@ -48,26 +51,30 @@ auto main() -> int {
   const auto configDir = std::filesystem::path(sago::getConfigHome()) / "editor";
   auto propertiesPath = configDir / "editor";
 
-  const auto properties = std::make_shared<ed::Properties>(propertiesPath);
+  auto properties = std::make_shared<ed::Properties>(propertiesPath);
 
   try {
-    const auto guiAdapter = std::make_shared<tr::ImGuiAdapter>();
-    const auto guiCallbackRegistrar = std::make_shared<tr::GuiCallBackRegistrar>();
-    const auto frameworkConfig = tr::FrameworkConfig{.initialWindowSize = glm::ivec2(width, height),
-                                                     .windowTitle = windowTitle.str()};
+    auto guiAdapter = std::make_shared<tr::ImGuiAdapter>();
+    auto guiCallbackRegistrar = std::make_shared<tr::GuiCallBackRegistrar>();
+    auto frameworkConfig = tr::FrameworkConfig{.initialWindowSize = glm::ivec2(width, height),
+                                               .windowTitle = windowTitle.str()};
+    auto uiStateBuffer = std::make_shared<tr::UIStateBuffer>();
 
-    auto frameworkContext =
-        tr::ThreadedFrameworkContext::create(frameworkConfig, guiAdapter, guiCallbackRegistrar);
+    auto frameworkContext = tr::ThreadedFrameworkContext::create(frameworkConfig,
+                                                                 guiAdapter,
+                                                                 guiCallbackRegistrar,
+                                                                 uiStateBuffer);
 
     const auto injector =
         di::make_injector(di::bind<ed::Properties>.to<>(properties),
                           di::bind<tr::IEventQueue>.to<>(
                               [&frameworkContext] { return frameworkContext->getEventQueue(); }),
-                          di::bind<tr::IGuiCallbackRegistrar>.to<>(guiCallbackRegistrar));
+                          di::bind<tr::IGuiCallbackRegistrar>.to<>(guiCallbackRegistrar),
+                          di::bind<tr::UIStateBuffer>.to<>(uiStateBuffer));
 
     auto app = injector.create<std::shared_ptr<ed::Application>>();
 
-    Log.info("Initialized");
+    Log.info("Application Initialized");
 
     frameworkContext->startGameworld();
     frameworkContext->startRenderer();

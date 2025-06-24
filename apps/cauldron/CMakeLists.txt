@@ -50,7 +50,6 @@ target_compile_definitions(${PROJECT_NAME}
 target_precompile_headers(${PROJECT_NAME}
   PRIVATE
   <any>
-  <di.hpp>
   <functional>
   <cereal/archives/binary.hpp>
   <cereal/types/unordered_map.hpp>

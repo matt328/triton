@@ -11,7 +11,8 @@ class Properties;
 class AssetViewer : public IComponent {
 public:
   AssetViewer(std::shared_ptr<DialogManager> newDialogManager,
-              std::shared_ptr<Properties> newProperties);
+              std::shared_ptr<Properties> newProperties,
+              std::shared_ptr<tr::IEventQueue> newEventQueue);
   ~AssetViewer();
 
   AssetViewer(const AssetViewer&) = default;
@@ -19,11 +20,13 @@ public:
   auto operator=(const AssetViewer&) -> AssetViewer& = default;
   auto operator=(AssetViewer&&) -> AssetViewer& = delete;
 
-  auto render(const UIState& uiState) -> void override;
+  auto render(const tr::UIState& uiState) -> void override;
+  auto bindInput() -> void override;
 
 private:
   std::shared_ptr<DialogManager> dialogManager;
   std::shared_ptr<Properties> properties;
+  std::shared_ptr<tr::IEventQueue> eventQueue;
 
   void createSkeletonDialog();
   void createAnimationDialog();

@@ -2,7 +2,7 @@
 
 #include "UIState.hpp"
 
-namespace ed {
+namespace tr {
 
 using Timestamp = std::chrono::steady_clock::time_point;
 

@@ -34,6 +34,7 @@
 #include "resources/allocators/GeometryDispatcher.hpp"
 #include "gfx/GeometryHandleMapper.hpp"
 #include "vk/command-buffer/CommandBufferManager.hpp"
+#include "fx/"
 
 #define BOOST_DI_CFG_CTOR_LIMIT_SIZE 20
 #include <di.hpp>
@@ -59,23 +60,25 @@ GraphicsContext::GraphicsContext(std::shared_ptr<IEventQueue> newEventQueue,
 GraphicsContext::~GraphicsContext() {
   Log.trace("Destroying GraphicsContext");
 }
-
+// Graphics can't depend on Framework UIState and UIStateBuffer will have to go in shared-api
+// Or factor out interface for UIStateBuffer as well as GameWorldData and GameWorldDataStateBuffer
 auto GraphicsContext::create(std::shared_ptr<IEventQueue> newEventQueue,
                              std::shared_ptr<IStateBuffer> newStateBuffer,
                              std::shared_ptr<IWindow> newWindow,
                              std::shared_ptr<IAssetService> newAssetService,
-                             std::shared_ptr<IGuiCallbackRegistrar> newGuiCallbackRegistrar)
+                             std::shared_ptr<IGuiCallbackRegistrar> newGuiCallbackRegistrar,
+                             std::shared_ptr<UIStateBuffer> newUIStateBuffer)
     -> std::shared_ptr<GraphicsContext> {
   Log.trace("GraphicsContext::create()");
-  const auto rendererConfig = RenderContextConfig{.useDescriptorBuffers = false,
-                                                  .maxStaticObjects = 1024,
-                                                  .maxDynamicObjects = 1024,
-                                                  .maxTerrainChunks = 1024,
-                                                  .maxTextures = 16,
-                                                  .framesInFlight = 2,
-                                                  .initialWidth = 1920,
-                                                  .initialHeight = 1080,
-                                                  .maxDebugObjects = 32};
+  auto rendererConfig = RenderContextConfig{.useDescriptorBuffers = false,
+                                            .maxStaticObjects = 1024,
+                                            .maxDynamicObjects = 1024,
+                                            .maxTerrainChunks = 1024,
+                                            .maxTextures = 16,
+                                            .framesInFlight = 2,
+                                            .initialWidth = 1920,
+                                            .initialHeight = 1080,
+                                            .maxDebugObjects = 32};
 
   const auto injector =
       di::make_injector(di::bind<IEventQueue>.to<>(newEventQueue),
