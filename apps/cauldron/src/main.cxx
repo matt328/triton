@@ -4,7 +4,7 @@
 #include "Properties.hpp"
 #include "bk/ThreadName.hpp"
 #include "fx/GuiCallbackRegistrar.hpp"
-#include "fx/UIStateBuffer.hpp"
+#include "ui/UIStateBuffer.hpp"
 #include "ui/Manager.hpp"
 #include "ui/components/Menu.hpp"
 #include "data/DataFacade.hpp"
@@ -55,22 +55,21 @@ auto main() -> int {
 
   try {
     auto guiAdapter = std::make_shared<tr::ImGuiAdapter>();
-    auto guiCallbackRegistrar = std::make_shared<tr::GuiCallBackRegistrar>();
+    // IGuiCallbackRegistrar can own the UIStateBuffer
     auto frameworkConfig = tr::FrameworkConfig{.initialWindowSize = glm::ivec2(width, height),
                                                .windowTitle = windowTitle.str()};
     auto uiStateBuffer = std::make_shared<tr::UIStateBuffer>();
+    auto guiCallbackRegistrar = std::make_shared<tr::GuiCallBackRegistrar>(uiStateBuffer);
 
-    auto frameworkContext = tr::ThreadedFrameworkContext::create(frameworkConfig,
-                                                                 guiAdapter,
-                                                                 guiCallbackRegistrar,
-                                                                 uiStateBuffer);
+    auto frameworkContext =
+        tr::ThreadedFrameworkContext::create(frameworkConfig, guiAdapter, guiCallbackRegistrar);
 
     const auto injector =
         di::make_injector(di::bind<ed::Properties>.to<>(properties),
                           di::bind<tr::IEventQueue>.to<>(
                               [&frameworkContext] { return frameworkContext->getEventQueue(); }),
-                          di::bind<tr::IGuiCallbackRegistrar>.to<>(guiCallbackRegistrar),
-                          di::bind<tr::UIStateBuffer>.to<>(uiStateBuffer));
+                          di::bind<tr::UIStateBuffer>.to<>(uiStateBuffer),
+                          di::bind<tr::IGuiCallbackRegistrar>.to<>(guiCallbackRegistrar));
 
     auto app = injector.create<std::shared_ptr<ed::Application>>();
 

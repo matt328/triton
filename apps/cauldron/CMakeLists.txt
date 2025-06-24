@@ -6,6 +6,7 @@ set(editor_SRC
   src/ImGuiAdapter.cxx
 
   src/ui/Manager.cxx
+  src/ui/UIStateBuffer.cxx
 
   src/ui/components/Menu.cxx
   src/ui/components/DialogManager.cxx

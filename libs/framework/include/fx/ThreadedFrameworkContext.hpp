@@ -19,8 +19,7 @@ class ThreadedFrameworkContext {
 public:
   static auto create(const FrameworkConfig& config,
                      std::shared_ptr<IGuiAdapter> guiAdapter,
-                     std::shared_ptr<IGuiCallbackRegistrar> guiCallbackRegistrar,
-                     std::shared_ptr<UIStateBuffer> uiStateBuffer)
+                     std::shared_ptr<IGuiCallbackRegistrar> guiCallbackRegistrar)
       -> std::shared_ptr<ThreadedFrameworkContext>;
 
   ThreadedFrameworkContext(const FrameworkConfig& config,
@@ -29,8 +28,7 @@ public:
                            std::shared_ptr<IStateBuffer> newStateBuffer,
                            std::shared_ptr<IWindow> newWindow,
                            std::shared_ptr<IAssetService> newAssetService,
-                           std::shared_ptr<IGuiCallbackRegistrar> newGuiCallbackRegistrar,
-                           std::shared_ptr<UIStateBuffer> newUIStateBuffer);
+                           std::shared_ptr<IGuiCallbackRegistrar> newGuiCallbackRegistrar);
 
   ~ThreadedFrameworkContext();
 

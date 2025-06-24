@@ -20,8 +20,7 @@ namespace tr {
 
 auto ThreadedFrameworkContext::create(const FrameworkConfig& config,
                                       std::shared_ptr<IGuiAdapter> guiAdapter,
-                                      std::shared_ptr<IGuiCallbackRegistrar> guiCallbackRegistrar,
-                                      std::shared_ptr<UIStateBuffer> uiStateBuffer)
+                                      std::shared_ptr<IGuiCallbackRegistrar> guiCallbackRegistrar)
     -> std::shared_ptr<ThreadedFrameworkContext> {
 
   auto eventQueue = std::make_shared<EventQueue>();
@@ -43,8 +42,7 @@ auto ThreadedFrameworkContext::create(const FrameworkConfig& config,
                         di::bind<IStateBuffer>.to<>(stateBuffer),
                         di::bind<IWindow>.to<>(window),
                         di::bind<IAssetService>.to<DefaultAssetService>(),
-                        di::bind<IGuiCallbackRegistrar>.to<>(guiCallbackRegistrar),
-                        di::bind<UIStateBuffer>.to<>(uiStateBuffer));
+                        di::bind<IGuiCallbackRegistrar>.to<>(guiCallbackRegistrar));
   return frameworkInjector.create<std::shared_ptr<ThreadedFrameworkContext>>();
 }
 
@@ -59,15 +57,13 @@ ThreadedFrameworkContext::ThreadedFrameworkContext(
     std::shared_ptr<IStateBuffer> newStateBuffer,
     std::shared_ptr<IWindow> newWindow,
     std::shared_ptr<IAssetService> newAssetService,
-    std::shared_ptr<IGuiCallbackRegistrar> newGuiCallbackRegistrar,
-    std::shared_ptr<UIStateBuffer> newUIStateBuffer)
+    std::shared_ptr<IGuiCallbackRegistrar> newGuiCallbackRegistrar)
     : eventQueue{std::move(newEventQueue)},
       actionSystem{std::move(newActionSystem)},
       stateBuffer{std::move(newStateBuffer)},
       window{std::move(newWindow)},
       assetService{std::move(newAssetService)},
-      guiCallbackRegistrar{std::move(newGuiCallbackRegistrar)},
-      uiStateBuffer{std::move(newUIStateBuffer)} {
+      guiCallbackRegistrar{std::move(newGuiCallbackRegistrar)} {
 
   // Find some other place to put this
   // Forward
@@ -130,8 +126,7 @@ auto ThreadedFrameworkContext::startRenderer() -> void {
                                                 stateBuffer,
                                                 window,
                                                 assetService,
-                                                guiCallbackRegistrar,
-                                                uiStateBuffer);
+                                                guiCallbackRegistrar);
       graphicsContext->run(token);
       Log.trace("Nulling out graphicsContext");
       graphicsContext = nullptr;

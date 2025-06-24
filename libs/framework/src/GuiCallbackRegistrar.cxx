@@ -2,11 +2,16 @@
 
 namespace tr {
 
+GuiCallBackRegistrar::GuiCallBackRegistrar(std::shared_ptr<UIStateBuffer> newStateBuffer)
+    : uiStateBuffer{std::move(newStateBuffer)} {
+}
+
 auto GuiCallBackRegistrar::setRenderCallback(std::function<void(void)> newRenderFn) -> void {
   renderFn = newRenderFn;
 }
 
-auto GuiCallBackRegistrar::render() -> void {
+auto GuiCallBackRegistrar::render(Timestamp t) -> void {
+  auto uiState = uiStateBuffer->getStates(t);
   assert(renderFn && "GuiCallback not registered");
   renderFn();
 }

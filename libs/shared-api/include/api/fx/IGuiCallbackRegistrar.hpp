@@ -12,7 +12,7 @@ public:
   auto operator=(IGuiCallbackRegistrar&&) -> IGuiCallbackRegistrar& = delete;
 
   virtual auto setRenderCallback(std::function<void(void)> newRenderFn) -> void = 0;
-  virtual auto render() -> void = 0;
+  virtual auto render(std::chrono::steady_clock::time_point t) -> void = 0;
 
   virtual auto setReadyCallback(std::function<void(void)> newReadyFn) -> void = 0;
   virtual auto ready() -> void = 0;

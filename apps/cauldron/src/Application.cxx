@@ -38,6 +38,7 @@ auto Application::onStart() -> void {
 
 auto Application::onUpdate() -> void {
   eventQueue->dispatchPending();
+  // uiStateBuffer->pushState({})
 }
 
 auto Application::onShutdown() -> void {
