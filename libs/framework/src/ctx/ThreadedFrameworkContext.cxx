@@ -10,6 +10,7 @@
 #include "fx/HorribleStateBuffer.hpp"
 #include "gw/GameWorldContext.hpp"
 #include "gfx/GraphicsContext.hpp"
+#include "api/gw/EditorStateBuffer.hpp"
 
 #define BOOST_DI_CFG_CTOR_LIMIT_SIZE 11
 #include <di.hpp>

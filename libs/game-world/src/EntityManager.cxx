@@ -7,6 +7,8 @@
 #include "components/EditorInfo.hpp"
 #include "systems2/CameraHandler.hpp"
 #include "systems2/FinalizerSystem.hpp"
+#include "systems2/EditorSystem.hpp"
+#include "api/gw/EditorStateBuffer.hpp"
 
 namespace tr {
 
@@ -16,8 +18,11 @@ constexpr auto DefaultFarClip = 10000.f;
 constexpr auto DefaultPosition = glm::vec3{0.f, 0.f, 5.f};
 
 EntityManager::EntityManager(std::shared_ptr<IEventQueue> newEventQueue,
-                             std::shared_ptr<IStateBuffer> newStateBuffer)
-    : eventQueue{std::move(newEventQueue)}, stateBuffer{std::move(newStateBuffer)} {
+                             std::shared_ptr<IStateBuffer> newStateBuffer,
+                             std::shared_ptr<EditorStateBuffer> newEditorStateBuffer)
+    : eventQueue{std::move(newEventQueue)},
+      stateBuffer{std::move(newStateBuffer)},
+      editorStateBuffer{std::move(newEditorStateBuffer)} {
   registry = std::make_unique<entt::registry>();
   Log.trace("Created EntityManager");
 
@@ -43,6 +48,9 @@ auto EntityManager::update() -> void {
   SimState writeState = SimState{1};
   FinalizerSystem::update(*registry, writeState, currentTime);
   stateBuffer->pushState(writeState, currentTime);
+
+  const auto editorState = EditorSystem::update(*registry);
+  editorStateBuffer->pushState(editorState, currentTime);
 }
 
 auto EntityManager::renderAreaCreated(const SwapchainCreated& event) -> void {

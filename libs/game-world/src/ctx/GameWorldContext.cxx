@@ -3,6 +3,7 @@
 #include "api/fx/IEventQueue.hpp"
 #include "api/fx/IStateBuffer.hpp"
 #include "gw/IEntityManager.hpp"
+#include "api/gw/EditorStateBuffer.hpp"
 
 #include <di.hpp>
 

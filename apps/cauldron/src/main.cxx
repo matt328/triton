@@ -4,7 +4,6 @@
 #include "Properties.hpp"
 #include "bk/ThreadName.hpp"
 #include "fx/GuiCallbackRegistrar.hpp"
-#include "ui/UIStateBuffer.hpp"
 #include "ui/Manager.hpp"
 #include "ui/components/Menu.hpp"
 #include "data/DataFacade.hpp"
@@ -16,6 +15,7 @@
 #include "config.h"
 #include "fx/ThreadedFrameworkContext.hpp"
 #include "api/fx/IEventQueue.hpp"
+#include "api/gw/EditorStateBuffer.hpp"
 
 // #include "TracyDefines.hpp"
 
@@ -55,11 +55,10 @@ auto main() -> int {
 
   try {
     auto guiAdapter = std::make_shared<tr::ImGuiAdapter>();
-    // IGuiCallbackRegistrar can own the UIStateBuffer
     auto frameworkConfig = tr::FrameworkConfig{.initialWindowSize = glm::ivec2(width, height),
                                                .windowTitle = windowTitle.str()};
-    auto uiStateBuffer = std::make_shared<tr::UIStateBuffer>();
-    auto guiCallbackRegistrar = std::make_shared<tr::GuiCallBackRegistrar>(uiStateBuffer);
+    auto uiStateBuffer = std::make_shared<tr::EditorStateBuffer>();
+    auto guiCallbackRegistrar = std::make_shared<tr::GuiCallBackRegistrar>();
 
     auto frameworkContext =
         tr::ThreadedFrameworkContext::create(frameworkConfig, guiAdapter, guiCallbackRegistrar);
@@ -68,7 +67,6 @@ auto main() -> int {
         di::make_injector(di::bind<ed::Properties>.to<>(properties),
                           di::bind<tr::IEventQueue>.to<>(
                               [&frameworkContext] { return frameworkContext->getEventQueue(); }),
-                          di::bind<tr::UIStateBuffer>.to<>(uiStateBuffer),
                           di::bind<tr::IGuiCallbackRegistrar>.to<>(guiCallbackRegistrar));
 
     auto app = injector.create<std::shared_ptr<ed::Application>>();

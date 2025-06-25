@@ -64,7 +64,7 @@ Menu::~Menu() {
 auto Menu::bindInput() -> void {
 }
 
-void Menu::render(const tr::UIState& uiState) {
+void Menu::render(const tr::EditorState& uiState) {
   auto showConfirmDialog = false;
 
   if (ImGui::BeginMainMenuBar()) {

@@ -20,7 +20,7 @@ public:
   auto operator=(const AssetViewer&) -> AssetViewer& = default;
   auto operator=(AssetViewer&&) -> AssetViewer& = delete;
 
-  auto render(const tr::UIState& uiState) -> void override;
+  auto render(const tr::EditorState& uiState) -> void override;
   auto bindInput() -> void override;
 
 private:

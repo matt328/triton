@@ -1,8 +1,8 @@
-#include "fx/UIStateBuffer.hpp"
+#include "api/gw/EditorStateBuffer.hpp"
 
 namespace tr {
 
-auto UIStateBuffer::getStates(Timestamp t) -> std::optional<UIState> {
+auto EditorStateBuffer::getStates(Timestamp t) -> std::optional<EditorState> {
   std::array<Entry, BufferSize> snapshot;
   {
     std::lock_guard lock(bufferMutex);
@@ -15,7 +15,6 @@ auto UIStateBuffer::getStates(Timestamp t) -> std::optional<UIState> {
     if (!entry.valid || entry.timestamp > t) {
       continue;
     }
-
     if (closest == nullptr || entry.timestamp > closest->timestamp) {
       closest = &entry;
     }
@@ -28,8 +27,9 @@ auto UIStateBuffer::getStates(Timestamp t) -> std::optional<UIState> {
   return std::nullopt;
 }
 
-auto UIStateBuffer::pushState(const UIState& newState, Timestamp t) -> void {
+auto EditorStateBuffer::pushState(const EditorState& newState, Timestamp t) -> void {
   ZoneScoped;
+  // not setting entry.valid for some reason
   const size_t idx = writeIndex.fetch_add(1, std::memory_order_acq_rel) % BufferSize;
   std::lock_guard lock(bufferMutex);
   buffer[idx] = Entry{.timestamp = t, .state = newState, .valid = true};

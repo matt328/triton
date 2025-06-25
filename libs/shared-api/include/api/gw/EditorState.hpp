@@ -2,8 +2,7 @@
 
 namespace tr {
 
-struct UIState {
-
+struct EditorState {
   struct Assets {
     std::vector<std::string> skeletons;
     std::vector<std::string> animations;

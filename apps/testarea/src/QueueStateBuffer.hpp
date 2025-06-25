@@ -1,10 +1,10 @@
 #pragma once
 
-using Timestamp = std::chrono::steady_clock::time_point;
+#include "bk/Chrono.h"
 
 struct SimState {
   double value = 0.0;
-  Timestamp timeStamp;
+  tr::Timestamp timeStamp;
 };
 
 class QueueStateBuffer {
@@ -22,7 +22,7 @@ public:
   auto getInterpolatedStates(SimState& stateA,
                              SimState& stateB,
                              float& alpha,
-                             Timestamp currentTimeSec) -> bool;
+                             tr::Timestamp currentTimeSec) -> bool;
 
   auto getWriteSlot() -> SimState*;
   auto commitWrite() -> void;

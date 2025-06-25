@@ -60,11 +60,12 @@ Manager::~Manager() {
   appLog = nullptr;
 }
 
-void Manager::render() {
+void Manager::render(const tr::EditorState& editorState) {
   if (!isReady) {
     return;
   }
   ZoneNamedN(guiRender, "Gui Render", true);
+  Log.debug("editorState animations.front={}", editorState.assets.animations.front());
   Dock::render();
 
   appLog->font = sauce;

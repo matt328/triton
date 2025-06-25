@@ -21,9 +21,9 @@ Application::Application(std::shared_ptr<Properties> newProperties,
     Log.debug("recentFile from properties: {0}", recentFile.value().string());
   }
 
-  guiCallbackRegistrar->setRenderCallback([&] {
+  guiCallbackRegistrar->setRenderCallback([&](const tr::EditorState& editorState) {
     if (manager != nullptr) {
-      manager->render();
+      manager->render(editorState);
     }
   });
 }

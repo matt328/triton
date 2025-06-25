@@ -7,6 +7,7 @@ set(gameworld_SRC
 
   src/systems2/FinalizerSystem.cxx
   src/systems2/CameraHandler.cxx
+  src/systems2/EditorSystem.cxx
 )
 
 add_library(${PROJECT_NAME} STATIC ${gameworld_SRC})

@@ -29,6 +29,7 @@ class IShaderBinding;
 class IShaderBindingFactory;
 class DSLayoutManager;
 class DSLayout;
+class EditorStateBuffer;
 
 namespace queue {
 class Graphics;
@@ -80,7 +81,8 @@ public:
              std::shared_ptr<GeometryHandleMapper> newGeometryHandleMapper,
              std::shared_ptr<ResourceAliasRegistry> newAliasRegistry,
              std::shared_ptr<IShaderBindingFactory> newShaderBindingFactory,
-             std::shared_ptr<DSLayoutManager> newLayoutManager);
+             std::shared_ptr<DSLayoutManager> newLayoutManager,
+             std::shared_ptr<EditorStateBuffer> newEditorStateBuffer);
   ~R3Renderer() override = default;
 
   R3Renderer(const R3Renderer&) = delete;
@@ -110,6 +112,7 @@ private:
   std::shared_ptr<ResourceAliasRegistry> aliasRegistry;
   std::shared_ptr<IShaderBindingFactory> shaderBindingFactory;
   std::shared_ptr<DSLayoutManager> layoutManager;
+  std::shared_ptr<EditorStateBuffer> editorStateBuffer;
 
   std::vector<vk::CommandBuffer> buffers;
 

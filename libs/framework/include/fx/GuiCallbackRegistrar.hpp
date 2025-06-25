@@ -1,13 +1,13 @@
 #pragma once
 
 #include "api/fx/IGuiCallbackRegistrar.hpp"
-#include "fx/UIStateBuffer.hpp"
+#include "bk/Chrono.h"
 
 namespace tr {
 
 class GuiCallBackRegistrar : public IGuiCallbackRegistrar {
 public:
-  GuiCallBackRegistrar(std::shared_ptr<UIStateBuffer> newStateBuffer);
+  GuiCallBackRegistrar() = default;
   ~GuiCallBackRegistrar() override = default;
 
   GuiCallBackRegistrar(const GuiCallBackRegistrar&) = default;
@@ -15,16 +15,14 @@ public:
   auto operator=(const GuiCallBackRegistrar&) -> GuiCallBackRegistrar& = default;
   auto operator=(GuiCallBackRegistrar&&) -> GuiCallBackRegistrar& = delete;
 
-  auto setRenderCallback(std::function<void(void)> newRenderFn) -> void override;
-  auto render(Timestamp t) -> void override;
+  auto setRenderCallback(RenderFnType newRenderFn) -> void override;
+  auto render(std::optional<EditorState> editorState) -> void override;
 
   auto setReadyCallback(std::function<void(void)> newReadyFn) -> void override;
   auto ready() -> void override;
 
 private:
-  std::shared_ptr<UIStateBuffer> uiStateBuffer;
-
-  std::function<void(void)> renderFn;
+  RenderFnType renderFn;
   std::function<void(void)> readyCallback;
 };
 

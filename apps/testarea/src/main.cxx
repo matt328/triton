@@ -1,9 +1,10 @@
 #include "QueueStateBuffer.hpp"
+#include "bk/Chrono.h"
 
 auto main() -> int {
   QueueStateBuffer queue;
 
-  Timestamp startTime = std::chrono::steady_clock::now();
+  tr::Timestamp startTime = tr::Clock::now();
   double currentSimValue = 0.0;
   int timeStepMs = 16; // 60 Hz
 

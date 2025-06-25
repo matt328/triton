@@ -1,5 +1,7 @@
 #pragma once
 
+#include "api/gw/EditorState.hpp"
+
 namespace tr {
 class IGuiCallbackRegistrar;
 }
@@ -32,7 +34,7 @@ public:
   auto operator=(const Manager&) -> Manager& = delete;
   auto operator=(Manager&&) -> Manager& = delete;
 
-  void render();
+  void render(const tr::EditorState& editorState);
 
 private:
   ImFont* sauce = nullptr;

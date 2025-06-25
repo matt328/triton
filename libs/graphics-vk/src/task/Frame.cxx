@@ -3,6 +3,8 @@
 #include "img/ManagedImage.hpp"
 #include <vulkan/vulkan_core.h>
 
+#include <utility>
+
 namespace tr {
 
 Frame::Frame(const uint8_t newIndex,
@@ -85,6 +87,14 @@ auto Frame::getLastBufferUse(BufferAliasVariant bufferAlias) const -> std::optio
     return std::nullopt;
   }
   return lastBufferUses.at(bufferAlias);
+}
+
+auto Frame::setEditorState(std::optional<EditorState> newState) -> void {
+  editorState = std::move(newState);
+}
+
+auto Frame::getEditorState() const -> std::optional<EditorState> {
+  return editorState;
 }
 
 auto Frame::addLogicalImage(LogicalHandle<ManagedImage> logicalHandle,

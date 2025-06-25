@@ -13,7 +13,7 @@ class IStateBuffer;
 class IApplication;
 class IWindow;
 class IAssetService;
-class UIStateBuffer;
+class EditorStateBuffer;
 
 class ThreadedFrameworkContext {
 public:
@@ -53,7 +53,7 @@ private:
   std::shared_ptr<IWindow> window;
   std::shared_ptr<IAssetService> assetService;
   std::shared_ptr<IGuiCallbackRegistrar> guiCallbackRegistrar;
-  std::shared_ptr<UIStateBuffer> uiStateBuffer;
+  std::shared_ptr<EditorStateBuffer> uiStateBuffer;
 
   std::shared_ptr<GameWorldContext> gameWorldContext;
   std::shared_ptr<GraphicsContext> graphicsContext;

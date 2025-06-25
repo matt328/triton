@@ -10,11 +10,13 @@ class FinalizerSystem;
 class IStateBuffer;
 class FrameState;
 class CameraHandler;
+class EditorStateBuffer;
 
 class EntityManager : public IEntityManager {
 public:
   explicit EntityManager(std::shared_ptr<IEventQueue> newEventQueue,
-                         std::shared_ptr<IStateBuffer> newStateBuffer);
+                         std::shared_ptr<IStateBuffer> newStateBuffer,
+                         std::shared_ptr<EditorStateBuffer> newEditorStateBuffer);
   ~EntityManager() override;
 
   EntityManager(const EntityManager&) = delete;
@@ -27,6 +29,7 @@ public:
 private:
   std::shared_ptr<IEventQueue> eventQueue;
   std::shared_ptr<IStateBuffer> stateBuffer;
+  std::shared_ptr<EditorStateBuffer> editorStateBuffer;
 
   std::unique_ptr<entt::registry> registry;
 

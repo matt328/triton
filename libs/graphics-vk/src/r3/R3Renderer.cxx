@@ -1,5 +1,6 @@
 #include "R3Renderer.hpp"
 #include "FrameState.hpp"
+#include "api/gw/EditorStateBuffer.hpp"
 #include "buffers/BufferCreateInfo.hpp"
 #include "buffers/BufferSystem.hpp"
 #include "gfx/IFrameGraph.hpp"
@@ -49,7 +50,8 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
                        std::shared_ptr<GeometryHandleMapper> newGeometryHandleMapper,
                        std::shared_ptr<ResourceAliasRegistry> newAliasRegistry,
                        std::shared_ptr<IShaderBindingFactory> newShaderBindingFactory,
-                       std::shared_ptr<DSLayoutManager> newLayoutManager)
+                       std::shared_ptr<DSLayoutManager> newLayoutManager,
+                       std::shared_ptr<EditorStateBuffer> newEditorStateBuffer)
     : rendererConfig{newRenderConfig},
       frameManager{std::move(newFrameManager)},
       graphicsQueue{std::move(newGraphicsQueue)},
@@ -67,7 +69,8 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
       geometryHandleMapper{std::move(newGeometryHandleMapper)},
       aliasRegistry{std::move(newAliasRegistry)},
       shaderBindingFactory{std::move(newShaderBindingFactory)},
-      layoutManager{std::move(newLayoutManager)} {
+      layoutManager{std::move(newLayoutManager)},
+      editorStateBuffer{std::move(newEditorStateBuffer)} {
   Log.trace("Constructing R3Renderer");
 
   createGlobalBuffers();
@@ -259,9 +262,10 @@ void R3Renderer::renderNextFrame() {
   auto* frame = std::get<Frame*>(result);
 
   std::optional<std::pair<SimState, SimState>> states = std::nullopt;
+  std::optional<EditorState> editorState = std::nullopt;
   {
     ZoneScopedN("getStates");
-    Timestamp currentTime = std::chrono::steady_clock::now();
+    Timestamp currentTime = Clock::now();
     int retries = 100; // e.g. timeout after ~100 * 10ms = 1s
     while (retries-- > 0 && states == std::nullopt) {
       ZoneScopedN("getStates try");
@@ -269,7 +273,15 @@ void R3Renderer::renderNextFrame() {
       if (states == std::nullopt) {
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
       }
+      editorState = editorStateBuffer->getStates(currentTime);
+      if (editorState == std::nullopt) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+      }
     }
+  }
+
+  if (editorState) {
+    frame->setEditorState(editorState);
   }
 
   if (states != std::nullopt) {

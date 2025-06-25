@@ -35,6 +35,8 @@
 #include "gfx/GeometryHandleMapper.hpp"
 #include "vk/command-buffer/CommandBufferManager.hpp"
 
+#include "api/gw/EditorStateBuffer.hpp"
+
 #define BOOST_DI_CFG_CTOR_LIMIT_SIZE 20
 #include <di.hpp>
 
@@ -59,8 +61,7 @@ GraphicsContext::GraphicsContext(std::shared_ptr<IEventQueue> newEventQueue,
 GraphicsContext::~GraphicsContext() {
   Log.trace("Destroying GraphicsContext");
 }
-// Graphics can't depend on Framework UIState and UIStateBuffer will have to go in shared-api
-// Or factor out interface for UIStateBuffer as well as GameWorldData and GameWorldDataStateBuffer
+
 auto GraphicsContext::create(std::shared_ptr<IEventQueue> newEventQueue,
                              std::shared_ptr<IStateBuffer> newStateBuffer,
                              std::shared_ptr<IWindow> newWindow,

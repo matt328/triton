@@ -1,5 +1,7 @@
 #include "ImGuiContext.hpp"
 #include "api/fx/IGuiCallbackRegistrar.hpp"
+#include "bk/Chrono.h"
+#include "task/Frame.hpp"
 
 namespace tr {
 
@@ -24,7 +26,7 @@ auto ImGuiContext::dispatch([[maybe_unused]] const Frame* frame,
   ImGui_ImplGlfw_NewFrame();
   ImGui::NewFrame();
 
-  guiCallbackRegistrar->render();
+  guiCallbackRegistrar->render(frame->getEditorState());
 
   ImGui::Render();
 
