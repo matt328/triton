@@ -2,8 +2,6 @@
 
 #include "DialogManager.hpp"
 
-#include "api/GlmToString.hpp"
-#include "imgui.h"
 #include "ui/assets/IconsLucide.hpp"
 #include "ui/components/FileDialog.hpp"
 
@@ -30,8 +28,8 @@ AssetViewer::~AssetViewer() {
 auto AssetViewer::bindInput() -> void {
 }
 
-auto AssetViewer::render(const tr::EditorState& uiState) -> void {
-  if (const auto unsaved = !uiState.saved ? ImGuiWindowFlags_UnsavedDocument : 0;
+auto AssetViewer::render(const tr::EditorState& editorState) -> void {
+  if (const auto unsaved = !editorState.saved ? ImGuiWindowFlags_UnsavedDocument : 0;
       ImGui::Begin("Assets", nullptr, ImGuiWindowFlags_MenuBar | unsaved)) {
 
     if (ImGui::BeginMenuBar()) {
@@ -70,7 +68,7 @@ auto AssetViewer::render(const tr::EditorState& uiState) -> void {
       ImGui::SetNextItemOpen(headerState[1]);
       if (ImGui::CollapsingHeader("Skeletons")) {
         ImGui::Indent(ItemIndent);
-        for (const auto& name : uiState.assets.skeletons) {
+        for (const auto& name : editorState.assets.skeletons | std::views::keys) {
           ImGui::Selectable((std::string{ICON_LC_BONE} + " " + name).c_str());
         }
         ImGui::Unindent(ItemIndent);
@@ -84,7 +82,7 @@ auto AssetViewer::render(const tr::EditorState& uiState) -> void {
       ImGui::SetNextItemOpen(headerState[2]);
       if (ImGui::CollapsingHeader("Animations")) {
         ImGui::Indent(ItemIndent);
-        for (const auto& name : uiState.assets.animations) {
+        for (const auto& name : editorState.assets.animations | std::views::keys) {
           ImGui::Selectable((std::string{ICON_LC_FILE_VIDEO} + " " + name).c_str());
         }
         ImGui::Unindent(ItemIndent);
@@ -98,7 +96,7 @@ auto AssetViewer::render(const tr::EditorState& uiState) -> void {
       ImGui::SetNextItemOpen(headerState[3]);
       if (ImGui::CollapsingHeader("Models")) {
         ImGui::Indent(ItemIndent);
-        for (const auto& name : uiState.assets.models) {
+        for (const auto& name : editorState.assets.models | std::views::keys) {
           ImGui::Selectable((std::string{ICON_LC_BOX} + " " + name).c_str());
         }
         ImGui::Unindent(ItemIndent);
@@ -144,7 +142,7 @@ void AssetViewer::createAnimationDialog() {
         Log.trace("name: {0}, file: {1}",
                   dialog.getValue<std::string>("name").value(),
                   dialog.getValue<std::filesystem::path>("filename").value().string());
-        eventQueue->emit(tr::AddModel{
+        eventQueue->emit(tr::AddAnimation{
             .name = dialog.getValue<std::string>("name").value(),
             .fileName = dialog.getValue<std::filesystem::path>("filename").value().string(),
         });

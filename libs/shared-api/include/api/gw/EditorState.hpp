@@ -4,9 +4,9 @@ namespace tr {
 
 struct EditorState {
   struct Assets {
-    std::vector<std::string> skeletons;
-    std::vector<std::string> animations;
-    std::vector<std::string> models;
+    std::unordered_map<std::string, std::string> skeletons;
+    std::unordered_map<std::string, std::string> animations;
+    std::unordered_map<std::string, std::string> models;
   };
 
   bool saved = true;

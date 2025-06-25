@@ -7,7 +7,6 @@
 #include "components/EditorInfo.hpp"
 #include "systems2/CameraHandler.hpp"
 #include "systems2/FinalizerSystem.hpp"
-#include "systems2/EditorSystem.hpp"
 #include "api/gw/EditorStateBuffer.hpp"
 
 namespace tr {
@@ -38,6 +37,13 @@ EntityManager::EntityManager(std::shared_ptr<IEventQueue> newEventQueue,
 
   eventQueue->subscribe<StaticModelUploaded>(
       [this](const StaticModelUploaded& event) { registerStaticModel(event); });
+
+  eventQueue->subscribe<tr::AddSkeleton>(
+      [this](const tr::AddSkeleton& event) { addSkeleton(event.name, event.fileName); });
+  eventQueue->subscribe<tr::AddAnimation>(
+      [this](const tr::AddAnimation& event) { addAnimation(event.name, event.fileName); });
+  eventQueue->subscribe<tr::AddModel>(
+      [this](const tr::AddModel& event) { addModel(event.name, event.fileName); });
 }
 
 EntityManager::~EntityManager() {
@@ -98,6 +104,22 @@ auto EntityManager::registerStaticModel(const StaticModelUploaded& event) -> voi
                                        .requestId = event.requestId,
                                        .entityName = event.entityName,
                                        .gameObjectId = entt::to_integral(entityId)});
+}
+
+auto EntityManager::addSkeleton(std::string name, std::string filename) -> void {
+  auto& editorData = registry->ctx().get<EditorState>();
+  editorData.assets.skeletons.emplace(name, filename);
+}
+
+auto EntityManager::addAnimation(std::string name, std::string filename) -> void {
+  auto& editorData = registry->ctx().get<EditorState>();
+  editorData.assets.animations.emplace(name, filename);
+}
+
+auto EntityManager::addModel(std::string name, std::string filename) -> void {
+  Log.trace("addModel name={}, filename={}", name, filename);
+  auto& editorData = registry->ctx().get<EditorState>();
+  editorData.assets.models.emplace(name, filename);
 }
 
 }

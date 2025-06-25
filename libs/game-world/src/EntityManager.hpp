@@ -37,6 +37,10 @@ private:
   auto renderAreaResized(const SwapchainResized& event) -> void;
   auto registerStaticModel(const StaticModelUploaded& event) -> void;
   auto createDefaultCamera() -> void;
+
+  auto addSkeleton(std::string name, std::string filename) -> void;
+  auto addAnimation(std::string name, std::string filename) -> void;
+  auto addModel(std::string name, std::string filename) -> void;
 };
 
 }
