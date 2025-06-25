@@ -14,7 +14,7 @@ public:
   auto operator=(const EditorSystem&) -> EditorSystem& = default;
   auto operator=(EditorSystem&&) -> EditorSystem& = delete;
 
-  static auto update(entt::registry& registry) -> EditorState;
+  static auto update(entt::registry& registry) -> const EditorState&;
 };
 
 }

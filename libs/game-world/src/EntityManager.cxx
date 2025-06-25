@@ -24,6 +24,7 @@ EntityManager::EntityManager(std::shared_ptr<IEventQueue> newEventQueue,
       stateBuffer{std::move(newStateBuffer)},
       editorStateBuffer{std::move(newEditorStateBuffer)} {
   registry = std::make_unique<entt::registry>();
+  registry->ctx().emplace<EditorState>();
   Log.trace("Created EntityManager");
 
   eventQueue->subscribe<Action>(
@@ -49,8 +50,7 @@ auto EntityManager::update() -> void {
   FinalizerSystem::update(*registry, writeState, currentTime);
   stateBuffer->pushState(writeState, currentTime);
 
-  const auto editorState = EditorSystem::update(*registry);
-  editorStateBuffer->pushState(editorState, currentTime);
+  editorStateBuffer->pushState(registry->ctx().get<EditorState>(), currentTime);
 }
 
 auto EntityManager::renderAreaCreated(const SwapchainCreated& event) -> void {
