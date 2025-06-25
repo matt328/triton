@@ -29,7 +29,7 @@ auto ThreadedFrameworkContext::create(const FrameworkConfig& config,
 
   auto taskQueue = std::make_shared<TaskQueue>(TaskQueueConfig{.maxQueueSize = 1024});
   auto stateBuffer = std::make_shared<HorribleStateBuffer>();
-
+  auto editorStateBuffer = std::make_shared<EditorStateBuffer>();
   auto window = std::make_shared<GlfwWindow>(WindowCreateInfo{.height = config.initialWindowSize.y,
                                                               .width = config.initialWindowSize.x,
                                                               .title = "Temporary Title"},
@@ -43,7 +43,8 @@ auto ThreadedFrameworkContext::create(const FrameworkConfig& config,
                         di::bind<IStateBuffer>.to<>(stateBuffer),
                         di::bind<IWindow>.to<>(window),
                         di::bind<IAssetService>.to<DefaultAssetService>(),
-                        di::bind<IGuiCallbackRegistrar>.to<>(guiCallbackRegistrar));
+                        di::bind<IGuiCallbackRegistrar>.to<>(guiCallbackRegistrar),
+                        di::bind<EditorStateBuffer>.to<>(editorStateBuffer));
   return frameworkInjector.create<std::shared_ptr<ThreadedFrameworkContext>>();
 }
 
@@ -58,13 +59,15 @@ ThreadedFrameworkContext::ThreadedFrameworkContext(
     std::shared_ptr<IStateBuffer> newStateBuffer,
     std::shared_ptr<IWindow> newWindow,
     std::shared_ptr<IAssetService> newAssetService,
-    std::shared_ptr<IGuiCallbackRegistrar> newGuiCallbackRegistrar)
+    std::shared_ptr<IGuiCallbackRegistrar> newGuiCallbackRegistrar,
+    std::shared_ptr<EditorStateBuffer> newEditorStateBuffer)
     : eventQueue{std::move(newEventQueue)},
       actionSystem{std::move(newActionSystem)},
       stateBuffer{std::move(newStateBuffer)},
       window{std::move(newWindow)},
       assetService{std::move(newAssetService)},
-      guiCallbackRegistrar{std::move(newGuiCallbackRegistrar)} {
+      guiCallbackRegistrar{std::move(newGuiCallbackRegistrar)},
+      editorStateBuffer{std::move(newEditorStateBuffer)} {
 
   // Find some other place to put this
   // Forward
@@ -109,7 +112,7 @@ auto ThreadedFrameworkContext::startGameworld() -> void {
   gameThread = std::jthread([this](std::stop_token token) {
     setCurrentThreadName("Game");
     try {
-      gameWorldContext = GameWorldContext::create(eventQueue, stateBuffer);
+      gameWorldContext = GameWorldContext::create(eventQueue, stateBuffer, editorStateBuffer);
       gameWorldContext->run(token);
       Log.trace("nulling out gameWorldContext");
       gameWorldContext = nullptr;
@@ -127,7 +130,8 @@ auto ThreadedFrameworkContext::startRenderer() -> void {
                                                 stateBuffer,
                                                 window,
                                                 assetService,
-                                                guiCallbackRegistrar);
+                                                guiCallbackRegistrar,
+                                                editorStateBuffer);
       graphicsContext->run(token);
       Log.trace("Nulling out graphicsContext");
       graphicsContext = nullptr;

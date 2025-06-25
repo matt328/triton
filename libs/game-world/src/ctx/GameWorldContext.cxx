@@ -20,12 +20,14 @@ GameWorldContext::GameWorldContext(std::shared_ptr<IEventQueue> newEventQueue,
 }
 
 auto GameWorldContext::create(std::shared_ptr<IEventQueue> newEventQueue,
-                              std::shared_ptr<IStateBuffer> newStateBuffer)
+                              std::shared_ptr<IStateBuffer> newStateBuffer,
+                              std::shared_ptr<EditorStateBuffer> newEditorStateBuffer)
     -> std::shared_ptr<GameWorldContext> {
 
   const auto injector = di::make_injector(di::bind<IEventQueue>.to<>(newEventQueue),
                                           di::bind<IEntityManager>.to<EntityManager>(),
-                                          di::bind<IStateBuffer>.to<>(newStateBuffer));
+                                          di::bind<IStateBuffer>.to<>(newStateBuffer),
+                                          di::bind<EditorStateBuffer>.to<>(newEditorStateBuffer));
 
   return injector.create<std::shared_ptr<GameWorldContext>>();
 }

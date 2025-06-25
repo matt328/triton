@@ -66,7 +66,8 @@ auto GraphicsContext::create(std::shared_ptr<IEventQueue> newEventQueue,
                              std::shared_ptr<IStateBuffer> newStateBuffer,
                              std::shared_ptr<IWindow> newWindow,
                              std::shared_ptr<IAssetService> newAssetService,
-                             std::shared_ptr<IGuiCallbackRegistrar> newGuiCallbackRegistrar)
+                             std::shared_ptr<IGuiCallbackRegistrar> newGuiCallbackRegistrar,
+                             std::shared_ptr<EditorStateBuffer> newEditorStateBuffer)
     -> std::shared_ptr<GraphicsContext> {
   Log.trace("GraphicsContext::create()");
   auto rendererConfig = RenderContextConfig{.useDescriptorBuffers = false,
@@ -114,7 +115,8 @@ auto GraphicsContext::create(std::shared_ptr<IEventQueue> newEventQueue,
                         di::bind<GeometryHandleMapper>.to(std::make_shared<GeometryHandleMapper>()),
                         di::bind<IAssetSystem>.to<DefaultAssetSystem>(),
                         di::bind<ResourceAliasRegistry>.to<ResourceAliasRegistry>(),
-                        di::bind<IGuiCallbackRegistrar>.to(newGuiCallbackRegistrar));
+                        di::bind<IGuiCallbackRegistrar>.to(newGuiCallbackRegistrar),
+                        di::bind<EditorStateBuffer>.to<>(newEditorStateBuffer));
 
   return injector.create<std::shared_ptr<GraphicsContext>>();
 }

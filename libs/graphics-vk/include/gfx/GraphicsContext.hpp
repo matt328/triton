@@ -10,6 +10,7 @@ class Device;
 class IAssetSystem;
 class IAssetService;
 class IGuiCallbackRegistrar;
+class EditorStateBuffer;
 
 class GraphicsContext {
 public:
@@ -29,7 +30,8 @@ public:
                      std::shared_ptr<IStateBuffer> newStateBuffer,
                      std::shared_ptr<IWindow> newWindow,
                      std::shared_ptr<IAssetService> newAssetService,
-                     std::shared_ptr<IGuiCallbackRegistrar> newGuiCallbackRegistrar)
+                     std::shared_ptr<IGuiCallbackRegistrar> newGuiCallbackRegistrar,
+                     std::shared_ptr<EditorStateBuffer> newEditorStateBuffer)
       -> std::shared_ptr<GraphicsContext>;
 
   auto run(std::stop_token token) -> void;

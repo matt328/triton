@@ -65,7 +65,6 @@ void Manager::render(const tr::EditorState& editorState) {
     return;
   }
   ZoneNamedN(guiRender, "Gui Render", true);
-  Log.debug("editorState animations.front={}", editorState.assets.animations.front());
   Dock::render();
 
   appLog->font = sauce;
@@ -75,7 +74,7 @@ void Manager::render(const tr::EditorState& editorState) {
 
   appMenu->render({});
   entityEditor->render();
-  assetViewer->render({});
+  assetViewer->render(editorState);
   assetTool->render();
 
   dialogManager->update();

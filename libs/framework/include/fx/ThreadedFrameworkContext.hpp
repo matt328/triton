@@ -28,7 +28,8 @@ public:
                            std::shared_ptr<IStateBuffer> newStateBuffer,
                            std::shared_ptr<IWindow> newWindow,
                            std::shared_ptr<IAssetService> newAssetService,
-                           std::shared_ptr<IGuiCallbackRegistrar> newGuiCallbackRegistrar);
+                           std::shared_ptr<IGuiCallbackRegistrar> newGuiCallbackRegistrar,
+                           std::shared_ptr<EditorStateBuffer> newEditorStateBuffer);
 
   ~ThreadedFrameworkContext();
 
@@ -53,7 +54,7 @@ private:
   std::shared_ptr<IWindow> window;
   std::shared_ptr<IAssetService> assetService;
   std::shared_ptr<IGuiCallbackRegistrar> guiCallbackRegistrar;
-  std::shared_ptr<EditorStateBuffer> uiStateBuffer;
+  std::shared_ptr<EditorStateBuffer> editorStateBuffer;
 
   std::shared_ptr<GameWorldContext> gameWorldContext;
   std::shared_ptr<GraphicsContext> graphicsContext;

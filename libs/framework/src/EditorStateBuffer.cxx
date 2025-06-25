@@ -29,7 +29,6 @@ auto EditorStateBuffer::getStates(Timestamp t) -> std::optional<EditorState> {
 
 auto EditorStateBuffer::pushState(const EditorState& newState, Timestamp t) -> void {
   ZoneScoped;
-  // not setting entry.valid for some reason
   const size_t idx = writeIndex.fetch_add(1, std::memory_order_acq_rel) % BufferSize;
   std::lock_guard lock(bufferMutex);
   buffer[idx] = Entry{.timestamp = t, .state = newState, .valid = true};
