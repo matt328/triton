@@ -1,5 +1,5 @@
 #pragma once
-#include "api/gw/EditorState.hpp"
+#include "api/gw/editordata/EditorState.hpp"
 #include "bk/Handle.hpp"
 #include "buffers/ManagedBuffer.hpp"
 #include "img/ManagedImage.hpp"
@@ -116,8 +116,8 @@ public:
   auto setLastBufferUse(BufferAliasVariant bufferAlias, LastBufferUse lastBufferUse) -> void;
   auto getLastBufferUse(BufferAliasVariant bufferAlias) const -> std::optional<LastBufferUse>;
 
-  auto setEditorState(std::optional<EditorContextData> newState) -> void;
-  auto getEditorState() const -> std::optional<EditorContextData>;
+  auto setEditorState(std::optional<EditorState> newState) -> void;
+  auto getEditorState() const -> std::optional<EditorState>;
 
 private:
   uint8_t index;
@@ -146,7 +146,7 @@ private:
   uint32_t debugObjectCount;
 
   uint32_t objectCount;
-  std::optional<EditorContextData> editorState;
+  std::optional<EditorState> editorState;
 
   static auto transitionImage(const vk::raii::CommandBuffer& cmd,
                               const vk::Image& image,

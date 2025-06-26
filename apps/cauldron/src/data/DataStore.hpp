@@ -90,7 +90,7 @@ struct DataStore {
   std::unordered_map<std::string, ModelData> models;
 
   // Scene
-  std::unordered_map<std::string, EntityData> scene;
+  // std::unordered_map<std::string, EntityData> scene;
 
   // Terrain
   std::unordered_map<std::string, TerrainData> terrainMap;
@@ -99,7 +99,7 @@ struct DataStore {
 
   template <class T>
   void serialize(T& archive) {
-    archive(skeletons, animations, models, scene);
+    archive(skeletons, animations, models /*, scene*/);
   }
 };
 

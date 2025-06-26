@@ -26,7 +26,7 @@ public:
   auto operator=(const Menu&) -> Menu& = delete;
   auto operator=(Menu&&) -> Menu& = delete;
 
-  auto render(const tr::EditorContextData& uiState) -> void override;
+  auto render(const tr::EditorState& uiState) -> void override;
 
   auto bindInput() -> void override;
 

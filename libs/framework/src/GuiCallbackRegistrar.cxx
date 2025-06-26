@@ -6,7 +6,7 @@ auto GuiCallBackRegistrar::setRenderCallback(RenderFnType newRenderFn) -> void {
   renderFn = newRenderFn;
 }
 
-auto GuiCallBackRegistrar::render(std::optional<EditorContextData> editorState) -> void {
+auto GuiCallBackRegistrar::render(std::optional<EditorState> editorState) -> void {
   assert(renderFn && "GuiCallback not registered");
   if (editorState) {
     renderFn(*editorState);

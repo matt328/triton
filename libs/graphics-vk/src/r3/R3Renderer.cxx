@@ -262,7 +262,7 @@ void R3Renderer::renderNextFrame() {
   auto* frame = std::get<Frame*>(result);
 
   std::optional<std::pair<SimState, SimState>> states = std::nullopt;
-  std::optional<EditorContextData> editorState = std::nullopt;
+  std::optional<EditorState> editorState = std::nullopt;
   {
     ZoneScopedN("getStates");
     Timestamp currentTime = Clock::now();

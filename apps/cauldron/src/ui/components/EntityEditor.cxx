@@ -101,7 +101,8 @@ auto EntityEditor::render(const tr::EditorState& editorState) -> void {
           renderTransformInspector(entityData.name, &entityData.orientation, transformCallback);
         }
         // Terrain Controls
-        const auto* terrainData = dataFacade->getTerrainData(editorState.selectedEntity.value());
+        const auto* terrainData =
+            dataFacade->getTerrainData(editorState.contextData.selectedEntity.value());
         if (terrainData != nullptr) {
           const auto terrainId = terrainData->entityId;
           static size_t selectedChunkIndex = 0;

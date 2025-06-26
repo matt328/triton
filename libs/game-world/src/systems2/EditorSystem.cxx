@@ -3,9 +3,13 @@
 
 namespace tr {
 
-auto EditorSystem::update(entt::registry& registry) -> const EditorContextData& {
+auto EditorSystem::update(entt::registry& registry) -> EditorState {
+  auto contextData = registry.ctx().get<EditorContextData>();
 
-  auto editorState = registry.ctx().get<EditorContextData>();
+  auto editorState = EditorState{
+      .contextData = contextData,
+      .objectDataMap = {},
+  };
 
   return editorState;
 }

@@ -1,10 +1,10 @@
 #pragma once
 
-#include "api/gw/EditorState.hpp"
+#include "api/gw/editordata/EditorState.hpp"
 
 namespace tr {
 
-using RenderFnType = std::function<void(const EditorContextData& editorState)>;
+using RenderFnType = std::function<void(const EditorState& editorState)>;
 
 class IGuiCallbackRegistrar {
 public:
@@ -16,9 +16,9 @@ public:
   auto operator=(const IGuiCallbackRegistrar&) -> IGuiCallbackRegistrar& = default;
   auto operator=(IGuiCallbackRegistrar&&) -> IGuiCallbackRegistrar& = delete;
 
-  virtual auto setRenderCallback(
-      std::function<void(const EditorContextData& editorState)> newRenderFn) -> void = 0;
-  virtual auto render(std::optional<EditorContextData> editorState) -> void = 0;
+  virtual auto setRenderCallback(std::function<void(const EditorState& editorState)> newRenderFn)
+      -> void = 0;
+  virtual auto render(std::optional<EditorState> editorState) -> void = 0;
 
   virtual auto setReadyCallback(std::function<void(void)> newReadyFn) -> void = 0;
   virtual auto ready() -> void = 0;

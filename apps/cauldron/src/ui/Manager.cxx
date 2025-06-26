@@ -60,7 +60,7 @@ Manager::~Manager() {
   appLog = nullptr;
 }
 
-void Manager::render(const tr::EditorContextData& editorState) {
+void Manager::render(const tr::EditorState& editorState) {
   if (!isReady) {
     return;
   }
@@ -73,7 +73,7 @@ void Manager::render(const tr::EditorContextData& editorState) {
   dialogManager->render();
 
   appMenu->render({});
-  entityEditor->render();
+  entityEditor->render(editorState);
   assetViewer->render(editorState);
   assetTool->render();
 

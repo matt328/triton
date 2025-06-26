@@ -36,9 +36,9 @@ public:
   void addModel(std::string_view name, const std::filesystem::path& path);
   void removeModel(std::string_view name);
 
-  void createStaticModel(const EntityData& entityData) noexcept;
+  void createStaticModel(const tr::EntityData& entityData) noexcept;
 
-  void createAnimatedModel(const EntityData& entityData);
+  void createAnimatedModel(const tr::EntityData& entityData);
 
   auto deleteEntity(std::string_view entityName) noexcept -> void;
 
@@ -58,7 +58,7 @@ public:
     return dataStore.entityNameMap.at(name.data());
   }
 
-  [[nodiscard]] auto getEntityData(std::string_view name) -> EntityData* {
+  [[nodiscard]] auto getEntityData(std::string_view name) -> tr::EntityData* {
     if (dataStore.scene.contains(name.data())) {
       return &dataStore.scene.at(name.data());
     }
