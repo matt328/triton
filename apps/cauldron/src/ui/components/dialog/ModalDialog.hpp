@@ -4,6 +4,7 @@
 #include "TypedControl.hpp"
 #include "imgui.h"
 #include "ui/components/FileDialog.hpp"
+#include "ui/components/dialog/DialogContext.hpp"
 #include "ui/components/dialog/FileControl.hpp"
 
 namespace ed {
@@ -25,12 +26,9 @@ public:
   }
 
   template <typename T>
-  void addControl(const std::string& name,
-                  const std::string& label,
-                  T initialValue,
-                  std::optional<ValueProvider> valueProvider = std::nullopt) {
+  void addControl(const std::string& name, const std::string& label, T initialValue) {
     controlNames.push_back(name);
-    controls[name] = std::make_unique<TypedControl<T>>(label, initialValue, valueProvider);
+    controls[name] = std::make_unique<TypedControl<T>>(name, label, initialValue);
   }
 
   void addFileControl(const std::string& name,
@@ -72,7 +70,7 @@ public:
       }
       for (const auto& name : controlNames) {
         const auto& control = controls[name];
-        control->render();
+        control->render(context);
       }
 
       ImGui::Separator();
@@ -110,8 +108,9 @@ public:
     }
   }
 
-  void setOpen() {
+  void setOpen(DialogRenderContext ctx = {}) {
     isOpen = true;
+    context = std::move(ctx);
   }
 
   void checkShouldOpen() {
@@ -127,6 +126,7 @@ private:
   std::vector<std::string> controlNames;
   std::optional<OkFunction> onOk;
   std::optional<CancelFunction> onCancel;
+  DialogRenderContext context = {};
 };
 
 };

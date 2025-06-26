@@ -3,7 +3,7 @@
 #include "api/fx/IEventQueue.hpp"
 #include "bk/DebugTools.hpp"
 
-#include "data/DataFacade.hpp"
+#include "data/DataStore.hpp"
 #include "ui/components/DialogManager.hpp"
 #include "ui/components/dialog/ModalDialog.hpp"
 #include "editors/TransformInspector.hpp"
@@ -28,6 +28,11 @@ EntityEditor::~EntityEditor() {
 
 auto EntityEditor::render(const tr::EditorState& editorState) -> void {
 
+  auto staticModelContext = DialogRenderContext{};
+  std::vector<std::string> items = {"item1", "item2"};
+  DialogRenderContext::DropdownData dropdownData = {.items = items};
+  staticModelContext.dropdownMap.emplace("model", dropdownData);
+
   if (ImGui::Begin(ComponentName,
                    nullptr,
                    ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_MenuBar)) {
@@ -35,10 +40,10 @@ auto EntityEditor::render(const tr::EditorState& editorState) -> void {
     if (ImGui::BeginMenuBar()) {
       if (ImGui::BeginMenu("New")) {
         if (ImGui::MenuItem("Static Model...")) {
-          dialogManager->setOpen(StaticEntityDialogName);
+          dialogManager->setOpen(StaticEntityDialogName, staticModelContext);
         }
         if (ImGui::MenuItem("Animated Model...")) {
-          dialogManager->setOpen(DialogName);
+          dialogManager->setOpen(DialogName, {});
         }
         if (ImGui::MenuItem("Terrain")) {
           // dataFacade->createTerrain("terrain", glm::vec3{9.f, 9.f, 9.f});
@@ -101,8 +106,8 @@ auto EntityEditor::render(const tr::EditorState& editorState) -> void {
           renderTransformInspector(entityData.name, &entityData.orientation, transformCallback);
         }
         // Terrain Controls
-        const auto* terrainData =
-            dataFacade->getTerrainData(editorState.contextData.selectedEntity.value());
+        const TerrainData* terrainData = nullptr;
+        // dataFacade->getTerrainData(editorState.contextData.selectedEntity.value());
         if (terrainData != nullptr) {
           const auto terrainId = terrainData->entityId;
           static size_t selectedChunkIndex = 0;
@@ -146,10 +151,9 @@ auto EntityEditor::render(const tr::EditorState& editorState) -> void {
         }
 
         if (del) {
-          const auto entityId = dataFacade->getEntityId(selectedEntity.value());
-          dataFacade->deleteEntity(selectedEntity.value());
+          const auto entityId = editorState.contextData.scene.objectNameMap.at(
+              editorState.contextData.selectedEntity.value());
           eventQueue->emit(tr::DeleteObject{.objectId = entityId});
-          selectedEntity = std::nullopt;
         }
       } else {
         ImGui::Text("No Entity Selected");
@@ -161,35 +165,6 @@ auto EntityEditor::render(const tr::EditorState& editorState) -> void {
 }
 
 void EntityEditor::createAnimatedEntityDialog() const {
-  ValueProvider modelProvider = [this]() -> std::vector<std::string> {
-    const auto& models = dataFacade->getModels();
-    auto modelNames = std::vector<std::string>{};
-    modelNames.reserve(models.size());
-    std::ranges::transform(models, std::back_inserter(modelNames), [](const auto& pair) {
-      return pair.first;
-    });
-    return modelNames;
-  };
-
-  ValueProvider skeletonProvider = [this]() -> std::vector<std::string> {
-    const auto& skeletons = dataFacade->getSkeletons();
-    auto skeletonNames = std::vector<std::string>{};
-    skeletonNames.reserve(skeletons.size());
-    std::ranges::transform(skeletons, std::back_inserter(skeletonNames), [](const auto& pair) {
-      return pair.first;
-    });
-    return skeletonNames;
-  };
-
-  ValueProvider animationsProvider = [this]() -> std::vector<std::string> {
-    const auto& animations = dataFacade->getAnimations();
-    auto animationNames = std::vector<std::string>{};
-    animationNames.reserve(animations.size());
-    std::ranges::transform(animations, std::back_inserter(animationNames), [](const auto& pair) {
-      return pair.first;
-    });
-    return animationNames;
-  };
 
   const auto onOk = [&](const ModalDialog& dialog) {
     std::random_device rd;
@@ -197,12 +172,13 @@ void EntityEditor::createAnimatedEntityDialog() const {
     std::uniform_real_distribution<float> dis(-5.f, 5.f);
 
     for (int i = 0; i < dialog.getValue<int>("count"); ++i) {
-      dataFacade->createAnimatedModel(EntityData{
-          .name = std::format("{} {}", dialog.getValue<std::string>("name").value(), i),
-          .orientation = Orientation{.position = glm::vec3{dis(gen), dis(gen), dis(gen)}},
-          .modelName = dialog.getValue<std::string>("model").value(),
-          .skeleton = dialog.getValue<std::string>("skeleton").value(),
-          .animations = {dialog.getValue<std::string>("animation").value()}});
+      // emit AnimatedModelRequest
+      // dataFacade->createAnimatedModel(EntityData{
+      //     .name = std::format("{} {}", dialog.getValue<std::string>("name").value(), i),
+      //     .orientation = Orientation{.position = glm::vec3{dis(gen), dis(gen), dis(gen)}},
+      //     .modelName = dialog.getValue<std::string>("model").value(),
+      //     .skeleton = dialog.getValue<std::string>("skeleton").value(),
+      //     .animations = {dialog.getValue<std::string>("animation").value()}});
     }
   };
 
@@ -212,17 +188,11 @@ void EntityEditor::createAnimatedEntityDialog() const {
 
   dialog->addControl("name", "Entity Name", std::string{"Unnamed Entity"});
 
-  dialog->addControl("model", "Model Name", std::string{"Unnamed Model"}, modelProvider);
+  dialog->addControl("model", "Model Name", std::string{"Unnamed Model"});
 
-  dialog->addControl("skeleton",
-                     "Skeleton Name",
-                     std::string{"Unnamed Skeleton"},
-                     skeletonProvider);
+  dialog->addControl("skeleton", "Skeleton Name", std::string{"Unnamed Skeleton"});
 
-  dialog->addControl("animation",
-                     "Animation Name",
-                     std::string{"Unnamed Animation"},
-                     animationsProvider);
+  dialog->addControl("animation", "Animation Name", std::string{"Unnamed Animation"});
 
   const int defaultCount = 10;
   dialog->addControl("count", "Count", defaultCount);
@@ -231,27 +201,19 @@ void EntityEditor::createAnimatedEntityDialog() const {
 }
 
 void EntityEditor::createStaticEntityDialog() const {
-  ValueProvider modelProvider = [this]() -> std::vector<std::string> {
-    const auto& models = dataFacade->getModels();
-    auto modelNames = std::vector<std::string>{};
-    modelNames.reserve(models.size());
-    std::ranges::transform(models, std::back_inserter(modelNames), [](const auto& pair) {
-      return pair.first;
-    });
-    return modelNames;
-  };
 
   const auto onOk = [&](const ModalDialog& dialog) {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<float> dis(-5.f, 5.f);
     for (int i = 0; i < dialog.getValue<int>("count"); ++i) {
-      dataFacade->createStaticModel(EntityData{
-          .name = std::format("{} {}", dialog.getValue<std::string>("name").value(), i),
-          .orientation = Orientation{.position = glm::vec3{dis(gen), dis(gen), dis(gen)}},
-          .modelName = dialog.getValue<std::string>("model").value(),
-          .skeleton = "",
-          .animations = {}});
+      // emit StaticModelRequest
+      // dataFacade->createStaticModel(EntityData{
+      //     .name = std::format("{} {}", dialog.getValue<std::string>("name").value(), i),
+      //     .orientation = Orientation{.position = glm::vec3{dis(gen), dis(gen), dis(gen)}},
+      //     .modelName = dialog.getValue<std::string>("model").value(),
+      //     .skeleton = "",
+      //     .animations = {}});
     }
   };
 
@@ -260,7 +222,7 @@ void EntityEditor::createStaticEntityDialog() const {
   auto dialog =
       std::make_unique<ModalDialog>(ICON_LC_CUBOID, StaticEntityDialogName, onOk, onCancel);
   dialog->addControl("name", "Entity Name", std::string{"Unnamed Entity"});
-  dialog->addControl("model", "Model Name", std::string{"Unnamed Model"}, modelProvider);
+  dialog->addControl("model", "Model Name", std::string{"Unnamed Model"});
   const int defaultCount = 10;
   dialog->addControl("count", "Count", defaultCount);
 

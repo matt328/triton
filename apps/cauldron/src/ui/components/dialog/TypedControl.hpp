@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ControlBase.hpp"
+#include "ui/components/dialog/DialogContext.hpp"
 #include <platform_folders.h>
 
 namespace ed {
@@ -11,19 +12,16 @@ template <typename T>
 class TypedControl : public ControlBase {
 
 public:
-  TypedControl(std::string label,
-               T initialValue,
-               std::optional<ValueProvider> newValueProvider = std::nullopt)
-      : label(std::move(label)), value(initialValue), valueProvider{std::move(newValueProvider)} {
+  TypedControl(std::string newName, std::string label, T initialValue)
+      : name{std::move(newName)}, label(std::move(label)), value(initialValue) {
   }
 
-  void render() override {
+  void render(const DialogRenderContext& renderContext = {}) override {
     static std::filesystem::path path{};
     if constexpr (std::is_same_v<T, std::string>) {
-      if (valueProvider.has_value()) {
-        // Render combobox if options are provided
+      if (renderContext.dropdownMap.contains(name)) {
         if (ImGui::BeginCombo(label.c_str(), value.c_str())) {
-          for (const auto& option : valueProvider.value()()) {
+          for (const auto& option : renderContext.dropdownMap.at(name).items) {
             bool isSelected = (value == option);
             if (ImGui::Selectable(option.c_str(), isSelected)) {
               value = option;
@@ -51,9 +49,10 @@ public:
   }
 
 private:
+  std::string name;
   std::string label;
   T value;
-  std::optional<ValueProvider> valueProvider;
+  DialogRenderContext renderContext;
 };
 
 enum class DialogResult : uint8_t {

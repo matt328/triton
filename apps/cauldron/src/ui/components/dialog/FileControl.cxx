@@ -17,7 +17,7 @@ FileControl::FileControl(std::string_view newName,
 FileControl::~FileControl() {
 }
 
-auto FileControl::render() -> void {
+auto FileControl::render(const DialogRenderContext& renderContext) -> void {
   float totalWidth = ImGui::CalcItemWidth();
   float buttonWidth = ImGui::GetFrameHeight();
   float textFieldWidth = totalWidth - buttonWidth - ImGui::GetStyle().ItemInnerSpacing.x;

@@ -35,13 +35,13 @@ auto AssetViewer::render(const tr::EditorState& editorState) -> void {
     if (ImGui::BeginMenuBar()) {
       if (ImGui::BeginMenu("Import")) {
         if (ImGui::MenuItem("Skeleton...")) {
-          dialogManager->setOpen("Skeleton");
+          dialogManager->setOpen("Skeleton", {});
         }
         if (ImGui::MenuItem("Animation...")) {
-          dialogManager->setOpen("Animation");
+          dialogManager->setOpen("Animation", {});
         }
         if (ImGui::MenuItem("Model...")) {
-          dialogManager->setOpen("Model");
+          dialogManager->setOpen("Model", {});
         }
         ImGui::EndMenu();
       }

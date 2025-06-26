@@ -21,7 +21,7 @@ public:
   auto operator=(const FileControl&) -> FileControl& = delete;
   auto operator=(FileControl&&) -> FileControl& = delete;
 
-  auto render() -> void override;
+  auto render(const DialogRenderContext& renderContext = {}) -> void override;
   [[nodiscard]] auto getValue() const -> std::any override;
 
 private:
