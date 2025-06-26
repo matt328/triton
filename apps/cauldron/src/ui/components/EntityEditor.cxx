@@ -14,11 +14,8 @@ constexpr auto DialogName = " AnimatedEntity";
 constexpr auto StaticEntityDialogName = " StaticEntity";
 
 EntityEditor::EntityEditor(std::shared_ptr<tr::IEventQueue> newEventQueue,
-                           std::shared_ptr<DataFacade> newDataFacade,
                            std::shared_ptr<DialogManager> newDialogManager)
-    : eventQueue{std::move(newEventQueue)},
-      dataFacade{std::move(newDataFacade)},
-      dialogManager{std::move(newDialogManager)} {
+    : eventQueue{std::move(newEventQueue)}, dialogManager{std::move(newDialogManager)} {
   Log.trace("Creating EntityEditor");
 
   createAnimatedEntityDialog();
@@ -29,7 +26,7 @@ EntityEditor::~EntityEditor() {
   Log.trace("Destroying EntityEditor");
 }
 
-void EntityEditor::render() {
+auto EntityEditor::render(const tr::EditorState& editorState) -> void {
 
   if (ImGui::Begin(ComponentName,
                    nullptr,
@@ -44,7 +41,7 @@ void EntityEditor::render() {
           dialogManager->setOpen(DialogName);
         }
         if (ImGui::MenuItem("Terrain")) {
-          dataFacade->createTerrain("terrain", glm::vec3{9.f, 9.f, 9.f});
+          // dataFacade->createTerrain("terrain", glm::vec3{9.f, 9.f, 9.f});
         }
         if (ImGui::MenuItem("Debug Cube")) {
           eventQueue->emit(tr::BoxWidget{.tag = "Test Stuff",
@@ -57,7 +54,7 @@ void EntityEditor::render() {
       ImGui::EndMenuBar();
     }
 
-    const auto entities = dataFacade->getEntityNames();
+    const auto entities = editorState.contextData.scene.objectNameMap;
 
     // Left
     ImGui::BeginChild("left pane",
@@ -65,9 +62,10 @@ void EntityEditor::render() {
                       ImGuiChildFlags_Border | ImGuiChildFlags_ResizeX);
 
     for (const auto& [entityName, entityId] : entities) {
-      if (ImGui::Selectable(entityName.c_str(), entityName == selectedEntity)) {
+      if (ImGui::Selectable(entityName.c_str(),
+                            entityName == editorState.contextData.selectedEntity)) {
         Log.trace("Selected Entity: {}", entityName);
-        selectedEntity = entityName;
+        eventQueue->emit(tr::SelectEntity{.entityId = entityName});
       }
     }
 
@@ -79,31 +77,31 @@ void EntityEditor::render() {
     {
       // Header
       ImGui::BeginChild("item view", ImVec2(0, 0), ImGuiChildFlags_Border);
-      if (selectedEntity.has_value()) {
+      if (editorState.contextData.selectedEntity.has_value()) {
+        if (editorState.objectDataMap.contains(editorState.contextData.selectedEntity.value())) {
+          auto entityData =
+              editorState.objectDataMap.at(editorState.contextData.selectedEntity.value());
 
-        auto* entityData = dataFacade->getEntityData(selectedEntity.value());
-
-        if (entityData != nullptr) {
           // Editor Info Component
-          ImGui::Text("%s", entityData->name.c_str());
+          ImGui::Text("%s", entityData.name.c_str());
 
           auto buttonWidth = 120.f;
           if (ImGui::Button(ICON_LC_X " Delete", ImVec2(buttonWidth, 0.f))) {
             del = true;
           }
 
-          const auto transformCallback = [this](std::string_view name, Orientation orientation) {
-            const auto entityId = dataFacade->getEntityId(name);
+          const auto transformCallback = [&, this](std::string_view name,
+                                                   tr::Orientation orientation) {
+            const auto entityId = editorState.contextData.scene.objectNameMap.at(name.data());
             eventQueue->emit(tr::TransformObject{
                 .objectId = entityId,
                 .transformData = tr::TransformData{.position = orientation.position,
                                                    .rotation = orientation.rotation}});
           };
-          renderTransformInspector(entityData->name, &entityData->orientation, transformCallback);
+          renderTransformInspector(entityData.name, &entityData.orientation, transformCallback);
         }
-
         // Terrain Controls
-        const auto* terrainData = dataFacade->getTerrainData(selectedEntity.value());
+        const auto* terrainData = dataFacade->getTerrainData(editorState.selectedEntity.value());
         if (terrainData != nullptr) {
           const auto terrainId = terrainData->entityId;
           static size_t selectedChunkIndex = 0;

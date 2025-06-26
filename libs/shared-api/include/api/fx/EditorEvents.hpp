@@ -17,4 +17,8 @@ struct AddModel {
   std::string fileName;
 };
 
+struct SelectEntity {
+  std::optional<std::string> entityId;
+};
+
 }

@@ -16,7 +16,7 @@ public:
   auto operator=(GuiCallBackRegistrar&&) -> GuiCallBackRegistrar& = delete;
 
   auto setRenderCallback(RenderFnType newRenderFn) -> void override;
-  auto render(std::optional<EditorState> editorState) -> void override;
+  auto render(std::optional<EditorContextData> editorState) -> void override;
 
   auto setReadyCallback(std::function<void(void)> newReadyFn) -> void override;
   auto ready() -> void override;

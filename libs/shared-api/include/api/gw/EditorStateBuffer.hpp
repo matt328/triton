@@ -1,6 +1,6 @@
 #pragma once
 
-#include "api/gw/EditorState.hpp"
+#include "api/gw/editordata/EditorState.hpp"
 #include "bk/Chrono.h"
 
 namespace tr {

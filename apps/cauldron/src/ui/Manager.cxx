@@ -60,7 +60,7 @@ Manager::~Manager() {
   appLog = nullptr;
 }
 
-void Manager::render(const tr::EditorState& editorState) {
+void Manager::render(const tr::EditorContextData& editorState) {
   if (!isReady) {
     return;
   }

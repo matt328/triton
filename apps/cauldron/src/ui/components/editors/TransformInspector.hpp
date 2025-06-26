@@ -1,13 +1,13 @@
 #pragma once
 
-#include "data/DataStore.hpp"
+#include "api/gw/editordata/GameObjectData.hpp"
 
 namespace ed {
 
-using Listener = std::function<void(std::string_view, Orientation)>;
+using Listener = std::function<void(std::string_view, tr::Orientation)>;
 
 inline auto renderTransformInspector(std::string_view name,
-                                     Orientation* orientation,
+                                     tr::Orientation* orientation,
                                      const Listener& listener) -> void {
   if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
     if (ImGui::DragFloat3("Position##Transform", glm::value_ptr(orientation->position), 0.5f)) {

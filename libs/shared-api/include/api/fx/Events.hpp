@@ -115,6 +115,7 @@ struct FrameEndEvent {
 using EventVariant = std::variant<AddSkeleton,
                                   AddAnimation,
                                   AddModel,
+                                  SelectEntity,
                                   BoxWidget,
                                   DeleteObject,
                                   TransformObject,

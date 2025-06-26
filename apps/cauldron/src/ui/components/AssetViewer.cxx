@@ -28,7 +28,7 @@ AssetViewer::~AssetViewer() {
 auto AssetViewer::bindInput() -> void {
 }
 
-auto AssetViewer::render(const tr::EditorState& editorState) -> void {
+auto AssetViewer::render(const tr::EditorContextData& editorState) -> void {
   if (const auto unsaved = !editorState.saved ? ImGuiWindowFlags_UnsavedDocument : 0;
       ImGui::Begin("Assets", nullptr, ImGuiWindowFlags_MenuBar | unsaved)) {
 

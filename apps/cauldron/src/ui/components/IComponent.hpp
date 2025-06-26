@@ -2,7 +2,7 @@
 
 #include "api/fx/Events.hpp"
 #include "api/fx/IEventQueue.hpp"
-#include "api/gw/EditorState.hpp"
+#include "api/gw/editordata/EditorState.hpp"
 
 namespace tr {
 class IEventQueue;

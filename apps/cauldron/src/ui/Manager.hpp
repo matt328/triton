@@ -34,7 +34,7 @@ public:
   auto operator=(const Manager&) -> Manager& = delete;
   auto operator=(Manager&&) -> Manager& = delete;
 
-  void render(const tr::EditorState& editorState);
+  void render(const tr::EditorContextData& editorState);
 
 private:
   ImFont* sauce = nullptr;

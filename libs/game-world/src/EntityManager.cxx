@@ -1,12 +1,14 @@
 #include "EntityManager.hpp"
 #include "api/fx/IEventQueue.hpp"
 #include "api/fx/IStateBuffer.hpp"
+#include "api/gw/editordata/EditorState.hpp"
 #include "components/Renderable.hpp"
 #include "components/Resources.hpp"
 #include "components/Transform.hpp"
 #include "components/EditorInfo.hpp"
 #include "systems2/CameraHandler.hpp"
 #include "systems2/FinalizerSystem.hpp"
+#include "systems2/EditorSystem.hpp"
 #include "api/gw/EditorStateBuffer.hpp"
 
 namespace tr {
@@ -23,7 +25,7 @@ EntityManager::EntityManager(std::shared_ptr<IEventQueue> newEventQueue,
       stateBuffer{std::move(newStateBuffer)},
       editorStateBuffer{std::move(newEditorStateBuffer)} {
   registry = std::make_unique<entt::registry>();
-  registry->ctx().emplace<EditorState>();
+  registry->ctx().emplace<EditorContextData>();
   Log.trace("Created EntityManager");
 
   eventQueue->subscribe<Action>(
@@ -56,7 +58,7 @@ auto EntityManager::update() -> void {
   FinalizerSystem::update(*registry, writeState, currentTime);
   stateBuffer->pushState(writeState, currentTime);
 
-  editorStateBuffer->pushState(registry->ctx().get<EditorState>(), currentTime);
+  editorStateBuffer->pushState(EditorSystem::update(*registry), currentTime);
 }
 
 auto EntityManager::renderAreaCreated(const SwapchainCreated& event) -> void {
@@ -107,18 +109,18 @@ auto EntityManager::registerStaticModel(const StaticModelUploaded& event) -> voi
 }
 
 auto EntityManager::addSkeleton(std::string name, std::string filename) -> void {
-  auto& editorData = registry->ctx().get<EditorState>();
+  auto& editorData = registry->ctx().get<EditorContextData>();
   editorData.assets.skeletons.emplace(name, filename);
 }
 
 auto EntityManager::addAnimation(std::string name, std::string filename) -> void {
-  auto& editorData = registry->ctx().get<EditorState>();
+  auto& editorData = registry->ctx().get<EditorContextData>();
   editorData.assets.animations.emplace(name, filename);
 }
 
 auto EntityManager::addModel(std::string name, std::string filename) -> void {
   Log.trace("addModel name={}, filename={}", name, filename);
-  auto& editorData = registry->ctx().get<EditorState>();
+  auto& editorData = registry->ctx().get<EditorContextData>();
   editorData.assets.models.emplace(name, filename);
 }
 

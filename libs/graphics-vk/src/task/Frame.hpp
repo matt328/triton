@@ -116,8 +116,8 @@ public:
   auto setLastBufferUse(BufferAliasVariant bufferAlias, LastBufferUse lastBufferUse) -> void;
   auto getLastBufferUse(BufferAliasVariant bufferAlias) const -> std::optional<LastBufferUse>;
 
-  auto setEditorState(std::optional<EditorState> newState) -> void;
-  auto getEditorState() const -> std::optional<EditorState>;
+  auto setEditorState(std::optional<EditorContextData> newState) -> void;
+  auto getEditorState() const -> std::optional<EditorContextData>;
 
 private:
   uint8_t index;
@@ -146,7 +146,7 @@ private:
   uint32_t debugObjectCount;
 
   uint32_t objectCount;
-  std::optional<EditorState> editorState;
+  std::optional<EditorContextData> editorState;
 
   static auto transitionImage(const vk::raii::CommandBuffer& cmd,
                               const vk::Image& image,

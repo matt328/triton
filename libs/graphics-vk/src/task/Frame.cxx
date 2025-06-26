@@ -89,11 +89,11 @@ auto Frame::getLastBufferUse(BufferAliasVariant bufferAlias) const -> std::optio
   return lastBufferUses.at(bufferAlias);
 }
 
-auto Frame::setEditorState(std::optional<EditorState> newState) -> void {
+auto Frame::setEditorState(std::optional<EditorContextData> newState) -> void {
   editorState = std::move(newState);
 }
 
-auto Frame::getEditorState() const -> std::optional<EditorState> {
+auto Frame::getEditorState() const -> std::optional<EditorContextData> {
   return editorState;
 }
 
