@@ -49,6 +49,26 @@ private:
 
   auto renderStaticEntityDialog(const tr::EditorState& editorState) -> void;
   auto renderAnimatedGameObjectDialog(const tr::EditorState& editorState) -> void;
+
+  static auto renderOkCancelButtons(float buttonWidth = 80.f) -> std::pair<bool, bool>;
+
+  template <typename T>
+  auto renderAliasCombo(const char* label,
+                        const std::unordered_map<std::string, T>& options,
+                        T& selected) -> void {
+    if (ImGui::BeginCombo(label, selected.alias.c_str())) {
+      for (const auto& [key, option] : options) {
+        bool isSelected = (selected == option);
+        if (ImGui::Selectable(option.alias.c_str(), isSelected)) {
+          selected = option;
+        }
+        if (isSelected) {
+          ImGui::SetItemDefaultFocus();
+        }
+      }
+      ImGui::EndCombo();
+    }
+  }
 };
 
 }

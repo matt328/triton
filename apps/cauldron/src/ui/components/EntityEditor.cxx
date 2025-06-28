@@ -180,35 +180,12 @@ auto EntityEditor::renderStaticEntityDialog(const tr::EditorState& editorState) 
     // Name Input
     ImGui::InputText("GameObject Name", &staticDialogInfo.objectName);
 
-    // Model Name/Path Input
-    if (ImGui::BeginCombo("Model", staticDialogInfo.selectedModel.alias.c_str())) {
-      const auto& options = editorState.contextData.assets.models;
-      for (const auto& option : options) {
-        bool isSelected = (staticDialogInfo.selectedModel == option.second);
-        if (ImGui::Selectable(option.second.alias.c_str(), isSelected)) {
-          staticDialogInfo.selectedModel = option.second;
-        }
-        if (isSelected) {
-          ImGui::SetItemDefaultFocus();
-        }
-      }
-      ImGui::EndCombo();
-    }
+    const auto& assets = editorState.contextData.assets;
+    renderAliasCombo("Model", assets.models, staticDialogInfo.selectedModel);
 
     ImGui::Separator();
 
-    auto availableWidth = ImGui::GetContentRegionAvail().x;
-    auto buttonWidth = 80.f;
-
-    ImGui::SetCursorPosX(availableWidth - (buttonWidth * 2));
-
-    if (ImGui::Button(ICON_LC_CIRCLE_CHECK_BIG " OK", ImVec2(buttonWidth, 0.f))) {
-      shouldOk = true;
-    }
-    ImGui::SameLine();
-    if (ImGui::Button(ICON_LC_BAN " Cancel", ImVec2(buttonWidth, 0.f))) {
-      shouldCancel = true;
-    }
+    std::tie(shouldOk, shouldCancel) = renderOkCancelButtons();
 
     ImGui::EndPopup();
   }
@@ -249,68 +226,16 @@ auto EntityEditor::renderAnimatedGameObjectDialog(const tr::EditorState& editorS
       ImGui::SetKeyboardFocusHere();
     }
 
-    // Name Input
     ImGui::InputText("GameObject Name", &animatedDialogInfo.objectName);
 
-    // Model Name/Path Input
-    if (ImGui::BeginCombo("Model", animatedDialogInfo.selectedModel.alias.c_str())) {
-      const auto& options = editorState.contextData.assets.models;
-      for (const auto& option : options) {
-        bool isSelected = (animatedDialogInfo.selectedModel == option.second);
-        if (ImGui::Selectable(option.second.alias.c_str(), isSelected)) {
-          animatedDialogInfo.selectedModel = option.second;
-        }
-        if (isSelected) {
-          ImGui::SetItemDefaultFocus();
-        }
-      }
-      ImGui::EndCombo();
-    }
-
-    // Skeleton Name/Path Input
-    if (ImGui::BeginCombo("Skeleton", animatedDialogInfo.selectedSkeleton.alias.c_str())) {
-      const auto& options = editorState.contextData.assets.skeletons;
-      for (const auto& option : options) {
-        bool isSelected = (animatedDialogInfo.selectedSkeleton == option.second);
-        if (ImGui::Selectable(option.second.alias.c_str(), isSelected)) {
-          animatedDialogInfo.selectedSkeleton = option.second;
-        }
-        if (isSelected) {
-          ImGui::SetItemDefaultFocus();
-        }
-      }
-      ImGui::EndCombo();
-    }
-
-    // Animation Name/Path Input
-    if (ImGui::BeginCombo("Animation", animatedDialogInfo.selectedAnimation.alias.c_str())) {
-      const auto& options = editorState.contextData.assets.animations;
-      for (const auto& option : options) {
-        bool isSelected = (animatedDialogInfo.selectedAnimation == option.second);
-        if (ImGui::Selectable(option.second.alias.c_str(), isSelected)) {
-          animatedDialogInfo.selectedAnimation = option.second;
-        }
-        if (isSelected) {
-          ImGui::SetItemDefaultFocus();
-        }
-      }
-      ImGui::EndCombo();
-    }
+    const auto& assets = editorState.contextData.assets;
+    renderAliasCombo("Model", assets.models, animatedDialogInfo.selectedModel);
+    renderAliasCombo("Skeleton", assets.skeletons, animatedDialogInfo.selectedSkeleton);
+    renderAliasCombo("Animation", assets.animations, animatedDialogInfo.selectedAnimation);
 
     ImGui::Separator();
 
-    auto availableWidth = ImGui::GetContentRegionAvail().x;
-    auto buttonWidth = 80.f;
-
-    ImGui::SetCursorPosX(availableWidth - (buttonWidth * 2));
-
-    if (ImGui::Button(ICON_LC_CIRCLE_CHECK_BIG " OK", ImVec2(buttonWidth, 0.f))) {
-      shouldOk = true;
-    }
-    ImGui::SameLine();
-    if (ImGui::Button(ICON_LC_BAN " Cancel", ImVec2(buttonWidth, 0.f))) {
-      shouldCancel = true;
-    }
+    std::tie(shouldOk, shouldCancel) = renderOkCancelButtons();
 
     ImGui::EndPopup();
   }
@@ -335,6 +260,23 @@ auto EntityEditor::renderAnimatedGameObjectDialog(const tr::EditorState& editorS
     ImGui::CloseCurrentPopup();
     animatedDialogInfo.isOpen = false;
   }
+}
+
+auto EntityEditor::renderOkCancelButtons(float buttonWidth) -> std::pair<bool, bool> {
+  bool ok = false;
+  bool cancel = false;
+
+  auto availableWidth = ImGui::GetContentRegionAvail().x;
+  ImGui::SetCursorPosX(availableWidth - (buttonWidth * 2));
+
+  if (ImGui::Button(ICON_LC_CIRCLE_CHECK_BIG " OK", ImVec2(buttonWidth, 0.f))) {
+    ok = true;
+  }
+  ImGui::SameLine();
+  if (ImGui::Button(ICON_LC_BAN " Cancel", ImVec2(buttonWidth, 0.f))) {
+    cancel = true;
+  }
+  return {ok, cancel};
 }
 
 }
