@@ -5,13 +5,11 @@
 namespace ed {
 
 class DataFacade;
-class DialogManager;
 class Properties;
 
 class AssetViewer : public IComponent {
 public:
-  AssetViewer(std::shared_ptr<DialogManager> newDialogManager,
-              std::shared_ptr<Properties> newProperties,
+  AssetViewer(std::shared_ptr<Properties> newProperties,
               std::shared_ptr<tr::IEventQueue> newEventQueue);
   ~AssetViewer();
 
@@ -24,13 +22,22 @@ public:
   auto bindInput() -> void override;
 
 private:
-  std::shared_ptr<DialogManager> dialogManager;
   std::shared_ptr<Properties> properties;
   std::shared_ptr<tr::IEventQueue> eventQueue;
 
-  void createSkeletonDialog();
-  void createAnimationDialog();
-  void createModelDialog();
+  struct AliasDialogInfo {
+    bool shouldShow = false;
+    bool isOpen = false;
+    tr::FileAlias alias;
+  };
+
+  AliasDialogInfo modelAliasInfo;
+  AliasDialogInfo skeletonAliasInfo;
+  AliasDialogInfo animationAliasInfo;
+
+  auto renderModelDialog() -> void;
+  auto renderSkeletonDialog() -> void;
+  auto renderAnimationDialog() -> void;
 };
 
 }

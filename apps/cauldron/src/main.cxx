@@ -6,7 +6,6 @@
 #include "fx/GuiCallbackRegistrar.hpp"
 #include "ui/Manager.hpp"
 #include "ui/components/Menu.hpp"
-#include "ui/components/DialogManager.hpp"
 #include "ui/components/AssetViewer.hpp"
 #include "ui/components/EntityEditor.hpp"
 #include "ui/components/AssetTool.hpp"

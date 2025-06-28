@@ -11,7 +11,6 @@ namespace ed {
 struct AppLog;
 class AssetTool;
 class AssetViewer;
-class DialogManager;
 class EntityEditor;
 class Menu;
 class Properties;
@@ -21,7 +20,6 @@ class Manager {
 public:
   explicit Manager(std::shared_ptr<Menu> newAppMenu,
                    std::shared_ptr<AssetViewer> newAssetViewer,
-                   std::shared_ptr<DialogManager> newDialogManager,
                    std::shared_ptr<EntityEditor> newEntityEditor,
                    std::shared_ptr<Properties> newProperties,
                    std::shared_ptr<AssetTool> newAssetTool,
@@ -41,7 +39,6 @@ private:
   std::shared_ptr<AppLog> appLog;
   std::shared_ptr<Menu> appMenu;
   std::shared_ptr<AssetViewer> assetViewer;
-  std::shared_ptr<DialogManager> dialogManager;
   std::shared_ptr<EntityEditor> entityEditor;
   std::shared_ptr<Properties> properties;
   std::shared_ptr<AssetTool> assetTool;

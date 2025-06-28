@@ -92,6 +92,10 @@ public:
 
   auto setOnOk(const FileDialogOkFunction& fn) -> void;
 
+  [[nodiscard]] auto getFinalSelection() const {
+    return finalSelection;
+  }
+
 private:
   std::shared_ptr<Properties> properties;
   std::vector<FilterItem> filterItems;
@@ -108,6 +112,8 @@ private:
   std::optional<std::filesystem::path> initialPath = std::nullopt;
   std::optional<std::filesystem::path> currentFolder;
   std::optional<std::filesystem::path> currentFile;
+
+  std::optional<std::filesystem::path> finalSelection;
 
   ColumnInfo columnInfo;
 

@@ -1,24 +1,17 @@
 #include "AssetViewer.hpp"
 
-#include "DialogManager.hpp"
-
 #include "ui/assets/IconsLucide.hpp"
 #include "ui/components/FileDialog.hpp"
+#include "ui/components/dialog/Helpers.hpp"
 
 namespace ed {
 
 constexpr auto ItemIndent = 16.f;
 
-AssetViewer::AssetViewer(std::shared_ptr<DialogManager> newDialogManager,
-                         std::shared_ptr<Properties> newProperties,
+AssetViewer::AssetViewer(std::shared_ptr<Properties> newProperties,
                          std::shared_ptr<tr::IEventQueue> newEventQueue)
-    : dialogManager{std::move(newDialogManager)},
-      properties{std::move(newProperties)},
-      eventQueue{std::move(newEventQueue)} {
+    : properties{std::move(newProperties)}, eventQueue{std::move(newEventQueue)} {
   Log.trace("Constructing AssetViewer");
-  createSkeletonDialog();
-  createAnimationDialog();
-  createModelDialog();
 }
 
 AssetViewer::~AssetViewer() {
@@ -35,13 +28,13 @@ auto AssetViewer::render(const tr::EditorState& editorState) -> void {
     if (ImGui::BeginMenuBar()) {
       if (ImGui::BeginMenu("Import")) {
         if (ImGui::MenuItem("Skeleton...")) {
-          dialogManager->setOpen("Skeleton", {});
+          skeletonAliasInfo.shouldShow = true;
         }
         if (ImGui::MenuItem("Animation...")) {
-          dialogManager->setOpen("Animation", {});
+          animationAliasInfo.shouldShow = true;
         }
         if (ImGui::MenuItem("Model...")) {
-          dialogManager->setOpen("Model", {});
+          modelAliasInfo.shouldShow = true;
         }
         ImGui::EndMenu();
       }
@@ -107,81 +100,172 @@ auto AssetViewer::render(const tr::EditorState& editorState) -> void {
     }
   }
   ImGui::End();
+
+  renderModelDialog();
+  renderSkeletonDialog();
+  renderAnimationDialog();
 }
 
-void AssetViewer::createSkeletonDialog() {
-  auto dialog = std::make_unique<ModalDialog>(
-      ICON_LC_BONE,
-      " Skeleton",
-      [&](const ModalDialog& dialog) {
-        Log.trace("name: {0}, file: {1}",
-                  dialog.getValue<std::string>("name").value(),
-                  dialog.getValue<std::filesystem::path>("filename").value().string());
-        eventQueue->emit(tr::AddSkeleton{
-            .name = dialog.getValue<std::string>("name").value(),
-            .fileName = dialog.getValue<std::filesystem::path>("filename").value().string()});
-      },
-      []() { Log.debug("Cancelled Dialog with no input"); });
+auto AssetViewer::renderModelDialog() -> void {
+  if (modelAliasInfo.shouldShow) {
+    ImGui::OpenPopup("Model");
+    modelAliasInfo.shouldShow = false;
+    modelAliasInfo.isOpen = true;
+  }
 
-  auto filterItems = {
-      FilterItem{.filter = ".ozz", .displayName = "Ozz Skeletons"},
-      FilterItem{.filter = ".*", .displayName = "All Files"},
-  };
+  bool shouldOk{};
+  bool shouldCancel{};
 
-  dialog->addControl("name", "Skeleton Name", std::string("Unnamed Skeleton"));
-  dialog->addFileControl("filename", "Skeleton File", properties, filterItems);
+  if (ImGui::BeginPopupModal("Model", &modelAliasInfo.isOpen)) {
+    if (ImGui::IsKeyPressed(ImGuiKey_Escape)) {
+      shouldCancel = true;
+    }
 
-  dialogManager->addDialog("Skeleton", std::move(dialog));
+    if (ImGui::IsWindowAppearing()) {
+      ImGui::SetKeyboardFocusHere();
+    }
+
+    auto filterItems = {
+        FilterItem{.filter = ".trm", .displayName = "Triton Models"},
+        FilterItem{.filter = ".*", .displayName = "All Files"},
+    };
+
+    ImGui::InputText("Name", &modelAliasInfo.alias.alias);
+    renderFileControl("Model", properties, filterItems, modelAliasInfo.alias.filePath);
+
+    ImGui::Separator();
+
+    std::tie(shouldOk, shouldCancel) = renderOkCancelButtons();
+
+    if (shouldOk) {
+      Log.trace("shouldOk alias={}, path={}",
+                modelAliasInfo.alias.alias,
+                modelAliasInfo.alias.filePath.string());
+      ImGui::CloseCurrentPopup();
+      modelAliasInfo.isOpen = false;
+      Log.trace("name={}, file={}",
+                modelAliasInfo.alias.alias,
+                modelAliasInfo.alias.filePath.string());
+      eventQueue->emit(tr::AddModel{.name = modelAliasInfo.alias.alias,
+                                    .fileName = modelAliasInfo.alias.filePath.string()});
+    }
+
+    if (shouldCancel) {
+      Log.trace("shouldCancel");
+      ImGui::CloseCurrentPopup();
+      modelAliasInfo.isOpen = false;
+    }
+
+    ImGui::EndPopup();
+  }
 }
 
-void AssetViewer::createAnimationDialog() {
-  auto dialog = std::make_unique<ModalDialog>(
-      ICON_LC_FILE_VIDEO,
-      " Animation",
-      [&](const ModalDialog& dialog) {
-        Log.trace("name: {0}, file: {1}",
-                  dialog.getValue<std::string>("name").value(),
-                  dialog.getValue<std::filesystem::path>("filename").value().string());
-        eventQueue->emit(tr::AddAnimation{
-            .name = dialog.getValue<std::string>("name").value(),
-            .fileName = dialog.getValue<std::filesystem::path>("filename").value().string(),
-        });
-      },
-      []() { Log.debug("Cancelled Dialog with no input"); });
+auto AssetViewer::renderSkeletonDialog() -> void {
+  if (skeletonAliasInfo.shouldShow) {
+    ImGui::OpenPopup("Skeleton");
+    skeletonAliasInfo.shouldShow = false;
+    skeletonAliasInfo.isOpen = true;
+  }
 
-  auto filterItems = {
-      FilterItem{.filter = ".ozz", .displayName = "Ozz Animation"},
-      FilterItem{.filter = ".*", .displayName = "All Files"},
-  };
+  bool shouldOk{};
+  bool shouldCancel{};
 
-  dialog->addControl("name", "Animation Name", std::string("Unnamed Animation"));
-  dialog->addFileControl("filename", "Animation File", properties, filterItems);
+  if (ImGui::BeginPopupModal("Skeleton", &skeletonAliasInfo.isOpen)) {
+    if (ImGui::IsKeyPressed(ImGuiKey_Escape)) {
+      shouldCancel = true;
+    }
 
-  dialogManager->addDialog("Animation", std::move(dialog));
+    if (ImGui::IsWindowAppearing()) {
+      ImGui::SetKeyboardFocusHere();
+    }
+
+    auto filterItems = {
+        FilterItem{.filter = ".ozz", .displayName = "Ozz Skeletons"},
+        FilterItem{.filter = ".*", .displayName = "All Files"},
+    };
+
+    ImGui::InputText("Name", &skeletonAliasInfo.alias.alias);
+    renderFileControl("Skeleton", properties, filterItems, skeletonAliasInfo.alias.filePath);
+
+    ImGui::Separator();
+
+    std::tie(shouldOk, shouldCancel) = renderOkCancelButtons();
+
+    if (shouldOk) {
+      Log.trace("shouldOk alias={}, path={}",
+                skeletonAliasInfo.alias.alias,
+                skeletonAliasInfo.alias.filePath.string());
+      ImGui::CloseCurrentPopup();
+      skeletonAliasInfo.isOpen = false;
+      Log.trace("name={}, file={}",
+                skeletonAliasInfo.alias.alias,
+                skeletonAliasInfo.alias.filePath.string());
+      eventQueue->emit(tr::AddSkeleton{.name = skeletonAliasInfo.alias.alias,
+                                       .fileName = skeletonAliasInfo.alias.filePath.string()});
+    }
+
+    if (shouldCancel) {
+      Log.trace("shouldCancel");
+      ImGui::CloseCurrentPopup();
+      skeletonAliasInfo.isOpen = false;
+    }
+
+    ImGui::EndPopup();
+  }
 }
 
-void AssetViewer::createModelDialog() {
-  auto dialog = std::make_unique<ModalDialog>(
-      ICON_LC_FILE_BOX,
-      " Model",
-      [&](const ModalDialog& dialog) {
-        Log.trace("name: {0}, file: {1}",
-                  dialog.getValue<std::string>("name").value(),
-                  dialog.getValue<std::filesystem::path>("filename").value().string());
-        eventQueue->emit(tr::AddModel{
-            .name = dialog.getValue<std::string>("name").value(),
-            .fileName = dialog.getValue<std::filesystem::path>("filename").value().string()});
-      },
-      []() { Log.debug("Cancelled Dialog with no input"); });
+auto AssetViewer::renderAnimationDialog() -> void {
+  if (animationAliasInfo.shouldShow) {
+    ImGui::OpenPopup("Animation");
+    animationAliasInfo.shouldShow = false;
+    animationAliasInfo.isOpen = true;
+  }
 
-  auto filterItems = {
-      FilterItem{.filter = ".trm", .displayName = "Triton Models"},
-      FilterItem{.filter = ".*", .displayName = "All Files"},
-  };
+  bool shouldOk{};
+  bool shouldCancel{};
 
-  dialog->addControl("name", "Model Name", std::string("Unnamed Model"));
-  dialog->addFileControl("filename", "Model File", properties, filterItems);
+  if (ImGui::BeginPopupModal("Animation", &animationAliasInfo.isOpen)) {
+    if (ImGui::IsKeyPressed(ImGuiKey_Escape)) {
+      shouldCancel = true;
+    }
 
-  dialogManager->addDialog("Model", std::move(dialog));
+    if (ImGui::IsWindowAppearing()) {
+      ImGui::SetKeyboardFocusHere();
+    }
+
+    auto filterItems = {
+        FilterItem{.filter = ".ozz", .displayName = "Ozz Animations"},
+        FilterItem{.filter = ".*", .displayName = "All Files"},
+    };
+
+    ImGui::InputText("Name", &animationAliasInfo.alias.alias);
+    renderFileControl("Animation", properties, filterItems, animationAliasInfo.alias.filePath);
+
+    ImGui::Separator();
+
+    std::tie(shouldOk, shouldCancel) = renderOkCancelButtons();
+
+    if (shouldOk) {
+      Log.trace("shouldOk alias={}, path={}",
+                animationAliasInfo.alias.alias,
+                animationAliasInfo.alias.filePath.string());
+      ImGui::CloseCurrentPopup();
+      animationAliasInfo.isOpen = false;
+      Log.trace("name={}, file={}",
+                animationAliasInfo.alias.alias,
+                animationAliasInfo.alias.filePath.string());
+      eventQueue->emit(tr::AddAnimation{.name = animationAliasInfo.alias.alias,
+                                        .fileName = animationAliasInfo.alias.filePath.string()});
+    }
+
+    if (shouldCancel) {
+      Log.trace("shouldCancel");
+      ImGui::CloseCurrentPopup();
+      animationAliasInfo.isOpen = false;
+    }
+
+    ImGui::EndPopup();
+  }
 }
+
 }

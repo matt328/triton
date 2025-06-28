@@ -12,7 +12,6 @@
 #include "ui/components/AssetViewer.hpp"
 #include "ui/components/ImGuiSink.hpp"
 #include "ui/components/Dock.hpp"
-#include "ui/components/DialogManager.hpp"
 #include "ui/components/Menu.hpp"
 
 namespace ed {
@@ -21,7 +20,6 @@ static constexpr float FontSize = 18.f;
 
 Manager::Manager(std::shared_ptr<Menu> newAppMenu,
                  std::shared_ptr<AssetViewer> newAssetViewer,
-                 std::shared_ptr<DialogManager> newDialogManager,
                  std::shared_ptr<EntityEditor> newEntityEditor,
                  std::shared_ptr<Properties> newProperties,
                  std::shared_ptr<AssetTool> newAssetTool,
@@ -29,7 +27,6 @@ Manager::Manager(std::shared_ptr<Menu> newAppMenu,
                  std::shared_ptr<ApplicationController> newApplicationController)
     : appMenu{std::move(newAppMenu)},
       assetViewer{std::move(newAssetViewer)},
-      dialogManager{std::move(newDialogManager)},
       entityEditor{std::move(newEntityEditor)},
       properties{std::move(newProperties)},
       assetTool{std::move(newAssetTool)},
@@ -70,14 +67,10 @@ void Manager::render(const tr::EditorState& editorState) {
   appLog->font = sauce;
   appLog->Draw("Log");
 
-  dialogManager->render();
-
   appMenu->render({});
   entityEditor->render(editorState);
   assetViewer->render(editorState);
   assetTool->render();
-
-  dialogManager->update();
 }
 
 auto Manager::setupFonts() -> void {

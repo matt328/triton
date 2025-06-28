@@ -3,7 +3,6 @@
 #include "api/fx/IEventQueue.hpp"
 #include "Properties.hpp"
 #include "FileDialog.hpp"
-#include "DialogManager.hpp"
 
 namespace ed {
 
@@ -12,11 +11,8 @@ const auto ProjectFilters =
                 FilterItem{.filter = ".*", .displayName = "All Files"}};
 
 Menu::Menu(std::shared_ptr<Properties> newProperties,
-           std::shared_ptr<DialogManager> newDialogManager,
            std::shared_ptr<tr::IEventQueue> newEventQueue)
-    : properties{std::move(newProperties)},
-      dialogManager{std::move(newDialogManager)},
-      eventQueue{std::move(newEventQueue)} {
+    : properties{std::move(newProperties)}, eventQueue{std::move(newEventQueue)} {
 
   projectOpenDialog = std::make_unique<FileDialog>(properties, ProjectFilters, "project");
   projectOpenDialog->setOnOk([&](std::vector<std::filesystem::path> selectedFile) {

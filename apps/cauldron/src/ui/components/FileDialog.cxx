@@ -215,26 +215,26 @@ auto FileDialog::render() -> void {
       shouldCancel = true;
     }
 
+    if (shouldOk) {
+      ImGui::CloseCurrentPopup();
+      const auto propPath = currentFolder.value() / selectedFilename;
+      Log.trace("putting property {}, value: {}", lastPathKey, currentFolder.value().string());
+      properties->put(lastPathKey, currentFolder.value().string());
+      isOpen = false;
+      if (onOk.has_value()) {
+        onOk.value()({propPath});
+      }
+    }
+
+    if (shouldCancel) {
+      ImGui::CloseCurrentPopup();
+      isOpen = false;
+      if (onCancel.has_value()) {
+        onCancel.value()();
+      }
+    }
+    finalSelection.emplace(currentFolder.value() / selectedFilename);
     ImGui::EndPopup();
-  }
-
-  if (shouldOk) {
-    ImGui::CloseCurrentPopup();
-    const auto propPath = currentFolder.value() / selectedFilename;
-    Log.trace("putting property {}, value: {}", lastPathKey, currentFolder.value().string());
-    properties->put(lastPathKey, currentFolder.value().string());
-    isOpen = false;
-    if (onOk.has_value()) {
-      onOk.value()({propPath});
-    }
-  }
-
-  if (shouldCancel) {
-    ImGui::CloseCurrentPopup();
-    isOpen = false;
-    if (onCancel.has_value()) {
-      onCancel.value()();
-    }
   }
 }
 
