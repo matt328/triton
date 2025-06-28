@@ -37,15 +37,17 @@ EntityManager::EntityManager(std::shared_ptr<IEventQueue> newEventQueue,
   eventQueue->subscribe<SwapchainResized>(
       [this](const SwapchainResized& event) { renderAreaResized(event); });
 
-  eventQueue->subscribe<StaticModelUploaded>(
-      [this](const StaticModelUploaded& event) { registerStaticModel(event); });
-
   eventQueue->subscribe<tr::AddSkeleton>(
       [this](const tr::AddSkeleton& event) { addSkeleton(event.name, event.fileName); });
   eventQueue->subscribe<tr::AddAnimation>(
       [this](const tr::AddAnimation& event) { addAnimation(event.name, event.fileName); });
   eventQueue->subscribe<tr::AddModel>(
       [this](const tr::AddModel& event) { addModel(event.name, event.fileName); });
+
+  eventQueue->subscribe<tr::CreateStaticGameObject>(
+      [this](const tr::CreateStaticGameObject& event) {
+        createStaticGameObject(event.entityName, event.geometryHandle, event.gameObjectData);
+      });
 }
 
 EntityManager::~EntityManager() {
@@ -93,35 +95,40 @@ auto EntityManager::createDefaultCamera() -> void {
   registry->ctx().insert_or_assign<CurrentCamera>(CurrentCamera{entity});
 }
 
-auto EntityManager::registerStaticModel(const StaticModelUploaded& event) -> void {
-  ZoneScopedN("static model uploaded handler");
-  Log.trace("EntityManager handling StaticModelUploaded, geometryHandle={}",
-            event.geometryHandle.id);
+auto EntityManager::createStaticGameObject(std::string entityName,
+                                           Handle<Geometry> geometryHandle,
+                                           const GameObjectData& gameObjectData) -> void {
+  ZoneScoped;
+  Log.trace("EntityManager creating static gameobject, geometryHandle={}", geometryHandle.id);
+
   auto entityId = registry->create();
-
-  registry->emplace<Renderable>(entityId, std::vector<Handle<Geometry>>{event.geometryHandle});
+  registry->emplace<Renderable>(entityId, std::vector<Handle<Geometry>>{geometryHandle});
   registry->emplace<Transform>(entityId);
-
-  eventQueue->emit(StaticModelResponse{.batchId = event.batchId,
-                                       .requestId = event.requestId,
-                                       .entityName = event.entityName,
-                                       .gameObjectId = entt::to_integral(entityId)});
+  registry->emplace<GameObjectData>(entityId, gameObjectData);
+  auto& ctxData = registry->ctx().get<EditorContextData>();
+  ctxData.scene.objectNameMap.emplace(entityName, static_cast<tr::GameObjectId>(entityId));
 }
 
 auto EntityManager::addSkeleton(std::string name, std::string filename) -> void {
   auto& editorData = registry->ctx().get<EditorContextData>();
-  editorData.assets.skeletons.emplace(name, filename);
+  editorData.assets.skeletons.emplace(
+      name,
+      FileAlias{.alias = name, .filePath = std::filesystem::path{filename}});
 }
 
 auto EntityManager::addAnimation(std::string name, std::string filename) -> void {
   auto& editorData = registry->ctx().get<EditorContextData>();
-  editorData.assets.animations.emplace(name, filename);
+  editorData.assets.animations.emplace(
+      name,
+      FileAlias{.alias = name, .filePath = std::filesystem::path{filename}});
 }
 
 auto EntityManager::addModel(std::string name, std::string filename) -> void {
   Log.trace("addModel name={}, filename={}", name, filename);
   auto& editorData = registry->ctx().get<EditorContextData>();
-  editorData.assets.models.emplace(name, filename);
+  editorData.assets.models.emplace(
+      name,
+      FileAlias{.alias = name, .filePath = std::filesystem::path{filename}});
 }
 
 }

@@ -8,15 +8,13 @@ class IEventQueue;
 
 namespace ed {
 
-class DataFacade;
 class FileDialog;
 class Properties;
 class DialogManager;
 
 class Menu : public IComponent {
 public:
-  Menu(std::shared_ptr<DataFacade> newDataFacade,
-       std::shared_ptr<Properties> newProperties,
+  Menu(std::shared_ptr<Properties> newProperties,
        std::shared_ptr<DialogManager> newDialogManager,
        std::shared_ptr<tr::IEventQueue> newEventQueue);
   ~Menu();
@@ -39,7 +37,6 @@ public:
   }
 
 private:
-  std::shared_ptr<DataFacade> dataFacade;
   std::shared_ptr<Properties> properties;
   std::shared_ptr<DialogManager> dialogManager;
   std::shared_ptr<tr::IEventQueue> eventQueue;

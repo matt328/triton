@@ -1,6 +1,7 @@
 #pragma once
 
 #include "api/gw/GameObjectType.hpp"
+#include "api/gw/editordata/FileAlias.hpp"
 #include "api/gw/editordata/GameObjectData.hpp"
 
 namespace tr {
@@ -8,9 +9,9 @@ namespace tr {
 struct EditorContextData {
 
   struct Assets {
-    std::unordered_map<std::string, std::string> skeletons;
-    std::unordered_map<std::string, std::string> animations;
-    std::unordered_map<std::string, std::string> models;
+    std::unordered_map<std::string, FileAlias> skeletons;
+    std::unordered_map<std::string, FileAlias> animations;
+    std::unordered_map<std::string, FileAlias> models;
   };
 
   struct Scene {

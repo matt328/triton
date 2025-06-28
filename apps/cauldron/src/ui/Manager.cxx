@@ -24,17 +24,17 @@ Manager::Manager(std::shared_ptr<Menu> newAppMenu,
                  std::shared_ptr<DialogManager> newDialogManager,
                  std::shared_ptr<EntityEditor> newEntityEditor,
                  std::shared_ptr<Properties> newProperties,
-                 std::shared_ptr<DataFacade> newDataFacade,
                  std::shared_ptr<AssetTool> newAssetTool,
-                 std::shared_ptr<tr::IGuiCallbackRegistrar> newGuiCallbackRegistrar)
+                 std::shared_ptr<tr::IGuiCallbackRegistrar> newGuiCallbackRegistrar,
+                 std::shared_ptr<ApplicationController> newApplicationController)
     : appMenu{std::move(newAppMenu)},
       assetViewer{std::move(newAssetViewer)},
       dialogManager{std::move(newDialogManager)},
       entityEditor{std::move(newEntityEditor)},
       properties{std::move(newProperties)},
-      dataFacade{std::move(newDataFacade)},
       assetTool{std::move(newAssetTool)},
-      guiCallbackRegistrar{std::move(newGuiCallbackRegistrar)} {
+      guiCallbackRegistrar{std::move(newGuiCallbackRegistrar)},
+      applicationController{std::move(newApplicationController)} {
 
   Log.trace("Constructing Manager");
 
@@ -96,11 +96,8 @@ auto Manager::setupFonts() -> void {
   static const ImWchar iconRanges[] = {ICON_MIN_LC, ICON_MAX_LC, 0};
   fontAtlas->AddFontFromMemoryTTF(lucide_ttf, lucide_ttf_len, 18.f, &lucideConfig, iconRanges);
 
-  sauce = fontAtlas->AddFontFromMemoryTTF(JetBrainsMono,
-                                          JetBrainsMonoLength,
-                                          FontSize,
-                                          &config,
-                                          ranges);
+  sauce =
+      fontAtlas->AddFontFromMemoryTTF(JetBrainsMono, JetBrainsMonoLength, 20.f, &config, ranges);
 
   if (!ImGui_ImplVulkan_CreateFontsTexture()) {
     Log.warn("Error creating Fonts Texture");

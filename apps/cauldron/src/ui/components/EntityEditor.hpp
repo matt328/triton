@@ -9,13 +9,9 @@ class IGameWorldSystem;
 
 namespace ed {
 
-class DataFacade;
-class DialogManager;
-
 class EntityEditor : IComponent {
 public:
-  EntityEditor(std::shared_ptr<tr::IEventQueue> newEventQueue,
-               std::shared_ptr<DialogManager> newDialogManager);
+  explicit EntityEditor(std::shared_ptr<tr::IEventQueue> newEventQueue);
   ~EntityEditor();
 
   EntityEditor(const EntityEditor&) = delete;
@@ -24,15 +20,35 @@ public:
   auto operator=(EntityEditor&&) -> EntityEditor& = delete;
 
   auto render(const tr::EditorState& editorState) -> void override;
+  auto bindInput() -> void override;
 
   static constexpr auto ComponentName = "Entity Editor";
 
 private:
   std::shared_ptr<tr::IEventQueue> eventQueue;
-  std::shared_ptr<DialogManager> dialogManager;
 
-  void createAnimatedEntityDialog() const;
-  void createStaticEntityDialog() const;
+  struct StaticGameObjectDialogInfo {
+    bool shouldShow;
+    bool isOpen;
+    std::string objectName;
+    tr::FileAlias selectedModel;
+  };
+
+  StaticGameObjectDialogInfo staticDialogInfo{};
+
+  struct AnimatedGameObjectDialogInfo {
+    bool shouldShow;
+    bool isOpen;
+    std::string objectName;
+    tr::FileAlias selectedModel;
+    tr::FileAlias selectedSkeleton;
+    tr::FileAlias selectedAnimation;
+  };
+
+  AnimatedGameObjectDialogInfo animatedDialogInfo{};
+
+  auto renderStaticEntityDialog(const tr::EditorState& editorState) -> void;
+  auto renderAnimatedGameObjectDialog(const tr::EditorState& editorState) -> void;
 };
 
 }

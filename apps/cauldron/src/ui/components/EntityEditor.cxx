@@ -1,37 +1,27 @@
 #include "EntityEditor.hpp"
 
 #include "api/fx/IEventQueue.hpp"
-#include "bk/DebugTools.hpp"
+#include "api/gw/editordata/GameObjectData.hpp"
 
 #include "data/DataStore.hpp"
-#include "ui/components/DialogManager.hpp"
-#include "ui/components/dialog/ModalDialog.hpp"
 #include "editors/TransformInspector.hpp"
+#include "ui/assets/IconsLucide.hpp"
 
 namespace ed {
 
-constexpr auto DialogName = " AnimatedEntity";
-constexpr auto StaticEntityDialogName = " StaticEntity";
-
-EntityEditor::EntityEditor(std::shared_ptr<tr::IEventQueue> newEventQueue,
-                           std::shared_ptr<DialogManager> newDialogManager)
-    : eventQueue{std::move(newEventQueue)}, dialogManager{std::move(newDialogManager)} {
+EntityEditor::EntityEditor(std::shared_ptr<tr::IEventQueue> newEventQueue)
+    : eventQueue{std::move(newEventQueue)} {
   Log.trace("Creating EntityEditor");
-
-  createAnimatedEntityDialog();
-  createStaticEntityDialog();
 }
 
 EntityEditor::~EntityEditor() {
   Log.trace("Destroying EntityEditor");
 }
 
-auto EntityEditor::render(const tr::EditorState& editorState) -> void {
+auto EntityEditor::bindInput() -> void {
+}
 
-  auto staticModelContext = DialogRenderContext{};
-  std::vector<std::string> items = {"item1", "item2"};
-  DialogRenderContext::DropdownData dropdownData = {.items = items};
-  staticModelContext.dropdownMap.emplace("model", dropdownData);
+auto EntityEditor::render(const tr::EditorState& editorState) -> void {
 
   if (ImGui::Begin(ComponentName,
                    nullptr,
@@ -40,10 +30,10 @@ auto EntityEditor::render(const tr::EditorState& editorState) -> void {
     if (ImGui::BeginMenuBar()) {
       if (ImGui::BeginMenu("New")) {
         if (ImGui::MenuItem("Static Model...")) {
-          dialogManager->setOpen(StaticEntityDialogName, staticModelContext);
+          staticDialogInfo.shouldShow = true;
         }
         if (ImGui::MenuItem("Animated Model...")) {
-          dialogManager->setOpen(DialogName, {});
+          animatedDialogInfo.shouldShow = true;
         }
         if (ImGui::MenuItem("Terrain")) {
           // dataFacade->createTerrain("terrain", glm::vec3{9.f, 9.f, 9.f});
@@ -162,71 +152,189 @@ auto EntityEditor::render(const tr::EditorState& editorState) -> void {
     ImGui::EndChild();
   }
   ImGui::End();
+
+  renderStaticEntityDialog(editorState);
+
+  renderAnimatedGameObjectDialog(editorState);
 }
 
-void EntityEditor::createAnimatedEntityDialog() const {
+auto EntityEditor::renderStaticEntityDialog(const tr::EditorState& editorState) -> void {
+  if (staticDialogInfo.shouldShow) {
+    ImGui::OpenPopup("StaticGameObject");
+    staticDialogInfo.shouldShow = false;
+    staticDialogInfo.isOpen = true;
+  }
 
-  const auto onOk = [&](const ModalDialog& dialog) {
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<float> dis(-5.f, 5.f);
+  bool shouldOk{};
+  bool shouldCancel{};
 
-    for (int i = 0; i < dialog.getValue<int>("count"); ++i) {
-      // emit AnimatedModelRequest
-      // dataFacade->createAnimatedModel(EntityData{
-      //     .name = std::format("{} {}", dialog.getValue<std::string>("name").value(), i),
-      //     .orientation = Orientation{.position = glm::vec3{dis(gen), dis(gen), dis(gen)}},
-      //     .modelName = dialog.getValue<std::string>("model").value(),
-      //     .skeleton = dialog.getValue<std::string>("skeleton").value(),
-      //     .animations = {dialog.getValue<std::string>("animation").value()}});
+  if (ImGui::BeginPopupModal("StaticGameObject", &staticDialogInfo.isOpen)) {
+    if (ImGui::IsKeyPressed(ImGuiKey_Escape)) {
+      shouldCancel = true;
     }
-  };
 
-  const auto onCancel = []() { Log.debug("Cancelled Dialog with no input"); };
+    if (ImGui::IsWindowAppearing()) {
+      ImGui::SetKeyboardFocusHere();
+    }
 
-  auto dialog = std::make_unique<ModalDialog>(ICON_LC_PLAY, DialogName, onOk, onCancel);
+    // Name Input
+    ImGui::InputText("GameObject Name", &staticDialogInfo.objectName);
 
-  dialog->addControl("name", "Entity Name", std::string{"Unnamed Entity"});
+    // Model Name/Path Input
+    if (ImGui::BeginCombo("Model", staticDialogInfo.selectedModel.alias.c_str())) {
+      const auto& options = editorState.contextData.assets.models;
+      for (const auto& option : options) {
+        bool isSelected = (staticDialogInfo.selectedModel == option.second);
+        if (ImGui::Selectable(option.second.alias.c_str(), isSelected)) {
+          staticDialogInfo.selectedModel = option.second;
+        }
+        if (isSelected) {
+          ImGui::SetItemDefaultFocus();
+        }
+      }
+      ImGui::EndCombo();
+    }
 
-  dialog->addControl("model", "Model Name", std::string{"Unnamed Model"});
+    ImGui::Separator();
 
-  dialog->addControl("skeleton", "Skeleton Name", std::string{"Unnamed Skeleton"});
+    auto availableWidth = ImGui::GetContentRegionAvail().x;
+    auto buttonWidth = 80.f;
 
-  dialog->addControl("animation", "Animation Name", std::string{"Unnamed Animation"});
+    ImGui::SetCursorPosX(availableWidth - (buttonWidth * 2));
 
-  const int defaultCount = 10;
-  dialog->addControl("count", "Count", defaultCount);
+    if (ImGui::Button(ICON_LC_CIRCLE_CHECK_BIG " OK", ImVec2(buttonWidth, 0.f))) {
+      shouldOk = true;
+    }
+    ImGui::SameLine();
+    if (ImGui::Button(ICON_LC_BAN " Cancel", ImVec2(buttonWidth, 0.f))) {
+      shouldCancel = true;
+    }
 
-  dialogManager->addDialog(DialogName, std::move(dialog));
+    ImGui::EndPopup();
+  }
+
+  if (shouldOk) {
+    Log.trace("shouldOk");
+    ImGui::CloseCurrentPopup();
+    staticDialogInfo.isOpen = false;
+    Log.trace("Static GameObject create: objectName={}, resourceAlias={}, resourcePath={}",
+              staticDialogInfo.objectName,
+              staticDialogInfo.selectedModel.alias,
+              staticDialogInfo.selectedModel.filePath.string());
+  }
+
+  if (shouldCancel) {
+    Log.trace("shouldCancel");
+    ImGui::CloseCurrentPopup();
+    staticDialogInfo.isOpen = false;
+  }
 }
 
-void EntityEditor::createStaticEntityDialog() const {
+auto EntityEditor::renderAnimatedGameObjectDialog(const tr::EditorState& editorState) -> void {
+  if (animatedDialogInfo.shouldShow) {
+    ImGui::OpenPopup("AnimatedGameObject");
+    animatedDialogInfo.shouldShow = false;
+    animatedDialogInfo.isOpen = true;
+  }
 
-  const auto onOk = [&](const ModalDialog& dialog) {
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<float> dis(-5.f, 5.f);
-    for (int i = 0; i < dialog.getValue<int>("count"); ++i) {
-      // emit StaticModelRequest
-      // dataFacade->createStaticModel(EntityData{
-      //     .name = std::format("{} {}", dialog.getValue<std::string>("name").value(), i),
-      //     .orientation = Orientation{.position = glm::vec3{dis(gen), dis(gen), dis(gen)}},
-      //     .modelName = dialog.getValue<std::string>("model").value(),
-      //     .skeleton = "",
-      //     .animations = {}});
+  bool shouldOk{};
+  bool shouldCancel{};
+
+  if (ImGui::BeginPopupModal("AnimatedGameObject", &animatedDialogInfo.isOpen)) {
+    if (ImGui::IsKeyPressed(ImGuiKey_Escape)) {
+      shouldCancel = true;
     }
-  };
 
-  const auto onCancel = []() { Log.debug("Cancelled Dialog with no input"); };
+    if (ImGui::IsWindowAppearing()) {
+      ImGui::SetKeyboardFocusHere();
+    }
 
-  auto dialog =
-      std::make_unique<ModalDialog>(ICON_LC_CUBOID, StaticEntityDialogName, onOk, onCancel);
-  dialog->addControl("name", "Entity Name", std::string{"Unnamed Entity"});
-  dialog->addControl("model", "Model Name", std::string{"Unnamed Model"});
-  const int defaultCount = 10;
-  dialog->addControl("count", "Count", defaultCount);
+    // Name Input
+    ImGui::InputText("GameObject Name", &animatedDialogInfo.objectName);
 
-  dialogManager->addDialog(StaticEntityDialogName, std::move(dialog));
+    // Model Name/Path Input
+    if (ImGui::BeginCombo("Model", animatedDialogInfo.selectedModel.alias.c_str())) {
+      const auto& options = editorState.contextData.assets.models;
+      for (const auto& option : options) {
+        bool isSelected = (animatedDialogInfo.selectedModel == option.second);
+        if (ImGui::Selectable(option.second.alias.c_str(), isSelected)) {
+          animatedDialogInfo.selectedModel = option.second;
+        }
+        if (isSelected) {
+          ImGui::SetItemDefaultFocus();
+        }
+      }
+      ImGui::EndCombo();
+    }
+
+    // Skeleton Name/Path Input
+    if (ImGui::BeginCombo("Skeleton", animatedDialogInfo.selectedSkeleton.alias.c_str())) {
+      const auto& options = editorState.contextData.assets.skeletons;
+      for (const auto& option : options) {
+        bool isSelected = (animatedDialogInfo.selectedSkeleton == option.second);
+        if (ImGui::Selectable(option.second.alias.c_str(), isSelected)) {
+          animatedDialogInfo.selectedSkeleton = option.second;
+        }
+        if (isSelected) {
+          ImGui::SetItemDefaultFocus();
+        }
+      }
+      ImGui::EndCombo();
+    }
+
+    // Animation Name/Path Input
+    if (ImGui::BeginCombo("Animation", animatedDialogInfo.selectedAnimation.alias.c_str())) {
+      const auto& options = editorState.contextData.assets.animations;
+      for (const auto& option : options) {
+        bool isSelected = (animatedDialogInfo.selectedAnimation == option.second);
+        if (ImGui::Selectable(option.second.alias.c_str(), isSelected)) {
+          animatedDialogInfo.selectedAnimation = option.second;
+        }
+        if (isSelected) {
+          ImGui::SetItemDefaultFocus();
+        }
+      }
+      ImGui::EndCombo();
+    }
+
+    ImGui::Separator();
+
+    auto availableWidth = ImGui::GetContentRegionAvail().x;
+    auto buttonWidth = 80.f;
+
+    ImGui::SetCursorPosX(availableWidth - (buttonWidth * 2));
+
+    if (ImGui::Button(ICON_LC_CIRCLE_CHECK_BIG " OK", ImVec2(buttonWidth, 0.f))) {
+      shouldOk = true;
+    }
+    ImGui::SameLine();
+    if (ImGui::Button(ICON_LC_BAN " Cancel", ImVec2(buttonWidth, 0.f))) {
+      shouldCancel = true;
+    }
+
+    ImGui::EndPopup();
+  }
+
+  if (shouldOk) {
+    Log.trace("shouldOk");
+    ImGui::CloseCurrentPopup();
+    animatedDialogInfo.isOpen = false;
+    Log.trace("DynamicGameObject create: objectName={}, modelAlias={}, modelPath={}, "
+              "skeletonAlias={}, skeletonPath={}, animationAlias={}, animationPath={}",
+              animatedDialogInfo.objectName,
+              animatedDialogInfo.selectedModel.alias,
+              animatedDialogInfo.selectedModel.filePath.string(),
+              animatedDialogInfo.selectedSkeleton.alias,
+              animatedDialogInfo.selectedSkeleton.filePath.string(),
+              animatedDialogInfo.selectedAnimation.alias,
+              animatedDialogInfo.selectedAnimation.filePath.string());
+  }
+
+  if (shouldCancel) {
+    Log.trace("shouldCancel");
+    ImGui::CloseCurrentPopup();
+    animatedDialogInfo.isOpen = false;
+  }
 }
 
 }

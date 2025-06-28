@@ -112,7 +112,8 @@ struct FrameEndEvent {
   std::any fenceHandle;
 };
 
-using EventVariant = std::variant<AddSkeleton,
+using EventVariant = std::variant<AddStaticModel,
+                                  AddSkeleton,
                                   AddAnimation,
                                   AddModel,
                                   SelectEntity,
@@ -124,7 +125,7 @@ using EventVariant = std::variant<AddSkeleton,
                                   TerrainCreated,
                                   DynamicModelResponse,
                                   DynamicModelRequest,
-                                  StaticModelResponse,
+                                  CreateStaticGameObject,
                                   StaticMeshRequest,
                                   UploadGeometryRequest,
                                   UploadGeometryResponse,

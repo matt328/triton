@@ -6,6 +6,7 @@ set(editor_SRC
   src/ImGuiAdapter.cxx
 
   src/ui/Manager.cxx
+  src/ApplicationController.cxx
 
   src/ui/components/Menu.cxx
   src/ui/components/DialogManager.cxx
@@ -14,8 +15,6 @@ set(editor_SRC
   src/ui/components/FileDialog.cxx
   src/ui/components/AssetTool.cxx
   src/ui/components/dialog/FileControl.cxx
-
-  src/data/DataFacade.cxx
 )
 
 add_executable(${PROJECT_NAME} ${editor_SRC})

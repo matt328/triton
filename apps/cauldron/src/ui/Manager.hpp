@@ -10,12 +10,12 @@ namespace ed {
 
 struct AppLog;
 class AssetTool;
-class DataFacade;
 class AssetViewer;
 class DialogManager;
 class EntityEditor;
 class Menu;
 class Properties;
+class ApplicationController;
 
 class Manager {
 public:
@@ -24,9 +24,9 @@ public:
                    std::shared_ptr<DialogManager> newDialogManager,
                    std::shared_ptr<EntityEditor> newEntityEditor,
                    std::shared_ptr<Properties> newProperties,
-                   std::shared_ptr<DataFacade> newDataFacade,
                    std::shared_ptr<AssetTool> newAssetTool,
-                   std::shared_ptr<tr::IGuiCallbackRegistrar> guiCallbackRegistrar);
+                   std::shared_ptr<tr::IGuiCallbackRegistrar> guiCallbackRegistrar,
+                   std::shared_ptr<ApplicationController> newApplicationController);
   ~Manager();
 
   Manager(const Manager&) = delete;
@@ -44,9 +44,9 @@ private:
   std::shared_ptr<DialogManager> dialogManager;
   std::shared_ptr<EntityEditor> entityEditor;
   std::shared_ptr<Properties> properties;
-  std::shared_ptr<DataFacade> dataFacade;
   std::shared_ptr<AssetTool> assetTool;
   std::shared_ptr<tr::IGuiCallbackRegistrar> guiCallbackRegistrar;
+  std::shared_ptr<ApplicationController> applicationController;
 
   bool isReady = false;
 

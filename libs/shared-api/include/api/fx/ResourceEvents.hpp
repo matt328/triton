@@ -5,6 +5,7 @@
 #include "api/gfx/GpuMaterialData.hpp"
 #include "api/gw/GameObjectType.hpp"
 #include "api/gw/TransformData.hpp"
+#include "api/gw/editordata/GameObjectData.hpp"
 #include "as/Model.hpp"
 #include "bk/Handle.hpp"
 
@@ -45,13 +46,12 @@ struct StaticModelUploaded {
   Handle<Geometry> geometryHandle;
 };
 
-/// EntityManager emits
-/// Client Handles
-struct StaticModelResponse {
-  uint64_t batchId;
-  uint64_t requestId;
+/// ApplicationController Emits
+/// EntityManager Handles
+struct CreateStaticGameObject {
   std::string entityName;
-  GameObjectId gameObjectId;
+  Handle<Geometry> geometryHandle;
+  GameObjectData gameObjectData;
 };
 
 struct DynamicModelRequest {

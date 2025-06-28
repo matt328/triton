@@ -1,23 +1,9 @@
 #include "Menu.hpp"
 
 #include "api/fx/IEventQueue.hpp"
-#include "data/DataFacade.hpp"
 #include "Properties.hpp"
 #include "FileDialog.hpp"
 #include "DialogManager.hpp"
-
-/*
-  All this ImGui Code now runs on the graphics thread. Any actions any of its components need to
-  take need to be events on the event queue.
-  Make sure all components are refactored to act like proper UI components with data inputs and
-  event outputs.
-
-  Need to be able to have the ui components somehow tell the gameworld what data they need so the
-  gameworld can add it to the state queue
-
-  The components' constructors and other methods will execute on the gameworld thread, its just the
-  render() methods will happen on the graphics thread
-*/
 
 namespace ed {
 
@@ -25,12 +11,10 @@ const auto ProjectFilters =
     std::vector{FilterItem{.filter = ".trp", .displayName = "Triton Projects"},
                 FilterItem{.filter = ".*", .displayName = "All Files"}};
 
-Menu::Menu(std::shared_ptr<DataFacade> newDataFacade,
-           std::shared_ptr<Properties> newProperties,
+Menu::Menu(std::shared_ptr<Properties> newProperties,
            std::shared_ptr<DialogManager> newDialogManager,
            std::shared_ptr<tr::IEventQueue> newEventQueue)
-    : dataFacade{std::move(newDataFacade)},
-      properties{std::move(newProperties)},
+    : properties{std::move(newProperties)},
       dialogManager{std::move(newDialogManager)},
       eventQueue{std::move(newEventQueue)} {
 
@@ -39,7 +23,7 @@ Menu::Menu(std::shared_ptr<DataFacade> newDataFacade,
     try {
       Log.trace("Open project file: {}", selectedFile.front().string());
       openFilePath = selectedFile.front();
-      dataFacade->load(selectedFile.front());
+      // eventQueue->emit(LoadProject{.fileName = selectedFile.front()});
     } catch (const std::exception& ex) { Log.error(ex.what()); }
   });
 
@@ -51,7 +35,7 @@ Menu::Menu(std::shared_ptr<DataFacade> newDataFacade,
         filepath.replace_extension("trp");
       }
       Log.trace("Save project file: {}", filepath.string());
-      dataFacade->save(filepath);
+      // eventQueue->emit(SaveProject{.filePath = filePath});
       properties->setRecentFile(filepath);
     } catch (const std::exception& ex) { Log.error(ex.what()); }
   });
@@ -71,7 +55,7 @@ void Menu::render(const tr::EditorState& uiState) {
     if (ImGui::BeginMenu("File")) {
 
       if (ImGui::MenuItem("New Project...")) {
-        if (dataFacade->isUnsaved()) {
+        if (!uiState.contextData.saved) {
           showConfirmDialog = true;
         }
       }
@@ -85,8 +69,7 @@ void Menu::render(const tr::EditorState& uiState) {
         if (const auto recentFile = properties->getRecentFile(); recentFile.has_value()) {
           const auto nameOnly = recentFile.value().string();
           if (ImGui::MenuItem(nameOnly.c_str())) {
-            dataFacade->clear();
-            dataFacade->load(recentFile.value());
+            // eventQueue->emit(LoadProject{.fileName = recentFile.value()});
             openFilePath.emplace(recentFile.value());
           }
         }
@@ -94,15 +77,15 @@ void Menu::render(const tr::EditorState& uiState) {
       }
 
       ImGui::Separator();
-      if (ImGui::MenuItem("Save Project", "Ctrl+S", false, dataFacade->isUnsaved())) {
+      if (ImGui::MenuItem("Save Project", "Ctrl+S", false, !uiState.contextData.saved)) {
         if (openFilePath.has_value()) {
-          dataFacade->save(openFilePath.value());
+          // eventQueue->emit(SaveProject{.fileName = openFilePath.value()});
         } else {
           projectSaveDialog->setOpen(std::nullopt, std::string{ICON_LC_FILE} + " Save Project");
         }
       }
 
-      if (ImGui::MenuItem("Save Project As...", nullptr, false, dataFacade->isUnsaved())) {
+      if (ImGui::MenuItem("Save Project As...", nullptr, false, !uiState.contextData.saved)) {
         projectSaveDialog->setOpen(std::nullopt, std::string{ICON_LC_FILE} + " Save Project");
       }
 

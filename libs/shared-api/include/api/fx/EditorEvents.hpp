@@ -1,5 +1,6 @@
 #pragma once
 
+#include "api/gw/editordata/GameObjectData.hpp"
 namespace tr {
 
 struct AddSkeleton {
@@ -19,6 +20,12 @@ struct AddModel {
 
 struct SelectEntity {
   std::optional<std::string> entityId;
+};
+
+struct AddStaticModel {
+  std::string name;
+  Orientation orientation;
+  std::string modelName;
 };
 
 }

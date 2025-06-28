@@ -41,6 +41,10 @@ private:
   auto addSkeleton(std::string name, std::string filename) -> void;
   auto addAnimation(std::string name, std::string filename) -> void;
   auto addModel(std::string name, std::string filename) -> void;
+
+  auto createStaticGameObject(std::string entityName,
+                              Handle<Geometry> geometryHandle,
+                              const GameObjectData& gameObjectData) -> void;
 };
 
 }

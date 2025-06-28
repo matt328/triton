@@ -6,7 +6,6 @@
 #include "fx/GuiCallbackRegistrar.hpp"
 #include "ui/Manager.hpp"
 #include "ui/components/Menu.hpp"
-#include "data/DataFacade.hpp"
 #include "ui/components/DialogManager.hpp"
 #include "ui/components/AssetViewer.hpp"
 #include "ui/components/EntityEditor.hpp"
@@ -16,6 +15,7 @@
 #include "fx/ThreadedFrameworkContext.hpp"
 #include "api/fx/IEventQueue.hpp"
 #include "api/gw/EditorStateBuffer.hpp"
+#include "ApplicationController.hpp"
 
 // #include "TracyDefines.hpp"
 
