@@ -9,6 +9,8 @@ class IGameWorldSystem;
 
 namespace ed {
 
+struct TerrainData;
+
 class EntityEditor : IComponent {
 public:
   explicit EntityEditor(std::shared_ptr<tr::IEventQueue> newEventQueue);
@@ -49,6 +51,12 @@ private:
 
   auto renderStaticEntityDialog(const tr::EditorState& editorState) -> void;
   auto renderAnimatedGameObjectDialog(const tr::EditorState& editorState) -> void;
+
+  auto renderMenuBar() -> void;
+  auto renderEntityList(const tr::EditorState& editorState) -> void;
+  auto renderEntityDetailView(const tr::EditorState& editorState) -> void;
+
+  auto renderTerrainControls(const TerrainData* terrainData) -> void;
 
   static auto renderOkCancelButtons(float buttonWidth = 80.f) -> std::pair<bool, bool>;
 

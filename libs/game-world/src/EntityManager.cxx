@@ -44,6 +44,11 @@ EntityManager::EntityManager(std::shared_ptr<IEventQueue> newEventQueue,
   eventQueue->subscribe<tr::AddModel>(
       [this](const tr::AddModel& event) { addModel(event.name, event.fileName); });
 
+  eventQueue->subscribe<tr::SelectEntity>([this](const tr::SelectEntity& event) {
+    auto& contextData = registry->ctx().get<EditorContextData>();
+    contextData.selectedEntity = event.entityId;
+  });
+
   eventQueue->subscribe<tr::CreateStaticGameObject>(
       [this](const tr::CreateStaticGameObject& event) {
         createStaticGameObject(event.entityName, event.geometryHandle, event.gameObjectData);

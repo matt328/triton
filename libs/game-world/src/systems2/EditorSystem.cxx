@@ -11,6 +11,12 @@ auto EditorSystem::update(entt::registry& registry) -> EditorState {
       .objectDataMap = {},
   };
 
+  const auto view = registry.view<GameObjectData>();
+
+  for (const auto& [entity, gameObjectData] : view.each()) {
+    editorState.objectDataMap.emplace(gameObjectData.name, gameObjectData);
+  }
+
   return editorState;
 }
 
