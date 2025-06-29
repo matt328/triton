@@ -2,6 +2,7 @@
 #include "api/fx/IEventQueue.hpp"
 #include "api/fx/IStateBuffer.hpp"
 #include "api/gw/editordata/EditorState.hpp"
+#include "api/gw/editordata/Project.hpp"
 #include "components/Renderable.hpp"
 #include "components/Resources.hpp"
 #include "components/Transform.hpp"
@@ -10,6 +11,7 @@
 #include "systems2/FinalizerSystem.hpp"
 #include "systems2/EditorSystem.hpp"
 #include "api/gw/EditorStateBuffer.hpp"
+#include <cereal/archives/binary.hpp>
 
 namespace tr {
 
@@ -37,17 +39,25 @@ EntityManager::EntityManager(std::shared_ptr<IEventQueue> newEventQueue,
   eventQueue->subscribe<SwapchainResized>(
       [this](const SwapchainResized& event) { renderAreaResized(event); });
 
-  eventQueue->subscribe<tr::AddSkeleton>(
-      [this](const tr::AddSkeleton& event) { addSkeleton(event.name, event.fileName); });
-  eventQueue->subscribe<tr::AddAnimation>(
-      [this](const tr::AddAnimation& event) { addAnimation(event.name, event.fileName); });
+  eventQueue->subscribe<tr::AddSkeleton>([this](const tr::AddSkeleton& event) {
+    addSkeleton(event.name, event.fileName, event.fromFile);
+  });
+  eventQueue->subscribe<tr::AddAnimation>([this](const tr::AddAnimation& event) {
+    addAnimation(event.name, event.fileName, event.fromFile);
+  });
   eventQueue->subscribe<tr::AddModel>(
-      [this](const tr::AddModel& event) { addModel(event.name, event.fileName); });
+      [this](const tr::AddModel& event) { addModel(event.name, event.fileName, event.fromFile); });
 
   eventQueue->subscribe<tr::SelectEntity>([this](const tr::SelectEntity& event) {
     auto& contextData = registry->ctx().get<EditorContextData>();
     contextData.selectedEntity = event.entityId;
   });
+
+  eventQueue->subscribe<tr::SaveProject>(
+      [this](const tr::SaveProject& event) { saveProject(event.filePath); });
+
+  eventQueue->subscribe<tr::LoadProject>(
+      [this](const tr::LoadProject& event) { loadProject(event.filePath); });
 
   eventQueue->subscribe<tr::CreateStaticGameObject>(
       [this](const tr::CreateStaticGameObject& event) {
@@ -114,26 +124,93 @@ auto EntityManager::createStaticGameObject(std::string entityName,
   ctxData.scene.objectNameMap.emplace(entityName, static_cast<tr::GameObjectId>(entityId));
 }
 
-auto EntityManager::addSkeleton(std::string name, std::string filename) -> void {
+auto EntityManager::addSkeleton(std::string name, std::string filename, bool fromFile) -> void {
   auto& editorData = registry->ctx().get<EditorContextData>();
   editorData.assets.skeletons.emplace(
       name,
       FileAlias{.alias = name, .filePath = std::filesystem::path{filename}});
+  if (!fromFile) {
+    editorData.saved = false;
+  }
 }
 
-auto EntityManager::addAnimation(std::string name, std::string filename) -> void {
+auto EntityManager::addAnimation(std::string name, std::string filename, bool fromFile) -> void {
   auto& editorData = registry->ctx().get<EditorContextData>();
   editorData.assets.animations.emplace(
       name,
       FileAlias{.alias = name, .filePath = std::filesystem::path{filename}});
+  if (!fromFile) {
+    editorData.saved = false;
+  }
 }
 
-auto EntityManager::addModel(std::string name, std::string filename) -> void {
+auto EntityManager::addModel(std::string name, std::string filename, bool fromFile) -> void {
   Log.trace("addModel name={}, filename={}", name, filename);
   auto& editorData = registry->ctx().get<EditorContextData>();
   editorData.assets.models.emplace(
       name,
       FileAlias{.alias = name, .filePath = std::filesystem::path{filename}});
+  if (!fromFile) {
+    editorData.saved = false;
+  }
+}
+
+auto EntityManager::saveProject(const std::filesystem::path& filePath) -> void {
+  auto& editorData = registry->ctx().get<EditorContextData>();
+
+  const auto view = registry->view<GameObjectData>();
+
+  auto gameObjects = std::unordered_map<std::string, GameObjectData>{};
+
+  for (const auto& [entity, gameObjectData] : view.each()) {
+    gameObjects.emplace(gameObjectData.name, gameObjectData);
+  }
+
+  auto project = tr::Project{
+      .skeletons = editorData.assets.skeletons,
+      .animations = editorData.assets.animations,
+      .models = editorData.assets.models,
+      .gameObjects = gameObjects,
+  };
+
+  auto os = std::ofstream(filePath, std::ios::binary);
+  cereal::BinaryOutputArchive output(os);
+  output(project);
+  Log.info("Wrote binary output file to {0}", filePath.string());
+  editorData.saved = true;
+}
+
+auto EntityManager::loadProject(const std::filesystem::path& filePath) -> void {
+  auto is = std::ifstream(filePath, std::ios::binary);
+  cereal::BinaryInputArchive input(is);
+  auto project = Project{};
+  input(project);
+
+  for (const auto& animation : project.animations) {
+    eventQueue->emit(tr::AddAnimation{.name = animation.second.alias,
+                                      .fileName = animation.second.filePath,
+                                      .fromFile = true});
+  }
+
+  for (const auto& skeleton : project.skeletons) {
+    eventQueue->emit(tr::AddSkeleton{.name = skeleton.second.alias,
+                                     .fileName = skeleton.second.filePath,
+                                     .fromFile = true});
+  }
+
+  for (const auto& model : project.models) {
+    eventQueue->emit(tr::AddModel{.name = model.second.alias,
+                                  .fileName = model.second.filePath,
+                                  .fromFile = true});
+  }
+
+  for (const auto& gameObject : project.gameObjects | std::views::values) {
+    const auto addStaticModel = AddStaticModel{.name = gameObject.name,
+                                               .orientation = gameObject.orientation,
+                                               .modelName = gameObject.modelName,
+                                               .fromFile = true};
+    eventQueue->emit(addStaticModel);
+  }
 }
 
 }

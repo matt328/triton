@@ -19,7 +19,7 @@ Menu::Menu(std::shared_ptr<Properties> newProperties,
     try {
       Log.trace("Open project file: {}", selectedFile.front().string());
       openFilePath = selectedFile.front();
-      // eventQueue->emit(LoadProject{.fileName = selectedFile.front()});
+      eventQueue->emit(tr::LoadProject{.filePath = selectedFile.front()});
     } catch (const std::exception& ex) { Log.error(ex.what()); }
   });
 
@@ -31,7 +31,7 @@ Menu::Menu(std::shared_ptr<Properties> newProperties,
         filepath.replace_extension("trp");
       }
       Log.trace("Save project file: {}", filepath.string());
-      // eventQueue->emit(SaveProject{.filePath = filePath});
+      eventQueue->emit(tr::SaveProject{.filePath = filepath});
       properties->setRecentFile(filepath);
     } catch (const std::exception& ex) { Log.error(ex.what()); }
   });
@@ -44,74 +44,70 @@ Menu::~Menu() {
 auto Menu::bindInput() -> void {
 }
 
-void Menu::render(const tr::EditorState& uiState) {
-  auto showConfirmDialog = false;
+auto Menu::renderFileMenu(const tr::EditorState& editorState, bool& showConfirmDialog) -> void {
+  if (ImGui::BeginMenu("File")) {
 
-  if (ImGui::BeginMainMenuBar()) {
-    if (ImGui::BeginMenu("File")) {
+    if (ImGui::MenuItem("New Project...")) {
+      if (!editorState.contextData.saved) {
+        showConfirmDialog = true;
+      }
+    }
 
-      if (ImGui::MenuItem("New Project...")) {
-        if (!uiState.contextData.saved) {
-          showConfirmDialog = true;
+    ImGui::Separator();
+    if (ImGui::MenuItem("Open Project...")) {
+      projectOpenDialog->setOpen(std::nullopt, "Open Project File");
+    }
+
+    if (ImGui::BeginMenu("Open Recent")) {
+      if (const auto recentFile = properties->getRecentFile(); recentFile.has_value()) {
+        const auto nameOnly = recentFile.value().string();
+        if (ImGui::MenuItem(nameOnly.c_str())) {
+          eventQueue->emit(tr::LoadProject{.filePath = recentFile.value()});
+          openFilePath.emplace(recentFile.value());
         }
       }
+      ImGui::EndMenu();
+    }
 
-      ImGui::Separator();
-      if (ImGui::MenuItem("Open Project...")) {
-        projectOpenDialog->setOpen(std::nullopt, "Open Project File");
-      }
-
-      if (ImGui::BeginMenu("Open Recent")) {
-        if (const auto recentFile = properties->getRecentFile(); recentFile.has_value()) {
-          const auto nameOnly = recentFile.value().string();
-          if (ImGui::MenuItem(nameOnly.c_str())) {
-            // eventQueue->emit(LoadProject{.fileName = recentFile.value()});
-            openFilePath.emplace(recentFile.value());
-          }
-        }
-        ImGui::EndMenu();
-      }
-
-      ImGui::Separator();
-      if (ImGui::MenuItem("Save Project", "Ctrl+S", false, !uiState.contextData.saved)) {
-        if (openFilePath.has_value()) {
-          // eventQueue->emit(SaveProject{.fileName = openFilePath.value()});
-        } else {
-          projectSaveDialog->setOpen(std::nullopt, std::string{ICON_LC_FILE} + " Save Project");
-        }
-      }
-
-      if (ImGui::MenuItem("Save Project As...", nullptr, false, !uiState.contextData.saved)) {
+    ImGui::Separator();
+    if (ImGui::MenuItem("Save Project", "Ctrl+S", false, !editorState.contextData.saved)) {
+      if (openFilePath.has_value()) {
+        eventQueue->emit(tr::SaveProject{.filePath = openFilePath.value()});
+      } else {
         projectSaveDialog->setOpen(std::nullopt, std::string{ICON_LC_FILE} + " Save Project");
       }
-
-      ImGui::Separator();
-
-      if (ImGui::MenuItem("Exit", "Alt+F4")) {
-        eventQueue->emit(tr::WindowClosed{});
-      }
-      ImGui::EndMenu();
     }
-    if (ImGui::BeginMenu("View")) {
-      if (ImGui::MenuItem("Fullscreen", "Alt+Enter", this->fullscreen)) {
-        this->fullscreen = !this->fullscreen;
-        toggleFullscreenFn();
-      }
-      if (ImGui::MenuItem("Demo Window", nullptr, state.demoWindowVisible)) {
-        state.demoWindowVisible = !state.demoWindowVisible;
-      }
-      if (ImGui::MenuItem("Wireframe", nullptr, enableWireframe)) {
-        enableWireframe = !enableWireframe;
-      }
-      ImGui::EndMenu();
+
+    if (ImGui::MenuItem("Save Project As...", nullptr, false, !editorState.contextData.saved)) {
+      projectSaveDialog->setOpen(std::nullopt, std::string{ICON_LC_FILE} + " Save Project");
     }
-    ImGui::EndMainMenuBar();
-  }
 
-  if (showConfirmDialog) {
-    ImGui::OpenPopup("Unsaved");
-  }
+    ImGui::Separator();
 
+    if (ImGui::MenuItem("Exit", "Alt+F4")) {
+      eventQueue->emit(tr::WindowClosed{});
+    }
+    ImGui::EndMenu();
+  }
+}
+
+auto Menu::renderViewMenu() -> void {
+  if (ImGui::BeginMenu("View")) {
+    if (ImGui::MenuItem("Fullscreen", "Alt+Enter", this->fullscreen)) {
+      this->fullscreen = !this->fullscreen;
+      toggleFullscreenFn();
+    }
+    if (ImGui::MenuItem("Demo Window", nullptr, state.demoWindowVisible)) {
+      state.demoWindowVisible = !state.demoWindowVisible;
+    }
+    if (ImGui::MenuItem("Wireframe", nullptr, enableWireframe)) {
+      enableWireframe = !enableWireframe;
+    }
+    ImGui::EndMenu();
+  }
+}
+
+auto Menu::renderUnsavedChangesPopup() -> void {
   if (ImGui::BeginPopupModal("Unsaved", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
     ImGui::Text("Unsaved changes will be lost. Are you sure?");
     ImGui::Separator();
@@ -131,12 +127,30 @@ void Menu::render(const tr::EditorState& uiState) {
     }
     ImGui::EndPopup();
   }
+}
 
+auto Menu::renderDialogs() -> void {
   projectOpenDialog->checkShouldOpen();
   projectOpenDialog->render();
 
   projectSaveDialog->checkShouldOpen();
   projectSaveDialog->render();
+}
+
+void Menu::render(const tr::EditorState& uiState) {
+  auto showConfirmDialog = false;
+  if (ImGui::BeginMainMenuBar()) {
+    renderFileMenu(uiState, showConfirmDialog);
+    renderViewMenu();
+    ImGui::EndMainMenuBar();
+  }
+
+  renderUnsavedChangesPopup();
+  renderDialogs();
+
+  if (showConfirmDialog) {
+    ImGui::OpenPopup("Unsaved");
+  }
 
   if (state.demoWindowVisible) {
     ImGui::ShowDemoWindow(&state.demoWindowVisible);

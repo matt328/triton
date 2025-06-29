@@ -65,7 +65,7 @@ void Manager::render(const tr::EditorState& editorState) {
   appLog->font = sauce;
   appLog->Draw("Log");
 
-  appMenu->render({});
+  appMenu->render(editorState);
   entityEditor->render(editorState);
   assetViewer->render(editorState);
   assetTool->render();

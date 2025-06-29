@@ -6,16 +6,19 @@ namespace tr {
 struct AddSkeleton {
   std::string name;
   std::string fileName;
+  bool fromFile = false;
 };
 
 struct AddAnimation {
   std::string name;
   std::string fileName;
+  bool fromFile = false;
 };
 
 struct AddModel {
   std::string name;
   std::string fileName;
+  bool fromFile = false;
 };
 
 struct SelectEntity {
@@ -26,6 +29,15 @@ struct AddStaticModel {
   std::string name;
   Orientation orientation;
   std::string modelName;
+  bool fromFile = false;
+};
+
+struct SaveProject {
+  std::filesystem::path filePath;
+};
+
+struct LoadProject {
+  std::filesystem::path filePath;
 };
 
 }

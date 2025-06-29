@@ -54,5 +54,10 @@ private:
 
   std::function<void(void)> quitFn;
   std::function<void(void)> toggleFullscreenFn;
+
+  auto renderFileMenu(const tr::EditorState& editorState, bool& showConfirmDialog) -> void;
+  auto renderViewMenu() -> void;
+  static auto renderUnsavedChangesPopup() -> void;
+  auto renderDialogs() -> void;
 };
 }

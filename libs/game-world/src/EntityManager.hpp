@@ -38,9 +38,11 @@ private:
   auto registerStaticModel(const StaticModelUploaded& event) -> void;
   auto createDefaultCamera() -> void;
 
-  auto addSkeleton(std::string name, std::string filename) -> void;
-  auto addAnimation(std::string name, std::string filename) -> void;
-  auto addModel(std::string name, std::string filename) -> void;
+  auto addSkeleton(std::string name, std::string filename, bool fromFile) -> void;
+  auto addAnimation(std::string name, std::string filename, bool fromFile) -> void;
+  auto addModel(std::string name, std::string filename, bool fromFile) -> void;
+  auto saveProject(const std::filesystem::path& filePath) -> void;
+  auto loadProject(const std::filesystem::path& filePath) -> void;
 
   auto createStaticGameObject(std::string entityName,
                               Handle<Geometry> geometryHandle,
