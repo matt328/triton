@@ -1,5 +1,20 @@
 #pragma once
+
+namespace ed {
+struct ImGuiConstants {
+  static constexpr float ButtonWidth = 80.f;
+  static constexpr uint32_t SplitPaneInitialWidth = 150;
+  static constexpr float UIFontSize = 18.f;
+  static constexpr float ConsoleFontSize = 20.f;
+  static constexpr float GlyphFontSize = 18.f;
+  static constexpr ImGuiWindowFlags ModalFlags =
+      ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse |
+      ImGuiWindowFlags_NoSavedSettings;
+};
+}
+
 namespace ImGuiEx {
+
 inline void setupImGuiStyle() {
   // Fork of Visual Studio style from ImThemes
   ImGuiStyle& style = ImGui::GetStyle();

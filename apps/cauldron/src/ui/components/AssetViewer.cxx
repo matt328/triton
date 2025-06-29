@@ -116,7 +116,7 @@ auto AssetViewer::renderModelDialog() -> void {
   bool shouldOk{};
   bool shouldCancel{};
 
-  if (ImGui::BeginPopupModal("Model", &modelAliasInfo.isOpen)) {
+  if (ImGui::BeginPopupModal("Model", &modelAliasInfo.isOpen, ImGuiConstants::ModalFlags)) {
     if (ImGui::IsKeyPressed(ImGuiKey_Escape)) {
       shouldCancel = true;
     }
@@ -148,12 +148,14 @@ auto AssetViewer::renderModelDialog() -> void {
                 modelAliasInfo.alias.filePath.string());
       eventQueue->emit(tr::AddModel{.name = modelAliasInfo.alias.alias,
                                     .fileName = modelAliasInfo.alias.filePath.string()});
+      modelAliasInfo.alias = {};
     }
 
     if (shouldCancel) {
       Log.trace("shouldCancel");
       ImGui::CloseCurrentPopup();
       modelAliasInfo.isOpen = false;
+      modelAliasInfo.alias = {};
     }
 
     ImGui::EndPopup();
@@ -170,7 +172,7 @@ auto AssetViewer::renderSkeletonDialog() -> void {
   bool shouldOk{};
   bool shouldCancel{};
 
-  if (ImGui::BeginPopupModal("Skeleton", &skeletonAliasInfo.isOpen)) {
+  if (ImGui::BeginPopupModal("Skeleton", &skeletonAliasInfo.isOpen, ImGuiConstants::ModalFlags)) {
     if (ImGui::IsKeyPressed(ImGuiKey_Escape)) {
       shouldCancel = true;
     }
@@ -224,7 +226,7 @@ auto AssetViewer::renderAnimationDialog() -> void {
   bool shouldOk{};
   bool shouldCancel{};
 
-  if (ImGui::BeginPopupModal("Animation", &animationAliasInfo.isOpen)) {
+  if (ImGui::BeginPopupModal("Animation", &animationAliasInfo.isOpen, ImGuiConstants::ModalFlags)) {
     if (ImGui::IsKeyPressed(ImGuiKey_Escape)) {
       shouldCancel = true;
     }

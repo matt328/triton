@@ -5,6 +5,7 @@
 
 #include "data/DataStore.hpp"
 #include "editors/TransformInspector.hpp"
+#include "ui/ImGuiStyle.hpp"
 #include "ui/assets/IconsLucide.hpp"
 
 namespace ed {
@@ -44,12 +45,16 @@ auto EntityEditor::renderStaticEntityDialog(const tr::EditorState& editorState) 
     ImGui::OpenPopup("StaticGameObject");
     staticDialogInfo.shouldShow = false;
     staticDialogInfo.isOpen = true;
+    staticDialogInfo.objectName = "";
+    staticDialogInfo.selectedModel = {};
   }
 
   bool shouldOk{};
   bool shouldCancel{};
 
-  if (ImGui::BeginPopupModal("StaticGameObject", &staticDialogInfo.isOpen)) {
+  if (ImGui::BeginPopupModal("StaticGameObject",
+                             &staticDialogInfo.isOpen,
+                             ImGuiConstants::ModalFlags)) {
     if (ImGui::IsKeyPressed(ImGuiKey_Escape)) {
       shouldCancel = true;
     }
@@ -104,7 +109,9 @@ auto EntityEditor::renderAnimatedGameObjectDialog(const tr::EditorState& editorS
   bool shouldOk{};
   bool shouldCancel{};
 
-  if (ImGui::BeginPopupModal("AnimatedGameObject", &animatedDialogInfo.isOpen)) {
+  if (ImGui::BeginPopupModal("AnimatedGameObject",
+                             &animatedDialogInfo.isOpen,
+                             ImGuiConstants::ModalFlags)) {
     if (ImGui::IsKeyPressed(ImGuiKey_Escape)) {
       shouldCancel = true;
     }
@@ -176,7 +183,9 @@ auto EntityEditor::renderMenuBar() -> void {
 auto EntityEditor::renderEntityList(const tr::EditorState& editorState) -> void {
   const auto entities = editorState.contextData.scene.objectNameMap;
 
-  ImGui::BeginChild("left pane", ImVec2(150, 0), ImGuiChildFlags_Border | ImGuiChildFlags_ResizeX);
+  ImGui::BeginChild("left pane",
+                    ImVec2(ImGuiConstants::SplitPaneInitialWidth, 0),
+                    ImGuiChildFlags_Border | ImGuiChildFlags_ResizeX);
 
   for (const auto& [entityName, entityId] : entities) {
     if (ImGui::Selectable(entityName.c_str(),
@@ -200,8 +209,7 @@ auto EntityEditor::renderEntityDetailView(const tr::EditorState& editorState) ->
       // Editor Info Component
       ImGui::Text("%s", entityData.name.c_str());
 
-      auto buttonWidth = 80.f;
-      if (ImGui::Button(ICON_LC_X " Delete", ImVec2(buttonWidth, 0.f))) {
+      if (ImGui::Button(ICON_LC_X " Delete", ImVec2(ImGuiConstants::ButtonWidth, 0.f))) {
         del = true;
       }
 

@@ -130,8 +130,7 @@ auto FileDialog::render() -> void {
 
         ImGui::TableNextColumn();
 
-        const auto label =
-            std::string(ICON_LC_FILE) + " " + entry.path().filename().string().c_str();
+        const auto label = std::string(ICON_LC_FILE) + " " + entry.path().filename().string();
 
         if (ImGui::Selectable(label.c_str(),
                               i == fileSelectedIndex,
@@ -202,16 +201,15 @@ auto FileDialog::render() -> void {
     ImGui::Separator();
 
     auto availableWidth = ImGui::GetContentRegionAvail().x;
-    auto buttonWidth = 80.f;
 
-    ImGui::SetCursorPosX(availableWidth - buttonWidth * 2);
+    ImGui::SetCursorPosX(availableWidth - (ImGuiConstants::ButtonWidth * 2));
 
-    if (ImGui::Button(ICON_LC_CIRCLE_CHECK_BIG " OK", ImVec2(buttonWidth, 0.f))) {
+    if (ImGui::Button(ICON_LC_CIRCLE_CHECK_BIG " OK", ImVec2(ImGuiConstants::ButtonWidth, 0.f))) {
       shouldOk = true;
     }
 
     ImGui::SameLine();
-    if (ImGui::Button(ICON_LC_BAN " Cancel", ImVec2(buttonWidth, 0.f))) {
+    if (ImGui::Button(ICON_LC_BAN " Cancel", ImVec2(ImGuiConstants::ButtonWidth, 0.f))) {
       shouldCancel = true;
     }
 

@@ -117,17 +117,16 @@ void Menu::render(const tr::EditorState& uiState) {
     ImGui::Separator();
 
     auto availableWidth = ImGui::GetContentRegionAvail().x;
-    auto buttonWidth = 80.f;
 
-    ImGui::SetCursorPosX(availableWidth - buttonWidth * 2);
+    ImGui::SetCursorPosX(availableWidth - (ImGuiConstants::ButtonWidth * 2));
 
-    if (ImGui::Button(ICON_LC_CIRCLE_CHECK_BIG " OK", ImVec2(buttonWidth, 0.f))) {
+    if (ImGui::Button(ICON_LC_CIRCLE_CHECK_BIG " OK", ImVec2(ImGuiConstants::ButtonWidth, 0.f))) {
       ImGui::CloseCurrentPopup();
       Log.info("Ok");
     }
     ImGui::SetItemDefaultFocus();
     ImGui::SameLine();
-    if (ImGui::Button(ICON_LC_BAN " Cancel", ImVec2(buttonWidth, 0.f))) {
+    if (ImGui::Button(ICON_LC_BAN " Cancel", ImVec2(ImGuiConstants::ButtonWidth, 0.f))) {
       ImGui::CloseCurrentPopup();
     }
     ImGui::EndPopup();

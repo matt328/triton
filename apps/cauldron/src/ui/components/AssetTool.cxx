@@ -73,21 +73,20 @@ AssetTool::~AssetTool() {
 }
 
 auto AssetTool::render() -> void {
-  auto buttonWidth = 120.f;
   if (ImGui::Begin(ComponentName, nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
 
-    if (ImGui::Button(ICON_LC_FOLDER_OPEN " Load Model", ImVec2(buttonWidth, 0.f))) {
+    if (ImGui::Button(ICON_LC_FOLDER_OPEN " Model", ImVec2(ImGuiConstants::ButtonWidth, 0.f))) {
       inputFileDialog->setOpen(std::nullopt, "Open GLTF File");
     }
 
     ImGui::BeginDisabled(!modelConverter->hasSkin());
-    if (ImGui::Button(ICON_LC_FOLDER_OPEN " Load Skeleton", ImVec2(buttonWidth, 0.f))) {
+    if (ImGui::Button(ICON_LC_FOLDER_OPEN " Skeleton", ImVec2(ImGuiConstants::ButtonWidth, 0.f))) {
       inputSkeletonDialog->setOpen(std::nullopt, "Open Skeleton");
     }
     ImGui::EndDisabled();
 
     ImGui::BeginDisabled(!modelConverter->isReady());
-    if (ImGui::Button(ICON_LC_FOLDER_OPEN " Save Triton Model", ImVec2(buttonWidth, 0.f))) {
+    if (ImGui::Button(ICON_LC_FOLDER_OPEN " TRM", ImVec2(ImGuiConstants::ButtonWidth, 0.f))) {
       outputFileDialog->setOpen(std::nullopt, "Save Triton Model");
     }
     ImGui::EndDisabled();

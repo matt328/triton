@@ -5,7 +5,8 @@
 
 namespace ed {
 
-inline static auto renderOkCancelButtons(float buttonWidth = 80.f) -> std::pair<bool, bool> {
+inline static auto renderOkCancelButtons(float buttonWidth = ImGuiConstants::ButtonWidth)
+    -> std::pair<bool, bool> {
   bool ok = false;
   bool cancel = false;
 

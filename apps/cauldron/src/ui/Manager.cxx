@@ -16,8 +16,6 @@
 
 namespace ed {
 
-static constexpr float FontSize = 18.f;
-
 Manager::Manager(std::shared_ptr<Menu> newAppMenu,
                  std::shared_ptr<AssetViewer> newAssetViewer,
                  std::shared_ptr<EntityEditor> newEntityEditor,
@@ -80,17 +78,28 @@ auto Manager::setupFonts() -> void {
 
   auto config = ImFontConfig{};
   config.FontDataOwnedByAtlas = false;
-  fontAtlas->AddFontFromMemoryTTF(RobotoFont, RobotoLength, FontSize, &config, ranges);
+  fontAtlas->AddFontFromMemoryTTF(RobotoFont,
+                                  RobotoLength,
+                                  ImGuiConstants::UIFontSize,
+                                  &config,
+                                  ranges);
 
   ImFontConfig lucideConfig;
   lucideConfig.MergeMode = true;
   lucideConfig.GlyphMinAdvanceX = 18.f;
   lucideConfig.GlyphOffset.y = 3.f;
   static const ImWchar iconRanges[] = {ICON_MIN_LC, ICON_MAX_LC, 0};
-  fontAtlas->AddFontFromMemoryTTF(lucide_ttf, lucide_ttf_len, 18.f, &lucideConfig, iconRanges);
+  fontAtlas->AddFontFromMemoryTTF(lucide_ttf,
+                                  lucide_ttf_len,
+                                  ImGuiConstants::GlyphFontSize,
+                                  &lucideConfig,
+                                  iconRanges);
 
-  sauce =
-      fontAtlas->AddFontFromMemoryTTF(JetBrainsMono, JetBrainsMonoLength, 20.f, &config, ranges);
+  sauce = fontAtlas->AddFontFromMemoryTTF(JetBrainsMono,
+                                          JetBrainsMonoLength,
+                                          ImGuiConstants::ConsoleFontSize,
+                                          &config,
+                                          ranges);
 
   if (!ImGui_ImplVulkan_CreateFontsTexture()) {
     Log.warn("Error creating Fonts Texture");

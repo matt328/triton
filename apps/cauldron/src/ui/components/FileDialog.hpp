@@ -72,6 +72,8 @@ struct FilterItem {
   }
 };
 
+// TODO: refactor this back to immediate mode instead of retained mode.
+
 class FileDialog {
 public:
   FileDialog(std::shared_ptr<Properties> newProperties,
