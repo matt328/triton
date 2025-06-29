@@ -45,7 +45,23 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y ninja-build cmake clang lld libx11-dev libxi-dev libgl1-mesa-dev libvulkan-dev libxinerama-dev libxcursor-dev
+          sudo apt-get install -y ninja-build lld libx11-dev libxi-dev libgl1-mesa-dev libvulkan-dev libxinerama-dev libxcursor-dev wget gnupg lsb-release software-properties-common
+
+      - name: Add LLVM apt repository
+        run: |
+          wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/llvm.asc
+          echo "deb http://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-$(lsb_release -cs)-20 main" | sudo tee /etc/apt/sources.list.d/llvm20.list
+
+      - name: Install LLVM 20
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-20 lldb-20 lld-20 llvm-20
+
+      - name: Set LLVM 20 as default
+        run: |
+          sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-20 100
+          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-20 100
+          clang --version
 
       - name: Setup Vulkan SDK
         uses: humbletim/setup-vulkan-sdk@main
