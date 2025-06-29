@@ -3,7 +3,7 @@
 #include "api/fx/IEventQueue.hpp"
 #include "api/gw/editordata/GameObjectData.hpp"
 
-#include "data/DataStore.hpp"
+#include "data/TerrainData.hpp"
 #include "editors/TransformInspector.hpp"
 #include "ui/ImGuiStyle.hpp"
 #include "ui/assets/IconsLucide.hpp"

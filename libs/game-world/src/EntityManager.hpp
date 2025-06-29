@@ -43,6 +43,7 @@ private:
   auto addModel(std::string name, std::string filename, bool fromFile) -> void;
   auto saveProject(const std::filesystem::path& filePath) -> void;
   auto loadProject(const std::filesystem::path& filePath) -> void;
+  auto selectEntity(std::optional<std::string> entityName) -> void;
 
   auto createStaticGameObject(std::string entityName,
                               Handle<Geometry> geometryHandle,

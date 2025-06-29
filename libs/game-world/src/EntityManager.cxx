@@ -48,10 +48,8 @@ EntityManager::EntityManager(std::shared_ptr<IEventQueue> newEventQueue,
   eventQueue->subscribe<tr::AddModel>(
       [this](const tr::AddModel& event) { addModel(event.name, event.fileName, event.fromFile); });
 
-  eventQueue->subscribe<tr::SelectEntity>([this](const tr::SelectEntity& event) {
-    auto& contextData = registry->ctx().get<EditorContextData>();
-    contextData.selectedEntity = event.entityId;
-  });
+  eventQueue->subscribe<tr::SelectEntity>(
+      [this](const tr::SelectEntity& event) { selectEntity(event.entityId); });
 
   eventQueue->subscribe<tr::SaveProject>(
       [this](const tr::SaveProject& event) { saveProject(event.filePath); });
@@ -153,6 +151,11 @@ auto EntityManager::addModel(std::string name, std::string filename, bool fromFi
   if (!fromFile) {
     editorData.saved = false;
   }
+}
+
+auto EntityManager::selectEntity(std::optional<std::string> entityName) -> void {
+  auto& contextData = registry->ctx().get<EditorContextData>();
+  contextData.selectedEntity = std::move(entityName);
 }
 
 auto EntityManager::saveProject(const std::filesystem::path& filePath) -> void {
