@@ -72,10 +72,10 @@ using BufferAliasVariant = std::variant<BufferAlias, GlobalBufferAlias>;
 
 // to_string
 struct BufferAliasToStringVisitor {
-  constexpr auto operator()(GlobalBufferAlias a) const -> std::string {
+   auto operator()(GlobalBufferAlias a) const -> std::string {
     return to_string(a);
   }
-  constexpr auto operator()(BufferAlias a) const -> std::string {
+   auto operator()(BufferAlias a) const -> std::string {
     return to_string(a);
   }
 };

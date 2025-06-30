@@ -94,7 +94,7 @@ auto EntityManager::createDefaultCamera() -> void {
       .farClip = DefaultFarClip,
       .position = DefaultPosition,
   };
-  const auto [width, height] = registry->ctx().get<const WindowDimensions>();
+  auto& [width, height] = registry->ctx().get<WindowDimensions>();
 
   const auto entity = registry->create();
   registry->emplace<Camera>(entity,
@@ -191,19 +191,19 @@ auto EntityManager::loadProject(const std::filesystem::path& filePath) -> void {
 
   for (const auto& animation : project.animations) {
     eventQueue->emit(tr::AddAnimation{.name = animation.second.alias,
-                                      .fileName = animation.second.filePath,
+                                      .fileName = animation.second.filePath.string(),
                                       .fromFile = true});
   }
 
   for (const auto& skeleton : project.skeletons) {
     eventQueue->emit(tr::AddSkeleton{.name = skeleton.second.alias,
-                                     .fileName = skeleton.second.filePath,
+                                     .fileName = skeleton.second.filePath.string(),
                                      .fromFile = true});
   }
 
   for (const auto& model : project.models) {
     eventQueue->emit(tr::AddModel{.name = model.second.alias,
-                                  .fileName = model.second.filePath,
+                                  .fileName = model.second.filePath.string(),
                                   .fromFile = true});
   }
 

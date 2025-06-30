@@ -87,7 +87,7 @@ auto EntityEditor::renderStaticEntityDialog(const tr::EditorState& editorState) 
     const auto addModel = tr::AddStaticModel{
         .name = staticDialogInfo.objectName,
         .orientation = tr::Orientation{},
-        .modelName = staticDialogInfo.selectedModel.filePath,
+        .modelName = staticDialogInfo.selectedModel.filePath.string(),
     };
     eventQueue->emit(addModel);
   }
