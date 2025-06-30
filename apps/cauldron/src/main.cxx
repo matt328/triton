@@ -50,6 +50,10 @@ auto main() -> int {
   const auto configDir = std::filesystem::path(sago::getConfigHome()) / "editor";
   auto propertiesPath = configDir / "editor";
 
+  auto* editorStateBuffer = new tr::EditorStateBuffer();
+  editorStateBuffer->getStates(tr::Clock::now());
+  delete editorStateBuffer;
+
   auto properties = std::make_shared<ed::Properties>(propertiesPath);
 
   try {

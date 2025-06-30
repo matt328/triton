@@ -207,7 +207,7 @@ auto EntityManager::loadProject(const std::filesystem::path& filePath) -> void {
                                   .fromFile = true});
   }
 
-  for (const auto& gameObject : project.gameObjects | std::views::values) {
+  for (const auto& gameObject : project.gameObjects | std::ranges::views::values) {
     const auto addStaticModel = AddStaticModel{.name = gameObject.name,
                                                .orientation = gameObject.orientation,
                                                .modelName = gameObject.modelName,

@@ -16,7 +16,6 @@ include(FetchContent)
 
 set(ENABLE_ALL_WARNINGS ON)
 set(ENABLE_EFFECTIVE_CXX ON)
-include(compiler-options)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -24,11 +23,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
-
-if(APPLE OR UNIX)
-  set(CMAKE_CXX_FLAGS -std=c++23)
-  add_link_options(-fuse-ld=lld)
-endif()
 
 set(CATCH2_VERSION v3.6.0)
 set(CEREAL_VERSION v1.3.2)

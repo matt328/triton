@@ -44,8 +44,9 @@ auto DebugTerrainSystem::registerTerrain(const TerrainCreateInfo& createInfo) ->
   blockUpdater->execute();
   blockUpdater->debug();
 
-  const auto chunks = std::vector<BlockResult>(std::ranges::begin(blockMap | std::views::values),
-                                               std::ranges::end(blockMap | std::views::values));
+  const auto chunks =
+      std::vector<BlockResult>(std::ranges::begin(blockMap | std::ranges::views::values),
+                               std::ranges::end(blockMap | std::ranges::views::values));
 
   const auto terrainHandle = terrainKeygen.getKey();
 

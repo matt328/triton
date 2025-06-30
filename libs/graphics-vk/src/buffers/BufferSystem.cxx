@@ -198,7 +198,7 @@ auto BufferSystem::getCurrentManagedBufferConst(Handle<ManagedBuffer> handle) co
   if (entry->lifetime == BufferLifetime::Transient) {
     managedBuffer.emplace(entry->versions.front().get());
   } else {
-    for (const auto& rec : entry->versions | std::views::reverse) {
+    for (const auto& rec : entry->versions | std::ranges::views::reverse) {
       if (rec->getValidFromFrame() <= frameState->getFrame() &&
           (!rec->getValidToFrame() || *rec->getValidToFrame() > frameState->getFrame())) {
         managedBuffer.emplace(rec.get());
@@ -217,7 +217,7 @@ auto BufferSystem::getCurrentManagedBuffer(Handle<ManagedBuffer> handle)
   if (entry->lifetime == BufferLifetime::Transient) {
     managedBuffer.emplace(entry->versions.front().get());
   } else {
-    for (const auto& rec : entry->versions | std::views::reverse) {
+    for (const auto& rec : entry->versions | std::ranges::views::reverse) {
       if (rec->getValidFromFrame() <= frameState->getFrame() &&
           (!rec->getValidToFrame() || *rec->getValidToFrame() > frameState->getFrame())) {
         managedBuffer.emplace(rec.get());

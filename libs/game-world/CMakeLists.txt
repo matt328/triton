@@ -38,6 +38,7 @@ target_precompile_headers(${PROJECT_NAME}
   <tracy/TracyC.h>
   <unordered_map>
   <queue>
+  <ranges>
   <string>
   <vector>
   PRIVATE

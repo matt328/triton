@@ -45,7 +45,7 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y ninja-build lld libx11-dev libxi-dev libgl1-mesa-dev libvulkan-dev libxinerama-dev libxcursor-dev wget gnupg lsb-release software-properties-common
+          sudo apt-get install -y cmake ninja-build lld libx11-dev libxi-dev libgl1-mesa-dev libvulkan-dev libxinerama-dev libxcursor-dev wget gnupg lsb-release software-properties-common libstdc++-13-dev
 
       - name: Add LLVM apt repository
         run: |
@@ -70,8 +70,8 @@ jobs:
           vulkan-components: Vulkan-Headers, Vulkan-Loader, Glslang, SPIRV-Tools
           vulkan-use-cache: true
 
-      - name: CMake Generate
+      - name: Configure build with Clang 20 and libstdc++ 15
         run: cmake --preset release
 
       - name: Build
-        run: cmake --build --preset release
+        run: cmake --build --preset release --target Cauldron

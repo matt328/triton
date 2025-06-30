@@ -61,7 +61,8 @@ auto AssetViewer::render(const tr::EditorState& editorState) -> void {
       ImGui::SetNextItemOpen(headerState[1]);
       if (ImGui::CollapsingHeader("Skeletons")) {
         ImGui::Indent(ItemIndent);
-        for (const auto& name : editorState.contextData.assets.skeletons | std::views::keys) {
+        for (const auto& name :
+             editorState.contextData.assets.skeletons | std::ranges::views::keys) {
           ImGui::Selectable((std::string{ICON_LC_BONE} + " " + name).c_str());
         }
         ImGui::Unindent(ItemIndent);
@@ -75,7 +76,8 @@ auto AssetViewer::render(const tr::EditorState& editorState) -> void {
       ImGui::SetNextItemOpen(headerState[2]);
       if (ImGui::CollapsingHeader("Animations")) {
         ImGui::Indent(ItemIndent);
-        for (const auto& name : editorState.contextData.assets.animations | std::views::keys) {
+        for (const auto& name :
+             editorState.contextData.assets.animations | std::ranges::views::keys) {
           ImGui::Selectable((std::string{ICON_LC_FILE_VIDEO} + " " + name).c_str());
         }
         ImGui::Unindent(ItemIndent);
@@ -89,7 +91,7 @@ auto AssetViewer::render(const tr::EditorState& editorState) -> void {
       ImGui::SetNextItemOpen(headerState[3]);
       if (ImGui::CollapsingHeader("Models")) {
         ImGui::Indent(ItemIndent);
-        for (const auto& name : editorState.contextData.assets.models | std::views::keys) {
+        for (const auto& name : editorState.contextData.assets.models | std::ranges::views::keys) {
           ImGui::Selectable((std::string{ICON_LC_BOX} + " " + name).c_str());
         }
         ImGui::Unindent(ItemIndent);

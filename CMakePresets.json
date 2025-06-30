@@ -10,7 +10,11 @@
         "CMAKE_CXX_STANDARD_REQUIRED": "ON",
         "CMAKE_CXX_EXTENSIONS": "OFF",
         "CMAKE_C_COMPILER": "clang",
-        "CMAKE_CXX_COMPILER": "clang++"
+        "CMAKE_CXX_COMPILER": "clang++",
+        "CMAKE_CXX_FLAGS": "-stdlib=libstdc++",
+        "CMAKE_EXE_LINKER_FLAGS": "-stdlib=libstdc++ -fuse-ld=lld",
+        "CMAKE_CXX_FLAGS_INIT": "-stdlib=libstdc++",
+        "CMAKE_EXE_LINKER_FLAGS_INIT": "-stdlib=libstdc++"
       }
     },
     {
@@ -21,7 +25,7 @@
       "binaryDir": "build/debug",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "CMAKE_CXX_FLAGS": "-Wall -g -Wextra -Weffc++ -Wno-unused-parameter -Wdeprecated-declarations -O0",
+        "CMAKE_CXX_FLAGS": "-Wall -g -Wextra -Weffc++ -Wno-unused-parameter -Wdeprecated-declarations -O0 -stdlib=libstdc++",
         "CMAKE_C_FLAGS": "-Wall -g -Wextra -Weffc++ -Wdeprecated-declarations -O0"
       }
     },
@@ -46,11 +50,8 @@
       "binaryDir": "build/release",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
-        "CMAKE_CXX_FLAGS": "-O3 -flto -march=native",
-        "CMAKE_C_FLAGS": "-O3 -flto -march=native",
-        "CMAKE_EXE_LINKER_FLAGS": "-fuse-ld=lld -Wl -O1",
-        "CMAKE_SHARED_LINKER_FLAGS": "-fuse-ld=lld -Wl -O1",
-        "CMAKE_MODULE_LINKER_FLAGS": "-fuse-ld=lld -Wl -O1"
+        "CMAKE_CXX_FLAGS": "-O3 -flto -march=native -stdlib=libstdc++",
+        "CMAKE_C_FLAGS": "-O3 -flto -march=native -stdlib=libstdc++"
       }
     },
     {
