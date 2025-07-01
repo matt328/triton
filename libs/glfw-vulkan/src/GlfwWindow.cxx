@@ -3,6 +3,8 @@
 #include "api/action/KeyMap.hpp"
 #include "api/fx/IEventQueue.hpp"
 #include "api/fx/IGuiAdapter.hpp"
+#include "IconData.hpp"
+#include "stb_image.h"
 
 #ifdef _WIN32
 #include <GLFW/glfw3native.h>
@@ -68,6 +70,18 @@ GlfwWindow::GlfwWindow(const WindowCreateInfo& createInfo,
                  rcClient.bottom - rcClient.top,
                  SWP_FRAMECHANGED);
 #endif
+
+    int height, width, channels;
+    auto* pixels =
+        stbi_load_from_memory(IconPng.data(), IconPng.size(), &width, &height, &channels, 4);
+
+    auto image = GLFWimage{
+        .width = width,
+        .height = height,
+        .pixels = pixels,
+    };
+
+    glfwSetWindowIcon(window, 1, &image);
 
     glfwSetWindowSizeLimits(window, MinWidth, MinHeight, GLFW_DONT_CARE, GLFW_DONT_CARE);
 
