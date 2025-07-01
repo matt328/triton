@@ -1,5 +1,6 @@
 #pragma once
 
+#include "buffers/ImageUploadPlan.hpp"
 #include "buffers/UploadPlan.hpp"
 #include "resources/TransferContext.hpp"
 #include "resources/allocators/IBufferAllocator.hpp"
@@ -30,7 +31,7 @@ public:
   auto operator=(const TransferSystem&) -> TransferSystem& = delete;
   auto operator=(TransferSystem&&) -> TransferSystem& = delete;
 
-  auto upload(UploadPlan& uploadPlan) -> void;
+  auto upload(UploadPlan& bufferPlan, ImageUploadPlan& imagePlan) -> void;
   auto enqueueResize(const ResizeRequest& resize) -> void;
   auto defragment(const DefragRequest& defrag) -> void;
 
@@ -47,7 +48,21 @@ private:
   TransferContext transferContext;
 
   auto checkSizes(const UploadPlan& uploadPlan) -> std::vector<ResizeRequest>;
-  auto processResizes(const std::vector<ResizeRequest>& resizeRequestList) -> void;
+  auto checkImageSizes(const ImageUploadPlan& imagePlan) -> std::vector<ResizeRequest>;
+
+  auto processResizes(const std::vector<ResizeRequest>& resizeRequestList,
+                      const std::vector<ResizeRequest>& imageResizeRequestList) -> void;
+
+  /// DstBuffer to BufferCopy2's into said buffer
+  using BufferCopyMap = std::unordered_map<Handle<ManagedBuffer>, std::vector<vk::BufferCopy2>>;
+
+  auto prepareBufferStagingData(const UploadPlan& bufferPlan) -> BufferCopyMap;
+  auto prepareImageStagingData(const ImageUploadPlan& imagePlan) -> void;
+
+  auto recordBufferUploads(const BufferCopyMap& bufferCopies) -> void;
+  auto recordImageUploads(const ImageUploadPlan& imagePlan) -> void;
+
+  auto submitAndWait() -> void;
 };
 
 }

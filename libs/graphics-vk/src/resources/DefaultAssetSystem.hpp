@@ -2,6 +2,7 @@
 
 #include "api/fx/Events.hpp"
 #include "as/StaticVertex.hpp"
+#include "buffers/ImageUploadPlan.hpp"
 #include "buffers/UploadPlan.hpp"
 #include "gfx/GeometryHandleMapper.hpp"
 #include "gfx/IAssetSystem.hpp"
@@ -54,6 +55,7 @@ private:
 
   auto handleStaticModelRequest(const StaticModelRequest& smRequest,
                                 UploadPlan& uploadPlan,
+                                ImageUploadPlan& imageUploadPlan,
                                 std::vector<StaticModelUploaded>& responses) -> void;
 
   auto handleStaticMeshRequest(const StaticMeshRequest& smRequest,
@@ -64,7 +66,7 @@ private:
   /// this method is unnecessary, but just convert it here for now.
   auto deInterleave(const std::vector<as::StaticVertex>& vertices,
                     const std::vector<uint32_t>& indexData) -> std::unique_ptr<GeometryData>;
-  static auto fromImageData(const as::ImageData& imageData) -> std::vector<UploadData>;
+  static auto fromImageData(const as::ImageData& imageData) -> std::vector<ImageUploadData>;
 };
 
 }

@@ -4,6 +4,7 @@
 #include "as/Model.hpp"
 #include "bk/ThreadName.hpp"
 #include "buffers/BufferSystem.hpp"
+#include "buffers/ImageUploadPlan.hpp"
 #include "buffers/UploadPlan.hpp"
 #include "r3/GeometryBufferPack.hpp"
 #include "resources/ByteConverters.hpp"
@@ -84,13 +85,16 @@ auto DefaultAssetSystem::requestStop() -> void {
 auto DefaultAssetSystem::handleEndResourceBatch(uint64_t batchId) -> void {
   ZoneScoped;
   auto uploadPlan = UploadPlan{.stagingBuffer = transferSystem->getTransferContext().stagingBuffer};
+  auto imageUploadPlan =
+      ImageUploadPlan{.stagingBuffer = transferSystem->getTransferContext().imageStagingBuffer};
+
   std::vector<StaticModelUploaded> responses{};
 
   for (auto& eventVariant : eventBatches[batchId]) {
     auto visitor = [&](auto&& arg) -> void {
       using T = std::decay_t<decltype(arg)>;
       if constexpr (std::is_same_v<T, StaticModelRequest>) {
-        handleStaticModelRequest(arg, uploadPlan, responses);
+        handleStaticModelRequest(arg, uploadPlan, imageUploadPlan, responses);
       }
       if constexpr (std::is_same_v<T, StaticMeshRequest>) {
         handleStaticMeshRequest(arg, uploadPlan, responses);
@@ -102,7 +106,7 @@ auto DefaultAssetSystem::handleEndResourceBatch(uint64_t batchId) -> void {
     std::visit(visitor, *eventVariant);
   }
 
-  transferSystem->upload(uploadPlan);
+  transferSystem->upload(uploadPlan, imageUploadPlan);
 
   for (const auto& response : responses) {
     eventQueue->emit(response);
@@ -111,6 +115,7 @@ auto DefaultAssetSystem::handleEndResourceBatch(uint64_t batchId) -> void {
 
 auto DefaultAssetSystem::handleStaticModelRequest(const StaticModelRequest& smRequest,
                                                   UploadPlan& uploadPlan,
+                                                  ImageUploadPlan& imageUploadPlan,
                                                   std::vector<StaticModelUploaded>& responses)
     -> void {
   ZoneScoped;
@@ -131,9 +136,9 @@ auto DefaultAssetSystem::handleStaticModelRequest(const StaticModelRequest& smRe
 
   uploadPlan.uploads.insert(uploadPlan.uploads.end(), uploads.begin(), uploads.end());
   const auto imageUploadData = fromImageData(model.imageData);
-  uploadPlan.uploads.insert(uploadPlan.uploads.end(),
-                            imageUploadData.begin(),
-                            imageUploadData.end());
+  imageUploadPlan.uploads.insert(imageUploadPlan.uploads.end(),
+                                 imageUploadData.begin(),
+                                 imageUploadData.end());
 }
 
 auto DefaultAssetSystem::handleStaticMeshRequest(const StaticMeshRequest& smRequest,
@@ -188,7 +193,7 @@ auto DefaultAssetSystem::deInterleave(const std::vector<as::StaticVertex>& verti
 }
 
 auto DefaultAssetSystem::fromImageData([[maybe_unused]] const as::ImageData& imageData)
-    -> std::vector<UploadData> {
+    -> std::vector<ImageUploadData> {
   return {};
 }
 

@@ -27,18 +27,43 @@ TransferSystem::TransferSystem(std::shared_ptr<BufferSystem> newBufferSystem,
                                                     .initialSize = StagingBufferSize,
                                                     .debugName = "Buffer-GeometryStaging"});
   transferContext.stagingAllocator = std::make_unique<LinearAllocator>(StagingBufferSize);
+
+  transferContext.imageStagingBuffer =
+      bufferSystem->registerBuffer(BufferCreateInfo{.bufferLifetime = BufferLifetime::Transient,
+                                                    .bufferUsage = BufferUsage::Transfer,
+                                                    .initialSize = StagingBufferSize,
+                                                    .debugName = "Buffer-ImageStaging"});
+  transferContext.imageStagingAllocator = std::make_unique<LinearAllocator>(StagingBufferSize);
 }
 
-auto TransferSystem::upload(UploadPlan& uploadPlan) -> void {
+auto TransferSystem::upload(UploadPlan& bufferPlan, ImageUploadPlan& imagePlan) -> void {
   ZoneScoped;
-  uploadPlan.sortByBuffer();
-  const auto resizeList = checkSizes(uploadPlan);
-  if (!resizeList.empty()) {
-    processResizes(resizeList);
-  }
-  std::unordered_map<Handle<ManagedBuffer>, std::vector<vk::BufferCopy2>> bufferCopies{};
+  bufferPlan.sortByBuffer();
 
-  for (const auto& upload : uploadPlan.uploads) {
+  auto bufferResizes = checkSizes(bufferPlan);
+  auto imageResizes = checkImageSizes(imagePlan);
+
+  processResizes(bufferResizes, imageResizes);
+
+  auto bufferCopies = prepareBufferStagingData(bufferPlan);
+  auto imageCopies = prepareImageStagingData(imagePlan);
+
+  commandBuffer->begin({.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
+
+  recordBufferUploads(bufferCopies);
+  recordImageUploads(imageCopies);
+
+  commandBuffer->end();
+
+  submitAndWait();
+
+  transferContext.stagingAllocator.reset();
+  transferContext.imageStagingAllocator.reset();
+}
+
+auto TransferSystem::prepareBufferStagingData(const UploadPlan& bufferPlan) -> BufferCopyMap {
+  auto bufferCopies = BufferCopyMap{};
+  for (const auto& upload : bufferPlan.uploads) {
     Log.trace("Copying into staging buffer offset={}, size={}, dstBuffer={}",
               upload.stagingOffset,
               upload.dataSize,
@@ -57,11 +82,10 @@ auto TransferSystem::upload(UploadPlan& uploadPlan) -> void {
               upload.dstBuffer.id);
     bufferCopies[upload.dstBuffer].push_back(region);
   }
+  return bufferCopies;
+}
 
-  constexpr vk::CommandBufferBeginInfo cmdBeginInfo{
-      .flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit};
-  commandBuffer->begin(cmdBeginInfo);
-
+auto TransferSystem::recordBufferUploads(const BufferCopyMap& bufferCopies) -> void {
   for (const auto& [dstHandle, regions] : bufferCopies) {
     const auto srcBuffer = bufferSystem->getVkBuffer(transferContext.stagingBuffer);
     const auto dstBuffer = bufferSystem->getVkBuffer(dstHandle);
@@ -81,9 +105,12 @@ auto TransferSystem::upload(UploadPlan& uploadPlan) -> void {
       }
     }
   }
+}
 
-  commandBuffer->end();
+auto TransferSystem::recordImageUploads(const ImageUploadPlan& imagePlan) -> void {
+}
 
+auto TransferSystem::submitAndWait() -> void {
   const auto submitInfo =
       vk::SubmitInfo{.commandBufferCount = 1, .pCommandBuffers = &**commandBuffer};
 
@@ -94,7 +121,6 @@ auto TransferSystem::upload(UploadPlan& uploadPlan) -> void {
     Log.warn("Timeout waiting for fence during asnyc submit");
   }
   device->getVkDevice().resetFences(**fence);
-  transferContext.stagingAllocator.reset();
 }
 
 auto TransferSystem::getTransferContext() -> TransferContext& {
@@ -113,8 +139,14 @@ auto TransferSystem::checkSizes([[maybe_unused]] const UploadPlan& uploadPlan)
   return {};
 }
 
+auto TransferSystem::checkImageSizes(const ImageUploadPlan& imagePlan)
+    -> std::vector<ResizeRequest> {
+  return {};
+}
+
 auto TransferSystem::processResizes(
-    [[maybe_unused]] const std::vector<ResizeRequest>& resizeRequestList) -> void {
+    [[maybe_unused]] const std::vector<ResizeRequest>& resizeRequestList,
+    [[maybe_unused]] const std::vector<ResizeRequest>& imageResizeRequestList) -> void {
 }
 
 }
