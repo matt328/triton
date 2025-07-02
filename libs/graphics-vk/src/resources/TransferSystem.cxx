@@ -1,7 +1,9 @@
 #include "TransferSystem.hpp"
+#include "ImageTransitionQueue.hpp"
 #include "api/gfx/GpuMaterialData.hpp"
 #include "buffers/BufferSystem.hpp"
 #include "gfx/QueueTypes.hpp"
+#include "img/ImageManager.hpp"
 #include "resources/ByteConverters.hpp"
 #include "resources/allocators/LinearAllocator.hpp"
 #include "vk/command-buffer/CommandBufferManager.hpp"
@@ -13,10 +15,16 @@ constexpr size_t StagingBufferSize = 183886080;
 TransferSystem::TransferSystem(std::shared_ptr<BufferSystem> newBufferSystem,
                                std::shared_ptr<Device> newDevice,
                                std::shared_ptr<queue::Transfer> newTransferQueue,
+                               std::shared_ptr<queue::Graphics> newGraphicsQueue,
+                               std::shared_ptr<ImageManager> newImageManager,
+                               std::shared_ptr<ImageTransitionQueue> newImageQueue,
                                const std::shared_ptr<CommandBufferManager>& commandBufferManager)
     : bufferSystem{std::move(newBufferSystem)},
       device{std::move(newDevice)},
       transferQueue{std::move(newTransferQueue)},
+      graphicsQueue{std::move(newGraphicsQueue)},
+      imageManager{std::move(newImageManager)},
+      imageQueue{std::move(newImageQueue)},
       commandBuffer{std::make_unique<vk::raii::CommandBuffer>(
           commandBufferManager->getTransferCommandBuffer())},
       fence(std::make_unique<vk::raii::Fence>(
@@ -39,6 +47,7 @@ TransferSystem::TransferSystem(std::shared_ptr<BufferSystem> newBufferSystem,
 auto TransferSystem::upload(UploadPlan& bufferPlan, ImageUploadPlan& imagePlan) -> void {
   ZoneScoped;
   bufferPlan.sortByBuffer();
+  transitionBatch = std::vector<ImageTransitionInfo>{};
 
   auto bufferResizes = checkSizes(bufferPlan);
   auto imageResizes = checkImageSizes(imagePlan);
@@ -85,6 +94,28 @@ auto TransferSystem::prepareBufferStagingData(const UploadPlan& bufferPlan) -> B
   return bufferCopies;
 }
 
+auto TransferSystem::prepareImageStagingData(const ImageUploadPlan& imagePlan) -> ImageCopyMap {
+  auto imageCopies = ImageCopyMap{};
+  for (const auto& imageUpload : imagePlan.uploads) {
+
+    const auto region = bufferSystem->insert(
+        transferContext.imageStagingBuffer,
+        imageUpload.data->data(),
+        BufferRegion{.offset = imageUpload.stagingBufferOffset, .size = imageUpload.dataSize});
+
+    const auto copyInfo = vk::BufferImageCopy2{
+        .bufferOffset = region->offset,
+        .bufferRowLength = 0,
+        .bufferImageHeight = 0,
+        .imageSubresource = imageUpload.subresource,
+        .imageOffset = imageUpload.imageOffset,
+        .imageExtent = imageUpload.imageExtent,
+    };
+    imageCopies.emplace(imageUpload.dstImage, std::vector<vk::BufferImageCopy2>{copyInfo});
+  }
+  return imageCopies;
+}
+
 auto TransferSystem::recordBufferUploads(const BufferCopyMap& bufferCopies) -> void {
   for (const auto& [dstHandle, regions] : bufferCopies) {
     const auto srcBuffer = bufferSystem->getVkBuffer(transferContext.stagingBuffer);
@@ -107,7 +138,62 @@ auto TransferSystem::recordBufferUploads(const BufferCopyMap& bufferCopies) -> v
   }
 }
 
-auto TransferSystem::recordImageUploads(const ImageUploadPlan& imagePlan) -> void {
+auto TransferSystem::recordImageUploads(const ImageCopyMap& imageCopies) -> void {
+  const auto srcBuffer = bufferSystem->getVkBuffer(transferContext.imageStagingBuffer);
+  for (const auto& [dstImageHandle, regions] : imageCopies) {
+    const auto& dstImage = imageManager->getImage(dstImageHandle);
+    vk::ImageMemoryBarrier2 imageBarrier = {
+        .srcStageMask = vk::PipelineStageFlagBits2::eTopOfPipe,
+        .srcAccessMask = vk::AccessFlagBits2::eNone,
+        .dstStageMask = vk::PipelineStageFlagBits2::eCopy,
+        .dstAccessMask = vk::AccessFlagBits2::eTransferWrite,
+        .oldLayout = vk::ImageLayout::eUndefined,
+        .newLayout = vk::ImageLayout::eTransferDstOptimal,
+        .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+        .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+        .image = dstImage.getImage(),
+        .subresourceRange = {.aspectMask = vk::ImageAspectFlagBits::eColor,
+                             .baseMipLevel = 0,
+                             .levelCount = 1,
+                             .baseArrayLayer = 0,
+                             .layerCount = 1}};
+
+    commandBuffer->pipelineBarrier2(
+        {.imageMemoryBarrierCount = 1, .pImageMemoryBarriers = &imageBarrier});
+    commandBuffer->copyBufferToImage2({.srcBuffer = *srcBuffer.value(),
+                                       .dstImage = dstImage.getImage(),
+                                       .dstImageLayout = vk::ImageLayout::eTransferDstOptimal,
+                                       .regionCount = static_cast<uint32_t>(regions.size()),
+                                       .pRegions = regions.data()});
+    vk::ImageMemoryBarrier2 releaseBarrier{
+        .srcStageMask = vk::PipelineStageFlagBits2::eTransfer,
+        .srcAccessMask = vk::AccessFlagBits2::eTransferWrite,
+        .oldLayout = vk::ImageLayout::eTransferDstOptimal,
+        .newLayout = vk::ImageLayout::eTransferDstOptimal, // layout stays the same
+        .srcQueueFamilyIndex = transferQueue->getFamily(),
+        .dstQueueFamilyIndex = graphicsQueue->getFamily(),
+        .image = dstImage.getImage(),
+        .subresourceRange = vk::ImageSubresourceRange{
+            .aspectMask = regions.front().imageSubresource.aspectMask,
+            .baseMipLevel = regions.front().imageSubresource.mipLevel,
+            .levelCount = 1,
+            .baseArrayLayer = regions.front().imageSubresource.baseArrayLayer,
+            .layerCount = regions.front().imageSubresource.layerCount,
+        }};
+    commandBuffer->pipelineBarrier2(
+        {.imageMemoryBarrierCount = 1, .pImageMemoryBarriers = &releaseBarrier});
+    transitionBatch.push_back(
+        ImageTransitionInfo{.image = dstImage.getImage(),
+                            .oldLayout = vk::ImageLayout::eTransferDstOptimal,
+                            .newLayout = vk::ImageLayout::eShaderReadOnlyOptimal,
+                            .subresourceRange = {
+                                .aspectMask = regions.front().imageSubresource.aspectMask,
+                                .baseMipLevel = regions.front().imageSubresource.mipLevel,
+                                .levelCount = 1,
+                                .baseArrayLayer = regions.front().imageSubresource.baseArrayLayer,
+                                .layerCount = regions.front().imageSubresource.layerCount,
+                            }});
+  }
 }
 
 auto TransferSystem::submitAndWait() -> void {
@@ -120,6 +206,10 @@ auto TransferSystem::submitAndWait() -> void {
       result != vk::Result::eSuccess) {
     Log.warn("Timeout waiting for fence during asnyc submit");
   }
+
+  // Add all the images that were uploaded to the queue here
+  imageQueue->enqueue(transitionBatch);
+
   device->getVkDevice().resetFences(**fence);
 }
 

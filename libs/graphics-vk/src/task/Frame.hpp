@@ -1,4 +1,5 @@
 #pragma once
+#include "ImageTransitionQueue.hpp"
 #include "api/gw/editordata/EditorState.hpp"
 #include "bk/Handle.hpp"
 #include "buffers/ManagedBuffer.hpp"
@@ -61,11 +62,6 @@ public:
   [[nodiscard]] auto getRenderingInfo() const -> vk::RenderingInfo;
   [[nodiscard]] auto getDrawImageExtent() const -> vk::Extent2D;
 
-  [[nodiscard]] auto getStaticObjectCount() const -> uint32_t;
-  [[nodiscard]] auto getDynamicObjectCount() const -> uint32_t;
-  [[nodiscard]] auto getTerrainChunkCount() const -> uint32_t;
-  [[nodiscard]] auto getDebugObjectCount() const -> uint32_t;
-
   [[nodiscard]] auto getObjectCount() const -> uint32_t;
 
   [[nodiscard]] auto getBufferHandle(BufferHandleType type) const -> BufferHandle;
@@ -103,11 +99,6 @@ public:
   auto setSwapchainImageIndex(uint32_t index) -> void;
   auto setDrawImageExtent(vk::Extent2D extent) -> void;
 
-  auto setStaticObjectCount(uint32_t newObjectCount) -> void;
-  auto setDynamicObjectCount(uint32_t newObjectCount) -> void;
-  auto setTerrainChunkCount(uint32_t newObjectCount) -> void;
-  auto setDebugObjectCount(uint32_t newDebugObjectCount) -> void;
-
   auto setObjectCount(uint32_t newObjectCount) -> void;
 
   auto setLastImageUse(ImageAlias imageAlias, LastImageUse lastImageUse) -> void;
@@ -118,6 +109,9 @@ public:
 
   auto setEditorState(std::optional<EditorState> newState) -> void;
   auto getEditorState() const -> std::optional<EditorState>;
+
+  auto setImageTransitionInfo(const std::vector<ImageTransitionInfo>& transitionInfo) -> void;
+  auto getImageTransitionInfo() -> std::vector<ImageTransitionInfo>;
 
 private:
   uint8_t index;
@@ -140,10 +134,7 @@ private:
   std::unordered_map<ImageAlias, LastImageUse> lastImageUses;
   std::unordered_map<BufferAliasVariant, LastBufferUse> lastBufferUses;
 
-  uint32_t staticObjectCount;
-  uint32_t dynamicObjectCount;
-  uint32_t terrainChunkCount;
-  uint32_t debugObjectCount;
+  std::vector<ImageTransitionInfo> imageTransitionInfo;
 
   uint32_t objectCount;
   std::optional<EditorState> editorState;

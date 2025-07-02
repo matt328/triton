@@ -26,11 +26,17 @@ void GltfTextureExtractor::execute(const tinygltf::Model& model,
     imageData[3] = 255; // Alpha
 
     image.image = std::move(imageData);
-    tritonModel.imageData = ImageData{image.image, image.width, image.height, image.component};
+    tritonModel.imageData = ImageData{.data = image.image,
+                                      .width = image.width,
+                                      .height = image.height,
+                                      .component = image.component};
   } else {
     const auto& texture = model.textures[textureIndex];
     const auto& image = model.images[texture.source];
-    tritonModel.imageData = ImageData{image.image, image.width, image.height, image.component};
+    tritonModel.imageData = ImageData{.data = image.image,
+                                      .width = image.width,
+                                      .height = image.height,
+                                      .component = image.component};
   }
 }
 }

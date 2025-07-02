@@ -5,7 +5,6 @@ set(graphicsvk_SRC
   src/buffers/BufferSystem.cxx
 
   src/img/ImageManager.cxx
-  src/img/ImageRegistry.cxx
 
   src/mem/Allocator.cxx
   src/mem/Buffer.cxx
@@ -63,6 +62,7 @@ set(graphicsvk_SRC
   src/VkGraphicsContext.cxx
   src/DefaultDebugManager.cxx
   src/NoopDebugManager.cxx
+  src/ImageTransitionQueue.cxx
 )
 
 add_library(${PROJECT_NAME} STATIC ${graphicsvk_SRC})

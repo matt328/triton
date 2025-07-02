@@ -16,6 +16,7 @@ class BufferSystem;
 class GeometryBufferPack;
 class TransferSystem;
 class GeometryAllocator;
+class ImageManager;
 
 constexpr uint32_t MaxBatchSize = 5;
 
@@ -27,7 +28,8 @@ public:
                               std::shared_ptr<GeometryBufferPack> newGeometryBufferPack,
                               std::shared_ptr<TransferSystem> newTransferSystem,
                               std::shared_ptr<GeometryAllocator> newGeometryAllocator,
-                              std::shared_ptr<GeometryHandleMapper> newGeometryHandleMapper);
+                              std::shared_ptr<GeometryHandleMapper> newGeometryHandleMapper,
+                              std::shared_ptr<ImageManager> newImageManager);
   ~DefaultAssetSystem() override;
 
   DefaultAssetSystem(const DefaultAssetSystem&) = delete;
@@ -46,6 +48,7 @@ private:
   std::shared_ptr<TransferSystem> transferSystem;
   std::shared_ptr<GeometryAllocator> geometryAllocator;
   std::shared_ptr<GeometryHandleMapper> geometryHandleMapper;
+  std::shared_ptr<ImageManager> imageManager;
 
   std::jthread thread;
 
@@ -66,7 +69,9 @@ private:
   /// this method is unnecessary, but just convert it here for now.
   auto deInterleave(const std::vector<as::StaticVertex>& vertices,
                     const std::vector<uint32_t>& indexData) -> std::unique_ptr<GeometryData>;
-  static auto fromImageData(const as::ImageData& imageData) -> std::vector<ImageUploadData>;
+  auto fromImageData(const as::ImageData& imageData) -> std::vector<ImageUploadData>;
+
+  static auto getVkFormat(int bits, int component) -> vk::Format;
 };
 
 }

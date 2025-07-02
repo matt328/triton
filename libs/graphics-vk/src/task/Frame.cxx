@@ -47,22 +47,6 @@ auto Frame::getSwapchainImageIndex() const noexcept -> uint32_t {
   return swapchainImageIndex;
 }
 
-auto Frame::getStaticObjectCount() const -> uint32_t {
-  return staticObjectCount;
-}
-
-auto Frame::getDynamicObjectCount() const -> uint32_t {
-  return dynamicObjectCount;
-}
-
-auto Frame::getTerrainChunkCount() const -> uint32_t {
-  return terrainChunkCount;
-}
-
-auto Frame::getDebugObjectCount() const -> uint32_t {
-  return debugObjectCount;
-}
-
 auto Frame::getObjectCount() const -> uint32_t {
   return objectCount;
 }
@@ -151,22 +135,6 @@ auto Frame::addLogicalShaderBinding(LogicalHandle<IShaderBinding> logicalHandle,
 
 auto Frame::setSwapchainImageIndex(const uint32_t index) -> void {
   swapchainImageIndex = index;
-}
-
-auto Frame::setStaticObjectCount(uint32_t newObjectCount) -> void {
-  staticObjectCount = newObjectCount;
-}
-
-auto Frame::setDynamicObjectCount(uint32_t newObjectCount) -> void {
-  dynamicObjectCount = newObjectCount;
-}
-
-auto Frame::setTerrainChunkCount(uint32_t newObjectCount) -> void {
-  terrainChunkCount = newObjectCount;
-}
-
-auto Frame::setDebugObjectCount(uint32_t newDebugObjectCount) -> void {
-  debugObjectCount = newDebugObjectCount;
 }
 
 auto Frame::setObjectCount(uint32_t newObjectCount) -> void {

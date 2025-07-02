@@ -22,7 +22,6 @@
 #include "vk/core/PhysicalDevice.hpp"
 #include "vk/sb/DSLayoutManager.hpp"
 #include "vk/sb/DSShaderBindingFactory.hpp"
-#include "img/ImageRegistry.hpp"
 #include "img/ImageManager.hpp"
 #include "r3/render-pass/RenderPassFactory.hpp"
 #include "r3/R3Renderer.hpp"

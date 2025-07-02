@@ -15,10 +15,12 @@ class SerializationException final : public tr::BaseException {
 
 class ImageData {
 public:
+  // TODO(Matt): change this to a std::vector<std::byte> at some point
   std::vector<unsigned char> data{};
   int width{};
   int height{};
   int component{};
+  int bits{8};
   template <class Archive>
   void serialize(Archive& archive) {
     archive(data, width, height, component);

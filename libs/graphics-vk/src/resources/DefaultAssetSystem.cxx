@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "DefaultAssetSystem.hpp"
 #include "api/fx/IAssetService.hpp"
 #include "api/fx/IEventQueue.hpp"
@@ -6,6 +8,8 @@
 #include "buffers/BufferSystem.hpp"
 #include "buffers/ImageUploadPlan.hpp"
 #include "buffers/UploadPlan.hpp"
+#include "img/ImageManager.hpp"
+#include "img/ImageRequest.hpp"
 #include "r3/GeometryBufferPack.hpp"
 #include "resources/ByteConverters.hpp"
 #include "resources/TransferSystem.hpp"
@@ -20,14 +24,16 @@ DefaultAssetSystem::DefaultAssetSystem(
     std::shared_ptr<GeometryBufferPack> newGeometryBufferPack,
     std::shared_ptr<TransferSystem> newTransferSystem,
     std::shared_ptr<GeometryAllocator> newGeometryAllocator,
-    std::shared_ptr<GeometryHandleMapper> newGeometryHandleMapper)
+    std::shared_ptr<GeometryHandleMapper> newGeometryHandleMapper,
+    std::shared_ptr<ImageManager> newImageManager)
     : eventQueue{std::move(newEventQueue)},
       assetService{std::move(newAssetService)},
       bufferSystem{std::move(newBufferSystem)},
       geometryBufferPack{std::move(newGeometryBufferPack)},
       transferSystem{std::move(newTransferSystem)},
       geometryAllocator{std::move(newGeometryAllocator)},
-      geometryHandleMapper{std::move(newGeometryHandleMapper)} {
+      geometryHandleMapper{std::move(newGeometryHandleMapper)},
+      imageManager{std::move(newImageManager)} {
   Log.trace("Constructing DefaultAssetSystem");
 }
 
@@ -135,6 +141,7 @@ auto DefaultAssetSystem::handleStaticModelRequest(const StaticModelRequest& smRe
   });
 
   uploadPlan.uploads.insert(uploadPlan.uploads.end(), uploads.begin(), uploads.end());
+
   const auto imageUploadData = fromImageData(model.imageData);
   imageUploadPlan.uploads.insert(imageUploadPlan.uploads.end(),
                                  imageUploadData.begin(),
@@ -194,7 +201,82 @@ auto DefaultAssetSystem::deInterleave(const std::vector<as::StaticVertex>& verti
 
 auto DefaultAssetSystem::fromImageData([[maybe_unused]] const as::ImageData& imageData)
     -> std::vector<ImageUploadData> {
-  return {};
+  auto uploadDataList = std::vector<ImageUploadData>{};
+
+  auto data = std::vector<std::byte>{};
+  data.resize(imageData.data.size());
+  std::ranges::transform(imageData.data, data.begin(), [](unsigned char c) {
+    return static_cast<std::byte>(c);
+  });
+
+  const auto imageHandle = imageManager->createImage({
+      .logicalName = "ModelTexture",
+      .format = getVkFormat(imageData.bits, imageData.component),
+      .extent =
+          vk::Extent2D{
+              .width = static_cast<uint32_t>(imageData.width),
+              .height = static_cast<uint32_t>(imageData.height),
+          },
+      .usageFlags = vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferDst,
+      .aspectFlags = vk::ImageAspectFlagBits::eColor,
+  });
+
+  auto stagingBufferOffset =
+      transferSystem->getTransferContext().imageStagingAllocator->allocate({.size = data.size()});
+
+  uploadDataList.push_back(ImageUploadData{
+      .data = std::make_shared<std::vector<std::byte>>(data),
+      .dataSize = data.size(),
+      .dstImage = imageHandle,
+      .subresource = vk::ImageSubresourceLayers{.aspectMask = vk::ImageAspectFlagBits::eColor,
+                                                .mipLevel = 0,
+                                                .baseArrayLayer = 0,
+                                                .layerCount = 1},
+      .imageExtent = vk::Extent3D{.width = static_cast<uint32_t>(imageData.width),
+                                  .height = static_cast<uint32_t>(imageData.height),
+                                  .depth = 1},
+      .stagingBufferOffset = stagingBufferOffset->offset});
+
+  return uploadDataList;
 }
 
+auto DefaultAssetSystem::getVkFormat(int bits, int component) -> vk::Format {
+  if (bits == 8) {
+    switch (component) {
+      case 1:
+        return vk::Format::eR8Unorm;
+      case 2:
+        return vk::Format::eR8G8Unorm;
+      case 3:
+        return vk::Format::eR8G8B8Unorm;
+      case 4:
+        return vk::Format::eR8G8B8A8Unorm;
+    }
+  } else if (bits == 16) {
+    switch (component) {
+      case 1:
+        return vk::Format::eR16Unorm;
+      case 2:
+        return vk::Format::eR16G16Unorm;
+      case 3:
+        return vk::Format::eR16G16B16Unorm;
+      case 4:
+        return vk::Format::eR16G16B16A16Unorm;
+    }
+  } else if (bits == 32) {
+    switch (component) {
+      case 1:
+        return vk::Format::eR32Sfloat;
+      case 2:
+        return vk::Format::eR32G32Sfloat;
+      case 3:
+        return vk::Format::eR32G32B32Sfloat;
+      case 4:
+        return vk::Format::eR32G32B32A32Sfloat;
+    }
+  }
+
+  throw std::runtime_error("Unsupported image format: component=" + std::to_string(component) +
+                           ", bits=" + std::to_string(bits));
+}
 }
