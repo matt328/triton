@@ -7,6 +7,7 @@
 #include "gfx/IFrameManager.hpp"
 #include "gfx/QueueTypes.hpp"
 #include "img/ImageManager.hpp"
+#include "img/TextureArena.hpp"
 #include "r3/GeometryBufferPack.hpp"
 #include "r3/draw-context/ContextFactory.hpp"
 #include "r3/draw-context/IDispatchContext.hpp"
@@ -16,7 +17,7 @@
 #include "r3/render-pass/passes/PresentPass.hpp"
 #include "resources/allocators/GeometryAllocator.hpp"
 #include "task/Frame.hpp"
-#include "gfx/GeometryHandleMapper.hpp"
+#include "gfx/HandleMapperTypes.hpp"
 #include "ComponentIds.hpp"
 #include "vk/command-buffer/CommandBufferManager.hpp"
 #include "vk/sb/DSLayoutManager.hpp"
@@ -51,7 +52,10 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
                        std::shared_ptr<ResourceAliasRegistry> newAliasRegistry,
                        std::shared_ptr<IShaderBindingFactory> newShaderBindingFactory,
                        std::shared_ptr<DSLayoutManager> newLayoutManager,
-                       std::shared_ptr<EditorStateBuffer> newEditorStateBuffer)
+                       std::shared_ptr<EditorStateBuffer> newEditorStateBuffer,
+                       std::shared_ptr<ImageTransitionQueue> newImageQueue,
+                       std::shared_ptr<TextureHandleMapper> newTextureHandleMapper,
+                       std::shared_ptr<TextureArena> newTextureArena)
     : rendererConfig{newRenderConfig},
       frameManager{std::move(newFrameManager)},
       graphicsQueue{std::move(newGraphicsQueue)},
@@ -70,7 +74,10 @@ R3Renderer::R3Renderer(RenderContextConfig newRenderConfig,
       aliasRegistry{std::move(newAliasRegistry)},
       shaderBindingFactory{std::move(newShaderBindingFactory)},
       layoutManager{std::move(newLayoutManager)},
-      editorStateBuffer{std::move(newEditorStateBuffer)} {
+      editorStateBuffer{std::move(newEditorStateBuffer)},
+      imageQueue{std::move(newImageQueue)},
+      textureHandleMapper{std::move(newTextureHandleMapper)},
+      textureArena{std::move(newTextureArena)} {
   Log.trace("Constructing R3Renderer");
 
   createGlobalBuffers();
@@ -196,6 +203,10 @@ auto R3Renderer::createGlobalBuffers() -> void {
                        .debugName = "Buffer-GeometryRegion"});
   aliasRegistry->setHandle(BufferAlias::GeometryRegion, globalBuffers.geometryRegion);
 
+  globalBuffers.materials = bufferSystem->registerPerFrameBuffer(
+      {.bufferLifetime = BufferLifetime::Transient, .debugName = "Buffer-Materials"});
+  aliasRegistry->setHandle(BufferAlias::Materials, globalBuffers.materials);
+
   globalBuffers.frameData = bufferSystem->registerPerFrameBuffer(BufferCreateInfo{
       .bufferLifetime = BufferLifetime::Transient,
       .bufferUsage = BufferUsage::Storage,
@@ -219,7 +230,8 @@ auto R3Renderer::createGlobalImages() -> void {
       .extent = vk::Extent2D{.width = rendererConfig.initialWidth,
                              .height = rendererConfig.initialHeight},
       .usageFlags = vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled,
-      .aspectFlags = vk::ImageAspectFlagBits::eColor});
+      .aspectFlags = vk::ImageAspectFlagBits::eColor,
+      .debugName = "forward"});
 
   globalImages.imguiColorImage = imageManager->createPerFrameImage(ImageRequest{
       .logicalName = "imgui",
@@ -227,7 +239,8 @@ auto R3Renderer::createGlobalImages() -> void {
       .extent = vk::Extent2D{.width = rendererConfig.initialWidth,
                              .height = rendererConfig.initialHeight},
       .usageFlags = vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled,
-      .aspectFlags = vk::ImageAspectFlagBits::eColor});
+      .aspectFlags = vk::ImageAspectFlagBits::eColor,
+      .debugName = "imgui"});
 
   // TODO(renderer-1): fix depth image, handle non-per frame images
   globalImages.forwardDepthImage = imageManager->createPerFrameImage(
@@ -236,7 +249,8 @@ auto R3Renderer::createGlobalImages() -> void {
                    .extent = vk::Extent2D{.width = rendererConfig.initialWidth,
                                           .height = rendererConfig.initialHeight},
                    .usageFlags = vk::ImageUsageFlagBits::eDepthStencilAttachment,
-                   .aspectFlags = vk::ImageAspectFlagBits::eDepth});
+                   .aspectFlags = vk::ImageAspectFlagBits::eDepth,
+                   .debugName = "depth"});
 
   aliasRegistry->setHandle(ImageAlias::SwapchainImage, imageManager->getSwapchainImageHandle());
 
@@ -287,6 +301,7 @@ void R3Renderer::renderNextFrame() {
   if (states != std::nullopt) {
     auto& current = (*states).first;
 
+    textureArena->updateShaderBindings(frame);
     buildFrameState(current.objectMetadata, current.stateHandles, geometryRegionContents);
 
     {
@@ -333,6 +348,9 @@ void R3Renderer::renderNextFrame() {
               bufferSystem->getBufferAddress(geometryBufferPack->getTexCoordBuffer()).value_or(0L),
           .normalBufferAddress =
               bufferSystem->getBufferAddress(geometryBufferPack->getNormalBuffer()).value_or(0L),
+          .materialBufferAddress =
+              bufferSystem->getBufferAddress(frame->getLogicalBuffer(globalBuffers.materials))
+                  .value_or(0L),
           .indirectCommandAddress =
               bufferSystem->getBufferAddress(frame->getLogicalBuffer(globalBuffers.drawCommands))
                   .value_or(0L),
@@ -350,6 +368,14 @@ void R3Renderer::renderNextFrame() {
             frame->getLogicalBuffer(globalBuffers.geometryRegion),
             geometryRegionContents.data(),
             BufferRegion{.size = sizeof(GpuGeometryRegionData) * geometryRegionContents.size()});
+      }
+
+      // MaterialDataBuffer
+      if (!materialDataContents.empty()) {
+        bufferSystem->insert(
+            frame->getLogicalBuffer(globalBuffers.materials),
+            materialDataContents.data(),
+            BufferRegion{.size = sizeof(GpuMaterialData) * materialDataContents.size()});
       }
 
       // Object Data Buffers
@@ -377,6 +403,7 @@ void R3Renderer::renderNextFrame() {
                              BufferRegion{.size = sizeof(GpuScaleData) * current.scales.size()});
       }
       // Set host values in frame
+      frame->setImageTransitionInfo(imageQueue->dequeue());
       frame->setObjectCount(current.objectMetadata.size());
     }
   } else {
@@ -394,10 +421,19 @@ auto R3Renderer::buildFrameState(std::vector<GpuObjectData>& objectData,
   ZoneScopedN("R3Renderer::buildFrameState");
   regionBuffer.clear();
   regionBuffer.reserve(objectData.size());
+
+  materialDataContents.clear();
+
   for (size_t i = 0; i < objectData.size(); ++i) {
     auto regionHandle = geometryHandleMapper->toInternal(stateHandles[i].geometryHandle);
     auto regionData = geometryAllocator->getRegionData(*regionHandle);
     objectData[i].geometryRegionId = regionBuffer.size();
+    if (stateHandles[i].textureHandle) {
+      auto textureHandle = textureHandleMapper->toInternal(*stateHandles[i].textureHandle);
+      auto textureId = textureArena->getTextureIndex(*textureHandle);
+      materialDataContents.push_back(
+          GpuMaterialData{.baseColor = {1.f, 0.f, 0.f, 1.f}, .albedoTextureId = textureId});
+    }
     regionBuffer.push_back(regionData);
   }
 }
@@ -477,7 +513,8 @@ auto R3Renderer::createForwardRenderPass() -> std::unique_ptr<IRenderPass> {
   auto forwardPass = renderPassFactory->createRenderPass(RenderPassCreateInfo{
       .passId = PassId::Forward,
       .passInfo = ForwardPassCreateInfo{.colorImage = ImageAlias::GeometryColorImage,
-                                        .depthImage = ImageAlias::DepthImage}});
+                                        .depthImage = ImageAlias::DepthImage,
+                                        .dsLayoutHandles = {textureArena->getDSLayoutHandle()}}});
 
   std::vector<CommandBufferUse> cmdBufferUses{};
 

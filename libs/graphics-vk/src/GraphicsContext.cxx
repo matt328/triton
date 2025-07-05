@@ -31,12 +31,13 @@
 #include "buffers/BufferSystem.hpp"
 
 #include "resources/allocators/GeometryDispatcher.hpp"
-#include "gfx/GeometryHandleMapper.hpp"
+#include "gfx/HandleMapperTypes.hpp"
 #include "vk/command-buffer/CommandBufferManager.hpp"
+#include "img/TextureArena.hpp"
 
 #include "api/gw/EditorStateBuffer.hpp"
 
-#define BOOST_DI_CFG_CTOR_LIMIT_SIZE 20
+#define BOOST_DI_CFG_CTOR_LIMIT_SIZE 25
 #include <di.hpp>
 
 namespace di = boost::di;

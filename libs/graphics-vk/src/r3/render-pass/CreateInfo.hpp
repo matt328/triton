@@ -25,6 +25,7 @@ struct ImGuiPassCreateInfo {
 struct ForwardPassCreateInfo {
   ImageAlias colorImage;
   ImageAlias depthImage;
+  std::vector<Handle<DSLayout>> dsLayoutHandles;
 };
 
 struct CullingPassCreateInfo {

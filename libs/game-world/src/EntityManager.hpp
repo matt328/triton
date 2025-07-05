@@ -47,7 +47,8 @@ private:
 
   auto createStaticGameObject(std::string entityName,
                               Handle<Geometry> geometryHandle,
-                              const GameObjectData& gameObjectData) -> void;
+                              const GameObjectData& gameObjectData,
+                              std::optional<Handle<TextureTag>> textureHandle) -> void;
 };
 
 }

@@ -64,7 +64,7 @@ private:
 
   HandleGenerator<ManagedImage> imageHandleGenerator;
 
-  auto createForwardPass(PassId passId, ForwardPassCreateInfo createInfo)
+  auto createForwardPass(PassId passId, const ForwardPassCreateInfo& createInfo)
       -> std::unique_ptr<IRenderPass>;
   auto createCullingPass(PassId passId, CullingPassCreateInfo createInfo)
       -> std::unique_ptr<IRenderPass>;

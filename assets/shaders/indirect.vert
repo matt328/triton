@@ -98,6 +98,7 @@ layout(buffer_reference, scalar) buffer GpuScaleDataBuffer {
 layout(location = 0) out vec2 v_texCoord;
 layout(location = 1) out vec3 v_normal;
 layout(location = 2) out vec4 v_color;
+layout(location = 3) out flat uint objectId;
 
 vec3 applyQuaternion(vec4 q, vec3 v) {
   vec3 u = q.xyz;
@@ -162,4 +163,5 @@ void main() {
   v_texCoord = texCoord;
   v_normal = normal;
   v_color = color;
+  objectId = gl_InstanceIndex;
 }

@@ -44,6 +44,7 @@ struct StaticModelUploaded {
   uint64_t requestId;
   std::string entityName;
   Handle<Geometry> geometryHandle;
+  std::optional<Handle<TextureTag>> textureHandle = std::nullopt;
 };
 
 /// ApplicationController Emits
@@ -51,6 +52,7 @@ struct StaticModelUploaded {
 struct CreateStaticGameObject {
   std::string entityName;
   Handle<Geometry> geometryHandle;
+  std::optional<Handle<TextureTag>> textureHandle;
   GameObjectData gameObjectData;
 };
 

@@ -59,7 +59,10 @@ EntityManager::EntityManager(std::shared_ptr<IEventQueue> newEventQueue,
 
   eventQueue->subscribe<tr::CreateStaticGameObject>(
       [this](const tr::CreateStaticGameObject& event) {
-        createStaticGameObject(event.entityName, event.geometryHandle, event.gameObjectData);
+        createStaticGameObject(event.entityName,
+                               event.geometryHandle,
+                               event.gameObjectData,
+                               event.textureHandle);
       });
 }
 
@@ -110,12 +113,20 @@ auto EntityManager::createDefaultCamera() -> void {
 
 auto EntityManager::createStaticGameObject(std::string entityName,
                                            Handle<Geometry> geometryHandle,
-                                           const GameObjectData& gameObjectData) -> void {
+                                           const GameObjectData& gameObjectData,
+                                           std::optional<Handle<TextureTag>> textureHandle)
+    -> void {
   ZoneScoped;
   Log.trace("EntityManager creating static gameobject, geometryHandle={}", geometryHandle.id);
 
   auto entityId = registry->create();
-  registry->emplace<Renderable>(entityId, std::vector<Handle<Geometry>>{geometryHandle});
+  auto textureHandles = std::vector<Handle<TextureTag>>{};
+  if (textureHandle) {
+    textureHandles.push_back(*textureHandle);
+  }
+  registry->emplace<Renderable>(entityId,
+                                std::vector<Handle<Geometry>>{geometryHandle},
+                                textureHandles);
   registry->emplace<Transform>(entityId);
   registry->emplace<GameObjectData>(entityId, gameObjectData);
   auto& ctxData = registry->ctx().get<EditorContextData>();

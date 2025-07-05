@@ -9,7 +9,7 @@
 #include "buffers/ImageUploadPlan.hpp"
 #include "buffers/UploadPlan.hpp"
 #include "img/ImageManager.hpp"
-#include "img/ImageRequest.hpp"
+#include "img/TextureArena.hpp"
 #include "r3/GeometryBufferPack.hpp"
 #include "resources/ByteConverters.hpp"
 #include "resources/TransferSystem.hpp"
@@ -25,7 +25,9 @@ DefaultAssetSystem::DefaultAssetSystem(
     std::shared_ptr<TransferSystem> newTransferSystem,
     std::shared_ptr<GeometryAllocator> newGeometryAllocator,
     std::shared_ptr<GeometryHandleMapper> newGeometryHandleMapper,
-    std::shared_ptr<ImageManager> newImageManager)
+    std::shared_ptr<TextureHandleMapper> newTextureHandleMapper,
+    std::shared_ptr<ImageManager> newImageManager,
+    std::shared_ptr<TextureArena> newTextureArena)
     : eventQueue{std::move(newEventQueue)},
       assetService{std::move(newAssetService)},
       bufferSystem{std::move(newBufferSystem)},
@@ -33,7 +35,9 @@ DefaultAssetSystem::DefaultAssetSystem(
       transferSystem{std::move(newTransferSystem)},
       geometryAllocator{std::move(newGeometryAllocator)},
       geometryHandleMapper{std::move(newGeometryHandleMapper)},
-      imageManager{std::move(newImageManager)} {
+      textureHandleMapper{std::move(newTextureHandleMapper)},
+      imageManager{std::move(newImageManager)},
+      textureArena{std::move(newTextureArena)} {
   Log.trace("Constructing DefaultAssetSystem");
 }
 
@@ -114,6 +118,18 @@ auto DefaultAssetSystem::handleEndResourceBatch(uint64_t batchId) -> void {
 
   transferSystem->upload(uploadPlan, imageUploadPlan);
 
+  for (const auto& upload : imageUploadPlan.uploads) {
+    const auto& image = imageManager->getImage(upload.dstImage);
+    const auto& sampler = imageManager->getSampler(imageManager->getDefaultSampler());
+    auto handle = textureArena->insert(image.getImageView(), sampler);
+    auto textureHandle = textureHandleMapper->toPublic(handle);
+    for (auto& response : responses) {
+      if (response.requestId == upload.requestId) {
+        response.textureHandle.emplace(textureHandle);
+      }
+    }
+  }
+
   for (const auto& response : responses) {
     eventQueue->emit(response);
   }
@@ -142,7 +158,7 @@ auto DefaultAssetSystem::handleStaticModelRequest(const StaticModelRequest& smRe
 
   uploadPlan.uploads.insert(uploadPlan.uploads.end(), uploads.begin(), uploads.end());
 
-  const auto imageUploadData = fromImageData(model.imageData);
+  const auto imageUploadData = fromImageData(model.imageData, smRequest.requestId);
   imageUploadPlan.uploads.insert(imageUploadPlan.uploads.end(),
                                  imageUploadData.begin(),
                                  imageUploadData.end());
@@ -199,7 +215,7 @@ auto DefaultAssetSystem::deInterleave(const std::vector<as::StaticVertex>& verti
                                                      .animationData = nullptr});
 }
 
-auto DefaultAssetSystem::fromImageData([[maybe_unused]] const as::ImageData& imageData)
+auto DefaultAssetSystem::fromImageData(const as::ImageData& imageData, uint64_t requestId)
     -> std::vector<ImageUploadData> {
   auto uploadDataList = std::vector<ImageUploadData>{};
 
@@ -219,6 +235,7 @@ auto DefaultAssetSystem::fromImageData([[maybe_unused]] const as::ImageData& ima
           },
       .usageFlags = vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferDst,
       .aspectFlags = vk::ImageAspectFlagBits::eColor,
+      .debugName = "ModelTexture",
   });
 
   auto stagingBufferOffset =
@@ -235,7 +252,8 @@ auto DefaultAssetSystem::fromImageData([[maybe_unused]] const as::ImageData& ima
       .imageExtent = vk::Extent3D{.width = static_cast<uint32_t>(imageData.width),
                                   .height = static_cast<uint32_t>(imageData.height),
                                   .depth = 1},
-      .stagingBufferOffset = stagingBufferOffset->offset});
+      .stagingBufferOffset = stagingBufferOffset->offset,
+      .requestId = requestId});
 
   return uploadDataList;
 }

@@ -13,6 +13,7 @@ enum class BufferAlias : uint8_t {
   GeometryRegion,
   FrameData,
   ResourceTable,
+  Materials,
   Count
 };
 
@@ -63,6 +64,8 @@ inline auto to_string(BufferAlias alias) -> std::string {
       return "GeometryRegion";
     case BufferAlias::Count:
       return "Count";
+    case BufferAlias::Materials:
+      return "Materials";
     default:
       return "UnknownBufferAlias";
   }
@@ -72,10 +75,10 @@ using BufferAliasVariant = std::variant<BufferAlias, GlobalBufferAlias>;
 
 // to_string
 struct BufferAliasToStringVisitor {
-   auto operator()(GlobalBufferAlias a) const -> std::string {
+  auto operator()(GlobalBufferAlias a) const -> std::string {
     return to_string(a);
   }
-   auto operator()(BufferAlias a) const -> std::string {
+  auto operator()(BufferAlias a) const -> std::string {
     return to_string(a);
   }
 };

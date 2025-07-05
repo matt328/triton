@@ -81,6 +81,14 @@ auto Frame::getEditorState() const -> std::optional<EditorState> {
   return editorState;
 }
 
+auto Frame::setImageTransitionInfo(const std::vector<ImageTransitionInfo>& transitionInfo) -> void {
+  this->imageTransitionInfo = transitionInfo;
+}
+
+auto Frame::getImageTransitionInfo() -> std::vector<ImageTransitionInfo> {
+  return imageTransitionInfo;
+}
+
 auto Frame::addLogicalImage(LogicalHandle<ManagedImage> logicalHandle,
                             Handle<ManagedImage> imageHandle) -> void {
   assert(!imageHandles.contains(logicalHandle) &&

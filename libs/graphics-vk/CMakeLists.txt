@@ -5,6 +5,7 @@ set(graphicsvk_SRC
   src/buffers/BufferSystem.cxx
 
   src/img/ImageManager.cxx
+  src/img/TextureArena.cxx
 
   src/mem/Allocator.cxx
   src/mem/Buffer.cxx

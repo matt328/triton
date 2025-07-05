@@ -40,6 +40,7 @@ auto ApplicationController::handleStaticModelUploaded(const tr::StaticModelUploa
   auto gameObjectData = inFlightMap.at(event.requestId);
   const auto sgo = tr::CreateStaticGameObject{.entityName = event.entityName,
                                               .geometryHandle = event.geometryHandle,
+                                              .textureHandle = *event.textureHandle,
                                               .gameObjectData = gameObjectData};
   inFlightMap.erase(event.requestId);
   eventQueue->emit(sgo);

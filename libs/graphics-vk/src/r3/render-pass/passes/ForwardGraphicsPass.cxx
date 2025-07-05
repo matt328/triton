@@ -8,6 +8,8 @@
 #include "r3/render-pass/PipelineCreateInfo.hpp"
 #include "r3/render-pass/PipelineFactory.hpp"
 #include "task/Frame.hpp"
+#include "vk/sb/DSLayout.hpp"
+#include "vk/sb/DSLayoutManager.hpp"
 
 namespace tr {
 
@@ -17,12 +19,14 @@ ForwardGraphicsPass::ForwardGraphicsPass(std::shared_ptr<ImageManager> newImageM
                                          std::shared_ptr<ContextFactory> newDrawContextFactory,
                                          std::shared_ptr<ResourceAliasRegistry> newAliasRegistry,
                                          std::shared_ptr<PipelineFactory> newPipelineFactory,
-                                         ForwardPassCreateInfo createInfo,
+                                         std::shared_ptr<DSLayoutManager> newLayoutManager,
+                                         const ForwardPassCreateInfo& createInfo,
                                          PassId newPassId)
     : imageManager{std::move(newImageManager)},
       drawContextFactory{std::move(newDrawContextFactory)},
       aliasRegistry{std::move(newAliasRegistry)},
       pipelineFactory{std::move(newPipelineFactory)},
+      layoutManager{std::move(newLayoutManager)},
       colorAlias{createInfo.colorImage},
       depthAlias{createInfo.depthImage},
       id{newPassId} {
@@ -48,10 +52,17 @@ ForwardGraphicsPass::ForwardGraphicsPass(std::shared_ptr<ImageManager> newImageM
       .entryPoint = "main",
   };
 
+  auto dsLayoutList = std::vector<vk::DescriptorSetLayout>{};
+  for (const auto& layoutHandle : createInfo.dsLayoutHandles) {
+    dsLayoutList.push_back(layoutManager->getLayout(layoutHandle).getVkLayout());
+  }
+
   const auto pipelineLayoutInfo = PipelineLayoutInfo{
-      .pushConstantInfoList = {PushConstantInfo{.stageFlags = vk::ShaderStageFlagBits::eVertex,
+      .pushConstantInfoList = {PushConstantInfo{.stageFlags = vk::ShaderStageFlagBits::eVertex |
+                                                              vk::ShaderStageFlagBits::eFragment,
                                                 .offset = 0,
-                                                .size = 104}}};
+                                                .size = 104}},
+      .descriptorSetLayouts = dsLayoutList};
 
   const auto pipelineCreateInfo =
       PipelineCreateInfo{.id = id,
@@ -105,8 +116,29 @@ auto ForwardGraphicsPass::execute(Frame* frame, vk::raii::CommandBuffer& cmdBuff
   renderingInfo.setColorAttachments(*colorAttachmentInfo);
   renderingInfo.setPDepthAttachment(&*depthAttachmentInfo);
 
+  if (!frame->getImageTransitionInfo().empty()) {
+    auto barriers = std::vector<vk::ImageMemoryBarrier2>{};
+    for (const auto& info : frame->getImageTransitionInfo()) {
+      barriers.push_back({.srcStageMask = vk::PipelineStageFlagBits2::eAllCommands,
+                          .srcAccessMask = vk::AccessFlagBits2::eNone,
+                          .dstStageMask = vk::PipelineStageFlagBits2::eAllCommands,
+                          .dstAccessMask = vk::AccessFlagBits2::eNone,
+                          .oldLayout = info.oldLayout,
+                          .newLayout = info.newLayout,
+                          .image = info.image,
+                          .subresourceRange = info.subresourceRange});
+    }
+
+    if (!barriers.empty()) {
+      Log.trace("Inserting Barrier");
+      cmdBuffer.pipelineBarrier2({.imageMemoryBarrierCount = static_cast<uint32_t>(barriers.size()),
+                                  .pImageMemoryBarriers = barriers.data()});
+    }
+  }
+
   cmdBuffer.beginRendering(renderingInfo);
   cmdBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, *pipeline);
+
   for (const auto& handle : drawableContexts) {
     const auto& drawContext = drawContextFactory->getDispatchContext(handle);
     drawContext->bind(frame, cmdBuffer, *pipelineLayout);

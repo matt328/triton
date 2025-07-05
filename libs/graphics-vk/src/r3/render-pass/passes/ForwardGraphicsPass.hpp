@@ -11,6 +11,7 @@ class ImageManager;
 class ContextFactory;
 class ResourceAliasRegistry;
 class PipelineFactory;
+class DSLayoutManager;
 
 struct ImageUse {
   ImageAlias color;
@@ -23,7 +24,8 @@ public:
                       std::shared_ptr<ContextFactory> newDrawContextFactory,
                       std::shared_ptr<ResourceAliasRegistry> newAliasRegistry,
                       std::shared_ptr<PipelineFactory> newPipelineFactory,
-                      ForwardPassCreateInfo createInfo,
+                      std::shared_ptr<DSLayoutManager> newLayoutManager,
+                      const ForwardPassCreateInfo& createInfo,
                       PassId newPassId);
   ~ForwardGraphicsPass() override = default;
 
@@ -42,6 +44,7 @@ private:
   std::shared_ptr<ContextFactory> drawContextFactory;
   std::shared_ptr<ResourceAliasRegistry> aliasRegistry;
   std::shared_ptr<PipelineFactory> pipelineFactory;
+  std::shared_ptr<DSLayoutManager> layoutManager;
   ImageAlias colorAlias;
   ImageAlias depthAlias;
   PassId id;

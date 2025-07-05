@@ -1,11 +1,10 @@
 #pragma once
 
 #include "api/fx/IStateBuffer.hpp"
-#include "api/gfx/RenderStyle.hpp"
 #include "buffers/ManagedBuffer.hpp"
 #include "gfx/IRenderContext.hpp"
 #include "gfx/RenderContextConfig.hpp"
-#include "gfx/GeometryHandleMapper.hpp"
+#include "gfx/HandleMapperTypes.hpp"
 #include "img/ManagedImage.hpp"
 
 namespace tr {
@@ -30,6 +29,8 @@ class IShaderBindingFactory;
 class DSLayoutManager;
 class DSLayout;
 class EditorStateBuffer;
+class ImageTransitionQueue;
+class TextureArena;
 
 namespace queue {
 class Graphics;
@@ -46,6 +47,7 @@ struct GlobalBuffers {
   LogicalHandle<ManagedBuffer> objectRotations;
   LogicalHandle<ManagedBuffer> objectScales;
   LogicalHandle<ManagedBuffer> geometryRegion;
+  LogicalHandle<ManagedBuffer> materials;
   LogicalHandle<ManagedBuffer> frameData;
   LogicalHandle<ManagedBuffer> resourceTable;
 };
@@ -82,7 +84,10 @@ public:
              std::shared_ptr<ResourceAliasRegistry> newAliasRegistry,
              std::shared_ptr<IShaderBindingFactory> newShaderBindingFactory,
              std::shared_ptr<DSLayoutManager> newLayoutManager,
-             std::shared_ptr<EditorStateBuffer> newEditorStateBuffer);
+             std::shared_ptr<EditorStateBuffer> newEditorStateBuffer,
+             std::shared_ptr<ImageTransitionQueue> newImageQueue,
+             std::shared_ptr<TextureHandleMapper> newTextureHandleMapper,
+             std::shared_ptr<TextureArena> newTextureArena);
   ~R3Renderer() override = default;
 
   R3Renderer(const R3Renderer&) = delete;
@@ -113,6 +118,9 @@ private:
   std::shared_ptr<IShaderBindingFactory> shaderBindingFactory;
   std::shared_ptr<DSLayoutManager> layoutManager;
   std::shared_ptr<EditorStateBuffer> editorStateBuffer;
+  std::shared_ptr<ImageTransitionQueue> imageQueue;
+  std::shared_ptr<TextureHandleMapper> textureHandleMapper;
+  std::shared_ptr<TextureArena> textureArena;
 
   std::vector<vk::CommandBuffer> buffers;
 
@@ -121,6 +129,7 @@ private:
   GlobalShaderBindings globalShaderBindings{};
 
   std::vector<GpuGeometryRegionData> geometryRegionContents;
+  std::vector<GpuMaterialData> materialDataContents;
 
   auto createGlobalBuffers() -> void;
   auto createGlobalImages() -> void;

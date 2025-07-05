@@ -16,6 +16,7 @@ struct ImageUploadData {
   vk::Extent3D imageExtent{};
 
   size_t stagingBufferOffset{};
+  uint64_t requestId{};
 };
 
 struct ImageUploadPlan {

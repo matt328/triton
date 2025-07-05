@@ -58,6 +58,7 @@ public:
   auto getSampler(Handle<vk::raii::Sampler>) const -> const vk::Sampler&;
   auto registerSwapchainImage(uint32_t index) -> Handle<ManagedImage>;
   auto registerDefaultSampler() -> Handle<vk::raii::Sampler>;
+  auto getDefaultSampler() const -> Handle<vk::raii::Sampler>;
 
 private:
   std::shared_ptr<Allocator> allocator;
@@ -73,6 +74,8 @@ private:
 
   HandleGenerator<vk::raii::Sampler> samplerGenerator;
   std::unordered_map<Handle<vk::raii::Sampler>, vk::raii::Sampler> samplers;
+
+  Handle<vk::raii::Sampler> defaultSampler;
 
   auto registerSwapchainImages() -> void;
 };

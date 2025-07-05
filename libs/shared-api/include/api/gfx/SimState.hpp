@@ -10,6 +10,7 @@ using Timestamp = std::chrono::time_point<std::chrono::steady_clock>;
 
 struct StateHandles {
   Handle<Geometry> geometryHandle;
+  std::optional<Handle<TextureTag>> textureHandle;
 };
 
 struct SimState {

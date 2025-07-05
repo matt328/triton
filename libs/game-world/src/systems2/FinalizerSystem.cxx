@@ -22,8 +22,13 @@ auto FinalizerSystem::update(entt::registry& registry, SimState& simState, Times
   std::tie(simState.view, simState.projection) = createCameraData(registry);
 
   for (const auto& [entity, renderable, transform] : view.each()) {
+    std::optional<Handle<TextureTag>> textureHandle =
+        renderable.textureHandles.empty()
+            ? std::nullopt
+            : std::make_optional<Handle<TextureTag>>(renderable.textureHandles.front());
     simState.stateHandles.push_back(
-        StateHandles{.geometryHandle = renderable.geometryHandles.front()});
+        StateHandles{.geometryHandle = renderable.geometryHandles.front(),
+                     .textureHandle = textureHandle});
 
     simState.positions.push_back({.position = transform.position});
     simState.rotations.push_back({.rotation = transform.rotation});

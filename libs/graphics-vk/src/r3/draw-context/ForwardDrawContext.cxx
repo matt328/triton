@@ -1,15 +1,19 @@
 #include "ForwardDrawContext.hpp"
 #include "buffers/BufferSystem.hpp"
+#include "img/TextureArena.hpp"
 #include "task/Frame.hpp"
 
 namespace tr {
 ForwardDrawContext::ForwardDrawContext(ContextId newId,
                                        std::shared_ptr<BufferSystem> newBufferSystem,
+                                       std::shared_ptr<TextureArena> newTextureArena,
                                        ForwardDrawContextCreateInfo newCreateInfo)
-    : IDispatchContext{newId, std::move(newBufferSystem)}, createInfo{newCreateInfo} {
+    : IDispatchContext{newId, std::move(newBufferSystem)},
+      textureArena{std::move(newTextureArena)},
+      createInfo{newCreateInfo} {
 }
 
-auto ForwardDrawContext::bind([[maybe_unused]] const Frame* frame,
+auto ForwardDrawContext::bind(const Frame* frame,
                               vk::raii::CommandBuffer& commandBuffer,
                               const vk::raii::PipelineLayout& layout) -> void {
   const auto pushConstants = PushConstants{
@@ -21,9 +25,11 @@ auto ForwardDrawContext::bind([[maybe_unused]] const Frame* frame,
               .value_or(0L),
   };
   commandBuffer.pushConstants<PushConstants>(layout,
-                                             vk::ShaderStageFlagBits::eVertex,
+                                             vk::ShaderStageFlagBits::eVertex |
+                                                 vk::ShaderStageFlagBits::eFragment,
                                              0,
                                              pushConstants);
+  textureArena->bindShaderBindings(frame, commandBuffer, layout);
 }
 
 auto ForwardDrawContext::dispatch(const Frame* frame, vk::raii::CommandBuffer& commandBuffer)

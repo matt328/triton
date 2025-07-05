@@ -10,9 +10,11 @@ namespace tr {
 
 ContextFactory::ContextFactory(std::shared_ptr<BufferSystem> newBufferSystem,
                                std::shared_ptr<IShaderBindingFactory> newShaderBindingFactory,
+                               std::shared_ptr<TextureArena> newTextureArena,
                                std::shared_ptr<IGuiCallbackRegistrar> newGuiCallbackRegistrar)
     : bufferSystem{std::move(newBufferSystem)},
       shaderBindingFactory{std::move(newShaderBindingFactory)},
+      textureArena{std::move(newTextureArena)},
       guiCallbackRegistrar{std::move(newGuiCallbackRegistrar)} {
 }
 
@@ -35,6 +37,7 @@ auto ContextFactory::createDispatchContext(ContextId id, DispatchCreateInfo crea
               handle,
               std::make_unique<ForwardDrawContext>(id,
                                                    bufferSystem,
+                                                   textureArena,
                                                    std::forward<decltype(ci)>(ci)));
         }
         if constexpr (std::is_same_v<T, CompositionContextCreateInfo>) {

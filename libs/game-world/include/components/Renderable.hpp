@@ -7,6 +7,7 @@ namespace tr {
 
 struct Renderable {
   std::vector<Handle<Geometry>> geometryHandles;
+  std::vector<Handle<TextureTag>> textureHandles;
 };
 
 }

@@ -5,10 +5,13 @@
 
 namespace tr {
 
+class TextureArena;
+
 class ForwardDrawContext : public IDispatchContext {
 public:
   ForwardDrawContext(ContextId newId,
                      std::shared_ptr<BufferSystem> newBufferSystem,
+                     std::shared_ptr<TextureArena> newTextureArena,
                      ForwardDrawContextCreateInfo newCreateInfo);
   ~ForwardDrawContext() override = default;
 
@@ -28,6 +31,7 @@ public:
   [[nodiscard]] auto getGraphInfo() const -> PassGraphInfo override;
 
 private:
+  std::shared_ptr<TextureArena> textureArena;
   ForwardDrawContextCreateInfo createInfo;
 
   struct PushConstants {

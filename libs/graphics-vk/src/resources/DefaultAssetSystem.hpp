@@ -4,7 +4,7 @@
 #include "as/StaticVertex.hpp"
 #include "buffers/ImageUploadPlan.hpp"
 #include "buffers/UploadPlan.hpp"
-#include "gfx/GeometryHandleMapper.hpp"
+#include "gfx/HandleMapperTypes.hpp"
 #include "gfx/IAssetSystem.hpp"
 
 namespace tr {
@@ -17,6 +17,7 @@ class GeometryBufferPack;
 class TransferSystem;
 class GeometryAllocator;
 class ImageManager;
+class TextureArena;
 
 constexpr uint32_t MaxBatchSize = 5;
 
@@ -29,7 +30,9 @@ public:
                               std::shared_ptr<TransferSystem> newTransferSystem,
                               std::shared_ptr<GeometryAllocator> newGeometryAllocator,
                               std::shared_ptr<GeometryHandleMapper> newGeometryHandleMapper,
-                              std::shared_ptr<ImageManager> newImageManager);
+                              std::shared_ptr<TextureHandleMapper> newTextureHandleMapper,
+                              std::shared_ptr<ImageManager> newImageManager,
+                              std::shared_ptr<TextureArena> newTextureArena);
   ~DefaultAssetSystem() override;
 
   DefaultAssetSystem(const DefaultAssetSystem&) = delete;
@@ -48,7 +51,9 @@ private:
   std::shared_ptr<TransferSystem> transferSystem;
   std::shared_ptr<GeometryAllocator> geometryAllocator;
   std::shared_ptr<GeometryHandleMapper> geometryHandleMapper;
+  std::shared_ptr<TextureHandleMapper> textureHandleMapper;
   std::shared_ptr<ImageManager> imageManager;
+  std::shared_ptr<TextureArena> textureArena;
 
   std::jthread thread;
 
@@ -69,7 +74,8 @@ private:
   /// this method is unnecessary, but just convert it here for now.
   auto deInterleave(const std::vector<as::StaticVertex>& vertices,
                     const std::vector<uint32_t>& indexData) -> std::unique_ptr<GeometryData>;
-  auto fromImageData(const as::ImageData& imageData) -> std::vector<ImageUploadData>;
+  auto fromImageData(const as::ImageData& imageData, uint64_t requestId)
+      -> std::vector<ImageUploadData>;
 
   static auto getVkFormat(int bits, int component) -> vk::Format;
 };

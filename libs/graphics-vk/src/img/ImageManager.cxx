@@ -28,6 +28,7 @@ ImageManager::~ImageManager() {
 }
 
 auto ImageManager::createImage(ImageRequest request) -> Handle<ManagedImage> {
+  Log.trace("CreateImage, name={}", request.debugName.value());
   const auto imageCreateInfo = vk::ImageCreateInfo{
       .imageType = vk::ImageType::e2D,
       .format = request.format,
@@ -131,11 +132,15 @@ auto ImageManager::registerDefaultSampler() -> Handle<vk::raii::Sampler> {
       .borderColor = vk::BorderColor::eIntOpaqueBlack,
       .unnormalizedCoordinates = VK_FALSE,
   };
-  const auto handle = samplerGenerator.requestHandle();
+  defaultSampler = samplerGenerator.requestHandle();
 
-  samplers.emplace(handle, device->getVkDevice().createSampler(samplerInfo));
+  samplers.emplace(defaultSampler, device->getVkDevice().createSampler(samplerInfo));
 
-  return handle;
+  return defaultSampler;
+}
+
+auto ImageManager::getDefaultSampler() const -> Handle<vk::raii::Sampler> {
+  return defaultSampler;
 }
 
 auto ImageManager::getSwapchainImageHandle() const -> LogicalHandle<ManagedImage> {

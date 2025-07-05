@@ -74,12 +74,13 @@ auto RenderPassFactory::createImGuiPass(PassId passId, ImGuiPassCreateInfo creat
                                      passId);
 }
 
-auto RenderPassFactory::createForwardPass(PassId passId, ForwardPassCreateInfo createInfo)
+auto RenderPassFactory::createForwardPass(PassId passId, const ForwardPassCreateInfo& createInfo)
     -> std::unique_ptr<IRenderPass> {
   return std::make_unique<ForwardGraphicsPass>(imageManager,
                                                drawContextFactory,
                                                aliasRegistry,
                                                pipelineFactory,
+                                               layoutManager,
                                                createInfo,
                                                passId);
 }

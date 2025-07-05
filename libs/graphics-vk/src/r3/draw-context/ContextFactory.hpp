@@ -12,11 +12,13 @@ class IDispatchContext;
 class IDrawContext;
 class IShaderBindingFactory;
 class IGuiCallbackRegistrar;
+class TextureArena;
 
 class ContextFactory {
 public:
   explicit ContextFactory(std::shared_ptr<BufferSystem> newBufferSystem,
                           std::shared_ptr<IShaderBindingFactory> newShaderBindingFactory,
+                          std::shared_ptr<TextureArena> newTextureArena,
                           std::shared_ptr<IGuiCallbackRegistrar> newGuiCallbackRegistrar);
   ~ContextFactory() = default;
 
@@ -35,6 +37,7 @@ public:
 private:
   std::shared_ptr<BufferSystem> bufferSystem;
   std::shared_ptr<IShaderBindingFactory> shaderBindingFactory;
+  std::shared_ptr<TextureArena> textureArena;
   std::shared_ptr<IGuiCallbackRegistrar> guiCallbackRegistrar;
 
   HandleGenerator<IDispatchContext> dispatchHandleGenerator;
