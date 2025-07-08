@@ -42,7 +42,6 @@ struct GpuObjectData {
 
 struct GpuTransformData {
   glm::vec3 position;
-  float _pad0 = 0.f;
 };
 
 struct GpuRotationData {
@@ -51,7 +50,6 @@ struct GpuRotationData {
 
 struct GpuScaleData {
   glm::vec3 scale;
-  float _pad0 = 0.f;
 };
 
 /// Describes a single Mesh in the GpuVertex*Data struct by indexing into the GpuIndexData buffer

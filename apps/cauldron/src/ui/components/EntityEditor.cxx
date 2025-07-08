@@ -7,6 +7,7 @@
 #include "editors/TransformInspector.hpp"
 #include "ui/ImGuiStyle.hpp"
 #include "ui/assets/IconsLucide.hpp"
+#include "bk/Rando.hpp"
 
 namespace ed {
 
@@ -168,6 +169,9 @@ auto EntityEditor::renderMenuBar() -> void {
       if (ImGui::MenuItem("Terrain")) {
         // dataFacade->createTerrain("terrain", glm::vec3{9.f, 9.f, 9.f});
       }
+      if (ImGui::MenuItem("Test Triangle")) {
+        createTestTriangle();
+      }
       if (ImGui::MenuItem("Debug Cube")) {
         eventQueue->emit(tr::BoxWidget{.tag = "Test Stuff",
                                        .center = glm::vec3(0.f, 0.f, 0.f),
@@ -296,4 +300,51 @@ auto EntityEditor::renderOkCancelButtons(float buttonWidth) -> std::pair<bool, b
   }
   return {ok, cancel};
 }
+
+auto EntityEditor::createTestTriangle() -> void {
+  const auto positions = std::vector<glm::vec3>{glm::vec3(-1.f, -1.f, 0.f),
+                                                glm::vec3(0.f, 1.f, 0.f),
+                                                glm::vec3(1.f, -1.f, 0.f)};
+
+  const auto colors = std::vector<glm::vec4>{glm::vec4(1.f, 0.f, 0.f, 1.f),
+                                             glm::vec4(0.f, 1.f, 0.f, 1.f),
+                                             glm::vec4(0.f, 0.f, 1.f, 1.f)};
+
+  const auto texCoords =
+      std::vector<glm::vec2>{glm::vec2(0.f, 0.f), glm::vec2(0.5f, 1.f), glm::vec2(1.f, 0.f)};
+
+  const auto indices = std::vector<uint32_t>{2, 1, 0};
+
+  std::vector<std::byte> positionBytes(reinterpret_cast<const std::byte*>(positions.data()),
+                                       reinterpret_cast<const std::byte*>(positions.data()) +
+                                           (positions.size() * sizeof(glm::vec3)));
+
+  std::vector<std::byte> colorBytes(reinterpret_cast<const std::byte*>(colors.data()),
+                                    reinterpret_cast<const std::byte*>(colors.data()) +
+                                        (colors.size() * sizeof(glm::vec4)));
+
+  std::vector<std::byte> texCoordBytes(reinterpret_cast<const std::byte*>(texCoords.data()),
+                                       reinterpret_cast<const std::byte*>(texCoords.data()) +
+                                           (texCoords.size() * sizeof(glm::vec2)));
+
+  std::vector<std::byte> indexBytes(reinterpret_cast<const std::byte*>(indices.data()),
+                                    reinterpret_cast<const std::byte*>(indices.data()) +
+                                        (indices.size() * sizeof(uint32_t)));
+
+  const auto geometryData =
+      tr::GeometryData{.indexData = std::make_shared<std::vector<std::byte>>(indexBytes),
+                       .positionData = std::make_shared<std::vector<std::byte>>(positionBytes),
+                       .colorData = std::make_shared<std::vector<std::byte>>(colorBytes),
+                       .texCoordData = std::make_shared<std::vector<std::byte>>(texCoordBytes)};
+
+  const auto entityName = std::format("Triangle-{}", bk::RandomUtils::int32InRange(1, 20));
+
+  const auto addTriangle = tr::AddStaticGeometry{
+      .name = entityName,
+      .orientation = tr::Orientation{.position = bk::RandomUtils::vec3InRange(-1.f, 1.f)},
+      .geometryData = geometryData,
+      .entityName = entityName};
+  eventQueue->emit(addTriangle);
+}
+
 }

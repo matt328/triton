@@ -10,7 +10,8 @@ CommandBufferManager::CommandBufferManager(std::shared_ptr<Device> newDevice,
   debugManager->setDevice(device);
 
   const auto transferCommandPoolCreateInfo = vk::CommandPoolCreateInfo{
-      .flags = vk::CommandPoolCreateFlagBits::eTransient,
+      .flags = vk::CommandPoolCreateFlagBits::eTransient |
+               vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
       .queueFamilyIndex = device->getTransferQueueFamily(),
   };
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "api/fx/EditorEvents.hpp"
 #include "api/gw/editordata/GameObjectData.hpp"
 #include "bk/Rando.hpp"
 
@@ -32,6 +33,7 @@ private:
   std::unordered_map<uint64_t, tr::GameObjectData> inFlightMap;
 
   auto handleAddStaticModel(const tr::AddStaticModel& event) -> void;
+  auto handleAddStaticGeometry(const tr::AddStaticGeometry& event) -> void;
   auto handleStaticModelUploaded(const tr::StaticModelUploaded& event) -> void;
 };
 

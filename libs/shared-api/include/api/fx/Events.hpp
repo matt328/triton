@@ -113,6 +113,7 @@ struct FrameEndEvent {
 };
 
 using EventVariant = std::variant<AddStaticModel,
+                                  AddStaticGeometry,
                                   AddSkeleton,
                                   AddAnimation,
                                   AddModel,

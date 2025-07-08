@@ -58,6 +58,8 @@ private:
 
   auto renderTerrainControls(const TerrainData* terrainData) -> void;
 
+  auto createTestTriangle() -> void;
+
   static auto renderOkCancelButtons(float buttonWidth = 80.f) -> std::pair<bool, bool>;
 
   template <typename T>

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "api/gfx/GeometryData.hpp"
 #include "api/gw/editordata/GameObjectData.hpp"
 namespace tr {
 
@@ -30,6 +31,13 @@ struct AddStaticModel {
   Orientation orientation;
   std::string modelName;
   bool fromFile = false;
+};
+
+struct AddStaticGeometry {
+  std::string name;
+  Orientation orientation;
+  GeometryData geometryData;
+  std::string entityName;
 };
 
 struct SaveProject {

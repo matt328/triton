@@ -66,8 +66,8 @@ auto TransferSystem::upload(UploadPlan& bufferPlan, ImageUploadPlan& imagePlan) 
 
   submitAndWait();
 
-  transferContext.stagingAllocator.reset();
-  transferContext.imageStagingAllocator.reset();
+  transferContext.stagingAllocator->reset();
+  transferContext.imageStagingAllocator->reset();
 }
 
 auto TransferSystem::prepareBufferStagingData(const UploadPlan& bufferPlan) -> BufferCopyMap {

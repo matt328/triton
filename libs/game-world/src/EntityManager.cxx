@@ -117,7 +117,9 @@ auto EntityManager::createStaticGameObject(std::string entityName,
                                            std::optional<Handle<TextureTag>> textureHandle)
     -> void {
   ZoneScoped;
-  Log.trace("EntityManager creating static gameobject, geometryHandle={}", geometryHandle.id);
+  Log.trace("EntityManager creating static gameobject name={}, geometryHandle={}",
+            entityName,
+            geometryHandle.id);
 
   auto entityId = registry->create();
   auto textureHandles = std::vector<Handle<TextureTag>>{};
@@ -127,7 +129,11 @@ auto EntityManager::createStaticGameObject(std::string entityName,
   registry->emplace<Renderable>(entityId,
                                 std::vector<Handle<Geometry>>{geometryHandle},
                                 textureHandles);
-  registry->emplace<Transform>(entityId);
+  registry->emplace<Transform>(entityId,
+                               Transform{
+                                   .rotation = gameObjectData.orientation.rotation,
+                                   .position = gameObjectData.orientation.position,
+                               });
   registry->emplace<GameObjectData>(entityId, gameObjectData);
   auto& ctxData = registry->ctx().get<EditorContextData>();
   ctxData.scene.objectNameMap.emplace(entityName, static_cast<tr::GameObjectId>(entityId));
