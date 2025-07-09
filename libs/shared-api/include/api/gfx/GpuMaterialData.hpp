@@ -40,7 +40,7 @@ struct GpuObjectData {
   uint32_t animationId;
 };
 
-struct GpuTransformData {
+struct alignas(4) GpuTransformData {
   glm::vec3 position;
 };
 
@@ -48,7 +48,7 @@ struct GpuRotationData {
   glm::quat rotation;
 };
 
-struct GpuScaleData {
+struct alignas(4) GpuScaleData {
   glm::vec3 scale;
 };
 

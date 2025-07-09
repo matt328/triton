@@ -23,6 +23,7 @@
 #include "vk/sb/DSLayoutManager.hpp"
 #include "vk/sb/IShaderBinding.hpp"
 #include "vk/sb/IShaderBindingFactory.hpp"
+#include "api/GlmToString.hpp"
 
 namespace tr {
 
@@ -397,6 +398,8 @@ void R3Renderer::renderNextFrame() {
             current.rotations.data(),
             BufferRegion{.size = sizeof(GpuRotationData) * current.rotations.size()});
       }
+      // For some reason the last object's scales are getting set to 0s
+      static_assert(sizeof(GpuScaleData) == 12);
       if (!current.scales.empty()) {
         bufferSystem->insert(frame->getLogicalBuffer(globalBuffers.objectScales),
                              current.scales.data(),

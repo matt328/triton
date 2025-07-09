@@ -188,10 +188,12 @@ auto DefaultAssetSystem::deInterleave(const std::vector<as::StaticVertex>& verti
     -> std::unique_ptr<GeometryData> {
   auto positions = std::make_shared<std::vector<GpuVertexPositionData>>();
   auto texCoords = std::make_shared<std::vector<GpuVertexTexCoordData>>();
+  auto colors = std::make_shared<std::vector<GpuVertexColorData>>();
   auto indices = std::make_shared<std::vector<GpuIndexData>>();
 
   positions->reserve(vertices.size() * sizeof(GpuVertexPositionData));
   texCoords->reserve(vertices.size() * sizeof(GpuVertexTexCoordData));
+  colors->reserve(vertices.size() * sizeof(GpuVertexColorData));
   indices->reserve(indexData.size() * sizeof(GpuIndexData));
 
   for (const auto& vertex : vertices) {

@@ -92,7 +92,7 @@ layout(buffer_reference, scalar) buffer GpuRotationDataBuffer {
 };
 
 layout(buffer_reference, scalar) buffer GpuScaleDataBuffer {
-  vec3 scale;
+  vec3 scale[];
 };
 
 layout(location = 0) out vec2 v_texCoord;
@@ -126,7 +126,7 @@ void main() {
   vec4 objectRotation = rotationDataBuffer[object.rotationIndex].rotation;
 
   GpuScaleDataBuffer scaleDataBuffer = GpuScaleDataBuffer(resourceTable.objectScalesAddress);
-  vec3 objectScale = scaleDataBuffer[object.scaleIndex].scale;
+  vec3 objectScale = scaleDataBuffer.scale[object.scaleIndex];
 
   GpuGeometryRegionData region = regionBuf.regions[object.geometryRegionId];
 
@@ -154,6 +154,9 @@ void main() {
   vec3 scaled = objectScale * position;
   vec3 rotated = applyQuaternion(objectRotation, scaled);
   vec3 transformed = rotated + objectPosition;
+
+  mat4 view = frameData.view;
+  mat4 projection = frameData.projection;
 
   vec4 worldPosition = vec4(transformed, 1.0);
   vec4 viewPosition = frameData.view * worldPosition;

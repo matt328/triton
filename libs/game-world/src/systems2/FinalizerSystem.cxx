@@ -29,7 +29,6 @@ auto FinalizerSystem::update(entt::registry& registry, SimState& simState, Times
     simState.stateHandles.push_back(
         StateHandles{.geometryHandle = renderable.geometryHandles.front(),
                      .textureHandle = textureHandle});
-
     simState.positions.push_back({.position = transform.position});
     simState.rotations.push_back({.rotation = transform.rotation});
     simState.scales.push_back({.scale = transform.scale});

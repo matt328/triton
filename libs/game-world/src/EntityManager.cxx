@@ -133,6 +133,7 @@ auto EntityManager::createStaticGameObject(std::string entityName,
                                Transform{
                                    .rotation = gameObjectData.orientation.rotation,
                                    .position = gameObjectData.orientation.position,
+                                   .scale = {1.f, 1.f, 1.f},
                                });
   registry->emplace<GameObjectData>(entityId, gameObjectData);
   auto& ctxData = registry->ctx().get<EditorContextData>();

@@ -339,11 +339,10 @@ auto EntityEditor::createTestTriangle() -> void {
 
   const auto entityName = std::format("Triangle-{}", bk::RandomUtils::int32InRange(1, 20));
 
-  const auto addTriangle = tr::AddStaticGeometry{
-      .name = entityName,
-      .orientation = tr::Orientation{.position = bk::RandomUtils::vec3InRange(-1.f, 1.f)},
-      .geometryData = geometryData,
-      .entityName = entityName};
+  const auto addTriangle = tr::AddStaticGeometry{.name = entityName,
+                                                 .orientation = tr::Orientation{},
+                                                 .geometryData = geometryData,
+                                                 .entityName = entityName};
   eventQueue->emit(addTriangle);
 }
 
