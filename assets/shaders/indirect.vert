@@ -84,11 +84,11 @@ layout(buffer_reference, scalar) buffer ObjectDataBuffer {
 };
 
 layout(buffer_reference, scalar) buffer GpuPositionDataBuffer {
-  vec3 position;
+  vec3 position[];
 };
 
 layout(buffer_reference, scalar) buffer GpuRotationDataBuffer {
-  vec4 rotation;
+  vec4 rotation[];
 };
 
 layout(buffer_reference, scalar) buffer GpuScaleDataBuffer {
@@ -119,11 +119,11 @@ void main() {
 
   GpuPositionDataBuffer positionDataBuffer =
       GpuPositionDataBuffer(resourceTable.objectPositionsAddress);
-  vec3 objectPosition = positionDataBuffer[object.transformIndex].position;
+  vec3 objectPosition = positionDataBuffer.position[object.transformIndex];
 
   GpuRotationDataBuffer rotationDataBuffer =
       GpuRotationDataBuffer(resourceTable.objectRotationsAddress);
-  vec4 objectRotation = rotationDataBuffer[object.rotationIndex].rotation;
+  vec4 objectRotation = rotationDataBuffer.rotation[object.rotationIndex];
 
   GpuScaleDataBuffer scaleDataBuffer = GpuScaleDataBuffer(resourceTable.objectScalesAddress);
   vec3 objectScale = scaleDataBuffer.scale[object.scaleIndex];

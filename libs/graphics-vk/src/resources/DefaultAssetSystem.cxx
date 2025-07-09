@@ -196,6 +196,8 @@ auto DefaultAssetSystem::deInterleave(const std::vector<as::StaticVertex>& verti
   colors->reserve(vertices.size() * sizeof(GpuVertexColorData));
   indices->reserve(indexData.size() * sizeof(GpuIndexData));
 
+  // TexCoord offsets i think are being set in bytes not elements
+
   for (const auto& vertex : vertices) {
     positions->emplace_back(vertex.position);
     texCoords->emplace_back(vertex.texCoord);
