@@ -105,13 +105,13 @@ auto GeometryAllocator::getRegionData(Handle<GeometryRegion> handle) const
       .positionOffset =
           static_cast<uint32_t>(region.positionRegion.offset / sizeof(GpuVertexPositionData))};
   if (region.texCoordRegion) {
-    regionData.texCoordOffset = region.texCoordRegion->offset;
+    regionData.texCoordOffset = region.texCoordRegion->offset / sizeof(GpuVertexTexCoordData);
   }
   if (region.normalRegion) {
-    regionData.normalOffset = region.normalRegion->offset;
+    regionData.normalOffset = region.normalRegion->offset / sizeof(GpuVertexNormalData);
   }
   if (region.colorRegion) {
-    regionData.colorOffset = region.colorRegion->offset;
+    regionData.colorOffset = region.colorRegion->offset / sizeof(GpuVertexColorData);
   }
 
   return regionData;
