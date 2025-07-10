@@ -33,7 +33,7 @@ public:
   auto operator=(EventQueue&&) -> EventQueue& = delete;
 
   void subscribe(std::type_index type,
-                 std::function<void(const EventVariant&)> listener,
+                 std::function<void(const std::shared_ptr<EventVariant>&)> listener,
                  std::string channel) override {
     auto& handlerMap = getThreadLocalHandlers();
     std::lock_guard lock(handlerMap.mutex);
@@ -58,7 +58,7 @@ public:
         while (it != eventQueue.end()) {
           const auto& [type, event] = *it;
           if (handlers.contains(type)) {
-            dispatchQueue.emplace_back(type, std::move(const_cast<EventVariant&>(event)));
+            dispatchQueue.emplace_back(type, event);
             it = eventQueue.erase(it);
           } else {
             ++it;
@@ -85,9 +85,10 @@ private:
     std::mutex mutex;
     std::unordered_map<
         std::type_index,
-        std::unordered_map<std::string, std::vector<std::function<void(const EventVariant&)>>>>
+        std::unordered_map<std::string,
+                           std::vector<std::function<void(const std::shared_ptr<EventVariant>&)>>>>
         handlers;
-    std::deque<std::pair<std::type_index, EventVariant>> dispatchQueue;
+    std::deque<std::pair<std::type_index, std::shared_ptr<EventVariant>>> dispatchQueue;
   };
 
   static auto getThreadLocalHandlers() -> ThreadLocalHandlerMap& {
@@ -96,7 +97,9 @@ private:
   }
 
   std::mutex emitMutex;
-  std::unordered_map<std::string, std::deque<std::pair<std::type_index, EventVariant>>> eventQueues;
+  std::unordered_map<std::string,
+                     std::deque<std::pair<std::type_index, std::shared_ptr<EventVariant>>>>
+      eventQueues;
 };
 
 }

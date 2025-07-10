@@ -50,7 +50,7 @@ private:
   MapKey imageKeygen;
   HandleGenerator<ManagedImage> imageHandleGenerator;
 
-  auto handleSwapchainResized(const SwapchainResized& event) -> void;
+  auto handleSwapchainResized(const std::shared_ptr<SwapchainResized>& event) -> void;
 };
 
 }

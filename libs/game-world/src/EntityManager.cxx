@@ -30,39 +30,41 @@ EntityManager::EntityManager(std::shared_ptr<IEventQueue> newEventQueue,
   registry->ctx().emplace<EditorContextData>();
   Log.trace("Created EntityManager");
 
-  eventQueue->subscribe<Action>(
-      [this](const Action& event) { CameraHandler::handleAction(event, *registry); });
+  eventQueue->subscribe<Action>([this](const std::shared_ptr<Action>& event) {
+    CameraHandler::handleAction(event, *registry);
+  });
 
   eventQueue->subscribe<SwapchainCreated>(
-      [this](const SwapchainCreated& event) { renderAreaCreated(event); });
+      [this](const std::shared_ptr<SwapchainCreated>& event) { renderAreaCreated(event); });
 
   eventQueue->subscribe<SwapchainResized>(
-      [this](const SwapchainResized& event) { renderAreaResized(event); });
+      [this](const std::shared_ptr<SwapchainResized>& event) { renderAreaResized(event); });
 
-  eventQueue->subscribe<tr::AddSkeleton>([this](const tr::AddSkeleton& event) {
-    addSkeleton(event.name, event.fileName, event.fromFile);
+  eventQueue->subscribe<tr::AddSkeleton>([this](const std::shared_ptr<tr::AddSkeleton>& event) {
+    addSkeleton(event->name, event->fileName, event->fromFile);
   });
-  eventQueue->subscribe<tr::AddAnimation>([this](const tr::AddAnimation& event) {
-    addAnimation(event.name, event.fileName, event.fromFile);
+  eventQueue->subscribe<tr::AddAnimation>([this](const std::shared_ptr<tr::AddAnimation>& event) {
+    addAnimation(event->name, event->fileName, event->fromFile);
   });
-  eventQueue->subscribe<tr::AddModel>(
-      [this](const tr::AddModel& event) { addModel(event.name, event.fileName, event.fromFile); });
+  eventQueue->subscribe<tr::AddModel>([this](const std::shared_ptr<tr::AddModel>& event) {
+    addModel(event->name, event->fileName, event->fromFile);
+  });
 
   eventQueue->subscribe<tr::SelectEntity>(
-      [this](const tr::SelectEntity& event) { selectEntity(event.entityId); });
+      [this](const std::shared_ptr<tr::SelectEntity>& event) { selectEntity(event->entityId); });
 
   eventQueue->subscribe<tr::SaveProject>(
-      [this](const tr::SaveProject& event) { saveProject(event.filePath); });
+      [this](const std::shared_ptr<tr::SaveProject>& event) { saveProject(event->filePath); });
 
   eventQueue->subscribe<tr::LoadProject>(
-      [this](const tr::LoadProject& event) { loadProject(event.filePath); });
+      [this](const std::shared_ptr<tr::LoadProject>& event) { loadProject(event->filePath); });
 
   eventQueue->subscribe<tr::CreateStaticGameObject>(
-      [this](const tr::CreateStaticGameObject& event) {
-        createStaticGameObject(event.entityName,
-                               event.geometryHandle,
-                               event.gameObjectData,
-                               event.textureHandle);
+      [this](const std::shared_ptr<tr::CreateStaticGameObject>& event) {
+        createStaticGameObject(event->entityName,
+                               event->geometryHandle,
+                               event->gameObjectData,
+                               event->textureHandle);
       });
 }
 
@@ -79,15 +81,15 @@ auto EntityManager::update() -> void {
   editorStateBuffer->pushState(EditorSystem::update(*registry), currentTime);
 }
 
-auto EntityManager::renderAreaCreated(const SwapchainCreated& event) -> void {
+auto EntityManager::renderAreaCreated(const std::shared_ptr<SwapchainCreated>& event) -> void {
   registry->ctx().insert_or_assign<WindowDimensions>(
-      WindowDimensions{.width = event.width, .height = event.height});
+      WindowDimensions{.width = event->width, .height = event->height});
   createDefaultCamera();
 }
 
-auto EntityManager::renderAreaResized(const SwapchainResized& event) -> void {
+auto EntityManager::renderAreaResized(const std::shared_ptr<SwapchainResized>& event) -> void {
   registry->ctx().insert_or_assign<WindowDimensions>(
-      WindowDimensions{.width = event.width, .height = event.height});
+      WindowDimensions{.width = event->width, .height = event->height});
 }
 
 auto EntityManager::createDefaultCamera() -> void {

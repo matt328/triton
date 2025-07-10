@@ -54,30 +54,35 @@ auto DefaultAssetSystem::run() -> void {
     Log.trace("Started AssetSystemThread");
     // Create all subscriptions on the thread
     eventQueue->subscribe<BeginResourceBatch>(
-        [this](const BeginResourceBatch& batch) {
-          eventBatches[batch.batchId] = std::vector<const EventVariant*>{};
+        [this](const auto& batch) {
+          eventBatches[batch->batchId] = std::vector<std::shared_ptr<EventVariant>>{};
         },
         "test_group");
 
     eventQueue->subscribe<StaticModelRequest>(
-        [this](const StaticModelRequest& smRequest, const EventVariant& eventVariant) {
-          eventBatches[smRequest.batchId].push_back(&eventVariant);
+        [this](const StaticModelRequest& smRequest,
+               const std::shared_ptr<EventVariant>& eventVariant) {
+          eventBatches[smRequest.batchId].push_back(eventVariant);
         },
         "test_group");
     eventQueue->subscribe<StaticMeshRequest>(
-        [this](const StaticMeshRequest& smRequest, const EventVariant& eventVariant) {
-          eventBatches[smRequest.batchId].push_back(&eventVariant);
+        [this](const StaticMeshRequest& smRequest,
+               const std::shared_ptr<EventVariant>& eventVariant) {
+          eventBatches[smRequest.batchId].push_back(eventVariant);
         },
         "test_group");
 
     eventQueue->subscribe<DynamicModelRequest>(
-        [this](const DynamicModelRequest& dmRequest, const EventVariant& eventVariant) {
-          eventBatches[dmRequest.batchId].push_back(&eventVariant);
+        [this](const DynamicModelRequest& dmRequest,
+               const std::shared_ptr<EventVariant>& eventVariant) {
+          eventBatches[dmRequest.batchId].push_back(eventVariant);
         },
         "test_group");
 
     eventQueue->subscribe<EndResourceBatch>(
-        [this](const EndResourceBatch& batch) { handleEndResourceBatch(batch.batchId); },
+        [this](const std::shared_ptr<EndResourceBatch>& batch) {
+          handleEndResourceBatch(batch->batchId);
+        },
         "test_group");
 
     while (!token.stop_requested()) {
@@ -99,8 +104,12 @@ auto DefaultAssetSystem::handleEndResourceBatch(uint64_t batchId) -> void {
       ImageUploadPlan{.stagingBuffer = transferSystem->getTransferContext().imageStagingBuffer};
 
   std::vector<StaticModelUploaded> responses{};
-
+  auto i = 0;
   for (auto& eventVariant : eventBatches[batchId]) {
+    if (eventVariant == nullptr) {
+      Log.warn("eventBatch {} has a null event", i);
+      continue;
+    }
     auto visitor = [&](auto&& arg) -> void {
       using T = std::decay_t<decltype(arg)>;
       if constexpr (std::is_same_v<T, StaticModelRequest>) {
@@ -114,6 +123,7 @@ auto DefaultAssetSystem::handleEndResourceBatch(uint64_t batchId) -> void {
       }
     };
     std::visit(visitor, *eventVariant);
+    ++i;
   }
 
   transferSystem->upload(uploadPlan, imageUploadPlan);

@@ -12,13 +12,13 @@ public:
   auto operator=(const CameraHandler&) -> CameraHandler& = default;
   auto operator=(CameraHandler&&) -> CameraHandler& = delete;
 
-  static auto handleAction(const Action& action, entt::registry& registry) -> void;
+  static auto handleAction(const std::shared_ptr<Action>& action, entt::registry& registry) -> void;
 
 private:
   CameraHandler() = default;
   ~CameraHandler() = default;
-  static auto handleStateAction(const Action& action, Camera& cam) -> void;
-  static auto handleRangeAction(const Action& action, Camera& cam) -> void;
+  static auto handleStateAction(const std::shared_ptr<Action>& action, Camera& cam) -> void;
+  static auto handleRangeAction(const std::shared_ptr<Action>& action, Camera& cam) -> void;
 };
 
 }

@@ -33,9 +33,9 @@ private:
 
   std::unique_ptr<entt::registry> registry;
 
-  auto renderAreaCreated(const SwapchainCreated& event) -> void;
-  auto renderAreaResized(const SwapchainResized& event) -> void;
-  auto registerStaticModel(const StaticModelUploaded& event) -> void;
+  auto renderAreaCreated(const std::shared_ptr<SwapchainCreated>& event) -> void;
+  auto renderAreaResized(const std::shared_ptr<SwapchainResized>& event) -> void;
+  auto registerStaticModel(const std::shared_ptr<StaticModelUploaded>& event) -> void;
   auto createDefaultCamera() -> void;
 
   auto addSkeleton(std::string name, std::string filename, bool fromFile) -> void;

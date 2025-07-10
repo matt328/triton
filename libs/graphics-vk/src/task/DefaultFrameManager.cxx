@@ -50,7 +50,7 @@ DefaultFrameManager::DefaultFrameManager(
   }
 
   eventQueue->subscribe<SwapchainResized>(
-      [&](SwapchainResized event) { handleSwapchainResized(event); });
+      [&](const std::shared_ptr<SwapchainResized>& event) { handleSwapchainResized(event); });
 }
 
 DefaultFrameManager::~DefaultFrameManager() {
@@ -59,8 +59,8 @@ DefaultFrameManager::~DefaultFrameManager() {
   frames.clear();
 }
 
-auto DefaultFrameManager::handleSwapchainResized([[maybe_unused]] const SwapchainResized& event)
-    -> void {
+auto DefaultFrameManager::handleSwapchainResized(
+    [[maybe_unused]] const std::shared_ptr<SwapchainResized>& event) -> void {
   // imageRegistry->swapchainResized(vk::Extent2D{.width = event.width, .height = event.height},
   //                                 renderConfig.renderScale);
 }

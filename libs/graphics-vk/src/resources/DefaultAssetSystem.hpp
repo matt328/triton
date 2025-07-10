@@ -57,7 +57,7 @@ private:
 
   std::jthread thread;
 
-  std::unordered_map<uint64_t, std::vector<const EventVariant*>> eventBatches;
+  std::unordered_map<uint64_t, std::vector<std::shared_ptr<EventVariant>>> eventBatches;
 
   auto handleEndResourceBatch(uint64_t batchId) -> void;
 

@@ -8,33 +8,33 @@ ActionSystem::ActionSystem(std::shared_ptr<IEventQueue> newEventQueue)
 
   Log.debug("Creating ActionSystem");
 
-  eventQueue->subscribe<MouseCaptured>([&](const MouseCaptured& event) {
-    if (event.isMouseCaptured) {
+  eventQueue->subscribe<MouseCaptured>([&](const std::shared_ptr<MouseCaptured>& event) {
+    if (event->isMouseCaptured) {
       firstMouse = true;
     }
   });
 
-  eventQueue->subscribe<KeyEvent>([&](const KeyEvent& event) {
-    const auto sourceIt = keyActionMap.find(event.key);
+  eventQueue->subscribe<KeyEvent>([&](const std::shared_ptr<KeyEvent>& event) {
+    const auto sourceIt = keyActionMap.find(event->key);
     if (sourceIt == keyActionMap.end()) {
       return;
     }
 
     const auto& [actionType, stateType, value] = sourceIt->second;
 
-    if (event.buttonState == ButtonState::Pressed) {
+    if (event->buttonState == ButtonState::Pressed) {
       eventQueue->emit(Action{.actionType = actionType, .stateType = stateType, .value = true});
-    } else if (event.buttonState == ButtonState::Released) {
+    } else if (event->buttonState == ButtonState::Released) {
       eventQueue->emit(Action{.actionType = actionType, .stateType = stateType, .value = false});
     }
   });
 
-  eventQueue->subscribe<MouseMoved>([&](const MouseMoved& event) {
-    const auto deltaX = static_cast<float>(prevX - event.x);
-    const auto deltaY = static_cast<float>(prevY - event.y);
+  eventQueue->subscribe<MouseMoved>([&](const std::shared_ptr<MouseMoved>& event) {
+    const auto deltaX = static_cast<float>(prevX - event->x);
+    const auto deltaY = static_cast<float>(prevY - event->y);
 
-    prevX = event.x;
-    prevY = event.y;
+    prevX = event->x;
+    prevY = event->y;
 
     if (firstMouse) {
       firstMouse = !firstMouse;
