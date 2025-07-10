@@ -32,9 +32,9 @@ private:
 
   std::unordered_map<uint64_t, tr::GameObjectData> inFlightMap;
 
-  auto handleAddStaticModel(const tr::AddStaticModel& event) -> void;
-  auto handleAddStaticGeometry(const tr::AddStaticGeometry& event) -> void;
-  auto handleStaticModelUploaded(const tr::StaticModelUploaded& event) -> void;
+  auto handleAddStaticModel(const std::shared_ptr<tr::AddStaticModel>& event) -> void;
+  auto handleAddStaticGeometry(const std::shared_ptr<tr::AddStaticGeometry>& event) -> void;
+  auto handleStaticModelUploaded(const std::shared_ptr<tr::StaticModelUploaded>& event) -> void;
 };
 
 }

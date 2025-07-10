@@ -19,8 +19,7 @@ namespace tr {
   This class is basically the core of the entire engine, so it needs to be as efficient as possible.
   TODO(matt): figure out how to get rid of those locks.
 */
-
-class EventQueue : public IEventQueue {
+class [[deprecated("This is Deprecated")]] EventQueue : public IEventQueue {
 public:
   EventQueue() = default;
   ~EventQueue() override {

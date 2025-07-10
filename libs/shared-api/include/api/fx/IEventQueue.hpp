@@ -16,57 +16,32 @@ public:
   auto operator=(const IEventQueue&) -> IEventQueue& = default;
   auto operator=(IEventQueue&&) -> IEventQueue& = delete;
 
-  virtual void subscribe(std::type_index type,
-                         std::function<void(const EventVariant&)> listener,
-                         std::string channel) = 0;
+  // Type-erased emit
+  virtual void emitErased(std::type_index type,
+                          std::shared_ptr<void> payload,
+                          const std::string& channel) = 0;
 
-  virtual void emit(std::type_index type, EventVariant event, std::string channel) = 0;
+  // Type-erased subscribe
+  virtual void subscribeErased(std::type_index type,
+                               std::function<void(std::shared_ptr<void>)> listener,
+                               const std::string& channel) = 0;
 
-  /// Dispatch any handlers that might have been subscribed on the current thread.
-  /// Must be called periodically from any thread on which events have been subscribed to.
+  // Dispatch queued events on current thread
   virtual void dispatchPending() = 0;
 
+  // Convenience templated API
   template <typename T>
-  void subscribe(std::function<void(const T&)> listener, std::string channel = "default") {
-    subscribe(
-        typeid(T),
-        [listener](const EventVariant& event) {
-          if (const T* typed = std::get_if<T>(&event)) {
-            listener(*typed);
-          }
-        },
-        channel);
+  void emit(T event, const std::string& channel = "default") {
+    emitErased(typeid(T), std::make_shared<T>(std::move(event)), channel);
   }
 
   template <typename T>
-  void subscribeWithVariant(std::function<void(const EventVariant&)> listener,
-                            std::string channel = "default") {
-    subscribe(
+  void subscribe(std::function<void(const std::shared_ptr<T>&)> listener,
+                 const std::string& channel = "default") {
+    subscribeErased(
         typeid(T),
-        [listener](const EventVariant& event) {
-          if (std::holds_alternative<T>(event)) {
-            listener(event);
-          }
-        },
+        [listener](std::shared_ptr<void> ptr) { listener(std::static_pointer_cast<T>(ptr)); },
         channel);
-  }
-
-  template <typename T>
-  void subscribe(std::function<void(const T&, const EventVariant&)> listener,
-                 std::string channel = "default") {
-    subscribe(
-        typeid(T),
-        [listener](const EventVariant& event) {
-          if (const T* typed = std::get_if<T>(&event)) {
-            listener(*typed, event);
-          }
-        },
-        channel);
-  }
-
-  template <typename T>
-  void emit(T event, std::string channel = "default") {
-    emit(typeid(T), EventVariant(std::move(event)), std::move(channel));
   }
 };
 
