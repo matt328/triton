@@ -6,15 +6,13 @@ namespace ed {
 ApplicationController::ApplicationController(std::shared_ptr<tr::IEventQueue> newEventQueue)
     : eventQueue{std::move(newEventQueue)} {
   eventQueue->subscribe<tr::AddStaticModel>(
-      [&](const std::shared_ptr<tr::AddStaticModel>& event) { handleAddStaticModel(event); });
+      [&](const auto& event) { handleAddStaticModel(event); });
 
   eventQueue->subscribe<tr::AddStaticGeometry>(
       [&](const auto& event) { handleAddStaticGeometry(event); });
 
   eventQueue->subscribe<tr::StaticModelUploaded>(
-      [&](const std::shared_ptr<tr::StaticModelUploaded>& event) {
-        handleStaticModelUploaded(event);
-      });
+      [&](const auto& event) { handleStaticModelUploaded(event); });
 }
 
 auto ApplicationController::handleAddStaticModel(const std::shared_ptr<tr::AddStaticModel>& event)

@@ -1,7 +1,7 @@
 #include "fx/ThreadedFrameworkContext.hpp"
 #include "ActionSystem.hpp"
 #include "DefaultAssetService.hpp"
-#include "EventQueue.hpp"
+#include "EventQueue2.hpp"
 #include "GlfwWindow.hpp"
 #include "api/fx/IApplication.hpp"
 #include "api/fx/IAssetService.hpp"
@@ -24,7 +24,7 @@ auto ThreadedFrameworkContext::create(const FrameworkConfig& config,
                                       std::shared_ptr<IGuiCallbackRegistrar> guiCallbackRegistrar)
     -> std::shared_ptr<ThreadedFrameworkContext> {
 
-  auto eventQueue = std::make_shared<EventQueue>();
+  auto eventQueue = std::make_shared<EventQueue2>();
   auto actionSystem = std::make_shared<ActionSystem>(eventQueue);
 
   auto taskQueue = std::make_shared<TaskQueue>(TaskQueueConfig{.maxQueueSize = 1024});
