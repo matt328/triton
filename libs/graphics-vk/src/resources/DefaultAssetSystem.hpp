@@ -1,6 +1,7 @@
 #pragma once
 
 #include "api/fx/Events.hpp"
+#include "api/fx/IEventQueue.hpp"
 #include "as/StaticVertex.hpp"
 #include "buffers/ImageUploadPlan.hpp"
 #include "buffers/UploadPlan.hpp"
@@ -21,6 +22,15 @@ class ImageManager;
 class TextureArena;
 
 constexpr uint32_t MaxBatchSize = 5;
+
+struct EmitEventVisitor {
+  std::shared_ptr<IEventQueue> eventQueue;
+
+  template <typename T>
+  void operator()(const T& event) const {
+    eventQueue->emit(event);
+  }
+};
 
 class DefaultAssetSystem : public IAssetSystem {
 public:

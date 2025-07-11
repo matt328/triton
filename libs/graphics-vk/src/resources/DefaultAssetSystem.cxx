@@ -128,7 +128,7 @@ auto DefaultAssetSystem::handleEndResourceBatch(uint64_t batchId) -> void {
       std::visit(ImageUploadPlan::ResponseEventVisitor{textureHandle}, inFlight.responseEvent);
       inFlight.remainingComponents--;
       if (inFlight.remainingComponents == 0) {
-        eventQueue->emit(inFlight.responseEvent);
+        std::visit(EmitEventVisitor{eventQueue}, inFlight.responseEvent);
         inFlightUploads.erase(requestId);
       }
     }
@@ -141,7 +141,7 @@ auto DefaultAssetSystem::handleEndResourceBatch(uint64_t batchId) -> void {
     // Find some way to tighten this up a bit.
     inFlight.remainingComponents--;
     if (inFlight.remainingComponents == 0) {
-      eventQueue->emit(inFlight.responseEvent);
+      std::visit(EmitEventVisitor{eventQueue}, inFlight.responseEvent);
       inFlightUploads.erase(requestId);
     }
   }
