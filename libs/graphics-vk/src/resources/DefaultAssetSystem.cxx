@@ -88,9 +88,7 @@ auto DefaultAssetSystem::requestStop() -> void {
 
 auto DefaultAssetSystem::modelPartComplete(uint64_t requestId) -> void {
   auto& inFlight = inFlightUploads[requestId];
-  if (--inFlight.remainingComponents == 0) {
-    inFlight.responseEvent
-  }
+  if (--inFlight.remainingComponents == 0) {}
 }
 
 auto DefaultAssetSystem::handleEndResourceBatch(uint64_t batchId) -> void {
@@ -99,15 +97,14 @@ auto DefaultAssetSystem::handleEndResourceBatch(uint64_t batchId) -> void {
   auto imageUploadPlan =
       ImageUploadPlan{.stagingBuffer = transferSystem->getTransferContext().imageStagingBuffer};
 
-  std::vector<StaticModelUploaded> responses{};
   for (auto& eventVariant : eventBatches[batchId]) {
     auto visitor = [&](auto&& arg) -> void {
       using T = std::decay_t<decltype(arg)>;
       if constexpr (std::is_same_v<T, std::shared_ptr<StaticModelRequest>>) {
-        handleStaticModelRequest(arg, uploadPlan, imageUploadPlan, responses);
+        handleStaticModelRequest(arg, uploadPlan, imageUploadPlan);
       }
       if constexpr (std::is_same_v<T, std::shared_ptr<StaticMeshRequest>>) {
-        handleStaticMeshRequest(arg, uploadPlan, responses);
+        handleStaticMeshRequest(arg, uploadPlan);
       }
       if constexpr (std::is_same_v<T, std::shared_ptr<DynamicModelRequest>>) {
         Log.trace("Handling Dynamic Model Request ID: {}", arg->requestId);
@@ -118,36 +115,42 @@ auto DefaultAssetSystem::handleEndResourceBatch(uint64_t batchId) -> void {
 
   transferSystem->upload(uploadPlan, imageUploadPlan);
 
-  for (const auto& upload : imageUploadPlan.uploads) {
-    const auto& image = imageManager->getImage(upload.dstImage);
-    const auto& sampler = imageManager->getSampler(imageManager->getDefaultSampler());
-    auto handle = textureArena->insert(image.getImageView(), sampler);
-    auto textureHandle = textureHandleMapper->toPublic(handle);
-
-    auto& inFlight = inFlightUploads[upload.requestId];
-    // set the textureHandle in the inFlight
-    // generalize this more into just updating the inFlight.
-    // consider putting the geometry handle in the upload so that we just update the inFlight with
-    // the upload after the upload's been processed that way that sme method can check to see if the
-    // response is ready to be emitted yet or not
-
-    for (auto& response : responses) {
-      if (response.requestId == upload.requestId) {
-        response.textureHandle.emplace(textureHandle);
+  // Post process image uploads, creating and adding texture handles
+  for (const auto& [requestId, uploads] : imageUploadPlan.uploadsByRequest) {
+    for (const auto& upload : uploads) {
+      // Create a Texture (image+sampler)
+      const auto& image = imageManager->getImage(upload.dstImage);
+      const auto& sampler = imageManager->getSampler(imageManager->getDefaultSampler());
+      auto handle = textureArena->insert(image.getImageView(), sampler);
+      auto textureHandle = textureHandleMapper->toPublic(handle);
+      // Set the texture in the *Uploaded event
+      auto& inFlight = inFlightUploads.at(requestId);
+      std::visit(ImageUploadPlan::ResponseEventVisitor{textureHandle}, inFlight.responseEvent);
+      inFlight.remainingComponents--;
+      if (inFlight.remainingComponents == 0) {
+        eventQueue->emit(inFlight.responseEvent);
+        inFlightUploads.erase(requestId);
       }
     }
   }
 
-  for (const auto& response : responses) {
-    eventQueue->emit(response);
+  for (const auto& [requestId, bufferUpload] : uploadPlan.uploadsByRequest) {
+    auto& inFlight = inFlightUploads.at(requestId);
+    auto geometryHandle = uploadPlan.geometryDataByRequest.at(requestId);
+    std::visit(UploadPlan::ResponseEventVisitor{geometryHandle}, inFlight.responseEvent);
+    // Find some way to tighten this up a bit.
+    inFlight.remainingComponents--;
+    if (inFlight.remainingComponents == 0) {
+      eventQueue->emit(inFlight.responseEvent);
+      inFlightUploads.erase(requestId);
+    }
   }
 }
 
 auto DefaultAssetSystem::handleStaticModelRequest(
     const std::shared_ptr<StaticModelRequest>& smRequest,
     UploadPlan& uploadPlan,
-    ImageUploadPlan& imageUploadPlan,
-    std::vector<StaticModelUploaded>& responses) -> void {
+    ImageUploadPlan& imageUploadPlan) -> void {
   ZoneScoped;
   Log.trace("Handling Static Model Request ID: {}", smRequest->requestId);
 
@@ -156,42 +159,31 @@ auto DefaultAssetSystem::handleStaticModelRequest(
   const auto [regionHandle, uploads] =
       geometryAllocator->allocate(*geometryData, transferSystem->getTransferContext());
 
-  inFlightUploads.emplace(
-      smRequest->requestId,
-      InFlightUpload::from(*smRequest, geometryHandleMapper->toPublic(regionHandle)));
+  inFlightUploads.emplace(smRequest->requestId, InFlightUpload::from(*smRequest));
 
-  responses.push_back(StaticModelUploaded{
-      .batchId = smRequest->batchId,
-      .requestId = smRequest->requestId,
-      .entityName = smRequest->entityName,
-      .geometryHandle = geometryHandleMapper->toPublic(regionHandle),
-  });
-
-  uploadPlan.uploads.insert(uploadPlan.uploads.end(), uploads.begin(), uploads.end());
+  for (const auto& upload : uploads) {
+    uploadPlan.uploadsByRequest[smRequest->requestId].push_back(upload);
+  }
+  uploadPlan.geometryDataByRequest.emplace(smRequest->requestId,
+                                           geometryHandleMapper->toPublic(regionHandle));
 
   const auto imageUploadData = fromImageData(model.imageData, smRequest->requestId);
-  imageUploadPlan.uploads.insert(imageUploadPlan.uploads.end(),
-                                 imageUploadData.begin(),
-                                 imageUploadData.end());
+  for (const auto& imageUpload : imageUploadData) {
+    imageUploadPlan.uploadsByRequest[smRequest->requestId].push_back(imageUpload);
+  }
 }
 
 auto DefaultAssetSystem::handleStaticMeshRequest(
     const std::shared_ptr<StaticMeshRequest>& smRequest,
-    UploadPlan& uploadPlan,
-    std::vector<StaticModelUploaded>& responses) -> void {
+    UploadPlan& uploadPlan) -> void {
   ZoneScoped;
   Log.trace("Handling Static Mesh Request ID: {}", smRequest->requestId);
   const auto [regionHandle, uploads] =
       geometryAllocator->allocate(smRequest->geometryData, transferSystem->getTransferContext());
 
-  responses.push_back(StaticModelUploaded{
-      .batchId = smRequest->batchId,
-      .requestId = smRequest->requestId,
-      .entityName = smRequest->entityName,
-      .geometryHandle = geometryHandleMapper->toPublic(regionHandle),
-  });
-
-  uploadPlan.uploads.insert(uploadPlan.uploads.end(), uploads.begin(), uploads.end());
+  for (const auto& upload : uploads) {
+    uploadPlan.uploadsByRequest[smRequest->requestId].push_back(upload);
+  }
 }
 
 auto DefaultAssetSystem::deInterleave(const std::vector<as::StaticVertex>& vertices,

@@ -8,14 +8,12 @@ using ResponseVariant = std::variant<StaticMeshUploaded, StaticModelUploaded, Dy
 
 struct InFlightUpload {
 
-  static auto from(const StaticModelRequest& req, Handle<Geometry> geometryHandle)
-      -> InFlightUpload {
+  static auto from(const StaticModelRequest& req) -> InFlightUpload {
     return {.requestId = req.requestId,
             .remainingComponents = 2,
             .responseEvent = StaticModelUploaded{.batchId = req.batchId,
                                                  .requestId = req.requestId,
-                                                 .entityName = req.entityName,
-                                                 .geometryHandle = geometryHandle}};
+                                                 .entityName = req.entityName}};
   }
 
   static auto from(const StaticMeshRequest& req) -> InFlightUpload {

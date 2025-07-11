@@ -70,12 +70,10 @@ private:
 
   auto handleStaticModelRequest(const std::shared_ptr<StaticModelRequest>& smRequest,
                                 UploadPlan& uploadPlan,
-                                ImageUploadPlan& imageUploadPlan,
-                                std::vector<StaticModelUploaded>& responses) -> void;
+                                ImageUploadPlan& imageUploadPlan) -> void;
 
   auto handleStaticMeshRequest(const std::shared_ptr<StaticMeshRequest>& smRequest,
-                               UploadPlan& uploadPlan,
-                               std::vector<StaticModelUploaded>& responses) -> void;
+                               UploadPlan& uploadPlan) -> void;
 
   auto modelPartComplete(uint64_t requestId) -> void;
 

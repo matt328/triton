@@ -1,5 +1,6 @@
 #pragma once
 
+#include "api/fx/ResourceEvents.hpp"
 #include "bk/Handle.hpp"
 #include "buffers/ManagedBuffer.hpp"
 #include "img/ManagedImage.hpp"
@@ -20,9 +21,20 @@ struct ImageUploadData {
 };
 
 struct ImageUploadPlan {
-  std::vector<ImageUploadData> uploads{};
+  std::unordered_map<uint64_t, std::vector<ImageUploadData>> uploadsByRequest{};
   size_t stagingSize{};
   Handle<ManagedBuffer> stagingBuffer;
+
+  struct ResponseEventVisitor {
+    Handle<TextureTag> textureHandle;
+
+    template <typename T>
+    void operator()(T& arg) const {
+      if constexpr (std::is_same_v<T, StaticModelUploaded>) {
+        arg.textureHandle.emplace(textureHandle);
+      }
+    }
+  };
 };
 
 }

@@ -46,7 +46,6 @@ TransferSystem::TransferSystem(std::shared_ptr<BufferSystem> newBufferSystem,
 
 auto TransferSystem::upload(UploadPlan& bufferPlan, ImageUploadPlan& imagePlan) -> void {
   ZoneScoped;
-  bufferPlan.sortByBuffer();
   transitionBatch = std::vector<ImageTransitionInfo>{};
 
   auto bufferResizes = checkSizes(bufferPlan);
@@ -72,7 +71,7 @@ auto TransferSystem::upload(UploadPlan& bufferPlan, ImageUploadPlan& imagePlan) 
 
 auto TransferSystem::prepareBufferStagingData(const UploadPlan& bufferPlan) -> BufferCopyMap {
   auto bufferCopies = BufferCopyMap{};
-  for (const auto& upload : bufferPlan.uploads) {
+  for (const auto& upload : bufferPlan.getSortedUploads()) {
     Log.trace("Copying into staging buffer offset={}, size={}, dstBuffer={}",
               upload.stagingOffset,
               upload.dataSize,
@@ -96,22 +95,23 @@ auto TransferSystem::prepareBufferStagingData(const UploadPlan& bufferPlan) -> B
 
 auto TransferSystem::prepareImageStagingData(const ImageUploadPlan& imagePlan) -> ImageCopyMap {
   auto imageCopies = ImageCopyMap{};
-  for (const auto& imageUpload : imagePlan.uploads) {
+  for (const auto& [_, imageUploads] : imagePlan.uploadsByRequest) {
+    for (const auto& imageUpload : imageUploads) {
+      const auto region = bufferSystem->insert(
+          transferContext.imageStagingBuffer,
+          imageUpload.data->data(),
+          BufferRegion{.offset = imageUpload.stagingBufferOffset, .size = imageUpload.dataSize});
 
-    const auto region = bufferSystem->insert(
-        transferContext.imageStagingBuffer,
-        imageUpload.data->data(),
-        BufferRegion{.offset = imageUpload.stagingBufferOffset, .size = imageUpload.dataSize});
-
-    const auto copyInfo = vk::BufferImageCopy2{
-        .bufferOffset = region->offset,
-        .bufferRowLength = 0,
-        .bufferImageHeight = 0,
-        .imageSubresource = imageUpload.subresource,
-        .imageOffset = imageUpload.imageOffset,
-        .imageExtent = imageUpload.imageExtent,
-    };
-    imageCopies.emplace(imageUpload.dstImage, std::vector<vk::BufferImageCopy2>{copyInfo});
+      const auto copyInfo = vk::BufferImageCopy2{
+          .bufferOffset = region->offset,
+          .bufferRowLength = 0,
+          .bufferImageHeight = 0,
+          .imageSubresource = imageUpload.subresource,
+          .imageOffset = imageUpload.imageOffset,
+          .imageExtent = imageUpload.imageExtent,
+      };
+      imageCopies.emplace(imageUpload.dstImage, std::vector<vk::BufferImageCopy2>{copyInfo});
+    }
   }
   return imageCopies;
 }
