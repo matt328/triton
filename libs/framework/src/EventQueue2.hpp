@@ -35,10 +35,16 @@ public:
     {
       std::lock_guard lock(globalMutex);
       for (auto& [channel, queue] : eventQueues) {
-        for (auto& [type, payload] : queue) {
-          data.dispatchQueue.emplace_back(type, std::move(payload));
+        auto it = queue.begin();
+        while (it != queue.end()) {
+          auto& [type, payload] = *it;
+          if (data.handlers.contains(type)) {
+            data.dispatchQueue.emplace_back(type, std::move(payload));
+            it = queue.erase(it);
+          } else {
+            ++it;
+          }
         }
-        queue.clear();
       }
     }
 

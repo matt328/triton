@@ -1,6 +1,7 @@
 #include "GlfwWindow.hpp"
 
 #include "api/action/KeyMap.hpp"
+#include "api/fx/Events.hpp"
 #include "api/fx/IEventQueue.hpp"
 #include "api/fx/IGuiAdapter.hpp"
 #include "IconData.hpp"
@@ -100,9 +101,8 @@ GlfwWindow::GlfwWindow(const WindowCreateInfo& createInfo,
     Log.warn("Error initializing GLFW");
   }
 
-  eventBus->subscribe<tr::WindowClosed>([&]([[maybe_unused]] const tr::WindowClosed& event) {
-    glfwSetWindowShouldClose(window, GLFW_TRUE);
-  });
+  eventBus->subscribe<tr::WindowClosed>(
+      [&]([[maybe_unused]] const auto& event) { glfwSetWindowShouldClose(window, GLFW_TRUE); });
 }
 
 GlfwWindow::~GlfwWindow() {

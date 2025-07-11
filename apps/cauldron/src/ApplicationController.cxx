@@ -1,5 +1,6 @@
 #include "ApplicationController.hpp"
 #include "api/fx/IEventQueue.hpp"
+#include "api/fx/ResourceEvents.hpp"
 
 namespace ed {
 

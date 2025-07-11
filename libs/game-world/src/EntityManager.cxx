@@ -51,13 +51,13 @@ EntityManager::EntityManager(std::shared_ptr<IEventQueue> newEventQueue,
   });
 
   eventQueue->subscribe<tr::SelectEntity>(
-      [this](const std::shared_ptr<tr::SelectEntity>& event) { selectEntity(event->entityId); });
+      [this](const auto& event) { selectEntity(event->entityId); });
 
   eventQueue->subscribe<tr::SaveProject>(
-      [this](const std::shared_ptr<tr::SaveProject>& event) { saveProject(event->filePath); });
+      [this](const auto& event) { saveProject(event->filePath); });
 
   eventQueue->subscribe<tr::LoadProject>(
-      [this](const std::shared_ptr<tr::LoadProject>& event) { loadProject(event->filePath); });
+      [this](const auto& event) { loadProject(event->filePath); });
 
   eventQueue->subscribe<tr::CreateStaticGameObject>(
       [this](const std::shared_ptr<tr::CreateStaticGameObject>& event) {
@@ -204,6 +204,7 @@ auto EntityManager::saveProject(const std::filesystem::path& filePath) -> void {
 }
 
 auto EntityManager::loadProject(const std::filesystem::path& filePath) -> void {
+  Log.trace("loadProject filePath={}", filePath.string());
   auto is = std::ifstream(filePath, std::ios::binary);
   cereal::BinaryInputArchive input(is);
   auto project = Project{};

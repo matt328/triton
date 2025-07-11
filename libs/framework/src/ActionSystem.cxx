@@ -1,4 +1,5 @@
 #include "ActionSystem.hpp"
+#include "api/fx/Events.hpp"
 #include "api/fx/IEventQueue.hpp"
 
 namespace tr {
@@ -8,13 +9,13 @@ ActionSystem::ActionSystem(std::shared_ptr<IEventQueue> newEventQueue)
 
   Log.debug("Creating ActionSystem");
 
-  eventQueue->subscribe<MouseCaptured>([&](const std::shared_ptr<MouseCaptured>& event) {
+  eventQueue->subscribe<MouseCaptured>([&](const auto& event) {
     if (event->isMouseCaptured) {
       firstMouse = true;
     }
   });
 
-  eventQueue->subscribe<KeyEvent>([&](const std::shared_ptr<KeyEvent>& event) {
+  eventQueue->subscribe<KeyEvent>([&](const auto& event) {
     const auto sourceIt = keyActionMap.find(event->key);
     if (sourceIt == keyActionMap.end()) {
       return;
@@ -29,7 +30,7 @@ ActionSystem::ActionSystem(std::shared_ptr<IEventQueue> newEventQueue)
     }
   });
 
-  eventQueue->subscribe<MouseMoved>([&](const std::shared_ptr<MouseMoved>& event) {
+  eventQueue->subscribe<MouseMoved>([&](const auto& event) {
     const auto deltaX = static_cast<float>(prevX - event->x);
     const auto deltaY = static_cast<float>(prevY - event->y);
 

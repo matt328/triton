@@ -57,16 +57,20 @@ private:
 
   std::jthread thread;
 
-  std::unordered_map<uint64_t, std::vector<std::shared_ptr<EventVariant>>> eventBatches;
+  using RequestVariant = std::variant<std::shared_ptr<StaticMeshRequest>,
+                                      std::shared_ptr<StaticModelRequest>,
+                                      std::shared_ptr<DynamicModelRequest>>;
+
+  std::unordered_map<uint64_t, std::vector<RequestVariant>> eventBatches;
 
   auto handleEndResourceBatch(uint64_t batchId) -> void;
 
-  auto handleStaticModelRequest(const StaticModelRequest& smRequest,
+  auto handleStaticModelRequest(const std::shared_ptr<StaticModelRequest>& smRequest,
                                 UploadPlan& uploadPlan,
                                 ImageUploadPlan& imageUploadPlan,
                                 std::vector<StaticModelUploaded>& responses) -> void;
 
-  auto handleStaticMeshRequest(const StaticMeshRequest& smRequest,
+  auto handleStaticMeshRequest(const std::shared_ptr<StaticMeshRequest>& smRequest,
                                UploadPlan& uploadPlan,
                                std::vector<StaticModelUploaded>& responses) -> void;
 

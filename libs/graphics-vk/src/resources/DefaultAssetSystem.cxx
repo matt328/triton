@@ -54,29 +54,18 @@ auto DefaultAssetSystem::run() -> void {
     Log.trace("Started AssetSystemThread");
     // Create all subscriptions on the thread
     eventQueue->subscribe<BeginResourceBatch>(
-        [this](const auto& batch) {
-          eventBatches[batch->batchId] = std::vector<std::shared_ptr<EventVariant>>{};
-        },
+        [this](const auto& batch) { eventBatches[batch->batchId] = std::vector<RequestVariant>{}; },
         "test_group");
 
     eventQueue->subscribe<StaticModelRequest>(
-        [this](const StaticModelRequest& smRequest,
-               const std::shared_ptr<EventVariant>& eventVariant) {
-          eventBatches[smRequest.batchId].push_back(eventVariant);
-        },
+        [this](const auto& smRequest) { eventBatches[smRequest->batchId].push_back(smRequest); },
         "test_group");
     eventQueue->subscribe<StaticMeshRequest>(
-        [this](const StaticMeshRequest& smRequest,
-               const std::shared_ptr<EventVariant>& eventVariant) {
-          eventBatches[smRequest.batchId].push_back(eventVariant);
-        },
+        [this](const auto& smRequest) { eventBatches[smRequest->batchId].push_back(smRequest); },
         "test_group");
 
     eventQueue->subscribe<DynamicModelRequest>(
-        [this](const DynamicModelRequest& dmRequest,
-               const std::shared_ptr<EventVariant>& eventVariant) {
-          eventBatches[dmRequest.batchId].push_back(eventVariant);
-        },
+        [this](const auto& dmRequest) { eventBatches[dmRequest->batchId].push_back(dmRequest); },
         "test_group");
 
     eventQueue->subscribe<EndResourceBatch>(
@@ -104,26 +93,20 @@ auto DefaultAssetSystem::handleEndResourceBatch(uint64_t batchId) -> void {
       ImageUploadPlan{.stagingBuffer = transferSystem->getTransferContext().imageStagingBuffer};
 
   std::vector<StaticModelUploaded> responses{};
-  auto i = 0;
   for (auto& eventVariant : eventBatches[batchId]) {
-    if (eventVariant == nullptr) {
-      Log.warn("eventBatch {} has a null event", i);
-      continue;
-    }
     auto visitor = [&](auto&& arg) -> void {
       using T = std::decay_t<decltype(arg)>;
-      if constexpr (std::is_same_v<T, StaticModelRequest>) {
+      if constexpr (std::is_same_v<T, std::shared_ptr<StaticModelRequest>>) {
         handleStaticModelRequest(arg, uploadPlan, imageUploadPlan, responses);
       }
-      if constexpr (std::is_same_v<T, StaticMeshRequest>) {
+      if constexpr (std::is_same_v<T, std::shared_ptr<StaticMeshRequest>>) {
         handleStaticMeshRequest(arg, uploadPlan, responses);
       }
-      if constexpr (std::is_same_v<T, DynamicModelRequest>) {
-        Log.trace("Handling Dynamic Model Request ID: {}", arg.requestId);
+      if constexpr (std::is_same_v<T, std::shared_ptr<DynamicModelRequest>>) {
+        Log.trace("Handling Dynamic Model Request ID: {}", arg->requestId);
       }
     };
-    std::visit(visitor, *eventVariant);
-    ++i;
+    std::visit(visitor, eventVariant);
   }
 
   transferSystem->upload(uploadPlan, imageUploadPlan);
@@ -145,14 +128,14 @@ auto DefaultAssetSystem::handleEndResourceBatch(uint64_t batchId) -> void {
   }
 }
 
-auto DefaultAssetSystem::handleStaticModelRequest(const StaticModelRequest& smRequest,
-                                                  UploadPlan& uploadPlan,
-                                                  ImageUploadPlan& imageUploadPlan,
-                                                  std::vector<StaticModelUploaded>& responses)
-    -> void {
+auto DefaultAssetSystem::handleStaticModelRequest(
+    const std::shared_ptr<StaticModelRequest>& smRequest,
+    UploadPlan& uploadPlan,
+    ImageUploadPlan& imageUploadPlan,
+    std::vector<StaticModelUploaded>& responses) -> void {
   ZoneScoped;
-  Log.trace("Handling Static Model Request ID: {}", smRequest.requestId);
-  const auto& model = assetService->loadModel(smRequest.modelFilename);
+  Log.trace("Handling Static Model Request ID: {}", smRequest->requestId);
+  const auto& model = assetService->loadModel(smRequest->modelFilename);
 
   const auto geometryData = deInterleave(*model.staticVertices, model.indices);
 
@@ -160,33 +143,33 @@ auto DefaultAssetSystem::handleStaticModelRequest(const StaticModelRequest& smRe
       geometryAllocator->allocate(*geometryData, transferSystem->getTransferContext());
 
   responses.push_back(StaticModelUploaded{
-      .batchId = smRequest.batchId,
-      .requestId = smRequest.requestId,
-      .entityName = smRequest.entityName,
+      .batchId = smRequest->batchId,
+      .requestId = smRequest->requestId,
+      .entityName = smRequest->entityName,
       .geometryHandle = geometryHandleMapper->toPublic(regionHandle),
   });
 
   uploadPlan.uploads.insert(uploadPlan.uploads.end(), uploads.begin(), uploads.end());
 
-  const auto imageUploadData = fromImageData(model.imageData, smRequest.requestId);
+  const auto imageUploadData = fromImageData(model.imageData, smRequest->requestId);
   imageUploadPlan.uploads.insert(imageUploadPlan.uploads.end(),
                                  imageUploadData.begin(),
                                  imageUploadData.end());
 }
 
-auto DefaultAssetSystem::handleStaticMeshRequest(const StaticMeshRequest& smRequest,
-                                                 UploadPlan& uploadPlan,
-                                                 std::vector<StaticModelUploaded>& responses)
-    -> void {
+auto DefaultAssetSystem::handleStaticMeshRequest(
+    const std::shared_ptr<StaticMeshRequest>& smRequest,
+    UploadPlan& uploadPlan,
+    std::vector<StaticModelUploaded>& responses) -> void {
   ZoneScoped;
-  Log.trace("Handling Static Mesh Request ID: {}", smRequest.requestId);
+  Log.trace("Handling Static Mesh Request ID: {}", smRequest->requestId);
   const auto [regionHandle, uploads] =
-      geometryAllocator->allocate(smRequest.geometryData, transferSystem->getTransferContext());
+      geometryAllocator->allocate(smRequest->geometryData, transferSystem->getTransferContext());
 
   responses.push_back(StaticModelUploaded{
-      .batchId = smRequest.batchId,
-      .requestId = smRequest.requestId,
-      .entityName = smRequest.entityName,
+      .batchId = smRequest->batchId,
+      .requestId = smRequest->requestId,
+      .entityName = smRequest->entityName,
       .geometryHandle = geometryHandleMapper->toPublic(regionHandle),
   });
 
