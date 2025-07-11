@@ -6,6 +6,7 @@
 #include "buffers/UploadPlan.hpp"
 #include "gfx/HandleMapperTypes.hpp"
 #include "gfx/IAssetSystem.hpp"
+#include "resources/InFlightUpload.hpp"
 
 namespace tr {
 
@@ -63,6 +64,8 @@ private:
 
   std::unordered_map<uint64_t, std::vector<RequestVariant>> eventBatches;
 
+  std::unordered_map<uint64_t, InFlightUpload> inFlightUploads;
+
   auto handleEndResourceBatch(uint64_t batchId) -> void;
 
   auto handleStaticModelRequest(const std::shared_ptr<StaticModelRequest>& smRequest,
@@ -73,6 +76,8 @@ private:
   auto handleStaticMeshRequest(const std::shared_ptr<StaticMeshRequest>& smRequest,
                                UploadPlan& uploadPlan,
                                std::vector<StaticModelUploaded>& responses) -> void;
+
+  auto modelPartComplete(uint64_t requestId) -> void;
 
   /// Eventually Update the TRM model formats to store data on disk in a deinterleaved format so
   /// this method is unnecessary, but just convert it here for now.

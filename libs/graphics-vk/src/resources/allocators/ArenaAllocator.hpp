@@ -15,11 +15,18 @@ public:
   auto operator=(ArenaAllocator&&) -> ArenaAllocator& = delete;
 
   auto allocate(const BufferRequest& requestData) -> std::optional<BufferRegion> override;
+  auto needsResize() -> bool override;
+  [[nodiscard]] auto getRecommendedSize() const -> size_t override;
+  auto notifyBufferResized(size_t newSize) -> void override;
   auto freeRegion(const BufferRegion& region) -> void override;
   auto reset() -> void override;
 
 private:
-  [[maybe_unused]] size_t initialSize{};
+  size_t currentBufferSize{};
+  size_t currentOffset = 0;
+
+  bool resizeRequired = false;
+  size_t lastFailedRequestSize = 0;
 };
 
 }

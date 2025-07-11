@@ -29,4 +29,15 @@ auto LinearAllocator::reset() -> void {
   currentOffset = 0;
 }
 
+auto LinearAllocator::needsResize() -> bool {
+  return false;
+}
+
+auto LinearAllocator::getRecommendedSize() const -> size_t {
+  return maxBufferSize;
+}
+
+auto LinearAllocator::notifyBufferResized(size_t newSize) -> void {
+}
+
 }

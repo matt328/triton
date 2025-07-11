@@ -86,6 +86,13 @@ auto DefaultAssetSystem::requestStop() -> void {
   thread.request_stop();
 }
 
+auto DefaultAssetSystem::modelPartComplete(uint64_t requestId) -> void {
+  auto& inFlight = inFlightUploads[requestId];
+  if (--inFlight.remainingComponents == 0) {
+    inFlight.responseEvent
+  }
+}
+
 auto DefaultAssetSystem::handleEndResourceBatch(uint64_t batchId) -> void {
   ZoneScoped;
   auto uploadPlan = UploadPlan{.stagingBuffer = transferSystem->getTransferContext().stagingBuffer};
@@ -116,6 +123,14 @@ auto DefaultAssetSystem::handleEndResourceBatch(uint64_t batchId) -> void {
     const auto& sampler = imageManager->getSampler(imageManager->getDefaultSampler());
     auto handle = textureArena->insert(image.getImageView(), sampler);
     auto textureHandle = textureHandleMapper->toPublic(handle);
+
+    auto& inFlight = inFlightUploads[upload.requestId];
+    // set the textureHandle in the inFlight
+    // generalize this more into just updating the inFlight.
+    // consider putting the geometry handle in the upload so that we just update the inFlight with
+    // the upload after the upload's been processed that way that sme method can check to see if the
+    // response is ready to be emitted yet or not
+
     for (auto& response : responses) {
       if (response.requestId == upload.requestId) {
         response.textureHandle.emplace(textureHandle);
@@ -135,12 +150,15 @@ auto DefaultAssetSystem::handleStaticModelRequest(
     std::vector<StaticModelUploaded>& responses) -> void {
   ZoneScoped;
   Log.trace("Handling Static Model Request ID: {}", smRequest->requestId);
+
   const auto& model = assetService->loadModel(smRequest->modelFilename);
-
   const auto geometryData = deInterleave(*model.staticVertices, model.indices);
-
   const auto [regionHandle, uploads] =
       geometryAllocator->allocate(*geometryData, transferSystem->getTransferContext());
+
+  inFlightUploads.emplace(
+      smRequest->requestId,
+      InFlightUpload::from(*smRequest, geometryHandleMapper->toPublic(regionHandle)));
 
   responses.push_back(StaticModelUploaded{
       .batchId = smRequest->batchId,
