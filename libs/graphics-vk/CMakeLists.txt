@@ -37,6 +37,7 @@ set(graphicsvk_SRC
 
   src/resources/DefaultAssetSystem.cxx
   src/resources/TransferSystem.cxx
+  src/resources/ModelProcessor.cxx
   src/resources/allocators/LinearAllocator.cxx
   src/resources/allocators/GeometryAllocator.cxx
   src/resources/allocators/ArenaAllocator.cxx

@@ -74,27 +74,20 @@ private:
 
   std::unordered_map<uint64_t, std::vector<RequestVariant>> eventBatches;
 
-  std::unordered_map<uint64_t, InFlightUpload> inFlightUploads;
+  InFlightUploadMap inFlightUploads;
 
-  auto handleEndResourceBatch(uint64_t batchId) -> void;
+  auto processesBatchedResources(uint64_t batchId) -> void;
 
-  auto handleStaticModelRequest(const std::shared_ptr<StaticModelRequest>& smRequest,
-                                UploadPlan& uploadPlan,
-                                ImageUploadPlan& imageUploadPlan) -> void;
+  auto processStaticModelRequest(const std::shared_ptr<StaticModelRequest>& smRequest,
+                                 UploadPlan& uploadPlan,
+                                 ImageUploadPlan& imageUploadPlan) -> void;
 
-  auto handleStaticMeshRequest(const std::shared_ptr<StaticMeshRequest>& smRequest,
-                               UploadPlan& uploadPlan) -> void;
+  auto processStaticMeshRequest(const std::shared_ptr<StaticMeshRequest>& smRequest,
+                                UploadPlan& uploadPlan) -> void;
 
-  auto modelPartComplete(uint64_t requestId) -> void;
+  auto collectUploads(uint64_t batchId) -> std::tuple<UploadPlan, ImageUploadPlan>;
 
-  /// Eventually Update the TRM model formats to store data on disk in a deinterleaved format so
-  /// this method is unnecessary, but just convert it here for now.
-  auto deInterleave(const std::vector<as::StaticVertex>& vertices,
-                    const std::vector<uint32_t>& indexData) -> std::unique_ptr<GeometryData>;
-  auto fromImageData(const as::ImageData& imageData, uint64_t requestId)
-      -> std::vector<ImageUploadData>;
-
-  static auto getVkFormat(int bits, int component) -> vk::Format;
+  auto finalizeResponses(UploadPlan& uploadPlan, ImageUploadPlan& imageUploadPlan) -> void;
 };
 
 }

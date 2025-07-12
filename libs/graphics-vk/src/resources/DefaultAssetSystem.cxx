@@ -14,6 +14,7 @@
 #include "resources/ByteConverters.hpp"
 #include "resources/TransferSystem.hpp"
 #include "resources/allocators/GeometryAllocator.hpp"
+#include "ModelProcessor.hpp"
 
 namespace tr {
 
@@ -70,7 +71,7 @@ auto DefaultAssetSystem::run() -> void {
 
     eventQueue->subscribe<EndResourceBatch>(
         [this](const std::shared_ptr<EndResourceBatch>& batch) {
-          handleEndResourceBatch(batch->batchId);
+          processesBatchedResources(batch->batchId);
         },
         "test_group");
 
@@ -86,36 +87,51 @@ auto DefaultAssetSystem::requestStop() -> void {
   thread.request_stop();
 }
 
-auto DefaultAssetSystem::modelPartComplete(uint64_t requestId) -> void {
-  auto& inFlight = inFlightUploads[requestId];
-  if (--inFlight.remainingComponents == 0) {}
+auto DefaultAssetSystem::processesBatchedResources(uint64_t batchId) -> void {
+  ZoneScoped;
+  auto [uploadPlan, imageUploadPlan] = collectUploads(batchId);
+  transferSystem->upload(uploadPlan, imageUploadPlan);
+  finalizeResponses(uploadPlan, imageUploadPlan);
 }
 
-auto DefaultAssetSystem::handleEndResourceBatch(uint64_t batchId) -> void {
-  ZoneScoped;
+auto DefaultAssetSystem::collectUploads(uint64_t batchId)
+    -> std::tuple<UploadPlan, ImageUploadPlan> {
   auto uploadPlan = UploadPlan{.stagingBuffer = transferSystem->getTransferContext().stagingBuffer};
   auto imageUploadPlan =
       ImageUploadPlan{.stagingBuffer = transferSystem->getTransferContext().imageStagingBuffer};
 
+  struct RequestEventVisitor {
+    UploadPlan& uploadPlan;
+    ImageUploadPlan& imageUploadPlan;
+    DefaultAssetSystem* assetSystem;
+
+    void operator()(const std::shared_ptr<StaticModelRequest>& req) const {
+      assetSystem->processStaticModelRequest(req, uploadPlan, imageUploadPlan);
+    }
+
+    void operator()(const std::shared_ptr<StaticMeshRequest>& req) const {
+      assetSystem->processStaticMeshRequest(req, uploadPlan);
+    }
+
+    void operator()(const std::shared_ptr<DynamicModelRequest>& req) const {
+      Log.trace("Handling Dynamic Model Request ID: {}", req->requestId);
+    }
+  };
+
+  auto visitor = RequestEventVisitor{.uploadPlan = uploadPlan,
+                                     .imageUploadPlan = imageUploadPlan,
+                                     .assetSystem = this};
+
   for (auto& eventVariant : eventBatches[batchId]) {
-    auto visitor = [&](auto&& arg) -> void {
-      using T = std::decay_t<decltype(arg)>;
-      if constexpr (std::is_same_v<T, std::shared_ptr<StaticModelRequest>>) {
-        handleStaticModelRequest(arg, uploadPlan, imageUploadPlan);
-      }
-      if constexpr (std::is_same_v<T, std::shared_ptr<StaticMeshRequest>>) {
-        handleStaticMeshRequest(arg, uploadPlan);
-      }
-      if constexpr (std::is_same_v<T, std::shared_ptr<DynamicModelRequest>>) {
-        Log.trace("Handling Dynamic Model Request ID: {}", arg->requestId);
-      }
-    };
     std::visit(visitor, eventVariant);
   }
 
-  transferSystem->upload(uploadPlan, imageUploadPlan);
+  return {uploadPlan, imageUploadPlan};
+}
 
-  // Post process image uploads, creating and adding texture handles
+auto DefaultAssetSystem::finalizeResponses(UploadPlan& uploadPlan, ImageUploadPlan& imageUploadPlan)
+    -> void {
+  // Post process image uploads, creating and adding texture handles to inFlightUploads
   for (const auto& [requestId, uploads] : imageUploadPlan.uploadsByRequest) {
     for (const auto& upload : uploads) {
       // Create a Texture (image+sampler)
@@ -134,6 +150,7 @@ auto DefaultAssetSystem::handleEndResourceBatch(uint64_t batchId) -> void {
     }
   }
 
+  // Update inFlight uploads with geometry handles
   for (const auto& [requestId, bufferUpload] : uploadPlan.uploadsByRequest) {
     auto& inFlight = inFlightUploads.at(requestId);
     auto geometryHandle = uploadPlan.geometryDataByRequest.at(requestId);
@@ -147,33 +164,24 @@ auto DefaultAssetSystem::handleEndResourceBatch(uint64_t batchId) -> void {
   }
 }
 
-auto DefaultAssetSystem::handleStaticModelRequest(
+auto DefaultAssetSystem::processStaticModelRequest(
     const std::shared_ptr<StaticModelRequest>& smRequest,
     UploadPlan& uploadPlan,
     ImageUploadPlan& imageUploadPlan) -> void {
-  ZoneScoped;
-  Log.trace("Handling Static Model Request ID: {}", smRequest->requestId);
-
-  const auto& model = assetService->loadModel(smRequest->modelFilename);
-  const auto geometryData = deInterleave(*model.staticVertices, model.indices);
-  const auto [regionHandle, uploads] =
-      geometryAllocator->allocate(*geometryData, transferSystem->getTransferContext());
-
-  inFlightUploads.emplace(smRequest->requestId, InFlightUpload::from(*smRequest));
-
-  for (const auto& upload : uploads) {
-    uploadPlan.uploadsByRequest[smRequest->requestId].push_back(upload);
-  }
-  uploadPlan.geometryDataByRequest.emplace(smRequest->requestId,
-                                           geometryHandleMapper->toPublic(regionHandle));
-
-  const auto imageUploadData = fromImageData(model.imageData, smRequest->requestId);
-  for (const auto& imageUpload : imageUploadData) {
-    imageUploadPlan.uploadsByRequest[smRequest->requestId].push_back(imageUpload);
-  }
+  ModelProcessor::handle(smRequest,
+                         uploadPlan,
+                         imageUploadPlan,
+                         inFlightUploads,
+                         AssetSystems{
+                             .assetService = assetService,
+                             .geometryAllocator = geometryAllocator,
+                             .transferSystem = transferSystem,
+                             .geometryHandleMapper = geometryHandleMapper,
+                             .imageManager = imageManager,
+                         });
 }
 
-auto DefaultAssetSystem::handleStaticMeshRequest(
+auto DefaultAssetSystem::processStaticMeshRequest(
     const std::shared_ptr<StaticMeshRequest>& smRequest,
     UploadPlan& uploadPlan) -> void {
   ZoneScoped;
@@ -186,122 +194,4 @@ auto DefaultAssetSystem::handleStaticMeshRequest(
   }
 }
 
-auto DefaultAssetSystem::deInterleave(const std::vector<as::StaticVertex>& vertices,
-                                      const std::vector<uint32_t>& indexData)
-    -> std::unique_ptr<GeometryData> {
-  auto positions = std::make_shared<std::vector<GpuVertexPositionData>>();
-  auto texCoords = std::make_shared<std::vector<GpuVertexTexCoordData>>();
-  auto colors = std::make_shared<std::vector<GpuVertexColorData>>();
-  auto indices = std::make_shared<std::vector<GpuIndexData>>();
-
-  positions->reserve(vertices.size() * sizeof(GpuVertexPositionData));
-  texCoords->reserve(vertices.size() * sizeof(GpuVertexTexCoordData));
-  colors->reserve(vertices.size() * sizeof(GpuVertexColorData));
-  indices->reserve(indexData.size() * sizeof(GpuIndexData));
-
-  // TexCoord offsets i think are being set in bytes not elements
-
-  for (const auto& vertex : vertices) {
-    positions->emplace_back(vertex.position);
-    texCoords->emplace_back(vertex.texCoord);
-  }
-
-  for (auto index : indexData) {
-    indices->emplace_back(index);
-  }
-
-  auto indicesBytes = toByteVector(indices);
-  auto texCoordBytes = toByteVector(texCoords);
-  auto positionBytes = toByteVector(positions);
-
-  return std::make_unique<GeometryData>(GeometryData{.indexData = indicesBytes,
-                                                     .positionData = positionBytes,
-                                                     .colorData = nullptr,
-                                                     .texCoordData = texCoordBytes,
-                                                     .normalData = nullptr,
-                                                     .animationData = nullptr});
-}
-
-auto DefaultAssetSystem::fromImageData(const as::ImageData& imageData, uint64_t requestId)
-    -> std::vector<ImageUploadData> {
-  auto uploadDataList = std::vector<ImageUploadData>{};
-
-  auto data = std::vector<std::byte>{};
-  data.resize(imageData.data.size());
-  std::ranges::transform(imageData.data, data.begin(), [](unsigned char c) {
-    return static_cast<std::byte>(c);
-  });
-
-  const auto imageHandle = imageManager->createImage({
-      .logicalName = "ModelTexture",
-      .format = getVkFormat(imageData.bits, imageData.component),
-      .extent =
-          vk::Extent2D{
-              .width = static_cast<uint32_t>(imageData.width),
-              .height = static_cast<uint32_t>(imageData.height),
-          },
-      .usageFlags = vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferDst,
-      .aspectFlags = vk::ImageAspectFlagBits::eColor,
-      .debugName = "ModelTexture",
-  });
-
-  auto stagingBufferOffset =
-      transferSystem->getTransferContext().imageStagingAllocator->allocate({.size = data.size()});
-
-  uploadDataList.push_back(ImageUploadData{
-      .data = std::make_shared<std::vector<std::byte>>(data),
-      .dataSize = data.size(),
-      .dstImage = imageHandle,
-      .subresource = vk::ImageSubresourceLayers{.aspectMask = vk::ImageAspectFlagBits::eColor,
-                                                .mipLevel = 0,
-                                                .baseArrayLayer = 0,
-                                                .layerCount = 1},
-      .imageExtent = vk::Extent3D{.width = static_cast<uint32_t>(imageData.width),
-                                  .height = static_cast<uint32_t>(imageData.height),
-                                  .depth = 1},
-      .stagingBufferOffset = stagingBufferOffset->offset,
-      .requestId = requestId});
-
-  return uploadDataList;
-}
-
-auto DefaultAssetSystem::getVkFormat(int bits, int component) -> vk::Format {
-  if (bits == 8) {
-    switch (component) {
-      case 1:
-        return vk::Format::eR8Unorm;
-      case 2:
-        return vk::Format::eR8G8Unorm;
-      case 3:
-        return vk::Format::eR8G8B8Unorm;
-      case 4:
-        return vk::Format::eR8G8B8A8Unorm;
-    }
-  } else if (bits == 16) {
-    switch (component) {
-      case 1:
-        return vk::Format::eR16Unorm;
-      case 2:
-        return vk::Format::eR16G16Unorm;
-      case 3:
-        return vk::Format::eR16G16B16Unorm;
-      case 4:
-        return vk::Format::eR16G16B16A16Unorm;
-    }
-  } else if (bits == 32) {
-    switch (component) {
-      case 1:
-        return vk::Format::eR32Sfloat;
-      case 2:
-        return vk::Format::eR32G32Sfloat;
-      case 3:
-        return vk::Format::eR32G32B32Sfloat;
-      case 4:
-        return vk::Format::eR32G32B32A32Sfloat;
-    }
-  }
-
-  throw std::runtime_error("Unsupported image format: component=" + std::to_string(component) +
-                           ", bits=" + std::to_string(bits));
-}
 }

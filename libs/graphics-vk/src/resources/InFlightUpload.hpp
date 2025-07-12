@@ -31,4 +31,6 @@ struct InFlightUpload {
   ResponseVariant responseEvent;
 };
 
+using InFlightUploadMap = std::unordered_map<uint64_t, InFlightUpload>;
+
 }
