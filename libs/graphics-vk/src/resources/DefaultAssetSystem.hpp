@@ -20,6 +20,7 @@ class TransferSystem;
 class GeometryAllocator;
 class ImageManager;
 class TextureArena;
+class IResourceProcessorFactory;
 
 constexpr uint32_t MaxBatchSize = 5;
 
@@ -34,16 +35,18 @@ struct EmitEventVisitor {
 
 class DefaultAssetSystem : public IAssetSystem {
 public:
-  explicit DefaultAssetSystem(std::shared_ptr<IEventQueue> newEventQueue,
-                              std::shared_ptr<IAssetService> newAssetService,
-                              std::shared_ptr<BufferSystem> newBufferSystem,
-                              std::shared_ptr<GeometryBufferPack> newGeometryBufferPack,
-                              std::shared_ptr<TransferSystem> newTransferSystem,
-                              std::shared_ptr<GeometryAllocator> newGeometryAllocator,
-                              std::shared_ptr<GeometryHandleMapper> newGeometryHandleMapper,
-                              std::shared_ptr<TextureHandleMapper> newTextureHandleMapper,
-                              std::shared_ptr<ImageManager> newImageManager,
-                              std::shared_ptr<TextureArena> newTextureArena);
+  explicit DefaultAssetSystem(
+      std::shared_ptr<IEventQueue> newEventQueue,
+      std::shared_ptr<IAssetService> newAssetService,
+      std::shared_ptr<BufferSystem> newBufferSystem,
+      std::shared_ptr<GeometryBufferPack> newGeometryBufferPack,
+      std::shared_ptr<TransferSystem> newTransferSystem,
+      std::shared_ptr<GeometryAllocator> newGeometryAllocator,
+      std::shared_ptr<GeometryHandleMapper> newGeometryHandleMapper,
+      std::shared_ptr<TextureHandleMapper> newTextureHandleMapper,
+      std::shared_ptr<ImageManager> newImageManager,
+      std::shared_ptr<TextureArena> newTextureArena,
+      std::shared_ptr<IResourceProcessorFactory> newResourceProcessorFactory);
   ~DefaultAssetSystem() override;
 
   DefaultAssetSystem(const DefaultAssetSystem&) = delete;
@@ -65,6 +68,7 @@ private:
   std::shared_ptr<TextureHandleMapper> textureHandleMapper;
   std::shared_ptr<ImageManager> imageManager;
   std::shared_ptr<TextureArena> textureArena;
+  std::shared_ptr<IResourceProcessorFactory> resourceProcessorFactory;
 
   std::jthread thread;
 

@@ -1,5 +1,3 @@
-#include <algorithm>
-
 #include "DefaultAssetSystem.hpp"
 #include "api/fx/IAssetService.hpp"
 #include "api/fx/IEventQueue.hpp"
@@ -14,7 +12,8 @@
 #include "resources/ByteConverters.hpp"
 #include "resources/TransferSystem.hpp"
 #include "resources/allocators/GeometryAllocator.hpp"
-#include "ModelProcessor.hpp"
+#include "resources/processors/IResourceProcessor.hpp"
+#include "resources/processors/IResourceProcessorFactory.hpp"
 
 namespace tr {
 
@@ -28,7 +27,8 @@ DefaultAssetSystem::DefaultAssetSystem(
     std::shared_ptr<GeometryHandleMapper> newGeometryHandleMapper,
     std::shared_ptr<TextureHandleMapper> newTextureHandleMapper,
     std::shared_ptr<ImageManager> newImageManager,
-    std::shared_ptr<TextureArena> newTextureArena)
+    std::shared_ptr<TextureArena> newTextureArena,
+    std::shared_ptr<IResourceProcessorFactory> newResourceProcessorFactory)
     : eventQueue{std::move(newEventQueue)},
       assetService{std::move(newAssetService)},
       bufferSystem{std::move(newBufferSystem)},
@@ -38,7 +38,8 @@ DefaultAssetSystem::DefaultAssetSystem(
       geometryHandleMapper{std::move(newGeometryHandleMapper)},
       textureHandleMapper{std::move(newTextureHandleMapper)},
       imageManager{std::move(newImageManager)},
-      textureArena{std::move(newTextureArena)} {
+      textureArena{std::move(newTextureArena)},
+      resourceProcessorFactory{std::move(newResourceProcessorFactory)} {
   Log.trace("Constructing DefaultAssetSystem");
 }
 
@@ -100,30 +101,27 @@ auto DefaultAssetSystem::collectUploads(uint64_t batchId)
   auto imageUploadPlan =
       ImageUploadPlan{.stagingBuffer = transferSystem->getTransferContext().imageStagingBuffer};
 
-  struct RequestEventVisitor {
-    UploadPlan& uploadPlan;
-    ImageUploadPlan& imageUploadPlan;
-    DefaultAssetSystem* assetSystem;
-
-    void operator()(const std::shared_ptr<StaticModelRequest>& req) const {
-      assetSystem->processStaticModelRequest(req, uploadPlan, imageUploadPlan);
-    }
-
-    void operator()(const std::shared_ptr<StaticMeshRequest>& req) const {
-      assetSystem->processStaticMeshRequest(req, uploadPlan);
-    }
-
-    void operator()(const std::shared_ptr<DynamicModelRequest>& req) const {
-      Log.trace("Handling Dynamic Model Request ID: {}", req->requestId);
-    }
-  };
-
-  auto visitor = RequestEventVisitor{.uploadPlan = uploadPlan,
-                                     .imageUploadPlan = imageUploadPlan,
-                                     .assetSystem = this};
-
   for (auto& eventVariant : eventBatches[batchId]) {
-    std::visit(visitor, eventVariant);
+    const auto result = std::visit(
+        [this](const auto& req) -> ProcessingResult {
+          using T = std::decay_t<decltype(*req)>;
+          return resourceProcessorFactory->getProcessorFor(typeid(T))->process(req);
+        },
+        eventVariant);
+
+    uploadPlan.geometryDataByRequest.emplace(result.requestId, *result.geometryHandle);
+    for (const auto& up : result.geometryUploads) {
+      uploadPlan.uploadsByRequest[result.requestId].push_back(up);
+    }
+
+    for (const auto& up : result.imageUploads) {
+      imageUploadPlan.uploadsByRequest[result.requestId].push_back(up);
+    }
+
+    inFlightUploads.emplace(result.requestId,
+                            InFlightUpload{.requestId = result.requestId,
+                                           .remainingComponents = 2,
+                                           .responseEvent = result.responseEvent});
   }
 
   return {uploadPlan, imageUploadPlan};
@@ -162,23 +160,6 @@ auto DefaultAssetSystem::finalizeResponses(UploadPlan& uploadPlan, ImageUploadPl
       inFlightUploads.erase(requestId);
     }
   }
-}
-
-auto DefaultAssetSystem::processStaticModelRequest(
-    const std::shared_ptr<StaticModelRequest>& smRequest,
-    UploadPlan& uploadPlan,
-    ImageUploadPlan& imageUploadPlan) -> void {
-  ModelProcessor::handle(smRequest,
-                         uploadPlan,
-                         imageUploadPlan,
-                         inFlightUploads,
-                         AssetSystems{
-                             .assetService = assetService,
-                             .geometryAllocator = geometryAllocator,
-                             .transferSystem = transferSystem,
-                             .geometryHandleMapper = geometryHandleMapper,
-                             .imageManager = imageManager,
-                         });
 }
 
 auto DefaultAssetSystem::processStaticMeshRequest(
