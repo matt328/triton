@@ -6,9 +6,14 @@ namespace tr {
 
 using ResponseVariant = std::variant<StaticMeshUploaded, StaticModelUploaded, DynamicModelUploaded>;
 
+enum class ComponentType : uint8_t {
+  Geometry = 0,
+  Image,
+};
+
 struct InFlightUpload {
   uint64_t requestId;
-  size_t remainingComponents = 2;
+  std::set<ComponentType> remainingComponents;
   ResponseVariant responseEvent;
 };
 

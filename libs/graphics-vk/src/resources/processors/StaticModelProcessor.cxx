@@ -34,7 +34,7 @@ auto StaticModelProcessor::process(std::shared_ptr<void> request) -> ProcessingR
   const auto& model = assetService->loadModel(smRequest->modelFilename);
   const auto geometryData = processorHelpers::deInterleave(*model.staticVertices, model.indices);
   auto regionHandle = Handle<GeometryRegion>{};
-  // Maybe geometry allocator should jus thave the transferSystem injected into it?
+  // Maybe geometry allocator should just have the transferSystem injected into it?
   std::tie(regionHandle, result.geometryUploads) =
       geometryAllocator->allocate(*geometryData, transferSystem->getTransferContext());
 
@@ -45,6 +45,7 @@ auto StaticModelProcessor::process(std::shared_ptr<void> request) -> ProcessingR
                                              .entityName = smRequest->entityName,
                                              .geometryHandle = geometryHandle};
   result.geometryHandle = geometryHandle;
+
   result.imageUploads.push_back(processImageData(model.imageData, smRequest->requestId));
 
   return result;

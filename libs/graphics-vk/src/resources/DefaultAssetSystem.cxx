@@ -1,7 +1,6 @@
 #include "DefaultAssetSystem.hpp"
 #include "api/fx/IAssetService.hpp"
 #include "api/fx/IEventQueue.hpp"
-#include "as/Model.hpp"
 #include "bk/ThreadName.hpp"
 #include "buffers/BufferSystem.hpp"
 #include "buffers/ImageUploadPlan.hpp"
@@ -9,7 +8,6 @@
 #include "img/ImageManager.hpp"
 #include "img/TextureArena.hpp"
 #include "r3/GeometryBufferPack.hpp"
-#include "resources/ByteConverters.hpp"
 #include "resources/TransferSystem.hpp"
 #include "resources/allocators/GeometryAllocator.hpp"
 #include "resources/processors/IResourceProcessor.hpp"
@@ -118,10 +116,11 @@ auto DefaultAssetSystem::collectUploads(uint64_t batchId)
       imageUploadPlan.uploadsByRequest[result.requestId].push_back(up);
     }
 
-    inFlightUploads.emplace(result.requestId,
-                            InFlightUpload{.requestId = result.requestId,
-                                           .remainingComponents = 2,
-                                           .responseEvent = result.responseEvent});
+    inFlightUploads.emplace(
+        result.requestId,
+        InFlightUpload{.requestId = result.requestId,
+                       .remainingComponents = {ComponentType::Image, ComponentType::Geometry},
+                       .responseEvent = result.responseEvent});
   }
 
   return {uploadPlan, imageUploadPlan};
@@ -135,27 +134,26 @@ auto DefaultAssetSystem::finalizeResponses(UploadPlan& uploadPlan, ImageUploadPl
       // Create a Texture (image+sampler)
       const auto& image = imageManager->getImage(upload.dstImage);
       const auto& sampler = imageManager->getSampler(imageManager->getDefaultSampler());
-      auto handle = textureArena->insert(image.getImageView(), sampler);
-      auto textureHandle = textureHandleMapper->toPublic(handle);
+
+      const auto handle = textureArena->insert(image.getImageView(), sampler);
+
+      const auto textureHandle = textureHandleMapper->toPublic(handle);
       // Set the texture in the *Uploaded event
       auto& inFlight = inFlightUploads.at(requestId);
       std::visit(ImageUploadPlan::ResponseEventVisitor{textureHandle}, inFlight.responseEvent);
-      inFlight.remainingComponents--;
-      if (inFlight.remainingComponents == 0) {
+      inFlight.remainingComponents.erase(ComponentType::Image);
+      if (inFlight.remainingComponents.empty()) {
         std::visit(EmitEventVisitor{eventQueue}, inFlight.responseEvent);
         inFlightUploads.erase(requestId);
       }
     }
   }
 
-  // Update inFlight uploads with geometry handles
+  // Update in flight component counts
   for (const auto& [requestId, bufferUpload] : uploadPlan.uploadsByRequest) {
     auto& inFlight = inFlightUploads.at(requestId);
-    auto geometryHandle = uploadPlan.geometryDataByRequest.at(requestId);
-    std::visit(UploadPlan::ResponseEventVisitor{geometryHandle}, inFlight.responseEvent);
-    // Find some way to tighten this up a bit.
-    inFlight.remainingComponents--;
-    if (inFlight.remainingComponents == 0) {
+    inFlight.remainingComponents.erase(ComponentType::Geometry);
+    if (inFlight.remainingComponents.empty()) {
       std::visit(EmitEventVisitor{eventQueue}, inFlight.responseEvent);
       inFlightUploads.erase(requestId);
     }

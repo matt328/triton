@@ -121,6 +121,7 @@ auto GraphicsContext::create(std::shared_ptr<IEventQueue> newEventQueue,
       di::bind<IGuiCallbackRegistrar>.to(newGuiCallbackRegistrar),
       di::bind<EditorStateBuffer>.to<>(newEditorStateBuffer),
       di::bind<IResourceProcessorFactory>.to<ResourceProcessorFactory>(),
+      // NOLINTNEXTLINE boost::di requires a c-style array here
       di::bind<IResourceProcessor*[]>.to<StaticModelProcessor, StaticMeshProcessor>());
 
   return injector.create<std::shared_ptr<GraphicsContext>>();
