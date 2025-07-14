@@ -9,6 +9,11 @@ ImageProcessor::ImageProcessor(std::shared_ptr<ImageManager> newImageManager,
     : imageManager{std::move(newImageManager)}, transferSystem{std::move(newTransferSystem)} {
 }
 
+auto ImageProcessor::analyzeImageData(const as::ImageData& imageData, uint64_t requestId)
+    -> StagingRequirements {
+  return {.requestId = requestId, .imageBytes = imageData.data.size()};
+}
+
 auto ImageProcessor::processImageData(const as::ImageData& imageData, uint64_t requestId)
     -> ImageUploadData {
   auto uploadDataList = std::vector<ImageUploadData>{};

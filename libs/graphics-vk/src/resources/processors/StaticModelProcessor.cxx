@@ -23,6 +23,20 @@ auto StaticModelProcessor::handles(std::type_index typeIndex) const -> bool {
   return thisType == typeIndex;
 }
 
+auto StaticModelProcessor::analyze(std::shared_ptr<void> request) -> StagingRequirements {
+  auto smRequest = std::static_pointer_cast<StaticModelRequest>(request);
+  const auto& model = assetService->loadModel(smRequest->modelFilename);
+  const auto imageDataSize = analyzeImageData(model.imageData, smRequest->requestId);
+  const auto geometryData = processorHelpers::deInterleave(*model.staticVertices, model.indices);
+  return {
+      .requestId = smRequest->requestId,
+      .geometryBytes = geometryData->getSize(),
+      .imageBytes = imageDataSize.imageBytes,
+      .geometryData = geometryData,
+      .imageDataList = {std::make_shared<as::ImageData>(model.imageData)},
+  };
+}
+
 auto StaticModelProcessor::process(std::shared_ptr<void> request) -> ProcessingResult {
   ZoneScoped;
   auto smRequest = std::static_pointer_cast<StaticModelRequest>(request);

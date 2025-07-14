@@ -11,7 +11,7 @@ namespace tr::processorHelpers {
 /// this method is unnecessary, but just convert it here for now.
 constexpr auto deInterleave(const std::vector<as::StaticVertex>& vertices,
                             const std::vector<uint32_t>& indexData)
-    -> std::unique_ptr<GeometryData> {
+    -> std::shared_ptr<GeometryData> {
   auto positions = std::make_shared<std::vector<GpuVertexPositionData>>();
   auto texCoords = std::make_shared<std::vector<GpuVertexTexCoordData>>();
   auto colors = std::make_shared<std::vector<GpuVertexColorData>>();
@@ -35,7 +35,7 @@ constexpr auto deInterleave(const std::vector<as::StaticVertex>& vertices,
   auto texCoordBytes = toByteVector(texCoords);
   auto positionBytes = toByteVector(positions);
 
-  return std::make_unique<GeometryData>(GeometryData{.indexData = indicesBytes,
+  return std::make_shared<GeometryData>(GeometryData{.indexData = indicesBytes,
                                                      .positionData = positionBytes,
                                                      .colorData = nullptr,
                                                      .texCoordData = texCoordBytes,

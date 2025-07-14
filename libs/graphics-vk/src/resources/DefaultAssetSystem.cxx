@@ -88,6 +88,25 @@ auto DefaultAssetSystem::requestStop() -> void {
 
 auto DefaultAssetSystem::processesBatchedResources(uint64_t batchId) -> void {
   ZoneScoped;
+  // Extract StagingRequirements
+  auto stagingRequirements = std::vector<StagingRequirements>{};
+  for (auto& request : eventBatches[batchId]) {
+    stagingRequirements.push_back(std::visit(
+        [this](const auto& req) -> StagingRequirements {
+          using T = std::decay_t<decltype(*req)>;
+          return resourceProcessorFactory->getProcessorFor(typeid(T))->analyze(req);
+        },
+        request));
+  }
+
+  // Partiton into std::vector<SubBatch>
+
+  // foreach SubBatch convert to UploadSubBatch
+
+  // foreach UploadSubBatch upload converts to SubBatchResult
+
+  // foreach SubBatchResult convert to *Response event and emit
+
   auto [uploadPlan, imageUploadPlan] = collectUploads(batchId);
   transferSystem->upload(uploadPlan, imageUploadPlan);
   finalizeResponses(uploadPlan, imageUploadPlan);

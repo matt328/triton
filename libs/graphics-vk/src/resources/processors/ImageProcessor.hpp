@@ -21,6 +21,8 @@ public:
 protected:
   auto processImageData(const as::ImageData& imageData, uint64_t requestId) -> ImageUploadData;
   static auto getVkFormat(int bits, int component) -> vk::Format;
+  static auto analyzeImageData(const as::ImageData& imageData, uint64_t requestId)
+      -> StagingRequirements;
 
 private:
   std::shared_ptr<ImageManager> imageManager;

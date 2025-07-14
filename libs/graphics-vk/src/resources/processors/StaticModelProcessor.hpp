@@ -26,6 +26,7 @@ public:
 
   [[nodiscard]] auto handles(std::type_index typeIndex) const -> bool override;
   auto process(std::shared_ptr<void> request) -> ProcessingResult override;
+  auto analyze(std::shared_ptr<void> request) -> StagingRequirements override;
 
 private:
   std::shared_ptr<IAssetService> assetService;
