@@ -1,5 +1,6 @@
 #pragma once
 
+#include "api/gfx/Geometry.hpp"
 #include "api/gfx/GeometryData.hpp"
 #include "as/Model.hpp"
 #include "bk/Handle.hpp"
@@ -56,19 +57,15 @@ struct UploadSubBatch {
   std::vector<ImageUploadItem> imageUploadItems;
 };
 
-struct BufferUploadResult {
+struct SubBatchResult {
   uint64_t requestId{};
   std::type_index responseType;
-};
-
-struct ImageUploadResult {
-  uint64_t requestId{};
-  std::type_index responseType;
+  Handle<Geometry> geometryHandle;
+  Handle<TextureTag> textureHandle;
 };
 
 struct UploadSubBatchResult {
-  std::vector<BufferUploadResult> bufferResults;
-  std::vector<ImageUploadResult> imageResults;
+  std::unordered_map<uint64_t, std::vector<SubBatchResult>> resultsByRequest;
 };
 
 }
