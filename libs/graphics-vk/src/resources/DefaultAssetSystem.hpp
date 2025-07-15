@@ -1,13 +1,12 @@
 #pragma once
 
-#include "api/fx/Events.hpp"
 #include "api/fx/IEventQueue.hpp"
-#include "as/StaticVertex.hpp"
 #include "buffers/ImageUploadPlan.hpp"
 #include "buffers/UploadPlan.hpp"
 #include "gfx/HandleMapperTypes.hpp"
 #include "gfx/IAssetSystem.hpp"
 #include "resources/InFlightUpload.hpp"
+#include "resources/processors/StagingRequirements.hpp"
 
 namespace tr {
 
@@ -23,6 +22,11 @@ class TextureArena;
 class IResourceProcessorFactory;
 
 constexpr uint32_t MaxBatchSize = 5;
+
+struct BufferSizes {
+  size_t geometry;
+  size_t image;
+};
 
 struct EmitEventVisitor {
   std::shared_ptr<IEventQueue> eventQueue;
@@ -92,6 +96,14 @@ private:
   auto collectUploads(uint64_t batchId) -> std::tuple<UploadPlan, ImageUploadPlan>;
 
   auto finalizeResponses(UploadPlan& uploadPlan, ImageUploadPlan& imageUploadPlan) -> void;
+
+  auto extractRequirements(uint64_t batchId, const std::vector<RequestVariant>& requests)
+      -> std::vector<StagingRequirements>;
+
+  auto partition(BufferSizes stagingBufferSizes,
+                 const std::vector<StagingRequirements>& requirements) -> std::vector<SubBatch>;
+
+  auto prepareUpload(const auto& subBatch) -> UploadSubBatch;
 };
 
 }

@@ -43,6 +43,8 @@ public:
   auto defragment(const DefragRequest& defrag) -> void;
 
   auto getTransferContext() -> TransferContext&;
+  auto getGeometryStagingBufferSize() -> size_t;
+  auto getImageStagingBufferSize() -> size_t;
 
 private:
   std::shared_ptr<BufferSystem> bufferSystem;

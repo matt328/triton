@@ -23,13 +23,20 @@ auto StaticModelProcessor::handles(std::type_index typeIndex) const -> bool {
   return thisType == typeIndex;
 }
 
-auto StaticModelProcessor::analyze(std::shared_ptr<void> request) -> StagingRequirements {
+auto StaticModelProcessor::analyze(uint64_t batchId, std::shared_ptr<void> request)
+    -> StagingRequirements {
   auto smRequest = std::static_pointer_cast<StaticModelRequest>(request);
   const auto& model = assetService->loadModel(smRequest->modelFilename);
   const auto imageDataSize = analyzeImageData(model.imageData, smRequest->requestId);
   const auto geometryData = processorHelpers::deInterleave(*model.staticVertices, model.indices);
   return {
-      .requestId = smRequest->requestId,
+      .cargo =
+          {
+              .batchId = batchId,
+              .requestId = smRequest->requestId,
+              .entityName = smRequest->entityName,
+          },
+      .responseType = typeid(StaticModelUploaded),
       .geometryBytes = geometryData->getSize(),
       .imageBytes = imageDataSize.imageBytes,
       .geometryData = geometryData,

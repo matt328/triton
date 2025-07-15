@@ -9,10 +9,16 @@
 
 namespace tr {
 
+struct Cargo {
+  uint64_t batchId;
+  uint64_t requestId;
+  std::string entityName;
+};
+
 /// Used to partition a flat list of these into a vector<SubBatch> such that each SubBatch contains
 /// a vector<StagingRequirements>
 struct StagingRequirements {
-  uint64_t requestId;
+  Cargo cargo;
   std::type_index responseType;
   std::optional<size_t> geometryBytes = std::nullopt;
   std::optional<size_t> imageBytes = std::nullopt;
@@ -26,7 +32,7 @@ struct SubBatch {
 };
 
 struct BufferUploadItem {
-  uint64_t requestId{};
+  Cargo cargo;
   std::type_index responseType;
 
   size_t dataSize{};
@@ -38,7 +44,7 @@ struct BufferUploadItem {
 };
 
 struct ImageUploadItem {
-  uint64_t requestId{};
+  Cargo cargo;
   std::type_index responseType;
 
   std::shared_ptr<std::vector<std::byte>> data = nullptr;
@@ -58,7 +64,7 @@ struct UploadSubBatch {
 };
 
 struct SubBatchResult {
-  uint64_t requestId{};
+  Cargo cargo;
   std::type_index responseType;
   Handle<Geometry> geometryHandle;
   Handle<TextureTag> textureHandle;

@@ -239,4 +239,11 @@ auto TransferSystem::processResizes(
     [[maybe_unused]] const std::vector<ResizeRequest>& imageResizeRequestList) -> void {
 }
 
+auto TransferSystem::getGeometryStagingBufferSize() -> size_t {
+  return StagingBufferSize;
+}
+auto TransferSystem::getImageStagingBufferSize() -> size_t {
+  return StagingBufferSize;
+}
+
 }

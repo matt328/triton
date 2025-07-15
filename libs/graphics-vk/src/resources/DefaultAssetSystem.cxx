@@ -86,26 +86,70 @@ auto DefaultAssetSystem::requestStop() -> void {
   thread.request_stop();
 }
 
-auto DefaultAssetSystem::processesBatchedResources(uint64_t batchId) -> void {
-  ZoneScoped;
-  // Extract StagingRequirements
+auto DefaultAssetSystem::extractRequirements(uint64_t batchId,
+                                             const std::vector<RequestVariant>& requests)
+    -> std::vector<StagingRequirements> {
   auto stagingRequirements = std::vector<StagingRequirements>{};
-  for (auto& request : eventBatches[batchId]) {
+  for (const auto& request : requests) {
     stagingRequirements.push_back(std::visit(
-        [this](const auto& req) -> StagingRequirements {
+        [this, batchId](const auto& req) -> StagingRequirements {
           using T = std::decay_t<decltype(*req)>;
-          return resourceProcessorFactory->getProcessorFor(typeid(T))->analyze(req);
+          return resourceProcessorFactory->getProcessorFor(typeid(T))->analyze(batchId, req);
         },
         request));
   }
+  return stagingRequirements;
+}
 
-  // Partiton into std::vector<SubBatch>
+auto DefaultAssetSystem::partition(BufferSizes stagingBufferSizes,
+                                   const std::vector<StagingRequirements>& requirements)
+    -> std::vector<SubBatch> {
+  auto subBatches = std::vector<SubBatch>{};
+  auto currentBatch = SubBatch{};
+  size_t currentGeometryBufferSize = 0L;
+  size_t currentImageBufferSize = 0L;
 
-  // foreach SubBatch convert to UploadSubBatch
+  for (const auto& req : requirements) {
+    const auto reqGeometry = req.geometryBytes.value_or(0L);
+    const auto reqImage = req.imageBytes.value_or(0L);
 
-  // foreach UploadSubBatch upload converts to SubBatchResult
+    const auto fits = (currentGeometryBufferSize + reqGeometry < stagingBufferSizes.geometry &&
+                       currentImageBufferSize + reqImage < stagingBufferSizes.image);
 
-  // foreach SubBatchResult convert to *Response event and emit
+    if (!fits && !currentBatch.items.empty()) {
+      subBatches.push_back(std::move(currentBatch));
+      currentBatch = SubBatch{};
+      currentGeometryBufferSize = 0L;
+      currentImageBufferSize = 0L;
+    }
+
+    currentBatch.items.push_back(req);
+    currentGeometryBufferSize += reqGeometry;
+    currentImageBufferSize += reqImage;
+  }
+  if (!currentBatch.items.empty()) {
+    subBatches.push_back(std::move(currentBatch));
+  }
+  return subBatches;
+}
+
+auto DefaultAssetSystem::prepareUpload(const SubBatch& subBatch) -> UploadSubBatch {
+}
+
+auto DefaultAssetSystem::processesBatchedResources(uint64_t batchId) -> void {
+  ZoneScoped;
+
+  auto stagingRequirements = extractRequirements(batchId, eventBatches[batchId]);
+
+  auto subBatches = partition({.geometry = transferSystem->getGeometryStagingBufferSize(),
+                               .image = transferSystem->getImageStagingBufferSize()},
+                              stagingRequirements);
+
+  for (const auto& subBatch : subBatches) {
+    auto uploadSubBatch = prepareUpload(subBatch);
+    // upload -> subBatchresult
+    // finalize convert to *Response and emit
+  }
 
   auto [uploadPlan, imageUploadPlan] = collectUploads(batchId);
   transferSystem->upload(uploadPlan, imageUploadPlan);
@@ -191,5 +235,4 @@ auto DefaultAssetSystem::processStaticMeshRequest(
     uploadPlan.uploadsByRequest[smRequest->requestId].push_back(upload);
   }
 }
-
 }
