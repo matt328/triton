@@ -6,6 +6,7 @@
 #include "bk/Handle.hpp"
 #include "buffers/ManagedBuffer.hpp"
 #include "img/ManagedImage.hpp"
+#include "resources/allocators/GeometryAllocator.hpp"
 
 namespace tr {
 
@@ -20,8 +21,8 @@ struct Cargo {
 struct StagingRequirements {
   Cargo cargo;
   std::type_index responseType;
-  std::optional<size_t> geometryBytes = std::nullopt;
-  std::optional<size_t> imageBytes = std::nullopt;
+  std::optional<size_t> geometrySize = std::nullopt;
+  std::optional<size_t> imageSize = std::nullopt;
   std::shared_ptr<GeometryData> geometryData;
   std::vector<std::shared_ptr<as::ImageData>> imageDataList;
 };
@@ -31,16 +32,10 @@ struct SubBatch {
   std::vector<StagingRequirements> items;
 };
 
-struct BufferUploadItem {
+struct GeometryUpload {
   Cargo cargo;
   std::type_index responseType;
-
-  size_t dataSize{};
-  std::shared_ptr<std::vector<std::byte>> data = nullptr;
-  Handle<ManagedBuffer> dstBuffer{};
-
-  size_t stagingOffset{};
-  size_t dstOffset{};
+  GeometryAllocation bufferAllocation;
 };
 
 struct ImageUploadItem {
@@ -59,7 +54,7 @@ struct ImageUploadItem {
 };
 
 struct UploadSubBatch {
-  std::vector<BufferUploadItem> bufferUploadItems;
+  std::vector<GeometryUpload> bufferUploadItems;
   std::vector<ImageUploadItem> imageUploadItems;
 };
 

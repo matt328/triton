@@ -110,8 +110,8 @@ auto DefaultAssetSystem::partition(BufferSizes stagingBufferSizes,
   size_t currentImageBufferSize = 0L;
 
   for (const auto& req : requirements) {
-    const auto reqGeometry = req.geometryBytes.value_or(0L);
-    const auto reqImage = req.imageBytes.value_or(0L);
+    const auto reqGeometry = req.geometrySize.value_or(0L);
+    const auto reqImage = req.imageSize.value_or(0L);
 
     const auto fits = (currentGeometryBufferSize + reqGeometry < stagingBufferSizes.geometry &&
                        currentImageBufferSize + reqImage < stagingBufferSizes.image);
@@ -133,7 +133,23 @@ auto DefaultAssetSystem::partition(BufferSizes stagingBufferSizes,
   return subBatches;
 }
 
+/// Each StagingRequirement in the subBatch will produce multiple BufferUploadItems
+/// and possibly multiple ImageUploadItems. This method returns a single UploadSubBatch, containing
+/// all of these.
 auto DefaultAssetSystem::prepareUpload(const SubBatch& subBatch) -> UploadSubBatch {
+  auto uploadSubBatch = UploadSubBatch{};
+  for (const auto& reqs : subBatch.items) {
+    if (reqs.geometrySize) {
+      const auto geometryAllocation =
+          geometryAllocator->allocate(*reqs.geometryData, transferSystem->getTransferContext());
+      auto bufferUploadItem = GeometryUpload{.cargo = reqs.cargo,
+                                             .responseType = reqs.responseType,
+                                             .bufferAllocation = geometryAllocation};
+      uploadSubBatch.bufferUploadItems.push_back(bufferUploadItem);
+    }
+    if (reqs.imageSize) {}
+  }
+  return uploadSubBatch;
 }
 
 auto DefaultAssetSystem::processesBatchedResources(uint64_t batchId) -> void {

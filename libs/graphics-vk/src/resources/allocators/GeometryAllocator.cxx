@@ -12,9 +12,9 @@ GeometryAllocator::GeometryAllocator(std::shared_ptr<GeometryBufferPack> newGeom
 }
 
 auto GeometryAllocator::allocate(const GeometryData& data, TransferContext& transferContext)
-    -> std::tuple<Handle<GeometryRegion>, std::vector<UploadData>> {
+    -> GeometryAllocation {
   auto geometryRegion = GeometryRegion{};
-  auto uploadList = std::vector<UploadData>{};
+  auto uploadList = std::vector<BufferAllocation>{};
 
   {
     auto size = data.indexData->size();
@@ -27,7 +27,7 @@ auto GeometryAllocator::allocate(const GeometryData& data, TransferContext& tran
 
     geometryRegion.indexCount = data.indexData->size() / sizeof(GpuIndexData);
 
-    uploadList.push_back(UploadData{
+    uploadList.push_back({
         .dataSize = size,
         .data = data.indexData,
         .dstBuffer = geometryBufferPack->getIndexBuffer(),
@@ -45,7 +45,7 @@ auto GeometryAllocator::allocate(const GeometryData& data, TransferContext& tran
     geometryRegion.positionRegion = geometryBufferPack->getPositionBufferAllocator()
                                         .allocate(BufferRequest{.size = size})
                                         .value();
-    uploadList.push_back(UploadData{
+    uploadList.push_back({
         .dataSize = size,
         .data = data.positionData,
         .dstBuffer = geometryBufferPack->getPositionBuffer(),
@@ -62,7 +62,7 @@ auto GeometryAllocator::allocate(const GeometryData& data, TransferContext& tran
               stagingRegion->offset);
     geometryRegion.colorRegion =
         geometryBufferPack->getColorBufferAllocator().allocate(BufferRequest{.size = size}).value();
-    uploadList.push_back(UploadData{
+    uploadList.push_back({
         .dataSize = size,
         .data = data.colorData,
         .dstBuffer = geometryBufferPack->getColorBuffer(),
@@ -80,7 +80,7 @@ auto GeometryAllocator::allocate(const GeometryData& data, TransferContext& tran
     geometryRegion.texCoordRegion = geometryBufferPack->getTexCoordBufferAllocator()
                                         .allocate(BufferRequest{.size = size})
                                         .value();
-    uploadList.push_back(UploadData{
+    uploadList.push_back({
         .dataSize = size,
         .data = data.texCoordData,
         .dstBuffer = geometryBufferPack->getTexCoordBuffer(),
@@ -91,7 +91,7 @@ auto GeometryAllocator::allocate(const GeometryData& data, TransferContext& tran
 
   const auto handle = regionGenerator.requestHandle();
   regionTable.emplace(handle, geometryRegion);
-  return {handle, uploadList};
+  return {.regionHandle = handle, .bufferAllocations = uploadList};
 }
 
 auto GeometryAllocator::getRegionData(Handle<GeometryRegion> handle) const

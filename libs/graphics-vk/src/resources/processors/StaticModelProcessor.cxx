@@ -37,8 +37,8 @@ auto StaticModelProcessor::analyze(uint64_t batchId, std::shared_ptr<void> reque
               .entityName = smRequest->entityName,
           },
       .responseType = typeid(StaticModelUploaded),
-      .geometryBytes = geometryData->getSize(),
-      .imageBytes = imageDataSize.imageBytes,
+      .geometrySize = geometryData->getSize(),
+      .imageSize = imageDataSize.imageSize,
       .geometryData = geometryData,
       .imageDataList = {std::make_shared<as::ImageData>(model.imageData)},
   };
