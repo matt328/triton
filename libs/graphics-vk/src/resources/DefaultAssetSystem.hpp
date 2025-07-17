@@ -84,26 +84,19 @@ private:
 
   InFlightUploadMap inFlightUploads;
 
-  auto processesBatchedResources(uint64_t batchId) -> void;
-
-  auto processStaticModelRequest(const std::shared_ptr<StaticModelRequest>& smRequest,
-                                 UploadPlan& uploadPlan,
-                                 ImageUploadPlan& imageUploadPlan) -> void;
-
-  auto processStaticMeshRequest(const std::shared_ptr<StaticMeshRequest>& smRequest,
-                                UploadPlan& uploadPlan) -> void;
-
-  auto collectUploads(uint64_t batchId) -> std::tuple<UploadPlan, ImageUploadPlan>;
-
-  auto finalizeResponses(UploadPlan& uploadPlan, ImageUploadPlan& imageUploadPlan) -> void;
+  auto processBatchedResources(uint64_t batchId) -> void;
 
   auto extractRequirements(uint64_t batchId, const std::vector<RequestVariant>& requests)
       -> std::vector<StagingRequirements>;
 
-  auto partition(BufferSizes stagingBufferSizes,
-                 const std::vector<StagingRequirements>& requirements) -> std::vector<SubBatch>;
+  static auto partition(BufferSizes stagingBufferSizes,
+                        const std::vector<StagingRequirements>& requirements)
+      -> std::vector<SubBatch>;
 
-  auto prepareUpload(const auto& subBatch) -> UploadSubBatch;
+  auto prepareUpload(const SubBatch& subBatch) -> UploadSubBatch;
+
+  auto processResults(const std::vector<SubBatchResult>& subBatchResults)
+      -> std::vector<ResponseVariant>;
 };
 
 }

@@ -5,6 +5,8 @@
 #include "buffers/UploadPlan.hpp"
 #include "resources/TransferContext.hpp"
 #include "resources/allocators/IBufferAllocator.hpp"
+#include "resources/processors/StagingRequirements.hpp"
+#include "gfx/HandleMapperTypes.hpp"
 
 namespace tr {
 
@@ -30,6 +32,7 @@ public:
                           std::shared_ptr<queue::Graphics> newGraphicsQueue,
                           std::shared_ptr<ImageManager> newImageManager,
                           std::shared_ptr<ImageTransitionQueue> newImageQueue,
+                          std::shared_ptr<GeometryHandleMapper> newGeometryHandleMapper,
                           const std::shared_ptr<CommandBufferManager>& commandBufferManager);
   ~TransferSystem() = default;
 
@@ -39,6 +42,7 @@ public:
   auto operator=(TransferSystem&&) -> TransferSystem& = delete;
 
   auto upload(UploadPlan& bufferPlan, ImageUploadPlan& imagePlan) -> void;
+  auto upload2(const UploadSubBatch& subBatch) -> std::vector<SubBatchResult>;
   auto enqueueResize(const ResizeRequest& resize) -> void;
   auto defragment(const DefragRequest& defrag) -> void;
 
@@ -53,6 +57,7 @@ private:
   std::shared_ptr<queue::Graphics> graphicsQueue;
   std::shared_ptr<ImageManager> imageManager;
   std::shared_ptr<ImageTransitionQueue> imageQueue;
+  std::shared_ptr<GeometryHandleMapper> geometryHandleMapper;
 
   std::unique_ptr<vk::raii::CommandBuffer> commandBuffer;
   std::unique_ptr<vk::raii::Fence> fence = nullptr;
@@ -60,15 +65,18 @@ private:
 
   TransferContext transferContext;
 
-  auto checkSizes(const UploadPlan& uploadPlan) -> std::vector<ResizeRequest>;
-  auto checkImageSizes(const ImageUploadPlan& imagePlan) -> std::vector<ResizeRequest>;
+  /// DstBuffer to BufferCopy2's into said buffer
+  using BufferCopyMap = std::unordered_map<Handle<ManagedBuffer>, std::vector<vk::BufferCopy2>>;
+  using ImageCopyMap = std::unordered_map<Handle<ManagedImage>, std::vector<vk::BufferImageCopy2>>;
+
+  auto checkSizes(const UploadSubBatch& uploadSubBatch)
+      -> std::tuple<std::vector<ResizeRequest>, std::vector<ResizeRequest>>;
 
   auto processResizes(const std::vector<ResizeRequest>& resizeRequestList,
                       const std::vector<ResizeRequest>& imageResizeRequestList) -> void;
 
-  /// DstBuffer to BufferCopy2's into said buffer
-  using BufferCopyMap = std::unordered_map<Handle<ManagedBuffer>, std::vector<vk::BufferCopy2>>;
-  using ImageCopyMap = std::unordered_map<Handle<ManagedImage>, std::vector<vk::BufferImageCopy2>>;
+  auto prepareStagingData(const UploadSubBatch& subBatch)
+      -> std::tuple<BufferCopyMap, ImageCopyMap>;
 
   auto prepareBufferStagingData(const UploadPlan& bufferPlan) -> BufferCopyMap;
   auto prepareImageStagingData(const ImageUploadPlan& imagePlan) -> ImageCopyMap;

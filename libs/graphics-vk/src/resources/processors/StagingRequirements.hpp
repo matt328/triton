@@ -38,7 +38,7 @@ struct GeometryUpload {
   GeometryAllocation bufferAllocation;
 };
 
-struct ImageUploadItem {
+struct ImageUpload {
   Cargo cargo;
   std::type_index responseType;
 
@@ -55,14 +55,14 @@ struct ImageUploadItem {
 
 struct UploadSubBatch {
   std::vector<GeometryUpload> bufferUploadItems;
-  std::vector<ImageUploadItem> imageUploadItems;
+  std::vector<ImageUpload> imageUploadItems;
 };
 
 struct SubBatchResult {
   Cargo cargo;
   std::type_index responseType;
   Handle<Geometry> geometryHandle;
-  Handle<TextureTag> textureHandle;
+  std::optional<Handle<TextureTag>> textureHandle = std::nullopt;
 };
 
 struct UploadSubBatchResult {
