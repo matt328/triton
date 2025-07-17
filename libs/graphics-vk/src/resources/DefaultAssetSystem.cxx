@@ -207,7 +207,7 @@ auto DefaultAssetSystem::processBatchedResources(uint64_t batchId) -> void {
   for (const auto& subBatch : subBatches) {
     const auto uploadSubBatch = prepareUpload(subBatch);
     const auto subBatchResults = transferSystem->upload2(uploadSubBatch);
-    const auto responses = processResults(subBatchResult);
+    const auto responses = processResults(subBatchResults);
     for (const auto& response : responses) {
       std::visit(EmitEventVisitor{eventQueue}, response);
     }

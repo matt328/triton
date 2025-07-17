@@ -10,9 +10,8 @@ namespace tr::processorHelpers {
 
 /// Eventually Update the TRM model formats to store data on disk in a deinterleaved format so
 /// this method is unnecessary, but just convert it here for now.
-constexpr auto deInterleave(const std::vector<as::StaticVertex>& vertices,
-                            const std::vector<uint32_t>& indexData)
-    -> std::shared_ptr<GeometryData> {
+inline auto deInterleave(const std::vector<as::StaticVertex>& vertices,
+                         const std::vector<uint32_t>& indexData) -> std::shared_ptr<GeometryData> {
   auto positions = std::make_shared<std::vector<GpuVertexPositionData>>();
   auto texCoords = std::make_shared<std::vector<GpuVertexTexCoordData>>();
   auto colors = std::make_shared<std::vector<GpuVertexColorData>>();

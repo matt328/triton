@@ -15,6 +15,7 @@ class CommandBufferManager;
 class Device;
 class ImageManager;
 class ImageTransitionQueue;
+class TextureArena;
 
 namespace queue {
 class Transfer;
@@ -33,6 +34,8 @@ public:
                           std::shared_ptr<ImageManager> newImageManager,
                           std::shared_ptr<ImageTransitionQueue> newImageQueue,
                           std::shared_ptr<GeometryHandleMapper> newGeometryHandleMapper,
+                          std::shared_ptr<TextureArena> newTextureArena,
+                          std::shared_ptr<TextureHandleMapper> newTextureHandleMapper,
                           const std::shared_ptr<CommandBufferManager>& commandBufferManager);
   ~TransferSystem() = default;
 
@@ -41,7 +44,6 @@ public:
   auto operator=(const TransferSystem&) -> TransferSystem& = delete;
   auto operator=(TransferSystem&&) -> TransferSystem& = delete;
 
-  auto upload(UploadPlan& bufferPlan, ImageUploadPlan& imagePlan) -> void;
   auto upload2(const UploadSubBatch& subBatch) -> std::vector<SubBatchResult>;
   auto enqueueResize(const ResizeRequest& resize) -> void;
   auto defragment(const DefragRequest& defrag) -> void;
@@ -58,6 +60,8 @@ private:
   std::shared_ptr<ImageManager> imageManager;
   std::shared_ptr<ImageTransitionQueue> imageQueue;
   std::shared_ptr<GeometryHandleMapper> geometryHandleMapper;
+  std::shared_ptr<TextureArena> textureArena;
+  std::shared_ptr<TextureHandleMapper> textureHandleMapper;
 
   std::unique_ptr<vk::raii::CommandBuffer> commandBuffer;
   std::unique_ptr<vk::raii::Fence> fence = nullptr;

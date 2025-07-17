@@ -4,6 +4,7 @@
 #include "buffers/BufferSystem.hpp"
 #include "gfx/QueueTypes.hpp"
 #include "img/ImageManager.hpp"
+#include "img/TextureArena.hpp"
 #include "resources/ByteConverters.hpp"
 #include "resources/allocators/LinearAllocator.hpp"
 #include "vk/command-buffer/CommandBufferManager.hpp"
@@ -19,6 +20,8 @@ TransferSystem::TransferSystem(std::shared_ptr<BufferSystem> newBufferSystem,
                                std::shared_ptr<ImageManager> newImageManager,
                                std::shared_ptr<ImageTransitionQueue> newImageQueue,
                                std::shared_ptr<GeometryHandleMapper> newGeometryHandleMapper,
+                               std::shared_ptr<TextureArena> newTextureArena,
+                               std::shared_ptr<TextureHandleMapper> newTextureHandleMapper,
                                const std::shared_ptr<CommandBufferManager>& commandBufferManager)
     : bufferSystem{std::move(newBufferSystem)},
       device{std::move(newDevice)},
@@ -27,6 +30,8 @@ TransferSystem::TransferSystem(std::shared_ptr<BufferSystem> newBufferSystem,
       imageManager{std::move(newImageManager)},
       imageQueue{std::move(newImageQueue)},
       geometryHandleMapper{std::move(newGeometryHandleMapper)},
+      textureArena{std::move(newTextureArena)},
+      textureHandleMapper{std::move(newTextureHandleMapper)},
       commandBuffer{std::make_unique<vk::raii::CommandBuffer>(
           commandBufferManager->getTransferCommandBuffer())},
       fence(std::make_unique<vk::raii::Fence>(
@@ -67,20 +72,25 @@ auto TransferSystem::upload2(const UploadSubBatch& subBatch) -> std::vector<SubB
   transferContext.stagingAllocator->reset();
   transferContext.imageStagingAllocator->reset();
 
-  /*
-    Could have been multiple images and geometries all piled together in here.
-    I think we need to extract each one by its requestId and combine the geometry uploads with their
-    image uploads.
-    So iterate over the geometry uploads, create a map of requestId to SubBatchResult and fill out
-    what we have. Then iterate the imageUploadItems and match them to the SubBatchResult by
-    requestId
-  */
+  auto resultsMap = std::unordered_map<uint64_t, SubBatchResult>{};
   for (const auto& geometryUpload : subBatch.bufferUploadItems) {
     const auto subBatchResult = SubBatchResult{.cargo = geometryUpload.cargo,
                                                .responseType = geometryUpload.responseType,
                                                .geometryHandle = geometryHandleMapper->toPublic(
                                                    geometryUpload.bufferAllocation.regionHandle)};
+    resultsMap.emplace(geometryUpload.cargo.requestId, subBatchResult);
   }
+  for (const auto& imageUpload : subBatch.imageUploadItems) {
+    const auto& image = imageManager->getImage(imageUpload.dstImage);
+    const auto& sampler = imageManager->getSampler(imageManager->getDefaultSampler());
+    auto handle = textureArena->insert(image.getImageView(), sampler);
+    auto textureHandle = textureHandleMapper->toPublic(handle);
+    resultsMap.at(imageUpload.cargo.requestId).textureHandle = textureHandle;
+  }
+  for (const auto& [_, value] : resultsMap) {
+    subBatchResults.push_back(value);
+  }
+  return subBatchResults;
 }
 
 auto TransferSystem::prepareStagingData(const UploadSubBatch& uploadSubBatch)
@@ -127,30 +137,6 @@ auto TransferSystem::prepareStagingData(const UploadSubBatch& uploadSubBatch)
   }
 
   return {bufferCopies, imageCopies};
-}
-
-auto TransferSystem::upload(UploadPlan& bufferPlan, ImageUploadPlan& imagePlan) -> void {
-  ZoneScoped;
-
-  auto bufferResizes = checkSizes(bufferPlan);
-  auto imageResizes = checkImageSizes(imagePlan);
-
-  processResizes(bufferResizes, imageResizes);
-
-  auto bufferCopies = prepareBufferStagingData(bufferPlan);
-  auto imageCopies = prepareImageStagingData(imagePlan);
-
-  commandBuffer->begin({.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
-
-  recordBufferUploads(bufferCopies);
-  recordImageUploads(imageCopies);
-
-  commandBuffer->end();
-
-  submitAndWait();
-
-  transferContext.stagingAllocator->reset();
-  transferContext.imageStagingAllocator->reset();
 }
 
 auto TransferSystem::prepareBufferStagingData(const UploadPlan& bufferPlan) -> BufferCopyMap {
@@ -308,13 +294,8 @@ auto TransferSystem::defragment([[maybe_unused]] const DefragRequest& defrag) ->
 }
 
 auto TransferSystem::checkSizes([[maybe_unused]] const UploadSubBatch& uploadSubBatch)
-    -> std::vector<ResizeRequest> {
+    -> std::tuple<std::vector<ResizeRequest>, std::vector<ResizeRequest>> {
   // TODO(resources): Actually check sizes
-  return {};
-}
-
-auto TransferSystem::checkImageSizes(const ImageUploadPlan& imagePlan)
-    -> std::vector<ResizeRequest> {
   return {};
 }
 

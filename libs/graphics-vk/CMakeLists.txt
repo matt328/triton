@@ -40,10 +40,6 @@ set(graphicsvk_SRC
   src/resources/allocators/LinearAllocator.cxx
   src/resources/allocators/GeometryAllocator.cxx
   src/resources/allocators/ArenaAllocator.cxx
-  src/resources/processors/ImageProcessor.cxx
-  src/resources/processors/StaticModelProcessor.cxx
-  src/resources/processors/StaticMeshProcessor.cxx
-  src/resources/processors/ResourceProcessorFactory.cxx
 
   src/task/Frame.cxx
   src/task/DefaultFrameManager.cxx
