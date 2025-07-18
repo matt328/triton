@@ -1,4 +1,5 @@
 #include "ResourceProcessorFactory.hpp"
+#include "api/fx/ResourceEvents.hpp"
 #include "resources/processors/IResourceProcessor.hpp"
 
 namespace tr {

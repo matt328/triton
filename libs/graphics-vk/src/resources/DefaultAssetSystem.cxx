@@ -195,19 +195,46 @@ auto DefaultAssetSystem::prepareUpload(const SubBatch& subBatch) -> UploadSubBat
   return uploadSubBatch;
 }
 
+auto DefaultAssetSystem::processResults(const std::vector<SubBatchResult>& subBatchResults)
+    -> std::vector<ResponseVariant> {
+  auto responses = std::vector<ResponseVariant>{};
+
+  for (const auto& result : subBatchResults) {
+    if (result.responseType == typeid(StaticModelUploaded)) {
+      auto modelUploaded = StaticModelUploaded{
+          .batchId = result.cargo.batchId,
+          .requestId = result.cargo.requestId,
+          .entityName = result.cargo.entityName,
+          .geometryHandle = result.geometryHandle,
+          .textureHandle = result.textureHandle,
+      };
+      responses.emplace_back(modelUploaded);
+    }
+  }
+
+  return responses;
+}
+
 auto DefaultAssetSystem::processBatchedResources(uint64_t batchId) -> void {
   ZoneScoped;
 
   auto stagingRequirements = extractRequirements(batchId, eventBatches[batchId]);
+  Log.trace("Extracted staging requirements");
 
   auto subBatches = partition({.geometry = transferSystem->getGeometryStagingBufferSize(),
                                .image = transferSystem->getImageStagingBufferSize()},
                               stagingRequirements);
+  Log.trace("Partitioned into subbatches, count={}", subBatches.size());
 
   for (const auto& subBatch : subBatches) {
     const auto uploadSubBatch = prepareUpload(subBatch);
+    Log.trace("Prepared upload");
+
     const auto subBatchResults = transferSystem->upload2(uploadSubBatch);
+    Log.trace("upload2'ed");
+
     const auto responses = processResults(subBatchResults);
+    Log.trace("processed results");
     for (const auto& response : responses) {
       std::visit(EmitEventVisitor{eventQueue}, response);
     }

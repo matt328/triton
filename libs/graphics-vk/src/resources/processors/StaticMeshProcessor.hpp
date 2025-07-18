@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IResourceProcessor.hpp"
+#include "api/fx/ResourceEvents.hpp"
 
 namespace tr {
 
@@ -16,8 +17,8 @@ public:
   auto operator=(const StaticMeshProcessor&) -> StaticMeshProcessor& = default;
   auto operator=(StaticMeshProcessor&&) -> StaticMeshProcessor& = delete;
 
-  [[nodiscard]] auto handles(std::type_index) const -> bool override;
-  auto process(std::shared_ptr<void> request) -> ProcessingResult override;
+  [[nodiscard]] auto handles(std::type_index eventType) const -> bool override;
+  auto analyze(uint64_t batchId, std::shared_ptr<void> request) -> StagingRequirements override;
 
 private:
   std::shared_ptr<TransferSystem> transferSystem;

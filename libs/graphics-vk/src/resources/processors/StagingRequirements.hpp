@@ -24,7 +24,7 @@ struct StagingRequirements {
   std::optional<size_t> geometrySize = std::nullopt;
   std::optional<size_t> imageSize = std::nullopt;
   std::shared_ptr<GeometryData> geometryData;
-  std::vector<std::shared_ptr<as::ImageData>> imageDataList;
+  std::vector<std::shared_ptr<as::ImageData>> imageDataList{};
 };
 
 struct SubBatch {

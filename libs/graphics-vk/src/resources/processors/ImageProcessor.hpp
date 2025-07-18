@@ -19,10 +19,10 @@ public:
   auto operator=(ImageProcessor&&) -> ImageProcessor& = delete;
 
 protected:
-  auto processImageData(const as::ImageData& imageData, uint64_t requestId) -> ImageUploadData;
   static auto getVkFormat(int bits, int component) -> vk::Format;
-  static auto analyzeImageData(const as::ImageData& imageData, uint64_t requestId)
-      -> StagingRequirements;
+  static auto analyzeImageData(const as::ImageData& imageData,
+                               const Cargo& cargo,
+                               std::type_index responseType) -> StagingRequirements;
 
 private:
   std::shared_ptr<ImageManager> imageManager;
