@@ -2,11 +2,11 @@
 
 namespace tr {
 
-ArenaAllocator::ArenaAllocator(size_t newInitialSize) : currentBufferSize{newInitialSize} {
+ArenaAllocator::ArenaAllocator(size_t newInitialSize, std::string newName)
+    : currentBufferSize{newInitialSize}, name{std::move(newName)} {
 }
 
-auto ArenaAllocator::allocate([[maybe_unused]] const BufferRequest& request)
-    -> std::optional<BufferRegion> {
+auto ArenaAllocator::allocate(const BufferRequest& request) -> std::optional<BufferRegion> {
   if (request.size == 0) {
     return std::nullopt;
   }
@@ -14,6 +14,9 @@ auto ArenaAllocator::allocate([[maybe_unused]] const BufferRequest& request)
   if (currentOffset + request.size > currentBufferSize) {
     resizeRequired = true;
     lastFailedRequestSize = request.size;
+    Log.warn("Allocator failed, requiredSize={}, currentBufferSize={}",
+             currentOffset + request.size,
+             currentBufferSize);
     return std::nullopt;
   }
 

@@ -1,13 +1,17 @@
+#include <utility>
+
 #include "LinearAllocator.hpp"
 
 namespace tr {
 
-LinearAllocator::LinearAllocator(size_t bufferSize) : maxBufferSize{bufferSize} {
+LinearAllocator::LinearAllocator(size_t bufferSize, std::string newName)
+    : maxBufferSize{bufferSize}, name{std::move(newName)} {
 }
 
 auto LinearAllocator::allocate(const BufferRequest& bufferRequest) -> std::optional<BufferRegion> {
   if (currentOffset + bufferRequest.size > maxBufferSize) {
-    Log.warn("current buffer size={} + requested size={} ({})> maxBufferSize={}",
+    Log.warn("Allocator: {}, current buffer size={} + requested size={} ({})> maxBufferSize={}",
+             name,
              currentOffset,
              bufferRequest.size,
              currentOffset + bufferRequest.size,

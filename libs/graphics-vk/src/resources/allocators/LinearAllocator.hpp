@@ -6,7 +6,7 @@ namespace tr {
 
 class LinearAllocator : public IBufferAllocator {
 public:
-  explicit LinearAllocator(size_t bufferSize);
+  explicit LinearAllocator(size_t bufferSize, std::string newName);
   ~LinearAllocator() override = default;
 
   LinearAllocator(const LinearAllocator&) = default;
@@ -24,6 +24,7 @@ public:
 private:
   size_t currentOffset{};
   size_t maxBufferSize{};
+  std::string name;
 };
 
 }

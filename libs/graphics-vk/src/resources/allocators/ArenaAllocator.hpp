@@ -6,7 +6,7 @@ namespace tr {
 
 class ArenaAllocator : public IBufferAllocator {
 public:
-  explicit ArenaAllocator(size_t newInitialSize);
+  explicit ArenaAllocator(size_t newInitialSize, std::string newName);
   ~ArenaAllocator() override = default;
 
   ArenaAllocator(const ArenaAllocator&) = default;
@@ -24,6 +24,8 @@ public:
 private:
   size_t currentBufferSize{};
   size_t currentOffset = 0;
+
+  std::string name;
 
   bool resizeRequired = false;
   size_t lastFailedRequestSize = 0;

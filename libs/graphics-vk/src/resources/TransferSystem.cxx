@@ -41,14 +41,16 @@ TransferSystem::TransferSystem(std::shared_ptr<BufferSystem> newBufferSystem,
                                                     .bufferUsage = BufferUsage::Transfer,
                                                     .initialSize = StagingBufferSize,
                                                     .debugName = "Buffer-GeometryStaging"});
-  transferContext.stagingAllocator = std::make_unique<LinearAllocator>(StagingBufferSize);
+  transferContext.stagingAllocator =
+      std::make_unique<LinearAllocator>(StagingBufferSize, "GeometryStagingBuffer");
 
   transferContext.imageStagingBuffer =
       bufferSystem->registerBuffer(BufferCreateInfo{.bufferLifetime = BufferLifetime::Transient,
                                                     .bufferUsage = BufferUsage::Transfer,
                                                     .initialSize = StagingBufferSize,
                                                     .debugName = "Buffer-ImageStaging"});
-  transferContext.imageStagingAllocator = std::make_unique<LinearAllocator>(StagingBufferSize);
+  transferContext.imageStagingAllocator =
+      std::make_unique<LinearAllocator>(StagingBufferSize, "ImageStagingBuffer");
 }
 
 auto TransferSystem::upload2(const UploadSubBatch& subBatch) -> std::vector<SubBatchResult> {

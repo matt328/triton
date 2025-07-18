@@ -2,6 +2,7 @@
 #include "buffers/BufferCreateInfo.hpp"
 #include "buffers/BufferSystem.hpp"
 #include "r3/graph/ResourceAliasRegistry.hpp"
+#include "resources/allocators/ArenaAllocator.hpp"
 #include "resources/allocators/IBufferAllocator.hpp"
 #include "resources/allocators/LinearAllocator.hpp"
 
@@ -45,12 +46,16 @@ GeometryBufferPack::GeometryBufferPack(const std::shared_ptr<BufferSystem>& buff
                            .initialSize = AnimationBufferInitialSize,
                            .itemStride = sizeof(glm::vec4),
                            .debugName = "Buffer-AnimationData"})} {
-  indexBufferAllocator = std::make_unique<LinearAllocator>(IndexBufferInitialSize);
-  positionBufferAllocator = std::make_unique<LinearAllocator>(PositionBufferInitialSize);
-  colorBufferAllocator = std::make_unique<LinearAllocator>(ColorBufferInitialSize);
-  texCoordBufferAllocator = std::make_unique<LinearAllocator>(TexCoordBufferInitialSize);
-  normalBufferAllocator = std::make_unique<LinearAllocator>(NormalBufferInitialSize);
-  animationBufferAllocator = std::make_unique<LinearAllocator>(AnimationBufferInitialSize);
+  indexBufferAllocator = std::make_unique<ArenaAllocator>(IndexBufferInitialSize, "IndexBuffer");
+  positionBufferAllocator =
+      std::make_unique<LinearAllocator>(PositionBufferInitialSize, "PositionBuffer");
+  colorBufferAllocator = std::make_unique<LinearAllocator>(ColorBufferInitialSize, "ColorBuffer");
+  texCoordBufferAllocator =
+      std::make_unique<LinearAllocator>(TexCoordBufferInitialSize, "TexCoordBuffer");
+  normalBufferAllocator =
+      std::make_unique<LinearAllocator>(NormalBufferInitialSize, "NormalBuffer");
+  animationBufferAllocator =
+      std::make_unique<LinearAllocator>(AnimationBufferInitialSize, "AnimationBuffer");
 
   aliasRegistry->setHandle(GlobalBufferAlias::Index, indexBuffer);
   aliasRegistry->setHandle(GlobalBufferAlias::Position, positionBuffer);

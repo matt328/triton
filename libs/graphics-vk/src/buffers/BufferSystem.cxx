@@ -61,10 +61,14 @@ auto BufferSystem::registerBuffer(const BufferCreateInfo& createInfo) -> Handle<
                                                 .currentSize = createInfo.initialSize}));
   switch (createInfo.allocationStrategy) {
     case AllocationStrategy::Linear:
-      allocatorMap.emplace(handle, std::make_unique<LinearAllocator>(createInfo.initialSize));
+      allocatorMap.emplace(
+          handle,
+          std::make_unique<LinearAllocator>(createInfo.initialSize, createInfo.debugName));
       break;
     case AllocationStrategy::Arena:
-      allocatorMap.emplace(handle, std::make_unique<ArenaAllocator>(createInfo.initialSize));
+      allocatorMap.emplace(
+          handle,
+          std::make_unique<ArenaAllocator>(createInfo.initialSize, createInfo.debugName));
       break;
     case AllocationStrategy::None:
       break;
