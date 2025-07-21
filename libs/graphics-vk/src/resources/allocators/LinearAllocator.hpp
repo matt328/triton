@@ -6,7 +6,7 @@ namespace tr {
 
 class LinearAllocator : public IBufferAllocator {
 public:
-  explicit LinearAllocator(size_t bufferSize, std::string newName);
+  LinearAllocator(Handle<ManagedBuffer> bufferHandle, size_t bufferSize, std::string newName);
   ~LinearAllocator() override = default;
 
   LinearAllocator(const LinearAllocator&) = default;
@@ -14,9 +14,8 @@ public:
   auto operator=(const LinearAllocator&) -> LinearAllocator& = default;
   auto operator=(LinearAllocator&&) -> LinearAllocator& = delete;
 
-  auto allocate(const BufferRequest& bufferRequest) -> std::optional<BufferRegion> override;
-  auto needsResize() -> bool override;
-  [[nodiscard]] auto getRecommendedSize() const -> size_t override;
+  auto allocate(const BufferRequest& bufferRequest) -> BufferRegion override;
+  auto checkSize(const BufferRequest& requestData) -> std::optional<ResizeRequest> override;
   auto notifyBufferResized(size_t newSize) -> void override;
   auto freeRegion(const BufferRegion& region) -> void override;
   auto reset() -> void override;

@@ -132,7 +132,9 @@ auto ThreadedFrameworkContext::startRenderer() -> void {
                                                 assetService,
                                                 guiCallbackRegistrar,
                                                 editorStateBuffer);
-      graphicsContext->run(token);
+      if (graphicsContext) {
+        graphicsContext->run(token);
+      }
       Log.trace("Nulling out graphicsContext");
       graphicsContext = nullptr;
     } catch (const std::exception& e) {

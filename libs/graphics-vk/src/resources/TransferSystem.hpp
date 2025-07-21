@@ -22,7 +22,8 @@ class Transfer;
 class Graphics;
 }
 
-struct ResizeRequest {};
+using BufferPair = std::vector<std::tuple<ManagedBuffer*, ManagedBuffer*>>;
+
 struct DefragRequest {};
 
 class TransferSystem {
@@ -45,12 +46,12 @@ public:
   auto operator=(TransferSystem&&) -> TransferSystem& = delete;
 
   auto upload2(const UploadSubBatch& subBatch) -> std::vector<SubBatchResult>;
-  auto enqueueResize(const ResizeRequest& resize) -> void;
   auto defragment(const DefragRequest& defrag) -> void;
 
   auto getTransferContext() -> TransferContext&;
   auto getGeometryStagingBufferSize() -> size_t;
   auto getImageStagingBufferSize() -> size_t;
+  auto copyBuffers(const BufferPair& bufferPair) -> void;
 
 private:
   std::shared_ptr<BufferSystem> bufferSystem;
@@ -76,8 +77,7 @@ private:
   auto checkSizes(const UploadSubBatch& uploadSubBatch)
       -> std::tuple<std::vector<ResizeRequest>, std::vector<ResizeRequest>>;
 
-  auto processResizes(const std::vector<ResizeRequest>& resizeRequestList,
-                      const std::vector<ResizeRequest>& imageResizeRequestList) -> void;
+  auto processResizes(const std::vector<ResizeRequest>& resizeRequestList) -> void;
 
   auto prepareStagingData(const UploadSubBatch& subBatch)
       -> std::tuple<BufferCopyMap, ImageCopyMap>;

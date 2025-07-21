@@ -2,23 +2,16 @@
 
 namespace tr {
 
-ArenaAllocator::ArenaAllocator(size_t newInitialSize, std::string newName)
-    : currentBufferSize{newInitialSize}, name{std::move(newName)} {
+// TODO(matt): Make this allocator more arena-like. right now it's just a clone of LinearAllocator
+
+ArenaAllocator::ArenaAllocator(Handle<ManagedBuffer> bufferHandle,
+                               size_t newInitialSize,
+                               std::string newName)
+    : IBufferAllocator{bufferHandle}, currentBufferSize{newInitialSize}, name{std::move(newName)} {
 }
 
-auto ArenaAllocator::allocate(const BufferRequest& request) -> std::optional<BufferRegion> {
-  if (request.size == 0) {
-    return std::nullopt;
-  }
-
-  if (currentOffset + request.size > currentBufferSize) {
-    resizeRequired = true;
-    lastFailedRequestSize = request.size;
-    Log.warn("Allocator failed, requiredSize={}, currentBufferSize={}",
-             currentOffset + request.size,
-             currentBufferSize);
-    return std::nullopt;
-  }
+auto ArenaAllocator::allocate(const BufferRequest& request) -> BufferRegion {
+  assert(request.size != 0);
 
   const auto offset = currentOffset;
   currentOffset += request.size;
@@ -28,29 +21,32 @@ auto ArenaAllocator::allocate(const BufferRequest& request) -> std::optional<Buf
   };
 }
 
+auto ArenaAllocator::checkSize(const BufferRequest& requestData) -> std::optional<ResizeRequest> {
+  Log.trace("CheckingSize, requestData.size={}, currentOffset={}, currentBufferSize={}",
+            requestData.size,
+            currentOffset,
+            currentBufferSize);
+  const auto requestedSize = currentOffset + requestData.size;
+  Log.trace("requestedSize={}", requestedSize);
+  if (requestedSize > currentBufferSize) {
+    Log.warn("Allocator failed, requiredSize={}, currentBufferSize={}",
+             currentOffset + requestData.size,
+             currentBufferSize);
+    // Initially just double the buffer size. Eventually create better resize strategies
+    return ResizeRequest{.bufferHandle = bufferHandle, .newSize = currentBufferSize * 2};
+  }
+  return std::nullopt;
+}
+
 auto ArenaAllocator::freeRegion([[maybe_unused]] const BufferRegion& region) -> void {
 }
 
 auto ArenaAllocator::reset() -> void {
   currentOffset = 0;
-  resizeRequired = false;
-  lastFailedRequestSize = 0;
-}
-
-auto ArenaAllocator::needsResize() -> bool {
-  return resizeRequired;
-}
-
-auto ArenaAllocator::getRecommendedSize() const -> size_t {
-  const auto required = currentOffset + lastFailedRequestSize;
-  const auto doubled = std::max(required, currentBufferSize * 2);
-  return doubled;
 }
 
 auto ArenaAllocator::notifyBufferResized(size_t newSize) -> void {
   currentBufferSize = newSize;
-  resizeRequired = false;
-  lastFailedRequestSize = 0l;
 }
 
 }

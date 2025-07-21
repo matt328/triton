@@ -23,7 +23,7 @@ public:
                                std::shared_ptr<Swapchain> newSwapchain,
                                std::shared_ptr<IEventQueue> newEventQueue,
                                std::shared_ptr<FrameState> newFrameState,
-                               const std::shared_ptr<IDebugManager>& debugManager);
+                               std::shared_ptr<IDebugManager> newDebugManager);
   ~DefaultFrameManager() override;
 
   DefaultFrameManager(const DefaultFrameManager&) = delete;
@@ -43,6 +43,7 @@ private:
   std::shared_ptr<IEventQueue> eventQueue;
   std::shared_ptr<BufferRegistry> bufferRegistry;
   std::shared_ptr<FrameState> frameState;
+  std::shared_ptr<IDebugManager> debugManager;
 
   size_t currentFrame;
   std::vector<std::unique_ptr<Frame>> frames;

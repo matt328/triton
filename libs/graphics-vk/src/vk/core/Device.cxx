@@ -4,6 +4,7 @@ namespace tr {
 
 Device::Device(std::shared_ptr<PhysicalDevice> newPhysicalDevice)
     : physicalDevice{std::move(newPhysicalDevice)} {
+  Log.trace("Constructing Device");
   device = physicalDevice->createDevice();
   queueFamilyIndices = physicalDevice->getQueueFamilyIndices();
 }

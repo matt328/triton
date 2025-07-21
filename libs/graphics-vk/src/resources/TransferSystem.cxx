@@ -1,11 +1,9 @@
 #include "TransferSystem.hpp"
 #include "ImageTransitionQueue.hpp"
-#include "api/gfx/GpuMaterialData.hpp"
 #include "buffers/BufferSystem.hpp"
 #include "gfx/QueueTypes.hpp"
 #include "img/ImageManager.hpp"
 #include "img/TextureArena.hpp"
-#include "resources/ByteConverters.hpp"
 #include "resources/allocators/LinearAllocator.hpp"
 #include "vk/command-buffer/CommandBufferManager.hpp"
 
@@ -42,7 +40,9 @@ TransferSystem::TransferSystem(std::shared_ptr<BufferSystem> newBufferSystem,
                                                     .initialSize = StagingBufferSize,
                                                     .debugName = "Buffer-GeometryStaging"});
   transferContext.stagingAllocator =
-      std::make_unique<LinearAllocator>(StagingBufferSize, "GeometryStagingBuffer");
+      std::make_unique<LinearAllocator>(transferContext.stagingBuffer,
+                                        StagingBufferSize,
+                                        "GeometryStagingBuffer");
 
   transferContext.imageStagingBuffer =
       bufferSystem->registerBuffer(BufferCreateInfo{.bufferLifetime = BufferLifetime::Transient,
@@ -50,15 +50,14 @@ TransferSystem::TransferSystem(std::shared_ptr<BufferSystem> newBufferSystem,
                                                     .initialSize = StagingBufferSize,
                                                     .debugName = "Buffer-ImageStaging"});
   transferContext.imageStagingAllocator =
-      std::make_unique<LinearAllocator>(StagingBufferSize, "ImageStagingBuffer");
+      std::make_unique<LinearAllocator>(transferContext.imageStagingBuffer,
+                                        StagingBufferSize,
+                                        "ImageStagingBuffer");
 }
 
 auto TransferSystem::upload2(const UploadSubBatch& subBatch) -> std::vector<SubBatchResult> {
   ZoneScoped;
   auto subBatchResults = std::vector<SubBatchResult>{};
-
-  auto [bufferResizes, imageResizes] = checkSizes(subBatch);
-  processResizes(bufferResizes, imageResizes);
 
   auto [bufferCopies, imageCopies] = prepareStagingData(subBatch);
 
@@ -212,6 +211,7 @@ auto TransferSystem::recordBufferUploads(const BufferCopyMap& bufferCopies) -> v
 
 auto TransferSystem::recordImageUploads(const ImageCopyMap& imageCopies) -> void {
   const auto srcBuffer = bufferSystem->getVkBuffer(transferContext.imageStagingBuffer);
+  transitionBatch.clear();
   for (const auto& [dstImageHandle, regions] : imageCopies) {
     const auto& dstImage = imageManager->getImage(dstImageHandle);
     vk::ImageMemoryBarrier2 imageBarrier = {
@@ -285,25 +285,31 @@ auto TransferSystem::submitAndWait() -> void {
   device->getVkDevice().resetFences(**fence);
 }
 
+auto TransferSystem::copyBuffers(const BufferPair& bufferPair) -> void {
+
+  commandBuffer->begin({.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
+
+  for (const auto& [dst, src] : bufferPair) {
+    const auto region = vk::BufferCopy2{.srcOffset = 0,
+                                        .dstOffset = 0,
+                                        .size = dst->getMeta().bufferCreateInfo.size};
+    const auto copyInfo2 = vk::CopyBufferInfo2{.srcBuffer = src->getVkBuffer(),
+                                               .dstBuffer = dst->getVkBuffer(),
+                                               .regionCount = 1,
+                                               .pRegions = &region};
+    commandBuffer->copyBuffer2(copyInfo2);
+  }
+
+  commandBuffer->end();
+
+  submitAndWait();
+}
+
 auto TransferSystem::getTransferContext() -> TransferContext& {
   return transferContext;
 }
 
-auto TransferSystem::enqueueResize([[maybe_unused]] const ResizeRequest& resize) -> void {
-}
-
 auto TransferSystem::defragment([[maybe_unused]] const DefragRequest& defrag) -> void {
-}
-
-auto TransferSystem::checkSizes([[maybe_unused]] const UploadSubBatch& uploadSubBatch)
-    -> std::tuple<std::vector<ResizeRequest>, std::vector<ResizeRequest>> {
-  // TODO(resources): Actually check sizes
-  return {};
-}
-
-auto TransferSystem::processResizes(
-    [[maybe_unused]] const std::vector<ResizeRequest>& resizeRequestList,
-    [[maybe_unused]] const std::vector<ResizeRequest>& imageResizeRequestList) -> void {
 }
 
 auto TransferSystem::getGeometryStagingBufferSize() -> size_t {

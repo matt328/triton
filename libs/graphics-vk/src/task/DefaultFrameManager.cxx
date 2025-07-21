@@ -8,8 +8,6 @@
 
 namespace tr {
 
-// Invert this dependency, remove bufferRegistry from here.
-
 DefaultFrameManager::DefaultFrameManager(
     const RenderContextConfig& newRenderContextConfig,
     std::shared_ptr<CommandBufferManager> newCommandBufferManager,
@@ -17,15 +15,16 @@ DefaultFrameManager::DefaultFrameManager(
     std::shared_ptr<Swapchain> newSwapchain,
     std::shared_ptr<IEventQueue> newEventQueue,
     std::shared_ptr<FrameState> newFrameState,
-    const std::shared_ptr<IDebugManager>& debugManager)
+    std::shared_ptr<IDebugManager> newDebugManager)
     : renderConfig{newRenderContextConfig},
       commandBufferManager{std::move(newCommandBufferManager)},
       device{std::move(newDevice)},
       swapchain{std::move(newSwapchain)},
       eventQueue{std::move(newEventQueue)},
       frameState{std::move(newFrameState)},
+      debugManager{std::move(newDebugManager)},
       currentFrame{0} {
-
+  Log.trace("Constructing DefaultFrameManager");
   for (uint8_t i = 0; i < renderConfig.framesInFlight; ++i) {
 
     auto fence = device->getVkDevice().createFence(
@@ -38,6 +37,7 @@ DefaultFrameManager::DefaultFrameManager(
     auto renderFinishedSemaphore = device->getVkDevice().createSemaphore({});
     debugManager->setObjectName(*renderFinishedSemaphore,
                                 "Semaphore-RenderFinished-Frame_" + std::to_string(i));
+    assert(debugManager);
     auto computeFinishedSemaphore = device->getVkDevice().createSemaphore({});
     debugManager->setObjectName(*computeFinishedSemaphore,
                                 "Semaphore-ComputeFinished-Frame_" + std::to_string(i));
@@ -51,6 +51,7 @@ DefaultFrameManager::DefaultFrameManager(
 
   eventQueue->subscribe<SwapchainResized>(
       [&](const std::shared_ptr<SwapchainResized>& event) { handleSwapchainResized(event); });
+  Log.trace("Finished Constructing DefaultFrameManager");
 }
 
 DefaultFrameManager::~DefaultFrameManager() {

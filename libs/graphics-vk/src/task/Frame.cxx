@@ -1,9 +1,6 @@
 #include "Frame.hpp"
 #include "bk/Handle.hpp"
 #include "img/ManagedImage.hpp"
-#include <vulkan/vulkan_core.h>
-
-#include <utility>
 
 namespace tr {
 

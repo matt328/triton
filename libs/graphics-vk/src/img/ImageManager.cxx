@@ -18,8 +18,9 @@ ImageManager::ImageManager(std::shared_ptr<Allocator> newAllocator,
       device{std::move(newDevice)},
       frameManager{std::move(newFrameManager)},
       swapchain{std::move(newSwapchain)} {
-
+  Log.trace("Creating ImageManager");
   registerSwapchainImages();
+  Log.trace("ImageManager Created");
 }
 
 ImageManager::~ImageManager() {

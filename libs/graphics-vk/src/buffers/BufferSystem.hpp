@@ -4,6 +4,7 @@
 #include "bk/HandleGenerator.hpp"
 #include "buffers/BufferCreateInfo.hpp"
 #include "buffers/ManagedBuffer.hpp"
+#include "resources/allocators/IBufferAllocator.hpp"
 
 namespace tr {
 
@@ -14,6 +15,7 @@ class Device;
 class Allocator;
 class IBufferAllocator;
 class FrameState;
+class TransferSystem;
 
 struct BufferEntry {
   BufferLifetime lifetime;
@@ -52,7 +54,13 @@ public:
   /// the CPU side.
   auto removeData(Handle<ManagedBuffer> handle, const BufferRegion& region) -> void;
 
-  auto allocate(Handle<ManagedBuffer> handle, size_t size) -> std::optional<BufferRegion>;
+  /// Attempts to reserve a BufferRegion of `size` in the buffer given by `handle`. On success, the
+  /// `AllocationResult` will contain a `BufferRegion`. If the buffer must be resized first, the
+  /// `AllocationResult` will contain a `ResizeRequest`. Allocation and resizing are separated out
+  /// from `BufferSystem::insert` since clients may want to batch buffer resize operations.
+  auto allocate(Handle<ManagedBuffer> handle, size_t size) -> BufferRegion;
+
+  auto checkSize(Handle<ManagedBuffer> handle, size_t size) -> std::optional<ResizeRequest>;
 
   /// Gets the buffer's address as a uint64_t to be set into a PushConstant.
   auto getBufferAddress(Handle<ManagedBuffer> handle) -> std::optional<uint64_t>;
@@ -65,7 +73,8 @@ public:
   /// completed. BufferSystem will handle replacing the buffer transparently to the renderer, always
   /// presenting a consistent buffer to he renderer and ensuring the frames in flight are flushed
   /// before deleting the old buffer.
-  auto resize(Handle<ManagedBuffer> handle, size_t newSize) -> vk::Fence&;
+  auto resize(const std::shared_ptr<TransferSystem>& transferSystem,
+              const std::vector<ResizeRequest>& resizeRequests) -> void;
 
   auto pruneOldVersions() -> void;
 

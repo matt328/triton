@@ -38,6 +38,8 @@ private:
   std::unique_ptr<vk::raii::DebugUtilsMessengerEXT> debugCallback;
   vk::DebugUtilsMessengerCreateInfoEXT debugCreateInfo;
 
+  std::mutex deviceMutex;
+
   static auto debugCallbackFn(
       [[maybe_unused]] vk::DebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
       [[maybe_unused]] vk::DebugUtilsMessageTypeFlagsEXT messageType,

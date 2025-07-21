@@ -45,11 +45,17 @@ public:
   auto operator=(const GeometryAllocator&) -> GeometryAllocator& = delete;
   auto operator=(GeometryAllocator&&) -> GeometryAllocator& = delete;
 
+  /// Allocate space in each buffer that will receive geometry data from this `GeometryData`.
+  /// This method will wait for any buffer resize operations that need to happen in order to fit the
+  /// data into the buffers.
   auto allocate(const GeometryData& data, TransferContext& transferContext) -> GeometryAllocation;
+
+  auto checkSizes(const GeometryData& data) -> std::vector<ResizeRequest>;
   [[nodiscard]] auto getRegionData(Handle<GeometryRegion> handle) const -> GpuGeometryRegionData;
 
 private:
   std::shared_ptr<GeometryBufferPack> geometryBufferPack;
+
   HandleGenerator<GeometryRegion> regionGenerator{};
   std::unordered_map<Handle<GeometryRegion>, GeometryRegion> regionTable;
 };

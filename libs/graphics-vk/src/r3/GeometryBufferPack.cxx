@@ -8,9 +8,10 @@
 
 namespace tr {
 
-GeometryBufferPack::GeometryBufferPack(const std::shared_ptr<BufferSystem>& bufferSystem,
+GeometryBufferPack::GeometryBufferPack(std::shared_ptr<BufferSystem> newBufferSystem,
                                        const std::shared_ptr<ResourceAliasRegistry>& aliasRegistry)
-    : indexBuffer{bufferSystem->registerBuffer(
+    : bufferSystem{std::move(newBufferSystem)},
+      indexBuffer{bufferSystem->registerBuffer(
           BufferCreateInfo{.allocationStrategy = AllocationStrategy::Arena,
                            .bufferLifetime = BufferLifetime::Persistent,
                            .initialSize = IndexBufferInitialSize,
@@ -46,17 +47,6 @@ GeometryBufferPack::GeometryBufferPack(const std::shared_ptr<BufferSystem>& buff
                            .initialSize = AnimationBufferInitialSize,
                            .itemStride = sizeof(glm::vec4),
                            .debugName = "Buffer-AnimationData"})} {
-  indexBufferAllocator = std::make_unique<ArenaAllocator>(IndexBufferInitialSize, "IndexBuffer");
-  positionBufferAllocator =
-      std::make_unique<LinearAllocator>(PositionBufferInitialSize, "PositionBuffer");
-  colorBufferAllocator = std::make_unique<LinearAllocator>(ColorBufferInitialSize, "ColorBuffer");
-  texCoordBufferAllocator =
-      std::make_unique<LinearAllocator>(TexCoordBufferInitialSize, "TexCoordBuffer");
-  normalBufferAllocator =
-      std::make_unique<LinearAllocator>(NormalBufferInitialSize, "NormalBuffer");
-  animationBufferAllocator =
-      std::make_unique<LinearAllocator>(AnimationBufferInitialSize, "AnimationBuffer");
-
   aliasRegistry->setHandle(GlobalBufferAlias::Index, indexBuffer);
   aliasRegistry->setHandle(GlobalBufferAlias::Position, positionBuffer);
   aliasRegistry->setHandle(GlobalBufferAlias::Color, colorBuffer);
@@ -89,28 +79,55 @@ auto GeometryBufferPack::getAnimationBuffer() const -> const Handle<ManagedBuffe
   return animationBuffer;
 }
 
-auto GeometryBufferPack::getIndexBufferAllocator() -> IBufferAllocator& {
-  return *indexBufferAllocator;
+auto GeometryBufferPack::checkSizes(const GeometryData& data) -> std::vector<ResizeRequest> {
+  auto resizes = std::vector<ResizeRequest>{};
+
+  auto check = [&](Handle<ManagedBuffer> handle, size_t size) {
+    if (auto maybe = bufferSystem->checkSize(handle, size)) {
+      resizes.push_back(*maybe);
+    }
+  };
+
+  check(indexBuffer, data.indexData->size());
+  check(positionBuffer, data.positionData->size());
+  check(colorBuffer, data.colorData ? data.colorData->size() : 0L);
+  check(texCoordBuffer, data.texCoordData ? data.texCoordData->size() : 0L);
+  check(normalBuffer, data.normalData ? data.normalData->size() : 0L);
+  check(animationBuffer, data.animationData ? data.animationData->size() : 0L);
+
+  return resizes;
 }
 
-auto GeometryBufferPack::getPositionBufferAllocator() -> IBufferAllocator& {
-  return *positionBufferAllocator;
+auto GeometryBufferPack::allocate(Handle<ManagedBuffer> handle, const BufferRequest& bufferRequest)
+    -> BufferRegion {
+  return bufferSystem->allocate(handle, bufferRequest.size);
+};
+
+auto GeometryBufferPack::allocateIndexBuffer(const BufferRequest& bufferRequest) -> BufferRegion {
+  return bufferSystem->allocate(indexBuffer, bufferRequest.size);
 }
 
-auto GeometryBufferPack::getColorBufferAllocator() -> IBufferAllocator& {
-  return *colorBufferAllocator;
+auto GeometryBufferPack::allocatePositionBuffer(const BufferRequest& bufferRequest)
+    -> BufferRegion {
+  return bufferSystem->allocate(positionBuffer, bufferRequest.size);
 }
 
-auto GeometryBufferPack::getTexCoordBufferAllocator() -> IBufferAllocator& {
-  return *texCoordBufferAllocator;
+auto GeometryBufferPack::allocateColorBuffer(const BufferRequest& bufferRequest) -> BufferRegion {
+  return bufferSystem->allocate(colorBuffer, bufferRequest.size);
 }
 
-auto GeometryBufferPack::getNormalBufferAllocator() -> IBufferAllocator& {
-  return *normalBufferAllocator;
+auto GeometryBufferPack::allocateTexCoordBuffer(const BufferRequest& bufferRequest)
+    -> BufferRegion {
+  return bufferSystem->allocate(texCoordBuffer, bufferRequest.size);
 }
 
-auto GeometryBufferPack::getAnimationBufferAllocator() -> IBufferAllocator& {
-  return *animationBufferAllocator;
+auto GeometryBufferPack::allocateNormalBuffer(const BufferRequest& bufferRequest) -> BufferRegion {
+  return bufferSystem->allocate(normalBuffer, bufferRequest.size);
+}
+
+auto GeometryBufferPack::allocateAnimationBuffer(const BufferRequest& bufferRequest)
+    -> BufferRegion {
+  return bufferSystem->allocate(animationBuffer, bufferRequest.size);
 }
 
 }

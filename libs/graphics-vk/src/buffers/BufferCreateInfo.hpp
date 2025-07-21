@@ -3,8 +3,8 @@
 namespace tr {
 
 enum class AllocationStrategy : uint8_t {
-  None = 0,
-  Linear,
+  Linear = 0,
+  Resizable,
   Arena
 };
 
@@ -27,7 +27,7 @@ enum class BufferUsage : uint8_t {
 };
 
 struct BufferCreateInfo {
-  AllocationStrategy allocationStrategy = AllocationStrategy::None;
+  AllocationStrategy allocationStrategy = AllocationStrategy::Linear;
   BufferLifetime bufferLifetime;
   BufferUsage bufferUsage = BufferUsage::Storage;
   size_t initialSize = 1024;

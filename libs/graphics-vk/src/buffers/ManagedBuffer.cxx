@@ -49,7 +49,7 @@ auto ManagedBuffer::uploadData(void* srcData, size_t size, size_t offset) -> voi
   assert(srcData != nullptr);
   assert(offset + size <= bufferMeta.bufferCreateInfo.size);
 
-  // Uncomment this if the memcpy line starts segfaulting again.
+  // Uncomment this to debug if the memcpy line starts segfaulting again.
   // volatile char* s = static_cast<volatile char*>(srcData);
   // for (size_t i = 0; i < size; ++i) {
   //   char tmp = s[i]; // try to read from srcData
@@ -72,6 +72,13 @@ auto ManagedBuffer::getValidFromFrame() const -> uint64_t {
 
 auto ManagedBuffer::getValidToFrame() const -> std::optional<uint64_t> {
   return validToFrame;
+}
+
+auto ManagedBuffer::setValidFromFrame(uint64_t frame) -> void {
+  validFromFrame = frame;
+}
+auto ManagedBuffer::setValidToFrame(uint64_t frame) -> void {
+  validToFrame = frame;
 }
 
 }

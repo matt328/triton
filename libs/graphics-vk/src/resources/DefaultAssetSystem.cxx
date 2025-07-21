@@ -142,6 +142,12 @@ auto DefaultAssetSystem::prepareUpload(const SubBatch& subBatch) -> UploadSubBat
   for (const auto& reqs : subBatch.items) {
     // Geometry
     if (reqs.geometrySize) {
+
+      const auto resizeRequests = geometryAllocator->checkSizes(*reqs.geometryData);
+      if (!resizeRequests.empty()) {
+        bufferSystem->resize(transferSystem, resizeRequests);
+      }
+
       const auto geometryAllocation =
           geometryAllocator->allocate(*reqs.geometryData, transferSystem->getTransferContext());
       auto bufferUploadItem = GeometryUpload{.cargo = reqs.cargo,
@@ -186,7 +192,7 @@ auto DefaultAssetSystem::prepareUpload(const SubBatch& subBatch) -> UploadSubBat
             .imageExtent = vk::Extent3D{.width = static_cast<uint32_t>(imageData->width),
                                         .height = static_cast<uint32_t>(imageData->height),
                                         .depth = 1},
-            .stagingBufferOffset = stagingBufferOffset->offset,
+            .stagingBufferOffset = stagingBufferOffset.offset,
         };
         uploadSubBatch.imageUploadItems.push_back(imageUpload);
       }

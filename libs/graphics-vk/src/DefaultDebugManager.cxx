@@ -2,6 +2,7 @@
 
 #include "vk/core/Context.hpp"
 #include "vk/core/Device.hpp"
+#include <shared_mutex>
 
 namespace tr {
 
@@ -68,6 +69,7 @@ auto DefaultDebugManager::setDevice(std::shared_ptr<Device> newDevice) -> void {
 }
 
 auto DefaultDebugManager::setObjectName(const ObjectHandle& handle, std::string_view name) -> void {
+  // std::lock_guard<std::mutex> lock(deviceMutex);
   if (!device.has_value()) {
     Log.warn("Attempted to set object name before Device was initialized");
     return;

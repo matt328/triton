@@ -48,6 +48,9 @@ public:
   [[nodiscard]] auto getValidFromFrame() const -> uint64_t;
   [[nodiscard]] auto getValidToFrame() const -> std::optional<uint64_t>;
 
+  auto setValidFromFrame(uint64_t frame) -> void;
+  auto setValidToFrame(uint64_t frame) -> void;
+
 private:
   vk::Buffer vkBuffer;
   BufferMeta bufferMeta;
