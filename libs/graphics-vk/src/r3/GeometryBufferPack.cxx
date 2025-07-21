@@ -83,6 +83,9 @@ auto GeometryBufferPack::checkSizes(const GeometryData& data) -> std::vector<Res
   auto resizes = std::vector<ResizeRequest>{};
 
   auto check = [&](Handle<ManagedBuffer> handle, size_t size) {
+    if (size == 0) {
+      return;
+    }
     if (auto maybe = bufferSystem->checkSize(handle, size)) {
       resizes.push_back(*maybe);
     }

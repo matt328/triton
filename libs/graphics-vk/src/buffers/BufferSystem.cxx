@@ -55,11 +55,19 @@ auto BufferSystem::resize(const std::shared_ptr<TransferSystem>& transferSystem,
       Log.warn("No current buffer for handle={}", handle.id);
       continue;
     }
+    Log.trace("Resizing Buffer: {}, newSize={}",
+              oldBuffer.value()->getMeta().debugName,
+              resize.newSize);
 
-    const auto bci = oldBuffer.value()->getMeta().bufferCreateInfo;
+    auto bci = oldBuffer.value()->getMeta().bufferCreateInfo;
+    bci.size = resize.newSize;
     const auto aci = oldBuffer.value()->getMeta().allocationCreateInfo;
 
-    auto newBuffer = allocator->createBuffer2(bci, aci);
+    const auto& entry = bufferMap.at(handle);
+    const auto newName =
+        std::format("{}-v{}", oldBuffer.value()->getMeta().debugName, entry->versions.size());
+
+    auto newBuffer = allocator->createBuffer2(bci, aci, newName);
     copyPairs.emplace_back(*oldBuffer, newBuffer.get());
 
     jobs.push_back(ResizeJob{.handle = handle,
@@ -79,6 +87,9 @@ auto BufferSystem::resize(const std::shared_ptr<TransferSystem>& transferSystem,
     auto& entry = bufferMap.at(job.handle);
     entry->versions.emplace_back(std::move(job.newBuffer));
     entry->currentSize = job.newSize;
+
+    // Somehow update bufferMeta's bci with new size
+
     if (allocatorMap.contains(job.handle)) {
       allocatorMap.at(job.handle)->notifyBufferResized(job.newSize);
     } else {
@@ -109,7 +120,8 @@ auto BufferSystem::registerBuffer(const BufferCreateInfo& createInfo) -> Handle<
   auto [bci, aci] = fromCreateInfo(createInfo);
 
   auto versions = std::deque<std::unique_ptr<ManagedBuffer>>{};
-  versions.emplace_back(allocator->createBuffer2(bci, aci, createInfo.debugName));
+  const auto name = std::format("{}-v0", createInfo.debugName);
+  versions.emplace_back(allocator->createBuffer2(bci, aci, name));
   bufferMap.emplace(
       handle,
       std::make_unique<BufferEntry>(BufferEntry{.lifetime = createInfo.bufferLifetime,
@@ -250,6 +262,12 @@ auto BufferSystem::fromCreateInfo(const BufferCreateInfo& createInfo)
 
   if (createInfo.indirect) {
     bci.usage |= vk::BufferUsageFlagBits::eIndirectBuffer;
+  }
+
+  if (createInfo.allocationStrategy == AllocationStrategy::Arena ||
+      createInfo.allocationStrategy == AllocationStrategy::Resizable) {
+    bci.usage |=
+        vk::BufferUsageFlagBits::eTransferSrc; // Needs eTransferSrc for copying during resize
   }
 
   return {bci, aci};

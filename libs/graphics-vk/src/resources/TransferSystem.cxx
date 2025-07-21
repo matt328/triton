@@ -99,10 +99,6 @@ auto TransferSystem::prepareStagingData(const UploadSubBatch& uploadSubBatch)
   auto bufferCopies = BufferCopyMap{};
   for (const auto& upload : uploadSubBatch.bufferUploadItems) {
     for (const auto& allocation : upload.bufferAllocation.bufferAllocations) {
-      Log.trace("Copying into staging buffer offset={}, size={}, dstBuffer={}",
-                allocation.stagingOffset,
-                allocation.dataSize,
-                allocation.dstBuffer.id);
       const auto stagingBufferRegion = bufferSystem->insert(
           transferContext.stagingBuffer,
           allocation.data->data(),
@@ -111,10 +107,6 @@ auto TransferSystem::prepareStagingData(const UploadSubBatch& uploadSubBatch)
       const auto region = vk::BufferCopy2{.srcOffset = stagingBufferRegion->offset,
                                           .dstOffset = allocation.dstOffset,
                                           .size = allocation.dataSize};
-      Log.trace("Created copy region, srcOffset={}, dstOffset={}, dstBuffer={}",
-                stagingBufferRegion->offset,
-                allocation.dstOffset,
-                allocation.dstBuffer.id);
       bufferCopies[allocation.dstBuffer].push_back(region);
     }
   }

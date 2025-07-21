@@ -20,6 +20,7 @@ struct BufferMeta {
   vk::BufferCreateInfo bufferCreateInfo;
   vma::AllocationInfo allocationInfo;
   vma::AllocationCreateInfo allocationCreateInfo;
+  std::string debugName;
 };
 
 class ManagedBuffer {
