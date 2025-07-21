@@ -201,6 +201,7 @@ auto R3Renderer::createGlobalBuffers() -> void {
 
   globalBuffers.geometryRegion = bufferSystem->registerPerFrameBuffer(
       BufferCreateInfo{.bufferLifetime = BufferLifetime::Transient,
+                       .initialSize = 8192,
                        .debugName = "Buffer-GeometryRegion"});
   aliasRegistry->setHandle(BufferAlias::GeometryRegion, globalBuffers.geometryRegion);
 
@@ -378,8 +379,10 @@ void R3Renderer::renderNextFrame() {
             materialDataContents.data(),
             BufferRegion{.size = sizeof(GpuMaterialData) * materialDataContents.size()});
       }
-
-      // Object Data Buffers
+      // TODO: might need to allow resizing transient buffers, or at least track their size/usage as
+      // metrics and get a better sense of how large they need to be. Right now the materialData
+      // buffer is not large enough to hold 60 materials
+      //  Object Data Buffers
       if (!current.objectMetadata.empty()) {
         bufferSystem->insert(
             frame->getLogicalBuffer(globalBuffers.objectData),

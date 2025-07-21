@@ -39,6 +39,10 @@ auto ManagedBuffer::map() -> void {
   }
 }
 
+auto ManagedBuffer::setSize(size_t newSize) -> void {
+  bufferMeta.bufferCreateInfo.setSize(newSize);
+}
+
 auto ManagedBuffer::uploadData(void* srcData, size_t size, size_t offset) -> void {
   assert(isMappable());
   if (this->mappedData == nullptr) {

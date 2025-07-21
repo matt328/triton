@@ -52,6 +52,8 @@ public:
   auto setValidFromFrame(uint64_t frame) -> void;
   auto setValidToFrame(uint64_t frame) -> void;
 
+  auto setSize(size_t newSize) -> void;
+
 private:
   vk::Buffer vkBuffer;
   BufferMeta bufferMeta;

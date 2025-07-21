@@ -89,7 +89,7 @@ auto BufferSystem::resize(const std::shared_ptr<TransferSystem>& transferSystem,
     entry->currentSize = job.newSize;
 
     // Somehow update bufferMeta's bci with new size
-
+    entry->versions.back()->setSize(job.newSize);
     if (allocatorMap.contains(job.handle)) {
       allocatorMap.at(job.handle)->notifyBufferResized(job.newSize);
     } else {
