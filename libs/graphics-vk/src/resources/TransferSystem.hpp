@@ -13,6 +13,7 @@ namespace tr {
 class BufferSystem;
 class CommandBufferManager;
 class Device;
+class PhysicalDevice;
 class ImageManager;
 class ImageTransitionQueue;
 class TextureArena;
@@ -30,6 +31,7 @@ class TransferSystem {
 public:
   explicit TransferSystem(std::shared_ptr<BufferSystem> newBufferSystem,
                           std::shared_ptr<Device> newDevice,
+                          std::shared_ptr<PhysicalDevice> newPhysicalDevice,
                           std::shared_ptr<queue::Transfer> newTransferQueue,
                           std::shared_ptr<queue::Graphics> newGraphicsQueue,
                           std::shared_ptr<ImageManager> newImageManager,
@@ -56,6 +58,7 @@ public:
 private:
   std::shared_ptr<BufferSystem> bufferSystem;
   std::shared_ptr<Device> device;
+  std::shared_ptr<PhysicalDevice> physicalDevice;
   std::shared_ptr<queue::Transfer> transferQueue;
   std::shared_ptr<queue::Graphics> graphicsQueue;
   std::shared_ptr<ImageManager> imageManager;
@@ -69,6 +72,8 @@ private:
   std::vector<ImageTransitionInfo> transitionBatch{};
 
   TransferContext transferContext;
+
+  tracy::VkCtx* tracyVkCtx;
 
   /// DstBuffer to BufferCopy2's into said buffer
   using BufferCopyMap = std::unordered_map<Handle<ManagedBuffer>, std::vector<vk::BufferCopy2>>;

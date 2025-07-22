@@ -13,6 +13,7 @@ constexpr size_t StagingBufferSize = 183886080;
 
 TransferSystem::TransferSystem(std::shared_ptr<BufferSystem> newBufferSystem,
                                std::shared_ptr<Device> newDevice,
+                               std::shared_ptr<PhysicalDevice> newPhysicalDevice,
                                std::shared_ptr<queue::Transfer> newTransferQueue,
                                std::shared_ptr<queue::Graphics> newGraphicsQueue,
                                std::shared_ptr<ImageManager> newImageManager,
@@ -23,6 +24,7 @@ TransferSystem::TransferSystem(std::shared_ptr<BufferSystem> newBufferSystem,
                                const std::shared_ptr<CommandBufferManager>& commandBufferManager)
     : bufferSystem{std::move(newBufferSystem)},
       device{std::move(newDevice)},
+      physicalDevice{std::move(newPhysicalDevice)},
       transferQueue{std::move(newTransferQueue)},
       graphicsQueue{std::move(newGraphicsQueue)},
       imageManager{std::move(newImageManager)},
@@ -34,6 +36,10 @@ TransferSystem::TransferSystem(std::shared_ptr<BufferSystem> newBufferSystem,
           commandBufferManager->getTransferCommandBuffer())},
       fence(std::make_unique<vk::raii::Fence>(
           device->getVkDevice().createFence(vk::FenceCreateInfo{}))) {
+  tracyVkCtx = TracyVkContext(*physicalDevice->getVkPhysicalDevice(),
+                              *device->getVkDevice(),
+                              *transferQueue->getQueue(),
+                              **commandBuffer);
   transferContext.stagingBuffer =
       bufferSystem->registerBuffer(BufferCreateInfo{.bufferLifetime = BufferLifetime::Transient,
                                                     .bufferUsage = BufferUsage::Transfer,
@@ -180,6 +186,7 @@ auto TransferSystem::prepareImageStagingData(const ImageUploadPlan& imagePlan) -
 }
 
 auto TransferSystem::recordBufferUploads(const BufferCopyMap& bufferCopies) -> void {
+  ZoneScoped;
   for (const auto& [dstHandle, regions] : bufferCopies) {
     const auto srcBuffer = bufferSystem->getVkBuffer(transferContext.stagingBuffer);
     const auto dstBuffer = bufferSystem->getVkBuffer(dstHandle);
@@ -202,6 +209,7 @@ auto TransferSystem::recordBufferUploads(const BufferCopyMap& bufferCopies) -> v
 }
 
 auto TransferSystem::recordImageUploads(const ImageCopyMap& imageCopies) -> void {
+  ZoneScoped;
   const auto srcBuffer = bufferSystem->getVkBuffer(transferContext.imageStagingBuffer);
   transitionBatch.clear();
   for (const auto& [dstImageHandle, regions] : imageCopies) {
@@ -261,8 +269,11 @@ auto TransferSystem::recordImageUploads(const ImageCopyMap& imageCopies) -> void
 }
 
 auto TransferSystem::submitAndWait() -> void {
+  ZoneScoped;
   const auto submitInfo =
       vk::SubmitInfo{.commandBufferCount = 1, .pCommandBuffers = &**commandBuffer};
+
+  TracyVkZone(tracyVkCtx, **commandBuffer, "Transfer Submit");
 
   transferQueue->getQueue().submit(submitInfo, **fence);
 
@@ -270,6 +281,8 @@ auto TransferSystem::submitAndWait() -> void {
       result != vk::Result::eSuccess) {
     Log.warn("Timeout waiting for fence during asnyc submit");
   }
+
+  TracyVkCollect(tracyVkCtx, **commandBuffer);
 
   // Add all the images that were uploaded to the queue here
   imageQueue->enqueue(transitionBatch);

@@ -90,6 +90,7 @@ auto DefaultAssetSystem::requestStop() -> void {
 auto DefaultAssetSystem::extractRequirements(uint64_t batchId,
                                              const std::vector<RequestVariant>& requests)
     -> std::vector<StagingRequirements> {
+  ZoneScoped;
   auto stagingRequirements = std::vector<StagingRequirements>{};
   for (const auto& request : requests) {
     stagingRequirements.push_back(std::visit(
@@ -105,6 +106,7 @@ auto DefaultAssetSystem::extractRequirements(uint64_t batchId,
 auto DefaultAssetSystem::partition(BufferSizes stagingBufferSizes,
                                    const std::vector<StagingRequirements>& requirements)
     -> std::vector<SubBatch> {
+  ZoneScoped;
   auto subBatches = std::vector<SubBatch>{};
   auto currentBatch = SubBatch{};
   size_t currentGeometryBufferSize = 0L;
@@ -138,6 +140,7 @@ auto DefaultAssetSystem::partition(BufferSizes stagingBufferSizes,
 /// and possibly multiple ImageUploadItems. This method returns a single UploadSubBatch, containing
 /// all of these.
 auto DefaultAssetSystem::prepareUpload(const SubBatch& subBatch) -> UploadSubBatch {
+  ZoneScoped;
   auto uploadSubBatch = UploadSubBatch{};
   for (const auto& reqs : subBatch.items) {
     // Geometry
@@ -203,6 +206,7 @@ auto DefaultAssetSystem::prepareUpload(const SubBatch& subBatch) -> UploadSubBat
 
 auto DefaultAssetSystem::processResults(const std::vector<SubBatchResult>& subBatchResults)
     -> std::vector<ResponseVariant> {
+  ZoneScoped;
   auto responses = std::vector<ResponseVariant>{};
 
   for (const auto& result : subBatchResults) {
