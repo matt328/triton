@@ -36,10 +36,7 @@ TransferSystem::TransferSystem(std::shared_ptr<BufferSystem> newBufferSystem,
           commandBufferManager->getTransferCommandBuffer())},
       fence(std::make_unique<vk::raii::Fence>(
           device->getVkDevice().createFence(vk::FenceCreateInfo{}))) {
-  tracyVkCtx = TracyVkContext(*physicalDevice->getVkPhysicalDevice(),
-                              *device->getVkDevice(),
-                              *transferQueue->getQueue(),
-                              **commandBuffer);
+
   transferContext.stagingBuffer =
       bufferSystem->registerBuffer(BufferCreateInfo{.bufferLifetime = BufferLifetime::Transient,
                                                     .bufferUsage = BufferUsage::Transfer,
@@ -273,16 +270,12 @@ auto TransferSystem::submitAndWait() -> void {
   const auto submitInfo =
       vk::SubmitInfo{.commandBufferCount = 1, .pCommandBuffers = &**commandBuffer};
 
-  TracyVkZone(tracyVkCtx, **commandBuffer, "Transfer Submit");
-
   transferQueue->getQueue().submit(submitInfo, **fence);
 
   if (const auto result = device->getVkDevice().waitForFences(**fence, 1u, UINT64_MAX);
       result != vk::Result::eSuccess) {
     Log.warn("Timeout waiting for fence during asnyc submit");
   }
-
-  TracyVkCollect(tracyVkCtx, **commandBuffer);
 
   // Add all the images that were uploaded to the queue here
   imageQueue->enqueue(transitionBatch);

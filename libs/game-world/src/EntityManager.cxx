@@ -119,9 +119,6 @@ auto EntityManager::createStaticGameObject(std::string entityName,
                                            std::optional<Handle<TextureTag>> textureHandle)
     -> void {
   ZoneScoped;
-  Log.trace("EntityManager creating static gameobject name={}, geometryHandle={}",
-            entityName,
-            geometryHandle.id);
 
   auto entityId = registry->create();
   auto textureHandles = std::vector<Handle<TextureTag>>{};

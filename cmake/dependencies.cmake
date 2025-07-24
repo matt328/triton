@@ -154,8 +154,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(tinygltf)
 
 # tracy
-set(TRACY_DELAYED_INIT OFF)
-set(TRACY_NO_EXIT ON)
+set(TRACY_DELAYED_INIT ON)
 FetchContent_Declare(
   tracy
   GIT_REPOSITORY https://github.com/wolfpld/tracy.git

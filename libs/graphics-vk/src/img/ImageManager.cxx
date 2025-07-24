@@ -29,7 +29,6 @@ ImageManager::~ImageManager() {
 }
 
 auto ImageManager::createImage(ImageRequest request) -> Handle<ManagedImage> {
-  Log.trace("CreateImage, name={}", request.debugName.value());
   const auto imageCreateInfo = vk::ImageCreateInfo{
       .imageType = vk::ImageType::e2D,
       .format = request.format,

@@ -22,16 +22,8 @@ auto ArenaAllocator::allocate(const BufferRequest& request) -> BufferRegion {
 }
 
 auto ArenaAllocator::checkSize(const BufferRequest& requestData) -> std::optional<ResizeRequest> {
-  Log.trace("CheckingSize, requestData.size={}, currentOffset={}, currentBufferSize={}",
-            requestData.size,
-            currentOffset,
-            currentBufferSize);
   const auto requestedSize = currentOffset + requestData.size;
-  Log.trace("requestedSize={}", requestedSize);
   if (requestedSize > currentBufferSize) {
-    Log.warn("Allocator failed, requiredSize={}, currentBufferSize={}",
-             currentOffset + requestData.size,
-             currentBufferSize);
     // Initially just double the buffer size. Eventually create better resize strategies
     return ResizeRequest{.bufferHandle = bufferHandle, .newSize = currentBufferSize * 2};
   }

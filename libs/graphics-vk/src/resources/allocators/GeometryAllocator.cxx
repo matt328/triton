@@ -24,9 +24,6 @@ auto GeometryAllocator::allocate(const GeometryData& data, TransferContext& tran
     const auto stagingRegion =
         transferContext.stagingAllocator->allocate(BufferRequest{.size = size});
 
-    Log.trace("Allocated index data in staging buffer, region.size={}, region.offset={}",
-              stagingRegion.size,
-              stagingRegion.offset);
     geometryRegion.indexRegion =
         geometryBufferPack->allocateIndexBuffer(BufferRequest{.size = size});
 
@@ -44,9 +41,6 @@ auto GeometryAllocator::allocate(const GeometryData& data, TransferContext& tran
   {
     auto size = data.positionData->size();
     auto stagingRegion = transferContext.stagingAllocator->allocate(BufferRequest{.size = size});
-    Log.trace("Allocated position data in staging buffer, region.size={}, region.offset={}",
-              stagingRegion.size,
-              stagingRegion.offset);
     geometryRegion.positionRegion =
         geometryBufferPack->allocatePositionBuffer(BufferRequest{.size = size});
     uploadList.push_back({
@@ -61,9 +55,6 @@ auto GeometryAllocator::allocate(const GeometryData& data, TransferContext& tran
   if (data.colorData != nullptr) {
     auto size = data.colorData->size();
     auto stagingRegion = transferContext.stagingAllocator->allocate(BufferRequest{.size = size});
-    Log.trace("Allocated color data in staging buffer, region.size={}, region.offset={}",
-              stagingRegion.size,
-              stagingRegion.offset);
     geometryRegion.colorRegion =
         geometryBufferPack->allocateColorBuffer(BufferRequest{.size = size});
     uploadList.push_back({
@@ -78,9 +69,6 @@ auto GeometryAllocator::allocate(const GeometryData& data, TransferContext& tran
   if (data.texCoordData != nullptr) {
     auto size = data.texCoordData->size();
     auto stagingRegion = transferContext.stagingAllocator->allocate(BufferRequest{.size = size});
-    Log.trace("Allocated texCoord data in staging buffer, region.size={}, region.offset={}",
-              stagingRegion.size,
-              stagingRegion.offset);
     geometryRegion.texCoordRegion =
         geometryBufferPack->allocateTexCoordBuffer(BufferRequest{.size = size});
     uploadList.push_back({

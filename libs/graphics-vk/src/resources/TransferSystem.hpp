@@ -73,8 +73,6 @@ private:
 
   TransferContext transferContext;
 
-  tracy::VkCtx* tracyVkCtx;
-
   /// DstBuffer to BufferCopy2's into said buffer
   using BufferCopyMap = std::unordered_map<Handle<ManagedBuffer>, std::vector<vk::BufferCopy2>>;
   using ImageCopyMap = std::unordered_map<Handle<ManagedImage>, std::vector<vk::BufferImageCopy2>>;
