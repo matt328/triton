@@ -78,7 +78,6 @@ auto EntityEditor::renderStaticEntityDialog(const tr::EditorState& editorState) 
   }
 
   if (shouldOk) {
-    Log.trace("shouldOk");
     ImGui::CloseCurrentPopup();
     staticDialogInfo.isOpen = false;
     Log.trace("Static GameObject create: objectName={}, resourceAlias={}, resourcePath={}",

@@ -229,22 +229,15 @@ auto DefaultAssetSystem::processBatchedResources(uint64_t batchId) -> void {
   ZoneScoped;
 
   auto stagingRequirements = extractRequirements(batchId, eventBatches[batchId]);
-  Log.trace("Extracted staging requirements");
 
   auto subBatches = partition({.geometry = transferSystem->getGeometryStagingBufferSize(),
                                .image = transferSystem->getImageStagingBufferSize()},
                               stagingRequirements);
-  Log.trace("Partitioned into subbatches, count={}", subBatches.size());
 
   for (const auto& subBatch : subBatches) {
     const auto uploadSubBatch = prepareUpload(subBatch);
-    Log.trace("Prepared upload");
-
     const auto subBatchResults = transferSystem->upload2(uploadSubBatch);
-    Log.trace("upload2'ed");
-
     const auto responses = processResults(subBatchResults);
-    Log.trace("processed results");
     for (const auto& response : responses) {
       std::visit(EmitEventVisitor{eventQueue}, response);
     }

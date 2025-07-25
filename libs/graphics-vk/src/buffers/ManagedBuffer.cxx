@@ -51,6 +51,9 @@ auto ManagedBuffer::uploadData(void* srcData, size_t size, size_t offset) -> voi
 
   assert(this->mappedData != nullptr);
   assert(srcData != nullptr);
+  if (offset + size > bufferMeta.bufferCreateInfo.size) {
+    Log.warn("Buffer {} Full", this->bufferMeta.debugName);
+  }
   assert(offset + size <= bufferMeta.bufferCreateInfo.size);
 
   // Uncomment this to debug if the memcpy line starts segfaulting again.

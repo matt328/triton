@@ -26,7 +26,7 @@ auto ApplicationController::handleAddStaticModel(const std::shared_ptr<tr::AddSt
   const auto endBatch = tr::EndResourceBatch{.batchId = 1};
 
   eventQueue->emit(beginBatch, UIGroup);
-  for (int i = 0; i < 30; ++i) {
+  for (int i = 0; i < 50; ++i) {
     const auto staticModelRequestId = bk::RandomUtils::uint64InRange(1, 10000);
 
     const auto modelRequest =

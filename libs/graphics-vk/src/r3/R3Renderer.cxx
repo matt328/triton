@@ -181,6 +181,7 @@ auto R3Renderer::createGlobalBuffers() -> void {
 
   globalBuffers.objectData = bufferSystem->registerPerFrameBuffer(
       BufferCreateInfo{.bufferLifetime = BufferLifetime::Transient,
+                       .initialSize = 40960,
                        .debugName = "Buffer-ObjectData"});
   aliasRegistry->setHandle(BufferAlias::ObjectData, globalBuffers.objectData);
 

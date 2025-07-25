@@ -73,6 +73,9 @@ auto TransferSystem::upload2(const UploadSubBatch& subBatch) -> std::vector<SubB
 
   submitAndWait();
 
+  // Add all the images that were uploaded to the queue here
+  imageQueue->enqueue(transitionBatch);
+
   transferContext.stagingAllocator->reset();
   transferContext.imageStagingAllocator->reset();
 
@@ -276,9 +279,6 @@ auto TransferSystem::submitAndWait() -> void {
       result != vk::Result::eSuccess) {
     Log.warn("Timeout waiting for fence during asnyc submit");
   }
-
-  // Add all the images that were uploaded to the queue here
-  imageQueue->enqueue(transitionBatch);
 
   device->getVkDevice().resetFences(**fence);
 }
