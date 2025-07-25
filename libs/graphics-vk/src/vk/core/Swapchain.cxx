@@ -57,6 +57,10 @@ auto Swapchain::getImages() const -> const std::vector<vk::Image>& {
   return swapchainImages;
 }
 
+auto Swapchain::getImageSemaphore(uint32_t imageIndex) const -> vk::Semaphore {
+  return imageSemaphores[imageIndex];
+}
+
 auto Swapchain::acquireNextImage(const vk::Semaphore& semaphore) const
     -> std::variant<uint32_t, ImageAcquireResult> {
   try {
@@ -155,6 +159,9 @@ auto Swapchain::createSwapchain() -> void {
                                                     .components = components,
                                                     .subresourceRange = subresourceRange};
     swapchainImageViews.emplace_back(device->getVkDevice(), createInfo);
+    imageSemaphores.emplace_back(device->getVkDevice().createSemaphore({}));
+    debugManager->setObjectName(*imageSemaphores.back(),
+                                "Semaphore-SwapchainImage_" + std::to_string(index));
   }
 
   if (oldSwapchain != nullptr) {

@@ -34,9 +34,6 @@ DefaultFrameManager::DefaultFrameManager(
     debugManager->setObjectName(*acquireImageSemaphore,
                                 "Semaphore-AcquireImage-Frame_" + std::to_string(i));
 
-    auto renderFinishedSemaphore = device->getVkDevice().createSemaphore({});
-    debugManager->setObjectName(*renderFinishedSemaphore,
-                                "Semaphore-RenderFinished-Frame_" + std::to_string(i));
     assert(debugManager);
     auto computeFinishedSemaphore = device->getVkDevice().createSemaphore({});
     debugManager->setObjectName(*computeFinishedSemaphore,
@@ -45,7 +42,6 @@ DefaultFrameManager::DefaultFrameManager(
     frames.push_back(std::make_unique<Frame>(static_cast<uint8_t>(frames.size()),
                                              std::move(fence),
                                              std::move(acquireImageSemaphore),
-                                             std::move(renderFinishedSemaphore),
                                              std::move(computeFinishedSemaphore)));
   }
 

@@ -32,6 +32,7 @@ private:
   struct StaticGameObjectDialogInfo {
     bool shouldShow;
     bool isOpen;
+    int32_t objectCount;
     std::string objectName;
     tr::FileAlias selectedModel;
   };

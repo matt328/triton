@@ -46,6 +46,7 @@ auto EntityEditor::renderStaticEntityDialog(const tr::EditorState& editorState) 
     ImGui::OpenPopup("StaticGameObject");
     staticDialogInfo.shouldShow = false;
     staticDialogInfo.isOpen = true;
+    staticDialogInfo.objectCount = 5;
     staticDialogInfo.objectName = "";
     staticDialogInfo.selectedModel = {};
   }
@@ -63,6 +64,9 @@ auto EntityEditor::renderStaticEntityDialog(const tr::EditorState& editorState) 
     if (ImGui::IsWindowAppearing()) {
       ImGui::SetKeyboardFocusHere();
     }
+
+    // Count Input
+    ImGui::DragInt("GameObject Count", &staticDialogInfo.objectCount, .5f, 0, 100);
 
     // Name Input
     ImGui::InputText("GameObject Name", &staticDialogInfo.objectName);

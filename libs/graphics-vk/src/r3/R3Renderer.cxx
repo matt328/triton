@@ -454,6 +454,9 @@ auto R3Renderer::endFrame(const Frame* frame, const FrameGraphResult& results) -
   constexpr auto waitStages =
       std::array<vk::PipelineStageFlags, 1>{vk::PipelineStageFlagBits::eColorAttachmentOutput};
 
+  const auto swapchainImageIndex = frame->getSwapchainImageIndex();
+  const auto& swapchainImageSemaphore = swapchain->getImageSemaphore(swapchainImageIndex);
+
   const auto submitInfo = vk::SubmitInfo{
       .waitSemaphoreCount = 1,
       .pWaitSemaphores = &*frame->getImageAvailableSemaphore(),
@@ -461,7 +464,7 @@ auto R3Renderer::endFrame(const Frame* frame, const FrameGraphResult& results) -
       .commandBufferCount = static_cast<uint32_t>(results.commandBuffers.size()),
       .pCommandBuffers = results.commandBuffers.data(),
       .signalSemaphoreCount = 1,
-      .pSignalSemaphores = &*frame->getRenderFinishedSemaphore(),
+      .pSignalSemaphores = &swapchainImageSemaphore,
   };
 
   try {
@@ -475,15 +478,13 @@ auto R3Renderer::endFrame(const Frame* frame, const FrameGraphResult& results) -
 
   try {
     ZoneScopedN("queue present");
-    const auto swapchainImageIndex = frame->getSwapchainImageIndex();
     const auto chain = swapchain->getSwapchain();
 
-    const auto presentInfo =
-        vk::PresentInfoKHR{.waitSemaphoreCount = 1,
-                           .pWaitSemaphores = &*frame->getRenderFinishedSemaphore(),
-                           .swapchainCount = 1,
-                           .pSwapchains = &chain,
-                           .pImageIndices = &swapchainImageIndex};
+    const auto presentInfo = vk::PresentInfoKHR{.waitSemaphoreCount = 1,
+                                                .pWaitSemaphores = &swapchainImageSemaphore,
+                                                .swapchainCount = 1,
+                                                .pSwapchains = &chain,
+                                                .pImageIndices = &swapchainImageIndex};
 
     if (const auto result2 = graphicsQueue->getQueue().presentKHR(presentInfo);
         result2 == vk::Result::eSuboptimalKHR || result2 == vk::Result::eErrorOutOfDateKHR) {
