@@ -206,8 +206,10 @@ auto R3Renderer::createGlobalBuffers() -> void {
                        .debugName = "Buffer-GeometryRegion"});
   aliasRegistry->setHandle(BufferAlias::GeometryRegion, globalBuffers.geometryRegion);
 
-  globalBuffers.materials = bufferSystem->registerPerFrameBuffer(
-      {.bufferLifetime = BufferLifetime::Transient, .debugName = "Buffer-Materials"});
+  globalBuffers.materials =
+      bufferSystem->registerPerFrameBuffer({.bufferLifetime = BufferLifetime::Transient,
+                                            .initialSize = 40960,
+                                            .debugName = "Buffer-Materials"});
   aliasRegistry->setHandle(BufferAlias::Materials, globalBuffers.materials);
 
   globalBuffers.frameData = bufferSystem->registerPerFrameBuffer(BufferCreateInfo{
