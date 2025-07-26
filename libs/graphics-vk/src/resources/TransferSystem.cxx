@@ -279,18 +279,18 @@ auto TransferSystem::submitAndWait() -> void {
       result != vk::Result::eSuccess) {
     Log.warn("Timeout waiting for fence during asnyc submit");
   }
-
+  Log.trace("Transfer Queue Submitted, resetting fence");
   device->getVkDevice().resetFences(**fence);
 }
 
 auto TransferSystem::copyBuffers(const BufferPair& bufferPair) -> void {
 
   commandBuffer->begin({.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
-
-  for (const auto& [dst, src] : bufferPair) {
+  Log.trace("Recording CopyBuffer commands");
+  for (const auto& [src, dst] : bufferPair) {
     const auto region = vk::BufferCopy2{.srcOffset = 0,
                                         .dstOffset = 0,
-                                        .size = dst->getMeta().bufferCreateInfo.size};
+                                        .size = src->getMeta().bufferCreateInfo.size};
     const auto copyInfo2 = vk::CopyBufferInfo2{.srcBuffer = src->getVkBuffer(),
                                                .dstBuffer = dst->getVkBuffer(),
                                                .regionCount = 1,

@@ -35,6 +35,11 @@ inline auto deInterleave(const std::vector<as::StaticVertex>& vertices,
   auto texCoordBytes = toByteVector(texCoords);
   auto positionBytes = toByteVector(positions);
 
+  Log.trace("Geometry Component Sizes: indices={}, texCoords={}, positions={}",
+            indicesBytes->size(),
+            texCoordBytes->size(),
+            positionBytes->size());
+
   return std::make_shared<GeometryData>(GeometryData{.indexData = indicesBytes,
                                                      .positionData = positionBytes,
                                                      .colorData = nullptr,

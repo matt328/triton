@@ -187,16 +187,19 @@ auto R3Renderer::createGlobalBuffers() -> void {
 
   globalBuffers.objectPositions = bufferSystem->registerPerFrameBuffer(
       BufferCreateInfo{.bufferLifetime = BufferLifetime::Transient,
+                       .initialSize = 40960,
                        .debugName = "Buffer-ObjectPositions"});
   aliasRegistry->setHandle(BufferAlias::ObjectPositions, globalBuffers.objectPositions);
 
   globalBuffers.objectRotations = bufferSystem->registerPerFrameBuffer(
       BufferCreateInfo{.bufferLifetime = BufferLifetime::Transient,
+                       .initialSize = 40960,
                        .debugName = "Buffer-ObjectRotations"});
   aliasRegistry->setHandle(BufferAlias::ObjectRotations, globalBuffers.objectRotations);
 
   globalBuffers.objectScales = bufferSystem->registerPerFrameBuffer(
       BufferCreateInfo{.bufferLifetime = BufferLifetime::Transient,
+                       .initialSize = 40960,
                        .debugName = "Buffer-ObjectScales"});
   aliasRegistry->setHandle(BufferAlias::ObjectScales, globalBuffers.objectScales);
 
@@ -215,6 +218,7 @@ auto R3Renderer::createGlobalBuffers() -> void {
   globalBuffers.frameData = bufferSystem->registerPerFrameBuffer(BufferCreateInfo{
       .bufferLifetime = BufferLifetime::Transient,
       .bufferUsage = BufferUsage::Storage,
+      .initialSize = 40960,
       .debugName = "Buffer-FrameData",
   });
   aliasRegistry->setHandle(BufferAlias::FrameData, globalBuffers.frameData);

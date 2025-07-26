@@ -24,8 +24,9 @@ auto ArenaAllocator::allocate(const BufferRequest& request) -> BufferRegion {
 auto ArenaAllocator::checkSize(const BufferRequest& requestData) -> std::optional<ResizeRequest> {
   const auto requestedSize = currentOffset + requestData.size;
   if (requestedSize > currentBufferSize) {
-    // Initially just double the buffer size. Eventually create better resize strategies
-    return ResizeRequest{.bufferHandle = bufferHandle, .newSize = currentBufferSize * 2};
+    // Currently only make room for one more model so we can test resizing easier
+    return ResizeRequest{.bufferHandle = bufferHandle,
+                         .newSize = currentBufferSize + requestData.size};
   }
   return std::nullopt;
 }

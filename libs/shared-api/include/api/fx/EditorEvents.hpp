@@ -31,6 +31,7 @@ struct AddStaticModel {
   Orientation orientation;
   std::string modelName;
   bool fromFile = false;
+  uint32_t count = 1;
 };
 
 struct AddStaticGeometry {

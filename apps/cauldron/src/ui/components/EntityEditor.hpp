@@ -53,7 +53,7 @@ private:
   auto renderStaticEntityDialog(const tr::EditorState& editorState) -> void;
   auto renderAnimatedGameObjectDialog(const tr::EditorState& editorState) -> void;
 
-  auto renderMenuBar() -> void;
+  auto renderMenuBar(const tr::EditorState& editorState) -> void;
   auto renderEntityList(const tr::EditorState& editorState) -> void;
   auto renderEntityDetailView(const tr::EditorState& editorState) -> void;
 

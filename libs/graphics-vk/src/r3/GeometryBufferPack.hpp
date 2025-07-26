@@ -10,10 +10,11 @@ class BufferSystem;
 class ResourceAliasRegistry;
 class IBufferAllocator;
 
-constexpr size_t IndexBufferInitialSize = 1024000;
-constexpr size_t PositionBufferInitialSize = 2671552;
+// Set these 1 byte larger than the test model so we can force a resize when loading 1 model
+constexpr size_t IndexBufferInitialSize = 45937;
+constexpr size_t PositionBufferInitialSize = 69649;
+constexpr size_t TexCoordBufferInitialSize = 46433;
 constexpr size_t ColorBufferInitialSize = 1024000;
-constexpr size_t TexCoordBufferInitialSize = 1024000;
 constexpr size_t NormalBufferInitialSize = 1024000;
 constexpr size_t AnimationBufferInitialSize = 1024000;
 
