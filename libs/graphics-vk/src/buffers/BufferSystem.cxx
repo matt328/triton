@@ -64,8 +64,15 @@ auto BufferSystem::resize(const std::shared_ptr<TransferSystem>& transferSystem,
     const auto aci = oldBuffer.value()->getMeta().allocationCreateInfo;
 
     const auto& entry = bufferMap.at(handle);
-    const auto newName =
-        std::format("{}-v{}", oldBuffer.value()->getMeta().debugName, entry->versions.size());
+
+    const std::string prefix = "-v";
+    auto input = oldBuffer.value()->getMeta().debugName;
+    size_t pos = input.rfind(prefix);
+    std::string newName;
+    if (pos != std::string::npos && pos + 2 < input.size()) {
+      uint32_t version = std::stoi(input.substr(pos + 2));
+      newName = input.substr(0, pos + 2) + std::to_string(version + 1);
+    }
 
     auto newBuffer = allocator->createBuffer2(bci, aci, newName);
     copyPairs.emplace_back(*oldBuffer, newBuffer.get());
