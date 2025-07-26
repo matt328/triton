@@ -90,6 +90,9 @@ auto TransferSystem::upload2(const UploadSubBatch& subBatch) -> std::vector<SubB
   for (const auto& imageUpload : subBatch.imageUploadItems) {
     const auto& image = imageManager->getImage(imageUpload.dstImage);
     const auto& sampler = imageManager->getSampler(imageManager->getDefaultSampler());
+    auto name = image.getName().value();
+    assert(name == "ModelTexture");
+    Log.trace("textureArena inserting image={}", image.getName().value());
     auto handle = textureArena->insert(image.getImageView(), sampler);
     auto textureHandle = textureHandleMapper->toPublic(handle);
     resultsMap.at(imageUpload.cargo.requestId).textureHandle = textureHandle;
@@ -284,7 +287,6 @@ auto TransferSystem::submitAndWait() -> void {
 }
 
 auto TransferSystem::copyBuffers(const BufferPair& bufferPair) -> void {
-
   commandBuffer->begin({.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
   Log.trace("Recording CopyBuffer commands");
   for (const auto& [src, dst] : bufferPair) {

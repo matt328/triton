@@ -63,8 +63,7 @@ auto BufferSystem::resize(const std::shared_ptr<TransferSystem>& transferSystem,
     bci.size = resize.newSize;
     const auto aci = oldBuffer.value()->getMeta().allocationCreateInfo;
 
-    const auto& entry = bufferMap.at(handle);
-
+    // TODO: fix this up
     const std::string prefix = "-v";
     auto input = oldBuffer.value()->getMeta().debugName;
     size_t pos = input.rfind(prefix);

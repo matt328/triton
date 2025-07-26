@@ -69,7 +69,8 @@ auto ImageManager::createImage(ImageRequest request) -> Handle<ManagedImage> {
           device->getVkDevice().createImageView(imageViewInfo),
           request.extent,
           request.format,
-          request.usageFlags));
+          request.usageFlags,
+          request.debugName));
   return key;
 }
 
@@ -109,7 +110,8 @@ auto ImageManager::registerSwapchainImage(uint32_t index) -> Handle<ManagedImage
                                                   swapchain->getSwapchainImageView(index),
                                                   swapchain->getImageExtent(),
                                                   swapchain->getImageFormat(),
-                                                  vk::ImageUsageFlagBits::eColorAttachment));
+                                                  vk::ImageUsageFlagBits::eColorAttachment,
+                                                  "SwapchainImage"));
 
   return handle;
 }

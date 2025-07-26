@@ -1,5 +1,16 @@
 # TODO
 
+## Threading Issues
+
+There are some multithreading issues around resource loading.
+Appears on loading either first batch or second batch.
+Observations gathered here.
+
+- Doesn't seem to happen when debugging, only running
+- An image that shouldn't be, is having barriers recorded for transitions as though it's a texture that's just been loaded, but the image is the depth image, or a swapchain image. It seems to only be one image at a time.
+- A texture will have a barrier transferring ownership from transfer queue to graphics queue queued multiple times.
+- It works fine.
+
 ## Project Structure
 
 - Need to clean up and document project configurations.

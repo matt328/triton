@@ -34,6 +34,7 @@ auto ApplicationController::handleAddStaticModel(const std::shared_ptr<tr::AddSt
                                .requestId = staticModelRequestId,
                                .modelFilename = event->modelName,
                                .entityName = std::format("{}-{}", event->name, i)};
+    Log.trace("emplacing requestId={} in inFlightMap", staticModelRequestId);
     inFlightMap.emplace(
         staticModelRequestId,
         tr::GameObjectData{.name = modelRequest.entityName,
@@ -55,6 +56,7 @@ auto ApplicationController::handleStaticModelUploaded(
                                               .textureHandle = event->textureHandle,
                                               .gameObjectData = gameObjectData};
   inFlightMap.erase(event->requestId);
+  Log.trace("erased requestId={} in inFlightMap", event->requestId);
   eventQueue->emit(sgo);
 }
 
@@ -70,6 +72,7 @@ auto ApplicationController::handleAddStaticGeometry(
                                                  .requestId = staticGeometryRequestId,
                                                  .geometryData = event->geometryData,
                                                  .entityName = event->name};
+
   inFlightMap.emplace(staticGeometryRequestId,
                       tr::GameObjectData{.name = event->name,
                                          .orientation = event->orientation,

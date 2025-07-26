@@ -35,26 +35,30 @@ public:
                vk::raii::ImageView newImageView,
                vk::Extent2D newExtent,
                vk::Format newFormat,
-               vk::ImageUsageFlags newFlags)
+               vk::ImageUsageFlags newFlags,
+               std::optional<std::string> newName = std::nullopt)
       : image(std::move(newImage)),
         imageView(std::move(newImageView)),
         extent(newExtent),
         format(newFormat),
-        usageFlags(newFlags) {
+        usageFlags(newFlags),
+        debugName(newName) {
   }
 
   ManagedImage(vk::Image externalImage,
                vk::ImageView newImageView,
                vk::Extent2D newExtent,
                vk::Format newFormat,
-               vk::ImageUsageFlags newFlags)
+               vk::ImageUsageFlags newFlags,
+               std::optional<std::string> newName)
       : image(nullptr), // no AllocatedImage
         externalImage(externalImage),
         imageView(nullptr),
         externalImageView(newImageView),
         extent(newExtent),
         format(newFormat),
-        usageFlags(newFlags) {
+        usageFlags(newFlags),
+        debugName(newName) {
   }
 
   ~ManagedImage() = default;
@@ -84,6 +88,10 @@ public:
     return usageFlags;
   }
 
+  [[nodiscard]] auto getName() const -> std::optional<std::string> {
+    return debugName;
+  }
+
   auto setExternalImage(vk::Image newImage) -> void {
     this->externalImage = newImage;
   }
@@ -100,6 +108,7 @@ private:
   vk::Extent2D extent;
   vk::Format format;
   vk::ImageUsageFlags usageFlags;
+  std::optional<std::string> debugName = std::nullopt;
 };
 
 }
