@@ -66,8 +66,7 @@ private:
       const std::vector<vk::SurfaceFormatKHR>& availableFormats) -> vk::SurfaceFormatKHR;
 
   [[nodiscard]] static auto chooseSwapExtent(const vk::SurfaceCapabilitiesKHR& capabilities,
-                                             const std::pair<uint32_t, uint32_t>& windowSize)
-      -> vk::Extent2D;
+                                             const vk::Extent2D& windowSize) -> vk::Extent2D;
 };
 
 }

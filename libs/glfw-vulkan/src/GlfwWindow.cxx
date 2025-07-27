@@ -35,6 +35,7 @@ GlfwWindow::GlfwWindow(const WindowCreateInfo& createInfo,
                               createInfo.title.c_str(),
                               nullptr,
                               nullptr);
+    Log.trace("Created Window");
 
 #ifdef _WIN32
     auto* hWnd = glfwGetWin32Window(window);
@@ -82,7 +83,7 @@ GlfwWindow::GlfwWindow(const WindowCreateInfo& createInfo,
         .pixels = pixels,
     };
 
-    glfwSetWindowIcon(window, 1, &image);
+    // glfwSetWindowIcon(window, 1, &image);
 
     glfwSetWindowSizeLimits(window, MinWidth, MinHeight, GLFW_DONT_CARE, GLFW_DONT_CARE);
 
@@ -119,6 +120,8 @@ GlfwWindow::~GlfwWindow() {
 
 auto GlfwWindow::createVulkanSurface(const vk::Instance& instance, VkSurfaceKHR* outSurface) const
     -> void {
+  Log.trace("Creating window surface");
+  const auto framebufferSize = getFramebufferSize();
   glfwCreateWindowSurface(&(*instance), window, nullptr, outSurface);
 }
 
@@ -139,6 +142,7 @@ auto GlfwWindow::setVulkanVersion(std::string_view vulkanVersion) -> void {
 auto GlfwWindow::getFramebufferSize() const -> glm::ivec2 {
   auto size = glm::ivec2(320, 400);
   glfwGetFramebufferSize(window, &size.x, &size.y);
+  Log.trace("Framebuffer Size: width={}, height={}", size.x, size.y);
   return size;
 }
 

@@ -26,7 +26,7 @@ const auto TrmFilters =
     std::vector{FilterItem{.filter = ".trm", .displayName = "Triton Model File"},
                 FilterItem{.filter = ".*", .displayName = "All Files"}};
 
-AssetTool::AssetTool(const std::shared_ptr<Properties>& properties) {
+AssetTool::AssetTool(std::shared_ptr<Properties> properties) {
   Log.trace("Constructing Asset Tool");
   const auto injector =
       di::make_injector(di::bind<as::ITransformParser>.to<as::GltfTransformParser>(),

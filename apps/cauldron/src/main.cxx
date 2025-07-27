@@ -47,14 +47,14 @@ auto main() -> int {
   windowTitle << " - Release Build";
 #endif
 
-  const auto configDir = std::filesystem::path(sago::getConfigHome()) / "editor";
-  auto propertiesPath = configDir / "editor";
+  const auto configDir = std::filesystem::path(sago::getConfigHome()) / "cauldron";
+  auto propertiesPath = configDir / "cauldron.properties";
 
   auto* editorStateBuffer = new tr::EditorStateBuffer();
   editorStateBuffer->getStates(tr::Clock::now());
   delete editorStateBuffer;
 
-  auto properties = std::make_shared<ed::Properties>(propertiesPath);
+  std::shared_ptr<ed::Properties> properties = std::make_shared<ed::Properties>(propertiesPath);
 
   try {
     auto guiAdapter = std::make_shared<tr::ImGuiAdapter>();

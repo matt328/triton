@@ -93,7 +93,7 @@ auto Swapchain::createSwapchain() -> void {
 
   const auto surfaceFormat = chooseSurfaceFormat(formats);
   const auto presentMode = choosePresentMode(presentModes);
-  const auto extent = chooseSwapExtent(capabilities, physicalDevice->getSurfaceSize());
+  const auto extent = chooseSwapExtent(capabilities, surface->getFramebufferSize());
   // One over the min, but not if it exceeds the max
   const auto imageCount =
       std::min(capabilities.minImageCount + 1,
@@ -196,12 +196,12 @@ auto Swapchain::chooseSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& ava
 }
 
 auto Swapchain::chooseSwapExtent(const vk::SurfaceCapabilitiesKHR& capabilities,
-                                 const std::pair<uint32_t, uint32_t>& windowSize) -> vk::Extent2D {
+                                 const vk::Extent2D& windowSize) -> vk::Extent2D {
   if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
     return capabilities.currentExtent;
   }
   const auto& [width, height] = windowSize;
-  vk::Extent2D actualExtent = {width, height};
+  vk::Extent2D actualExtent = {.width = width, .height = height};
 
   actualExtent.width = std::clamp(actualExtent.width,
                                   capabilities.minImageExtent.width,
