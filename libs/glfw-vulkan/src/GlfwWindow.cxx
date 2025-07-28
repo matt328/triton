@@ -85,7 +85,7 @@ GlfwWindow::GlfwWindow(const WindowCreateInfo& createInfo,
         .pixels = pixels,
     };
 
-    // glfwSetWindowIcon(window, 1, &image);
+    glfwSetWindowIcon(window, 1, &image);
 
     glfwSetWindowSizeLimits(window, MinWidth, MinHeight, GLFW_DONT_CARE, GLFW_DONT_CARE);
 

@@ -28,7 +28,8 @@ namespace di = boost::di;
 //                    [[maybe_unused]] _In_ LPSTR lpCmdLine,
 //                    [[maybe_unused]] _In_ int nShowCmd) {
 // #else
-auto main() -> int {
+auto main(int argc, char** argv) -> int {
+  std::vector<std::string_view> args(argv, argv + argc);
   setCurrentThreadName("Main");
   // #endif
   initLogger(spdlog::level::trace, spdlog::level::trace);

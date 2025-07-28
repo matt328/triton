@@ -67,6 +67,19 @@
       }
     },
     {
+      "name": "tsan-debug",
+      "inherits": "base",
+      "displayName": "Clang with ThreadSanitizer (Debug)",
+      "binaryDir": "${sourceDir}/build/tsan-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_CXX_FLAGS": "-fsanitize=thread -fno-omit-frame-pointer",
+        "CMAKE_C_FLAGS": "-fsanitize=thread -fno-omit-frame-pointer",
+        "CMAKE_EXE_LINKER_FLAGS": "-fsanitize=thread",
+        "CMAKE_SHARED_LINKER_FLAGS": "-fsanitize=thread"
+      }
+    },
+    {
       "name": "msvc-debug",
       "displayName": "MSVC Debug",
       "generator": "Visual Studio 17 2022",
