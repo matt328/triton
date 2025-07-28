@@ -260,8 +260,7 @@ auto BufferSystem::fromCreateInfo(const BufferCreateInfo& createInfo)
     aci.setUsage(vma::MemoryUsage::eGpuOnly);
     aci.setRequiredFlags(vk::MemoryPropertyFlagBits::eDeviceLocal);
   } else if (createInfo.bufferLifetime == BufferLifetime::Transient) {
-    bci.usage |= vk::BufferUsageFlagBits::eShaderDeviceAddress;
-    aci.setUsage(vma::MemoryUsage::eCpuToGpu);
+    aci.setUsage(vma::MemoryUsage::eCpuOnly);
     aci.setRequiredFlags(vk::MemoryPropertyFlagBits::eHostCoherent |
                          vk::MemoryPropertyFlagBits::eHostVisible);
   }

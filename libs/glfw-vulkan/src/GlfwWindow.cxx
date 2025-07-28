@@ -26,6 +26,8 @@ GlfwWindow::GlfwWindow(const WindowCreateInfo& createInfo,
 
   glfwSetErrorCallback(errorCallback);
 
+  // glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
+
   if (glfwInit() == GLFW_TRUE) {
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);

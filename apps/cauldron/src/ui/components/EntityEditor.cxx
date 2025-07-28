@@ -172,7 +172,7 @@ auto EntityEditor::renderMenuBar(const tr::EditorState& editorState) -> void {
         const auto addModel = tr::AddStaticModel{
             .name = "TestModel",
             .orientation = tr::Orientation{},
-            .modelName = assets.models.at("Test").filePath,
+            .modelName = assets.models.at("Viking Room").filePath,
             .count = 50,
         };
         eventQueue->emit(addModel);

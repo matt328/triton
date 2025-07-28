@@ -1,5 +1,4 @@
 #include "ManagedBuffer.hpp"
-#include "api/gfx/GpuMaterialData.hpp"
 
 namespace tr {
 
@@ -62,7 +61,14 @@ auto ManagedBuffer::uploadData(void* srcData, size_t size, size_t offset) -> voi
   //   char tmp = s[i]; // try to read from srcData
   // }
 
-  std::memcpy(static_cast<char*>(this->mappedData) + offset, srcData, size);
+  // if this starts segfaulting again, the last time it was broken I updated the nvidia drivers
+  // on fedora kde and it started working again.
+
+  char* dst = static_cast<char*>(this->mappedData);
+
+  if (dst) {
+    std::memcpy(dst + offset, srcData, size);
+  }
 }
 
 [[nodiscard]] auto ManagedBuffer::getVkBuffer() const -> const vk::Buffer& {
