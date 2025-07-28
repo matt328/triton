@@ -4,6 +4,10 @@
 
 #include "api/fx/IWindow.hpp"
 
+namespace ed {
+class Properties;
+}
+
 namespace tr {
 
 class IEventQueue;
@@ -19,7 +23,8 @@ class GlfwWindow : public IWindow {
 public:
   explicit GlfwWindow(const WindowCreateInfo& createInfo,
                       std::shared_ptr<IEventQueue> newEventBus,
-                      std::shared_ptr<IGuiAdapter> newGuiAdapter);
+                      std::shared_ptr<IGuiAdapter> newGuiAdapter,
+                      std::shared_ptr<ed::Properties> newProperties);
   ~GlfwWindow() override;
 
   GlfwWindow(const GlfwWindow&) = default;
@@ -40,6 +45,7 @@ public:
 private:
   std::shared_ptr<IEventQueue> eventBus;
   std::shared_ptr<IGuiAdapter> guiAdapter;
+  std::shared_ptr<ed::Properties> properties;
 
   GLFWwindow* window;
 

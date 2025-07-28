@@ -20,13 +20,18 @@ constexpr int MinHeight = 200;
 
 GlfwWindow::GlfwWindow(const WindowCreateInfo& createInfo,
                        std::shared_ptr<IEventQueue> newEventBus,
-                       std::shared_ptr<IGuiAdapter> newGuiAdapter)
-    : eventBus{std::move(newEventBus)}, guiAdapter{std::move(newGuiAdapter)} {
+                       std::shared_ptr<IGuiAdapter> newGuiAdapter,
+                       std::shared_ptr<ed::Properties> newProperties)
+    : eventBus{std::move(newEventBus)},
+      guiAdapter{std::move(newGuiAdapter)},
+      properties{std::move(newProperties)} {
   Log.trace("Constructing Window");
 
   glfwSetErrorCallback(errorCallback);
 
-  // glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
+  if (properties->getX11Requested()) {
+    glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
+  }
 
   if (glfwInit() == GLFW_TRUE) {
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);

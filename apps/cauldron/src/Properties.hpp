@@ -1,8 +1,17 @@
 #pragma once
 
-#include <optional>
-#include <utility>
 namespace cereal {
+
+/*
+  Split configuration and preferences.
+  config has 2 sources that get merged, config file and command line args with command line args
+  taking precedence.
+  preferences has one source, the existing 'Properties'
+  Preferences can be a binary file, not user readable.
+  Config file should be human readable/editable json.
+  config is read-only once the application is started. read from file, overwrite values from any
+  command line args that are present
+*/
 
 template <class Archive>
 void serialize(Archive& ar, std::filesystem::path& path) {
@@ -21,6 +30,7 @@ struct PropertiesData {
   std::filesystem::path recentFile{};
   std::filesystem::path lastOpenDialogPath{};
   std::unordered_map<std::string, std::string> mapData;
+  bool x11Requested = false;
 
   template <class T>
   void serialize(T& archive) {
@@ -93,6 +103,10 @@ public:
     return std::optional{propertiesData.lastOpenDialogPath};
   }
 
+  [[nodiscard]] auto getX11Requested() const -> bool {
+    return propertiesData.x11Requested;
+  }
+
   auto setRecentFile(const std::filesystem::path& value) {
     auto lock = std::lock_guard(mtx);
     propertiesData.recentFile = value;
@@ -103,6 +117,11 @@ public:
     auto lock = std::lock_guard(mtx);
     propertiesData.lastOpenDialogPath = value;
     save();
+  }
+
+  auto setX11Requested(bool requested) {
+    auto lock = std::lock_guard(mtx);
+    propertiesData.x11Requested = requested;
   }
 
 private:

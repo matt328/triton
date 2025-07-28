@@ -29,10 +29,14 @@ namespace di = boost::di;
 //                    [[maybe_unused]] _In_ int nShowCmd) {
 // #else
 auto main(int argc, char** argv) -> int {
-  std::vector<std::string_view> args(argv, argv + argc);
   setCurrentThreadName("Main");
   // #endif
   initLogger(spdlog::level::trace, spdlog::level::trace);
+
+  std::vector<std::string_view> args(argv, argv + argc);
+  for (const auto& param : args) {
+    Log.trace("command line arg: {}", param);
+  }
 
   Log.info("Console is now ready for logging!");
 
@@ -56,6 +60,12 @@ auto main(int argc, char** argv) -> int {
   delete editorStateBuffer;
 
   std::shared_ptr<ed::Properties> properties = std::make_shared<ed::Properties>(propertiesPath);
+
+  for (const auto& param : args) {
+    if (param == "-x11") {
+      properties->setX11Requested(true);
+    }
+  }
 
   try {
     auto guiAdapter = std::make_shared<tr::ImGuiAdapter>();

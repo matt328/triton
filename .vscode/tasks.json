@@ -1,166 +1,191 @@
 {
-   "version": "2.0.0",
-   "inputs": [
-      {
-         "id": "assetOutputFile",
-         "type": "promptString",
-         "description": "Base filename to write out",
-         "default": "/Users/matt/Projects/game-assets/models/gltf-working/model.json"
+  "version": "2.0.0",
+  "inputs": [
+    {
+      "id": "assetOutputFile",
+      "type": "promptString",
+      "description": "Base filename to write out",
+      "default": "/Users/matt/Projects/game-assets/models/gltf-working/model.json"
+    },
+    {
+      "id": "assetInputFile",
+      "type": "promptString",
+      "description": "glTF File to read",
+      "default": "/Users/matt/Projects/game-assets/models/gltf-working/textured.gltf"
+    },
+    {
+      "id": "assetSkeletonFile",
+      "type": "promptString",
+      "description": "skeleton file to read",
+      "default": "/Users/matt/Projects/game-assets/models/gltf-working/skeleton.ozz"
+    },
+  ],
+  "tasks": [
+    {
+      "type": "cmake",
+      "label": "CMake: Build AssetTool",
+      "command": "build",
+      "preset": "editor-debug",
+      "detail": "CMake Build AssetTool",
+      "targets": [
+        "assettool"
+      ],
+      "problemMatcher": [
+        "$gcc"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
       },
-      {
-         "id": "assetInputFile",
-         "type": "promptString",
-         "description": "glTF File to read",
-         "default": "/Users/matt/Projects/game-assets/models/gltf-working/textured.gltf"
-      },
-      {
-         "id": "assetSkeletonFile",
-         "type": "promptString",
-         "description": "skeleton file to read",
-         "default": "/Users/matt/Projects/game-assets/models/gltf-working/skeleton.ozz"
-      },
-   ],
-   "tasks": [
-      {
-         "type": "cmake",
-         "label": "CMake: Build AssetTool",
-         "command": "build",
-         "preset": "editor-debug",
-         "detail": "CMake Build AssetTool",
-         "targets": [
-            "assettool"
-         ],
-         "problemMatcher": [
-            "$gcc"
-         ],
-         "group": {
-            "kind": "build",
-            "isDefault": true
-         },
-         "presentation": {
-            "echo": true,
-            "reveal": "always",
-            "focus": false,
-            "panel": "shared",
-            "clear": true
-         }
-      },
-      {
-         "label": "Build Editor",
-         "detail": "Build Editor in Debug Configuration",
-         "type": "shell",
-         "command": "cmake",
-         "args": [
-            "--build",
-            "--preset",
-            "editor-debug",
-            "--target",
-            "editor"
-         ],
-         "problemMatcher": [
-            "$gcc"
-         ],
-         "group": {
-            "kind": "build",
-            "isDefault": true
-         },
-         "presentation": {
-            "echo": true,
-            "reveal": "always",
-            "focus": false,
-            "panel": "shared",
-            "clear": true
-         }
-      },
-      {
-         "label": "Run AssetTool",
-         "detail": "Run assettool",
-         "dependsOn": "CMake: Build AssetTool",
-         "type": "shell",
-         "command": "${workspaceFolder}/build/debug/apps/assettool/assettool",
-         "args": [
-            "gltf",
-            "-f=${input:assetInputFile}",
-            "-s=${input:assetSkeletonFile}",
-            "-o=${input:assetOutputFile}"
-         ],
-         "group": {
-            "kind": "build",
-            "isDefault": true
-         },
-         "presentation": {
-            "echo": true,
-            "reveal": "always",
-            "focus": false,
-            "panel": "shared",
-            "clear": true,
-            "showReuseMessage": false
-         }
-      },
-      {
-         "label": "AssetTool-AnotherModel",
-         "type": "shell",
-         "command": "${workspaceFolder}/build/debug/apps/assettool/assettool",
-         "args": [
-            "gltf",
-            "-f=/Users/matt/Projects/game-assets/models/gltf-working/textured.gltf",
-            "-s=/Users/matt/Projects/game-assets/models/gltf-working/skeleton.ozz",
-            "-o=/Users/matt/Projects/game-assets/models/gltf-working/model.json"
-         ],
-         "group": {
-            "kind": "build",
-            "isDefault": true
-         },
-         "presentation": {
-            "echo": true,
-            "reveal": "always",
-            "focus": false,
-            "panel": "shared"
-         }
-      },
-      {
-         "type": "cmake",
-         "label": "CMake: build",
-         "command": "build",
-         "targets": [
-            "editor"
-         ],
-         "group": "build",
-         "problemMatcher": [],
-         "detail": "CMake template build task",
-         "presentation": {
-            "clear": true,
-            "echo": true,
-            "reveal": "always",
-            "focus": false,
-            "panel": "dedicated",
-            "showReuseMessage": false
-         }
-      },
-      {
-         "label": "Run Ninja ccov-asset-lib-test",
-         "type": "shell",
-         "command": "ninja",
-         "args": [
-            "ccov-export-asset-lib-test"
-         ],
-         "group": {
-            "kind": "build",
-            "isDefault": false
-         },
-         "options": {
-            "cwd": "${workspaceFolder}\\build\\debug-coverage"
-         },
-         "problemMatcher": [],
-         "detail": "Runs the Ninja target ccov-asset-lib-test."
-      },
-      {
-         "type": "cmake",
-         "label": "CMake: clean",
-         "command": "clean",
-         "preset": "${command:cmake.activeBuildPresetName}",
-         "problemMatcher": [],
-         "detail": "CMake clean the active build preset.",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "clear": true
       }
-   ]
+    },
+    {
+      "label": "Build Editor",
+      "detail": "Build Editor in Debug Configuration",
+      "type": "shell",
+      "command": "cmake",
+      "args": [
+        "--build",
+        "--preset",
+        "editor-debug",
+        "--target",
+        "editor"
+      ],
+      "problemMatcher": [
+        "$gcc"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "clear": true
+      }
+    },
+    {
+      "label": "Launch Cauldron",
+      "detail": "Run Cauldron",
+      "dependsOn": "CMake: Build Cauldron",
+      "type": "shell",
+      "command": "${workspaceFolder}/build/debug/apps/cauldron/Cauldron",
+      "args": [
+        "-x11"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/build/debug/apps/cauldron/"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "clear": true,
+        "showReuseMessage": false
+      }
+    },
+    {
+      "label": "Run AssetTool",
+      "detail": "Run assettool",
+      "dependsOn": "CMake: Build AssetTool",
+      "type": "shell",
+      "command": "${workspaceFolder}/build/debug/apps/assettool/assettool",
+      "args": [
+        "gltf",
+        "-f=${input:assetInputFile}",
+        "-s=${input:assetSkeletonFile}",
+        "-o=${input:assetOutputFile}"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "clear": true,
+        "showReuseMessage": false
+      }
+    },
+    {
+      "label": "AssetTool-AnotherModel",
+      "type": "shell",
+      "command": "${workspaceFolder}/build/debug/apps/assettool/assettool",
+      "args": [
+        "gltf",
+        "-f=/Users/matt/Projects/game-assets/models/gltf-working/textured.gltf",
+        "-s=/Users/matt/Projects/game-assets/models/gltf-working/skeleton.ozz",
+        "-o=/Users/matt/Projects/game-assets/models/gltf-working/model.json"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "type": "cmake",
+      "label": "CMake: build",
+      "command": "build",
+      "targets": [
+        "editor"
+      ],
+      "group": "build",
+      "problemMatcher": [],
+      "detail": "CMake template build task",
+      "presentation": {
+        "clear": true,
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "dedicated",
+        "showReuseMessage": false
+      }
+    },
+    {
+      "label": "Run Ninja ccov-asset-lib-test",
+      "type": "shell",
+      "command": "ninja",
+      "args": [
+        "ccov-export-asset-lib-test"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "options": {
+        "cwd": "${workspaceFolder}\\build\\debug-coverage"
+      },
+      "problemMatcher": [],
+      "detail": "Runs the Ninja target ccov-asset-lib-test."
+    },
+    {
+      "type": "cmake",
+      "label": "CMake: clean",
+      "command": "clean",
+      "preset": "${command:cmake.activeBuildPresetName}",
+      "problemMatcher": [],
+      "detail": "CMake clean the active build preset.",
+    }
+  ]
 }
