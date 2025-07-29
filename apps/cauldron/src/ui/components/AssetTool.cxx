@@ -26,7 +26,7 @@ const auto TrmFilters =
     std::vector{FilterItem{.filter = ".trm", .displayName = "Triton Model File"},
                 FilterItem{.filter = ".*", .displayName = "All Files"}};
 
-AssetTool::AssetTool(std::shared_ptr<Properties> properties) {
+AssetTool::AssetTool(std::shared_ptr<Preferences> preferences) {
   Log.trace("Constructing Asset Tool");
   const auto injector =
       di::make_injector(di::bind<as::ITransformParser>.to<as::GltfTransformParser>(),
@@ -38,7 +38,7 @@ AssetTool::AssetTool(std::shared_ptr<Properties> properties) {
 
   modelConverter = injector.create<std::shared_ptr<as::ModelConverter>>();
 
-  inputFileDialog = std::make_unique<FileDialog>(properties, InputFilters, "assettool-gltf");
+  inputFileDialog = std::make_unique<FileDialog>(preferences, InputFilters, "assettool-gltf");
   inputFileDialog->setOnOk([&](std::vector<std::filesystem::path> selectedFile) {
     try {
       inputFile = selectedFile.front();
@@ -47,7 +47,7 @@ AssetTool::AssetTool(std::shared_ptr<Properties> properties) {
   });
 
   inputSkeletonDialog =
-      std::make_unique<FileDialog>(properties, SkeletonFilters, "assettool-skeleton");
+      std::make_unique<FileDialog>(preferences, SkeletonFilters, "assettool-skeleton");
   inputSkeletonDialog->setOnOk([&](std::vector<std::filesystem::path> selectedFile) {
     try {
       inputFile = selectedFile.front();
@@ -55,7 +55,7 @@ AssetTool::AssetTool(std::shared_ptr<Properties> properties) {
     } catch (const std::exception& ex) { Log.error(ex.what()); }
   });
 
-  outputFileDialog = std::make_unique<FileDialog>(properties, TrmFilters, "assettool-trm");
+  outputFileDialog = std::make_unique<FileDialog>(preferences, TrmFilters, "assettool-trm");
   outputFileDialog->setOnOk([&](std::vector<std::filesystem::path> selectedFile) {
     try {
       auto outputFile = selectedFile.front();

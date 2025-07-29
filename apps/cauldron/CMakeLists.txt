@@ -4,6 +4,7 @@ set(editor_SRC
   src/main.cxx
   src/Application.cxx
   src/ImGuiAdapter.cxx
+  src/Preferences.cxx
 
   src/ui/Manager.cxx
   src/ApplicationController.cxx

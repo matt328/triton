@@ -8,9 +8,9 @@ namespace ed {
 
 constexpr auto ItemIndent = 16.f;
 
-AssetViewer::AssetViewer(std::shared_ptr<Properties> newProperties,
+AssetViewer::AssetViewer(std::shared_ptr<Preferences> newPreferences,
                          std::shared_ptr<tr::IEventQueue> newEventQueue)
-    : properties{std::move(newProperties)}, eventQueue{std::move(newEventQueue)} {
+    : preferences{std::move(newPreferences)}, eventQueue{std::move(newEventQueue)} {
   Log.trace("Constructing AssetViewer");
 }
 
@@ -133,7 +133,7 @@ auto AssetViewer::renderModelDialog() -> void {
     };
 
     ImGui::InputText("Name", &modelAliasInfo.alias.alias);
-    renderFileControl("Model", properties, filterItems, modelAliasInfo.alias.filePath);
+    renderFileControl("Model", preferences, filterItems, modelAliasInfo.alias.filePath);
 
     ImGui::Separator();
 
@@ -189,7 +189,7 @@ auto AssetViewer::renderSkeletonDialog() -> void {
     };
 
     ImGui::InputText("Name", &skeletonAliasInfo.alias.alias);
-    renderFileControl("Skeleton", properties, filterItems, skeletonAliasInfo.alias.filePath);
+    renderFileControl("Skeleton", preferences, filterItems, skeletonAliasInfo.alias.filePath);
 
     ImGui::Separator();
 
@@ -243,7 +243,7 @@ auto AssetViewer::renderAnimationDialog() -> void {
     };
 
     ImGui::InputText("Name", &animationAliasInfo.alias.alias);
-    renderFileControl("Animation", properties, filterItems, animationAliasInfo.alias.filePath);
+    renderFileControl("Animation", preferences, filterItems, animationAliasInfo.alias.filePath);
 
     ImGui::Separator();
 

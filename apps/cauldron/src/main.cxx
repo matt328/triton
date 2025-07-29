@@ -1,7 +1,7 @@
 #include "Application.hpp"
 
 // Following aren't referenced in this file, but need to be here for BoostDI to work
-#include "Properties.hpp"
+#include "Preferences.hpp"
 #include "bk/ThreadName.hpp"
 #include "fx/GuiCallbackRegistrar.hpp"
 #include "ui/Manager.hpp"
@@ -53,19 +53,19 @@ auto main(int argc, char** argv) -> int {
 #endif
 
   const auto configDir = std::filesystem::path(sago::getConfigHome()) / "cauldron";
-  auto propertiesPath = configDir / "cauldron.properties";
+  auto preferencesPath = configDir / "cauldron.prefs";
 
   auto* editorStateBuffer = new tr::EditorStateBuffer();
   editorStateBuffer->getStates(tr::Clock::now());
   delete editorStateBuffer;
 
-  std::shared_ptr<ed::Properties> properties = std::make_shared<ed::Properties>(propertiesPath);
+  std::shared_ptr<ed::Preferences> preferences = std::make_shared<ed::Preferences>(preferencesPath);
 
-  for (const auto& param : args) {
-    if (param == "-x11") {
-      properties->setX11Requested(true);
-    }
-  }
+  // for (const auto& param : args) {
+  //   if (param == "-x11") {
+  //     properties->setX11Requested(true);
+  //   }
+  // }
 
   try {
     auto guiAdapter = std::make_shared<tr::ImGuiAdapter>();
@@ -78,7 +78,7 @@ auto main(int argc, char** argv) -> int {
         tr::ThreadedFrameworkContext::create(frameworkConfig, guiAdapter, guiCallbackRegistrar);
 
     const auto injector =
-        di::make_injector(di::bind<ed::Properties>.to<>(properties),
+        di::make_injector(di::bind<ed::Preferences>.to<>(preferences),
                           di::bind<tr::IEventQueue>.to<>(
                               [&frameworkContext] { return frameworkContext->getEventQueue(); }),
                           di::bind<tr::IGuiCallbackRegistrar>.to<>(guiCallbackRegistrar));

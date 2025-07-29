@@ -6,10 +6,10 @@
 
 namespace ed {
 
-FileDialog::FileDialog(std::shared_ptr<Properties> newProperties,
+FileDialog::FileDialog(std::shared_ptr<Preferences> newPreferences,
                        std::vector<FilterItem> newFilterItems,
                        std::string_view newUniqueName)
-    : properties{std::move(newProperties)},
+    : preferences{std::move(newPreferences)},
       filterItems{std::move(newFilterItems)},
       uniqueName{newUniqueName.data()} {
   lastPathKey = uniqueName + "lastPathKey";
@@ -31,9 +31,9 @@ auto FileDialog::render() -> void {
         currentFolder = initialPath;
       }
       // Try properties
-    } else if (properties->get(lastPathKey).has_value()) {
+    } else if (preferences->getStringValue(lastPathKey).has_value()) {
       if (!currentFolder.has_value()) {
-        currentFolder = properties->get(lastPathKey).transform([](const auto& path) {
+        currentFolder = preferences->getStringValue(lastPathKey).transform([](const auto& path) {
           return std::filesystem::path{path};
         });
       }
@@ -214,7 +214,7 @@ auto FileDialog::render() -> void {
       ImGui::CloseCurrentPopup();
       const auto propPath = currentFolder.value() / selectedFilename;
       Log.trace("putting property {}, value: {}", lastPathKey, currentFolder.value().string());
-      properties->put(lastPathKey, currentFolder.value().string());
+      preferences->putStringValue(lastPathKey, currentFolder.value().string());
       isOpen = false;
       if (onOk.has_value()) {
         onOk.value()({propPath});

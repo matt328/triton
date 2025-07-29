@@ -5,11 +5,11 @@
 namespace ed {
 
 class DataFacade;
-class Properties;
+class Preferences;
 
 class AssetViewer : public IComponent {
 public:
-  AssetViewer(std::shared_ptr<Properties> newProperties,
+  AssetViewer(std::shared_ptr<Preferences> newPreferences,
               std::shared_ptr<tr::IEventQueue> newEventQueue);
   ~AssetViewer();
 
@@ -22,7 +22,7 @@ public:
   auto bindInput() -> void override;
 
 private:
-  std::shared_ptr<Properties> properties;
+  std::shared_ptr<Preferences> preferences;
   std::shared_ptr<tr::IEventQueue> eventQueue;
 
   struct AliasDialogInfo {
