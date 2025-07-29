@@ -20,18 +20,13 @@ constexpr int MinHeight = 200;
 
 GlfwWindow::GlfwWindow(const WindowCreateInfo& createInfo,
                        std::shared_ptr<IEventQueue> newEventBus,
-                       std::shared_ptr<IGuiAdapter> newGuiAdapter,
-                       std::shared_ptr<ed::Properties> newProperties)
-    : eventBus{std::move(newEventBus)},
-      guiAdapter{std::move(newGuiAdapter)},
-      properties{std::move(newProperties)} {
+                       std::shared_ptr<IGuiAdapter> newGuiAdapter)
+    : eventBus{std::move(newEventBus)}, guiAdapter{std::move(newGuiAdapter)} {
   Log.trace("Constructing Window");
 
   glfwSetErrorCallback(errorCallback);
 
-  if (properties->getX11Requested()) {
-    glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
-  }
+  glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
 
   if (glfwInit() == GLFW_TRUE) {
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -80,7 +75,9 @@ GlfwWindow::GlfwWindow(const WindowCreateInfo& createInfo,
                  SWP_FRAMECHANGED);
 #endif
 
-    int height, width, channels;
+    int height;
+    int width;
+    int channels;
     auto* pixels =
         stbi_load_from_memory(IconPng.data(), IconPng.size(), &width, &height, &channels, 4);
 
