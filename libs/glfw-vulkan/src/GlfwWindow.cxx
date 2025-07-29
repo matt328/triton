@@ -128,7 +128,6 @@ GlfwWindow::~GlfwWindow() {
 auto GlfwWindow::createVulkanSurface(const vk::Instance& instance, VkSurfaceKHR* outSurface) const
     -> void {
   Log.trace("Creating window surface");
-  const auto framebufferSize = getFramebufferSize();
   glfwCreateWindowSurface(&(*instance), window, nullptr, outSurface);
 }
 
@@ -174,6 +173,10 @@ void GlfwWindow::toggleFullscreen() {
 }
 
 void GlfwWindow::errorCallback(int code, const char* description) {
+  if (code == GLFW_FEATURE_UNAVAILABLE && strstr(description, "Wayland") != nullptr) {
+    // hopefully this is the error about setting the window icon, and we can ignore it.
+    return;
+  }
   Log.critical("GLFW Error Code: {}, description: {}", code, description);
   throw std::runtime_error("GLFW Error. See log output for details");
 }
