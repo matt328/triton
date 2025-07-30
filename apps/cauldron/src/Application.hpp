@@ -9,14 +9,16 @@ class IEventQueue;
 class IGuiCallbackRegistrar;
 }
 
-namespace ed {
-
+namespace bk {
 class Preferences;
+}
+
+namespace ed {
 class Manager;
 
 class Application : public tr::IApplication {
 public:
-  Application(std::shared_ptr<Preferences> newPreferences,
+  Application(std::shared_ptr<bk::Preferences> newPreferences,
               std::shared_ptr<Manager> newManager,
               std::shared_ptr<tr::IEventQueue> newEventQueue,
               std::shared_ptr<tr::IGuiCallbackRegistrar> newGuiCallbackRegistrar);
@@ -33,7 +35,7 @@ public:
   auto onShutdown() -> void override;
 
 private:
-  std::shared_ptr<Preferences> preferences;
+  std::shared_ptr<bk::Preferences> preferences;
   std::shared_ptr<Manager> manager;
   std::shared_ptr<tr::IEventQueue> eventQueue;
   std::shared_ptr<tr::IGuiCallbackRegistrar> guiCallbackRegistrar;

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace ed {
+namespace bk {
 
 class Preferences {
 public:
@@ -12,24 +12,23 @@ public:
   auto operator=(const Preferences&) -> Preferences& = delete;
   auto operator=(Preferences&&) -> Preferences& = delete;
 
-  [[nodiscard]] auto getRecentFile() const -> std::optional<std::string>;
-  [[nodiscard]] auto getLastOpenDialogPath() const -> std::optional<std::string>;
-  [[nodiscard]] auto getStringValue(std::string key) const -> std::optional<std::string>;
+  auto put(const std::string& key, const std::string& value) -> void;
 
-  auto setRecentFile(std::string filename) -> void;
-  auto setLastOpenDialogPath(std::string path) -> void;
-  auto putStringValue(std::string key, std::string value) -> void;
+  template <typename T>
+  auto get(const std::string& key) const -> std::optional<T> {
+    if constexpr (std::is_same_v<T, std::string>) {
+      auto it = preferencesData.stringMap.find(key);
+      return it != preferencesData.stringMap.end() ? std::optional{it->second} : std::nullopt;
+    }
+  }
 
 private:
   struct Data {
-    std::optional<std::string> recentFile;
-    std::optional<std::string> lastOpenDialogPath;
-
     std::unordered_map<std::string, std::string> stringMap;
 
     template <class T>
     void serialize(T& archive) {
-      archive(recentFile, lastOpenDialogPath, stringMap);
+      archive(stringMap);
     }
   };
 

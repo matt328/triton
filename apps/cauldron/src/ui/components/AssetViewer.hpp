@@ -2,14 +2,17 @@
 
 #include "IComponent.hpp"
 
+namespace bk {
+class Preferences;
+}
+
 namespace ed {
 
 class DataFacade;
-class Preferences;
 
 class AssetViewer : public IComponent {
 public:
-  AssetViewer(std::shared_ptr<Preferences> newPreferences,
+  AssetViewer(std::shared_ptr<bk::Preferences> newPreferences,
               std::shared_ptr<tr::IEventQueue> newEventQueue);
   ~AssetViewer();
 
@@ -22,7 +25,7 @@ public:
   auto bindInput() -> void override;
 
 private:
-  std::shared_ptr<Preferences> preferences;
+  std::shared_ptr<bk::Preferences> preferences;
   std::shared_ptr<tr::IEventQueue> eventQueue;
 
   struct AliasDialogInfo {

@@ -7,7 +7,7 @@ namespace ed {
 
 class AssetTool {
 public:
-  explicit AssetTool(std::shared_ptr<Preferences> preferences);
+  explicit AssetTool(std::shared_ptr<bk::Preferences> preferences);
   ~AssetTool();
 
   AssetTool(const AssetTool&) = delete;

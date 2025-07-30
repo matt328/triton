@@ -1,7 +1,8 @@
 #include "Menu.hpp"
 
+#include "PrefKeys.hpp"
 #include "api/fx/IEventQueue.hpp"
-#include "Preferences.hpp"
+#include "bk/Preferences.hpp"
 #include "FileDialog.hpp"
 
 namespace ed {
@@ -10,11 +11,12 @@ const auto ProjectFilters =
     std::vector{FilterItem{.filter = ".trp", .displayName = "Triton Projects"},
                 FilterItem{.filter = ".*", .displayName = "All Files"}};
 
-Menu::Menu(std::shared_ptr<Preferences> newPreferences,
+Menu::Menu(std::shared_ptr<bk::Preferences> newPreferences,
            std::shared_ptr<tr::IEventQueue> newEventQueue)
     : preferences{std::move(newPreferences)}, eventQueue{std::move(newEventQueue)} {
 
-  projectOpenDialog = std::make_unique<FileDialog>(preferences, ProjectFilters, "project");
+  projectOpenDialog =
+      std::make_unique<FileDialog>(preferences, ProjectFilters, prefs::projectOpenPath);
   projectOpenDialog->setOnOk([&](std::vector<std::filesystem::path> selectedFile) {
     try {
       Log.trace("Open project file: {}", selectedFile.front().string());
@@ -23,7 +25,8 @@ Menu::Menu(std::shared_ptr<Preferences> newPreferences,
     } catch (const std::exception& ex) { Log.error(ex.what()); }
   });
 
-  projectSaveDialog = std::make_unique<FileDialog>(preferences, ProjectFilters, "project");
+  projectSaveDialog =
+      std::make_unique<FileDialog>(preferences, ProjectFilters, prefs::projectSavePath);
   projectSaveDialog->setOnOk([&](std::vector<std::filesystem::path> selectedFile) {
     try {
       auto filepath = selectedFile.front();
@@ -32,7 +35,7 @@ Menu::Menu(std::shared_ptr<Preferences> newPreferences,
       }
       Log.trace("Save project file: {}", filepath.string());
       eventQueue->emit(tr::SaveProject{.filePath = filepath});
-      preferences->setRecentFile(filepath);
+      preferences->put(prefs::recentFile, filepath.string());
     } catch (const std::exception& ex) { Log.error(ex.what()); }
   });
 }
@@ -59,7 +62,8 @@ auto Menu::renderFileMenu(const tr::EditorState& editorState, bool& showConfirmD
     }
 
     if (ImGui::BeginMenu("Open Recent")) {
-      if (const auto recentFile = preferences->getRecentFile(); recentFile.has_value()) {
+      if (const auto recentFile = preferences->get<std::string>(prefs::recentFile);
+          recentFile.has_value()) {
         const auto& nameOnly = recentFile.value();
         if (ImGui::MenuItem(nameOnly.c_str())) {
           eventQueue->emit(tr::LoadProject{.filePath = recentFile.value()});

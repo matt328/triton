@@ -6,6 +6,10 @@ namespace tr {
 class IGuiCallbackRegistrar;
 }
 
+namespace bk {
+class Preferences;
+}
+
 namespace ed {
 
 struct AppLog;
@@ -13,7 +17,6 @@ class AssetTool;
 class AssetViewer;
 class EntityEditor;
 class Menu;
-class Preferences;
 class ApplicationController;
 
 class Manager {
@@ -21,7 +24,7 @@ public:
   explicit Manager(std::shared_ptr<Menu> newAppMenu,
                    std::shared_ptr<AssetViewer> newAssetViewer,
                    std::shared_ptr<EntityEditor> newEntityEditor,
-                   std::shared_ptr<Preferences> newPreferences,
+                   std::shared_ptr<bk::Preferences> newPreferences,
                    std::shared_ptr<AssetTool> newAssetTool,
                    std::shared_ptr<tr::IGuiCallbackRegistrar> guiCallbackRegistrar,
                    std::shared_ptr<ApplicationController> newApplicationController);
@@ -40,7 +43,7 @@ private:
   std::shared_ptr<Menu> appMenu;
   std::shared_ptr<AssetViewer> assetViewer;
   std::shared_ptr<EntityEditor> entityEditor;
-  std::shared_ptr<Preferences> preferences;
+  std::shared_ptr<bk::Preferences> preferences;
   std::shared_ptr<AssetTool> assetTool;
   std::shared_ptr<tr::IGuiCallbackRegistrar> guiCallbackRegistrar;
   std::shared_ptr<ApplicationController> applicationController;

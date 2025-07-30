@@ -24,7 +24,7 @@ inline static auto renderOkCancelButtons(float buttonWidth = ImGuiConstants::But
 }
 
 inline static auto renderFileControl(const std::string& name,
-                                     std::shared_ptr<Preferences> preferences,
+                                     std::shared_ptr<bk::Preferences> preferences,
                                      const std::vector<FilterItem>& filterItems,
                                      std::filesystem::path& value) -> void {
   using DialogMap = std::unordered_map<std::string, std::unique_ptr<FileDialog>>;

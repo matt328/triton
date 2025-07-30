@@ -1,5 +1,6 @@
 #include "AssetViewer.hpp"
 
+#include "PrefKeys.hpp"
 #include "ui/assets/IconsLucide.hpp"
 #include "ui/components/FileDialog.hpp"
 #include "ui/components/dialog/Helpers.hpp"
@@ -8,7 +9,7 @@ namespace ed {
 
 constexpr auto ItemIndent = 16.f;
 
-AssetViewer::AssetViewer(std::shared_ptr<Preferences> newPreferences,
+AssetViewer::AssetViewer(std::shared_ptr<bk::Preferences> newPreferences,
                          std::shared_ptr<tr::IEventQueue> newEventQueue)
     : preferences{std::move(newPreferences)}, eventQueue{std::move(newEventQueue)} {
   Log.trace("Constructing AssetViewer");
@@ -133,7 +134,10 @@ auto AssetViewer::renderModelDialog() -> void {
     };
 
     ImGui::InputText("Name", &modelAliasInfo.alias.alias);
-    renderFileControl("Model", preferences, filterItems, modelAliasInfo.alias.filePath);
+    renderFileControl(prefs::assetViewerModelPath,
+                      preferences,
+                      filterItems,
+                      modelAliasInfo.alias.filePath);
 
     ImGui::Separator();
 
@@ -189,7 +193,10 @@ auto AssetViewer::renderSkeletonDialog() -> void {
     };
 
     ImGui::InputText("Name", &skeletonAliasInfo.alias.alias);
-    renderFileControl("Skeleton", preferences, filterItems, skeletonAliasInfo.alias.filePath);
+    renderFileControl(prefs::assetViewerSkeletonPath,
+                      preferences,
+                      filterItems,
+                      skeletonAliasInfo.alias.filePath);
 
     ImGui::Separator();
 
@@ -243,7 +250,10 @@ auto AssetViewer::renderAnimationDialog() -> void {
     };
 
     ImGui::InputText("Name", &animationAliasInfo.alias.alias);
-    renderFileControl("Animation", preferences, filterItems, animationAliasInfo.alias.filePath);
+    renderFileControl(prefs::assetViewerAnimationPath,
+                      preferences,
+                      filterItems,
+                      animationAliasInfo.alias.filePath);
 
     ImGui::Separator();
 

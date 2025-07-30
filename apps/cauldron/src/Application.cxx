@@ -1,12 +1,13 @@
 #include "Application.hpp"
-#include "Preferences.hpp"
+#include "bk/Preferences.hpp"
 #include "api/fx/IEventQueue.hpp"
 #include "api/fx/IGuiCallbackRegistrar.hpp"
 #include "ui/Manager.hpp"
+#include "PrefKeys.hpp"
 
 namespace ed {
 
-Application::Application(std::shared_ptr<Preferences> newPreferences,
+Application::Application(std::shared_ptr<bk::Preferences> newPreferences,
                          std::shared_ptr<Manager> newManager,
                          std::shared_ptr<tr::IEventQueue> newEventQueue,
                          std::shared_ptr<tr::IGuiCallbackRegistrar> newGuiCallbackRegistrar)
@@ -17,7 +18,8 @@ Application::Application(std::shared_ptr<Preferences> newPreferences,
 
   Log.debug("Created Application");
 
-  if (const auto recentFile = preferences->getRecentFile(); recentFile.has_value()) {
+  if (const auto recentFile = preferences->get<std::string>(prefs::recentFile);
+      recentFile.has_value()) {
     Log.debug("recentFile from preferences: {0}", recentFile.value());
   }
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Preferences.hpp"
+#include "bk/Preferences.hpp"
 #include "ui/assets/IconsLucide.hpp"
 namespace ed {
 
@@ -76,9 +76,9 @@ struct FilterItem {
 
 class FileDialog {
 public:
-  FileDialog(std::shared_ptr<Preferences> newPreferences,
+  FileDialog(std::shared_ptr<bk::Preferences> newPreferences,
              std::vector<FilterItem> filterItems,
-             std::string_view newUniqueName);
+             std::string newLastPathKey);
   ~FileDialog() = default;
 
   FileDialog(const FileDialog&) = delete;
@@ -99,9 +99,8 @@ public:
   }
 
 private:
-  std::shared_ptr<Preferences> preferences;
+  std::shared_ptr<bk::Preferences> preferences;
   std::vector<FilterItem> filterItems;
-  std::string uniqueName{};
 
   std::string lastPathKey;
 

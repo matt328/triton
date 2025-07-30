@@ -1,6 +1,6 @@
-#include "Preferences.hpp"
+#include "bk/Preferences.hpp"
 
-namespace ed {
+namespace bk {
 
 Preferences::Preferences(std::filesystem::path newPath) : path{std::move(newPath)} {
   if (!exists(path.parent_path())) {
@@ -31,36 +31,9 @@ Preferences::Preferences(std::filesystem::path newPath) : path{std::move(newPath
   Log.debug("Loaded preferences");
 }
 
-[[nodiscard]] auto Preferences::getRecentFile() const -> std::optional<std::string> {
-  return preferencesData.recentFile;
-}
-
-[[nodiscard]] auto Preferences::getLastOpenDialogPath() const -> std::optional<std::string> {
-  return preferencesData.lastOpenDialogPath;
-}
-
-auto Preferences::setRecentFile(std::string filename) -> void {
+auto Preferences::put(const std::string& key, const std::string& value) -> void {
   auto lock = std::lock_guard(mtx);
-  preferencesData.recentFile = std::move(filename);
-  save();
-}
-
-auto Preferences::setLastOpenDialogPath(std::string path) -> void {
-  auto lock = std::lock_guard(mtx);
-  preferencesData.lastOpenDialogPath = std::move(path);
-  save();
-}
-
-auto Preferences::getStringValue(std::string key) const -> std::optional<std::string> {
-  if (preferencesData.stringMap.contains(key)) {
-    return preferencesData.stringMap.at(key);
-  }
-  return std::nullopt;
-}
-
-auto Preferences::putStringValue(std::string key, std::string value) -> void {
-  auto lock = std::lock_guard(mtx);
-  preferencesData.stringMap[key] = std::move(value);
+  preferencesData.stringMap[key] = value;
   save();
 }
 

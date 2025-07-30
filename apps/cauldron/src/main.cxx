@@ -1,7 +1,7 @@
 #include "Application.hpp"
 
 // Following aren't referenced in this file, but need to be here for BoostDI to work
-#include "Preferences.hpp"
+#include "bk/Preferences.hpp"
 #include "bk/ThreadName.hpp"
 #include "fx/GuiCallbackRegistrar.hpp"
 #include "ui/Manager.hpp"
@@ -59,7 +59,7 @@ auto main(int argc, char** argv) -> int {
   editorStateBuffer->getStates(tr::Clock::now());
   delete editorStateBuffer;
 
-  std::shared_ptr<ed::Preferences> preferences = std::make_shared<ed::Preferences>(preferencesPath);
+  std::shared_ptr<bk::Preferences> preferences = std::make_shared<bk::Preferences>(preferencesPath);
 
   // for (const auto& param : args) {
   //   if (param == "-x11") {
@@ -78,7 +78,7 @@ auto main(int argc, char** argv) -> int {
         tr::ThreadedFrameworkContext::create(frameworkConfig, guiAdapter, guiCallbackRegistrar);
 
     const auto injector =
-        di::make_injector(di::bind<ed::Preferences>.to<>(preferences),
+        di::make_injector(di::bind<bk::Preferences>.to<>(preferences),
                           di::bind<tr::IEventQueue>.to<>(
                               [&frameworkContext] { return frameworkContext->getEventQueue(); }),
                           di::bind<tr::IGuiCallbackRegistrar>.to<>(guiCallbackRegistrar));
