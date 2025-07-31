@@ -133,6 +133,7 @@ auto DefaultAssetSystem::partition(BufferSizes stagingBufferSizes,
   if (!currentBatch.items.empty()) {
     subBatches.push_back(std::move(currentBatch));
   }
+  Log.trace("UploadBatch partitioned into {} subbatches", subBatches.size());
   return subBatches;
 }
 
