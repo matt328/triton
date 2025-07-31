@@ -20,6 +20,7 @@ struct BufferMeta {
   vk::BufferCreateInfo bufferCreateInfo;
   vma::AllocationInfo allocationInfo;
   vma::AllocationCreateInfo allocationCreateInfo;
+  std::string debugName;
 };
 
 class ManagedBuffer {
@@ -47,6 +48,11 @@ public:
 
   [[nodiscard]] auto getValidFromFrame() const -> uint64_t;
   [[nodiscard]] auto getValidToFrame() const -> std::optional<uint64_t>;
+
+  auto setValidFromFrame(uint64_t frame) -> void;
+  auto setValidToFrame(uint64_t frame) -> void;
+
+  auto setSize(size_t newSize) -> void;
 
 private:
   vk::Buffer vkBuffer;

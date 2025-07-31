@@ -19,14 +19,14 @@ namespace ed {
 Manager::Manager(std::shared_ptr<Menu> newAppMenu,
                  std::shared_ptr<AssetViewer> newAssetViewer,
                  std::shared_ptr<EntityEditor> newEntityEditor,
-                 std::shared_ptr<Properties> newProperties,
+                 std::shared_ptr<bk::Preferences> newPreferences,
                  std::shared_ptr<AssetTool> newAssetTool,
                  std::shared_ptr<tr::IGuiCallbackRegistrar> newGuiCallbackRegistrar,
                  std::shared_ptr<ApplicationController> newApplicationController)
     : appMenu{std::move(newAppMenu)},
       assetViewer{std::move(newAssetViewer)},
       entityEditor{std::move(newEntityEditor)},
-      properties{std::move(newProperties)},
+      preferences{std::move(newPreferences)},
       assetTool{std::move(newAssetTool)},
       guiCallbackRegistrar{std::move(newGuiCallbackRegistrar)},
       applicationController{std::move(newApplicationController)} {

@@ -9,6 +9,9 @@ auto ImageTransitionQueue::enqueue(std::vector<ImageTransitionInfo> imageTransit
 auto ImageTransitionQueue::dequeue() -> std::vector<ImageTransitionInfo> {
   auto batch = std::vector<ImageTransitionInfo>{};
   queue.try_dequeue(batch);
+  if (!batch.empty()) {
+    Log.trace("ImageTransitionQueue not empty, size={}", batch.size());
+  }
   return batch;
 }
 

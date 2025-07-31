@@ -45,6 +45,8 @@ Instance::~Instance() {
 
 auto Instance::createSurface(IWindow& window) const -> std::unique_ptr<vk::raii::SurfaceKHR> {
   VkSurfaceKHR tempSurface = nullptr;
+  Log.trace("createSurface()");
+  const auto size = window.getFramebufferSize();
   window.createVulkanSurface(**instance, &tempSurface);
   Log.trace("Created Surface");
   return std::make_unique<vk::raii::SurfaceKHR>(*instance, tempSurface);

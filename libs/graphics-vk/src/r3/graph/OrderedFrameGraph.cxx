@@ -36,7 +36,6 @@ auto OrderedFrameGraph::getPass(PassId id) -> std::unique_ptr<IRenderPass>& {
 auto OrderedFrameGraph::bake() -> void {
   auto barrierPrecursorGenerator = BarrierPrecursorGenerator{};
   barrierPrecursorPlan = barrierPrecursorGenerator.build(renderPasses);
-  Log.debug("{}", barrierPrecursorPlan);
 }
 
 auto OrderedFrameGraph::execute(Frame* frame) -> FrameGraphResult {

@@ -2,6 +2,7 @@ project("base-kit")
 
 set(basekit_SRC
   src/Logger2.cxx
+  src/Preferences.cxx
 )
 
 add_library(${PROJECT_NAME} STATIC ${basekit_SRC})
@@ -13,8 +14,13 @@ target_compile_definitions(${PROJECT_NAME}
 
 target_precompile_headers(${PROJECT_NAME}
   PUBLIC
+  <cereal/archives/binary.hpp>
+  <cereal/types/unordered_map.hpp>
+  <cereal/types/string.hpp>
   <chrono>
   <exception>
+  <filesystem>
+  <fstream>
   <functional>
   <glm/glm.hpp>
   <iomanip>
@@ -36,6 +42,7 @@ target_precompile_headers(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
   PUBLIC
+  cereal::cereal
   glm
   spdlog::spdlog_header_only
   Tracy::TracyClient

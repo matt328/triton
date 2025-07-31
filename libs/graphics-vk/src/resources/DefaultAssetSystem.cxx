@@ -1,9 +1,6 @@
-#include <algorithm>
-
 #include "DefaultAssetSystem.hpp"
 #include "api/fx/IAssetService.hpp"
 #include "api/fx/IEventQueue.hpp"
-#include "as/Model.hpp"
 #include "bk/ThreadName.hpp"
 #include "buffers/BufferSystem.hpp"
 #include "buffers/ImageUploadPlan.hpp"
@@ -11,9 +8,11 @@
 #include "img/ImageManager.hpp"
 #include "img/TextureArena.hpp"
 #include "r3/GeometryBufferPack.hpp"
-#include "resources/ByteConverters.hpp"
 #include "resources/TransferSystem.hpp"
 #include "resources/allocators/GeometryAllocator.hpp"
+#include "resources/processors/Helpers.hpp"
+#include "resources/processors/IResourceProcessor.hpp"
+#include "resources/processors/IResourceProcessorFactory.hpp"
 
 namespace tr {
 
@@ -27,7 +26,8 @@ DefaultAssetSystem::DefaultAssetSystem(
     std::shared_ptr<GeometryHandleMapper> newGeometryHandleMapper,
     std::shared_ptr<TextureHandleMapper> newTextureHandleMapper,
     std::shared_ptr<ImageManager> newImageManager,
-    std::shared_ptr<TextureArena> newTextureArena)
+    std::shared_ptr<TextureArena> newTextureArena,
+    std::shared_ptr<IResourceProcessorFactory> newResourceProcessorFactory)
     : eventQueue{std::move(newEventQueue)},
       assetService{std::move(newAssetService)},
       bufferSystem{std::move(newBufferSystem)},
@@ -37,7 +37,8 @@ DefaultAssetSystem::DefaultAssetSystem(
       geometryHandleMapper{std::move(newGeometryHandleMapper)},
       textureHandleMapper{std::move(newTextureHandleMapper)},
       imageManager{std::move(newImageManager)},
-      textureArena{std::move(newTextureArena)} {
+      textureArena{std::move(newTextureArena)},
+      resourceProcessorFactory{std::move(newResourceProcessorFactory)} {
   Log.trace("Constructing DefaultAssetSystem");
 }
 
@@ -70,7 +71,7 @@ auto DefaultAssetSystem::run() -> void {
 
     eventQueue->subscribe<EndResourceBatch>(
         [this](const std::shared_ptr<EndResourceBatch>& batch) {
-          handleEndResourceBatch(batch->batchId);
+          processBatchedResources(batch->batchId);
         },
         "test_group");
 
@@ -86,212 +87,162 @@ auto DefaultAssetSystem::requestStop() -> void {
   thread.request_stop();
 }
 
-auto DefaultAssetSystem::handleEndResourceBatch(uint64_t batchId) -> void {
+auto DefaultAssetSystem::extractRequirements(uint64_t batchId,
+                                             const std::vector<RequestVariant>& requests)
+    -> std::vector<StagingRequirements> {
   ZoneScoped;
-  auto uploadPlan = UploadPlan{.stagingBuffer = transferSystem->getTransferContext().stagingBuffer};
-  auto imageUploadPlan =
-      ImageUploadPlan{.stagingBuffer = transferSystem->getTransferContext().imageStagingBuffer};
-
-  std::vector<StaticModelUploaded> responses{};
-  for (auto& eventVariant : eventBatches[batchId]) {
-    auto visitor = [&](auto&& arg) -> void {
-      using T = std::decay_t<decltype(arg)>;
-      if constexpr (std::is_same_v<T, std::shared_ptr<StaticModelRequest>>) {
-        handleStaticModelRequest(arg, uploadPlan, imageUploadPlan, responses);
-      }
-      if constexpr (std::is_same_v<T, std::shared_ptr<StaticMeshRequest>>) {
-        handleStaticMeshRequest(arg, uploadPlan, responses);
-      }
-      if constexpr (std::is_same_v<T, std::shared_ptr<DynamicModelRequest>>) {
-        Log.trace("Handling Dynamic Model Request ID: {}", arg->requestId);
-      }
-    };
-    std::visit(visitor, eventVariant);
+  auto stagingRequirements = std::vector<StagingRequirements>{};
+  for (const auto& request : requests) {
+    stagingRequirements.push_back(std::visit(
+        [this, batchId](const auto& req) -> StagingRequirements {
+          using T = std::decay_t<decltype(*req)>;
+          return resourceProcessorFactory->getProcessorFor(typeid(T))->analyze(batchId, req);
+        },
+        request));
   }
-
-  transferSystem->upload(uploadPlan, imageUploadPlan);
-
-  for (const auto& upload : imageUploadPlan.uploads) {
-    const auto& image = imageManager->getImage(upload.dstImage);
-    const auto& sampler = imageManager->getSampler(imageManager->getDefaultSampler());
-    auto handle = textureArena->insert(image.getImageView(), sampler);
-    auto textureHandle = textureHandleMapper->toPublic(handle);
-    for (auto& response : responses) {
-      if (response.requestId == upload.requestId) {
-        response.textureHandle.emplace(textureHandle);
-      }
-    }
-  }
-
-  for (const auto& response : responses) {
-    eventQueue->emit(response);
-  }
+  return stagingRequirements;
 }
 
-auto DefaultAssetSystem::handleStaticModelRequest(
-    const std::shared_ptr<StaticModelRequest>& smRequest,
-    UploadPlan& uploadPlan,
-    ImageUploadPlan& imageUploadPlan,
-    std::vector<StaticModelUploaded>& responses) -> void {
+auto DefaultAssetSystem::partition(BufferSizes stagingBufferSizes,
+                                   const std::vector<StagingRequirements>& requirements)
+    -> std::vector<SubBatch> {
   ZoneScoped;
-  Log.trace("Handling Static Model Request ID: {}", smRequest->requestId);
-  const auto& model = assetService->loadModel(smRequest->modelFilename);
+  auto subBatches = std::vector<SubBatch>{};
+  auto currentBatch = SubBatch{};
+  size_t currentGeometryBufferSize = 0L;
+  size_t currentImageBufferSize = 0L;
 
-  const auto geometryData = deInterleave(*model.staticVertices, model.indices);
+  for (const auto& req : requirements) {
+    const auto reqGeometry = req.geometrySize.value_or(0L);
+    const auto reqImage = req.imageSize.value_or(0L);
 
-  const auto [regionHandle, uploads] =
-      geometryAllocator->allocate(*geometryData, transferSystem->getTransferContext());
+    const auto fits = (currentGeometryBufferSize + reqGeometry < stagingBufferSizes.geometry &&
+                       currentImageBufferSize + reqImage < stagingBufferSizes.image);
 
-  responses.push_back(StaticModelUploaded{
-      .batchId = smRequest->batchId,
-      .requestId = smRequest->requestId,
-      .entityName = smRequest->entityName,
-      .geometryHandle = geometryHandleMapper->toPublic(regionHandle),
-  });
+    if (!fits && !currentBatch.items.empty()) {
+      subBatches.push_back(std::move(currentBatch));
+      currentBatch = SubBatch{};
+      currentGeometryBufferSize = 0L;
+      currentImageBufferSize = 0L;
+    }
 
-  uploadPlan.uploads.insert(uploadPlan.uploads.end(), uploads.begin(), uploads.end());
-
-  const auto imageUploadData = fromImageData(model.imageData, smRequest->requestId);
-  imageUploadPlan.uploads.insert(imageUploadPlan.uploads.end(),
-                                 imageUploadData.begin(),
-                                 imageUploadData.end());
+    currentBatch.items.push_back(req);
+    currentGeometryBufferSize += reqGeometry;
+    currentImageBufferSize += reqImage;
+  }
+  if (!currentBatch.items.empty()) {
+    subBatches.push_back(std::move(currentBatch));
+  }
+  Log.trace("UploadBatch partitioned into {} subbatches", subBatches.size());
+  return subBatches;
 }
 
-auto DefaultAssetSystem::handleStaticMeshRequest(
-    const std::shared_ptr<StaticMeshRequest>& smRequest,
-    UploadPlan& uploadPlan,
-    std::vector<StaticModelUploaded>& responses) -> void {
+/// Each StagingRequirement in the subBatch will produce multiple BufferUploadItems
+/// and possibly multiple ImageUploadItems. This method returns a single UploadSubBatch, containing
+/// all of these.
+auto DefaultAssetSystem::prepareUpload(const SubBatch& subBatch) -> UploadSubBatch {
   ZoneScoped;
-  Log.trace("Handling Static Mesh Request ID: {}", smRequest->requestId);
-  const auto [regionHandle, uploads] =
-      geometryAllocator->allocate(smRequest->geometryData, transferSystem->getTransferContext());
+  auto uploadSubBatch = UploadSubBatch{};
+  for (const auto& reqs : subBatch.items) {
+    // Geometry
+    if (reqs.geometrySize) {
 
-  responses.push_back(StaticModelUploaded{
-      .batchId = smRequest->batchId,
-      .requestId = smRequest->requestId,
-      .entityName = smRequest->entityName,
-      .geometryHandle = geometryHandleMapper->toPublic(regionHandle),
-  });
+      const auto resizeRequests = geometryAllocator->checkSizes(*reqs.geometryData);
+      if (!resizeRequests.empty()) {
+        bufferSystem->resize(transferSystem, resizeRequests);
+      }
 
-  uploadPlan.uploads.insert(uploadPlan.uploads.end(), uploads.begin(), uploads.end());
-}
-
-auto DefaultAssetSystem::deInterleave(const std::vector<as::StaticVertex>& vertices,
-                                      const std::vector<uint32_t>& indexData)
-    -> std::unique_ptr<GeometryData> {
-  auto positions = std::make_shared<std::vector<GpuVertexPositionData>>();
-  auto texCoords = std::make_shared<std::vector<GpuVertexTexCoordData>>();
-  auto colors = std::make_shared<std::vector<GpuVertexColorData>>();
-  auto indices = std::make_shared<std::vector<GpuIndexData>>();
-
-  positions->reserve(vertices.size() * sizeof(GpuVertexPositionData));
-  texCoords->reserve(vertices.size() * sizeof(GpuVertexTexCoordData));
-  colors->reserve(vertices.size() * sizeof(GpuVertexColorData));
-  indices->reserve(indexData.size() * sizeof(GpuIndexData));
-
-  // TexCoord offsets i think are being set in bytes not elements
-
-  for (const auto& vertex : vertices) {
-    positions->emplace_back(vertex.position);
-    texCoords->emplace_back(vertex.texCoord);
-  }
-
-  for (auto index : indexData) {
-    indices->emplace_back(index);
-  }
-
-  auto indicesBytes = toByteVector(indices);
-  auto texCoordBytes = toByteVector(texCoords);
-  auto positionBytes = toByteVector(positions);
-
-  return std::make_unique<GeometryData>(GeometryData{.indexData = indicesBytes,
-                                                     .positionData = positionBytes,
-                                                     .colorData = nullptr,
-                                                     .texCoordData = texCoordBytes,
-                                                     .normalData = nullptr,
-                                                     .animationData = nullptr});
-}
-
-auto DefaultAssetSystem::fromImageData(const as::ImageData& imageData, uint64_t requestId)
-    -> std::vector<ImageUploadData> {
-  auto uploadDataList = std::vector<ImageUploadData>{};
-
-  auto data = std::vector<std::byte>{};
-  data.resize(imageData.data.size());
-  std::ranges::transform(imageData.data, data.begin(), [](unsigned char c) {
-    return static_cast<std::byte>(c);
-  });
-
-  const auto imageHandle = imageManager->createImage({
-      .logicalName = "ModelTexture",
-      .format = getVkFormat(imageData.bits, imageData.component),
-      .extent =
-          vk::Extent2D{
-              .width = static_cast<uint32_t>(imageData.width),
-              .height = static_cast<uint32_t>(imageData.height),
-          },
-      .usageFlags = vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferDst,
-      .aspectFlags = vk::ImageAspectFlagBits::eColor,
-      .debugName = "ModelTexture",
-  });
-
-  auto stagingBufferOffset =
-      transferSystem->getTransferContext().imageStagingAllocator->allocate({.size = data.size()});
-
-  uploadDataList.push_back(ImageUploadData{
-      .data = std::make_shared<std::vector<std::byte>>(data),
-      .dataSize = data.size(),
-      .dstImage = imageHandle,
-      .subresource = vk::ImageSubresourceLayers{.aspectMask = vk::ImageAspectFlagBits::eColor,
-                                                .mipLevel = 0,
-                                                .baseArrayLayer = 0,
-                                                .layerCount = 1},
-      .imageExtent = vk::Extent3D{.width = static_cast<uint32_t>(imageData.width),
-                                  .height = static_cast<uint32_t>(imageData.height),
-                                  .depth = 1},
-      .stagingBufferOffset = stagingBufferOffset->offset,
-      .requestId = requestId});
-
-  return uploadDataList;
-}
-
-auto DefaultAssetSystem::getVkFormat(int bits, int component) -> vk::Format {
-  if (bits == 8) {
-    switch (component) {
-      case 1:
-        return vk::Format::eR8Unorm;
-      case 2:
-        return vk::Format::eR8G8Unorm;
-      case 3:
-        return vk::Format::eR8G8B8Unorm;
-      case 4:
-        return vk::Format::eR8G8B8A8Unorm;
+      const auto geometryAllocation =
+          geometryAllocator->allocate(*reqs.geometryData, transferSystem->getTransferContext());
+      auto bufferUploadItem = GeometryUpload{.cargo = reqs.cargo,
+                                             .responseType = reqs.responseType,
+                                             .bufferAllocation = geometryAllocation};
+      uploadSubBatch.bufferUploadItems.push_back(bufferUploadItem);
     }
-  } else if (bits == 16) {
-    switch (component) {
-      case 1:
-        return vk::Format::eR16Unorm;
-      case 2:
-        return vk::Format::eR16G16Unorm;
-      case 3:
-        return vk::Format::eR16G16B16Unorm;
-      case 4:
-        return vk::Format::eR16G16B16A16Unorm;
+
+    // Image(s)
+    if (reqs.imageSize) {
+      for (const auto& imageData : reqs.imageDataList) {
+        auto byteArray =
+            std::make_shared<std::vector<std::byte>>(processorHelpers::toByteVector(imageData));
+        // Create a destination image
+        const auto imageHandle = imageManager->createImage({
+            .logicalName = "ModelTexture",
+            .format = processorHelpers::getVkFormat(imageData->bits, imageData->component),
+            .extent =
+                vk::Extent2D{
+                    .width = static_cast<uint32_t>(imageData->width),
+                    .height = static_cast<uint32_t>(imageData->height),
+                },
+            .usageFlags = vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferDst,
+            .aspectFlags = vk::ImageAspectFlagBits::eColor,
+            .debugName = "ModelTexture",
+        });
+        // Allocate
+        auto stagingBufferOffset =
+            transferSystem->getTransferContext().imageStagingAllocator->allocate(
+                {.size = byteArray->size()});
+        // Create ImageUpload
+        auto imageUpload = ImageUpload{
+            .cargo = reqs.cargo,
+            .responseType = reqs.responseType,
+            .data = byteArray,
+            .dataSize = byteArray->size(),
+            .dstImage = imageHandle,
+            .subresource = vk::ImageSubresourceLayers{.aspectMask = vk::ImageAspectFlagBits::eColor,
+                                                      .mipLevel = 0,
+                                                      .baseArrayLayer = 0,
+                                                      .layerCount = 1},
+            .imageExtent = vk::Extent3D{.width = static_cast<uint32_t>(imageData->width),
+                                        .height = static_cast<uint32_t>(imageData->height),
+                                        .depth = 1},
+            .stagingBufferOffset = stagingBufferOffset.offset,
+        };
+        uploadSubBatch.imageUploadItems.push_back(imageUpload);
+      }
     }
-  } else if (bits == 32) {
-    switch (component) {
-      case 1:
-        return vk::Format::eR32Sfloat;
-      case 2:
-        return vk::Format::eR32G32Sfloat;
-      case 3:
-        return vk::Format::eR32G32B32Sfloat;
-      case 4:
-        return vk::Format::eR32G32B32A32Sfloat;
+  }
+  return uploadSubBatch;
+}
+
+auto DefaultAssetSystem::processResults(const std::vector<SubBatchResult>& subBatchResults)
+    -> std::vector<ResponseVariant> {
+  ZoneScoped;
+  auto responses = std::vector<ResponseVariant>{};
+
+  for (const auto& result : subBatchResults) {
+    if (result.responseType == typeid(StaticModelUploaded)) {
+      auto modelUploaded = StaticModelUploaded{
+          .batchId = result.cargo.batchId,
+          .requestId = result.cargo.requestId,
+          .entityName = result.cargo.entityName,
+          .geometryHandle = result.geometryHandle,
+          .textureHandle = result.textureHandle,
+      };
+      responses.emplace_back(modelUploaded);
     }
   }
 
-  throw std::runtime_error("Unsupported image format: component=" + std::to_string(component) +
-                           ", bits=" + std::to_string(bits));
+  return responses;
 }
+
+auto DefaultAssetSystem::processBatchedResources(uint64_t batchId) -> void {
+  ZoneScoped;
+
+  auto stagingRequirements = extractRequirements(batchId, eventBatches[batchId]);
+
+  auto subBatches = partition({.geometry = transferSystem->getGeometryStagingBufferSize(),
+                               .image = transferSystem->getImageStagingBufferSize()},
+                              stagingRequirements);
+
+  for (const auto& subBatch : subBatches) {
+    const auto uploadSubBatch = prepareUpload(subBatch);
+    const auto subBatchResults = transferSystem->upload2(uploadSubBatch);
+    const auto responses = processResults(subBatchResults);
+    for (const auto& response : responses) {
+      std::visit(EmitEventVisitor{eventQueue}, response);
+    }
+  }
+}
+
 }

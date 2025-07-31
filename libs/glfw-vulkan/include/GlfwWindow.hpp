@@ -4,6 +4,10 @@
 
 #include "api/fx/IWindow.hpp"
 
+namespace ed {
+class Properties;
+}
+
 namespace tr {
 
 class IEventQueue;

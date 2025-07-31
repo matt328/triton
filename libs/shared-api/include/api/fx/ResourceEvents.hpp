@@ -37,6 +37,14 @@ struct StaticMeshRequest {
   std::optional<tr::TransformData> initialTransform = std::nullopt;
 };
 
+struct StaticMeshUploaded {
+  uint64_t batchId;
+  uint64_t requestId;
+  std::string entityName;
+  Handle<Geometry> geometryHandle;
+  std::optional<Handle<TextureTag>> textureHandle = std::nullopt;
+};
+
 /// AssetSystem emits
 /// EntityManager handles
 struct StaticModelUploaded {
@@ -64,7 +72,7 @@ struct DynamicModelRequest {
   std::optional<tr::TransformData> initialTransform = std::nullopt;
 };
 
-struct DynamicModelResponse {
+struct DynamicModelUploaded {
   uint64_t batchId;
   uint64_t requestId;
   std::string entityName;

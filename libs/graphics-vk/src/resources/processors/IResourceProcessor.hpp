@@ -1,0 +1,21 @@
+#pragma once
+
+#include "StagingRequirements.hpp"
+
+namespace tr {
+
+class IResourceProcessor {
+public:
+  IResourceProcessor() = default;
+  virtual ~IResourceProcessor() = default;
+
+  IResourceProcessor(const IResourceProcessor&) = default;
+  IResourceProcessor(IResourceProcessor&&) = delete;
+  auto operator=(const IResourceProcessor&) -> IResourceProcessor& = default;
+  auto operator=(IResourceProcessor&&) -> IResourceProcessor& = delete;
+
+  [[nodiscard]] virtual auto handles(std::type_index) const -> bool = 0;
+  virtual auto analyze(uint64_t batchId, std::shared_ptr<void> request) -> StagingRequirements = 0;
+};
+
+}

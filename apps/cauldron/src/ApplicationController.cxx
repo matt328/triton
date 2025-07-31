@@ -26,7 +26,7 @@ auto ApplicationController::handleAddStaticModel(const std::shared_ptr<tr::AddSt
   const auto endBatch = tr::EndResourceBatch{.batchId = 1};
 
   eventQueue->emit(beginBatch, UIGroup);
-  for (int i = 0; i < 3000; ++i) {
+  for (int i = 0; i < event->count; ++i) {
     const auto staticModelRequestId = bk::RandomUtils::uint64InRange(1, 10000);
 
     const auto modelRequest =
@@ -34,10 +34,11 @@ auto ApplicationController::handleAddStaticModel(const std::shared_ptr<tr::AddSt
                                .requestId = staticModelRequestId,
                                .modelFilename = event->modelName,
                                .entityName = std::format("{}-{}", event->name, i)};
+    Log.trace("emplacing requestId={} in inFlightMap", staticModelRequestId);
     inFlightMap.emplace(
         staticModelRequestId,
         tr::GameObjectData{.name = modelRequest.entityName,
-                           .orientation = {.position = bk::RandomUtils::vec3InRange(-10, 10)},
+                           .orientation = {.position = bk::RandomUtils::vec3InRange(-1, 1)},
                            .modelName = event->modelName,
                            .skeleton = "",
                            .animations = {}});
@@ -55,6 +56,7 @@ auto ApplicationController::handleStaticModelUploaded(
                                               .textureHandle = event->textureHandle,
                                               .gameObjectData = gameObjectData};
   inFlightMap.erase(event->requestId);
+  Log.trace("erased requestId={} in inFlightMap", event->requestId);
   eventQueue->emit(sgo);
 }
 
@@ -70,6 +72,7 @@ auto ApplicationController::handleAddStaticGeometry(
                                                  .requestId = staticGeometryRequestId,
                                                  .geometryData = event->geometryData,
                                                  .entityName = event->name};
+
   inFlightMap.emplace(staticGeometryRequestId,
                       tr::GameObjectData{.name = event->name,
                                          .orientation = event->orientation,

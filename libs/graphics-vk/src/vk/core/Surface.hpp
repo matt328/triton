@@ -15,6 +15,7 @@ public:
   auto operator=(Surface&&) -> Surface& = delete;
 
   [[nodiscard]] auto getVkSurface() const -> vk::raii::SurfaceKHR&;
+  [[nodiscard]] auto getFramebufferSize() const -> vk::Extent2D;
 
 private:
   std::shared_ptr<IWindow> window;

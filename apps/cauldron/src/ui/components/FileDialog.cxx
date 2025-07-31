@@ -1,7 +1,4 @@
-#include <filesystem>
-#include <optional>
 #include <platform_folders.h>
-#include <utility>
 
 #include "FileDialog.hpp"
 #include "imgui.h"
@@ -9,13 +6,12 @@
 
 namespace ed {
 
-FileDialog::FileDialog(std::shared_ptr<Properties> newProperties,
+FileDialog::FileDialog(std::shared_ptr<bk::Preferences> newPreferences,
                        std::vector<FilterItem> newFilterItems,
-                       std::string_view newUniqueName)
-    : properties{std::move(newProperties)},
+                       std::string newLastPathKey)
+    : preferences{std::move(newPreferences)},
       filterItems{std::move(newFilterItems)},
-      uniqueName{newUniqueName.data()} {
-  lastPathKey = uniqueName + "lastPathKey";
+      lastPathKey{std::move(newLastPathKey)} {
 }
 
 auto FileDialog::render() -> void {
@@ -34,11 +30,9 @@ auto FileDialog::render() -> void {
         currentFolder = initialPath;
       }
       // Try properties
-    } else if (properties->get(lastPathKey).has_value()) {
+    } else if (auto lastPath = preferences->get<std::string>(lastPathKey); lastPath.has_value()) {
       if (!currentFolder.has_value()) {
-        currentFolder = properties->get(lastPathKey).transform([](const auto& path) {
-          return std::filesystem::path{path};
-        });
+        currentFolder = std::filesystem::path{*lastPath};
       }
       // Finally use desktop
     } else if (!currentFolder.has_value()) {
@@ -217,7 +211,7 @@ auto FileDialog::render() -> void {
       ImGui::CloseCurrentPopup();
       const auto propPath = currentFolder.value() / selectedFilename;
       Log.trace("putting property {}, value: {}", lastPathKey, currentFolder.value().string());
-      properties->put(lastPathKey, currentFolder.value().string());
+      preferences->put(lastPathKey, currentFolder.value().string());
       isOpen = false;
       if (onOk.has_value()) {
         onOk.value()({propPath});

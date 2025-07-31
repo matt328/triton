@@ -1,6 +1,8 @@
 #pragma once
 
+#include "api/gfx/GeometryData.hpp"
 #include "buffers/ManagedBuffer.hpp"
+#include "resources/TransferSystem.hpp"
 
 namespace tr {
 
@@ -8,16 +10,17 @@ class BufferSystem;
 class ResourceAliasRegistry;
 class IBufferAllocator;
 
-constexpr size_t IndexBufferInitialSize = 1024000;
-constexpr size_t PositionBufferInitialSize = 2671552;
+// Set these 1 byte larger than the test model so we can force a resize when loading 1 model
+constexpr size_t IndexBufferInitialSize = 45937;
+constexpr size_t PositionBufferInitialSize = 69649;
+constexpr size_t TexCoordBufferInitialSize = 46433;
 constexpr size_t ColorBufferInitialSize = 1024000;
-constexpr size_t TexCoordBufferInitialSize = 1024000;
 constexpr size_t NormalBufferInitialSize = 1024000;
 constexpr size_t AnimationBufferInitialSize = 1024000;
 
 class GeometryBufferPack {
 public:
-  GeometryBufferPack(const std::shared_ptr<BufferSystem>& bufferSystem,
+  GeometryBufferPack(std::shared_ptr<BufferSystem> newBufferSystem,
                      const std::shared_ptr<ResourceAliasRegistry>& aliasRegistry);
   ~GeometryBufferPack() = default;
 
@@ -33,27 +36,27 @@ public:
   [[nodiscard]] auto getNormalBuffer() const -> const Handle<ManagedBuffer>&;
   [[nodiscard]] auto getAnimationBuffer() const -> const Handle<ManagedBuffer>&;
 
-  auto getIndexBufferAllocator() -> IBufferAllocator&;
-  auto getPositionBufferAllocator() -> IBufferAllocator&;
-  auto getColorBufferAllocator() -> IBufferAllocator&;
-  auto getTexCoordBufferAllocator() -> IBufferAllocator&;
-  auto getNormalBufferAllocator() -> IBufferAllocator&;
-  auto getAnimationBufferAllocator() -> IBufferAllocator&;
+  /// Checks to see if any buffers need resized to hold this data. Returns a vector of
+  /// ResizeRequests containing each buffer that needs resized, and the buffer's new size.
+  auto checkSizes(const GeometryData& data) -> std::vector<ResizeRequest>;
+
+  auto allocate(Handle<ManagedBuffer> handle, const BufferRequest& bufferRequest) -> BufferRegion;
+  auto allocateIndexBuffer(const BufferRequest& bufferRequest) -> BufferRegion;
+  auto allocatePositionBuffer(const BufferRequest& bufferRequest) -> BufferRegion;
+  auto allocateColorBuffer(const BufferRequest& bufferRequest) -> BufferRegion;
+  auto allocateTexCoordBuffer(const BufferRequest& bufferRequest) -> BufferRegion;
+  auto allocateNormalBuffer(const BufferRequest& bufferRequest) -> BufferRegion;
+  auto allocateAnimationBuffer(const BufferRequest& bufferRequest) -> BufferRegion;
 
 private:
+  std::shared_ptr<BufferSystem> bufferSystem;
+
   Handle<ManagedBuffer> indexBuffer;
   Handle<ManagedBuffer> positionBuffer;
   Handle<ManagedBuffer> colorBuffer;
   Handle<ManagedBuffer> texCoordBuffer;
   Handle<ManagedBuffer> normalBuffer;
   Handle<ManagedBuffer> animationBuffer;
-
-  std::unique_ptr<IBufferAllocator> indexBufferAllocator;
-  std::unique_ptr<IBufferAllocator> positionBufferAllocator;
-  std::unique_ptr<IBufferAllocator> colorBufferAllocator;
-  std::unique_ptr<IBufferAllocator> texCoordBufferAllocator;
-  std::unique_ptr<IBufferAllocator> normalBufferAllocator;
-  std::unique_ptr<IBufferAllocator> animationBufferAllocator;
 };
 
 }

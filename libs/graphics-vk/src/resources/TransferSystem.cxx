@@ -1,10 +1,9 @@
 #include "TransferSystem.hpp"
 #include "ImageTransitionQueue.hpp"
-#include "api/gfx/GpuMaterialData.hpp"
 #include "buffers/BufferSystem.hpp"
 #include "gfx/QueueTypes.hpp"
 #include "img/ImageManager.hpp"
-#include "resources/ByteConverters.hpp"
+#include "img/TextureArena.hpp"
 #include "resources/allocators/LinearAllocator.hpp"
 #include "vk/command-buffer/CommandBufferManager.hpp"
 
@@ -14,48 +13,56 @@ constexpr size_t StagingBufferSize = 183886080;
 
 TransferSystem::TransferSystem(std::shared_ptr<BufferSystem> newBufferSystem,
                                std::shared_ptr<Device> newDevice,
+                               std::shared_ptr<PhysicalDevice> newPhysicalDevice,
                                std::shared_ptr<queue::Transfer> newTransferQueue,
                                std::shared_ptr<queue::Graphics> newGraphicsQueue,
                                std::shared_ptr<ImageManager> newImageManager,
                                std::shared_ptr<ImageTransitionQueue> newImageQueue,
+                               std::shared_ptr<GeometryHandleMapper> newGeometryHandleMapper,
+                               std::shared_ptr<TextureArena> newTextureArena,
+                               std::shared_ptr<TextureHandleMapper> newTextureHandleMapper,
                                const std::shared_ptr<CommandBufferManager>& commandBufferManager)
     : bufferSystem{std::move(newBufferSystem)},
       device{std::move(newDevice)},
+      physicalDevice{std::move(newPhysicalDevice)},
       transferQueue{std::move(newTransferQueue)},
       graphicsQueue{std::move(newGraphicsQueue)},
       imageManager{std::move(newImageManager)},
       imageQueue{std::move(newImageQueue)},
+      geometryHandleMapper{std::move(newGeometryHandleMapper)},
+      textureArena{std::move(newTextureArena)},
+      textureHandleMapper{std::move(newTextureHandleMapper)},
       commandBuffer{std::make_unique<vk::raii::CommandBuffer>(
           commandBufferManager->getTransferCommandBuffer())},
       fence(std::make_unique<vk::raii::Fence>(
           device->getVkDevice().createFence(vk::FenceCreateInfo{}))) {
+
   transferContext.stagingBuffer =
       bufferSystem->registerBuffer(BufferCreateInfo{.bufferLifetime = BufferLifetime::Transient,
                                                     .bufferUsage = BufferUsage::Transfer,
                                                     .initialSize = StagingBufferSize,
                                                     .debugName = "Buffer-GeometryStaging"});
-  transferContext.stagingAllocator = std::make_unique<LinearAllocator>(StagingBufferSize);
+  transferContext.stagingAllocator =
+      std::make_unique<LinearAllocator>(transferContext.stagingBuffer,
+                                        StagingBufferSize,
+                                        "GeometryStagingBuffer");
 
   transferContext.imageStagingBuffer =
       bufferSystem->registerBuffer(BufferCreateInfo{.bufferLifetime = BufferLifetime::Transient,
                                                     .bufferUsage = BufferUsage::Transfer,
                                                     .initialSize = StagingBufferSize,
                                                     .debugName = "Buffer-ImageStaging"});
-  transferContext.imageStagingAllocator = std::make_unique<LinearAllocator>(StagingBufferSize);
+  transferContext.imageStagingAllocator =
+      std::make_unique<LinearAllocator>(transferContext.imageStagingBuffer,
+                                        StagingBufferSize,
+                                        "ImageStagingBuffer");
 }
 
-auto TransferSystem::upload(UploadPlan& bufferPlan, ImageUploadPlan& imagePlan) -> void {
+auto TransferSystem::upload2(const UploadSubBatch& subBatch) -> std::vector<SubBatchResult> {
   ZoneScoped;
-  bufferPlan.sortByBuffer();
-  transitionBatch = std::vector<ImageTransitionInfo>{};
+  auto subBatchResults = std::vector<SubBatchResult>{};
 
-  auto bufferResizes = checkSizes(bufferPlan);
-  auto imageResizes = checkImageSizes(imagePlan);
-
-  processResizes(bufferResizes, imageResizes);
-
-  auto bufferCopies = prepareBufferStagingData(bufferPlan);
-  auto imageCopies = prepareImageStagingData(imagePlan);
+  auto [bufferCopies, imageCopies] = prepareStagingData(subBatch);
 
   commandBuffer->begin({.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
 
@@ -66,13 +73,74 @@ auto TransferSystem::upload(UploadPlan& bufferPlan, ImageUploadPlan& imagePlan) 
 
   submitAndWait();
 
+  // Add all the images that were uploaded to the queue here
+  imageQueue->enqueue(transitionBatch);
+
   transferContext.stagingAllocator->reset();
   transferContext.imageStagingAllocator->reset();
+
+  auto resultsMap = std::unordered_map<uint64_t, SubBatchResult>{};
+  for (const auto& geometryUpload : subBatch.bufferUploadItems) {
+    const auto subBatchResult = SubBatchResult{.cargo = geometryUpload.cargo,
+                                               .responseType = geometryUpload.responseType,
+                                               .geometryHandle = geometryHandleMapper->toPublic(
+                                                   geometryUpload.bufferAllocation.regionHandle)};
+    resultsMap.emplace(geometryUpload.cargo.requestId, subBatchResult);
+  }
+  for (const auto& imageUpload : subBatch.imageUploadItems) {
+    const auto& image = imageManager->getImage(imageUpload.dstImage);
+    const auto& sampler = imageManager->getSampler(imageManager->getDefaultSampler());
+    auto handle = textureArena->insert(image.getImageView(), sampler);
+    auto textureHandle = textureHandleMapper->toPublic(handle);
+    resultsMap.at(imageUpload.cargo.requestId).textureHandle = textureHandle;
+  }
+  for (const auto& [_, value] : resultsMap) {
+    subBatchResults.push_back(value);
+  }
+  return subBatchResults;
+}
+
+auto TransferSystem::prepareStagingData(const UploadSubBatch& uploadSubBatch)
+    -> std::tuple<BufferCopyMap, ImageCopyMap> {
+  auto bufferCopies = BufferCopyMap{};
+  for (const auto& upload : uploadSubBatch.bufferUploadItems) {
+    for (const auto& allocation : upload.bufferAllocation.bufferAllocations) {
+      const auto stagingBufferRegion = bufferSystem->insert(
+          transferContext.stagingBuffer,
+          allocation.data->data(),
+          BufferRegion{.offset = allocation.stagingOffset, .size = allocation.dataSize});
+
+      const auto region = vk::BufferCopy2{.srcOffset = stagingBufferRegion->offset,
+                                          .dstOffset = allocation.dstOffset,
+                                          .size = allocation.dataSize};
+      bufferCopies[allocation.dstBuffer].push_back(region);
+    }
+  }
+
+  auto imageCopies = ImageCopyMap{};
+  for (const auto& imageUpload : uploadSubBatch.imageUploadItems) {
+    const auto region = bufferSystem->insert(
+        transferContext.imageStagingBuffer,
+        imageUpload.data->data(),
+        BufferRegion{.offset = imageUpload.stagingBufferOffset, .size = imageUpload.dataSize});
+
+    const auto copyInfo = vk::BufferImageCopy2{
+        .bufferOffset = region->offset,
+        .bufferRowLength = 0,
+        .bufferImageHeight = 0,
+        .imageSubresource = imageUpload.subresource,
+        .imageOffset = imageUpload.imageOffset,
+        .imageExtent = imageUpload.imageExtent,
+    };
+    imageCopies.emplace(imageUpload.dstImage, std::vector<vk::BufferImageCopy2>{copyInfo});
+  }
+
+  return {bufferCopies, imageCopies};
 }
 
 auto TransferSystem::prepareBufferStagingData(const UploadPlan& bufferPlan) -> BufferCopyMap {
   auto bufferCopies = BufferCopyMap{};
-  for (const auto& upload : bufferPlan.uploads) {
+  for (const auto& upload : bufferPlan.getSortedUploads()) {
     Log.trace("Copying into staging buffer offset={}, size={}, dstBuffer={}",
               upload.stagingOffset,
               upload.dataSize,
@@ -96,27 +164,29 @@ auto TransferSystem::prepareBufferStagingData(const UploadPlan& bufferPlan) -> B
 
 auto TransferSystem::prepareImageStagingData(const ImageUploadPlan& imagePlan) -> ImageCopyMap {
   auto imageCopies = ImageCopyMap{};
-  for (const auto& imageUpload : imagePlan.uploads) {
+  for (const auto& [_, imageUploads] : imagePlan.uploadsByRequest) {
+    for (const auto& imageUpload : imageUploads) {
+      const auto region = bufferSystem->insert(
+          transferContext.imageStagingBuffer,
+          imageUpload.data->data(),
+          BufferRegion{.offset = imageUpload.stagingBufferOffset, .size = imageUpload.dataSize});
 
-    const auto region = bufferSystem->insert(
-        transferContext.imageStagingBuffer,
-        imageUpload.data->data(),
-        BufferRegion{.offset = imageUpload.stagingBufferOffset, .size = imageUpload.dataSize});
-
-    const auto copyInfo = vk::BufferImageCopy2{
-        .bufferOffset = region->offset,
-        .bufferRowLength = 0,
-        .bufferImageHeight = 0,
-        .imageSubresource = imageUpload.subresource,
-        .imageOffset = imageUpload.imageOffset,
-        .imageExtent = imageUpload.imageExtent,
-    };
-    imageCopies.emplace(imageUpload.dstImage, std::vector<vk::BufferImageCopy2>{copyInfo});
+      const auto copyInfo = vk::BufferImageCopy2{
+          .bufferOffset = region->offset,
+          .bufferRowLength = 0,
+          .bufferImageHeight = 0,
+          .imageSubresource = imageUpload.subresource,
+          .imageOffset = imageUpload.imageOffset,
+          .imageExtent = imageUpload.imageExtent,
+      };
+      imageCopies.emplace(imageUpload.dstImage, std::vector<vk::BufferImageCopy2>{copyInfo});
+    }
   }
   return imageCopies;
 }
 
 auto TransferSystem::recordBufferUploads(const BufferCopyMap& bufferCopies) -> void {
+  ZoneScoped;
   for (const auto& [dstHandle, regions] : bufferCopies) {
     const auto srcBuffer = bufferSystem->getVkBuffer(transferContext.stagingBuffer);
     const auto dstBuffer = bufferSystem->getVkBuffer(dstHandle);
@@ -139,7 +209,9 @@ auto TransferSystem::recordBufferUploads(const BufferCopyMap& bufferCopies) -> v
 }
 
 auto TransferSystem::recordImageUploads(const ImageCopyMap& imageCopies) -> void {
+  ZoneScoped;
   const auto srcBuffer = bufferSystem->getVkBuffer(transferContext.imageStagingBuffer);
+  transitionBatch.clear();
   for (const auto& [dstImageHandle, regions] : imageCopies) {
     const auto& dstImage = imageManager->getImage(dstImageHandle);
     vk::ImageMemoryBarrier2 imageBarrier = {
@@ -197,6 +269,7 @@ auto TransferSystem::recordImageUploads(const ImageCopyMap& imageCopies) -> void
 }
 
 auto TransferSystem::submitAndWait() -> void {
+  ZoneScoped;
   const auto submitInfo =
       vk::SubmitInfo{.commandBufferCount = 1, .pCommandBuffers = &**commandBuffer};
 
@@ -206,37 +279,41 @@ auto TransferSystem::submitAndWait() -> void {
       result != vk::Result::eSuccess) {
     Log.warn("Timeout waiting for fence during asnyc submit");
   }
-
-  // Add all the images that were uploaded to the queue here
-  imageQueue->enqueue(transitionBatch);
-
+  Log.trace("Transfer Queue Submitted, resetting fence");
   device->getVkDevice().resetFences(**fence);
+}
+
+auto TransferSystem::copyBuffers(const BufferPair& bufferPair) -> void {
+  commandBuffer->begin({.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
+  Log.trace("Recording CopyBuffer commands");
+  for (const auto& [src, dst] : bufferPair) {
+    const auto region = vk::BufferCopy2{.srcOffset = 0,
+                                        .dstOffset = 0,
+                                        .size = src->getMeta().bufferCreateInfo.size};
+    const auto copyInfo2 = vk::CopyBufferInfo2{.srcBuffer = src->getVkBuffer(),
+                                               .dstBuffer = dst->getVkBuffer(),
+                                               .regionCount = 1,
+                                               .pRegions = &region};
+    commandBuffer->copyBuffer2(copyInfo2);
+  }
+
+  commandBuffer->end();
+
+  submitAndWait();
 }
 
 auto TransferSystem::getTransferContext() -> TransferContext& {
   return transferContext;
 }
 
-auto TransferSystem::enqueueResize([[maybe_unused]] const ResizeRequest& resize) -> void {
-}
-
 auto TransferSystem::defragment([[maybe_unused]] const DefragRequest& defrag) -> void {
 }
 
-auto TransferSystem::checkSizes([[maybe_unused]] const UploadPlan& uploadPlan)
-    -> std::vector<ResizeRequest> {
-  // TODO(resources): Actually check sizes
-  return {};
+auto TransferSystem::getGeometryStagingBufferSize() -> size_t {
+  return StagingBufferSize;
 }
-
-auto TransferSystem::checkImageSizes(const ImageUploadPlan& imagePlan)
-    -> std::vector<ResizeRequest> {
-  return {};
-}
-
-auto TransferSystem::processResizes(
-    [[maybe_unused]] const std::vector<ResizeRequest>& resizeRequestList,
-    [[maybe_unused]] const std::vector<ResizeRequest>& imageResizeRequestList) -> void {
+auto TransferSystem::getImageStagingBufferSize() -> size_t {
+  return StagingBufferSize;
 }
 
 }

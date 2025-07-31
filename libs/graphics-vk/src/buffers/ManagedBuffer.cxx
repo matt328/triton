@@ -1,5 +1,4 @@
 #include "ManagedBuffer.hpp"
-#include "api/gfx/GpuMaterialData.hpp"
 
 namespace tr {
 
@@ -39,6 +38,10 @@ auto ManagedBuffer::map() -> void {
   }
 }
 
+auto ManagedBuffer::setSize(size_t newSize) -> void {
+  bufferMeta.bufferCreateInfo.setSize(newSize);
+}
+
 auto ManagedBuffer::uploadData(void* srcData, size_t size, size_t offset) -> void {
   assert(isMappable());
   if (this->mappedData == nullptr) {
@@ -47,15 +50,25 @@ auto ManagedBuffer::uploadData(void* srcData, size_t size, size_t offset) -> voi
 
   assert(this->mappedData != nullptr);
   assert(srcData != nullptr);
+  if (offset + size > bufferMeta.bufferCreateInfo.size) {
+    Log.warn("Buffer {} Full", this->bufferMeta.debugName);
+  }
   assert(offset + size <= bufferMeta.bufferCreateInfo.size);
 
-  // Uncomment this if the memcpy line starts segfaulting again.
+  // Uncomment this to debug if the memcpy line starts segfaulting again.
   // volatile char* s = static_cast<volatile char*>(srcData);
   // for (size_t i = 0; i < size; ++i) {
   //   char tmp = s[i]; // try to read from srcData
   // }
 
-  std::memcpy(static_cast<char*>(this->mappedData) + offset, srcData, size);
+  // if this starts segfaulting again, the last time it was broken I updated the nvidia drivers
+  // on fedora kde and it started working again.
+
+  char* dst = static_cast<char*>(this->mappedData);
+
+  if (dst) {
+    std::memcpy(dst + offset, srcData, size);
+  }
 }
 
 [[nodiscard]] auto ManagedBuffer::getVkBuffer() const -> const vk::Buffer& {
@@ -72,6 +85,13 @@ auto ManagedBuffer::getValidFromFrame() const -> uint64_t {
 
 auto ManagedBuffer::getValidToFrame() const -> std::optional<uint64_t> {
   return validToFrame;
+}
+
+auto ManagedBuffer::setValidFromFrame(uint64_t frame) -> void {
+  validFromFrame = frame;
+}
+auto ManagedBuffer::setValidToFrame(uint64_t frame) -> void {
+  validToFrame = frame;
 }
 
 }

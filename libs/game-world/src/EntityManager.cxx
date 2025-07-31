@@ -119,9 +119,6 @@ auto EntityManager::createStaticGameObject(std::string entityName,
                                            std::optional<Handle<TextureTag>> textureHandle)
     -> void {
   ZoneScoped;
-  Log.trace("EntityManager creating static gameobject name={}, geometryHandle={}",
-            entityName,
-            geometryHandle.id);
 
   auto entityId = registry->create();
   auto textureHandles = std::vector<Handle<TextureTag>>{};
@@ -205,30 +202,47 @@ auto EntityManager::saveProject(const std::filesystem::path& filePath) -> void {
 
 auto EntityManager::loadProject(const std::filesystem::path& filePath) -> void {
   Log.trace("loadProject filePath={}", filePath.string());
-  auto is = std::ifstream(filePath, std::ios::binary);
-  cereal::BinaryInputArchive input(is);
-  auto project = Project{};
-  input(project);
+  auto openFile = [&]() -> std::optional<Project> {
+    try {
+      auto is = std::ifstream(filePath, std::ios::binary);
+      if (!is) {
+        Log.warn("Error opening file {}", filePath.string());
+        return std::nullopt;
+      }
+      cereal::BinaryInputArchive input(is);
+      auto project = Project{};
+      input(project);
+      return project;
+    } catch (const std::exception& ex) {
+      Log.warn("Error opening project: {}", ex.what());
+      return std::nullopt;
+    }
+  };
 
-  for (const auto& animation : project.animations) {
+  auto project = openFile();
+  if (!project) {
+    return;
+  }
+
+  for (const auto& animation : project->animations) {
     eventQueue->emit(tr::AddAnimation{.name = animation.second.alias,
                                       .fileName = animation.second.filePath.string(),
                                       .fromFile = true});
   }
 
-  for (const auto& skeleton : project.skeletons) {
+  for (const auto& skeleton : project->skeletons) {
     eventQueue->emit(tr::AddSkeleton{.name = skeleton.second.alias,
                                      .fileName = skeleton.second.filePath.string(),
                                      .fromFile = true});
   }
 
-  for (const auto& model : project.models) {
+  for (const auto& model : project->models) {
     eventQueue->emit(tr::AddModel{.name = model.second.alias,
                                   .fileName = model.second.filePath.string(),
                                   .fromFile = true});
   }
 
-  for (const auto& gameObject : project.gameObjects | std::ranges::views::values) {
+  for (const auto& gameObject : project->gameObjects | std::ranges::views::values) {
     const auto addStaticModel = AddStaticModel{.name = gameObject.name,
                                                .orientation = gameObject.orientation,
                                                .modelName = gameObject.modelName,

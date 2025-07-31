@@ -57,6 +57,10 @@ auto Swapchain::getImages() const -> const std::vector<vk::Image>& {
   return swapchainImages;
 }
 
+auto Swapchain::getImageSemaphore(uint32_t imageIndex) const -> vk::Semaphore {
+  return imageSemaphores[imageIndex];
+}
+
 auto Swapchain::acquireNextImage(const vk::Semaphore& semaphore) const
     -> std::variant<uint32_t, ImageAcquireResult> {
   try {
@@ -89,7 +93,7 @@ auto Swapchain::createSwapchain() -> void {
 
   const auto surfaceFormat = chooseSurfaceFormat(formats);
   const auto presentMode = choosePresentMode(presentModes);
-  const auto extent = chooseSwapExtent(capabilities, physicalDevice->getSurfaceSize());
+  const auto extent = chooseSwapExtent(capabilities, surface->getFramebufferSize());
   // One over the min, but not if it exceeds the max
   const auto imageCount =
       std::min(capabilities.minImageCount + 1,
@@ -155,6 +159,9 @@ auto Swapchain::createSwapchain() -> void {
                                                     .components = components,
                                                     .subresourceRange = subresourceRange};
     swapchainImageViews.emplace_back(device->getVkDevice(), createInfo);
+    imageSemaphores.emplace_back(device->getVkDevice().createSemaphore({}));
+    debugManager->setObjectName(*imageSemaphores.back(),
+                                "Semaphore-SwapchainImage_" + std::to_string(index));
   }
 
   if (oldSwapchain != nullptr) {
@@ -189,12 +196,12 @@ auto Swapchain::chooseSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& ava
 }
 
 auto Swapchain::chooseSwapExtent(const vk::SurfaceCapabilitiesKHR& capabilities,
-                                 const std::pair<uint32_t, uint32_t>& windowSize) -> vk::Extent2D {
+                                 const vk::Extent2D& windowSize) -> vk::Extent2D {
   if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
     return capabilities.currentExtent;
   }
   const auto& [width, height] = windowSize;
-  vk::Extent2D actualExtent = {width, height};
+  vk::Extent2D actualExtent = {.width = width, .height = height};
 
   actualExtent.width = std::clamp(actualExtent.width,
                                   capabilities.minImageExtent.width,

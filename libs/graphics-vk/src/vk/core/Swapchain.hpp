@@ -33,6 +33,7 @@ public:
   [[nodiscard]] auto getSwapchainImageView(uint32_t imageIndex) const -> vk::ImageView;
   [[nodiscard]] auto getDepthFormat() const -> vk::Format;
   [[nodiscard]] auto getImages() const -> const std::vector<vk::Image>&;
+  [[nodiscard]] auto getImageSemaphore(uint32_t imageIndex) const -> vk::Semaphore;
 
   [[nodiscard]] auto acquireNextImage(const vk::Semaphore& semaphore) const
       -> std::variant<uint32_t, ImageAcquireResult>;
@@ -51,6 +52,7 @@ private:
 
   std::vector<vk::Image> swapchainImages;
   std::vector<vk::raii::ImageView> swapchainImageViews;
+  std::vector<vk::raii::Semaphore> imageSemaphores;
 
   vk::Format swapchainImageFormat;
   vk::Extent2D swapchainExtent;
@@ -64,8 +66,7 @@ private:
       const std::vector<vk::SurfaceFormatKHR>& availableFormats) -> vk::SurfaceFormatKHR;
 
   [[nodiscard]] static auto chooseSwapExtent(const vk::SurfaceCapabilitiesKHR& capabilities,
-                                             const std::pair<uint32_t, uint32_t>& windowSize)
-      -> vk::Extent2D;
+                                             const vk::Extent2D& windowSize) -> vk::Extent2D;
 };
 
 }

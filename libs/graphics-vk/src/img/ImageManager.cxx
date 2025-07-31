@@ -18,8 +18,9 @@ ImageManager::ImageManager(std::shared_ptr<Allocator> newAllocator,
       device{std::move(newDevice)},
       frameManager{std::move(newFrameManager)},
       swapchain{std::move(newSwapchain)} {
-
+  Log.trace("Creating ImageManager");
   registerSwapchainImages();
+  Log.trace("ImageManager Created");
 }
 
 ImageManager::~ImageManager() {
@@ -28,7 +29,6 @@ ImageManager::~ImageManager() {
 }
 
 auto ImageManager::createImage(ImageRequest request) -> Handle<ManagedImage> {
-  Log.trace("CreateImage, name={}", request.debugName.value());
   const auto imageCreateInfo = vk::ImageCreateInfo{
       .imageType = vk::ImageType::e2D,
       .format = request.format,
@@ -69,7 +69,8 @@ auto ImageManager::createImage(ImageRequest request) -> Handle<ManagedImage> {
           device->getVkDevice().createImageView(imageViewInfo),
           request.extent,
           request.format,
-          request.usageFlags));
+          request.usageFlags,
+          request.debugName));
   return key;
 }
 
@@ -109,7 +110,8 @@ auto ImageManager::registerSwapchainImage(uint32_t index) -> Handle<ManagedImage
                                                   swapchain->getSwapchainImageView(index),
                                                   swapchain->getImageExtent(),
                                                   swapchain->getImageFormat(),
-                                                  vk::ImageUsageFlagBits::eColorAttachment));
+                                                  vk::ImageUsageFlagBits::eColorAttachment,
+                                                  "SwapchainImage"));
 
   return handle;
 }

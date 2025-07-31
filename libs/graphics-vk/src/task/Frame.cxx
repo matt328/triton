@@ -1,21 +1,16 @@
 #include "Frame.hpp"
 #include "bk/Handle.hpp"
 #include "img/ManagedImage.hpp"
-#include <vulkan/vulkan_core.h>
-
-#include <utility>
 
 namespace tr {
 
 Frame::Frame(const uint8_t newIndex,
              vk::raii::Fence&& newRenderFence,
              vk::raii::Semaphore&& newImageAvailableSemaphore,
-             vk::raii::Semaphore&& newRenderFinishedSemaphore,
              vk::raii::Semaphore&& newComputeFinishedSemaphore)
     : index{newIndex},
       inFlightFence{std::move(newRenderFence)},
       imageAvailableSemaphore{std::move(newImageAvailableSemaphore)},
-      renderFinishedSemaphore{std::move(newRenderFinishedSemaphore)},
       computeFinishedSemaphore{std::move(newComputeFinishedSemaphore)} {
 }
 
@@ -29,10 +24,6 @@ auto Frame::getIndex() const -> uint8_t {
 
 auto Frame::getImageAvailableSemaphore() const -> const vk::raii::Semaphore& {
   return imageAvailableSemaphore;
-}
-
-auto Frame::getRenderFinishedSemaphore() const -> const vk::raii::Semaphore& {
-  return renderFinishedSemaphore;
 }
 
 auto Frame::getComputeFinishedSemaphore() const -> const vk::raii::Semaphore& {

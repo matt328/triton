@@ -48,8 +48,15 @@ auto TextureArena::remove(Handle<Texture> handle) -> void {
 auto TextureArena::updateShaderBindings(const Frame* frame) -> void {
   if (newDataAvailable.exchange(false)) {
     std::scoped_lock lock(swapMutex);
-    textures = std::move(stagingTextures);
-    handleMap = std::move(stagingHandleMap);
+
+    for (const auto& tex : stagingTextures) {
+      textures.emplace_back(tex);
+    }
+
+    for (const auto& [key, value] : stagingHandleMap) {
+      handleMap[key] = value;
+    }
+
     stagingTextures.clear();
     stagingHandleMap.clear();
     for (auto& [key, value] : dirty) {

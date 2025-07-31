@@ -46,6 +46,7 @@ auto PhysicalDevice::getDescriptorBufferProperties() const
 }
 
 auto PhysicalDevice::createDevice() -> std::unique_ptr<vk::raii::Device> {
+  Log.trace("PhysicalDevice createDevice()");
   deviceQueueFamilyIndices = findQueueFamilies(*physicalDevice, surface->getVkSurface());
   std::vector<vk::DeviceQueueCreateInfo> queueCreateInfos;
   std::unordered_set<uint32_t> usedQueueFamilies;
@@ -169,7 +170,7 @@ auto PhysicalDevice::createDevice() -> std::unique_ptr<vk::raii::Device> {
                              extendedDynamicStateFeatures,
                              synchronization2Features,
                              /*dbFeatures*/};
-
+  Log.trace("calling createDevice");
   return std::make_unique<vk::raii::Device>(physicalDevice->createDevice(c.get(), nullptr));
 }
 auto PhysicalDevice::getVkPhysicalDevice() const -> vk::raii::PhysicalDevice& {

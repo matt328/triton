@@ -130,7 +130,6 @@ auto ForwardGraphicsPass::execute(Frame* frame, vk::raii::CommandBuffer& cmdBuff
     }
 
     if (!barriers.empty()) {
-      Log.trace("Inserting Barrier");
       cmdBuffer.pipelineBarrier2({.imageMemoryBarrierCount = static_cast<uint32_t>(barriers.size()),
                                   .pImageMemoryBarriers = barriers.data()});
     }

@@ -1,11 +1,10 @@
-#include <algorithm>
-
 #include "BufferSystem.hpp"
 #include "FrameState.hpp"
 #include "buffers/BufferCreateInfo.hpp"
 #include "buffers/ManagedBuffer.hpp"
 #include "gfx/IFrameManager.hpp"
 #include "mem/Allocator.hpp"
+#include "resources/TransferSystem.hpp"
 #include "resources/allocators/ArenaAllocator.hpp"
 #include "resources/allocators/IBufferAllocator.hpp"
 #include "resources/allocators/LinearAllocator.hpp"
@@ -31,6 +30,80 @@ BufferSystem::~BufferSystem() {
   Log.trace("BufferSystem Destroyed");
 }
 
+auto BufferSystem::resize(const std::shared_ptr<TransferSystem>& transferSystem,
+                          const std::vector<ResizeRequest>& resizeRequests) -> void {
+
+  struct ResizeJob {
+    Handle<ManagedBuffer> handle;
+    ManagedBuffer* oldBuffer;
+    std::unique_ptr<ManagedBuffer> newBuffer;
+    size_t newSize;
+  };
+
+  std::vector<ResizeJob> jobs;
+  std::vector<std::tuple<ManagedBuffer*, ManagedBuffer*>> copyPairs;
+
+  // Prepare resizes
+  for (const auto& resize : resizeRequests) {
+    auto handle = resize.bufferHandle;
+    if (!bufferMap.contains(handle)) {
+      continue;
+    }
+
+    auto oldBuffer = getCurrentManagedBuffer(handle);
+    if (!oldBuffer) {
+      Log.warn("No current buffer for handle={}", handle.id);
+      continue;
+    }
+    Log.trace("Resizing Buffer: {}, newSize={}",
+              oldBuffer.value()->getMeta().debugName,
+              resize.newSize);
+
+    auto bci = oldBuffer.value()->getMeta().bufferCreateInfo;
+    bci.size = resize.newSize;
+    const auto aci = oldBuffer.value()->getMeta().allocationCreateInfo;
+
+    // TODO: fix this up
+    const std::string prefix = "-v";
+    auto input = oldBuffer.value()->getMeta().debugName;
+    size_t pos = input.rfind(prefix);
+    std::string newName;
+    if (pos != std::string::npos && pos + 2 < input.size()) {
+      uint32_t version = std::stoi(input.substr(pos + 2));
+      newName = input.substr(0, pos + 2) + std::to_string(version + 1);
+    }
+
+    auto newBuffer = allocator->createBuffer2(bci, aci, newName);
+    copyPairs.emplace_back(*oldBuffer, newBuffer.get());
+
+    jobs.push_back(ResizeJob{.handle = handle,
+                             .oldBuffer = *oldBuffer,
+                             .newBuffer = std::move(newBuffer),
+                             .newSize = resize.newSize});
+  }
+
+  transferSystem->copyBuffers(copyPairs);
+
+  // Finalize buffer version
+  const auto currentFrame = frameState->getFrame();
+  for (auto& job : jobs) {
+    job.newBuffer->setValidFromFrame(currentFrame + 1);
+    job.oldBuffer->setValidToFrame(currentFrame + 1);
+
+    auto& entry = bufferMap.at(job.handle);
+    entry->versions.emplace_back(std::move(job.newBuffer));
+    entry->currentSize = job.newSize;
+
+    // Somehow update bufferMeta's bci with new size
+    entry->versions.back()->setSize(job.newSize);
+    if (allocatorMap.contains(job.handle)) {
+      allocatorMap.at(job.handle)->notifyBufferResized(job.newSize);
+    } else {
+      Log.warn("Resized a buffer with no allocator: {}", job.handle.id);
+    }
+  }
+}
+
 auto BufferSystem::getBufferAddress(Handle<ManagedBuffer> handle) -> std::optional<uint64_t> {
   const auto managedBuffer = getCurrentManagedBufferConst(handle);
 
@@ -53,7 +126,8 @@ auto BufferSystem::registerBuffer(const BufferCreateInfo& createInfo) -> Handle<
   auto [bci, aci] = fromCreateInfo(createInfo);
 
   auto versions = std::deque<std::unique_ptr<ManagedBuffer>>{};
-  versions.emplace_back(allocator->createBuffer2(bci, aci, createInfo.debugName));
+  const auto name = std::format("{}-v0", createInfo.debugName);
+  versions.emplace_back(allocator->createBuffer2(bci, aci, name));
   bufferMap.emplace(
       handle,
       std::make_unique<BufferEntry>(BufferEntry{.lifetime = createInfo.bufferLifetime,
@@ -61,12 +135,17 @@ auto BufferSystem::registerBuffer(const BufferCreateInfo& createInfo) -> Handle<
                                                 .currentSize = createInfo.initialSize}));
   switch (createInfo.allocationStrategy) {
     case AllocationStrategy::Linear:
-      allocatorMap.emplace(handle, std::make_unique<LinearAllocator>(createInfo.initialSize));
+      allocatorMap.emplace(
+          handle,
+          std::make_unique<LinearAllocator>(handle, createInfo.initialSize, createInfo.debugName));
       break;
     case AllocationStrategy::Arena:
-      allocatorMap.emplace(handle, std::make_unique<ArenaAllocator>(createInfo.initialSize));
+      allocatorMap.emplace(
+          handle,
+          std::make_unique<ArenaAllocator>(handle, createInfo.initialSize, createInfo.debugName));
       break;
-    case AllocationStrategy::None:
+    case AllocationStrategy::Resizable:
+
       break;
   }
   return handle;
@@ -86,7 +165,6 @@ auto BufferSystem::registerPerFrameBuffer(const BufferCreateInfo& createInfo)
   return logicalHandle;
 }
 
-// Figure out why buffer data isn't showing up
 auto BufferSystem::insert(Handle<ManagedBuffer> handle,
                           void* data,
                           const BufferRegion& targetRegion) -> std::optional<BufferRegion> {
@@ -105,10 +183,8 @@ auto BufferSystem::insert(Handle<ManagedBuffer> handle,
   return maybeBufferRegion;
 }
 
-auto BufferSystem::allocate(Handle<ManagedBuffer> handle, size_t size)
-    -> std::optional<BufferRegion> {
+auto BufferSystem::allocate(Handle<ManagedBuffer> handle, size_t size) -> BufferRegion {
   assert(bufferMap.contains(handle) && "During allocation, buffer handle doesn't exist");
-  std::optional<BufferRegion> maybeRegion = std::nullopt;
 
   const auto lifetime = bufferMap.at(handle)->lifetime;
 
@@ -117,10 +193,18 @@ auto BufferSystem::allocate(Handle<ManagedBuffer> handle, size_t size)
     auto& bufferAllocator = allocatorMap.at(handle);
     return bufferAllocator->allocate(BufferRequest{.size = size});
   }
+  assert("Tried to allocate a transient buffer");
+  return BufferRegion{};
+}
 
-  Log.warn("Attempted to allocate transient buffer");
-
-  return maybeRegion;
+auto BufferSystem::checkSize(Handle<ManagedBuffer> handle, size_t size)
+    -> std::optional<ResizeRequest> {
+  if (!allocatorMap.contains(handle)) {
+    Log.warn("Check size of a buffer that doesn't have an allocator, handle={}", handle.id);
+    return std::nullopt;
+  }
+  auto& allocator = allocatorMap.at(handle);
+  return allocator->checkSize(BufferRequest{.size = size});
 }
 
 auto BufferSystem::removeData(Handle<ManagedBuffer> handle, const BufferRegion& region) -> void {
@@ -176,14 +260,19 @@ auto BufferSystem::fromCreateInfo(const BufferCreateInfo& createInfo)
     aci.setUsage(vma::MemoryUsage::eGpuOnly);
     aci.setRequiredFlags(vk::MemoryPropertyFlagBits::eDeviceLocal);
   } else if (createInfo.bufferLifetime == BufferLifetime::Transient) {
-    bci.usage |= vk::BufferUsageFlagBits::eShaderDeviceAddress;
-    aci.setUsage(vma::MemoryUsage::eCpuToGpu);
+    aci.setUsage(vma::MemoryUsage::eCpuOnly);
     aci.setRequiredFlags(vk::MemoryPropertyFlagBits::eHostCoherent |
                          vk::MemoryPropertyFlagBits::eHostVisible);
   }
 
   if (createInfo.indirect) {
     bci.usage |= vk::BufferUsageFlagBits::eIndirectBuffer;
+  }
+
+  if (createInfo.allocationStrategy == AllocationStrategy::Arena ||
+      createInfo.allocationStrategy == AllocationStrategy::Resizable) {
+    bci.usage |=
+        vk::BufferUsageFlagBits::eTransferSrc; // Needs eTransferSrc for copying during resize
   }
 
   return {bci, aci};

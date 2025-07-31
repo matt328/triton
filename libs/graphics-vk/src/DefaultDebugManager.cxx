@@ -129,7 +129,25 @@ auto DefaultDebugManager::setObjectName(const ObjectHandle& handle, std::string_
                                           .pObjectName = name.data()};
       device->get()->getVkDevice().setDebugUtilsObjectNameEXT(debugNameInfo);
     } break;
+    case ObjectHandle::Type::DescriptorSetLayout: {
+      const auto l = reinterpret_cast<uint64_t>(
+          static_cast<VkDescriptorSetLayout>(handle.descriptorSetLayout));
+      const auto debugNameInfo =
+          vk::DebugUtilsObjectNameInfoEXT{.objectType = vk::ObjectType::eDescriptorSetLayout,
+                                          .objectHandle = l,
+                                          .pObjectName = name.data()};
+      device->get()->getVkDevice().setDebugUtilsObjectNameEXT(debugNameInfo);
+    } break;
+    case ObjectHandle::Type::DescriptorSet: {
+      const auto l = reinterpret_cast<uint64_t>(static_cast<VkDescriptorSet>(handle.descriptorSet));
+      const auto debugNameInfo =
+          vk::DebugUtilsObjectNameInfoEXT{.objectType = vk::ObjectType::eDescriptorSet,
+                                          .objectHandle = l,
+                                          .pObjectName = name.data()};
+      device->get()->getVkDevice().setDebugUtilsObjectNameEXT(debugNameInfo);
+    } break;
     default:
+      assert(0);
       Log.warn("Object type not supported for setting name");
   }
 }

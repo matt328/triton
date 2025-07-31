@@ -1,7 +1,7 @@
 #include "Application.hpp"
 
 // Following aren't referenced in this file, but need to be here for BoostDI to work
-#include "Properties.hpp"
+#include "bk/Preferences.hpp"
 #include "bk/ThreadName.hpp"
 #include "fx/GuiCallbackRegistrar.hpp"
 #include "ui/Manager.hpp"
@@ -28,10 +28,15 @@ namespace di = boost::di;
 //                    [[maybe_unused]] _In_ LPSTR lpCmdLine,
 //                    [[maybe_unused]] _In_ int nShowCmd) {
 // #else
-auto main() -> int {
+auto main(int argc, char** argv) -> int {
   setCurrentThreadName("Main");
   // #endif
   initLogger(spdlog::level::trace, spdlog::level::trace);
+
+  std::vector<std::string_view> args(argv, argv + argc);
+  for (const auto& param : args) {
+    Log.trace("command line arg: {}", param);
+  }
 
   Log.info("Console is now ready for logging!");
 
@@ -47,14 +52,20 @@ auto main() -> int {
   windowTitle << " - Release Build";
 #endif
 
-  const auto configDir = std::filesystem::path(sago::getConfigHome()) / "editor";
-  auto propertiesPath = configDir / "editor";
+  const auto configDir = std::filesystem::path(sago::getConfigHome()) / "cauldron";
+  auto preferencesPath = configDir / "cauldron.prefs";
 
   auto* editorStateBuffer = new tr::EditorStateBuffer();
   editorStateBuffer->getStates(tr::Clock::now());
   delete editorStateBuffer;
 
-  auto properties = std::make_shared<ed::Properties>(propertiesPath);
+  std::shared_ptr<bk::Preferences> preferences = std::make_shared<bk::Preferences>(preferencesPath);
+
+  // for (const auto& param : args) {
+  //   if (param == "-x11") {
+  //     properties->setX11Requested(true);
+  //   }
+  // }
 
   try {
     auto guiAdapter = std::make_shared<tr::ImGuiAdapter>();
@@ -67,7 +78,7 @@ auto main() -> int {
         tr::ThreadedFrameworkContext::create(frameworkConfig, guiAdapter, guiCallbackRegistrar);
 
     const auto injector =
-        di::make_injector(di::bind<ed::Properties>.to<>(properties),
+        di::make_injector(di::bind<bk::Preferences>.to<>(preferences),
                           di::bind<tr::IEventQueue>.to<>(
                               [&frameworkContext] { return frameworkContext->getEventQueue(); }),
                           di::bind<tr::IGuiCallbackRegistrar>.to<>(guiCallbackRegistrar));

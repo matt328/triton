@@ -39,7 +39,7 @@ auto DefaultAssetService::loadModel(std::string_view filename) -> as::Model {
       }
     }
   } catch (BaseException& ex) {
-    ex << "GeometryFactory::loadTrmFile(): ";
+    ex << "DefaultAssetService::loadModel(): ";
     throw;
   }
   Log.warn("loadTrmFile returning empty model");

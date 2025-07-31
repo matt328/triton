@@ -26,6 +26,8 @@ GlfwWindow::GlfwWindow(const WindowCreateInfo& createInfo,
 
   glfwSetErrorCallback(errorCallback);
 
+  glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
+
   if (glfwInit() == GLFW_TRUE) {
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
@@ -35,6 +37,7 @@ GlfwWindow::GlfwWindow(const WindowCreateInfo& createInfo,
                               createInfo.title.c_str(),
                               nullptr,
                               nullptr);
+    Log.trace("Created Window");
 
 #ifdef _WIN32
     auto* hWnd = glfwGetWin32Window(window);
@@ -72,7 +75,9 @@ GlfwWindow::GlfwWindow(const WindowCreateInfo& createInfo,
                  SWP_FRAMECHANGED);
 #endif
 
-    int height, width, channels;
+    int height;
+    int width;
+    int channels;
     auto* pixels =
         stbi_load_from_memory(IconPng.data(), IconPng.size(), &width, &height, &channels, 4);
 
@@ -119,6 +124,7 @@ GlfwWindow::~GlfwWindow() {
 
 auto GlfwWindow::createVulkanSurface(const vk::Instance& instance, VkSurfaceKHR* outSurface) const
     -> void {
+  Log.trace("Creating window surface");
   glfwCreateWindowSurface(&(*instance), window, nullptr, outSurface);
 }
 
@@ -139,6 +145,7 @@ auto GlfwWindow::setVulkanVersion(std::string_view vulkanVersion) -> void {
 auto GlfwWindow::getFramebufferSize() const -> glm::ivec2 {
   auto size = glm::ivec2(320, 400);
   glfwGetFramebufferSize(window, &size.x, &size.y);
+  Log.trace("Framebuffer Size: width={}, height={}", size.x, size.y);
   return size;
 }
 
@@ -163,6 +170,10 @@ void GlfwWindow::toggleFullscreen() {
 }
 
 void GlfwWindow::errorCallback(int code, const char* description) {
+  if (code == GLFW_FEATURE_UNAVAILABLE && strstr(description, "Wayland") != nullptr) {
+    // hopefully this is the error about setting the window icon, and we can ignore it.
+    return;
+  }
   Log.critical("GLFW Error Code: {}, description: {}", code, description);
   throw std::runtime_error("GLFW Error. See log output for details");
 }

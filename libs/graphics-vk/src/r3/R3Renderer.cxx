@@ -181,36 +181,44 @@ auto R3Renderer::createGlobalBuffers() -> void {
 
   globalBuffers.objectData = bufferSystem->registerPerFrameBuffer(
       BufferCreateInfo{.bufferLifetime = BufferLifetime::Transient,
+                       .initialSize = 40960,
                        .debugName = "Buffer-ObjectData"});
   aliasRegistry->setHandle(BufferAlias::ObjectData, globalBuffers.objectData);
 
   globalBuffers.objectPositions = bufferSystem->registerPerFrameBuffer(
       BufferCreateInfo{.bufferLifetime = BufferLifetime::Transient,
+                       .initialSize = 40960,
                        .debugName = "Buffer-ObjectPositions"});
   aliasRegistry->setHandle(BufferAlias::ObjectPositions, globalBuffers.objectPositions);
 
   globalBuffers.objectRotations = bufferSystem->registerPerFrameBuffer(
       BufferCreateInfo{.bufferLifetime = BufferLifetime::Transient,
+                       .initialSize = 40960,
                        .debugName = "Buffer-ObjectRotations"});
   aliasRegistry->setHandle(BufferAlias::ObjectRotations, globalBuffers.objectRotations);
 
   globalBuffers.objectScales = bufferSystem->registerPerFrameBuffer(
       BufferCreateInfo{.bufferLifetime = BufferLifetime::Transient,
+                       .initialSize = 40960,
                        .debugName = "Buffer-ObjectScales"});
   aliasRegistry->setHandle(BufferAlias::ObjectScales, globalBuffers.objectScales);
 
   globalBuffers.geometryRegion = bufferSystem->registerPerFrameBuffer(
       BufferCreateInfo{.bufferLifetime = BufferLifetime::Transient,
+                       .initialSize = 8192,
                        .debugName = "Buffer-GeometryRegion"});
   aliasRegistry->setHandle(BufferAlias::GeometryRegion, globalBuffers.geometryRegion);
 
-  globalBuffers.materials = bufferSystem->registerPerFrameBuffer(
-      {.bufferLifetime = BufferLifetime::Transient, .debugName = "Buffer-Materials"});
+  globalBuffers.materials =
+      bufferSystem->registerPerFrameBuffer({.bufferLifetime = BufferLifetime::Transient,
+                                            .initialSize = 40960,
+                                            .debugName = "Buffer-Materials"});
   aliasRegistry->setHandle(BufferAlias::Materials, globalBuffers.materials);
 
   globalBuffers.frameData = bufferSystem->registerPerFrameBuffer(BufferCreateInfo{
       .bufferLifetime = BufferLifetime::Transient,
       .bufferUsage = BufferUsage::Storage,
+      .initialSize = 40960,
       .debugName = "Buffer-FrameData",
   });
   aliasRegistry->setHandle(BufferAlias::FrameData, globalBuffers.frameData);
@@ -378,8 +386,10 @@ void R3Renderer::renderNextFrame() {
             materialDataContents.data(),
             BufferRegion{.size = sizeof(GpuMaterialData) * materialDataContents.size()});
       }
-
-      // Object Data Buffers
+      // TODO: might need to allow resizing transient buffers, or at least track their size/usage as
+      // metrics and get a better sense of how large they need to be. Right now the materialData
+      // buffer is not large enough to hold 60 materials
+      //  Object Data Buffers
       if (!current.objectMetadata.empty()) {
         bufferSystem->insert(
             frame->getLogicalBuffer(globalBuffers.objectData),
@@ -448,6 +458,9 @@ auto R3Renderer::endFrame(const Frame* frame, const FrameGraphResult& results) -
   constexpr auto waitStages =
       std::array<vk::PipelineStageFlags, 1>{vk::PipelineStageFlagBits::eColorAttachmentOutput};
 
+  const auto swapchainImageIndex = frame->getSwapchainImageIndex();
+  const auto& swapchainImageSemaphore = swapchain->getImageSemaphore(swapchainImageIndex);
+
   const auto submitInfo = vk::SubmitInfo{
       .waitSemaphoreCount = 1,
       .pWaitSemaphores = &*frame->getImageAvailableSemaphore(),
@@ -455,7 +468,7 @@ auto R3Renderer::endFrame(const Frame* frame, const FrameGraphResult& results) -
       .commandBufferCount = static_cast<uint32_t>(results.commandBuffers.size()),
       .pCommandBuffers = results.commandBuffers.data(),
       .signalSemaphoreCount = 1,
-      .pSignalSemaphores = &*frame->getRenderFinishedSemaphore(),
+      .pSignalSemaphores = &swapchainImageSemaphore,
   };
 
   try {
@@ -469,15 +482,13 @@ auto R3Renderer::endFrame(const Frame* frame, const FrameGraphResult& results) -
 
   try {
     ZoneScopedN("queue present");
-    const auto swapchainImageIndex = frame->getSwapchainImageIndex();
     const auto chain = swapchain->getSwapchain();
 
-    const auto presentInfo =
-        vk::PresentInfoKHR{.waitSemaphoreCount = 1,
-                           .pWaitSemaphores = &*frame->getRenderFinishedSemaphore(),
-                           .swapchainCount = 1,
-                           .pSwapchains = &chain,
-                           .pImageIndices = &swapchainImageIndex};
+    const auto presentInfo = vk::PresentInfoKHR{.waitSemaphoreCount = 1,
+                                                .pWaitSemaphores = &swapchainImageSemaphore,
+                                                .swapchainCount = 1,
+                                                .pSwapchains = &chain,
+                                                .pImageIndices = &swapchainImageIndex};
 
     if (const auto result2 = graphicsQueue->getQueue().presentKHR(presentInfo);
         result2 == vk::Result::eSuboptimalKHR || result2 == vk::Result::eErrorOutOfDateKHR) {

@@ -29,7 +29,7 @@ auto EntityEditor::render(const tr::EditorState& editorState) -> void {
                    nullptr,
                    ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_MenuBar)) {
 
-    renderMenuBar();
+    renderMenuBar(editorState);
     renderEntityList(editorState);
     ImGui::SameLine();
     renderEntityDetailView(editorState);
@@ -46,6 +46,7 @@ auto EntityEditor::renderStaticEntityDialog(const tr::EditorState& editorState) 
     ImGui::OpenPopup("StaticGameObject");
     staticDialogInfo.shouldShow = false;
     staticDialogInfo.isOpen = true;
+    staticDialogInfo.objectCount = 5;
     staticDialogInfo.objectName = "";
     staticDialogInfo.selectedModel = {};
   }
@@ -64,6 +65,9 @@ auto EntityEditor::renderStaticEntityDialog(const tr::EditorState& editorState) 
       ImGui::SetKeyboardFocusHere();
     }
 
+    // Count Input
+    ImGui::DragInt("GameObject Count", &staticDialogInfo.objectCount, .5f, 0, 100);
+
     // Name Input
     ImGui::InputText("GameObject Name", &staticDialogInfo.objectName);
 
@@ -78,7 +82,6 @@ auto EntityEditor::renderStaticEntityDialog(const tr::EditorState& editorState) 
   }
 
   if (shouldOk) {
-    Log.trace("shouldOk");
     ImGui::CloseCurrentPopup();
     staticDialogInfo.isOpen = false;
     Log.trace("Static GameObject create: objectName={}, resourceAlias={}, resourcePath={}",
@@ -89,6 +92,7 @@ auto EntityEditor::renderStaticEntityDialog(const tr::EditorState& editorState) 
         .name = staticDialogInfo.objectName,
         .orientation = tr::Orientation{},
         .modelName = staticDialogInfo.selectedModel.filePath.string(),
+        .count = static_cast<uint32_t>(staticDialogInfo.objectCount),
     };
     eventQueue->emit(addModel);
   }
@@ -157,11 +161,21 @@ auto EntityEditor::renderAnimatedGameObjectDialog(const tr::EditorState& editorS
   }
 }
 
-auto EntityEditor::renderMenuBar() -> void {
+auto EntityEditor::renderMenuBar(const tr::EditorState& editorState) -> void {
   if (ImGui::BeginMenuBar()) {
     if (ImGui::BeginMenu("New")) {
       if (ImGui::MenuItem("Static Model...")) {
         staticDialogInfo.shouldShow = true;
+      }
+      if (ImGui::MenuItem("Static Model Test")) {
+        const auto& assets = editorState.contextData.assets;
+        const auto addModel = tr::AddStaticModel{
+            .name = "TestModel",
+            .orientation = tr::Orientation{},
+            .modelName = assets.models.at("Viking Room").filePath,
+            .count = 50,
+        };
+        eventQueue->emit(addModel);
       }
       if (ImGui::MenuItem("Animated Model...")) {
         animatedDialogInfo.shouldShow = true;

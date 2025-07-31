@@ -20,6 +20,26 @@
           "ignoreFailures": true
         }
       ]
+    },
+    {
+      "name": "Debug Cauldron TSAN (GDB)",
+      "type": "cppdbg",
+      "request": "launch",
+      "showDisplayString": true,
+      "program": "${workspaceFolder}/build/tsan-debug/apps/cauldron/Cauldron",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}/build/tsan-debug/apps/cauldron",
+      "environment": [],
+      "MIMode": "gdb",
+      "miDebuggerPath": "/usr/bin/gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
     }
   ]
 }
