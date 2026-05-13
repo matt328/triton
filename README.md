@@ -1,8 +1,6 @@
 # Updates:
 
-Original Triton has reached the point where some decisions that enabled faster prototyping and development now need to be reconsidered. vulkan_raii helped with learning Vulkan's concepts without being bogged down so much in the verbosity of the C API, but creating my own thin wrappers over the Vulkan components' handles will provide a better degree of control and understanding. Boost::DI was also great for prototyping, but as the project grew, I feel into the trap of foregoing solid architecture design in favor of a component soup, where anything and everything can just be injected anywhere.
-
-Triton is being rewritten as Arbor: https://github.com/matt328/arbor. 
+Triton has reached the point where some decisions that enabled faster prototyping and development now need to be reconsidered. Boost::DI was also great for prototyping, but as the project grew, I fell into the trap of foregoing solid architecture design in favor of a component soup, where anything and everything can just be injected anywhere. Most notably, in retrospect, the overall 'style' of the project very much favored object oriented C++, when moving from prototyping and learning into higher performance rendering is better suited to a more data oriented design.
 
 # Triton
 
